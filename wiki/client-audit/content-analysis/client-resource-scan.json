@@ -1,0 +1,29 @@
+{
+  "stats": {
+    "archives": 36,
+    "nonClassResources": 18275,
+    "textResourcesScanned": 9611
+  },
+  "pattern": "prison(?:\\.classic|:addinfos)|mine_\\d+|Лесопилка|Лунный топор|armored_too_low|armorer|level.?requirements",
+  "hits": [
+    {
+      "archive": "libraries-mcassets",
+      "entry": "assets/minecraft/lang/en_us.lang",
+      "sha256": "db74ad57bb46a49aff7f1ac6dbb32089b5721bd51ef92483bc4a9aab825413ae",
+      "matches": [
+        {
+          "line": 1398,
+          "text": "entity.Villager.armor=Armorer"
+        }
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "archive": "libraries-mcassets",
+      "entry": "assets/minecraft/optifine/natural.properties",
+      "reason": "not UTF-8"
+    }
+  ],
+  "limitation": "Lexical scan of UTF-8 text resources under 4 MiB; absent matches do not exclude binary/obfuscated/generated data."
+}

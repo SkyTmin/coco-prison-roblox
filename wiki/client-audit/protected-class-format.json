@@ -1,0 +1,314 @@
+{
+  "classes": 7291,
+  "formats": {
+    "c7c70001": 7291
+  },
+  "structureParsed": 7291,
+  "errors": [],
+  "samples": [
+    {
+      "name": "#hqsNq.class",
+      "seedHex": "043e9d4823ed26e1",
+      "constantPoolCount": 383,
+      "constantPoolEnd": 3733,
+      "access": 33,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "bf9813abeb06",
+      "expectedName": "#hqsNq",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "bf9813abeb06",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "48c4512cb525",
+          "length": 6
+        },
+        {
+          "index": 5,
+          "hex": "12352313d356518432c917dd607d2bca0ef8af18",
+          "length": 20
+        },
+        {
+          "index": 7,
+          "hex": "6d5cb375bfc7",
+          "length": 6
+        },
+        {
+          "index": 8,
+          "hex": "3e2a4d996b214c1f3deada",
+          "length": 11
+        }
+      ]
+    },
+    {
+      "name": "#iRrnH.class",
+      "seedHex": "6949a8bc64fe0c61",
+      "constantPoolCount": 585,
+      "constantPoolEnd": 4763,
+      "access": 1057,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "5d2104f70910",
+      "expectedName": "#iRrnH",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "5d2104f70910",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "53a5396a59c876fcdd04eed937405ba3287dbc948d9f62e2ff61d68d9ba91f5f12685e",
+          "length": 35
+        },
+        {
+          "index": 4,
+          "hex": "dc2cd6d7ea01086f010f592eb89c17c6",
+          "length": 16
+        },
+        {
+          "index": 6,
+          "hex": "d3bd90bc7cef",
+          "length": 6
+        },
+        {
+          "index": 8,
+          "hex": "8b69ff54a5c9b1",
+          "length": 7
+        }
+      ]
+    },
+    {
+      "name": "#aKmTm.class",
+      "seedHex": "ac6a9a7b8a6de2f8",
+      "constantPoolCount": 858,
+      "constantPoolEnd": 8341,
+      "access": 33,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "1652e65fada0",
+      "expectedName": "#aKmTm",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "1652e65fada0",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "6c9114c12005",
+          "length": 6
+        },
+        {
+          "index": 5,
+          "hex": "9ad711046ada",
+          "length": 6
+        },
+        {
+          "index": 6,
+          "hex": "1c41dd89a08e7a9b43173492e6d448028f8f73db8041ba3b5bf64779a5998a",
+          "length": 31
+        },
+        {
+          "index": 9,
+          "hex": "7be376",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "name": "#Hxaja.class",
+      "seedHex": "539fc8e521e6d385",
+      "constantPoolCount": 74,
+      "constantPoolEnd": 711,
+      "access": 33,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "d85a16c27d8b",
+      "expectedName": "#Hxaja",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "d85a16c27d8b",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "ba436125dbba56525672608e9ed574452ca14f42bec87d4059f431560c3df15ace88671c",
+          "length": 36
+        },
+        {
+          "index": 4,
+          "hex": "82703ef2cc27cc9b5f4f1e9e34173ddf",
+          "length": 16
+        },
+        {
+          "index": 6,
+          "hex": "b9cfec71b26e",
+          "length": 6
+        },
+        {
+          "index": 8,
+          "hex": "52ad40",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "name": "#zkgXx.class",
+      "seedHex": "e5ac9453bee4daa4",
+      "constantPoolCount": 242,
+      "constantPoolEnd": 2635,
+      "access": 1057,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "a96a62383a54",
+      "expectedName": "#zkgXx",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "a96a62383a54",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "69bd7faa98e5839ce68dafa7cdf18dcb",
+          "length": 16
+        },
+        {
+          "index": 5,
+          "hex": "f1e106d0488bf3dbc19f77891f26a7ad74a0",
+          "length": 18
+        },
+        {
+          "index": 7,
+          "hex": "0469e3107a92",
+          "length": 6
+        },
+        {
+          "index": 8,
+          "hex": "f9b5b2195d580261a8618f7b597d52a27c4367676f92f3204c5018986103cb",
+          "length": 31
+        }
+      ]
+    },
+    {
+      "name": "#VlLAd.class",
+      "seedHex": "1f3a686d7a0df679",
+      "constantPoolCount": 134,
+      "constantPoolEnd": 1579,
+      "access": 49,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "302e3b08a861",
+      "expectedName": "#VlLAd",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "302e3b08a861",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "be5e8fc9e46e3715fdcc03a6146d5371",
+          "length": 16
+        },
+        {
+          "index": 5,
+          "hex": "0b9ebdd18468",
+          "length": 6
+        },
+        {
+          "index": 6,
+          "hex": "ac1ea8",
+          "length": 3
+        },
+        {
+          "index": 9,
+          "hex": "8018169bf84153c889d2cc10f672812d5fd7c8de4532e501f3c222e9879b48272a229df04b1a69",
+          "length": 39
+        }
+      ]
+    },
+    {
+      "name": "#LHpFo.class",
+      "seedHex": "3e584527b23bb5e6",
+      "constantPoolCount": 251,
+      "constantPoolEnd": 3028,
+      "access": 33,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "caa81fb030e3",
+      "expectedName": "#LHpFo",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "caa81fb030e3",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "c3b815e7f691103621446c46546b786d",
+          "length": 16
+        },
+        {
+          "index": 5,
+          "hex": "32140849764a",
+          "length": 6
+        },
+        {
+          "index": 6,
+          "hex": "91adc06a0f7df68475eed692c9728bef49bb74ef75",
+          "length": 21
+        },
+        {
+          "index": 7,
+          "hex": "73f441",
+          "length": 3
+        }
+      ]
+    },
+    {
+      "name": "#KDzbM.class",
+      "seedHex": "1f6f6fb474763477",
+      "constantPoolCount": 49,
+      "constantPoolEnd": 486,
+      "access": 33,
+      "thisClassIndex": 2,
+      "nameIndex": 1,
+      "encodedNameHex": "fae4095dd85a",
+      "expectedName": "#KDzbM",
+      "firstUtf8": [
+        {
+          "index": 1,
+          "hex": "fae4095dd85a",
+          "length": 6
+        },
+        {
+          "index": 3,
+          "hex": "9d8ad4b0601275d6bb615dd937233085",
+          "length": 16
+        },
+        {
+          "index": 5,
+          "hex": "652c733a8d6a",
+          "length": 6
+        },
+        {
+          "index": 6,
+          "hex": "7407775b3a1c5284fa7c45",
+          "length": 11
+        },
+        {
+          "index": 7,
+          "hex": "d8fea7",
+          "length": 3
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# Roblox place files live in Studio / the cloud; the map is rebuilt by scripts/build-yard.luau
+place/
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxm.lock
+
+# Rojo / Wally / tooling output
+sourcemap.json
+Packages/
+ServerPackages/
+DevPackages/
+*.log
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+__pycache__/
+.claude/worktrees/

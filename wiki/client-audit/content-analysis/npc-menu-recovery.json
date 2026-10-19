@@ -1,0 +1,373 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "user supplied in-game NPC menus",
+  "sources": [
+    {
+      "id": "npc_image_1",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-89ab7c1c-8984-4739-ba15-9cf3c9242669.png",
+      "originalSha256": "8e10120bd00448c979c809d6428381f5a8d03d9ab77b9645fd967ba1d3b04d49",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        410,
+        285,
+        1515,
+        779
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-01.png",
+      "evidenceSha256": "27de91f5425b8289109f9a2c84fa210b4a82e1bcd3cf164a5cf992e049cb07a6"
+    },
+    {
+      "id": "npc_image_2",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-081cf0ad-6798-420b-a5ae-f9b9513cf116.png",
+      "originalSha256": "897994f7243871f0c41c91408fd1fb05829d60b593e021c31235b94466a4bb97",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        611,
+        371,
+        1309,
+        694
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-02.png",
+      "evidenceSha256": "00f6e5d15ffab5f1bb764b5740cde0b2f7a552eda61365692291326cdb5f8589"
+    },
+    {
+      "id": "npc_image_3",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-5760c57c-8cbe-4c47-9259-72e2397e82a4.png",
+      "originalSha256": "874e0c58533819e1e0903e78ef9693c1672f3b8f3849bfd640eba2cbf5806f96",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        688,
+        265,
+        1233,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-03.png",
+      "evidenceSha256": "8072aa618190a1ac4ee0ca44f16f607513e3cc0d20e8bed8511b42310fffedbe"
+    },
+    {
+      "id": "npc_image_4",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-eacac7e9-8198-45a2-9b4c-c1d9eb8e6457.png",
+      "originalSha256": "c05c871c84f8aa121255716afb14c60d42a0882eacd65bf4a35b48f385b6e2cf",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        688,
+        265,
+        1335,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-04.png",
+      "evidenceSha256": "c1dd9e42c6164510a435f747978566d5bb4b1216c8f929e745b3645e87ea912b"
+    },
+    {
+      "id": "npc_image_5",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-6af61260-4b56-4c0f-ab32-f6021324a0c8.png",
+      "originalSha256": "19da977e01576378c7d469747c857e12ac7f3939f0f226d5f5368e8b99fd4052",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        688,
+        265,
+        1535,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-05.png",
+      "evidenceSha256": "17db261c684fffc40dda2ad3ff8569f3305701780af50f25762ca92076559eff"
+    },
+    {
+      "id": "npc_image_6",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-06288c17-3695-42e8-8f56-d4e2c5da9154.png",
+      "originalSha256": "3b6e2abd00dc9bec8a8f8dc08f7ecefc6ccc44aadd3ab1e0c2bab752db8f10a9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        630,
+        265,
+        1290,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-06.png",
+      "evidenceSha256": "bebab6eef5f881d7d83ac9b38772dd23866e0b3ebf877923811873f2a5d00e49"
+    },
+    {
+      "id": "npc_image_7",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-7697a661-e2b4-4bf2-8ae9-631d43fa2631.png",
+      "originalSha256": "233f891907652e9afaf4f586e53abaa0f6a0183fb592de54f8a23904c124b9e2",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        630,
+        265,
+        1380,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-07.png",
+      "evidenceSha256": "bcf96e105cf84e53d362c89cb2ef1c90fb497da8848bc65d4b4178cc9451ae27"
+    },
+    {
+      "id": "npc_image_8",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-2a2a7ff5-7616-4831-81ae-cd5b823b380c.png",
+      "originalSha256": "465dc02aa1b54b3312fd3b2e611e1e9a01eb50c6a9a3033f11a20d76ecc010c9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        630,
+        265,
+        1595,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-08.png",
+      "evidenceSha256": "42a5e965b5dae7f594afad7f1c3621785880d89c5be529da9411b60088c6c005"
+    },
+    {
+      "id": "npc_image_9",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-ab2034b9-4408-4c88-bdb2-3a0cdd0e5438.png",
+      "originalSha256": "876d28d41dc601fb294ae3d46b49827e0284f444f2d4922aa8bf8dd7e3e18b46",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        630,
+        265,
+        1290,
+        794
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-09.png",
+      "evidenceSha256": "99ce947bff6498047a085497680c93bd5de53821855dd6e21b06bd1e729c9fd7"
+    },
+    {
+      "id": "npc_image_10",
+      "attachmentNumber": 10,
+      "originalFilename": "codex-clipboard-05e77f36-31c5-4c74-8dc7-7977a9297040.png",
+      "originalSha256": "74c600e17adec748e4d54ff414b006585d4a11609b12359f924962f1a86ac254",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        490,
+        370,
+        1428,
+        694
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/npc-menu-evidence/npc-10.png",
+      "evidenceSha256": "e44d729fae4c98b9c86a021dc30ac725e3aa52683316300952f3f2a576647eed"
+    }
+  ],
+  "trainer": [
+    {
+      "name": "Сила",
+      "observedLevel": 0,
+      "displayedMaximum": 20,
+      "description": "Увеличивает силу удара",
+      "nextUpgradeRequirements": {
+        "Зомби": 30,
+        "Убийства": 15,
+        "Деньги": 500
+      },
+      "evidence": [
+        "npc_image_1"
+      ],
+      "perLevelNumericEffect": null,
+      "laterUpgradeRequirements": null
+    },
+    {
+      "name": "Ловкость",
+      "observedLevel": 0,
+      "displayedMaximum": 20,
+      "description": "Позволяет увернуться от удара",
+      "nextUpgradeRequirements": {
+        "Деньги": 50,
+        "Летучие мыши": 5
+      },
+      "evidence": [
+        "npc_image_1"
+      ],
+      "perLevelNumericEffect": null,
+      "laterUpgradeRequirements": null
+    },
+    {
+      "name": "Нужды",
+      "observedLevel": 0,
+      "displayedMaximum": 20,
+      "description": "Снижает потребность справлять нужду",
+      "nextUpgradeRequirements": {
+        "Деньги": 450
+      },
+      "evidence": [
+        "npc_image_1"
+      ],
+      "perLevelNumericEffect": null,
+      "laterUpgradeRequirements": null
+    }
+  ],
+  "foodShop": [
+    {
+      "name": "Яблоко",
+      "price": "0.03",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_2"
+      ],
+      "purchaseQuantity": null
+    },
+    {
+      "name": "Хлеб",
+      "price": "0.25",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_2"
+      ],
+      "purchaseQuantity": null
+    },
+    {
+      "name": "Жареная курица",
+      "price": "0.5",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_2"
+      ],
+      "purchaseQuantity": null
+    }
+  ],
+  "toolShop": [
+    {
+      "name": "Деревянный топор",
+      "price": "4",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_10"
+      ],
+      "purchaseQuantity": null
+    },
+    {
+      "name": "Деревянная кирка",
+      "price": "22.5",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_10"
+      ],
+      "purchaseQuantity": null
+    },
+    {
+      "name": "Ножницы",
+      "price": "4000",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_10"
+      ],
+      "purchaseQuantity": null
+    },
+    {
+      "name": "Деревянная лопата",
+      "price": "4",
+      "currency": "game money",
+      "nameStatus": "visual icon identification",
+      "evidence": [
+        "npc_image_10"
+      ],
+      "purchaseQuantity": null
+    }
+  ],
+  "starExchanges": [
+    {
+      "name": "Древний ключ",
+      "cost": 10,
+      "currency": "звёзды",
+      "evidence": [
+        "npc_image_6",
+        "npc_image_9"
+      ],
+      "tooltip": "Данный ключ используется для открытия Древнего кейса на Спавне"
+    },
+    {
+      "name": "Улучшенный древний ключ",
+      "cost": 60,
+      "currency": "звёзды",
+      "evidence": [
+        "npc_image_7",
+        "npc_image_9"
+      ],
+      "tooltip": "Данный ключ используется для открытия Древнего кейса на Спавне"
+    },
+    {
+      "name": "Развеиватель",
+      "cost": 15,
+      "currency": "звёзды",
+      "evidence": [
+        "npc_image_8",
+        "npc_image_9"
+      ],
+      "tooltip": "Используйте, чтобы свеять Древние Зачарования с предмета. При использовании книга, с помощью которой было наложено это зачарование — возвращена не будет.",
+      "booksReturned": false
+    }
+  ],
+  "shardExchanges": [
+    {
+      "name": "Лунное лезвие",
+      "costQuantityVisible": 4,
+      "evidence": [
+        "npc_image_3",
+        "npc_image_4"
+      ],
+      "ingredientNameSource": "previously recovered localization: Лунная сталь",
+      "effect": "Меняет облик топора и повышает Эффективность до IV",
+      "restriction": "Только максимальный уровень предмета"
+    },
+    {
+      "name": "Вулканический камень",
+      "costQuantityVisible": 4,
+      "evidence": [
+        "npc_image_3",
+        "npc_image_5"
+      ],
+      "ingredientNameSource": "previously recovered localization: Огненный осколок",
+      "effect": "Меч поджигает того, кому нанесён урон этим мечом",
+      "restriction": "Только максимальный уровень предмета",
+      "fireAspectLevelInScreenshot": null
+    }
+  ],
+  "caveats": [
+    "Only initial trainer upgrade requirements are shown; no later cost curve or effect coefficients recovered.",
+    "Shop prices are displayed offer prices; purchase quantity and actual transaction semantics were not tested.",
+    "Food/tool names are identified from icons, not hover names or exact material IDs.",
+    "Ingredient names for shard recipes come from prior localization; screenshots show icons and quantity 4.",
+    "The volcanic stone tooltip shown does not contain a numeric fire enchantment level.",
+    "No purchases, upgrades or exchanges were performed by the agent."
+  ]
+}

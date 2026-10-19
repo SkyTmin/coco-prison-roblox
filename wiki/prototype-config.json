@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "status": "superseded_mining_only_v0.1",
+  "source": "Independent Roblox prototype design; not Prison defaults",
+  "locales": [
+    "ru",
+    "en",
+    "es",
+    "fr"
+  ],
+  "defaultLocale": "ru",
+  "economy": {
+    "baseMineSeconds": 0.8,
+    "minimumMineSeconds": 0.2,
+    "sellTripSeconds": 10,
+    "startingCash": 0,
+    "startingTokens": 0,
+    "saleMultiplierByPrestige": [
+      1,
+      1.25
+    ],
+    "moneyScale": 100,
+    "tokenEveryMinedBlocks": 100,
+    "tokenCounting": "one per removed block; extra yield does not count",
+    "tokenYieldBonus": {
+      "maxLevel": 3,
+      "costByLevel": [
+        2,
+        4,
+        8
+      ],
+      "chanceByLevel": [
+        0,
+        0.05,
+        0.1,
+        0.15
+      ]
+    }
+  },
+  "ores": [
+    {
+      "id": "stone",
+      "label": {
+        "ru": "Камень",
+        "en": "Stone",
+        "es": "Piedra",
+        "fr": "Pierre"
+      },
+      "sellPrice": 1,
+      "hardness": 1
+    },
+    {
+      "id": "coal",
+      "label": {
+        "ru": "Уголь",
+        "en": "Coal",
+        "es": "Carbón",
+        "fr": "Charbon"
+      },
+      "sellPrice": 4,
+      "hardness": 1.2
+    },
+    {
+      "id": "copper",
+      "label": {
+        "ru": "Медь",
+        "en": "Copper",
+        "es": "Cobre",
+        "fr": "Cuivre"
+      },
+      "sellPrice": 8,
+      "hardness": 1.5
+    },
+    {
+      "id": "iron",
+      "label": {
+        "ru": "Железо",
+        "en": "Iron",
+        "es": "Hierro",
+        "fr": "Fer"
+      },
+      "sellPrice": 16,
+      "hardness": 2
+    },
+    {
+      "id": "gold",
+      "label": {
+        "ru": "Золото",
+        "en": "Gold",
+        "es": "Oro",
+        "fr": "Or"
+      },
+      "sellPrice": 40,
+      "hardness": 3
+    }
+  ],
+  "mines": [
+    {
+      "id": "A",
+      "label": {
+        "ru": "Карьер",
+        "en": "Quarry",
+        "es": "Cantera",
+        "fr": "Carrière"
+      },
+      "rankIndex": 0,
+      "unlockCost": 0,
+      "size": [
+        12,
+        8,
+        12
+      ],
+      "weights": {
+        "stone": 80,
+        "coal": 15,
+        "copper": 5
+      }
+    },
+    {
+      "id": "B",
+      "label": {
+        "ru": "Рудник",
+        "en": "Ore Mine",
+        "es": "Mina de mineral",
+        "fr": "Mine de minerai"
+      },
+      "rankIndex": 1,
+      "unlockCost": 300,
+      "size": [
+        12,
+        8,
+        12
+      ],
+      "weights": {
+        "stone": 35,
+        "coal": 35,
+        "copper": 25,
+        "iron": 5
+      }
+    },
+    {
+      "id": "C",
+      "label": {
+        "ru": "Глубина",
+        "en": "Depths",
+        "es": "Profundidades",
+        "fr": "Profondeurs"
+      },
+      "rankIndex": 2,
+      "unlockCost": 1600,
+      "size": [
+        12,
+        8,
+        12
+      ],
+      "weights": {
+        "coal": 20,
+        "copper": 35,
+        "iron": 35,
+        "gold": 10
+      }
+    }
+  ],
+  "pickaxes": [
+    {
+      "level": 0,
+      "power": 1,
+      "purchaseCost": 0,
+      "minimumRank": "A"
+    },
+    {
+      "level": 1,
+      "power": 1.4,
+      "purchaseCost": 60,
+      "minimumRank": "A"
+    },
+    {
+      "level": 2,
+      "power": 2,
+      "purchaseCost": 280,
+      "minimumRank": "B"
+    },
+    {
+      "level": 3,
+      "power": 2.8,
+      "purchaseCost": 1200,
+      "minimumRank": "C"
+    }
+  ],
+  "backpacks": [
+    {
+      "level": 0,
+      "capacity": 40,
+      "purchaseCost": 0,
+      "minimumRank": "A"
+    },
+    {
+      "level": 1,
+      "capacity": 100,
+      "purchaseCost": 40,
+      "minimumRank": "A"
+    },
+    {
+      "level": 2,
+      "capacity": 220,
+      "purchaseCost": 160,
+      "minimumRank": "B"
+    },
+    {
+      "level": 3,
+      "capacity": 400,
+      "purchaseCost": 500,
+      "minimumRank": "C"
+    }
+  ],
+  "prestige": {
+    "maximumLevel": 1,
+    "requiredRank": "C",
+    "cashCost": 6000,
+    "sellMultiplier": 1.25,
+    "reset": {
+      "cash": true,
+      "ores": true,
+      "rank": true,
+      "pickaxe": true,
+      "backpack": true
+    },
+    "keep": {
+      "tokens": true,
+      "tokenYieldBonus": true,
+      "lifetimeStats": true,
+      "cosmetics": true
+    },
+    "repeatAfterMaximum": false
+  },
+  "world": {
+    "maxPlayersForPrototype": 6,
+    "blockSizeStuds": 4,
+    "resetSeconds": 180,
+    "resetAtRemainingFraction": 0.15,
+    "resetWarningSeconds": 5,
+    "maximumMiningDistanceStuds": 18
+  },
+  "model": {
+    "runs": 1000,
+    "seed": 20261018,
+    "idealActivePlay": true,
+    "includesTokenBonus": false,
+    "includesBombs": false,
+    "includesIdleTime": false,
+    "includesLatency": false,
+    "finishPoint": "first prestige",
+    "maximumSimulatedSeconds": 14400
+  },
+  "routes": [
+    {
+      "id": "no_upgrades",
+      "label": "Без улучшений",
+      "buyPickaxes": false,
+      "buyBackpacks": false
+    },
+    {
+      "id": "pickaxes",
+      "label": "С покупкой доступных кирок",
+      "buyPickaxes": true,
+      "buyBackpacks": false
+    },
+    {
+      "id": "pickaxes_backpacks",
+      "label": "С кирками и рюкзаками",
+      "buyPickaxes": true,
+      "buyBackpacks": true
+    }
+  ]
+}

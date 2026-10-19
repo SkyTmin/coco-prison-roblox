@@ -1,0 +1,2440 @@
+{
+  "recordedDate": "2026-10-20",
+  "reason": "Corrects incomplete 127-frame evidence inventory",
+  "sourceType": "User game screenshots found in local attachment files and visually classified",
+  "sources": [
+    {
+      "id": "coverage_3",
+      "inventoryIndex": 3,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-bdc33fb9-448c-4b41-bfbe-cdc87d79eb35.png",
+      "originalSha256": "0b190069135beb83de4d1c94afbe8696fbbfb5318b0fb0e97b281450f8af2826",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/003.png",
+      "evidenceSha256": "b1ea83b2c13b2f66a708c848f06f9ae77cdeba595442cd988a3d2bb1021102f4"
+    },
+    {
+      "id": "coverage_4",
+      "inventoryIndex": 4,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-99d13650-8e54-4c32-867c-159b0e68edd3.png",
+      "originalSha256": "ad8b5ab2df39f1fc615cf3257fbb0b506adcd7a48ab3dee3e4f6721565e9e157",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/004.png",
+      "evidenceSha256": "621e2e12f4ccbd797848edb8e2bd278c06bbaf340f146d6a1c55f00b25d4bf7f"
+    },
+    {
+      "id": "coverage_5",
+      "inventoryIndex": 5,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-0da761a5-0214-4e95-948c-ae4af6af27a5.png",
+      "originalSha256": "c97b4972223922cbb527d2cec8d35430849005c0835bb506fbd5b780ccbddda5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/005.png",
+      "evidenceSha256": "3b3b4d80f5529aebee5fb142225e3cf7fbfd127039f57d59b99bf6159e080ef5"
+    },
+    {
+      "id": "coverage_6",
+      "inventoryIndex": 6,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-a87e7459-1b62-4d0c-a47a-13e2d7c58a05.png",
+      "originalSha256": "8756afb6b197415d5d33653148add136d1d13574fc812f8962bef15d2956deb3",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/006.png",
+      "evidenceSha256": "467eeed1fd827446966374cbe981220839d6fdd8f97101c998082c4f18b71a1d"
+    },
+    {
+      "id": "coverage_7",
+      "inventoryIndex": 7,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-05129740-a3e1-4d7d-98ac-c33b65b0e0c9.png",
+      "originalSha256": "69ec4cc963ade505312887ecb322cf9b210f2ddefcf76644966a08844a852691",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/007.png",
+      "evidenceSha256": "d094089810b3c635a1f773c64397da65c5f5a0fab2c9fcc92ec2c2a030ec60bc"
+    },
+    {
+      "id": "coverage_8",
+      "inventoryIndex": 8,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-f5ed12e7-af6e-4112-8c1e-3ab7038d293f.png",
+      "originalSha256": "9c9b705ac65461c55088f6704a162065a4ea0898e3974730879b34fc0ac26e9e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/008.png",
+      "evidenceSha256": "eb94603402e390ed5bf18be36b757387721f51d571c900d1c82c03518b489f01"
+    },
+    {
+      "id": "coverage_9",
+      "inventoryIndex": 9,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-fed13cb8-5726-4e7c-8f96-f0ed4a1112f7.png",
+      "originalSha256": "3310c26d2d5f32f08ba864c258209498cf5834303e9e575d15b2d2d6910d1b3e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/009.png",
+      "evidenceSha256": "47af659ecb65b9f08a0c5b97abe3ccce977dc1226716c41ca05977d74249b022"
+    },
+    {
+      "id": "coverage_10",
+      "inventoryIndex": 10,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-011f6ce1-f4b3-4ff0-860f-3e3e37190061.png",
+      "originalSha256": "8574ca06904445848a633300de7f56a95840f4e9388de0d42a032267702c01d1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/010.png",
+      "evidenceSha256": "c119554f8c525131c10419749671a357a3f4690ba1b4a2e6354866b317c84c66"
+    },
+    {
+      "id": "coverage_11",
+      "inventoryIndex": 11,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-83e771b8-c652-4531-9fb7-90fb5f8d2401.png",
+      "originalSha256": "03bcc06686e9876cf4755eaaa3219782fbbf55a00febf778128c508d82460834",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/011.png",
+      "evidenceSha256": "bc4c2b2a228bd609b7302ae315c02d2accd8e74fd8ad8a516582e52de935cd01"
+    },
+    {
+      "id": "coverage_12",
+      "inventoryIndex": 12,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-a6f8c582-5432-470f-918b-eba4fbe25fba.png",
+      "originalSha256": "4a7599f5cb8a374e7930799c5f52e958d1da2fe9d4038d5c6431b0fb970acf2e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/012.png",
+      "evidenceSha256": "e93ea2a7836ea25a87df8a6d5e7a02a142cebac9f0f15570e86ebf1e1b15c7b8"
+    },
+    {
+      "id": "coverage_13",
+      "inventoryIndex": 13,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-8c86440c-c5ac-4162-893d-e6d0c462fb13.png",
+      "originalSha256": "0e9284f2f24b466a8b7ba8fc070451db6464fd5a0f372cad64be7dc604f86036",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/013.png",
+      "evidenceSha256": "77543121500889592756a493d3bd3099311c99fffbcf70cfcf5cce311ddc0a81"
+    },
+    {
+      "id": "coverage_14",
+      "inventoryIndex": 14,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-b3de041a-1564-4764-a273-9b55798f47ca.png",
+      "originalSha256": "83ce6cc86002592f9b9ba5ea2342cf96d15e60a037b0c09155e7ed8ee0fe4dd0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/014.png",
+      "evidenceSha256": "e01e98f66b3effab7d5eac31bd2a82f41f6f06fcb417fef6ed62bd23a44a77aa"
+    },
+    {
+      "id": "coverage_15",
+      "inventoryIndex": 15,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-f8544222-1722-4853-a9cd-33ca1e94ffdf.png",
+      "originalSha256": "7cc715b8fb2f1809481c5cfcf4bd21bbae9d7b7abd7363fc6e5b020c64a5b964",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/015.png",
+      "evidenceSha256": "625bd5e0de7afb6cba605f4a47ff3c103cdeb5c07dab7d7a6fc45e98e8c1bd83"
+    },
+    {
+      "id": "coverage_16",
+      "inventoryIndex": 16,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-02e741f1-0a6d-4a29-9b34-56bebf8e68bd.png",
+      "originalSha256": "187c1d74c9d01b78570d42c25071ba78f7948f70337ade4b9d1356d12fe2cb99",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/016.png",
+      "evidenceSha256": "68cefae334b31ef4a9b645408dc3dad4c80ca4ef15c911093426816a16b185fa"
+    },
+    {
+      "id": "coverage_17",
+      "inventoryIndex": 17,
+      "group": "helmet",
+      "originalFilename": "codex-clipboard-8d153edf-1640-4dbd-aeee-1d6361a4c256.png",
+      "originalSha256": "1cd751860e9826346c761ccd22d20a824c3a9bab5507a1eff68623b38e41302c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/helmet/017.png",
+      "evidenceSha256": "03b863b0bb777ca555e38e29126490b18451543ea242462cd3186986e411b7fd"
+    },
+    {
+      "id": "coverage_18",
+      "inventoryIndex": 18,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-0444a646-d254-49fe-979d-22c23f4c3c34.png",
+      "originalSha256": "b7bade066fb4d81adb14bd0c638f3012aa9a02dc2cf85490e8783047655e1d30",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/018.png",
+      "evidenceSha256": "986cc6ab21e557396cc8c098e5e651ad02fb4863bf7ff9a97947f5cbe3cc0e1b"
+    },
+    {
+      "id": "coverage_19",
+      "inventoryIndex": 19,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-3647269a-037c-4c50-96d0-71014e8dd902.png",
+      "originalSha256": "7c2be87e296d8488830a97c6a5755febceded3b2d7d64e1884127171713850f6",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/019.png",
+      "evidenceSha256": "8bf3a95d40d3c20209faa12b31e4905b4613f5284972d77e6e64f08085f30375"
+    },
+    {
+      "id": "coverage_20",
+      "inventoryIndex": 20,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-4750d50d-0aff-4ad0-9be1-bbef671df7c3.png",
+      "originalSha256": "9812b074e09e3169bed5c46c1592dc3ed04b40d1280bef79bb494e312330412e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/020.png",
+      "evidenceSha256": "07b5bb60071d09f0532e2e704a3eeae6eb316661fda1cd527db7abda3f9b8057"
+    },
+    {
+      "id": "coverage_21",
+      "inventoryIndex": 21,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-5c8b1636-e54b-479a-9324-2fde5f805275.png",
+      "originalSha256": "62488ce30e72ae364ed3c4f58ffcfb746c240c7f65907f2e1e9001bc2719a705",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/021.png",
+      "evidenceSha256": "52ddc56ad011bb0d621467441f2763edf6d0da5726a00ff7fbf963f1161e9bcb"
+    },
+    {
+      "id": "coverage_22",
+      "inventoryIndex": 22,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-e167d408-3e31-43fc-9885-c83eec901140.png",
+      "originalSha256": "dc3dee73e4d4fa9c9189b7b5903bc1ae386f3d1689c851deaa42acc755f9207e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/022.png",
+      "evidenceSha256": "a1f18e4b1ac3dcd32a387c22d67251dac55e6c972dbe6887a0ac6ab68c339d7c"
+    },
+    {
+      "id": "coverage_23",
+      "inventoryIndex": 23,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-85905774-a42b-4830-b08d-f3c2b57706fe.png",
+      "originalSha256": "466043f9cf73c4a124a6a04a1abbf8e1ca3fe5af781ddd0f3b1181e91cfb04ba",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/023.png",
+      "evidenceSha256": "7646e530a20c63293e8ddc260deb1372cb35aa6506341ad959f8263eaccc028d"
+    },
+    {
+      "id": "coverage_24",
+      "inventoryIndex": 24,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-575cb3a8-4c54-4675-8b57-5adf188677f9.png",
+      "originalSha256": "d115c4d7ada75ec88b2afab372ad06103d5be170f082efd706b41d1b046b36dc",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/024.png",
+      "evidenceSha256": "ef91959a193b7e52bdea7a16a0faa3a119ac38933e79b3dbdcb805f06f23df52"
+    },
+    {
+      "id": "coverage_25",
+      "inventoryIndex": 25,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-41cd34b0-1b1b-42cc-bc86-da7d47a951cd.png",
+      "originalSha256": "525e1a5f5955f3e480a3211f83b530d946cddfd27d6ec7a846a36c04756d27dd",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/025.png",
+      "evidenceSha256": "3919dd58131483bcced4b37777976849a08539cd35ba34ac9a4dcfd47a6a0dbe"
+    },
+    {
+      "id": "coverage_26",
+      "inventoryIndex": 26,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-c294640f-1853-41d4-9d6f-f58fa2927a3d.png",
+      "originalSha256": "d994da2f81bdbde1f21a339692ee4b63699c73a27b8385656cf07ad15596db48",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/026.png",
+      "evidenceSha256": "61ecb809913b971abc297f821beb14bd2fbfc957a26c1452b517e52708cf7810"
+    },
+    {
+      "id": "coverage_27",
+      "inventoryIndex": 27,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-0e5af4f3-a96f-4477-8ab2-f3d8280d08b7.png",
+      "originalSha256": "28486968ef18c926ae74d2f533ca3bfb7e5fe30adb1309e95994bc88d0dadf7a",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/027.png",
+      "evidenceSha256": "c55d690b3768494153fb12de554c7a4658e1f1fa02cd706d50465836572bc412"
+    },
+    {
+      "id": "coverage_28",
+      "inventoryIndex": 28,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-c94db6d3-2fe9-4583-8043-c6c94f0db04c.png",
+      "originalSha256": "d1ed94b9927e73eb75e163252b1c95152067c2d6ef50dfc844b0277bd3f53be9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/028.png",
+      "evidenceSha256": "725d439906fc33101f69cb12bb6867cab8e064e8f409b0fe69f6f1dd138bd983"
+    },
+    {
+      "id": "coverage_29",
+      "inventoryIndex": 29,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-21427342-fd4b-4836-9e97-31d826bc4960.png",
+      "originalSha256": "2891e3856a88b0bb47fc7c0ca7692fe7fdd7532b55bece437e019dace2747ff3",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/029.png",
+      "evidenceSha256": "b33aaf4bacb6c9ac1d42428188aadc4543562a5b4eba86437c575b0784c59c09"
+    },
+    {
+      "id": "coverage_30",
+      "inventoryIndex": 30,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-c36b39fb-14b5-439c-9f3d-efc87aa20226.png",
+      "originalSha256": "e697929af9cef3b84aeafdf7d8c4778091d058b15be3543973459c198199ad27",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/030.png",
+      "evidenceSha256": "0cfceeb72becb6e66b97c3adfb4c623551b6af97230179e78353c8314f399dff"
+    },
+    {
+      "id": "coverage_31",
+      "inventoryIndex": 31,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-2940936b-ab13-43a1-a5b1-36dabc7b01d0.png",
+      "originalSha256": "b8f258355bebded31ac9e3674868350a85cb3f6cc38f3f710d3102778b3c000c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/031.png",
+      "evidenceSha256": "3a639ca5f955ae49bb6509be4ad86ff2f5fa864ae3f17d6e268a48c797972224"
+    },
+    {
+      "id": "coverage_32",
+      "inventoryIndex": 32,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-12c07fef-d8fa-4791-b16e-e3688cd9d509.png",
+      "originalSha256": "3c56ca9cf302d626435aa3b8c4b309e4de3f1c4495f376d4643007068518e163",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/032.png",
+      "evidenceSha256": "1169ea3683cbeb3b6cfe7ae666b99192e64cc49d8f8e35d27d32906b08a5316d"
+    },
+    {
+      "id": "coverage_33",
+      "inventoryIndex": 33,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-b9110457-9f32-4fa3-8905-831a85247865.png",
+      "originalSha256": "583bdc9b460fcecc17e051e708501bd1981e3f01750627900bd3aa0d47c71c5b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/033.png",
+      "evidenceSha256": "009b49f97242dbb61133518ac8f81a3f1eca072226b75f70571256d92435c724"
+    },
+    {
+      "id": "coverage_34",
+      "inventoryIndex": 34,
+      "group": "chestplate",
+      "originalFilename": "codex-clipboard-2c2448b2-4c02-4fed-9d94-1876c942c703.png",
+      "originalSha256": "284b228bb1d67a8231950c3f0c7ee73d229ca0ad4f34b2bae16f1d20ec2d5f56",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/chestplate/034.png",
+      "evidenceSha256": "42b230fef091197e9e3e61a3d7d4a919c31befd420299142f96f09cbbba1cf86"
+    },
+    {
+      "id": "coverage_35",
+      "inventoryIndex": 35,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-1d29cd79-0b95-45d3-a92f-7ec57122ed3f.png",
+      "originalSha256": "3c7e443364cc6a73d26218f3364ad02e0a8fa1bb927121eee41a65d3f833524c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/035.png",
+      "evidenceSha256": "089b485eb1f5e9605240ac8594913f7ca9f30f0f3ddce00d1f6e4dcdb0c4a9e7"
+    },
+    {
+      "id": "coverage_36",
+      "inventoryIndex": 36,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-021c01e4-07fa-48f4-bd52-bf8887ec4b0a.png",
+      "originalSha256": "8e2e271bcb797c29bc7a64af48b3f8c2de5f7e9dea6ef6cb464ad31dd593b06d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/036.png",
+      "evidenceSha256": "f4cc84cf185787c0193e6fad8f32e5635453751cac587e79930265900bc6b277"
+    },
+    {
+      "id": "coverage_37",
+      "inventoryIndex": 37,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-f79b94e1-8d4e-4aa5-8ac1-fd0c58b438ba.png",
+      "originalSha256": "c3a67bc6628ab55cc70ac89e0b35b3d643c54b648368e99eb9d88f4910b49caf",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/037.png",
+      "evidenceSha256": "9618083dacd30a9829ec7d58f8573f6de2c7574f7ea382d0c35994b0833b01d0"
+    },
+    {
+      "id": "coverage_38",
+      "inventoryIndex": 38,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-7049b183-3b53-4e44-a165-6c2a503e1d8e.png",
+      "originalSha256": "722519c403b4d8386ee0f2541a29783c353a6eca98041192c4d0277b4807f729",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/038.png",
+      "evidenceSha256": "20cba429dbfe4237f45cb6d947ea473e8b8554b9bc62eadebb4a2df7411f770c"
+    },
+    {
+      "id": "coverage_39",
+      "inventoryIndex": 39,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-e66f01f9-ad49-49c2-899d-c1b9bf4e46e9.png",
+      "originalSha256": "96f49e4ccb7bdb9746a968bf94dfc0bc4fcc0e61e5cfdefd3e48c2b6a81ac5e1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/039.png",
+      "evidenceSha256": "4d17737ec08c8ae606b1853bf5eb2fb979d9c2d2da7cd9a74bb91b2eb4131bea"
+    },
+    {
+      "id": "coverage_40",
+      "inventoryIndex": 40,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-28e29aa6-1cd3-4541-858f-9ebba923878e.png",
+      "originalSha256": "99aab0ecead7fa445b5789ab42bdc731e4c958c34d8412c9e5517f4fca174a59",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/040.png",
+      "evidenceSha256": "35f77e3e77ec0a602a742e20669fbd88b52db60fb9beb9f240bc6b8e7e804e61"
+    },
+    {
+      "id": "coverage_41",
+      "inventoryIndex": 41,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-c34a27e8-e221-4d0f-8d4a-668ce642fbd9.png",
+      "originalSha256": "4c92b264bf10d9c135fde1c4b5a52f73db91ee90dea116a32080ac87563120bb",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/041.png",
+      "evidenceSha256": "fad8d2a590c84bd1b29da3ff004ccecd940aae66bc7d6a76dbafa33605cb0b56"
+    },
+    {
+      "id": "coverage_42",
+      "inventoryIndex": 42,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-3a8dd6a3-79a0-43c6-9753-5b981dc467e6.png",
+      "originalSha256": "aafbb08674ca0c4cd78fcfdfd3ee2cb2d8b1ba59db8dc93c5dc30dfbbcc80d03",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/042.png",
+      "evidenceSha256": "602d8211b8f2d89c822d17e9cb22bc0617fc3240d4fe3fd4f4f03b6453aa976b"
+    },
+    {
+      "id": "coverage_43",
+      "inventoryIndex": 43,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-8862ad9f-682b-4217-b695-43ea1f3e3cfc.png",
+      "originalSha256": "b792843c1fe55dd3d5e1119af44f5fb0e2db58fb9c9bf1925d93611764a2562e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/043.png",
+      "evidenceSha256": "9a0d20edcd70ec09a41518050d29960efd48569427945e0c737fb0d8def31f87"
+    },
+    {
+      "id": "coverage_44",
+      "inventoryIndex": 44,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-993f0bfd-4ea1-4b00-97f3-a1b9ba327eb6.png",
+      "originalSha256": "7cb38a075e4d06eb6c1f6bfbc66174c2e8c3d7192bc240cac8e46e9071ce6fdd",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/044.png",
+      "evidenceSha256": "e0fa9e9a0e347e6a94c2001e7e89e4a52e9f831a11df7fd713cd8b8de59076e1"
+    },
+    {
+      "id": "coverage_45",
+      "inventoryIndex": 45,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-4449951f-9a02-4f8d-85c2-f34fd03fea43.png",
+      "originalSha256": "a7c7eec355babc10f12823897400a43b1ded4377a733511788c0992edab7082c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/045.png",
+      "evidenceSha256": "fbcd200c57aabe7ef394a21033af5682b86193f7ea4596dd8f9ca899f11fc858"
+    },
+    {
+      "id": "coverage_46",
+      "inventoryIndex": 46,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-b1247165-a8a7-43a5-9923-d767ac448895.png",
+      "originalSha256": "e9bbea34cf744a5f8e68129b63dc237af425f1d8c4e038cb5b7f0333c67abafb",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/046.png",
+      "evidenceSha256": "8de5165d2354ddf326bf691a9ed8a639ff5ab7484c931d2ab9ffb162ffe999a7"
+    },
+    {
+      "id": "coverage_47",
+      "inventoryIndex": 47,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-5f44cbad-44d8-4acc-a8b5-2647a020ae89.png",
+      "originalSha256": "033cff187b8d65d9a15ab677a10486e41d8b73534b71f4fc3b52cfcd6ca9865b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/047.png",
+      "evidenceSha256": "bb0c98a9d03704dd88375618e82e46cc9f9ce38770855d2f36ce84535ccf9488"
+    },
+    {
+      "id": "coverage_48",
+      "inventoryIndex": 48,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-313f1bfb-f27a-4714-ac31-aaa0e5cff907.png",
+      "originalSha256": "8aeeffa69d7c77d56a938d15949cf8d986ec52f7719760a89ebe37d747c2ffa8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/048.png",
+      "evidenceSha256": "ea42288947ae63e81d1c2cabcf02a08274ff1784e3dcf819fc19507f8bdf5898"
+    },
+    {
+      "id": "coverage_49",
+      "inventoryIndex": 49,
+      "group": "leggings",
+      "originalFilename": "codex-clipboard-74f5fc64-ca6f-4801-8e0c-01558a9a9ccc.png",
+      "originalSha256": "ba9fa9ee64c744823e1467c0215dafd896e71a393100f2600d56b179feb94e1b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/leggings/049.png",
+      "evidenceSha256": "660395bfcb980eae30e12cd149055858e0670a7bdc309721b868cb2bfb364597"
+    },
+    {
+      "id": "coverage_50",
+      "inventoryIndex": 50,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-4777288c-2f70-4e8d-a8ce-ff977a64d802.png",
+      "originalSha256": "f8a449c42224cb7bfd9a979aab32d11e2f64e390815eec2d4c18d50b8b328d83",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/050.png",
+      "evidenceSha256": "3aa706df5487fd089252bfdcd80861b68a791e512f3cd51cdb3585f27f63d2a9"
+    },
+    {
+      "id": "coverage_51",
+      "inventoryIndex": 51,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-e9122c4b-1cd9-4d0d-89af-45aac0dcf92a.png",
+      "originalSha256": "130f0494ed8c6f373e99b434d24fc74584602ed0bf67f03a3d94054c952553dd",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/051.png",
+      "evidenceSha256": "9989b028ab15d8fbd5b7dbe0edb395cca3bc9cafa39dfee99234e98e9d59e5c8"
+    },
+    {
+      "id": "coverage_52",
+      "inventoryIndex": 52,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-46a0f8d1-9299-4368-8b52-5a05f7bc1aeb.png",
+      "originalSha256": "3bfc0e6a5cc2d1e77a2bed6bc65cc8716ca03691d538835848f14d46d849837b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/052.png",
+      "evidenceSha256": "57b92a8c741874b0536b92159df846ba1aed44fafd955d113487180a53bbd3c8"
+    },
+    {
+      "id": "coverage_53",
+      "inventoryIndex": 53,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-6fd6a83d-b644-4975-9061-85f2b46cfa48.png",
+      "originalSha256": "44b0ae6a4f840acbfc0a4cf1f04166d388216c6ba455f09eb8aee5841354bbc2",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/053.png",
+      "evidenceSha256": "22b31e347d4f039554d2ad7e7264f6db3f97c3bd374850ca99e7024c1780e41e"
+    },
+    {
+      "id": "coverage_54",
+      "inventoryIndex": 54,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-a05088e3-7827-448a-aff2-e8bc393e82ff.png",
+      "originalSha256": "b5ac21b08645679454ac6466d998bf8953de10acd7b5068f49e3b256b1b6a6b6",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/054.png",
+      "evidenceSha256": "5d85f40b4357535dc32b3c6b72da352982b2400c992d1c81896b2c058193bf5e"
+    },
+    {
+      "id": "coverage_55",
+      "inventoryIndex": 55,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-b41316b8-ee1e-427a-85bb-1f727c07f64c.png",
+      "originalSha256": "a603e23764a2d24c638c898dd3c0cff9cbb11f4f1a3f11042196c2c36f08099c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/055.png",
+      "evidenceSha256": "b24515c9349246d66682c9cbbdfdfae1a1c71c86d076043154a8c5a5aebba69b"
+    },
+    {
+      "id": "coverage_56",
+      "inventoryIndex": 56,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-292f80a9-308e-48da-beef-4bf88a5667cf.png",
+      "originalSha256": "32368508aadeff9b04df3a7586944112b329bd5599be3ee50d81cb3793a3f208",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/056.png",
+      "evidenceSha256": "0dc6212f6b434686c61f37000231765aa4d2939f34371e1f6bf11787f6501fa8"
+    },
+    {
+      "id": "coverage_57",
+      "inventoryIndex": 57,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-be8e03e9-c86f-48ae-ae99-04d89ca260ef.png",
+      "originalSha256": "379ab45c3404eae24c76f2ea313bf2271119ee55eb84de99de8647c1b22393d7",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/057.png",
+      "evidenceSha256": "73546e426c64b750dee7a7f6bcf46c5a2cff85be12f2a2e5fce503718cd553f0"
+    },
+    {
+      "id": "coverage_58",
+      "inventoryIndex": 58,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-50c10d16-720a-45a2-a2d3-86ca9b6731c4.png",
+      "originalSha256": "c86ddc06eaf1c9e60095bfaf1d524adb1de68f7680f6af046fbeb40341e57943",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/058.png",
+      "evidenceSha256": "d8ea4c2c8a29ec15c8bbf5a487e3490032cb047d98b07dbbd95f1cb63c7b77d5"
+    },
+    {
+      "id": "coverage_59",
+      "inventoryIndex": 59,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-7fa36477-1869-4983-9d71-1b83f146c4e7.png",
+      "originalSha256": "bab07e0bf5845d2b6e682a079e13c84b8eda5002d22a1e564b80e2408a56fd53",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/059.png",
+      "evidenceSha256": "feb39bf05ffdd1df50b1d02952841ceda396d95a4a793fb7a9fa99f24e33e64e"
+    },
+    {
+      "id": "coverage_60",
+      "inventoryIndex": 60,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-f8299d26-a015-4e78-aa3a-e9bb8f6a8540.png",
+      "originalSha256": "6aa5727259d0b40e48df2c11d918c31314ef61b79efa8f4d250179b3bd97de08",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/060.png",
+      "evidenceSha256": "93addcba210ef7d5abb3462a0759dd3dce98c4abb98bbb4777240366dec3dc15"
+    },
+    {
+      "id": "coverage_61",
+      "inventoryIndex": 61,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-667517be-775a-4d16-8f62-0c0d377f5095.png",
+      "originalSha256": "e7286e3b1b9586ff81a669e796a519386cab4f4bfd8a73cb1157571c05725c43",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/061.png",
+      "evidenceSha256": "b1afc54214759c6744c5d8f1130b7e212014356c3596094509861760c33b2c0d"
+    },
+    {
+      "id": "coverage_62",
+      "inventoryIndex": 62,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-859c1962-268f-4ddc-bded-0ad4098340d0.png",
+      "originalSha256": "1127c828ac655499c7fd26f41656874c0767956f1fe86e818da6b6f18f4ede1f",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/062.png",
+      "evidenceSha256": "cd952d26580f3279c1f712197ebd342ca782b8bd1aef0e126c184204740bdec9"
+    },
+    {
+      "id": "coverage_63",
+      "inventoryIndex": 63,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-b3f72190-81f1-4044-97d9-77e38d72c55b.png",
+      "originalSha256": "b0f169bf742d5502475a5183db556174f7fa6c19a2e349f82b4fbd688549c25f",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/063.png",
+      "evidenceSha256": "ea93fd7e662bcc7e86b79ffbbdff3f2869282b92c13d4db14a481fe570f341a5"
+    },
+    {
+      "id": "coverage_64",
+      "inventoryIndex": 64,
+      "group": "boots",
+      "originalFilename": "codex-clipboard-0a2b99d0-dcb0-422b-b082-b3a8c2b0618c.png",
+      "originalSha256": "594d15ddcefc2f59c90228b3ea7bf5503d6b83ad73671333731d65a25d0a2070",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/boots/064.png",
+      "evidenceSha256": "55b86f13d173cbf80811ee10b9655a74a36045ed3507ff8a8ba8627deee70ab9"
+    },
+    {
+      "id": "coverage_65",
+      "inventoryIndex": 65,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-e4ad4c9a-c450-4acd-bd56-ef05c7dbccbe.png",
+      "originalSha256": "adb83d6be4f3f348c0864d68a5880f518a964126e0f5aee73982c2fe04771c70",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/065.png",
+      "evidenceSha256": "25da3a72a2b89cea0a802f3860e0b2c679fe0b2db9361e4aafa078e37b46e934"
+    },
+    {
+      "id": "coverage_66",
+      "inventoryIndex": 66,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-9b206b9f-852c-4480-93a4-13fc1ca85a51.png",
+      "originalSha256": "95623e5ab6983e1643e56cb3e9ce408292d11ed212b93ecae7de1751d4024174",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/066.png",
+      "evidenceSha256": "3d52a941ca39f920ec0f6527b0854e49b3bb7e583c2c82533c9efa885fcd4295"
+    },
+    {
+      "id": "coverage_67",
+      "inventoryIndex": 67,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-257f659a-f15a-423d-b5a0-ca3a22d5534e.png",
+      "originalSha256": "0421e844f8701166992d694164147bae5286e4bf5e81f398e9640ec1afac95b9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/067.png",
+      "evidenceSha256": "5054e4111acbdcac706569cc5f709f33c67b6d15fb30315a823d4a4adad01b3b"
+    },
+    {
+      "id": "coverage_68",
+      "inventoryIndex": 68,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-7596b649-8987-4da1-b9b5-3228e7b7109f.png",
+      "originalSha256": "46021224004e82eebe4235c029e76f7103b52235614e57185eb4dd2d3b37de43",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/068.png",
+      "evidenceSha256": "2755475e9c2f6367b01907079285243c9e3e803ebc3fcfcab9a4db2a6bb54765"
+    },
+    {
+      "id": "coverage_69",
+      "inventoryIndex": 69,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-54e5f7cf-a842-4717-beb3-af4fcfff8ecd.png",
+      "originalSha256": "720152c02094f67e0e04ad9602c481ffd7927f703dc4e38504d1bedd60e42815",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/069.png",
+      "evidenceSha256": "d51ebbe023ffd14b8f622dcf638a5ddbbf01282dc8c9af78c9f148dfa623255a"
+    },
+    {
+      "id": "coverage_70",
+      "inventoryIndex": 70,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-26f4db7a-559f-4c42-88a8-b156635d2376.png",
+      "originalSha256": "1ba8da1ee94203e8f37899941d48a1cb153c172dab920e32db55a663843fddb0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/070.png",
+      "evidenceSha256": "493f0e38cbd400a6bd26e53f799ab6a257c4886aaef44622a908bf1d91a96827"
+    },
+    {
+      "id": "coverage_71",
+      "inventoryIndex": 71,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-dc8597f3-c076-4e51-9dd3-36919be08a80.png",
+      "originalSha256": "2026c853f312c093ebc15fd05ae8a4f0884d5bb70c620d4e0231e0441e5811e0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/071.png",
+      "evidenceSha256": "f8b43d2d673692a30a91a569c5fe24f4b6a34b2973334f8307b327621a374407"
+    },
+    {
+      "id": "coverage_72",
+      "inventoryIndex": 72,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-ec696654-6a85-42a1-91f4-93c6c7eda3d3.png",
+      "originalSha256": "5f6fd6168942805342c0517d4e4afa34ca28ec8f11e26c444d57ce0cdde9b85d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/072.png",
+      "evidenceSha256": "724641db7c6f9f7b9cf427ae6c1b1672e883cf7aa2c9258822079ff15658c7ea"
+    },
+    {
+      "id": "coverage_73",
+      "inventoryIndex": 73,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-535b94a0-bf75-49e5-989b-1ea568ed8f26.png",
+      "originalSha256": "0e37b6f6d28f872983defc77fc28f5e1bbab0a22b86c3f5a3a316555e891d166",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/073.png",
+      "evidenceSha256": "ab75f954fd83ed6f3769a3e38b1753913787f58d54aa4f1215a183833f059fd3"
+    },
+    {
+      "id": "coverage_74",
+      "inventoryIndex": 74,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-f86750c6-f9d4-4e2c-bba3-106f6d52299b.png",
+      "originalSha256": "ee7277915524edf0f41c725997dd6a04851a3301c7cda6d4066757e03345d18d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/074.png",
+      "evidenceSha256": "03be49423b09637e9855c92850c2b6247846b270863f31a581249dc9ebffe4ce"
+    },
+    {
+      "id": "coverage_75",
+      "inventoryIndex": 75,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-c8317fdf-98a7-4bce-b6a4-f67cf423247a.png",
+      "originalSha256": "81a2e7ab6196c7042423ce7f6f933df3a9ced6553d005cea111f5b82c2234ee2",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/075.png",
+      "evidenceSha256": "3520afa9281334c25600334f4d390883c34f57db84bbacf677179852e22002db"
+    },
+    {
+      "id": "coverage_76",
+      "inventoryIndex": 76,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-6f96ebc5-2a8a-4acd-9399-28d99a171d15.png",
+      "originalSha256": "fa62e04e61cb5eb7842c07c52256f9d3e2077f27a6cac3f5b9b6f70554960093",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/076.png",
+      "evidenceSha256": "ae16a0f799cd5d226d6c9e9688479bdc18a99e481db0d40ab0835e6cbdfaa18c"
+    },
+    {
+      "id": "coverage_77",
+      "inventoryIndex": 77,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-30b70cff-9d9a-48ca-a22d-a0ebab933e03.png",
+      "originalSha256": "a1ba2de13ee86cfdcb03b2754e3cad266a975d74057447001b499db6988a6d12",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/077.png",
+      "evidenceSha256": "6cc405df76a29ccf7fcfc90413d6bab146616547f74d43dc133da0bd0692e4ff"
+    },
+    {
+      "id": "coverage_78",
+      "inventoryIndex": 78,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-1db38b4a-9434-4031-a78d-5cb4b878f6a4.png",
+      "originalSha256": "0fbc70650e761569881eb637f2f64cd0d188a27cc7c48a144a7e589f674a5646",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/078.png",
+      "evidenceSha256": "7fb63d7ff18710a5cb8f91fb8f7fbb27838f28e3c6c4e7eed0bb9dc33fa5a12d"
+    },
+    {
+      "id": "coverage_79",
+      "inventoryIndex": 79,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-98bd593a-c399-4ca1-9eb8-d86440704f5b.png",
+      "originalSha256": "86b7574b6b7693d29d83aa9870a30db58f2583d78c5618ddcda08b0668b74f93",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/079.png",
+      "evidenceSha256": "1d31ba646ee78914439de44aee0277d7f011e3edeb148cfe92093e5ee796ae53"
+    },
+    {
+      "id": "coverage_80",
+      "inventoryIndex": 80,
+      "group": "axe",
+      "originalFilename": "codex-clipboard-a4b08726-c797-4152-8230-74b57c2c9a81.png",
+      "originalSha256": "23b50b0fe31e106a66a239460dfe45809c3e6be0ae7c320cae93509b143ea3ee",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/axe/080.png",
+      "evidenceSha256": "2b476f1d7fd071d3db266c4b338c86e22aa6233f62caaeb1c608653e06afd320"
+    },
+    {
+      "id": "coverage_81",
+      "inventoryIndex": 81,
+      "group": "mining",
+      "originalFilename": "codex-clipboard-ac17c637-cfc4-476b-b41b-5d6eeba12428.png",
+      "originalSha256": "ba5cc5bc7eb3b8122935349f486386fc448afb385ba935bbf90e6212b746233e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        0,
+        24,
+        1910,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/mining/081.png",
+      "evidenceSha256": "804ad5bcbb6a76f2306b2fb61d7aab65beba69c0f9eeb7ab1ff527a53d1e6c05"
+    },
+    {
+      "id": "coverage_82",
+      "inventoryIndex": 82,
+      "group": "mining",
+      "originalFilename": "codex-clipboard-044e6b8b-1ee8-40a7-a929-2a26b4fff1f6.png",
+      "originalSha256": "84e2510f501e322bdc268b340d071a256e49cacef8cd5a278b17d427ae4fc317",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        0,
+        24,
+        1910,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/mining/082.png",
+      "evidenceSha256": "427037b846fa15134b4d67353bb51c36b950b8030f406c488450c0a6251f550a"
+    },
+    {
+      "id": "coverage_83",
+      "inventoryIndex": 83,
+      "group": "faction",
+      "originalFilename": "codex-clipboard-b4ba8aa7-3155-46ed-9dff-c70931d58518.png",
+      "originalSha256": "10250329156d1ffd142b55e0dae29f4fc14542e2b4ce0d50d58bc44ccb4e921d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        600,
+        300,
+        1330,
+        780
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/faction/083.png",
+      "evidenceSha256": "87abc1ae8d654a72becda7b6538804f5642fa815b79ab51f969a576b6f5d5126"
+    },
+    {
+      "id": "coverage_84",
+      "inventoryIndex": 84,
+      "group": "faction",
+      "originalFilename": "codex-clipboard-057821c9-19d1-4b65-9fe9-1669720e8ccb.png",
+      "originalSha256": "f3110a318212f7863ae73773fd20f53ccfdf1677deb83c2619b1ea834a3568d4",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        600,
+        300,
+        1330,
+        780
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/faction/084.png",
+      "evidenceSha256": "eee9d2905e691645d01584bbcc35977655cd2f27262d013fa9d0dc99fe4197d7"
+    },
+    {
+      "id": "coverage_85",
+      "inventoryIndex": 85,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-95e36729-1ee0-437a-bc0a-312201667b52.png",
+      "originalSha256": "4e4a15e6c7650485a16e0692a359fcb28c609ec30ab80ed43dc32b8e06d85243",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/085.png",
+      "evidenceSha256": "6d46f4b9ad444b7bd3752516217cb8110099c024c18900c90541666590c36431"
+    },
+    {
+      "id": "coverage_86",
+      "inventoryIndex": 86,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-86801dc1-c940-4043-8b19-06f8faf68713.png",
+      "originalSha256": "14bb7be70aaf162d344da3233bdf845e85a2e04e12ae6acf78bbfc8ea2311bf3",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/086.png",
+      "evidenceSha256": "32bbb6e6559305b40419f6540bbdde5e6c5e27904ba6feb884e229f23df4a349"
+    },
+    {
+      "id": "coverage_87",
+      "inventoryIndex": 87,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-10961dde-f0db-49d8-b896-6782d10185de.png",
+      "originalSha256": "043713672db6c79bca5000f3d896a531c5be033ca4f286bb23ce974fa232d676",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/087.png",
+      "evidenceSha256": "58ad63016b75501442309fc7a4e908625b5fcda7b378daa620d718118b533b90"
+    },
+    {
+      "id": "coverage_88",
+      "inventoryIndex": 88,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-32ce6c9c-9c31-4c34-be41-03b9c01fb090.png",
+      "originalSha256": "e429493a1e57843f892716fa9850da15bfed572126a8d4362b0053e87017acd8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/088.png",
+      "evidenceSha256": "d54e0027fbc60bee9071a98891f41f31d57975d9e27e3e57254da4441c95a1bd"
+    },
+    {
+      "id": "coverage_89",
+      "inventoryIndex": 89,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-196a9fe7-517f-408a-8c56-069869e7ba48.png",
+      "originalSha256": "259915e7f513ae96a4491cbc3eef65e38b0814bd732d9751a1160567f0f91679",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/089.png",
+      "evidenceSha256": "3b22581a24720353aedc2092f14a44473962d48af5b677455612541327d01db4"
+    },
+    {
+      "id": "coverage_90",
+      "inventoryIndex": 90,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-8ee531a0-f5f1-4f58-8490-97cf7f149683.png",
+      "originalSha256": "d8709f7bfae64a805678169e488383386f02f4453fcd1a8629d0a46c22628f4c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/090.png",
+      "evidenceSha256": "29426acd742c57c8af3ab96fe39f2f0fefdeacb4c655d44e2b395fe7a440aaa0"
+    },
+    {
+      "id": "coverage_91",
+      "inventoryIndex": 91,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-f412036c-7efe-4a23-9715-fb7d71bfbe0f.png",
+      "originalSha256": "e47d336e5fba105482514b067a3cb5613878de60979555afb8876c58d7a8f719",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/091.png",
+      "evidenceSha256": "42320830e748eddb44d7b00f0cd6d5365956493a7e3a2975c9e4ac13126ad75d"
+    },
+    {
+      "id": "coverage_92",
+      "inventoryIndex": 92,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-66f8f5bb-776d-4f24-88f0-4b7b7f903b6e.png",
+      "originalSha256": "8bba6420ca26238da0f5c3de22e14d7955c2b852997563b6a175d07c9b9f095c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/092.png",
+      "evidenceSha256": "496fa827859a19769c14d4909a2b242e9262aed4f1742d2abafc9920a2d9bf8c"
+    },
+    {
+      "id": "coverage_93",
+      "inventoryIndex": 93,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-07802541-1084-4941-8ce9-ab119eda96a6.png",
+      "originalSha256": "cd47c18483856f5f221aabdbba3aaf56216da36daba3b2744cec5ada76e8424d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/093.png",
+      "evidenceSha256": "5ae846e4354aabe7450c61631ef139468a0f3fa05a81fef92723d311610a41f7"
+    },
+    {
+      "id": "coverage_94",
+      "inventoryIndex": 94,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-c7e2b200-ab45-43f2-8ddd-ed3a60996393.png",
+      "originalSha256": "28b3dc8cc5a8f17e17557ae54bbc44703d18952acdb3dc1e736d4bb4baec704f",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/094.png",
+      "evidenceSha256": "f2e85ef6230ef5ac73f8ac8d200005b941d8106c9c026978c1939e8330e69c22"
+    },
+    {
+      "id": "coverage_95",
+      "inventoryIndex": 95,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-85989ba1-8ecb-46da-aa9a-b9e63166c042.png",
+      "originalSha256": "931327841456110bf6414cf70e23c8afb76a17770f72e0b693903906559233a5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/095.png",
+      "evidenceSha256": "37b737cd595e773d92c3610b4eddfb1e620e993e7abb69b1c6963373ce03dd6d"
+    },
+    {
+      "id": "coverage_96",
+      "inventoryIndex": 96,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-c5aab0db-5979-43d0-aab5-80160752dee6.png",
+      "originalSha256": "906c9ff231b9707db794ab04914b86a186b8934b74c743e826cde4a51ac76f36",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/096.png",
+      "evidenceSha256": "1bf9f86e4c4152aeb9073c3ea8ac23422ae94d7c4ad03e67caa57cd14c1b2da5"
+    },
+    {
+      "id": "coverage_97",
+      "inventoryIndex": 97,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-39b0e827-2dbb-4c5c-8baa-f275d3ee07a9.png",
+      "originalSha256": "5ca32cd6446d4d2e0124ebfa043c8e038082ba0a23db459fbc99738905bc8e98",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/097.png",
+      "evidenceSha256": "a0d0206fe8570c93e1ce28ac7266c3775d16f1f6ddda0551254d8667074b8d73"
+    },
+    {
+      "id": "coverage_98",
+      "inventoryIndex": 98,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-f70d1ac3-8e44-4f10-b795-2901a71031e8.png",
+      "originalSha256": "5dd1635876ae02ba587064903ef54182a4d0bcb44fef1d2ad3da8dadf872c915",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/098.png",
+      "evidenceSha256": "d0a9cbbd9dc358a5dddfd9941934d30f496b133a06a443a654c5f56176836857"
+    },
+    {
+      "id": "coverage_99",
+      "inventoryIndex": 99,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-db9ea4eb-ff4e-4adf-9b76-eda2f380526a.png",
+      "originalSha256": "303bef148b4dec7abb08e4bac51ef539c7b1e862e1d909f34ac38fe95fe3d2d0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/099.png",
+      "evidenceSha256": "b0bddbc1c9ff88cf80a319ad7649ade7b81135f19e320661bfaf2d2e390cc92b"
+    },
+    {
+      "id": "coverage_100",
+      "inventoryIndex": 100,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-14f09918-50b4-4404-a8d5-e3ccac07a1d4.png",
+      "originalSha256": "1eb97ef54ceba30c0334c3638271392becb39d1dab8de6002bf8558e6da13326",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/100.png",
+      "evidenceSha256": "08513bc6f26a8f25ec1a809bab2eb982eeb78e92a44f9c3f667629b884021e6d"
+    },
+    {
+      "id": "coverage_101",
+      "inventoryIndex": 101,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-2641ed83-d25f-4b24-8b37-f81f88722aea.png",
+      "originalSha256": "add38ea6c6423cee4409303d86036ff9fe80922c813597ff34ec01ed2b32bf23",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/101.png",
+      "evidenceSha256": "2f4130b0f499d5d9e81c63f71fab72788845d34ed8cfe71ad16c4e98c27c8aa3"
+    },
+    {
+      "id": "coverage_102",
+      "inventoryIndex": 102,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-f7b638a8-4e88-4137-8fa7-b0e0893fc226.png",
+      "originalSha256": "c8090949c3ad92b74939b70f95ee454b45f211eb597a1b8e9fb0b44eb693e18e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/102.png",
+      "evidenceSha256": "b0bdf84d5c46355512fa23a5611321de727ebe8e2c1b8bdd1ed8ba59b39029b2"
+    },
+    {
+      "id": "coverage_103",
+      "inventoryIndex": 103,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-6f098d7d-9b16-4dc7-a185-4f562830f6f6.png",
+      "originalSha256": "f5cd23be5e7c5d8962556ac402dea0175892b2f59d4e5d28f653ec57cd916c39",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/103.png",
+      "evidenceSha256": "7168b6b4fe59972f2f398fe52ea3290f4c31728a64a3212d68512dca2c3341ba"
+    },
+    {
+      "id": "coverage_104",
+      "inventoryIndex": 104,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-29cd0a2d-7e27-4c70-a8c0-36e270940360.png",
+      "originalSha256": "9996a2539e236eb0edb0daa33ebc1f12cf295fc5fcd65dcaf9990401bc67ffab",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/104.png",
+      "evidenceSha256": "41170f5dd507c632506ceae579461a710c73eb9b78c89fec190ff59fb7d2aac5"
+    },
+    {
+      "id": "coverage_105",
+      "inventoryIndex": 105,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-1564108e-d03d-46d3-93f4-181cffca3b07.png",
+      "originalSha256": "29b599206d4e057d0d0040a6e27cf8db52217dca5514ab8145b3c1854ee66264",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/105.png",
+      "evidenceSha256": "5b3c56d0f6739c669c57a10585131171eb68a6253c07afb8b831de1a5ce88214"
+    },
+    {
+      "id": "coverage_106",
+      "inventoryIndex": 106,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-d9eccfae-f261-4188-9289-8d263d923415.png",
+      "originalSha256": "14b1e3b65328ba8068f4d2e0876ebb9eb26c62ef0c5fe93729df3825bddad204",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/106.png",
+      "evidenceSha256": "e67bc935910023edfc5cef369e6b36c275e2e5f3ba10db84cc21f860ca8dc6ea"
+    },
+    {
+      "id": "coverage_107",
+      "inventoryIndex": 107,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-2cf4014d-7799-4e19-9ef3-28072e000c4b.png",
+      "originalSha256": "f1e7ed95260848a0ecccaf3af13d7c1abcc0e77603d228c0f5a5131d845af286",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/107.png",
+      "evidenceSha256": "f79f0299dfdb99994d0b1e0fd13659a3f88ccdb5ea98bd52c7dd378116af353a"
+    },
+    {
+      "id": "coverage_108",
+      "inventoryIndex": 108,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-667591ff-221a-4592-9e32-1cc265cd054b.png",
+      "originalSha256": "e4eccec5421b77467258a1252ccfa145582c66217f4cca9cefdc9e2450823044",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/108.png",
+      "evidenceSha256": "b1cfd489c859c82d222ff94f64caaac8c4afeabe176acbe4d4d510c48fdba824"
+    },
+    {
+      "id": "coverage_109",
+      "inventoryIndex": 109,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-c7772563-9a8a-41f7-9cfd-67bfa12af934.png",
+      "originalSha256": "1d6747e5da4860ae4d093e6c5ad1401a5e5d5a187cef4bbd766afa866dd89e81",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/109.png",
+      "evidenceSha256": "4cf98ba6b1b5759203f7740e500e47a291243363cf849bbb6f7354cf3b2395d0"
+    },
+    {
+      "id": "coverage_110",
+      "inventoryIndex": 110,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-5c81b12b-1c1f-41f5-8928-023b63d03c85.png",
+      "originalSha256": "b8e3cacfd17e2e410fd4460f65c091cd76c870164c940b9aeb7f7e7017095b3e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/110.png",
+      "evidenceSha256": "fe0dc90e528b3d7584f2f76a97aa40e0ed1be071f51dc8b5c0b816693cd0e88b"
+    },
+    {
+      "id": "coverage_111",
+      "inventoryIndex": 111,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-54d7ef38-3afe-4d9e-b8f5-d4590c302635.png",
+      "originalSha256": "f9be401b00b9f044ed568b669750683937ca240c85f392cb8bd3b17cb0d82cfa",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/111.png",
+      "evidenceSha256": "bce01cc54091091a2e298ce1ac49e709b1aa5a3dc2fa55818e2c7a2d0a65c17f"
+    },
+    {
+      "id": "coverage_112",
+      "inventoryIndex": 112,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-119b1ba5-cac9-4a23-98eb-23a1d0616b92.png",
+      "originalSha256": "05bb4572ed6c2db97e75f9d15f510b813d002762b1516de91fe16507f3f9f250",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/112.png",
+      "evidenceSha256": "46db02f5d68bbd36d699450e2d572234c0347ac198e82a22a7d2dea81330db0d"
+    },
+    {
+      "id": "coverage_113",
+      "inventoryIndex": 113,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-c60762b6-fc1c-45ef-a0bc-8f9b4a7ea581.png",
+      "originalSha256": "5854f2e596b6510d9f8a7b4e257fa96d87d04af2e2831cb586237f972d821282",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/113.png",
+      "evidenceSha256": "9b4e626e7284e43019d3ffef776761a8c2e6b64bcadbb97cc7e05d43e4183337"
+    },
+    {
+      "id": "coverage_114",
+      "inventoryIndex": 114,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-ff2d54b0-00d5-49fb-89ec-42def731e5a9.png",
+      "originalSha256": "fdb8c4641afb99822f99e6bce811a025296979c9441522c2922056b0bc3567d9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/114.png",
+      "evidenceSha256": "4d0f9d27a5c7116c4e2cdf4898b346b4d3f657759bf4cc705b0cac07704ffda9"
+    },
+    {
+      "id": "coverage_115",
+      "inventoryIndex": 115,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-3a85fa5e-8286-44ce-a33f-b318ccee310c.png",
+      "originalSha256": "33e87f4fa10a98f8ad91bfe8c3fd6e15eac8926e40774f6e51ca3075da491cd0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/115.png",
+      "evidenceSha256": "a25a64bd9828a16be06b26542c253298e51001216e76e244bbafd235b04ea978"
+    },
+    {
+      "id": "coverage_116",
+      "inventoryIndex": 116,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-f59f3ae1-3f4e-4dd9-b058-75e82a1a56a0.png",
+      "originalSha256": "09ec4887cd71809cb019ba1d8a472fd0569ff09ac5f4b9d422fc9f43fee21df2",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/116.png",
+      "evidenceSha256": "b59f3255222dabf167ac1e8a3c60b4244960c95474b80535a7276387037fe857"
+    },
+    {
+      "id": "coverage_117",
+      "inventoryIndex": 117,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-8d84eb79-d4ff-432b-9dae-084d0790bf27.png",
+      "originalSha256": "214b1cb95ee0c6e0bf89de1f52e0e1917bd06f2daebb8166991d481d1d2fae8a",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/117.png",
+      "evidenceSha256": "dee33c14ee605c2813ecce2abd3341cc47752ae3e74c3c9bb152dbeebf89de6a"
+    },
+    {
+      "id": "coverage_118",
+      "inventoryIndex": 118,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-e4629e01-bc37-4c90-9003-13b116fd7c99.png",
+      "originalSha256": "208f5db9cd260a5ed7ca58ab51e659ddb507a23165a3ed0a7d2e78918f4efb34",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/118.png",
+      "evidenceSha256": "4fcdc95a2e3c663ab95f3249227c9da85a87ed2b5e6e60f9a1247d17c06b3585"
+    },
+    {
+      "id": "coverage_119",
+      "inventoryIndex": 119,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-9b1cdb8f-3e2c-480a-9b98-052c955bf50b.png",
+      "originalSha256": "4552761cd14427c02d0a7631a271b48937d377bf40f0bc24d66a9621410a476b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/119.png",
+      "evidenceSha256": "b2abff7974d4fe83aa9095cc84d1add26f9108f0caa70d138e3602910768d091"
+    },
+    {
+      "id": "coverage_120",
+      "inventoryIndex": 120,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-22d5622a-76c0-451e-9c39-4fa4ab732e5f.png",
+      "originalSha256": "d83d0eaaa918f11a4744b8540e6a3453c9b4dbfc596543d94dbdf3b6b9d15e79",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/120.png",
+      "evidenceSha256": "5821fc0345904f3e1a7d6bbb5da2ce51f2747a1a7d563c37f09906a4bb2596af"
+    },
+    {
+      "id": "coverage_121",
+      "inventoryIndex": 121,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-208a932a-2fcc-4485-b64a-6241ee31ba94.png",
+      "originalSha256": "551ca74e494c9dcb464181ef43e6f0760247bbc43680d8502e08a1822c83516c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/121.png",
+      "evidenceSha256": "ceab2131a3bd202d2889eb1539f2b06a8045a25261beba1386bc089c19257fda"
+    },
+    {
+      "id": "coverage_122",
+      "inventoryIndex": 122,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-720b7570-5af7-4e21-a0b6-d8ef261ef84a.png",
+      "originalSha256": "aeef12e3ef659b9abde75692fec7939f554d13e273517dc0b404fbb0d01b9d36",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/122.png",
+      "evidenceSha256": "d570c2bf1f58b0aa9c3563ea68b7b2b9587056ed25e5155dd3ee2878c51f4c4b"
+    },
+    {
+      "id": "coverage_123",
+      "inventoryIndex": 123,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-9b2e90ad-bc8a-44d2-9712-67e5b60e2cbb.png",
+      "originalSha256": "9f979a7233c799ec0a151f662ac913be4b3cfad7517983d3c2bdc74534e26f41",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/123.png",
+      "evidenceSha256": "b5879653cb3910c898a53e55c183867f48e24984f9a336d1da8f08eafee4c8b2"
+    },
+    {
+      "id": "coverage_124",
+      "inventoryIndex": 124,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-0c5702e2-e643-4e7a-970f-fddbc00ac2b7.png",
+      "originalSha256": "a92ba5da502988c2fc1e994bf706b7e9f4f604d1eac115100cd918ffc6fd1851",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/124.png",
+      "evidenceSha256": "b3b944a4bedd502db73e8ee06010398a0700f893ebbf6c97b6bd0e7ad070cec7"
+    },
+    {
+      "id": "coverage_125",
+      "inventoryIndex": 125,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-36cbf9f5-885a-4572-a172-6984ad87491f.png",
+      "originalSha256": "e37fa43d9f6f8d09a384fe1900d0363dadfcc7280ae8aeb389c0519ae64ef03d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/125.png",
+      "evidenceSha256": "8032d608ea61387d5d9092387a1d3c310185d619732d3c404e76a79c8fa32c18"
+    },
+    {
+      "id": "coverage_126",
+      "inventoryIndex": 126,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-85b5e566-ea77-430d-89c7-673acb89a163.png",
+      "originalSha256": "666b0990c44943ebd0c5fc442c7b1e46b296479fb2f6ee77c993e7d14fccaf39",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/126.png",
+      "evidenceSha256": "75d72e21e0ba83171308091acd28b6c03d361e739685eb053a4a62ddb4d06336"
+    },
+    {
+      "id": "coverage_127",
+      "inventoryIndex": 127,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-0f93e881-e803-43f6-ac97-996f53911f30.png",
+      "originalSha256": "5d48d754c4ff106df15a41c6550119d50b4f42a5aa6e6080a5e7fba4701375a7",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/127.png",
+      "evidenceSha256": "d13003d006656779961ed9a008ea1cdb82ee072c3b3c7b94f8db97d31a7bfe5d"
+    },
+    {
+      "id": "coverage_128",
+      "inventoryIndex": 128,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-a08491a9-cff7-443a-974c-48a7c013d5b0.png",
+      "originalSha256": "65554221d47451759564d61329b4dd40344d563d2b0a5fb74dc113b6180373a7",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/128.png",
+      "evidenceSha256": "5d6cdce579ef149f932bf02d1a6ae4df43656ac9369e4c8b683dff5acc901ed1"
+    },
+    {
+      "id": "coverage_129",
+      "inventoryIndex": 129,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-d49af0e5-3145-4216-b54c-4c15a5b5e249.png",
+      "originalSha256": "58c480adf9519b0410fe97cb4ed7124904caeff673cc3620ae8e20dad4b12f17",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/129.png",
+      "evidenceSha256": "51af0821d3752a4f1b9d8cec1e76e3faca05139cc5a3f684349e729e15550c8a"
+    },
+    {
+      "id": "coverage_130",
+      "inventoryIndex": 130,
+      "group": "auction",
+      "originalFilename": "codex-clipboard-c008ed3b-621f-4cf8-b5b3-e3f9961c3168.png",
+      "originalSha256": "4e535e1aae4f6f92f045e8c6ef8c4bbf697c727322e20c4b947eae7a4c71c62a",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        375,
+        250,
+        1900,
+        1035
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/missed-menu-evidence/auction/130.png",
+      "evidenceSha256": "71f2d9a2157f9528dbe70d558669324b44ee7f83e042a1e908677c4b5935c581"
+    }
+  ],
+  "excludedNonGameplayFiles": 2
+}

@@ -1,0 +1,477 @@
+{
+  "mode": [
+    {
+      "class": "#UVdrl.class",
+      "strings": [
+        "models/pets/prisoneer.model"
+      ]
+    },
+    {
+      "class": "#yyEmo.class",
+      "strings": [
+        "Classic Lighting"
+      ]
+    },
+    {
+      "class": "#cUxRK.class",
+      "strings": [
+        "prisoneer"
+      ]
+    }
+  ],
+  "addon_delivery": [
+    {
+      "class": "#AFiqB.class",
+      "strings": [
+        "(Ljava/util/stream/Stream;)Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#oPFjF.class",
+      "strings": [
+        "\u0001.class"
+      ]
+    },
+    {
+      "class": "#vtVzT.class",
+      "strings": [
+        "DEV MOD: \u0001"
+      ]
+    },
+    {
+      "class": "#ukBGi.class",
+      "strings": [
+        "java/lang/ClassLoader",
+        "(Ljava/lang/ClassLoader;)L#tDdoS;"
+      ]
+    },
+    {
+      "class": "#EwOEU.class",
+      "strings": [
+        "unregisterServerMod"
+      ]
+    },
+    {
+      "class": "#NmMzy.class",
+      "strings": [
+        "java/lang/ClassLoader",
+        "(Ljava/lang/ClassLoader;[B)V"
+      ]
+    },
+    {
+      "class": "#yhByS.class",
+      "strings": [
+        "(L#BGxpj;)Ljava/lang/ClassLoader;",
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#HaKxK.class",
+      "strings": [
+        "p13n|server_models"
+      ]
+    },
+    {
+      "class": "#nseYN.class",
+      "strings": [
+        "ServerMods: "
+      ]
+    },
+    {
+      "class": "#wdeLJ.class",
+      "strings": [
+        "assets-addon.jar",
+        "Could not open assets addon"
+      ]
+    },
+    {
+      "class": "#SzjXA.class",
+      "strings": [
+        "assets-addon.jar",
+        "Could not open assets addon"
+      ]
+    },
+    {
+      "class": "#ZzrGr.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#UQggy.class",
+      "strings": [
+        "addons"
+      ]
+    },
+    {
+      "class": "#XAhBt.class",
+      "strings": [
+        "getContextClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "(Ljava/lang/Class;Ljava/lang/ClassLoader;)V"
+      ]
+    },
+    {
+      "class": "#Egnsn.class",
+      "strings": [
+        "registerServerMod"
+      ]
+    },
+    {
+      "class": "!#KgeyY.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "ModClassLoader already closed!",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#XWGMO.class",
+      "strings": [
+        "getClassLoaderName"
+      ]
+    },
+    {
+      "class": "#icyiq.class",
+      "strings": [
+        "(L#BGxpj;)Ljava/lang/ClassLoader;",
+        "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#hxJVx.class",
+      "strings": [
+        "(Ljava/lang/ClassLoader;[B)V",
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#qOPCE.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#DdWkU.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#DWQJF.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#UCAUC.class",
+      "strings": [
+        "(Ljava/lang/Class;Ljava/lang/ClassLoader;)L#yjewG;",
+        "(Ljava/lang/Class;Ljava/lang/ClassLoader;)V"
+      ]
+    },
+    {
+      "class": "#ybzlv.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#pGpgG.class",
+      "strings": [
+        "Attempted to deserialize a java.lang.Class. Forgot to register a type adapter?"
+      ]
+    },
+    {
+      "class": "#vItnE.class",
+      "strings": [
+        "(Ljava/lang/ClassLoader;Ljava/lang/String;)Z",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#zqqdA.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#YGEtT.class",
+      "strings": [
+        "getContextClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#QXXJg.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#HObWH.class",
+      "strings": [
+        "java.lang.classloading.ClassFeature"
+      ]
+    },
+    {
+      "class": "#EpRcR.class",
+      "strings": [
+        "\u0001/addons.json",
+        "\u0001/\u0001/addons.json"
+      ]
+    },
+    {
+      "class": "#furhO.class",
+      "strings": [
+        "(Ljava/lang/ClassLoader;)L#tDdoS;"
+      ]
+    },
+    {
+      "class": "#vqHCw.class",
+      "strings": [
+        "\u0001.class"
+      ]
+    },
+    {
+      "class": "#awBxy.class",
+      "strings": [
+        "java/lang/ClassLoader",
+        "defineClasses",
+        ".class",
+        "(Ljava/lang/ClassLoader;Ljava/util/List;)V",
+        "{}: defineClasses completed in {}ms",
+        "(Ljava/lang/String;Ljava/lang/ClassLoader;)V",
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "(Ljava/lang/ClassLoader;Ljava/lang/String;)Z",
+        "defineClass"
+      ]
+    },
+    {
+      "class": "#ZZHzG.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#SzrVy.class",
+      "strings": [
+        "\u0001.class"
+      ]
+    },
+    {
+      "class": "#tXnNL.class",
+      "strings": [
+        "Attempted to serialize java.lang.Class: "
+      ]
+    },
+    {
+      "class": "#QZOTo.class",
+      "strings": [
+        "Main.class"
+      ]
+    },
+    {
+      "class": "#FzyvG.class",
+      "strings": [
+        "ModClassLoader is closed!"
+      ]
+    },
+    {
+      "class": "#uwrmf.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#YpcPj.class",
+      "strings": [
+        "ServerMods: "
+      ]
+    },
+    {
+      "class": "#yjewG.class",
+      "strings": [
+        "(Ljava/lang/Class;Ljava/lang/ClassLoader;)V",
+        "Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#hFPDx.class",
+      "strings": [
+        "./assets-addon.jar"
+      ]
+    },
+    {
+      "class": "#EiIaf.class",
+      "strings": [
+        "(Ljava/util/stream/Stream;)Ljava/lang/ClassLoader;",
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#vnbjQ.class",
+      "strings": [
+        "Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#LWFCU.class",
+      "strings": [
+        "asyncModLoad",
+        "Mod %s is already loading. Current mod: %s, this mod: %s"
+      ]
+    },
+    {
+      "class": "#TXkiS.class",
+      "strings": [
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#EyzjR.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#qCtpv.class",
+      "strings": [
+        ".class"
+      ]
+    },
+    {
+      "class": "#PdUjM.class",
+      "strings": [
+        "Bytecode not available, can't check class version"
+      ]
+    },
+    {
+      "class": "#StuFl.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#aCcBb.class",
+      "strings": [
+        "Main.class"
+      ]
+    },
+    {
+      "class": "#uZqll.class",
+      "strings": [
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#WbiKz.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#qVJgJ.class",
+      "strings": [
+        "addons",
+        "./cache/addons/addons.json",
+        "Error on addon {} load: Resource not found",
+        "Error on addon {} load: {}",
+        "Error on addon {} load: "
+      ]
+    },
+    {
+      "class": "#FEIUy.class",
+      "strings": [
+        "Main.class"
+      ]
+    },
+    {
+      "class": "#jXIzL.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#LVUeA.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#lcNdR.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;",
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#psErS.class",
+      "strings": [
+        "java/lang/ClassLoader"
+      ]
+    },
+    {
+      "class": "#phhYe.class",
+      "strings": [
+        "Ljava/lang/ClassLoader;",
+        "(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;"
+      ]
+    },
+    {
+      "class": "#pshZO.class",
+      "strings": [
+        "p13n|server_models"
+      ]
+    },
+    {
+      "class": "#gPEcH.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#BATlM.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    },
+    {
+      "class": "#cReDY.class",
+      "strings": [
+        "getClassLoader",
+        "()Ljava/lang/ClassLoader;"
+      ]
+    }
+  ],
+  "ui_transport": [
+    {
+      "class": "#oPnqv.class",
+      "strings": [
+        "HANDSHAKE"
+      ]
+    }
+  ]
+}

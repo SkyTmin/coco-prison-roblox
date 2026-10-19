@@ -1,0 +1,1822 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "user supplied in-game upgrade previews",
+  "realmVariant": null,
+  "sources": [
+    {
+      "id": "sword_image_1",
+      "batch": "sword",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-0726bcbc-4cf3-4dce-b540-ee7dbea5d4b5.png",
+      "originalSha256": "d1165b75c876055509aeaeff0da32d6d0aa557a76d4b6613be39905701ed8734",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-01.png",
+      "evidenceSha256": "6737c6318766493334ad277ad75ef6e242888f2e158d9794e20024549b31ea3e"
+    },
+    {
+      "id": "sword_image_2",
+      "batch": "sword",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-af7287ab-806a-4eb3-8370-868acc24a5e0.png",
+      "originalSha256": "616dfd126f9b6ec62d5aa8e0fa83ccdfb08bedffd78e7530bdc7d3fcac4be44e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-02.png",
+      "evidenceSha256": "c3febefae05062bb9912169e34e233b113b9288e00e90b00b86980b20c132ffa"
+    },
+    {
+      "id": "sword_image_3",
+      "batch": "sword",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-e843a25b-2be5-414f-ba94-2fca20848a49.png",
+      "originalSha256": "b989db9ff00fa1bc4ac710d7a28f5fadd6ba3899936b0d84c09456398fc1cdff",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-03.png",
+      "evidenceSha256": "a50b285e721d9a0f6eb183f910fd7a60085d1151b0c32b287f4e5f8ab2c4f168"
+    },
+    {
+      "id": "sword_image_4",
+      "batch": "sword",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-d04878b6-0d0b-40c1-9d82-e309cea9e398.png",
+      "originalSha256": "9f7e3ac61fce3da439ad1dda078f58624ea1ee286dea093b52da2fe41e73b425",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-04.png",
+      "evidenceSha256": "ef6c72253fcf0e763f81fbc2c2be59672558f4bea11ba76816c9cc7615cdaa2d"
+    },
+    {
+      "id": "sword_image_5",
+      "batch": "sword",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-c74fc810-da69-43db-86f2-12509cbf69cd.png",
+      "originalSha256": "47a34a42c7047209374a107db963f66e68578c6c22ec9ff3ea2619b8410c098c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-05.png",
+      "evidenceSha256": "a44020a2c138682bcd55ad77a08fb8e02b1dc1f854d329960ee8a2835b7f6c96"
+    },
+    {
+      "id": "sword_image_6",
+      "batch": "sword",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-c02ad3b6-a49c-4552-b704-2a864670a05d.png",
+      "originalSha256": "d67203052b18e4977006ca311f67c3fd1bafce05c54b036ee5de02e1bf4539b9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-06.png",
+      "evidenceSha256": "0e3558c0a91f0a1fe73edffd56c296f16a61d34370d2ad4e0f4e86db3beec56f"
+    },
+    {
+      "id": "sword_image_7",
+      "batch": "sword",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-b10e42ce-bcb1-4299-bffb-271d3f8f7d19.png",
+      "originalSha256": "fbe33441671d2869004262318a504b3d34e3d4d7420b6b4f2e905bf2ed19e656",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-07.png",
+      "evidenceSha256": "a7f4baa5fee4b1f909795291ebc92bc9727d4f2506afb29f766fe1c75beab6e6"
+    },
+    {
+      "id": "sword_image_8",
+      "batch": "sword",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-b469bf08-aada-47a2-97f1-a693481ba71e.png",
+      "originalSha256": "b2cb267329e11fc9e6cc6aa6b47297974a721c2e03a275df08552fa9bb3ce94c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-08.png",
+      "evidenceSha256": "088eede95a2ce5b599a0c5d1b6bd7eb25369d732805a202014dd00dded288528"
+    },
+    {
+      "id": "sword_image_9",
+      "batch": "sword",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-9f30a3ee-13fc-4ead-a860-0d9659134cad.png",
+      "originalSha256": "af67c7afbbd71bd5a0810841c20b3c795ce002230b2f1d749bff5b3c6146f3c8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-09.png",
+      "evidenceSha256": "793cdfda2b8fa46b2a7abd2d31a1840723c346ea367585003d61fb3f60ea6447"
+    },
+    {
+      "id": "sword_image_10",
+      "batch": "sword",
+      "attachmentNumber": 10,
+      "originalFilename": "codex-clipboard-661094c7-4c73-4c3b-b556-1b07dc7a2969.png",
+      "originalSha256": "4a96c6266ef8c2a2be8b641b369046ce40555980d80f8abc0c0c5ef3eace9fc8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-10.png",
+      "evidenceSha256": "4cd62b44b606eaf1bb6ad01a2b105c1918ca118a88457af3957fa66f67fd5bd7"
+    },
+    {
+      "id": "sword_image_11",
+      "batch": "sword",
+      "attachmentNumber": 11,
+      "originalFilename": "codex-clipboard-0fa0d307-d170-496a-857e-9a534d7474f8.png",
+      "originalSha256": "17a1b33637f0ea647d9b734bd566d018580f578829d2ab7e4382684b310fad93",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-11.png",
+      "evidenceSha256": "a122bd1edd285e8549d888d74481491f3c14e7f6a60d3fe618450ca7c30f292a"
+    },
+    {
+      "id": "sword_image_12",
+      "batch": "sword",
+      "attachmentNumber": 12,
+      "originalFilename": "codex-clipboard-36e447c2-2469-42e6-af32-4dfe8a580bd8.png",
+      "originalSha256": "4d8bdfc69b42f2a054a98989f4494bdac3722f34baa0579c0af74dbb4ce2d026",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-12.png",
+      "evidenceSha256": "ddedc4bad3584d4e73e60b5936b65d4d912d5fc795dd941bfca2be83a7c3eb2f"
+    },
+    {
+      "id": "sword_image_13",
+      "batch": "sword",
+      "attachmentNumber": 13,
+      "originalFilename": "codex-clipboard-ff1a5d8f-b6dd-4d41-9d2a-7dfc5d9927fe.png",
+      "originalSha256": "57991748ea523d74aab07949d16b56a878293eea184fd73aa8ab17465d500c56",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-13.png",
+      "evidenceSha256": "cb6d47fe4c6e503be2667075a0c0740728dc27ed1aaf0a37bbd335055cff2c0c"
+    },
+    {
+      "id": "sword_image_14",
+      "batch": "sword",
+      "attachmentNumber": 14,
+      "originalFilename": "codex-clipboard-9f17311c-e5b4-43c7-80d7-a8d8b6f19bc2.png",
+      "originalSha256": "fe939a1895f02d885af8b17acf171699c8dfd106819559498bcaede5245ca1c0",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-14.png",
+      "evidenceSha256": "c3aab336fb7f9217691f895b6811a139f4256512a7cd187e992dae4356d916d4"
+    },
+    {
+      "id": "sword_image_15",
+      "batch": "sword",
+      "attachmentNumber": 15,
+      "originalFilename": "codex-clipboard-c32f5a86-ce8b-4fe6-9d79-fe7bb8e5f114.png",
+      "originalSha256": "ab3bcb64f74c28a314bb959d136a3826dd45aed1974ab8d53f879510cfba9c86",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/sword-15.png",
+      "evidenceSha256": "5b4be41106bfa548b51c2a8fc7c10b1d2bc1fb26837292f513a644b6b39008da"
+    },
+    {
+      "id": "shovel_image_1",
+      "batch": "shovel",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-6567d824-c6e9-4573-8e2f-d5675a3b0bc5.png",
+      "originalSha256": "52c219033e9c9d4bd9a7968d13a7f4660135199dbcb36a154999cff53779b9af",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-01.png",
+      "evidenceSha256": "45893413e4c2e351ec60ccb7044246f4ed88a56b42e8e8e4f280472496767658"
+    },
+    {
+      "id": "shovel_image_2",
+      "batch": "shovel",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-2cfbddb6-5611-4be4-83a0-349fdeaa694b.png",
+      "originalSha256": "9c156a5220513ea0978505be56ee1fe2ed6925b3037a744a251b404e627757a1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-02.png",
+      "evidenceSha256": "654cef381b57304029ef74b40e719219002e79511f34d51474d380faa917e84f"
+    },
+    {
+      "id": "shovel_image_3",
+      "batch": "shovel",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-a2de420f-4ea4-49a8-bb48-d2681316223e.png",
+      "originalSha256": "1fe6e245f2cdf6acfaeed54e4e5b2f0cf2179628b2b6507a077e3d32580549e6",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-03.png",
+      "evidenceSha256": "2c2941d1f99097b53f19f6f92d1a0ec6d8e035f4a5b727fbd2b4526102a95ba9"
+    },
+    {
+      "id": "shovel_image_4",
+      "batch": "shovel",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-998b3960-4444-4f35-95a1-f480ccc37569.png",
+      "originalSha256": "2ea6265d875e031608fd1c48ac0f2b2b16b978a105612ecfdafe4f7086ea47b1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-04.png",
+      "evidenceSha256": "030d79fb194e62e7e4a8d2d7d720aacd3f383ca51dbcc122a9e37ef1ad4a62d9"
+    },
+    {
+      "id": "shovel_image_5",
+      "batch": "shovel",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-a569b454-321e-44b3-bf6f-c2a27ae77316.png",
+      "originalSha256": "602316226ea674dba6acfed1185714a695bf2d0bf4ca7e3995b07447e656a9d3",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-05.png",
+      "evidenceSha256": "6aec5f02b981309febd0459d850d7209f58aaa73893900ac8c81fb878140abb7"
+    },
+    {
+      "id": "shovel_image_6",
+      "batch": "shovel",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-b0122a76-0765-4f18-aab2-4d954609e017.png",
+      "originalSha256": "b1ffed7a3cdfe452dbcca37ee70559ba180bbe1841c0ab34b64bca86dd2324c8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-06.png",
+      "evidenceSha256": "76c793446ecaedf1e74292325b4d04054480aa50798aeec3eceb5aa8a819bc4f"
+    },
+    {
+      "id": "shovel_image_7",
+      "batch": "shovel",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-72c94225-f4f8-4076-916f-f344178e8b4d.png",
+      "originalSha256": "c91a4d350c809accca0c26689133fb52d1d5c86b9a2769def61a408474bb039c",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-07.png",
+      "evidenceSha256": "edbf0486fbb3bef20b7fe812860592d943b1b7848612f5b4b7de1178637a1c6b"
+    },
+    {
+      "id": "shovel_image_8",
+      "batch": "shovel",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-def9b6c9-759c-4368-b504-ebbfb2a94a93.png",
+      "originalSha256": "548d2f86695016f416005afa40f968621fe827f41f2dc29b65af34105664a581",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-08.png",
+      "evidenceSha256": "2223cca506f22e2beab40560e860b301e7211f50cfd702035c6ba2ea5809d456"
+    },
+    {
+      "id": "shovel_image_9",
+      "batch": "shovel",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-a5c80eee-a0c1-4a04-91c3-b6552d0aa6cc.png",
+      "originalSha256": "5cf2b59bede373d03d360d4b11a983e5283fb320755b41a9573f3a49a1d75ef8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-09.png",
+      "evidenceSha256": "42b13dc0e12c263809147e0caa5f6bf06dc7d121155b55c9b7078c9bc325cdda"
+    },
+    {
+      "id": "shovel_image_10",
+      "batch": "shovel",
+      "attachmentNumber": 10,
+      "originalFilename": "codex-clipboard-fe56c6c9-5e08-4461-b565-d4fd86d530f5.png",
+      "originalSha256": "fcab23907ba22a04de993969e0ea944809ef4bcf9073ff8e69807909731c88ad",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-10.png",
+      "evidenceSha256": "104a21dfcf32a6e56172652ecfb68b0ae4c1c4c2c2021c98d93a61ac7b17ce16"
+    },
+    {
+      "id": "shovel_image_11",
+      "batch": "shovel",
+      "attachmentNumber": 11,
+      "originalFilename": "codex-clipboard-d8cfc811-f0ab-4c09-9404-ccaa75fd33a9.png",
+      "originalSha256": "ce262fe17753e19c573e475d135ce5c7811d59b4e1042252b57de4debf1fdfde",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-11.png",
+      "evidenceSha256": "2b00b2d239fe267cea798ffcf3861beced11a40183e0d51330e2a423315e446a"
+    },
+    {
+      "id": "shovel_image_12",
+      "batch": "shovel",
+      "attachmentNumber": 12,
+      "originalFilename": "codex-clipboard-7f6ef8a7-fddd-423c-b369-ca44679eb200.png",
+      "originalSha256": "b39ff2aa83454461e84963d698ab6bfda352ec5585e7f0a5bccc35e9f73642e9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-12.png",
+      "evidenceSha256": "9765f92429c4c976aab51779d57ab0a940810c75ec5cee8a86552887fc0f0f81"
+    },
+    {
+      "id": "shovel_image_13",
+      "batch": "shovel",
+      "attachmentNumber": 13,
+      "originalFilename": "codex-clipboard-ba4b72f5-8bdd-40ca-97ad-7335c958b457.png",
+      "originalSha256": "2ca0131b390c81150e9a9f72e63276cc8f68c925fe4ee066a4e47169d0516b96",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-13.png",
+      "evidenceSha256": "a20abf88b80b75378822a0220de939669c9b548f4d769f1cb3736aab15f540d1"
+    },
+    {
+      "id": "shovel_image_14",
+      "batch": "shovel",
+      "attachmentNumber": 14,
+      "originalFilename": "codex-clipboard-d19dbfa8-48e6-4521-8040-b71dc9d864f3.png",
+      "originalSha256": "50393388021d5c54958b78f5f02ceff0cef8e98123fbd74934393e9b16bb7536",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-14.png",
+      "evidenceSha256": "3c047fbde9fb5b87953d25a74f3cd9aea780ec448aaed17c1c81e2335a5a3f1a"
+    },
+    {
+      "id": "shovel_image_15",
+      "batch": "shovel",
+      "attachmentNumber": 15,
+      "originalFilename": "codex-clipboard-11454356-fd8e-4a08-9877-e7656eaff18a.png",
+      "originalSha256": "dfb4adb9384dd99f3ff381dea66d05da1df3e8c19afb076b5e199947615a55d6",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-15.png",
+      "evidenceSha256": "33b255999d05cf20f832e3d40d787097c8eb42f20f233ea17efe3efac7c1a135"
+    },
+    {
+      "id": "shovel_image_16",
+      "batch": "shovel",
+      "attachmentNumber": 16,
+      "originalFilename": "codex-clipboard-e0ec809e-0fd6-46d7-9bd1-e4d17f8fd55c.png",
+      "originalSha256": "17b9756defcc3b94d5e7d225c765f70d847e68b253a5a216f8200ad267887b6a",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-upgrade-evidence/shovel-16.png",
+      "evidenceSha256": "e51c19f609ce9c481df5e1e2e3205be9a2248ed07ce8200c6ee34bee1e134644"
+    }
+  ],
+  "sword": {
+    "transitions": [
+      {
+        "fromLevel": 1,
+        "toLevel": 2,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 10
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "5",
+            "exactValue": 5,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Деревянный меч",
+          "displayedLevel": 1
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянный меч",
+          "fromLevel": 1,
+          "toLevel": 2
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_1"
+        ]
+      },
+      {
+        "fromLevel": 2,
+        "toLevel": 3,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 20
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "15",
+            "exactValue": 15,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Деревянный меч",
+          "displayedLevel": 2
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянный меч",
+          "fromLevel": 2,
+          "toLevel": 3
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_2"
+        ]
+      },
+      {
+        "fromLevel": 3,
+        "toLevel": 4,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 40
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "45",
+            "exactValue": 45,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Деревянный меч",
+          "displayedLevel": 3
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянный меч",
+          "fromLevel": 3,
+          "toLevel": 4
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_3"
+        ]
+      },
+      {
+        "fromLevel": 4,
+        "toLevel": 5,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 80
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "90",
+            "exactValue": 90,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Каменный меч",
+          "displayedLevel": 4
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянный меч",
+          "fromLevel": 4,
+          "toLevel": 5
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "sword_image_4"
+        ]
+      },
+      {
+        "fromLevel": 5,
+        "toLevel": 6,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 110
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "180",
+            "exactValue": 180,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Каменный меч",
+          "displayedLevel": 5
+        },
+        "rightUpgradeRow": {
+          "name": "Каменный меч",
+          "fromLevel": 5,
+          "toLevel": 6
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_5"
+        ]
+      },
+      {
+        "fromLevel": 6,
+        "toLevel": 7,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 140
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "360",
+            "exactValue": 360,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Каменный меч",
+          "displayedLevel": 6
+        },
+        "rightUpgradeRow": {
+          "name": "Каменный меч",
+          "fromLevel": 6,
+          "toLevel": 7
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_6"
+        ]
+      },
+      {
+        "fromLevel": 7,
+        "toLevel": 8,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 200
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "750",
+            "exactValue": 750,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Каменный меч",
+          "displayedLevel": 7
+        },
+        "rightUpgradeRow": {
+          "name": "Каменный меч",
+          "fromLevel": 7,
+          "toLevel": 8
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_7"
+        ]
+      },
+      {
+        "fromLevel": 8,
+        "toLevel": 9,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 520
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "1.5K",
+            "exactValue": null,
+            "approximateValue": 1500,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Железный меч",
+          "displayedLevel": 8
+        },
+        "rightUpgradeRow": {
+          "name": "Каменный меч",
+          "fromLevel": 8,
+          "toLevel": 9
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "sword_image_8"
+        ]
+      },
+      {
+        "fromLevel": 9,
+        "toLevel": 10,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 860
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "2.8K",
+            "exactValue": null,
+            "approximateValue": 2800,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Железный меч",
+          "displayedLevel": 9
+        },
+        "rightUpgradeRow": {
+          "name": "Железный меч",
+          "fromLevel": 9,
+          "toLevel": 10
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_9"
+        ]
+      },
+      {
+        "fromLevel": 10,
+        "toLevel": 11,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 1530
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "4.9K",
+            "exactValue": null,
+            "approximateValue": 4900,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Железный меч",
+          "displayedLevel": 10
+        },
+        "rightUpgradeRow": {
+          "name": "Железный меч",
+          "fromLevel": 10,
+          "toLevel": 11
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_10"
+        ]
+      },
+      {
+        "fromLevel": 11,
+        "toLevel": 12,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 2100
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "6K",
+            "exactValue": null,
+            "approximateValue": 6000,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Железный меч",
+          "displayedLevel": 11
+        },
+        "rightUpgradeRow": {
+          "name": "Железный меч",
+          "fromLevel": 11,
+          "toLevel": 12
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_11"
+        ]
+      },
+      {
+        "fromLevel": 12,
+        "toLevel": 13,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 5600
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "9K",
+            "exactValue": null,
+            "approximateValue": 9000,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Алмазный меч",
+          "displayedLevel": 12
+        },
+        "rightUpgradeRow": {
+          "name": "Железный меч",
+          "fromLevel": 12,
+          "toLevel": 13
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "sword_image_12"
+        ]
+      },
+      {
+        "fromLevel": 13,
+        "toLevel": 14,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 7600
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "10.9K",
+            "exactValue": null,
+            "approximateValue": 10900,
+            "precision": "abbreviated UI value"
+          },
+          "Оружейник": {
+            "display": "3",
+            "exactValue": 3,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Алмазный меч",
+          "displayedLevel": 13
+        },
+        "rightUpgradeRow": {
+          "name": "Алмазный меч",
+          "fromLevel": 13,
+          "toLevel": 14
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_13"
+        ]
+      },
+      {
+        "fromLevel": 14,
+        "toLevel": 15,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 13900
+        },
+        "requirements": {
+          "Крысы": {
+            "display": "13.8K",
+            "exactValue": null,
+            "approximateValue": 13800,
+            "precision": "abbreviated UI value"
+          },
+          "Оружейник": {
+            "display": "5",
+            "exactValue": 5,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Острота",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Алмазный меч",
+          "displayedLevel": 14
+        },
+        "rightUpgradeRow": {
+          "name": "Алмазный меч",
+          "fromLevel": 14,
+          "toLevel": 15
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "sword_image_14"
+        ]
+      }
+    ],
+    "terminalPreview": {
+      "displayedLevel": 15,
+      "bottomLabel": "Уровень 15",
+      "rightUpgradeRow": "Алмазный меч 15 → 15",
+      "displayedCost": 13900,
+      "displayedRequirements": {
+        "Крысы": {
+          "display": "13.8K",
+          "exactValue": null,
+          "approximateValue": 13800,
+          "precision": "abbreviated UI value"
+        },
+        "Оружейник": {
+          "display": "5",
+          "exactValue": 5,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "evidence": [
+        "sword_image_15"
+      ],
+      "absoluteServerMaximum": null
+    },
+    "nominalTotalUpgradeMoney": 32710
+  },
+  "shovel": {
+    "transitions": [
+      {
+        "fromLevel": 1,
+        "toLevel": 2,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 5
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "20",
+            "exactValue": 20,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Песок": {
+            "display": "15",
+            "exactValue": 15,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "15",
+            "exactValue": 15,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Деревянная лопата",
+          "displayedLevel": 1
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянная лопата",
+          "fromLevel": 1,
+          "toLevel": 2
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_1"
+        ]
+      },
+      {
+        "fromLevel": 2,
+        "toLevel": 3,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 10
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "30",
+            "exactValue": 30,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Песок": {
+            "display": "36",
+            "exactValue": 36,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "30",
+            "exactValue": 30,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Деревянная лопата",
+          "displayedLevel": 2
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянная лопата",
+          "fromLevel": 2,
+          "toLevel": 3
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_2"
+        ]
+      },
+      {
+        "fromLevel": 3,
+        "toLevel": 4,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 20
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "60",
+            "exactValue": 60,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Песок": {
+            "display": "65",
+            "exactValue": 65,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "75",
+            "exactValue": 75,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Деревянная лопата",
+          "displayedLevel": 3
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянная лопата",
+          "fromLevel": 3,
+          "toLevel": 4
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_3"
+        ]
+      },
+      {
+        "fromLevel": 4,
+        "toLevel": 5,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 40
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "295",
+            "exactValue": 295,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Песок": {
+            "display": "240",
+            "exactValue": 240,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "265",
+            "exactValue": 265,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Каменная лопата",
+          "displayedLevel": 4
+        },
+        "rightUpgradeRow": {
+          "name": "Деревянная лопата",
+          "fromLevel": 4,
+          "toLevel": 5
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "shovel_image_4"
+        ]
+      },
+      {
+        "fromLevel": 5,
+        "toLevel": 6,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 80
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "530",
+            "exactValue": 530,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Песок": {
+            "display": "590",
+            "exactValue": 590,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "480",
+            "exactValue": 480,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Каменная лопата",
+          "displayedLevel": 5
+        },
+        "rightUpgradeRow": {
+          "name": "Каменная лопата",
+          "fromLevel": 5,
+          "toLevel": 6
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_5"
+        ]
+      },
+      {
+        "fromLevel": 6,
+        "toLevel": 7,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 110
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "1.07K",
+            "exactValue": null,
+            "approximateValue": 1070,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "960",
+            "exactValue": 960,
+            "approximateValue": null,
+            "precision": "integer UI value"
+          },
+          "Земля": {
+            "display": "1.17K",
+            "exactValue": null,
+            "approximateValue": 1170,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Каменная лопата",
+          "displayedLevel": 6
+        },
+        "rightUpgradeRow": {
+          "name": "Каменная лопата",
+          "fromLevel": 6,
+          "toLevel": 7
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_6"
+        ]
+      },
+      {
+        "fromLevel": 7,
+        "toLevel": 8,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 175
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "1.67K",
+            "exactValue": null,
+            "approximateValue": 1670,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "1.83K",
+            "exactValue": null,
+            "approximateValue": 1830,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "1.5K",
+            "exactValue": null,
+            "approximateValue": 1500,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Каменная лопата",
+          "displayedLevel": 7
+        },
+        "rightUpgradeRow": {
+          "name": "Каменная лопата",
+          "fromLevel": 7,
+          "toLevel": 8
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_7"
+        ]
+      },
+      {
+        "fromLevel": 8,
+        "toLevel": 9,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 405
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "2.4K",
+            "exactValue": null,
+            "approximateValue": 2400,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "2.15K",
+            "exactValue": null,
+            "approximateValue": 2150,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "2.6K",
+            "exactValue": null,
+            "approximateValue": 2600,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Железная лопата",
+          "displayedLevel": 8
+        },
+        "rightUpgradeRow": {
+          "name": "Каменная лопата",
+          "fromLevel": 8,
+          "toLevel": 9
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "shovel_image_8"
+        ]
+      },
+      {
+        "fromLevel": 9,
+        "toLevel": 10,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 1330
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "4.65K",
+            "exactValue": null,
+            "approximateValue": 4650,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "4.2K",
+            "exactValue": null,
+            "approximateValue": 4200,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "3.8K",
+            "exactValue": null,
+            "approximateValue": 3800,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Железная лопата",
+          "displayedLevel": 9
+        },
+        "rightUpgradeRow": {
+          "name": "Железная лопата",
+          "fromLevel": 9,
+          "toLevel": 10
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_9"
+        ]
+      },
+      {
+        "fromLevel": 10,
+        "toLevel": 11,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 1880
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "4.95K",
+            "exactValue": null,
+            "approximateValue": 4950,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "5.5K",
+            "exactValue": null,
+            "approximateValue": 5500,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "6.05K",
+            "exactValue": null,
+            "approximateValue": 6050,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Железная лопата",
+          "displayedLevel": 10
+        },
+        "rightUpgradeRow": {
+          "name": "Железная лопата",
+          "fromLevel": 10,
+          "toLevel": 11
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_10"
+        ]
+      },
+      {
+        "fromLevel": 11,
+        "toLevel": 12,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 2600
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "5.35K",
+            "exactValue": null,
+            "approximateValue": 5350,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "6.6K",
+            "exactValue": null,
+            "approximateValue": 6600,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "5.95K",
+            "exactValue": null,
+            "approximateValue": 5950,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Железная лопата",
+          "displayedLevel": 11
+        },
+        "rightUpgradeRow": {
+          "name": "Железная лопата",
+          "fromLevel": 11,
+          "toLevel": 12
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_11"
+        ]
+      },
+      {
+        "fromLevel": 12,
+        "toLevel": 13,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 3050
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "8K",
+            "exactValue": null,
+            "approximateValue": 8000,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "7.2K",
+            "exactValue": null,
+            "approximateValue": 7200,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "8.8K",
+            "exactValue": null,
+            "approximateValue": 8800,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": null,
+        "leftPreview": {
+          "name": "Алмазная лопата",
+          "displayedLevel": 12
+        },
+        "rightUpgradeRow": {
+          "name": "Железная лопата",
+          "fromLevel": 12,
+          "toLevel": 13
+        },
+        "labelMismatch": true,
+        "evidence": [
+          "shovel_image_12"
+        ]
+      },
+      {
+        "fromLevel": 13,
+        "toLevel": 14,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 6700
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "10.6K",
+            "exactValue": null,
+            "approximateValue": 10600,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "8.65K",
+            "exactValue": null,
+            "approximateValue": 8650,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "9.6K",
+            "exactValue": null,
+            "approximateValue": 9600,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 0,
+          "after": 1
+        },
+        "leftPreview": {
+          "name": "Алмазная лопата",
+          "displayedLevel": 13
+        },
+        "rightUpgradeRow": {
+          "name": "Алмазная лопата",
+          "fromLevel": 13,
+          "toLevel": 14
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_13"
+        ]
+      },
+      {
+        "fromLevel": 14,
+        "toLevel": 15,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 7550
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "10.1K",
+            "exactValue": null,
+            "approximateValue": 10100,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "12.3K",
+            "exactValue": null,
+            "approximateValue": 12300,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "11.2K",
+            "exactValue": null,
+            "approximateValue": 11200,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 1,
+          "after": 2
+        },
+        "leftPreview": {
+          "name": "Алмазная лопата",
+          "displayedLevel": 14
+        },
+        "rightUpgradeRow": {
+          "name": "Алмазная лопата",
+          "fromLevel": 14,
+          "toLevel": 15
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_14"
+        ]
+      },
+      {
+        "fromLevel": 15,
+        "toLevel": 16,
+        "cost": {
+          "currency": "game money",
+          "exactValue": 9250
+        },
+        "requirements": {
+          "Гравий": {
+            "display": "11.1K",
+            "exactValue": null,
+            "approximateValue": 11100,
+            "precision": "abbreviated UI value"
+          },
+          "Песок": {
+            "display": "12.3K",
+            "exactValue": null,
+            "approximateValue": 12300,
+            "precision": "abbreviated UI value"
+          },
+          "Земля": {
+            "display": "13.5K",
+            "exactValue": null,
+            "approximateValue": 13500,
+            "precision": "abbreviated UI value"
+          }
+        },
+        "enchantmentChange": {
+          "name": "Эффективность",
+          "before": 2,
+          "after": 3
+        },
+        "leftPreview": {
+          "name": "Алмазная лопата",
+          "displayedLevel": 15
+        },
+        "rightUpgradeRow": {
+          "name": "Алмазная лопата",
+          "fromLevel": 15,
+          "toLevel": 16
+        },
+        "labelMismatch": false,
+        "evidence": [
+          "shovel_image_15"
+        ]
+      }
+    ],
+    "terminalPreview": {
+      "displayedLevel": 16,
+      "bottomLabel": "Уровень 16",
+      "rightUpgradeRow": "Алмазная лопата 16 → 16",
+      "displayedCost": 9250,
+      "displayedRequirements": {
+        "Гравий": {
+          "display": "11.1K",
+          "exactValue": null,
+          "approximateValue": 11100,
+          "precision": "abbreviated UI value"
+        },
+        "Песок": {
+          "display": "12.3K",
+          "exactValue": null,
+          "approximateValue": 12300,
+          "precision": "abbreviated UI value"
+        },
+        "Земля": {
+          "display": "13.5K",
+          "exactValue": null,
+          "approximateValue": 13500,
+          "precision": "abbreviated UI value"
+        }
+      },
+      "evidence": [
+        "shovel_image_16"
+      ],
+      "absoluteServerMaximum": null
+    },
+    "nominalTotalUpgradeMoney": 33205
+  },
+  "caveats": [
+    "Previews do not prove purchases, ownership, counter spending or reset rules.",
+    "K requirements retain their abbreviated precision; exact integer thresholds are unknown.",
+    "On material boundaries left/right names disagree; both are preserved.",
+    "Final 15→15 / 16→16 screens repeat previous data and are not extra upgrades.",
+    "Damage per hit, break speeds, formulas and absolute server-wide maximums remain unknown.",
+    "Do not replace irregular shovel thresholds with a monotonic formula."
+  ]
+}

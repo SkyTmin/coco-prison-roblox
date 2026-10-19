@@ -1,0 +1,12 @@
+{
+  "screenshots": 31,
+  "swordTransitions": 14,
+  "shovelTransitions": 15,
+  "swordMoneySum": 32710,
+  "shovelMoneySum": 33205,
+  "terminalScreens": 2,
+  "evidenceHashesVerified": true,
+  "manualTranscription": true,
+  "nonMonotonicShovelRequirementsPreserved": true,
+  "absoluteMaximumsProven": false
+}

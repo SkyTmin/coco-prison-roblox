@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 2,
+  "status": "rpg_chapter_design_unplaytested",
+  "reference": "Cristalix inspired; own values, not historical reconstruction",
+  "supersedes": "prototype-config.json (mining-only v0.1)",
+  "locales": [
+    "ru",
+    "en",
+    "es",
+    "fr"
+  ],
+  "defaultLocale": "ru",
+  "moneyScale": 100,
+  "chapter": {
+    "maxLevel": 5,
+    "finish": "first_boss_defeated_next_area_unlocked",
+    "prestigeEnabled": false
+  },
+  "levels": [
+    {
+      "level": 1,
+      "totalWork": 0,
+      "coinCost": 0
+    },
+    {
+      "level": 2,
+      "totalWork": 40,
+      "coinCost": 75,
+      "quest": "first_sale"
+    },
+    {
+      "level": 3,
+      "totalWork": 110,
+      "coinCost": 150,
+      "quest": "earth_order"
+    },
+    {
+      "level": 4,
+      "totalWork": 220,
+      "coinCost": 300,
+      "mobKills": {
+        "rat": 5
+      }
+    },
+    {
+      "level": 5,
+      "totalWork": 360,
+      "coinCost": 550,
+      "mobKills": {
+        "zombie": 5
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "wood",
+      "label": {
+        "ru": "Дерево",
+        "en": "Wood",
+        "es": "Madera",
+        "fr": "Bois"
+      },
+      "coinPrice": 2,
+      "tool": "axe"
+    },
+    {
+      "id": "dirt",
+      "label": {
+        "ru": "Земля",
+        "en": "Dirt",
+        "es": "Tierra",
+        "fr": "Terre"
+      },
+      "coinPrice": 1,
+      "tool": "shovel"
+    },
+    {
+      "id": "clay",
+      "label": {
+        "ru": "Глина",
+        "en": "Clay",
+        "es": "Arcilla",
+        "fr": "Argile"
+      },
+      "coinPrice": 3,
+      "tool": "shovel"
+    },
+    {
+      "id": "stone",
+      "label": {
+        "ru": "Камень",
+        "en": "Stone",
+        "es": "Piedra",
+        "fr": "Pierre"
+      },
+      "coinPrice": 2,
+      "tool": "pickaxe"
+    },
+    {
+      "id": "coal",
+      "label": {
+        "ru": "Уголь",
+        "en": "Coal",
+        "es": "Carbón",
+        "fr": "Charbon"
+      },
+      "coinPrice": 5,
+      "tool": "pickaxe"
+    },
+    {
+      "id": "iron",
+      "label": {
+        "ru": "Железо",
+        "en": "Iron",
+        "es": "Hierro",
+        "fr": "Fer"
+      },
+      "coinPrice": 8,
+      "tool": "pickaxe"
+    }
+  ],
+  "jobs": {
+    "woodcutting": {
+      "minimumLevel": 1,
+      "tool": "axe"
+    },
+    "digging": {
+      "minimumLevel": 1,
+      "tool": "shovel"
+    },
+    "mining": {
+      "minimumLevel": 3,
+      "tool": "pickaxe"
+    }
+  },
+  "needs": {
+    "offlineDecay": false,
+    "initialValue": 100,
+    "maximumValue": 100,
+    "lowThreshold": 25,
+    "maxWorkSlowdown": 0.2,
+    "hygiene": {
+      "decayPerOnlineMinute": 2,
+      "workSlowdown": 0.1,
+      "restoreInteraction": "shower"
+    },
+    "rest": {
+      "decayPerOnlineMinute": 1.5,
+      "workSlowdown": 0.15,
+      "restoreInteraction": "bed"
+    },
+    "bladderComfort": {
+      "decayPerOnlineMinute": 2,
+      "moveSlowdown": 0.1,
+      "restoreInteraction": "toilet"
+    }
+  },
+  "combat": {
+    "playerHP": 100,
+    "swordDamage": [
+      6,
+      10,
+      14
+    ],
+    "attackCooldownSeconds": 0.75,
+    "armorReduction": [
+      0.1,
+      0.2
+    ],
+    "serverOwned": true
+  },
+  "mobs": {
+    "rat": {
+      "hp": 30,
+      "damage": 6,
+      "minimumLevel": 3
+    },
+    "zombie": {
+      "hp": 80,
+      "damage": 12,
+      "minimumLevel": 4
+    }
+  },
+  "boss": {
+    "minimumLevel": 5,
+    "maximumParticipants": 3,
+    "baseHP": 900,
+    "hpPerAdditionalParticipant": 0.6,
+    "heavyDamage": 18,
+    "summonAtHpFraction": 0.5,
+    "summonMob": "rat",
+    "summonCount": 2
+  },
+  "factions": {
+    "choiceMinimumLevel": 5,
+    "count": 3,
+    "chapterStatBonuses": false,
+    "choiceDuringCombat": false
+  },
+  "workKey": {
+    "probabilityPerAcceptedTarget": 0.005,
+    "hardPity": 200,
+    "resetOnWorkKey": true,
+    "resetOnQuestOrBossKey": false,
+    "rollsPerAcceptedTarget": 1
+  },
+  "commonChest": {
+    "keyCost": 1,
+    "rewards": [
+      {
+        "id": "coins",
+        "weight": 30,
+        "quantity": 50
+      },
+      {
+        "id": "food",
+        "weight": 20,
+        "quantity": 3
+      },
+      {
+        "id": "hygiene_supplies",
+        "weight": 20,
+        "contents": [
+          {
+            "id": "soap",
+            "quantity": 1
+          },
+          {
+            "id": "paper",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "id": "iron",
+        "weight": 20,
+        "quantity": 3
+      },
+      {
+        "id": "minor_mob_damage_book",
+        "weight": 10,
+        "quantity": 1
+      }
+    ],
+    "book": {
+      "mobDamageBonus": 0.05,
+      "maxEquippedCopies": 1
+    },
+    "unclaimedQueue": true
+  },
+  "world": {
+    "maximumPlayers": 6,
+    "mineCells": 600,
+    "publicSafeHub": true,
+    "chapterPvpEnabled": false
+  },
+  "death": {
+    "rawResourceLossFraction": 0.1,
+    "rawResourceLossMaximum": 30,
+    "keepTools": true,
+    "keepGear": true,
+    "keepKeys": true,
+    "keepQuestItems": true
+  },
+  "modelStatus": "No full RPG timing simulation yet; old balance-results.json is inapplicable."
+}

@@ -1,0 +1,16 @@
+{
+  "file": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\CLIENT-DECOMPILED-SOURCES.zip",
+  "bytes": 25868662,
+  "sha256": "6cbd8728153439faa7ce8511925cd193d02308947091267e4620c433112ddfef",
+  "totals": {
+    "archivesInspected": 36,
+    "archivesWithClasses": 33,
+    "inputClasses": 27259,
+    "representedClasses": 27259,
+    "javaFiles": 26345,
+    "kotlinFiles": 914,
+    "missingClasses": 0,
+    "filesWithMethodErrors": 0,
+    "allInputCopyHashesVerified": true
+  }
+}

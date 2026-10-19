@@ -1,0 +1,107 @@
+{
+  "checkedOn": "2026-10-18",
+  "exactCristalixServerPlugin": {
+    "status": "No verified public source archive or runnable server-plugin release found in checked sources",
+    "scope": "Official Cristalix forum resource links, public GitHub repositories and web search; this is not proof that no publication exists"
+  },
+  "downloads": [
+    {
+      "id": "cristalix-prison-classic-pack",
+      "classification": "Resource pack linked from official Cristalix forum; not server plugin",
+      "file": "downloads/Cristalix-Prison-Classic-official-resourcepack.zip",
+      "bytes": 5396482,
+      "sha256": "E01333E34201B90E9702F2F253D212831DD3C2E5744AE803253BFFFBDB9F05C2",
+      "sourcePage": "https://forum.cristalix.gg/threads/29045/",
+      "downloadUrl": "https://drive.usercontent.google.com/download?id=1DR1kO6eiw0usdKNEdkDw10WgeEfK-7PL&export=download",
+      "zipEntryCount": 354,
+      "observedAssets": [
+        "rat model",
+        "giant zombie model",
+        "zombie2/zombie3 models",
+        "soap",
+        "toilet_paper",
+        "sleeping_bag",
+        "vaccine",
+        "normal/mythic/rank/upgraded_mythic keys"
+      ],
+      "keyMaterialInThisPack": "clay_ball; NBT case selects key texture",
+      "historicalCaveat": "The currently linked pack does not establish item materials in the user's old season."
+    },
+    {
+      "id": "cristalix-prison-client-module",
+      "classification": "Public Cristalix client-mod source collection; mod-prison is HUD code, not server gameplay",
+      "file": "downloads/Cristalix-client-mods-0330a03-source.zip",
+      "bytes": 195850,
+      "sha256": "F7DECB2A5814540DEBCF9C3CE91DAF57B2D86F7EB76582C2927EB39B22B4DCF6",
+      "repository": "https://github.com/func-solutions/cristalix-mods",
+      "commit": "0330a035ff963e028773bdf434bbc4fe3a807a37",
+      "commitDate": "2021-12-14T20:52:47Z",
+      "downloadUrl": "https://codeload.github.com/func-solutions/cristalix-mods/zip/0330a035ff963e028773bdf434bbc4fe3a807a37",
+      "extractedRoot": "downloads/Cristalix-client-source/cristalix-mods-0330a035ff963e028773bdf434bbc4fe3a807a37",
+      "primaryFile": "mod-prison/src/main/kotlin/ru/cristalix/mods/prison/PrisonMod.kt",
+      "gitBlobVerification": {
+        "verified": 88,
+        "mismatches": 0
+      },
+      "githubReleasesFound": 0,
+      "licenseFileFound": false
+    },
+    {
+      "id": "redline-prisonevo",
+      "classification": "Public source for different server RedLine; not Cristalix, not complete ready-to-run server bundle",
+      "file": "downloads/RedLine-PrisonEvo-6246616-source.zip",
+      "bytes": 478921,
+      "sha256": "9AD8ABE5C0CD61473128F17AAF2F18EC6E64B1619CF814053B5E059ECD0424AD",
+      "repository": "https://github.com/see1234/PrisonEvo",
+      "commit": "62466165a901dc5db66f378d664f3c0fcad223a5",
+      "downloadUrl": "https://codeload.github.com/see1234/PrisonEvo/zip/62466165a901dc5db66f378d664f3c0fcad223a5",
+      "extractedRoot": "downloads/RedLine-source/PrisonEvo-62466165a901dc5db66f378d664f3c0fcad223a5",
+      "identityEvidence": {
+        "file": "src/main/resources/plugin.yml",
+        "author": "Konus",
+        "description": "Плагин PrisonEvo для RedLine."
+      },
+      "observedModules": [
+        "boss",
+        "gangs",
+        "pets",
+        "quest",
+        "luckyblocks",
+        "api/Artifacts.java",
+        "listener/BlockBreakListener.java",
+        "trainer"
+      ],
+      "limits": [
+        "Build expects missing libraries in libs/*.jar",
+        "Many referenced configuration files are not included",
+        "NMS imports bind some classes to v1_12_R1",
+        "No gameplay plugin JAR in source archive; Gradle wrapper JAR is only build tooling"
+      ],
+      "gitBlobVerification": {
+        "verified": 201,
+        "mismatches": 0
+      },
+      "githubReleasesFound": 0,
+      "licenseFileFound": false
+    }
+  ],
+  "otherCheckedCandidates": [
+    {
+      "url": "https://github.com/TheSwell/PrisonEvo",
+      "classification": "Small RedLine project skeleton, not verified Cristalix server source"
+    },
+    {
+      "url": "https://github.com/ZnZq/PrisonEvo-Wiki",
+      "classification": "Wiki/data site, not server plugin"
+    },
+    {
+      "url": "https://forum-minecraft.ru/resources/stickmixneeds-sozdat-potrebnosti-na-servere.1269/",
+      "classification": "Third-party listing of needs plugin; author/source and relation to Cristalix unverified; not downloaded"
+    },
+    {
+      "url": "https://github.com/PrisonTeam/Prison",
+      "classification": "Generic mines/ranks plugin; previously researched separately"
+    }
+  ],
+  "handling": "Archives downloaded and statically inspected. Source extracted after path validation; downloaded scripts and JARs were not run. Hash equality verifies downloaded content against listed revision, not behavior or security."
+}

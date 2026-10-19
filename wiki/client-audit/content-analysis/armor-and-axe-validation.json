@@ -1,0 +1,16 @@
+{
+  "screenshots": 78,
+  "distinctUpgradeTransitions": 71,
+  "armorTransitions": 56,
+  "axeTransitions": 15,
+  "terminalScreens": 5,
+  "repeatedChestplateScreens": 2,
+  "hashesMatched": true,
+  "totals": {
+    "helmet": 34424,
+    "chestplate": 41475,
+    "leggings": 38997,
+    "boots": 34824,
+    "axe": 38657
+  }
+}

@@ -1,0 +1,337 @@
+00358640 movzx    eax, dx
+00358643 movabs   r10, 0xffff0000ffff
+0035864d xor      rax, qword ptr [rcx]
+00358650 movabs   r9, 0xff00ff00ff00ff
+0035865a ror      r8, 0x3b
+0035865e movabs   rcx, 0x5caec792d7cd0106
+00358668 xor      rax, rcx
+0035866b ror      r8, 6
+0035866f rol      rax, 0xc
+00358673 movabs   rcx, 0xf6ab2024ef16c808
+0035867d add      rcx, rax
+00358680 movabs   rax, 0x6bdd89d20a2875f5
+0035868a xor      rcx, rax
+0035868d movabs   rax, 0xfbedc513ea96c6f
+00358697 sub      rcx, rax
+0035869a rol      rcx, 0x20
+0035869e mov      rdx, rcx
+003586a1 mov      rax, rcx
+003586a4 shr      rdx, 0x10
+003586a8 shl      rcx, 0x10
+003586ac shl      rax, 0x10
+003586b0 xor      rdx, rax
+003586b3 and      rdx, r10
+003586b6 xor      rdx, rcx
+003586b9 mov      rcx, rdx
+003586bc mov      rax, rdx
+003586bf shl      rdx, 8
+003586c3 shr      rcx, 8
+003586c7 shl      rax, 8
+003586cb xor      rcx, rax
+003586ce movabs   rax, 0x23065951f017b147
+003586d8 and      rcx, r9
+003586db xor      rcx, rdx
+003586de rol      rcx, 0x12
+003586e2 mov      rdx, rcx
+003586e5 xor      rdx, r8
+003586e8 imul     rdx, rax
+003586ec movabs   rax, 0x7bca588a75eb78f6
+003586f6 ror      rdx, 0xd
+003586fa sub      rdx, rcx
+003586fd xor      rdx, rax
+00358700 ror      rdx, 2
+00358704 rol      rdx, 0x20
+00358708 mov      rcx, rdx
+0035870b mov      rax, rdx
+0035870e shr      rcx, 0x10
+00358712 shl      rdx, 0x10
+00358716 shl      rax, 0x10
+0035871a xor      rcx, rax
+0035871d and      rcx, r10
+00358720 xor      rcx, rdx
+00358723 mov      rdx, rcx
+00358726 mov      rax, rcx
+00358729 shl      rcx, 8
+0035872d shr      rdx, 8
+00358731 shl      rax, 8
+00358735 xor      rdx, rax
+00358738 and      rdx, r9
+0035873b xor      rdx, rcx
+0035873e rol      rdx, 0x20
+00358742 mov      rcx, rdx
+00358745 mov      rax, rdx
+00358748 shr      rcx, 0x10
+0035874c shl      rax, 0x10
+00358750 xor      rcx, rax
+00358753 shl      rdx, 0x10
+00358757 and      rcx, r10
+0035875a xor      rcx, rdx
+0035875d mov      r8, rcx
+00358760 mov      rax, rcx
+00358763 shr      r8, 8
+00358767 shl      rax, 8
+0035876b xor      r8, rax
+0035876e shl      rcx, 8
+00358772 and      r8, r9
+00358775 movabs   rax, 0x6bc6782eb7c7c7d3
+0035877f xor      r8, rcx
+00358782 imul     r8, rax
+00358786 rol      r8, 0x20
+0035878a mov      rdx, r8
+0035878d shr      rdx, 0x10
+00358791 mov      rax, r8
+00358794 shl      r8, 0x10
+00358798 shl      rax, 0x10
+0035879c xor      rdx, rax
+0035879f and      rdx, r10
+003587a2 xor      rdx, r8
+003587a5 mov      rax, rdx
+003587a8 mov      rcx, rdx
+003587ab shr      rax, 8
+003587af shl      rcx, 8
+003587b3 xor      rax, rcx
+003587b6 shl      rdx, 8
+003587ba and      rax, r9
+003587bd xor      rax, rdx
+003587c0 ret      
+003587c1 int3     
+003587c2 int3     
+003587c3 int3     
+003587c4 int3     
+003587c5 int3     
+003587c6 int3     
+003587c7 int3     
+003587c8 int3     
+003587c9 int3     
+003587ca int3     
+003587cb int3     
+003587cc int3     
+003587cd int3     
+003587ce int3     
+003587cf int3     
+003587d0 mov      qword ptr [rsp + 8], rbx
+003587d5 mov      qword ptr [rsp + 0x10], rbp
+003587da mov      qword ptr [rsp + 0x18], rsi
+003587df mov      qword ptr [rsp + 0x20], rdi
+003587e4 push     r12
+003587e6 push     r13
+003587e8 push     r14
+003587ea push     r15
+003587ec movzx    eax, dx
+003587ef mov      rbp, r9
+003587f2 xor      rax, qword ptr [rcx]
+003587f5 mov      rbx, r8
+003587f8 movabs   rcx, 0x67a54eb748e9a446
+00358802 movabs   r9, 0x94d049bb133111eb
+0035880c xor      rax, rcx
+0035880f movabs   r14, 0xbf58476d1ce4e5b9
+00358819 rol      rax, 0xc
+0035881d movabs   rcx, 0xf6ab2024ef16c808
+00358827 add      rcx, rax
+0035882a xor      r10d, r10d
+0035882d movabs   rax, 0x6bdd89d20a2875f5
+00358837 movabs   r13, 0x5851f42d4c957f2d
+00358841 xor      rcx, rax
+00358844 mov      r11d, r10d
+00358847 movabs   rax, 0xfbedc513ea96c6f
+00358851 mov      esi, r10d
+00358854 sub      rcx, rax
+00358857 rol      rcx, 0x20
+0035885b mov      rdx, rcx
+0035885e mov      rax, rcx
+00358861 shl      rax, 0x10
+00358865 shl      rcx, 0x10
+00358869 shr      rdx, 0x10
+0035886d xor      rdx, rax
+00358870 movabs   rax, 0xffff0000ffff
+0035887a and      rdx, rax
+0035887d xor      rdx, rcx
+00358880 mov      r15, rdx
+00358883 mov      rax, rdx
+00358886 shl      rax, 8
+0035888a shl      rdx, 8
+0035888e shr      r15, 8
+00358892 xor      r15, rax
+00358895 movabs   rax, 0xff00ff00ff00ff
+0035889f and      r15, rax
+003588a2 movabs   rax, 0x21e04695ec8806ef
+003588ac xor      r15, rdx
+003588af rol      r15, 0x12
+003588b3 mov      rdx, r15
+003588b6 xor      rdx, rax
+003588b9 movabs   rax, 0x9e3779b97f4a7c15
+003588c3 add      rax, rdx
+003588c6 mov      rcx, rax
+003588c9 shr      rcx, 0x1e
+003588cd xor      rcx, rax
+003588d0 movabs   rax, 0xda3e39cb94b95bdb
+003588da xor      rdx, rax
+003588dd movabs   rax, 0x61c8864680b583eb
+003588e7 imul     rcx, r14
+003588eb sub      rdx, rax
+003588ee mov      r8, rcx
+003588f1 mov      rax, rdx
+003588f4 shr      rax, 0x1e
+003588f8 shr      r8, 0x1b
+003588fc xor      rax, rdx
+003588ff xor      r8, rcx
+00358902 imul     r8, r9
+00358906 imul     rax, r14
+0035890a mov      rcx, rax
+0035890d shr      rcx, 0x1b
+00358911 xor      rcx, rax
+00358914 imul     rcx, r9
+00358918 mov      r9, r8
+0035891b shr      r9, 0x1f
+0035891f mov      r12, rcx
+00358922 xor      r9, r8
+00358925 shr      r12, 0x1f
+00358929 imul     r9, r13
+0035892d xor      r12, rcx
+00358930 or       r12, 1
+00358934 add      r9, r12
+00358937 test     rbp, rbp
+0035893a je       0x3589a1
+0035893c mov      rdi, rbx
+0035893f mov      r14, rbp
+00358942 test     esi, esi
+00358944 jne      0x358982
+00358946 mov      r8, r9
+00358949 mov      esi, 4
+0035894e mov      rdx, r8
+00358951 mov      rax, r8
+00358954 shr      rax, 0x1b
+00358958 shr      r8, 0x3b
+0035895c imul     r9, r13
+00358960 shr      rdx, 0x2d
+00358964 mov      ecx, r8d
+00358967 xor      edx, eax
+00358969 neg      ecx
+0035896b and      ecx, 0x1f
+0035896e mov      eax, edx
+00358970 mov      r11d, edx
+00358973 add      r9, r12
+00358976 shl      r11d, cl
+00358979 mov      ecx, r8d
+0035897c shr      rax, cl
+0035897f or       r11, rax
+00358982 movzx    eax, r11b
+00358986 dec      esi
+00358988 xor      byte ptr [rdi], al
+0035898a inc      rdi
+0035898d shr      r11, 8
+00358991 sub      r14, 1
+00358995 jne      0x358942
+00358997 movabs   r14, 0xbf58476d1ce4e5b9
+003589a1 movabs   rax, 0x43c4ab317d3abd88
+003589ab mov      r8, r15
+003589ae xor      r8, rax
+003589b1 movabs   rsi, 0x94d049bb133111eb
+003589bb movabs   rax, 0x9e3779b97f4a7c15
+003589c5 mov      rdx, r10
+003589c8 add      rax, r8
+003589cb mov      r9d, r10d
+003589ce mov      rcx, rax
+003589d1 movabs   r12, 0x3c6ef372fe94f82a
+003589db shr      rcx, 0x1e
+003589df xor      rcx, rax
+003589e2 imul     rcx, r14
+003589e6 mov      rax, rcx
+003589e9 shr      rax, 0x1b
+003589ed xor      rax, rcx
+003589f0 imul     rax, rsi
+003589f4 mov      rcx, rax
+003589f7 shr      rcx, 0x1f
+003589fb xor      rcx, rax
+003589fe jne      0x358a2a
+00358a00 lea      rax, [r8 + r12]
+00358a04 mov      rcx, rax
+00358a07 shr      rcx, 0x1e
+00358a0b xor      rcx, rax
+00358a0e imul     rcx, r14
+00358a12 mov      rax, rcx
+00358a15 shr      rax, 0x1b
+00358a19 xor      rax, rcx
+00358a1c imul     rax, rsi
+00358a20 mov      rcx, rax
+00358a23 shr      rcx, 0x1f
+00358a27 xor      rcx, rax
+00358a2a movabs   rdi, 0x2545f4914f6cdd1d
+00358a34 test     rbp, rbp
+00358a37 je       0x358a86
+00358a39 mov      r8, rbx
+00358a3c mov      r11, rbp
+00358a3f nop      
+00358a40 test     r9d, r9d
+00358a43 jne      0x358a70
+00358a45 mov      rdx, rcx
+00358a48 mov      r9d, 8
+00358a4e shr      rdx, 0xc
+00358a52 xor      rdx, rcx
+00358a55 mov      rax, rdx
+00358a58 shl      rax, 0x19
+00358a5c xor      rdx, rax
+00358a5f mov      rax, rdx
+00358a62 shr      rax, 0x1b
+00358a66 xor      rdx, rax
+00358a69 mov      rcx, rdx
+00358a6c imul     rdx, rdi
+00358a70 movzx    eax, dl
+00358a73 dec      r9d
+00358a76 xor      byte ptr [r8], al
+00358a79 inc      r8
+00358a7c shr      rdx, 8
+00358a80 sub      r11, 1
+00358a84 jne      0x358a40
+00358a86 movabs   rax, 0xd40f096ba1463917
+00358a90 mov      r8, r15
+00358a93 xor      r8, rax
+00358a96 movabs   rcx, 0x9e3779b97f4a7c15
+00358aa0 add      rcx, r8
+00358aa3 mov      rax, r10
+00358aa6 mov      rdx, rcx
+00358aa9 mov      r9d, r10d
+00358aac shr      rdx, 0x1e
+00358ab0 xor      rdx, rcx
+00358ab3 imul     rdx, r14
+00358ab7 mov      rcx, rdx
+00358aba shr      rcx, 0x1b
+00358abe xor      rcx, rdx
+00358ac1 imul     rcx, rsi
+00358ac5 mov      rdx, rcx
+00358ac8 shr      rdx, 0x1f
+00358acc xor      rdx, rcx
+00358acf jne      0x358afb
+00358ad1 lea      rcx, [r8 + r12]
+00358ad5 mov      rdx, rcx
+00358ad8 shr      rdx, 0x1e
+00358adc xor      rdx, rcx
+00358adf imul     rdx, r14
+00358ae3 mov      rcx, rdx
+00358ae6 shr      rcx, 0x1b
+00358aea xor      rcx, rdx
+00358aed imul     rcx, rsi
+00358af1 mov      rdx, rcx
+00358af4 shr      rdx, 0x1f
+00358af8 xor      rdx, rcx
+00358afb test     rbp, rbp
+00358afe je       0x358b4c
+00358b00 mov      r8, rbx
+00358b03 mov      r11, rbp
+00358b06 test     r9d, r9d
+00358b09 jne      0x358b36
+00358b0b mov      rax, rdx
+00358b0e mov      r9d, 8
+00358b14 shr      rax, 0xc
+00358b18 xor      rax, rdx
+00358b1b mov      rcx, rax
+00358b1e shl      rcx, 0x19
+00358b22 xor      rax, rcx
+00358b25 mov      rcx, rax
+00358b28 shr      rcx, 0x1b
+00358b2c xor      rax, rcx
+00358b2f mov      rdx, rax
+00358b32 imul     rax, rdi
+00358b36 movzx    ecx, al
+00358b39 dec      r9d
+00358b3c xor      byte ptr [r8], cl

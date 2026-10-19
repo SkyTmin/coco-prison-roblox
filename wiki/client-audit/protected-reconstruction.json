@@ -1,0 +1,7 @@
+{
+  "classes": 7291,
+  "methods": 62427,
+  "errors": [],
+  "output": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\full-decompilation\\inputs\\minecraft-reconstructed.jar",
+  "bytecodeValidation": "All 62,427 method bodies passed opcode/instruction-boundary, branch/switch-target and invoke-padding checks. This is not JVM type/stack verification or a gameplay test."
+}

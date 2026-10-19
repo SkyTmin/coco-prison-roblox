@@ -1,0 +1,1113 @@
+{
+  "collectedOn": "2026-10-18",
+  "kind": "Client localization evidence, not server source",
+  "source": "decoded/ru_RU-prison.json",
+  "totalPrisonStrings": 2500,
+  "classicStrings": 1837,
+  "rules": [
+    {
+      "id": "needs-shower",
+      "group": "Потребности",
+      "summary": "Мыло позволяет удовлетворить потребность в душе вне стационарной зоны.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.disease.anti.item.shower.lore",
+          "text": "Вы, как и любой другой человек,\nнуждаетесь в тёплом душе. Однако,\nс этим Мылом Вы с лёгкостью\nможете помыться где угодно!\n\n — Использовать"
+        }
+      ]
+    },
+    {
+      "id": "needs-sleep",
+      "group": "Потребности",
+      "summary": "Спальный мешок позволяет отдохнуть в выбранном месте.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.disease.anti.item.sleep.lore",
+          "text": "Вы, как и любой другой человек\nнуждаетесь в хорошем отдыхе.\nС этим Спальным мешком Вы сможете\nотдохнуть в любом удобном месте!\n\n — Использовать"
+        }
+      ]
+    },
+    {
+      "id": "needs-toilet",
+      "group": "Потребности",
+      "summary": "Туалетная бумага позволяет удовлетворить туалетную потребность вне стационарной зоны.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.disease.anti.item.toilet.lore",
+          "text": "Вы, как и любой другой человек,\nнуждаетесь в походе в туалет. Но,\nс этой Туалетной бумагой Вы\nсможете заняться этим где угодно!\n\n — Использовать"
+        }
+      ]
+    },
+    {
+      "id": "needs-item-check",
+      "group": "Потребности",
+      "summary": "Использование расходника без подходящей нужды отклоняется.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.disease.anti.no_disease",
+          "text": "Зачем Вы используете этот предмет? У Вас нет нужд, которые он может убрать!"
+        }
+      ]
+    },
+    {
+      "id": "needs-vaccine",
+      "group": "Потребности",
+      "summary": "Вакцина описана как отключение всех трёх бытовых потребностей.",
+      "status": "described_in_client_text",
+      "limitation": "Срок действия в границах сезонов и вайпов не установлен.",
+      "evidence": [
+        {
+          "key": "prison.classic.disease.vaccine.lore",
+          "text": "Использовав Вакцину, Вы забудете\nот каких-либо потребностей справлять\nнужду, ходить в душ или же спать!\n\n — для активации"
+        },
+        {
+          "key": "prison.classic.disease.vaccine.error_already_used",
+          "text": "Вы уже использовали Вакцину ранее!"
+        }
+      ]
+    },
+    {
+      "id": "needs-training",
+      "group": "Потребности",
+      "summary": "Тренер позволяет развивать сопротивляемость нуждам.",
+      "status": "described_in_client_text",
+      "limitation": "Частота возникновения и величина изменения отсутствуют.",
+      "evidence": [
+        {
+          "key": "prison.classic.trainer.upgrade.needs.description",
+          "text": "Снижает потребность справлять нужду"
+        },
+        {
+          "key": "prison.classic.trainer.needs.upgrade",
+          "text": "Поздравляем! Вы прокачали иммунитет к нуждам с %s до %s уровня!"
+        }
+      ]
+    },
+    {
+      "id": "needs-gang",
+      "group": "Потребности",
+      "summary": "Улучшение банды «Выносливость» снижает частоту нужд.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.endurance.lore",
+          "text": "Прокачав Выносливость, каждый участник\nВашей банды получит пониженную надобность в\nсправлении нужд.\n\nС каждым повышением уровня\nнадобность уменьшается."
+        }
+      ]
+    },
+    {
+      "id": "needs-enchantment",
+      "group": "Потребности",
+      "summary": "Зачарование «Чистюля» делает душ, сон и туалет более редкими.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.ancient_enchantment.list.neat.lore",
+          "text": "Ты следишь за собой, поэтому\nнужды (туалет, душ и сон)\nнаступают реже."
+        }
+      ]
+    },
+    {
+      "id": "faction-entry",
+      "group": "Фракции",
+      "summary": "Вступление во фракцию требует пятого уровня.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.fraction.error.level",
+          "text": "Ваш уровень ниже необходимого! Для вступления во Фракцию необходимо иметь пятый уровень!"
+        }
+      ]
+    },
+    {
+      "id": "faction-capacity",
+      "group": "Фракции",
+      "summary": "Вступление в переполненную фракцию ограничивается.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.fraction.error.overloaded",
+          "text": "В выбранной Вами фракции находится слишком много людей, но Вы можете вступить во фракцию %a"
+        }
+      ]
+    },
+    {
+      "id": "faction-storage",
+      "group": "Фракции",
+      "summary": "Открытие сундуков на чужой базе фракции запрещается.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.fraction.error.foreign_base",
+          "text": "Вы не можете открывать сундуки на чужой базе фракции!"
+        }
+      ]
+    },
+    {
+      "id": "faction-capture",
+      "group": "Фракции",
+      "summary": "Для захвата точки во дворах нужно копать блоки возле маяка.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.fraction.warzone.gui.mine_block",
+          "text": "Вскопайте блоки возле маяка"
+        },
+        {
+          "key": "prison.classic.fraction.warzone.capture_start",
+          "text": "Фракция %a начала захват точки %a на локации Дворы"
+        }
+      ]
+    },
+    {
+      "id": "faction-bonuses",
+      "group": "Фракции",
+      "summary": "В интерфейсе точек предусмотрены направления: блоки, спешка, мобы и деньги.",
+      "status": "described_in_client_text",
+      "limitation": "Размер бонусов и правила удержания отсутствуют.",
+      "evidence": [
+        {
+          "key": "prison.classic.fraction.warzone.point.blocks",
+          "text": "Блоки"
+        },
+        {
+          "key": "prison.classic.fraction.warzone.point.haste",
+          "text": "Спешка"
+        },
+        {
+          "key": "prison.classic.fraction.warzone.point.mobs",
+          "text": "Мобы"
+        },
+        {
+          "key": "prison.classic.fraction.warzone.point.money",
+          "text": "Деньги"
+        }
+      ]
+    },
+    {
+      "id": "gang-quests",
+      "group": "Банды",
+      "summary": "Задания охватывают добычу, мобов, боссов, PvP, лечение и продажу предметов.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.quests.description.block_break",
+          "text": "Накопать %s блоков"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.mob_kill",
+          "text": "Убить моба %a"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.boss_damage",
+          "text": "Нанести %s урона боссам"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.boss_kill",
+          "text": "Убить босса %a"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.player_damage",
+          "text": "Нанести %s  урона по игрокам"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.health_regain",
+          "text": "Восстановить %s  здоровья"
+        },
+        {
+          "key": "prison.classic.gang.quests.description.item_sell",
+          "text": "Продать %s предметов Надзирателю"
+        }
+      ]
+    },
+    {
+      "id": "gang-quest-reset",
+      "group": "Банды",
+      "summary": "При обновлении категории заданий предыдущий прогресс сбрасывается.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.gui.quests.update.lore",
+          "text": "Здесь указано время, оставшееся до\nобновления квестов в выбранной категории.\n\nПосле обновления квестов весь предыдущий\nпрогресс будет сброшен."
+        }
+      ]
+    },
+    {
+      "id": "gang-blacksmith",
+      "group": "Банды",
+      "summary": "Открытая кузница позволяет объединять книги одного типа для повышения уровня.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.blacksmith_description",
+          "text": "Открыв Кузницу, Ваша банда сможет \nскрещивать книги одного типа для \nпрокачки уровня"
+        }
+      ]
+    },
+    {
+      "id": "gang-librarian",
+      "group": "Банды",
+      "summary": "В библиотеке древние книги перерабатываются в пользу общей прогрессии банды.",
+      "status": "described_in_client_text",
+      "limitation": "Один текст обещает древние звёзды, другой описывает очки и пороговую награду. Точную последовательность нужно проверить в игре.",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.librarian_description",
+          "text": "Открыв Библиотеку, Ваша банда сможет \nраспылять Древние книги для\nполучения Древних звёзд"
+        },
+        {
+          "key": "prison.classic.gang.librarian.description",
+          "text": "Перерабатывайте книги в очки и при достижении определённого количества банда получит награду"
+        }
+      ]
+    },
+    {
+      "id": "gang-storage",
+      "group": "Банды",
+      "summary": "Прокачка сундуков увеличивает общий склад, прокачка казны увеличивает её вместимость.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.chests_description",
+          "text": "Улучшая сундуки, Вашей банде становится \nдоступно дополнительное хранилище на складе"
+        },
+        {
+          "key": "prison.classic.gang.upgrades.treasury_description",
+          "text": "Увеличивая казну, её хранилище \nстановится более вместительным"
+        }
+      ]
+    },
+    {
+      "id": "gang-block-rewards",
+      "group": "Банды",
+      "summary": "«Фарт» даёт шанс дополнительного предмета-блока, «Конверсия» — дополнительного блока в статистику.",
+      "status": "described_in_client_text",
+      "limitation": "Это разные виды награды; проценты не раскрыты.",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.additional_blocks.item.lore",
+          "text": "Прокачав Фарт, каждый участник Вашей\nбанды с определённым шансом получит\nдополнительно вскопанный блок.\n\nС каждым повышением уровня\nшанс увеличивается."
+        },
+        {
+          "key": "prison.classic.gang.upgrades.additional_blocks.stats.lore",
+          "text": "Прокачав Конверсию, каждый участник Вашей\nбанды с определённым шансом получит\nдополнительно вскопанный блок в статистику.\n\nС каждым повышением уровня\nшанс увеличивается."
+        }
+      ]
+    },
+    {
+      "id": "gang-mob-stats",
+      "group": "Банды",
+      "summary": "«Охотник» даёт шанс дополнительного убийства моба в статистике.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.upgrades.hunter.lore",
+          "text": "Прокачав Охотника, каждый участник Вашей\nбанды получит дополнительного убитого\nмоба в статистику с определённым шансом.\n\nС каждым повышением уровня\nшанс увеличивается."
+        }
+      ]
+    },
+    {
+      "id": "cell-entry-food",
+      "group": "Камера",
+      "summary": "Текст арбуза указывает доступ к личной камере с восьмого уровня и необходимость кормить помощников.",
+      "status": "described_in_client_text",
+      "limitation": "Описание говорит, что голодный помощник сбегает; таймер и точный порядок штрафа не установлены.",
+      "evidence": [
+        {
+          "key": "prison.classic.cell.melon.lore",
+          "text": "Любимое лакомство шестёрок.\nОтнесите дольки в Личную камеру и положите\nв кормушку — сытая шестёрка работает,\nголодная сбегает.\n\nЛичная камера открывается с 8-го уровня"
+        }
+      ]
+    },
+    {
+      "id": "cell-food-types",
+      "group": "Камера",
+      "summary": "В интерфейсе еды помощников предусмотрены яблоки, плоть и арбузы.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.cell.henchman.food.apple.non_emoji_text",
+          "text": "Яблоки"
+        },
+        {
+          "key": "prison.classic.cell.henchman.food.flesh.non_emoji_text",
+          "text": "Плоть"
+        },
+        {
+          "key": "prison.classic.cell.henchman.food.melon.non_emoji_text",
+          "text": "Арбузы"
+        }
+      ]
+    },
+    {
+      "id": "cell-sieve",
+      "group": "Камера",
+      "summary": "Для сита имеются подписи наград: пыль, ключ и древняя звезда.",
+      "status": "described_in_client_text",
+      "limitation": "Это подписи интерфейса, не таблица шансов выпадения.",
+      "evidence": [
+        {
+          "key": "prison.classic.cell.sieve.dust",
+          "text": "Пыль"
+        },
+        {
+          "key": "prison.classic.cell.sieve.key",
+          "text": "Ключ"
+        },
+        {
+          "key": "prison.classic.cell.sieve.star",
+          "text": "Древняя звезда"
+        }
+      ]
+    },
+    {
+      "id": "career-drill",
+      "group": "Карьеры",
+      "summary": "Бур требует топливных бочек; для него предусмотрены отдельный экран и отсчёт оставшегося времени.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.carrier.screen.fuel_hint",
+          "text": "Бур требует топливные бочки для работы"
+        },
+        {
+          "key": "prison.classic.carrier.screen.time_left_label",
+          "text": "До конца работы"
+        },
+        {
+          "key": "prison.classic.barrel.lore",
+          "text": "Используйте на карьерах,\nчтобы запитать Бур"
+        }
+      ]
+    },
+    {
+      "id": "career-entry-pass",
+      "group": "Карьеры",
+      "summary": "Пропуска четырёх типов карьеров описывают минутное окно входа для банды.",
+      "status": "described_in_client_text",
+      "limitation": "Минутное окно входа нельзя считать длительностью добычи.",
+      "evidence": [
+        {
+          "key": "prison.classic.carrier.pass.stone.lore",
+          "text": "Открывает Вашей банде вход на\nкарьер на 1 минуту. Используйте\nна локации «Лобби карьеров»\n\n — для активации"
+        },
+        {
+          "key": "prison.classic.carrier.pass.diamond.lore",
+          "text": "Открывает Вашей банде вход на\nкарьер на 1 минуту. Используйте\nна локации \"Лобби карьеров\"\n\n — для активации"
+        },
+        {
+          "key": "prison.classic.carrier.pass.synthetic.lore",
+          "text": "Открывает Вашей банде вход на\nкарьер на 1 минуту. Используйте\nна локации \"Лобби карьеров\"\n\n — для активации"
+        },
+        {
+          "key": "prison.classic.carrier.pass.titan.lore",
+          "text": "Открывает Вашей банде вход на\nкарьер на 1 минуту. Используйте\nна локации \"Лобби карьеров\"\n\n — для активации"
+        }
+      ]
+    },
+    {
+      "id": "gang-mine-pass",
+      "group": "Карьеры",
+      "summary": "Отдельный пропуск открывает шахту банды на десять минут.",
+      "status": "described_in_client_text",
+      "limitation": "Этот пропуск и пропуск на карьер — разные предметы.",
+      "evidence": [
+        {
+          "key": "prison.classic.gang.mine.pass.lore",
+          "text": "Используйте, чтобы Ваша банда\nполучила доступ на Шахту банды\nна 10 минут. Уровень шахты - %s\n\n — по предмету\nдля использования"
+        }
+      ]
+    },
+    {
+      "id": "lootbox-kinds",
+      "group": "Ключи и кейсы",
+      "summary": "Ключи обычного, древнего и именного кейса имеют разные назначения.",
+      "status": "described_in_client_text",
+      "limitation": "Источники выпадения всех ключей и их Minecraft-материалы здесь не заданы.",
+      "evidence": [
+        {
+          "key": "prison.classic.item.lootbox.default.lore",
+          "text": "Данный ключ используется для\nоткрытия Обычного кейса на Спавне"
+        },
+        {
+          "key": "prison.classic.item.lootbox.ancient.lore",
+          "text": "Данный ключ используется для\nоткрытия Древнего кейса на Спавне"
+        },
+        {
+          "key": "prison.classic.item.lootbox.rank.lore",
+          "text": "Данный ключ используется для\nоткрытия Кейса с кличками на Спавне"
+        }
+      ]
+    },
+    {
+      "id": "stars-exchange",
+      "group": "Ключи и кейсы",
+      "summary": "Древняя звезда описана как награда босса или обычного кейса и обменивается на ключи на рынке.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.item.nether.star.lore",
+          "text": "Может выпасть при убийстве босса или\nиз Обычного кейса\n\nВы можете обменять Древнюю звезду на\nключи у Обменника звёзд на Рынке"
+        }
+      ]
+    },
+    {
+      "id": "enchantment-failure",
+      "group": "Зачарования",
+      "summary": "Наложение древнего зачарования вероятностное; при неудаче книга рвётся.",
+      "status": "described_in_client_text",
+      "limitation": "Вместо процента стоит подстановка.",
+      "evidence": [
+        {
+          "key": "prison.classic.ancient_enchantment.lore",
+          "text": "%a\n\nЧтобы наложить, нужно нажать\nкнигой по желаемому предмету.\n\n Шанс зачарования предмета » %s\n\n Можно зачаровать следующие предметы"
+        },
+        {
+          "key": "prison.classic.ancient_enchantment.not_applied",
+          "text": "При попытке наложить Древнее Зачарование %a на предмет %a книга порвалась... Зачарование не наложилось"
+        }
+      ]
+    },
+    {
+      "id": "enchantment-powder",
+      "group": "Зачарования",
+      "summary": "Древний порошок увеличивает шанс наложения книги.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.ancient_enchantment.powder.lore",
+          "text": "Этот порошок очищает книгу\nот пыли, тем самым увеличичивая\nеё шанс наложения.\n\nЭффективность » %s"
+        },
+        {
+          "key": "prison.classic.ancient_enchantment.powder.already_max_chance",
+          "text": "На этой книге уже максимальный шанс наложения!"
+        }
+      ]
+    },
+    {
+      "id": "enchantment-remove",
+      "group": "Зачарования",
+      "summary": "Развеиватель снимает зачарование без возврата использованной книги.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.ancient_enchantment.disenchanter.lore",
+          "text": "Используйте, чтобы свеять\nДревние Зачарования с предмета.\nПри использовании книга, с помощью\nкоторой было наложено это\nзачарование — возвращена не будет.\n\n — по предмету\nдля использования"
+        }
+      ]
+    },
+    {
+      "id": "enchantment-improved-key",
+      "group": "Зачарования",
+      "summary": "Описание предпросмотра обещает книгу максимального уровня при открытии улучшенным древним ключом.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.ancient_enchantment.lore_preview",
+          "text": "%a\n\nЧтобы наложить, нужно нажать\nкнигой по желаемому предмету.\n\nОткрыв лутбокс с улучшенным древним\nключом - книга выпадет с максимальным уровнем!\n\n Можно зачаровать следующие предметы"
+        }
+      ]
+    },
+    {
+      "id": "artifact-puzzle",
+      "group": "Артефакты",
+      "summary": "Сбор всех девяти фрагментов картинки даёт ключ от кейса артефактов.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.artifact.claim.error.incomplete",
+          "text": "Фрагменты ещё не собраны — нужны все девять."
+        },
+        {
+          "key": "prison.classic.artifact.claim.success",
+          "text": "Картинка %s собрана — вы получили ключ от кейса артефактов!"
+        },
+        {
+          "key": "prison.classic.artifact.screen.create_ready_tooltip",
+          "text": "Все девять фрагментов на месте\nВы получите ключ от кейса артефактов"
+        }
+      ]
+    },
+    {
+      "id": "artifact-duplicates",
+      "group": "Артефакты",
+      "summary": "Накопленные дубликаты конвертируются в отсутствующий фрагмент.",
+      "status": "described_in_client_text",
+      "limitation": "Порог дубликатов подставляется сервером через %d.",
+      "evidence": [
+        {
+          "key": "prison.classic.artifact.screen.howto",
+          "text": "Фрагменты падают с шахт, боссов,\nмобов, ключей и других занятий.\nКаждые %d дубликатов дают фрагмент,\nкоторого у вас ещё нет."
+        },
+        {
+          "key": "prison.classic.artifact.fragment.notify.converted",
+          "text": "Из повторок собрался недостающий фрагмент!"
+        }
+      ]
+    },
+    {
+      "id": "artifact-rarities",
+      "group": "Артефакты",
+      "summary": "Предусмотрены обычные, редкие и эпические артефакты.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.artifact.tier.common.title",
+          "text": "Обычный"
+        },
+        {
+          "key": "prison.classic.artifact.tier.rare.title",
+          "text": "Редкий"
+        },
+        {
+          "key": "prison.classic.artifact.tier.epic.title",
+          "text": "Эпический"
+        }
+      ]
+    },
+    {
+      "id": "artifact-sources",
+      "group": "Артефакты",
+      "summary": "Описание перечисляет шахты, боссов, мобов, ключи и другие занятия как источники фрагментов.",
+      "status": "described_in_client_text",
+      "limitation": "Список не раскрывает вероятности и ограничения конкретного источника.",
+      "evidence": [
+        {
+          "key": "prison.classic.artifact.screen.howto",
+          "text": "Фрагменты падают с шахт, боссов,\nмобов, ключей и других занятий.\nКаждые %d дубликатов дают фрагмент,\nкоторого у вас ещё нет."
+        }
+      ]
+    },
+    {
+      "id": "boss-last-hit",
+      "group": "Боссы",
+      "summary": "Сообщение денежной награды обещает дополнительный бонус 20% за финальное убийство.",
+      "status": "described_in_client_text",
+      "limitation": "Серверный расчёт распределения денег не получен.",
+      "evidence": [
+        {
+          "key": "prison.classic.boss.reward.balance_notify_final",
+          "text": "Вы получили %s за убийство босса %a (+20\\% за финальное убийство)"
+        }
+      ]
+    },
+    {
+      "id": "boss-presence",
+      "group": "Боссы",
+      "summary": "Сообщение отказа указывает, что для получения награды нужно быть на локации в момент смерти босса.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.boss.reward.not_at_location",
+          "text": "На момент убийства босса Вы не были на локации, потому награды за его убийства не были Вам выданы"
+        }
+      ]
+    },
+    {
+      "id": "boss-damage-ranking",
+      "group": "Боссы",
+      "summary": "После победы предусмотрено сообщение с рейтингом нанесённого урона и последним ударом.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.boss.killed_info",
+          "text": "Босс %a был повержен!\n\n   Топ по урону:\n   %s\n\n   Последний удар совершил %s"
+        }
+      ]
+    },
+    {
+      "id": "boss-minion-shield",
+      "group": "Боссы",
+      "summary": "Описание Древесного хранителя связывает его неуязвимость с живыми призванными существами.",
+      "status": "described_in_client_text",
+      "limitation": "Описание боя нужно подтвердить наблюдением; это не код ИИ.",
+      "evidence": [
+        {
+          "key": "prison.classic.boss.forest_guardian.description",
+          "text": "Древний страж чащи, сплетённый из корней и коры. Пока его создания живы, никакое оружие не способно ранить хранителя."
+        },
+        {
+          "key": "prison.classic.boss.forest_guardian.notify.minions",
+          "text": "Убейте всех миньонов"
+        }
+      ]
+    },
+    {
+      "id": "training-combat",
+      "group": "Развитие",
+      "summary": "Тренер развивает силу удара и вероятность уклонения.",
+      "status": "described_in_client_text",
+      "limitation": "",
+      "evidence": [
+        {
+          "key": "prison.classic.trainer.upgrade.strength.description",
+          "text": "Увеличивает силу удара"
+        },
+        {
+          "key": "prison.classic.trainer.upgrade.agility.description",
+          "text": "Позволяет увернуться от удара"
+        }
+      ]
+    },
+    {
+      "id": "tutorial-tasks",
+      "group": "Обучение",
+      "summary": "В начальном сценарии есть задачи убить двух крыс, выкопать пятнадцать блоков и купить новую лопату.",
+      "status": "described_in_client_text",
+      "limitation": "Наличие текста само по себе не доказывает доступность этапа в текущем сезоне.",
+      "evidence": [
+        {
+          "key": "prison.classic.guide.stage.second.3",
+          "text": "Убей двух крыс и расчисти нам путь."
+        },
+        {
+          "key": "prison.classic.guide.stage.third.3",
+          "text": "Возьми лопату и вскопай 15 блоков."
+        },
+        {
+          "key": "prison.classic.guide.stage.fourth.requirements_not_met",
+          "text": "Ты всё ещё носишься с этой старой лопатой? Иди и купи новую!"
+        }
+      ]
+    }
+  ],
+  "enchantments": [
+    {
+      "id": "vampirism",
+      "name": "Вампиризм",
+      "description": "При нанесении противнику урона\nпредметом с этим зачарованием ты\nрегенерируешь некоторое количество здоровья,\nзависящее от нанесённого урона и уровня\nэтого Древнего Зачарования.",
+      "nameKey": "prison.classic.ancient_enchantment.list.vampirism.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.vampirism.lore"
+    },
+    {
+      "id": "sacred",
+      "name": "Просвещённый",
+      "description": "При получении урона есть\nшанс восстановить определённое\nколичество здоровья.",
+      "nameKey": "prison.classic.ancient_enchantment.list.sacred.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.sacred.lore"
+    },
+    {
+      "id": "blindness",
+      "name": "Слепота",
+      "description": "Есть шанс наложить на противника\nслепоту, если нанести ему урон\nпредметом с этим зачарованием.",
+      "nameKey": "prison.classic.ancient_enchantment.list.blindness.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.blindness.lore"
+    },
+    {
+      "id": "toxic",
+      "name": "Токсичный",
+      "description": "При нанесении урона предметом\nс таким зачарованием есть\nшанс отравить врага.",
+      "nameKey": "prison.classic.ancient_enchantment.list.toxic.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.toxic.lore"
+    },
+    {
+      "id": "slowness",
+      "name": "Бульдозер",
+      "description": "При получении урона есть\nшанс замедлить противника.",
+      "nameKey": "prison.classic.ancient_enchantment.list.slowness.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.slowness.lore"
+    },
+    {
+      "id": "fired",
+      "name": "Раскалённый",
+      "description": "При получении урона есть\nшанс поджечь противника.",
+      "nameKey": "prison.classic.ancient_enchantment.list.fired.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.fired.lore"
+    },
+    {
+      "id": "rage",
+      "name": "Ярость",
+      "description": "С каждым ударом по противнику\nтвой урон по нему возрастает.",
+      "nameKey": "prison.classic.ancient_enchantment.list.rage.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.rage.lore"
+    },
+    {
+      "id": "vortex",
+      "name": "Вихрь",
+      "description": "Вихрь клинков! Дезориентируй\nПротивника огромной волной ударов.",
+      "nameKey": "prison.classic.ancient_enchantment.list.vortex.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.vortex.lore"
+    },
+    {
+      "id": "ninja",
+      "name": "Ниндзя",
+      "description": "При нанесении удара у Вас есть\nшанс получить скорость. Будьте быстрее\nпротивника!",
+      "nameKey": "prison.classic.ancient_enchantment.list.ninja.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.ninja.lore"
+    },
+    {
+      "id": "hulk",
+      "name": "Халк",
+      "description": "Навсегда даётся эффект\nсопротивление урону I и\nзамедление I. Как... танк?...",
+      "nameKey": "prison.classic.ancient_enchantment.list.hulk.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.hulk.lore"
+    },
+    {
+      "id": "frost",
+      "name": "Мороз",
+      "description": "При попадании стрелой\nесть возможность снизить скорость\nигрока на короткое время.",
+      "nameKey": "prison.classic.ancient_enchantment.list.frost.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.frost.lore"
+    },
+    {
+      "id": "fire",
+      "name": "Пожар",
+      "description": "При попадании стрелой\nспавнит с шансом огненный\nвзрыв под игроком.",
+      "nameKey": "prison.classic.ancient_enchantment.list.fire.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.fire.lore"
+    },
+    {
+      "id": "saving",
+      "name": "Экономия",
+      "description": "При выстреле из лука\nесть шанс сохранить стрелу\nу себя в инвентаре.",
+      "nameKey": "prison.classic.ancient_enchantment.list.saving.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.saving.lore"
+    },
+    {
+      "id": "springs",
+      "name": "Пружины",
+      "description": "Вечный эффект прыгучести.",
+      "nameKey": "prison.classic.ancient_enchantment.list.springs.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.springs.lore"
+    },
+    {
+      "id": "thor",
+      "name": "Громовержец",
+      "description": "При нанесении урона предметом с таким зачарованием\nесть шанс свергнуть молнию на врага.",
+      "nameKey": "prison.classic.ancient_enchantment.list.thor.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.thor.lore"
+    },
+    {
+      "id": "boxer",
+      "name": "Боксёр",
+      "description": "При нанесении урона предметом с таким зачарованием\nесть шанс нанести противнику значительный\nурон и подкинуть его.",
+      "nameKey": "prison.classic.ancient_enchantment.list.boxer.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.boxer.lore"
+    },
+    {
+      "id": "hammer",
+      "name": "Молот",
+      "description": "При копании есть шанс вскопать\nслучайные блоки в определённом\nрадиусе.",
+      "nameKey": "prison.classic.ancient_enchantment.list.hammer.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.hammer.lore"
+    },
+    {
+      "id": "archeologist",
+      "name": "Археолог",
+      "description": "При копании есть шанс получить\nэффект ускоренного копания.",
+      "nameKey": "prison.classic.ancient_enchantment.list.archeologist.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.archeologist.lore"
+    },
+    {
+      "id": "confusion",
+      "name": "Замешательство",
+      "description": "При нанесении урона предметом с таким зачарованием\nесть шанс наложить на противника тошноту.",
+      "nameKey": "prison.classic.ancient_enchantment.list.confusion.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.confusion.lore"
+    },
+    {
+      "id": "glutton",
+      "name": "Обжора",
+      "description": "Позволяет восстановить голод\nво время сражений.\nБольше не нужно заботиться о еде\nво время боя!",
+      "nameKey": "prison.classic.ancient_enchantment.list.glutton.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.glutton.lore"
+    },
+    {
+      "id": "wither",
+      "name": "Иссушение",
+      "description": "При получении урона\nесть шанс наложить на противника\nэффект иссушения.",
+      "nameKey": "prison.classic.ancient_enchantment.list.wither.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.wither.lore"
+    },
+    {
+      "id": "fortification",
+      "name": "Укрепление",
+      "description": "При получении урона\nесть шанс наложить на противника\nэффект слабости.",
+      "nameKey": "prison.classic.ancient_enchantment.list.fortification.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.fortification.lore"
+    },
+    {
+      "id": "tornado",
+      "name": "Торнадо",
+      "description": "При получении урона\nесть шанс перемешать все\nвещи в инвентаре противника.",
+      "nameKey": "prison.classic.ancient_enchantment.list.tornado.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.tornado.lore"
+    },
+    {
+      "id": "tank",
+      "name": "Танк",
+      "description": "Даёт постоянные дополнительные\nсердца к Вашему здоровью.",
+      "nameKey": "prison.classic.ancient_enchantment.list.tank.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.tank.lore"
+    },
+    {
+      "id": "berserk",
+      "name": "Берсерк",
+      "description": "Если у Вас меньше 10 сердец,\nто есть шанс, что Вы\nнанесёте x2 урон.",
+      "nameKey": "prison.classic.ancient_enchantment.list.berserk.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.berserk.lore"
+    },
+    {
+      "id": "lifestiller",
+      "name": "Гнев",
+      "description": "При нанесении урона\nпредметом с таким зачарованием\nесть шанс украсть у противника\nнекоторое количество здоровья.",
+      "nameKey": "prison.classic.ancient_enchantment.list.lifestiller.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.lifestiller.lore"
+    },
+    {
+      "id": "mason",
+      "name": "Муляр",
+      "description": "",
+      "nameKey": "prison.classic.ancient_enchantment.list.mason.display_name",
+      "descriptionKey": null
+    },
+    {
+      "id": "digger",
+      "name": "Землекоп",
+      "description": "",
+      "nameKey": "prison.classic.ancient_enchantment.list.digger.display_name",
+      "descriptionKey": null
+    },
+    {
+      "id": "lumberjack",
+      "name": "Дровосек",
+      "description": "",
+      "nameKey": "prison.classic.ancient_enchantment.list.lumberjack.display_name",
+      "descriptionKey": null
+    },
+    {
+      "id": "hunter",
+      "name": "Охотник",
+      "description": "",
+      "nameKey": "prison.classic.ancient_enchantment.list.hunter.display_name",
+      "descriptionKey": null
+    },
+    {
+      "id": "plastolom",
+      "name": "Пластолом",
+      "description": "С небольшим шансом при копании\nсносит весь слой шахты,\nна котором ты стоишь.\nВ статистику идёт половина\nблоков слоя, до 200 штук.",
+      "nameKey": "prison.classic.ancient_enchantment.list.plastolom.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.plastolom.lore"
+    },
+    {
+      "id": "curse",
+      "name": "Проклятие",
+      "description": "При ударе по игроку есть шанс\nпроклясть его: на несколько секунд\nон не может восстанавливать здоровье.\nВампиризм и Просвещённый\nтоже не сработают.\nПосле проклятия игрок 5 секунд\nзащищён от нового.",
+      "nameKey": "prison.classic.ancient_enchantment.list.curse.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.curse.lore"
+    },
+    {
+      "id": "neat",
+      "name": "Чистюля",
+      "description": "Ты следишь за собой, поэтому\nнужды (туалет, душ и сон)\nнаступают реже.",
+      "nameKey": "prison.classic.ancient_enchantment.list.neat.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.neat.lore"
+    },
+    {
+      "id": "baryga",
+      "name": "Барыга",
+      "description": "При копании в шахте есть шанс\nполучить ещё один такой же блок.\nРаботает и с автопродажей.",
+      "nameKey": "prison.classic.ancient_enchantment.list.baryga.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.baryga.lore"
+    },
+    {
+      "id": "snitch",
+      "name": "Стукач",
+      "description": "Тот, кто тебя ударил,\nначинает светиться и виден\nвсем вокруг несколько секунд.",
+      "nameKey": "prison.classic.ancient_enchantment.list.snitch.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.snitch.lore"
+    },
+    {
+      "id": "shnyr",
+      "name": "Шныр",
+      "description": "Есть шанс увернуться\nот удара другого игрока\nи не получить урон.",
+      "nameKey": "prison.classic.ancient_enchantment.list.shnyr.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.shnyr.lore"
+    },
+    {
+      "id": "obshak",
+      "name": "Общак",
+      "description": "Увеличивает твою долю денег\nиз банка босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+      "nameKey": "prison.classic.ancient_enchantment.list.obshak.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.obshak.lore"
+    },
+    {
+      "id": "prospector",
+      "name": "Старатель",
+      "description": "Увеличивает количество звёзд\nс босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+      "nameKey": "prison.classic.ancient_enchantment.list.prospector.display_name",
+      "descriptionKey": "prison.classic.ancient_enchantment.list.prospector.lore"
+    }
+  ],
+  "bosses": [
+    {
+      "id": "ent",
+      "name": "Грут",
+      "description": "Древний дух, оберегающий покой леса. Каждый, кто вторгнется в его владения, рискует навсегда остаться среди диких зарослей.",
+      "nameKey": "prison.classic.boss.ent.name",
+      "descriptionKey": "prison.classic.boss.ent.description"
+    },
+    {
+      "id": "piglin",
+      "name": "Король Пиглинов",
+      "description": "Алчный вождь, одержимый лишь властью и золотом. Сделает всё, чтобы добыча оказалась в его копытах.",
+      "nameKey": "prison.classic.boss.piglin.name",
+      "descriptionKey": "prison.classic.boss.piglin.description"
+    },
+    {
+      "id": "knight",
+      "name": "Рыцарь",
+      "description": "Хладнокровный воин в сияющих доспехах. Рождён, чтобы жить на поле боя и купаться в лучах славы после очередной победы.",
+      "nameKey": "prison.classic.boss.knight.name",
+      "descriptionKey": "prison.classic.boss.knight.description"
+    },
+    {
+      "id": "illusionist",
+      "name": "Иллюзионист",
+      "description": "Хитрый маг, чьи иллюзии и острые как бритва клинки способны застать даже самого вооруженного противника врасплох.",
+      "nameKey": "prison.classic.boss.illusionist.name",
+      "descriptionKey": "prison.classic.boss.illusionist.description"
+    },
+    {
+      "id": "reaper",
+      "name": "Жнец",
+      "description": "Само воплощение смерти. Тёмный дух, что скитается между мирами и появляется лишь там, где кончается жизнь.",
+      "nameKey": "prison.classic.boss.reaper.name",
+      "descriptionKey": "prison.classic.boss.reaper.description"
+    },
+    {
+      "id": "mole",
+      "name": "Моль",
+      "description": "Убийца, выходящая на охоту под покровом ночи, чьё присутствие несет холод и страх. Встреча с ней - это танец со смертью.",
+      "nameKey": "prison.classic.boss.mole.name",
+      "descriptionKey": "prison.classic.boss.mole.description"
+    },
+    {
+      "id": "vecna",
+      "name": "Векна",
+      "description": "Существо из тьмы, что не спешит, а выбирает. Его сила - в страхах, что живут внутри. Встреча с ним - это медленная гибель разума.",
+      "nameKey": "prison.classic.boss.vecna.name",
+      "descriptionKey": "prison.classic.boss.vecna.description"
+    },
+    {
+      "id": "giant_zombie",
+      "name": "Зомбарь",
+      "description": "Груда плоти, источающая гной и зловонный запах. Пробуждённый мертвец, что никак не может найти покой.",
+      "nameKey": "prison.classic.boss.giant_zombie.name",
+      "descriptionKey": "prison.classic.boss.giant_zombie.description"
+    },
+    {
+      "id": "splinter",
+      "name": "Сплинтер",
+      "description": "Огромная крыса с острыми клыками, выросшая в мраке подземелий и гор мусора, чья голодная тень поджидает за каждым углом.",
+      "nameKey": "prison.classic.boss.splinter.name",
+      "descriptionKey": "prison.classic.boss.splinter.description"
+    },
+    {
+      "id": "skeleton",
+      "name": "Скелетон",
+      "description": "Павший предводитель навеки забытой армии, чей пустой взгляд нагоняет жуть и безысходность.",
+      "nameKey": "prison.classic.boss.skeleton.name",
+      "descriptionKey": "prison.classic.boss.skeleton.description"
+    },
+    {
+      "id": "spider_queen",
+      "name": "Паучья матка",
+      "description": "Королева, скрывающаяся в тени своей армии. Каждый кто, осмелился войти в ее логово, обречен стать добычей.",
+      "nameKey": "prison.classic.boss.spider_queen.name",
+      "descriptionKey": "prison.classic.boss.spider_queen.description"
+    },
+    {
+      "id": "void",
+      "name": "Воид",
+      "description": "",
+      "nameKey": "prison.classic.boss.void.name",
+      "descriptionKey": null
+    },
+    {
+      "id": "basalt_guardian",
+      "name": "Базальтовый страж",
+      "description": "Древний каменный исполин, веками охраняющий недра Каменоломни. Его клинок из застывшей лавы раскалывает скалы, а из земли под его ударами вырываются базальтовые шипы.",
+      "nameKey": "prison.classic.boss.basalt_guardian.name",
+      "descriptionKey": "prison.classic.boss.basalt_guardian.description"
+    },
+    {
+      "id": "minotaur",
+      "name": "Минотавр",
+      "description": "Древний страж Подножья горы, закованный в цепи и погружённый в вековой сон. Тот, кто осмелится его разбудить, познает ярость рогов и копыт.",
+      "nameKey": "prison.classic.boss.minotaur.name",
+      "descriptionKey": "prison.classic.boss.minotaur.description"
+    },
+    {
+      "id": "poseidon",
+      "name": "Посейдон",
+      "description": "Владыка морей, дремавший на дне Затопленного маяка. Его трезубец призывает молнии, а гнев оборачивается штормом и приливными волнами.",
+      "nameKey": "prison.classic.boss.poseidon.name",
+      "descriptionKey": "prison.classic.boss.poseidon.description"
+    },
+    {
+      "id": "forest_spirit",
+      "name": "Лесной дух",
+      "description": "Древний дух Лепреконовой долины. Пока культисты хранят его тотем, лес не знает покоя.",
+      "nameKey": "prison.classic.boss.forest_spirit.name",
+      "descriptionKey": "prison.classic.boss.forest_spirit.description"
+    },
+    {
+      "id": "raven_knight",
+      "name": "Вороний рыцарь",
+      "description": "Проклятый рыцарь Замка, чья душа отдана воронам. Он охраняет древние стены от непрошеных гостей.",
+      "nameKey": "prison.classic.boss.raven_knight.name",
+      "descriptionKey": "prison.classic.boss.raven_knight.description"
+    },
+    {
+      "id": "the_lovers",
+      "name": "Самурай",
+      "description": "Самурай Ханасигуро и дух его возлюбленной. Даже смерть не смогла разлучить их: теперь они сражаются вместе, клинком и стрелой.",
+      "nameKey": "prison.classic.boss.the_lovers.name",
+      "descriptionKey": "prison.classic.boss.the_lovers.description"
+    },
+    {
+      "id": "forest_guardian",
+      "name": "Древесный хранитель",
+      "description": "Древний страж чащи, сплетённый из корней и коры. Пока его создания живы, никакое оружие не способно ранить хранителя.",
+      "nameKey": "prison.classic.boss.forest_guardian.name",
+      "descriptionKey": "prison.classic.boss.forest_guardian.description"
+    },
+    {
+      "id": "un_king",
+      "name": "Король нежити",
+      "description": "Древний повелитель мертвых, поднявшийся из-под Рынка. Мечет темные снаряды, призывает взрывающиеся черепа и призрачный меч, а под защитой своих гулей обрушивает на врагов метеоры.",
+      "nameKey": "prison.classic.boss.un_king.name",
+      "descriptionKey": "prison.classic.boss.un_king.description"
+    }
+  ]
+}

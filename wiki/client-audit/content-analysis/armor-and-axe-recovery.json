@@ -1,0 +1,2053 @@
+{
+  "recordedDate": "2026-10-20",
+  "sourceType": "Manual reading of 78 supplied game screenshots omitted from the initial inventory",
+  "sourcesManifest": "missed-menu-sources.json",
+  "sourceIds": [
+    "coverage_3",
+    "coverage_4",
+    "coverage_5",
+    "coverage_6",
+    "coverage_7",
+    "coverage_8",
+    "coverage_9",
+    "coverage_10",
+    "coverage_11",
+    "coverage_12",
+    "coverage_13",
+    "coverage_14",
+    "coverage_15",
+    "coverage_16",
+    "coverage_17",
+    "coverage_18",
+    "coverage_19",
+    "coverage_20",
+    "coverage_21",
+    "coverage_22",
+    "coverage_23",
+    "coverage_24",
+    "coverage_25",
+    "coverage_26",
+    "coverage_27",
+    "coverage_28",
+    "coverage_29",
+    "coverage_30",
+    "coverage_31",
+    "coverage_32",
+    "coverage_33",
+    "coverage_34",
+    "coverage_35",
+    "coverage_36",
+    "coverage_37",
+    "coverage_38",
+    "coverage_39",
+    "coverage_40",
+    "coverage_41",
+    "coverage_42",
+    "coverage_43",
+    "coverage_44",
+    "coverage_45",
+    "coverage_46",
+    "coverage_47",
+    "coverage_48",
+    "coverage_49",
+    "coverage_50",
+    "coverage_51",
+    "coverage_52",
+    "coverage_53",
+    "coverage_54",
+    "coverage_55",
+    "coverage_56",
+    "coverage_57",
+    "coverage_58",
+    "coverage_59",
+    "coverage_60",
+    "coverage_61",
+    "coverage_62",
+    "coverage_63",
+    "coverage_64",
+    "coverage_65",
+    "coverage_66",
+    "coverage_67",
+    "coverage_68",
+    "coverage_69",
+    "coverage_70",
+    "coverage_71",
+    "coverage_72",
+    "coverage_73",
+    "coverage_74",
+    "coverage_75",
+    "coverage_76",
+    "coverage_77",
+    "coverage_78",
+    "coverage_79",
+    "coverage_80"
+  ],
+  "items": {
+    "helmet": {
+      "transitions": [
+        {
+          "fromLevel": 1,
+          "toLevel": 2,
+          "evidence": [
+            "coverage_3"
+          ],
+          "moneyCost": 20,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "5",
+            "exactValue": 5,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаный шлем",
+          "displayedLeftLevel": 1,
+          "displayedRightName": "Кожаный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 2,
+          "toLevel": 3,
+          "evidence": [
+            "coverage_4"
+          ],
+          "moneyCost": 34,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "10",
+            "exactValue": 10,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаный шлем",
+          "displayedLeftLevel": 2,
+          "displayedRightName": "Кожаный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 3,
+          "toLevel": 4,
+          "evidence": [
+            "coverage_5"
+          ],
+          "moneyCost": 60,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "20",
+            "exactValue": 20,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаный шлем",
+          "displayedLeftLevel": 3,
+          "displayedRightName": "Кожаный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 4,
+          "toLevel": 5,
+          "evidence": [
+            "coverage_6"
+          ],
+          "moneyCost": 150,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "35",
+            "exactValue": 35,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Койф",
+          "displayedLeftLevel": 4,
+          "displayedRightName": "Кожаный шлем",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 5,
+          "toLevel": 6,
+          "evidence": [
+            "coverage_7"
+          ],
+          "moneyCost": 225,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "60",
+            "exactValue": 60,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Койф",
+          "displayedLeftLevel": 5,
+          "displayedRightName": "Койф",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 6,
+          "toLevel": 7,
+          "evidence": [
+            "coverage_8"
+          ],
+          "moneyCost": 325,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "100",
+            "exactValue": 100,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Койф",
+          "displayedLeftLevel": 6,
+          "displayedRightName": "Койф",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 7,
+          "toLevel": 8,
+          "evidence": [
+            "coverage_9"
+          ],
+          "moneyCost": 550,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "175",
+            "exactValue": 175,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Койф",
+          "displayedLeftLevel": 7,
+          "displayedRightName": "Койф",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 8,
+          "toLevel": 9,
+          "evidence": [
+            "coverage_10"
+          ],
+          "moneyCost": 970,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "335",
+            "exactValue": 335,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный шлем",
+          "displayedLeftLevel": 8,
+          "displayedRightName": "Койф",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 9,
+          "toLevel": 10,
+          "evidence": [
+            "coverage_11"
+          ],
+          "moneyCost": 1840,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "820",
+            "exactValue": 820,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный шлем",
+          "displayedLeftLevel": 9,
+          "displayedRightName": "Железный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 10,
+          "toLevel": 11,
+          "evidence": [
+            "coverage_12"
+          ],
+          "moneyCost": 2600,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.24K",
+            "exactValue": null,
+            "approximateValue": 1240
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный шлем",
+          "displayedLeftLevel": 10,
+          "displayedRightName": "Железный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 11,
+          "toLevel": 12,
+          "evidence": [
+            "coverage_13"
+          ],
+          "moneyCost": 3700,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.8K",
+            "exactValue": null,
+            "approximateValue": 1800
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный шлем",
+          "displayedLeftLevel": 11,
+          "displayedRightName": "Железный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 12,
+          "toLevel": 13,
+          "evidence": [
+            "coverage_14"
+          ],
+          "moneyCost": 5550,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "2.8K",
+            "exactValue": null,
+            "approximateValue": 2800
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный шлем",
+          "displayedLeftLevel": 12,
+          "displayedRightName": "Железный шлем",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 13,
+          "toLevel": 14,
+          "evidence": [
+            "coverage_15"
+          ],
+          "moneyCost": 6900,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 3,
+          "displayedLeftName": "Алмазный шлем",
+          "displayedLeftLevel": 13,
+          "displayedRightName": "Алмазный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 14,
+          "toLevel": 15,
+          "evidence": [
+            "coverage_16"
+          ],
+          "moneyCost": 11500,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 5,
+          "displayedLeftName": "Алмазный шлем",
+          "displayedLeftLevel": 14,
+          "displayedRightName": "Алмазный шлем",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        }
+      ],
+      "terminalPreview": {
+        "evidence": [
+          "coverage_17"
+        ],
+        "level": 15,
+        "display": "15 → 15",
+        "repeatedPreviousCost": 11500,
+        "repeatedPreviousRequirement": null,
+        "repeatedArmorerLevel": 5,
+        "countedAsAdditionalTransition": false
+      },
+      "nominalTotalUpgradeMoney": 34424,
+      "totalExcludesInitialPurchase": true,
+      "namesByObservedMaterial": [
+        "Кожаный шлем",
+        "Койф",
+        "Железный шлем",
+        "Алмазный шлем"
+      ],
+      "highestShownLevel": 15,
+      "absoluteMaximumLevel": null
+    },
+    "chestplate": {
+      "transitions": [
+        {
+          "fromLevel": 1,
+          "toLevel": 2,
+          "evidence": [
+            "coverage_18"
+          ],
+          "moneyCost": 25,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "4",
+            "exactValue": 4,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаная куртка",
+          "displayedLeftLevel": 1,
+          "displayedRightName": "Кожаная куртка",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 2,
+          "toLevel": 3,
+          "evidence": [
+            "coverage_19"
+          ],
+          "moneyCost": 40,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "8",
+            "exactValue": 8,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаная куртка",
+          "displayedLeftLevel": 2,
+          "displayedRightName": "Кожаная куртка",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 3,
+          "toLevel": 4,
+          "evidence": [
+            "coverage_20"
+          ],
+          "moneyCost": 60,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "14",
+            "exactValue": 14,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаная куртка",
+          "displayedLeftLevel": 3,
+          "displayedRightName": "Кожаная куртка",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 4,
+          "toLevel": 5,
+          "evidence": [
+            "coverage_21"
+          ],
+          "moneyCost": 150,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "35",
+            "exactValue": 35,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчуга",
+          "displayedLeftLevel": 4,
+          "displayedRightName": "Кожаная куртка",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 5,
+          "toLevel": 6,
+          "evidence": [
+            "coverage_22"
+          ],
+          "moneyCost": 225,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "60",
+            "exactValue": 60,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчуга",
+          "displayedLeftLevel": 5,
+          "displayedRightName": "Кольчуга",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 6,
+          "toLevel": 7,
+          "evidence": [
+            "coverage_23"
+          ],
+          "moneyCost": 325,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "110",
+            "exactValue": 110,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчуга",
+          "displayedLeftLevel": 6,
+          "displayedRightName": "Кольчуга",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 7,
+          "toLevel": 8,
+          "evidence": [
+            "coverage_24"
+          ],
+          "moneyCost": 550,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "240",
+            "exactValue": 240,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчуга",
+          "displayedLeftLevel": 7,
+          "displayedRightName": "Кольчуга",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 8,
+          "toLevel": 9,
+          "evidence": [
+            "coverage_25"
+          ],
+          "moneyCost": 1650,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "600",
+            "exactValue": 600,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный нагрудник",
+          "displayedLeftLevel": 8,
+          "displayedRightName": "Кольчуга",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 9,
+          "toLevel": 10,
+          "evidence": [
+            "coverage_26",
+            "coverage_28"
+          ],
+          "moneyCost": 2250,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.05K",
+            "exactValue": null,
+            "approximateValue": 1050
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный нагрудник",
+          "displayedLeftLevel": 9,
+          "displayedRightName": "Железный нагрудник",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 10,
+          "toLevel": 11,
+          "evidence": [
+            "coverage_27"
+          ],
+          "moneyCost": 3200,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.95K",
+            "exactValue": null,
+            "approximateValue": 1950
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный нагрудник",
+          "displayedLeftLevel": 10,
+          "displayedRightName": "Железный нагрудник",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 11,
+          "toLevel": 12,
+          "evidence": [
+            "coverage_29"
+          ],
+          "moneyCost": 4950,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "3K",
+            "exactValue": null,
+            "approximateValue": 3000
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный нагрудник",
+          "displayedLeftLevel": 11,
+          "displayedRightName": "Железный нагрудник",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 12,
+          "toLevel": 13,
+          "evidence": [
+            "coverage_30",
+            "coverage_31"
+          ],
+          "moneyCost": 5850,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "4.9K",
+            "exactValue": null,
+            "approximateValue": 4900
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный нагрудник",
+          "displayedLeftLevel": 12,
+          "displayedRightName": "Железный нагрудник",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 13,
+          "toLevel": 14,
+          "evidence": [
+            "coverage_32"
+          ],
+          "moneyCost": 7400,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 3,
+          "displayedLeftName": "Алмазный нагрудник",
+          "displayedLeftLevel": 13,
+          "displayedRightName": "Алмазный нагрудник",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 14,
+          "toLevel": 15,
+          "evidence": [
+            "coverage_33"
+          ],
+          "moneyCost": 14800,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 5,
+          "displayedLeftName": "Алмазный нагрудник",
+          "displayedLeftLevel": 14,
+          "displayedRightName": "Алмазный нагрудник",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        }
+      ],
+      "terminalPreview": {
+        "evidence": [
+          "coverage_34"
+        ],
+        "level": 15,
+        "display": "15 → 15",
+        "repeatedPreviousCost": 14800,
+        "repeatedPreviousRequirement": null,
+        "repeatedArmorerLevel": 5,
+        "countedAsAdditionalTransition": false
+      },
+      "nominalTotalUpgradeMoney": 41475,
+      "totalExcludesInitialPurchase": true,
+      "namesByObservedMaterial": [
+        "Кожаная куртка",
+        "Кольчуга",
+        "Железный нагрудник",
+        "Алмазный нагрудник"
+      ],
+      "highestShownLevel": 15,
+      "absoluteMaximumLevel": null
+    },
+    "leggings": {
+      "transitions": [
+        {
+          "fromLevel": 1,
+          "toLevel": 2,
+          "evidence": [
+            "coverage_35"
+          ],
+          "moneyCost": 25,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "3",
+            "exactValue": 3,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные штаны",
+          "displayedLeftLevel": 1,
+          "displayedRightName": "Кожаные штаны",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 2,
+          "toLevel": 3,
+          "evidence": [
+            "coverage_36"
+          ],
+          "moneyCost": 37,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "7",
+            "exactValue": 7,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные штаны",
+          "displayedLeftLevel": 2,
+          "displayedRightName": "Кожаные штаны",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 3,
+          "toLevel": 4,
+          "evidence": [
+            "coverage_37"
+          ],
+          "moneyCost": 75,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "15",
+            "exactValue": 15,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные штаны",
+          "displayedLeftLevel": 3,
+          "displayedRightName": "Кожаные штаны",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 4,
+          "toLevel": 5,
+          "evidence": [
+            "coverage_38"
+          ],
+          "moneyCost": 150,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "27",
+            "exactValue": 27,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные поножи",
+          "displayedLeftLevel": 4,
+          "displayedRightName": "Кожаные штаны",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 5,
+          "toLevel": 6,
+          "evidence": [
+            "coverage_39"
+          ],
+          "moneyCost": 300,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "45",
+            "exactValue": 45,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные поножи",
+          "displayedLeftLevel": 5,
+          "displayedRightName": "Кольчужные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 6,
+          "toLevel": 7,
+          "evidence": [
+            "coverage_40"
+          ],
+          "moneyCost": 450,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "75",
+            "exactValue": 75,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные поножи",
+          "displayedLeftLevel": 6,
+          "displayedRightName": "Кольчужные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 7,
+          "toLevel": 8,
+          "evidence": [
+            "coverage_41"
+          ],
+          "moneyCost": 830,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "160",
+            "exactValue": 160,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные поножи",
+          "displayedLeftLevel": 7,
+          "displayedRightName": "Кольчужные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 8,
+          "toLevel": 9,
+          "evidence": [
+            "coverage_42"
+          ],
+          "moneyCost": 1880,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "405",
+            "exactValue": 405,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные поножи",
+          "displayedLeftLevel": 8,
+          "displayedRightName": "Кольчужные поножи",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 9,
+          "toLevel": 10,
+          "evidence": [
+            "coverage_43"
+          ],
+          "moneyCost": 3000,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "720",
+            "exactValue": 720,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные поножи",
+          "displayedLeftLevel": 9,
+          "displayedRightName": "Железные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 10,
+          "toLevel": 11,
+          "evidence": [
+            "coverage_44"
+          ],
+          "moneyCost": 3100,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.42K",
+            "exactValue": null,
+            "approximateValue": 1420
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные поножи",
+          "displayedLeftLevel": 10,
+          "displayedRightName": "Железные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 11,
+          "toLevel": 12,
+          "evidence": [
+            "coverage_45"
+          ],
+          "moneyCost": 4500,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "2.55K",
+            "exactValue": null,
+            "approximateValue": 2550
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные поножи",
+          "displayedLeftLevel": 11,
+          "displayedRightName": "Железные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 12,
+          "toLevel": 13,
+          "evidence": [
+            "coverage_46"
+          ],
+          "moneyCost": 5250,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "3.8K",
+            "exactValue": null,
+            "approximateValue": 3800
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазные поножи",
+          "displayedLeftLevel": 12,
+          "displayedRightName": "Железные поножи",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 13,
+          "toLevel": 14,
+          "evidence": [
+            "coverage_47"
+          ],
+          "moneyCost": 6000,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 3,
+          "displayedLeftName": "Алмазные поножи",
+          "displayedLeftLevel": 13,
+          "displayedRightName": "Алмазные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 14,
+          "toLevel": 15,
+          "evidence": [
+            "coverage_48"
+          ],
+          "moneyCost": 13400,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 5,
+          "displayedLeftName": "Алмазные поножи",
+          "displayedLeftLevel": 14,
+          "displayedRightName": "Алмазные поножи",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        }
+      ],
+      "terminalPreview": {
+        "evidence": [
+          "coverage_49"
+        ],
+        "level": 15,
+        "display": "15 → 15",
+        "repeatedPreviousCost": 13400,
+        "repeatedPreviousRequirement": null,
+        "repeatedArmorerLevel": 5,
+        "countedAsAdditionalTransition": false
+      },
+      "nominalTotalUpgradeMoney": 38997,
+      "totalExcludesInitialPurchase": true,
+      "namesByObservedMaterial": [
+        "Кожаные штаны",
+        "Кольчужные поножи",
+        "Железные поножи",
+        "Алмазные поножи"
+      ],
+      "highestShownLevel": 15,
+      "absoluteMaximumLevel": null
+    },
+    "boots": {
+      "transitions": [
+        {
+          "fromLevel": 1,
+          "toLevel": 2,
+          "evidence": [
+            "coverage_50"
+          ],
+          "moneyCost": 20,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "5",
+            "exactValue": 5,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные ботинки",
+          "displayedLeftLevel": 1,
+          "displayedRightName": "Кожаные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 2,
+          "toLevel": 3,
+          "evidence": [
+            "coverage_51"
+          ],
+          "moneyCost": 34,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "10",
+            "exactValue": 10,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные ботинки",
+          "displayedLeftLevel": 2,
+          "displayedRightName": "Кожаные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 3,
+          "toLevel": 4,
+          "evidence": [
+            "coverage_52"
+          ],
+          "moneyCost": 60,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "20",
+            "exactValue": 20,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кожаные ботинки",
+          "displayedLeftLevel": 3,
+          "displayedRightName": "Кожаные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 4,
+          "toLevel": 5,
+          "evidence": [
+            "coverage_53"
+          ],
+          "moneyCost": 150,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "30",
+            "exactValue": 30,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные ботинки",
+          "displayedLeftLevel": 4,
+          "displayedRightName": "Кожаные ботинки",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 5,
+          "toLevel": 6,
+          "evidence": [
+            "coverage_54"
+          ],
+          "moneyCost": 225,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "45",
+            "exactValue": 45,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные ботинки",
+          "displayedLeftLevel": 5,
+          "displayedRightName": "Кольчужные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 6,
+          "toLevel": 7,
+          "evidence": [
+            "coverage_55"
+          ],
+          "moneyCost": 325,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "80",
+            "exactValue": 80,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные ботинки",
+          "displayedLeftLevel": 6,
+          "displayedRightName": "Кольчужные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 7,
+          "toLevel": 8,
+          "evidence": [
+            "coverage_56"
+          ],
+          "moneyCost": 550,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "160",
+            "exactValue": 160,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Кольчужные ботинки",
+          "displayedLeftLevel": 7,
+          "displayedRightName": "Кольчужные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 8,
+          "toLevel": 9,
+          "evidence": [
+            "coverage_57"
+          ],
+          "moneyCost": 970,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "335",
+            "exactValue": 335,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные ботинки",
+          "displayedLeftLevel": 8,
+          "displayedRightName": "Кольчужные ботинки",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 9,
+          "toLevel": 10,
+          "evidence": [
+            "coverage_58"
+          ],
+          "moneyCost": 1840,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "980",
+            "exactValue": 980,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные ботинки",
+          "displayedLeftLevel": 9,
+          "displayedRightName": "Железные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 10,
+          "toLevel": 11,
+          "evidence": [
+            "coverage_59"
+          ],
+          "moneyCost": 2600,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.35K",
+            "exactValue": null,
+            "approximateValue": 1350
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные ботинки",
+          "displayedLeftLevel": 10,
+          "displayedRightName": "Железные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 11,
+          "toLevel": 12,
+          "evidence": [
+            "coverage_60"
+          ],
+          "moneyCost": 3700,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "1.95K",
+            "exactValue": null,
+            "approximateValue": 1950
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железные ботинки",
+          "displayedLeftLevel": 11,
+          "displayedRightName": "Железные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 12,
+          "toLevel": 13,
+          "evidence": [
+            "coverage_61"
+          ],
+          "moneyCost": 5550,
+          "currencyDisplay": "$",
+          "requiredCounter": "Крысы",
+          "counterThreshold": {
+            "display": "2.85K",
+            "exactValue": null,
+            "approximateValue": 2850
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазные ботинки",
+          "displayedLeftLevel": 12,
+          "displayedRightName": "Железные ботинки",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 13,
+          "toLevel": 14,
+          "evidence": [
+            "coverage_62"
+          ],
+          "moneyCost": 6900,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 3,
+          "displayedLeftName": "Алмазные ботинки",
+          "displayedLeftLevel": 13,
+          "displayedRightName": "Алмазные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 14,
+          "toLevel": 15,
+          "evidence": [
+            "coverage_63"
+          ],
+          "moneyCost": 11900,
+          "currencyDisplay": "$",
+          "requiredCounter": "Оружейник",
+          "counterThreshold": null,
+          "armorerLevel": 5,
+          "displayedLeftName": "Алмазные ботинки",
+          "displayedLeftLevel": 14,
+          "displayedRightName": "Алмазные ботинки",
+          "enchantmentChangeShown": {
+            "displayName": "Защита",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        }
+      ],
+      "terminalPreview": {
+        "evidence": [
+          "coverage_64"
+        ],
+        "level": 15,
+        "display": "15 → 15",
+        "repeatedPreviousCost": 11900,
+        "repeatedPreviousRequirement": null,
+        "repeatedArmorerLevel": 5,
+        "countedAsAdditionalTransition": false
+      },
+      "nominalTotalUpgradeMoney": 34824,
+      "totalExcludesInitialPurchase": true,
+      "namesByObservedMaterial": [
+        "Кожаные ботинки",
+        "Кольчужные ботинки",
+        "Железные ботинки",
+        "Алмазные ботинки"
+      ],
+      "highestShownLevel": 15,
+      "absoluteMaximumLevel": null
+    },
+    "axe": {
+      "transitions": [
+        {
+          "fromLevel": 1,
+          "toLevel": 2,
+          "evidence": [
+            "coverage_65"
+          ],
+          "moneyCost": 2,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "25",
+            "exactValue": 25,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Деревянный топор",
+          "displayedLeftLevel": 1,
+          "displayedRightName": "Деревянный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 2,
+          "toLevel": 3,
+          "evidence": [
+            "coverage_66"
+          ],
+          "moneyCost": 5,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "50",
+            "exactValue": 50,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Деревянный топор",
+          "displayedLeftLevel": 2,
+          "displayedRightName": "Деревянный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 3,
+          "toLevel": 4,
+          "evidence": [
+            "coverage_67"
+          ],
+          "moneyCost": 10,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "100",
+            "exactValue": 100,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Деревянный топор",
+          "displayedLeftLevel": 3,
+          "displayedRightName": "Деревянный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 4,
+          "toLevel": 5,
+          "evidence": [
+            "coverage_68"
+          ],
+          "moneyCost": 20,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "200",
+            "exactValue": 200,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Каменный топор",
+          "displayedLeftLevel": 4,
+          "displayedRightName": "Деревянный топор",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 5,
+          "toLevel": 6,
+          "evidence": [
+            "coverage_69"
+          ],
+          "moneyCost": 40,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "400",
+            "exactValue": 400,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Каменный топор",
+          "displayedLeftLevel": 5,
+          "displayedRightName": "Каменный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 6,
+          "toLevel": 7,
+          "evidence": [
+            "coverage_70"
+          ],
+          "moneyCost": 80,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "800",
+            "exactValue": 800,
+            "approximateValue": null
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Каменный топор",
+          "displayedLeftLevel": 6,
+          "displayedRightName": "Каменный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 7,
+          "toLevel": 8,
+          "evidence": [
+            "coverage_71"
+          ],
+          "moneyCost": 160,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "1.1K",
+            "exactValue": null,
+            "approximateValue": 1100
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Каменный топор",
+          "displayedLeftLevel": 7,
+          "displayedRightName": "Каменный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 8,
+          "toLevel": 9,
+          "evidence": [
+            "coverage_72"
+          ],
+          "moneyCost": 240,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "1.9K",
+            "exactValue": null,
+            "approximateValue": 1900
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный топор",
+          "displayedLeftLevel": 8,
+          "displayedRightName": "Каменный топор",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 9,
+          "toLevel": 10,
+          "evidence": [
+            "coverage_73"
+          ],
+          "moneyCost": 480,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "2.5K",
+            "exactValue": null,
+            "approximateValue": 2500
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный топор",
+          "displayedLeftLevel": 9,
+          "displayedRightName": "Железный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 10,
+          "toLevel": 11,
+          "evidence": [
+            "coverage_74"
+          ],
+          "moneyCost": 1070,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "4.2K",
+            "exactValue": null,
+            "approximateValue": 4200
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный топор",
+          "displayedLeftLevel": 10,
+          "displayedRightName": "Железный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 11,
+          "toLevel": 12,
+          "evidence": [
+            "coverage_75"
+          ],
+          "moneyCost": 2900,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "6.75K",
+            "exactValue": null,
+            "approximateValue": 6750
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Железный топор",
+          "displayedLeftLevel": 11,
+          "displayedRightName": "Железный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 12,
+          "toLevel": 13,
+          "evidence": [
+            "coverage_76"
+          ],
+          "moneyCost": 3750,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "11.2K",
+            "exactValue": null,
+            "approximateValue": 11200
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный топор",
+          "displayedLeftLevel": 12,
+          "displayedRightName": "Железный топор",
+          "enchantmentChangeShown": null,
+          "materialBoundary": true,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 13,
+          "toLevel": 14,
+          "evidence": [
+            "coverage_77"
+          ],
+          "moneyCost": 7500,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "14.2K",
+            "exactValue": null,
+            "approximateValue": 14200
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный топор",
+          "displayedLeftLevel": 13,
+          "displayedRightName": "Алмазный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 0,
+            "after": 1
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 14,
+          "toLevel": 15,
+          "evidence": [
+            "coverage_78"
+          ],
+          "moneyCost": 9000,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "18.8K",
+            "exactValue": null,
+            "approximateValue": 18800
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный топор",
+          "displayedLeftLevel": 14,
+          "displayedRightName": "Алмазный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 1,
+            "after": 2
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        },
+        {
+          "fromLevel": 15,
+          "toLevel": 16,
+          "evidence": [
+            "coverage_79"
+          ],
+          "moneyCost": 13400,
+          "currencyDisplay": "$",
+          "requiredCounter": "Дерево",
+          "counterThreshold": {
+            "display": "22.3K",
+            "exactValue": null,
+            "approximateValue": 22300
+          },
+          "armorerLevel": null,
+          "displayedLeftName": "Алмазный топор",
+          "displayedLeftLevel": 15,
+          "displayedRightName": "Алмазный топор",
+          "enchantmentChangeShown": {
+            "displayName": "Эффективность",
+            "before": 2,
+            "after": 3
+          },
+          "materialBoundary": false,
+          "requirementsSpentOnUpgrade": null,
+          "playerActuallyUpgraded": false
+        }
+      ],
+      "terminalPreview": {
+        "evidence": [
+          "coverage_80"
+        ],
+        "level": 16,
+        "display": "16 → 16",
+        "repeatedPreviousCost": 13400,
+        "repeatedPreviousRequirement": {
+          "display": "22.3K",
+          "exactValue": null,
+          "approximateValue": 22300
+        },
+        "repeatedArmorerLevel": null,
+        "countedAsAdditionalTransition": false
+      },
+      "nominalTotalUpgradeMoney": 38657,
+      "totalExcludesInitialPurchase": true,
+      "namesByObservedMaterial": [
+        "Деревянный топор",
+        "Каменный топор",
+        "Железный топор",
+        "Алмазный топор"
+      ],
+      "highestShownLevel": 16,
+      "absoluteMaximumLevel": null
+    }
+  },
+  "caveats": [
+    "Four armor categories each contain 14 shown transitions 1→15; axe contains 15 transitions 1→16.",
+    "Protection and Efficiency are displayed enchantment levels, not recovered damage reduction/mining speed coefficients.",
+    "At 4→5, 8→9 and 12→13 the left preview already names the next material while the right row retains the old material name; both raw labels are saved.",
+    "The same chestplate 9→10 and 12→13 transitions appear twice; repeats are evidence, not extra purchases.",
+    "Terminal 15→15 and 16→16 screens repeat previous costs/requirements; these values are not additional upgrade stages.",
+    "K is abbreviated UI precision. Resource thresholds are not summed and their spending/reset semantics are unknown.",
+    "The four armor menus show Armorer 3 at 13→14 and 5 at 14→15, replacing the rats row; no hidden rats threshold is invented.",
+    "No numeric defense coefficient, durability, actual purchase or absolute server maximum is established by these previews."
+  ]
+}

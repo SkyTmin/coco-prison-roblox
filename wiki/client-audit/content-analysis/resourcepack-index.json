@@ -1,0 +1,1803 @@
+{
+  "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\downloads\\Cristalix-Prison-Classic-official-resourcepack.zip",
+  "sha256": "e01333e34201b90e9702f2f253d212831dd3c2e5744ae803253bfffbdb9f05c2",
+  "entries": [
+    {
+      "path": "assets/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent.model",
+      "bytes": 281241
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_branch.model",
+      "bytes": 16877
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_branch_upwards.model",
+      "bytes": 16366
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_guardian.model",
+      "bytes": 257507
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_minion.model",
+      "bytes": 65009
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_sorcerer.model",
+      "bytes": 144409
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/ent_warrior.model",
+      "bytes": 126623
+    },
+    {
+      "path": "assets/minecraft/bedrock/ent/leaf_tornado.model",
+      "bytes": 7850
+    },
+    {
+      "path": "assets/minecraft/bedrock/giant/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/giant/giant_zombie.model",
+      "bytes": 112491
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/barbell.model",
+      "bytes": 9455
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/benchpress.model",
+      "bytes": 11074
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/bike.model",
+      "bytes": 7057
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/latpulldown.model",
+      "bytes": 6753
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/punchingbag.model",
+      "bytes": 5919
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/squatrack.model",
+      "bytes": 7170
+    },
+    {
+      "path": "assets/minecraft/bedrock/gym/treadmill.model",
+      "bytes": 8995
+    },
+    {
+      "path": "assets/minecraft/bedrock/illusionist/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/illusionist/dagger.model",
+      "bytes": 9949
+    },
+    {
+      "path": "assets/minecraft/bedrock/illusionist/illusionist.model",
+      "bytes": 141061
+    },
+    {
+      "path": "assets/minecraft/bedrock/illusionist/rabbit.model",
+      "bytes": 143143
+    },
+    {
+      "path": "assets/minecraft/bedrock/knight/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/knight/knight.model",
+      "bytes": 709552
+    },
+    {
+      "path": "assets/minecraft/bedrock/knight/vfx_explosion.model",
+      "bytes": 649786
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/moon_glow.model",
+      "bytes": 1262953
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/vfx_soul_explosion.model",
+      "bytes": 630219
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/vfx_soul_impact.model",
+      "bytes": 159896
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/vfx_soul_meteor.model",
+      "bytes": 38642
+    },
+    {
+      "path": "assets/minecraft/bedrock/mole/vfx_soul_rain.model",
+      "bytes": 370416
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/axe.model",
+      "bytes": 23380
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/bow.model",
+      "bytes": 36387
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/pickaxe.model",
+      "bytes": 21698
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/shovel.model",
+      "bytes": 19278
+    },
+    {
+      "path": "assets/minecraft/bedrock/newyear/sword.model",
+      "bytes": 20846
+    },
+    {
+      "path": "assets/minecraft/bedrock/nikolay/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/npc/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/npc/jobs.model",
+      "bytes": 32195
+    },
+    {
+      "path": "assets/minecraft/bedrock/npc/librarian.model",
+      "bytes": 32374
+    },
+    {
+      "path": "assets/minecraft/bedrock/npc/wiki.model",
+      "bytes": 31286
+    },
+    {
+      "path": "assets/minecraft/bedrock/other/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/other/vfx_aftershock.model",
+      "bytes": 17080
+    },
+    {
+      "path": "assets/minecraft/bedrock/other/vfx_meteor.model",
+      "bytes": 56719
+    },
+    {
+      "path": "assets/minecraft/bedrock/other/vfx_rain.model",
+      "bytes": 379661
+    },
+    {
+      "path": "assets/minecraft/bedrock/piglin/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/piglin/piglin_glutten_minion.model",
+      "bytes": 182986
+    },
+    {
+      "path": "assets/minecraft/bedrock/piglin/piglin_glutton.model",
+      "bytes": 2192606
+    },
+    {
+      "path": "assets/minecraft/bedrock/rat/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/rat/rat.model",
+      "bytes": 168322
+    },
+    {
+      "path": "assets/minecraft/bedrock/reaper/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/reaper/circle.model",
+      "bytes": 3992
+    },
+    {
+      "path": "assets/minecraft/bedrock/reaper/reaper.model",
+      "bytes": 432979
+    },
+    {
+      "path": "assets/minecraft/bedrock/skeleton/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/skeleton/poison.model",
+      "bytes": 91409
+    },
+    {
+      "path": "assets/minecraft/bedrock/skeleton/skeleton.model",
+      "bytes": 509569
+    },
+    {
+      "path": "assets/minecraft/bedrock/skeleton/skeleton_minion.model",
+      "bytes": 136275
+    },
+    {
+      "path": "assets/minecraft/bedrock/skeleton/trap.model",
+      "bytes": 43266
+    },
+    {
+      "path": "assets/minecraft/bedrock/spider/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/spider/hunstman_spider.model",
+      "bytes": 123067
+    },
+    {
+      "path": "assets/minecraft/bedrock/spider/spider.model",
+      "bytes": 344634
+    },
+    {
+      "path": "assets/minecraft/bedrock/spider/spider_web.model",
+      "bytes": 19826
+    },
+    {
+      "path": "assets/minecraft/bedrock/splinter/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/splinter/splinter.model",
+      "bytes": 382078
+    },
+    {
+      "path": "assets/minecraft/bedrock/splinter/splinter_bottle.model",
+      "bytes": 49114
+    },
+    {
+      "path": "assets/minecraft/bedrock/splinter/splinter_spider.model",
+      "bytes": 107126
+    },
+    {
+      "path": "assets/minecraft/bedrock/splinter/strike_of_fury.model",
+      "bytes": 151497
+    },
+    {
+      "path": "assets/minecraft/bedrock/tyan/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/tyan/model_cristalix_grl.model",
+      "bytes": 133960
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/axe.model",
+      "bytes": 87571
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/bow.model",
+      "bytes": 65074
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/pickaxe.model",
+      "bytes": 56983
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/shovel.model",
+      "bytes": 51282
+    },
+    {
+      "path": "assets/minecraft/bedrock/valentine/sword.model",
+      "bytes": 60745
+    },
+    {
+      "path": "assets/minecraft/bedrock/zombie/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/bedrock/zombie/zombie2.model",
+      "bytes": 147171
+    },
+    {
+      "path": "assets/minecraft/bedrock/zombie/zombie3.model",
+      "bytes": 205620
+    },
+    {
+      "path": "assets/minecraft/blockstates/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/blockstates/simple_block_6108.json",
+      "bytes": 370
+    },
+    {
+      "path": "assets/minecraft/blockstates/simple_block_7033.json",
+      "bytes": 221
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_blocks_booster.png",
+      "bytes": 885
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_blocks_booster.properties",
+      "bytes": 96
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_mobs_booster.png",
+      "bytes": 1153
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_mobs_booster.properties",
+      "bytes": 92
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_money_booster.png",
+      "bytes": 890
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_money_booster.properties",
+      "bytes": 94
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_blocks_booster.png",
+      "bytes": 876
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_blocks_booster.properties",
+      "bytes": 92
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_mobs_booster.png",
+      "bytes": 1091
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_mobs_booster.properties",
+      "bytes": 88
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_money_booster.png",
+      "bytes": 856
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_money_booster.properties",
+      "bytes": 90
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_block_booster.png",
+      "bytes": 879
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_block_booster.properties",
+      "bytes": 89
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_money_booster.png",
+      "bytes": 864
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_money_booster.properties",
+      "bytes": 88
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/sleeping_bag.png",
+      "bytes": 723
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/sleeping_bag.properties",
+      "bytes": 75
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/soap.png",
+      "bytes": 612
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/soap.properties",
+      "bytes": 66
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/toilet_paper.png",
+      "bytes": 561
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/toilet_paper.properties",
+      "bytes": 76
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/vaccine.png",
+      "bytes": 776
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/vaccine.properties",
+      "bytes": 69
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/ancient_book.png",
+      "bytes": 526
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/ancient_book.properties",
+      "bytes": 74
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/disenchanter.png",
+      "bytes": 810
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/disenchanter.properties",
+      "bytes": 79
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/powder.png",
+      "bytes": 943
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/powder.properties",
+      "bytes": 70
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23.json",
+      "bytes": 27783
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23.png",
+      "bytes": 5516
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23.properties",
+      "bytes": 72
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23_animations_1.png",
+      "bytes": 1112
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23_animations_1.png.mcmeta",
+      "bytes": 39
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/location/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/location/basement_pass.png",
+      "bytes": 773
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/location/basement_pass.properties",
+      "bytes": 81
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/default/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/default/loc4.json",
+      "bytes": 12120
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/default/loc4.png",
+      "bytes": 3967
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/default/loc4.properties",
+      "bytes": 69
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/mythic_key.png",
+      "bytes": 696
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/mythic_key.properties",
+      "bytes": 71
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/normal_key.png",
+      "bytes": 541
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/normal_key.properties",
+      "bytes": 72
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/rank_key.png",
+      "bytes": 972
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/rank_key.properties",
+      "bytes": 67
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/upgraded_mythic_key.png",
+      "bytes": 789
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/upgraded_mythic_key.properties",
+      "bytes": 89
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25.json",
+      "bytes": 32954
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25.png",
+      "bytes": 4440
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25.properties",
+      "bytes": 71
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25_animation_1.png",
+      "bytes": 466
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25_animation_1.png.mcmeta",
+      "bytes": 655
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14.json",
+      "bytes": 35854
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14.properties",
+      "bytes": 71
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_01.png",
+      "bytes": 323
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_01.png.mcmeta",
+      "bytes": 41
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_02.png",
+      "bytes": 1388
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_02.png.mcmeta",
+      "bytes": 41
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_03.png",
+      "bytes": 619
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_animation_03.png.mcmeta",
+      "bytes": 41
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14_texture_01.png",
+      "bytes": 11722
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/money/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/money/money.png",
+      "bytes": 690
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/money/money.properties",
+      "bytes": 67
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/rank/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/rank/rank.png",
+      "bytes": 361
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/rank/rank.properties",
+      "bytes": 65
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/fire_shard.png",
+      "bytes": 1036
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/fire_shard.properties",
+      "bytes": 77
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_blade.png",
+      "bytes": 733
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_blade.properties",
+      "bytes": 77
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_steel.png",
+      "bytes": 965
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_steel.properties",
+      "bytes": 77
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/volcanic.png",
+      "bytes": 702
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/volcanic.properties",
+      "bytes": 73
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skills/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skills/oblivion_scroll.png",
+      "bytes": 963
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skills/oblivion_scroll.properties",
+      "bytes": 87
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/armors/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/diamond_shovel.png",
+      "bytes": 2009
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/diamond_shovel.properties",
+      "bytes": 82
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/gold_shovel.png",
+      "bytes": 2010
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/gold_shovel.properties",
+      "bytes": 78
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/iron_shovel.png",
+      "bytes": 1990
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/iron_shovel.properties",
+      "bytes": 76
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/stone_shovel.png",
+      "bytes": 1992
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/stone_shovel.properties",
+      "bytes": 78
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/wood_shovel.png",
+      "bytes": 2000
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/wood_shovel.properties",
+      "bytes": 78
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/special/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/special/moon_axe.png",
+      "bytes": 781
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/special/moon_axe.properties",
+      "bytes": 76
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit_properties",
+      "bytes": 1897
+    },
+    {
+      "path": "assets/minecraft/models/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/models/block/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/models/block/simple_block_6108.json",
+      "bytes": 4453
+    },
+    {
+      "path": "assets/minecraft/models/block/simple_block_7033.json",
+      "bytes": 2111
+    },
+    {
+      "path": "assets/minecraft/optifine/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/enderman.jem",
+      "bytes": 30102
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/endermite.jem",
+      "bytes": 3020
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/iron_golem.jem",
+      "bytes": 14523
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/silverfish.jem",
+      "bytes": 3713
+    },
+    {
+      "path": "assets/minecraft/optifine/cem/spider.jem",
+      "bytes": 21920
+    },
+    {
+      "path": "assets/minecraft/optifine/random/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/silverfish.properties",
+      "bytes": 38
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/silverfish2.png",
+      "bytes": 679
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/silverfish3.png",
+      "bytes": 656
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/silverfish4.png",
+      "bytes": 641
+    },
+    {
+      "path": "assets/minecraft/sounds/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/branch_pierce.ogg",
+      "bytes": 24693
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_grunt.ogg",
+      "bytes": 18008
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_guardian_grunt1.ogg",
+      "bytes": 14164
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_guardian_grunt2.ogg",
+      "bytes": 21567
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_guardian_grunt3.ogg",
+      "bytes": 10340
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_king_grunt1.ogg",
+      "bytes": 8276
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_king_grunt2.ogg",
+      "bytes": 12847
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_king_shout.ogg",
+      "bytes": 21205
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ent_king_skill.ogg",
+      "bytes": 12195
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/ground_smash.ogg",
+      "bytes": 30999
+    },
+    {
+      "path": "assets/minecraft/sounds/ent/leaf_tornado.ogg",
+      "bytes": 23869
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/death.ogg",
+      "bytes": 17636
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle1.ogg",
+      "bytes": 30898
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle2.ogg",
+      "bytes": 18407
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle3.ogg",
+      "bytes": 56129
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle4.ogg",
+      "bytes": 34998
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle5.ogg",
+      "bytes": 31094
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle6.ogg",
+      "bytes": 29562
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle7.ogg",
+      "bytes": 28620
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle8.ogg",
+      "bytes": 29583
+    },
+    {
+      "path": "assets/minecraft/sounds/giant/idle9.ogg",
+      "bytes": 348966
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/attack.ogg",
+      "bytes": 20068
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/cards_fell.ogg",
+      "bytes": 15826
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/cards_whoosh.ogg",
+      "bytes": 15406
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/hurt.ogg",
+      "bytes": 11594
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/magical_death.ogg",
+      "bytes": 18335
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/magical_ray.ogg",
+      "bytes": 18890
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/regeneration.ogg",
+      "bytes": 55883
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/summon_rabbits.ogg",
+      "bytes": 34167
+    },
+    {
+      "path": "assets/minecraft/sounds/illusionist/swing_dagger.ogg",
+      "bytes": 28224
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/attack.ogg",
+      "bytes": 9155
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/death.ogg",
+      "bytes": 41756
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/hurt.ogg",
+      "bytes": 9081
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/idle.ogg",
+      "bytes": 11374
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/ult_stomp.ogg",
+      "bytes": 23733
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/walk.ogg",
+      "bytes": 16538
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/warrior_slash1.ogg",
+      "bytes": 9379
+    },
+    {
+      "path": "assets/minecraft/sounds/knight/warrior_wheel_spin.ogg",
+      "bytes": 70735
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/endermite/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/endermite/hit1.ogg",
+      "bytes": 28270
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/endermite/kill.ogg",
+      "bytes": 39382
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/hit1.ogg",
+      "bytes": 8201
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/hit2.ogg",
+      "bytes": 8201
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/hit3.ogg",
+      "bytes": 8201
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/kill.ogg",
+      "bytes": 13414
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/say1.ogg",
+      "bytes": 12679
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/say2.ogg",
+      "bytes": 12679
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/say3.ogg",
+      "bytes": 12679
+    },
+    {
+      "path": "assets/minecraft/sounds/mob/silverfish/say4.ogg",
+      "bytes": 12679
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/attack.ogg",
+      "bytes": 13135
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/bullet_shoot.ogg",
+      "bytes": 14850
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/death.ogg",
+      "bytes": 40591
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/descend_fly.ogg",
+      "bytes": 40620
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/hurt.ogg",
+      "bytes": 8764
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/idle.ogg",
+      "bytes": 34066
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/meteor_summon.ogg",
+      "bytes": 57372
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/midnight_claim.ogg",
+      "bytes": 56064
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/shadow_light.ogg",
+      "bytes": 38601
+    },
+    {
+      "path": "assets/minecraft/sounds/mole/spawn.ogg",
+      "bytes": 55894
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_attack1.ogg",
+      "bytes": 11055
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_attack2.ogg",
+      "bytes": 11178
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_attack3.ogg",
+      "bytes": 26692
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_cyclone.ogg",
+      "bytes": 31535
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_deer_summon.ogg",
+      "bytes": 69388
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_hit1.ogg",
+      "bytes": 16168
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_hit2.ogg",
+      "bytes": 14631
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_hit3.ogg",
+      "bytes": 14384
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_laser_hit.ogg",
+      "bytes": 28058
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_laser_shoot.ogg",
+      "bytes": 26959
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_pierce.ogg",
+      "bytes": 34903
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_run_step.ogg",
+      "bytes": 11941
+    },
+    {
+      "path": "assets/minecraft/sounds/nikolay/nikolai_sliding.ogg",
+      "bytes": 22406
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/body_slam.ogg",
+      "bytes": 65542
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/charge.ogg",
+      "bytes": 123087
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/damage.ogg",
+      "bytes": 30615
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/death.ogg",
+      "bytes": 79267
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/foot_stomp.ogg",
+      "bytes": 35727
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/healing.ogg",
+      "bytes": 118753
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/horizontal_attack.ogg",
+      "bytes": 39737
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/idle1.ogg",
+      "bytes": 24798
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/idle2.ogg",
+      "bytes": 28331
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/idle3.ogg",
+      "bytes": 28087
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/idle4.ogg",
+      "bytes": 26598
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/minion_atk1.ogg",
+      "bytes": 15734
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/minion_atk2.ogg",
+      "bytes": 15555
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/spawn.ogg",
+      "bytes": 99728
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/spin_slam.ogg",
+      "bytes": 63927
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/summon.ogg",
+      "bytes": 56535
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/upchuck.ogg",
+      "bytes": 78648
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/vertical_attack.ogg",
+      "bytes": 40556
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/walk1.ogg",
+      "bytes": 14036
+    },
+    {
+      "path": "assets/minecraft/sounds/piglin/walk2.ogg",
+      "bytes": 13926
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/attack.ogg",
+      "bytes": 63637
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/circle_sweep.ogg",
+      "bytes": 49955
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/death.ogg",
+      "bytes": 130326
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/ground_attack.ogg",
+      "bytes": 20254
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/hurt.ogg",
+      "bytes": 8438
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/hurt2.ogg",
+      "bytes": 8768
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/soul_take.ogg",
+      "bytes": 36013
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/spawn.ogg",
+      "bytes": 264064
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/teleport_attack.ogg",
+      "bytes": 42993
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/teleport_cast.ogg",
+      "bytes": 138099
+    },
+    {
+      "path": "assets/minecraft/sounds/reaper/teleport_silence.ogg",
+      "bytes": 218926
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/poison.ogg",
+      "bytes": 29561
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/roar.ogg",
+      "bytes": 72162
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/skeleton_death.ogg",
+      "bytes": 18683
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/skeleton_summon.ogg",
+      "bytes": 26207
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/stomp1.ogg",
+      "bytes": 22415
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/stomp2.ogg",
+      "bytes": 21700
+    },
+    {
+      "path": "assets/minecraft/sounds/skeleton/stomp3.ogg",
+      "bytes": 25673
+    },
+    {
+      "path": "assets/minecraft/sounds.json",
+      "bytes": 7624
+    },
+    {
+      "path": "assets/minecraft/textures/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/blocks/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/blocks/kitchen_bin.png",
+      "bytes": 304
+    },
+    {
+      "path": "assets/minecraft/textures/blocks/stone_grave.png",
+      "bytes": 5484
+    },
+    {
+      "path": "assets/minecraft/textures/entity/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/entity/enderman/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/entity/enderman/enderman.png",
+      "bytes": 5899
+    },
+    {
+      "path": "assets/minecraft/textures/entity/endermite.png",
+      "bytes": 638
+    },
+    {
+      "path": "assets/minecraft/textures/entity/iron_golem.png",
+      "bytes": 12432
+    },
+    {
+      "path": "assets/minecraft/textures/entity/silverfish.png",
+      "bytes": 666
+    },
+    {
+      "path": "assets/minecraft/textures/entity/spider/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/entity/spider/spider.png",
+      "bytes": 6696
+    },
+    {
+      "path": "assets/minecraft/textures/entity/wolf/",
+      "bytes": 0
+    },
+    {
+      "path": "assets/minecraft/textures/entity/wolf/wolf.png",
+      "bytes": 3048
+    },
+    {
+      "path": "assets/minecraft/textures/entity/wolf/wolf_angry.png",
+      "bytes": 3049
+    },
+    {
+      "path": "assets/minecraft/textures/entity/wolf/wolf_tame.png",
+      "bytes": 3056
+    },
+    {
+      "path": "pack.mcmeta",
+      "bytes": 63
+    },
+    {
+      "path": "pack.png",
+      "bytes": 2692
+    }
+  ],
+  "rules": [
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_blocks_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "fraction_blocks_booster",
+        "nbt.booster": "pattern:fraction_blocks"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=fraction_blocks_booster\r\nnbt.booster=pattern:fraction_blocks"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_mobs_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "fraction_mobs_booster",
+        "nbt.booster": "pattern:fraction_mobs"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=fraction_mobs_booster\r\nnbt.booster=pattern:fraction_mobs"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/fraction_money_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "fraction_money_booster",
+        "nbt.booster": "pattern:fraction_money"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=fraction_money_booster\r\nnbt.booster=pattern:fraction_money"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_blocks_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "global_blocks_booster",
+        "nbt.booster": "pattern:global_blocks"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=global_blocks_booster\r\nnbt.booster=pattern:global_blocks"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_mobs_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "global_mobs_booster",
+        "nbt.booster": "pattern:global_mobs"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=global_mobs_booster\r\nnbt.booster=pattern:global_mobs"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/global_money_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "global_money_booster",
+        "nbt.booster": "pattern:global_money"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=global_money_booster\r\nnbt.booster=pattern:global_money"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_block_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "local_block_booster",
+        "nbt.booster": "pattern:local_blocks"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=local_block_booster\r\nnbt.booster=pattern:local_blocks"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/booster/local_money_booster.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "local_money_booster",
+        "nbt.booster": "pattern:local_money"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=local_money_booster\r\nnbt.booster=pattern:local_money"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/sleeping_bag.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "sleeping_bag",
+        "nbt.disease": "pattern:sleep"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=sleeping_bag\r\nnbt.disease=pattern:sleep"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/soap.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "soap",
+        "nbt.disease": "pattern:soap"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=soap\r\nnbt.disease=pattern:soap"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/toilet_paper.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "toilet_paper",
+        "nbt.disease": "pattern:toilet"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=toilet_paper\r\nnbt.disease=pattern:toilet"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/disease/vaccine.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "vaccine",
+        "nbt.vaccine": "pattern:true"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=vaccine\r\nnbt.vaccine=pattern:true"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/ancient_book.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "ancient_book",
+        "nbt.ancient": "pattern:book"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=ancient_book\r\nnbt.ancient=pattern:book"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/disenchanter.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "disenchanter",
+        "nbt.disenchanter": "pattern:true"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=disenchanter\r\nnbt.disenchanter=pattern:true"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/enchantment/powder.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "powder",
+        "nbt.ancient": "pattern:powder"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=powder\r\nnbt.ancient=pattern:powder"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/ghetto/loc23.properties",
+      "properties": {
+        "type": "item",
+        "matchItems": "CLAY_BALL",
+        "model": "loc23.json",
+        "nbt.ghetto": "pattern:chest"
+      },
+      "raw": "type=item\nmatchItems=CLAY_BALL\nmodel=loc23.json\nnbt.ghetto=pattern:chest"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/location/basement_pass.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "basement_pass",
+        "nbt.basement_pass": "pattern:true"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=basement_pass\r\nnbt.basement_pass=pattern:true"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/default/loc4.properties",
+      "properties": {
+        "type": "item",
+        "matchItems": "CLAY_BALL",
+        "model": "loc4.json",
+        "nbt.chest": "pattern:loc4"
+      },
+      "raw": "type=item\nmatchItems=CLAY_BALL\nmodel=loc4.json\nnbt.chest=pattern:loc4"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/mythic_key.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "mythic_key",
+        "nbt.case": "pattern:mythic"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=mythic_key\r\nnbt.case=pattern:mythic"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/normal_key.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "normal_key",
+        "nbt.case": "pattern:default"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=normal_key\r\nnbt.case=pattern:default"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/rank_key.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "rank_key",
+        "nbt.case": "pattern:rank"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=rank_key\r\nnbt.case=pattern:rank"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/keys/upgraded_mythic_key.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "upgraded_mythic_key",
+        "nbt.case": "pattern:upgraded_mythic"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=upgraded_mythic_key\r\nnbt.case=pattern:upgraded_mythic"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/mythic/loc25.properties",
+      "properties": {
+        "type": "item",
+        "matchItems": "CLAY_BALL",
+        "model": "loc25.json",
+        "nbt.chest": "pattern:loc25"
+      },
+      "raw": "type=item\nmatchItems=CLAY_BALL\nmodel=loc25.json\nnbt.chest=pattern:loc25"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/lootbox/rank/loc14.properties",
+      "properties": {
+        "type": "item",
+        "matchItems": "CLAY_BALL",
+        "model": "loc14.json",
+        "nbt.chest": "pattern:loc14"
+      },
+      "raw": "type=item\nmatchItems=CLAY_BALL\nmodel=loc14.json\nnbt.chest=pattern:loc14"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/money/money.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "money",
+        "nbt.prison": "pattern:money"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=money\r\nnbt.prison=pattern:money"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/rank/rank.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "rank",
+        "nbt.prison": "pattern:rank"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=rank\r\nnbt.prison=pattern:rank"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/fire_shard.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "fire_shard",
+        "nbt.prison": "pattern:fire_shard"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=fire_shard\r\nnbt.prison=pattern:fire_shard"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_blade.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "moon_blade",
+        "nbt.prison": "pattern:moon_blade"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=moon_blade\r\nnbt.prison=pattern:moon_blade"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/moon_steel.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "moon_steel",
+        "nbt.prison": "pattern:moon_steel"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=moon_steel\r\nnbt.prison=pattern:moon_steel"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/shard/volcanic.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "volcanic",
+        "nbt.prison": "pattern:volcanic"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=volcanic\r\nnbt.prison=pattern:volcanic"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skills/oblivion_scroll.properties",
+      "properties": {
+        "type": "item",
+        "items": "clay_ball",
+        "texture": "oblivion_scroll",
+        "nbt.skills": "pattern:oblivion_scroll"
+      },
+      "raw": "type=item\r\nitems=clay_ball\r\ntexture=oblivion_scroll\r\nnbt.skills=pattern:oblivion_scroll"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/diamond_shovel.properties",
+      "properties": {
+        "type": "item",
+        "items": "diamond_shovel",
+        "texture": "diamond_shovel",
+        "nbt.weapons": "pattern:mythrile"
+      },
+      "raw": "type=item\nitems=diamond_shovel\ntexture=diamond_shovel\nnbt.weapons=pattern:mythrile"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/gold_shovel.properties",
+      "properties": {
+        "type": "item",
+        "items": "golden_shovel",
+        "texture": "gold_shovel",
+        "nbt.weapons": "pattern:mythrile"
+      },
+      "raw": "type=item\nitems=golden_shovel\ntexture=gold_shovel\nnbt.weapons=pattern:mythrile"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/iron_shovel.properties",
+      "properties": {
+        "type": "item",
+        "items": "iron_shovel",
+        "texture": "iron_shovel",
+        "nbt.weapons": "pattern:mythrile"
+      },
+      "raw": "type=item\nitems=iron_shovel\ntexture=iron_shovel\nnbt.weapons=pattern:mythrile"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/stone_shovel.properties",
+      "properties": {
+        "type": "item",
+        "items": "stone_shovel",
+        "texture": "stone_shovel",
+        "nbt.weapons": "pattern:mythrile"
+      },
+      "raw": "type=item\nitems=stone_shovel\ntexture=stone_shovel\nnbt.weapons=pattern:mythrile"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/shovel/wood_shovel.properties",
+      "properties": {
+        "type": "item",
+        "items": "wooden_shovel",
+        "texture": "wood_shovel",
+        "nbt.weapons": "pattern:mythrile"
+      },
+      "raw": "type=item\nitems=wooden_shovel\ntexture=wood_shovel\nnbt.weapons=pattern:mythrile"
+    },
+    {
+      "path": "assets/minecraft/mcpatcher/cit/skins/weapons/special/moon_axe.properties",
+      "properties": {
+        "type": "item",
+        "items": "diamond_axe",
+        "texture": "moon_axe",
+        "nbt.weapons": "pattern:moon_axe"
+      },
+      "raw": "type=item\r\nitems=diamond_axe\r\ntexture=moon_axe\r\nnbt.weapons=pattern:moon_axe"
+    },
+    {
+      "path": "assets/minecraft/optifine/random/entity/silverfish.properties",
+      "properties": {
+        "skins.2": "1 2 3 4",
+        "weights.2": "25 25 25 25"
+      },
+      "raw": "skins.2=1 2 3 4\r\nweights.2=25 25 25 25"
+    }
+  ],
+  "limitation": "A texture-selection rule is not a server upgrade table."
+}

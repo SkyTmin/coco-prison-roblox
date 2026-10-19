@@ -1,0 +1,142 @@
+[
+  {
+    "id": "ent",
+    "name": "Грут",
+    "description": "Древний дух, оберегающий покой леса. Каждый, кто вторгнется в его владения, рискует навсегда остаться среди диких зарослей.",
+    "nameKey": "prison.classic.boss.ent.name",
+    "descriptionKey": "prison.classic.boss.ent.description"
+  },
+  {
+    "id": "piglin",
+    "name": "Король Пиглинов",
+    "description": "Алчный вождь, одержимый лишь властью и золотом. Сделает всё, чтобы добыча оказалась в его копытах.",
+    "nameKey": "prison.classic.boss.piglin.name",
+    "descriptionKey": "prison.classic.boss.piglin.description"
+  },
+  {
+    "id": "knight",
+    "name": "Рыцарь",
+    "description": "Хладнокровный воин в сияющих доспехах. Рождён, чтобы жить на поле боя и купаться в лучах славы после очередной победы.",
+    "nameKey": "prison.classic.boss.knight.name",
+    "descriptionKey": "prison.classic.boss.knight.description"
+  },
+  {
+    "id": "illusionist",
+    "name": "Иллюзионист",
+    "description": "Хитрый маг, чьи иллюзии и острые как бритва клинки способны застать даже самого вооруженного противника врасплох.",
+    "nameKey": "prison.classic.boss.illusionist.name",
+    "descriptionKey": "prison.classic.boss.illusionist.description"
+  },
+  {
+    "id": "reaper",
+    "name": "Жнец",
+    "description": "Само воплощение смерти. Тёмный дух, что скитается между мирами и появляется лишь там, где кончается жизнь.",
+    "nameKey": "prison.classic.boss.reaper.name",
+    "descriptionKey": "prison.classic.boss.reaper.description"
+  },
+  {
+    "id": "mole",
+    "name": "Моль",
+    "description": "Убийца, выходящая на охоту под покровом ночи, чьё присутствие несет холод и страх. Встреча с ней - это танец со смертью.",
+    "nameKey": "prison.classic.boss.mole.name",
+    "descriptionKey": "prison.classic.boss.mole.description"
+  },
+  {
+    "id": "vecna",
+    "name": "Векна",
+    "description": "Существо из тьмы, что не спешит, а выбирает. Его сила - в страхах, что живут внутри. Встреча с ним - это медленная гибель разума.",
+    "nameKey": "prison.classic.boss.vecna.name",
+    "descriptionKey": "prison.classic.boss.vecna.description"
+  },
+  {
+    "id": "giant_zombie",
+    "name": "Зомбарь",
+    "description": "Груда плоти, источающая гной и зловонный запах. Пробуждённый мертвец, что никак не может найти покой.",
+    "nameKey": "prison.classic.boss.giant_zombie.name",
+    "descriptionKey": "prison.classic.boss.giant_zombie.description"
+  },
+  {
+    "id": "splinter",
+    "name": "Сплинтер",
+    "description": "Огромная крыса с острыми клыками, выросшая в мраке подземелий и гор мусора, чья голодная тень поджидает за каждым углом.",
+    "nameKey": "prison.classic.boss.splinter.name",
+    "descriptionKey": "prison.classic.boss.splinter.description"
+  },
+  {
+    "id": "skeleton",
+    "name": "Скелетон",
+    "description": "Павший предводитель навеки забытой армии, чей пустой взгляд нагоняет жуть и безысходность.",
+    "nameKey": "prison.classic.boss.skeleton.name",
+    "descriptionKey": "prison.classic.boss.skeleton.description"
+  },
+  {
+    "id": "spider_queen",
+    "name": "Паучья матка",
+    "description": "Королева, скрывающаяся в тени своей армии. Каждый кто, осмелился войти в ее логово, обречен стать добычей.",
+    "nameKey": "prison.classic.boss.spider_queen.name",
+    "descriptionKey": "prison.classic.boss.spider_queen.description"
+  },
+  {
+    "id": "void",
+    "name": "Воид",
+    "description": "",
+    "nameKey": "prison.classic.boss.void.name",
+    "descriptionKey": null
+  },
+  {
+    "id": "basalt_guardian",
+    "name": "Базальтовый страж",
+    "description": "Древний каменный исполин, веками охраняющий недра Каменоломни. Его клинок из застывшей лавы раскалывает скалы, а из земли под его ударами вырываются базальтовые шипы.",
+    "nameKey": "prison.classic.boss.basalt_guardian.name",
+    "descriptionKey": "prison.classic.boss.basalt_guardian.description"
+  },
+  {
+    "id": "minotaur",
+    "name": "Минотавр",
+    "description": "Древний страж Подножья горы, закованный в цепи и погружённый в вековой сон. Тот, кто осмелится его разбудить, познает ярость рогов и копыт.",
+    "nameKey": "prison.classic.boss.minotaur.name",
+    "descriptionKey": "prison.classic.boss.minotaur.description"
+  },
+  {
+    "id": "poseidon",
+    "name": "Посейдон",
+    "description": "Владыка морей, дремавший на дне Затопленного маяка. Его трезубец призывает молнии, а гнев оборачивается штормом и приливными волнами.",
+    "nameKey": "prison.classic.boss.poseidon.name",
+    "descriptionKey": "prison.classic.boss.poseidon.description"
+  },
+  {
+    "id": "forest_spirit",
+    "name": "Лесной дух",
+    "description": "Древний дух Лепреконовой долины. Пока культисты хранят его тотем, лес не знает покоя.",
+    "nameKey": "prison.classic.boss.forest_spirit.name",
+    "descriptionKey": "prison.classic.boss.forest_spirit.description"
+  },
+  {
+    "id": "raven_knight",
+    "name": "Вороний рыцарь",
+    "description": "Проклятый рыцарь Замка, чья душа отдана воронам. Он охраняет древние стены от непрошеных гостей.",
+    "nameKey": "prison.classic.boss.raven_knight.name",
+    "descriptionKey": "prison.classic.boss.raven_knight.description"
+  },
+  {
+    "id": "the_lovers",
+    "name": "Самурай",
+    "description": "Самурай Ханасигуро и дух его возлюбленной. Даже смерть не смогла разлучить их: теперь они сражаются вместе, клинком и стрелой.",
+    "nameKey": "prison.classic.boss.the_lovers.name",
+    "descriptionKey": "prison.classic.boss.the_lovers.description"
+  },
+  {
+    "id": "forest_guardian",
+    "name": "Древесный хранитель",
+    "description": "Древний страж чащи, сплетённый из корней и коры. Пока его создания живы, никакое оружие не способно ранить хранителя.",
+    "nameKey": "prison.classic.boss.forest_guardian.name",
+    "descriptionKey": "prison.classic.boss.forest_guardian.description"
+  },
+  {
+    "id": "un_king",
+    "name": "Король нежити",
+    "description": "Древний повелитель мертвых, поднявшийся из-под Рынка. Мечет темные снаряды, призывает взрывающиеся черепа и призрачный меч, а под защитой своих гулей обрушивает на врагов метеоры.",
+    "nameKey": "prison.classic.boss.un_king.name",
+    "descriptionKey": "prison.classic.boss.un_king.description"
+  }
+]

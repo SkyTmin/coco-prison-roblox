@@ -1,0 +1,868 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "user supplied in-game screenshots",
+  "serverBrand": "Cristalix",
+  "modeLabel": "Prison Classic",
+  "observedPlayerLevel": 8,
+  "realmVariant": null,
+  "scope": "Observed menu state; Normal/Quick variant and complete server cap are not established.",
+  "transcription": "Manual visual reading of original-resolution supplied attachments",
+  "sources": [
+    {
+      "id": "image_1",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-134e806e-2f09-4e5d-9b3c-5acc2c711472.png",
+      "originalSha256": "40c1e759d3eb6d110c034ce2c63979dd7696acfb99a35c0d584fa0c3018dd668",
+      "originalDimensions": [
+        1418,
+        860
+      ],
+      "cropBox": [
+        76,
+        38,
+        1330,
+        793
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-01-game-menu.png",
+      "evidenceSha256": "a2380bc2311a4233b94e404729109ece3c4e95ba10bb46f654f2d565d4a9c888",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_2",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-f12bee24-6108-4756-8855-7085226c4acf.png",
+      "originalSha256": "cc9584bc7a509aeb7294b4e7a0601a1a22639afe137b6e94d696bf2396d7aa7d",
+      "originalDimensions": [
+        1342,
+        828
+      ],
+      "cropBox": [
+        23,
+        13,
+        1278,
+        768
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-02-game-menu.png",
+      "evidenceSha256": "cf29c5ec917ca73593dae3b338c70b0a99d2baecd6bb88d3cb336bad5137e0ee",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_3",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-9310962b-1f66-40e4-9b6d-2e4125c42237.png",
+      "originalSha256": "8e481f4f6ff55e03c78454a390e7860d389c12b5a0e30e6e400916b9acfab825",
+      "originalDimensions": [
+        1640,
+        904
+      ],
+      "cropBox": [
+        191,
+        66,
+        1448,
+        820
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-03-game-menu.png",
+      "evidenceSha256": "5f45a15e58988fe3691a04fe252cea36080cb6cf309df07e128a1a04fbadba0f",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_4",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-024f13f0-a3c3-4e04-9ca2-d3dcab2760c7.png",
+      "originalSha256": "557f11f7ab9c6a8c5c43e3e97515006267fac73c5d7eb8b732397cc2c19fc099",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        333,
+        163,
+        1587,
+        919
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-04-game-menu.png",
+      "evidenceSha256": "aa01fff428a930ecb8a3db61c8c742eab3c32b16804343b47f89e61a52f966e9",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_5",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-96593a8d-f524-480a-90c6-cf7749236769.png",
+      "originalSha256": "34c0bf877930a28a6e54d2c1733d8592f9921e6dbd73052901c701c81e50e761",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        332,
+        154,
+        1587,
+        908
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-05-game-menu.png",
+      "evidenceSha256": "f98540e68de0459e1c3fe3a08261255d02797ffafddfcc92b8ef4e5c6af491de",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_6",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-d0c1f034-1a6d-4daf-b563-e4692c9fb330.png",
+      "originalSha256": "cc9584bc7a509aeb7294b4e7a0601a1a22639afe137b6e94d696bf2396d7aa7d",
+      "originalDimensions": [
+        1342,
+        828
+      ],
+      "cropBox": [
+        23,
+        13,
+        1278,
+        768
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-06-game-menu.png",
+      "evidenceSha256": "cf29c5ec917ca73593dae3b338c70b0a99d2baecd6bb88d3cb336bad5137e0ee",
+      "duplicateOf": "image_2"
+    },
+    {
+      "id": "image_7",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-b3c5d609-8ab3-48b8-b1ad-74a9f9ef3b01.png",
+      "originalSha256": "283593bacaf436dcacbd4d45c78f9be8221dd3d8deb576a41fcadfdc9ce23439",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        332,
+        154,
+        1587,
+        908
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-07-game-menu.png",
+      "evidenceSha256": "bbe2c08d2a158238e048d07519c1e2a14a3b8e322c4e08b8c8bd1e751c71bbcc",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_8",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-c3810108-adb5-4cb5-bd03-8fb114b6e674.png",
+      "originalSha256": "30fa10c36b75cad09dd369338b35ae9ea5f1c8cd7dbca9db9eed21e430d64039",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        645,
+        253,
+        1278,
+        810
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-08-game-menu.png",
+      "evidenceSha256": "7fd35685cb014cec647784cc44e30d0d57d93c67ac6307e1f3a9ee3770e442d3",
+      "duplicateOf": null
+    },
+    {
+      "id": "image_9",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-fb734bb3-af7b-452b-ab34-224368510d29.png",
+      "originalSha256": "403f717d1bce02cf689c8651c13b1e17dcd12b65a19b6ebd0238873e11f11164",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        579,
+        292,
+        1340,
+        740
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/mine-menu-evidence/screenshot-09-game-menu.png",
+      "evidenceSha256": "548f758c9993a1550baf5fc980fbc9d00da4fdfc638b875125e13137bf021db8",
+      "duplicateOf": null
+    }
+  ],
+  "mineLocations": [
+    {
+      "name": "Тюрьма",
+      "menuTab": "Шахты",
+      "unlockLevel": null,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": true,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": false,
+      "pvpEnabled": null,
+      "evidence": [
+        "image_1",
+        "image_2",
+        "image_3",
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Каменоломня",
+      "menuTab": "Шахты",
+      "unlockLevel": null,
+      "unlockLevelUpperBound": 8,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "pvpBadgeVisible": false,
+      "pvpEnabled": null,
+      "evidence": [
+        "image_1"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Подножье горы",
+      "menuTab": "Шахты",
+      "unlockLevel": null,
+      "unlockLevelUpperBound": 8,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "pvpBadgeVisible": false,
+      "pvpEnabled": null,
+      "evidence": [
+        "image_1"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Преисподняя",
+      "menuTab": "Шахты",
+      "unlockLevel": null,
+      "unlockLevelUpperBound": 8,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "pvpBadgeVisible": false,
+      "pvpEnabled": null,
+      "evidence": [
+        "image_1"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Пирамида",
+      "menuTab": "Шахты",
+      "unlockLevel": 9,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_1",
+        "image_9"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Королевский сад",
+      "menuTab": "Шахты",
+      "unlockLevel": 11,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_1",
+        "image_2"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Затопленный маяк",
+      "menuTab": "Шахты",
+      "unlockLevel": 13,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_1",
+        "image_2"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Пустотная крепость",
+      "menuTab": "Шахты",
+      "unlockLevel": 15,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_2"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Паучье логово",
+      "menuTab": "Шахты",
+      "unlockLevel": 17,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_2",
+        "image_3",
+        "image_6"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Снежная длань",
+      "menuTab": "Шахты",
+      "unlockLevel": 19,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_2",
+        "image_3"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Рынок",
+      "menuTab": "Шахты",
+      "unlockLevel": 21,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_2",
+        "image_3"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Лепреконовая долина",
+      "menuTab": "Шахты",
+      "unlockLevel": 23,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_3"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Замок",
+      "menuTab": "Шахты",
+      "unlockLevel": 25,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_3"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Изнанка",
+      "menuTab": "Шахты",
+      "unlockLevel": 27,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_3",
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Киото",
+      "menuTab": "Шахты",
+      "unlockLevel": 29,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_3",
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Ферма",
+      "menuTab": "Шахты",
+      "unlockLevel": 31,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Амбар",
+      "menuTab": "Шахты",
+      "unlockLevel": 33,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Врата края",
+      "menuTab": "Шахты",
+      "unlockLevel": 35,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_4"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Древо",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 37,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Церковь",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 39,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Чистилище",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 41,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Эдем",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 43,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Херувимы",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 45,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Врата",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 47,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    },
+    {
+      "name": "Рай",
+      "menuTab": "Небесные шахты",
+      "unlockLevel": 49,
+      "unlockLevelUpperBound": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "pvpBadgeVisible": true,
+      "pvpEnabled": true,
+      "evidence": [
+        "image_5"
+      ],
+      "exactMaterialIds": null,
+      "blockPercentages": null,
+      "blockPrices": null,
+      "resetSeconds": null,
+      "dimensions": null,
+      "requiredTool": null
+    }
+  ],
+  "otherLocations": [
+    {
+      "name": "Подвал",
+      "unlockLevel": null,
+      "accessLabel": null,
+      "pvpBadgeVisible": true,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "База фракций",
+      "unlockLevel": null,
+      "accessLabel": null,
+      "pvpBadgeVisible": true,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "Дворы",
+      "unlockLevel": null,
+      "accessLabel": null,
+      "pvpBadgeVisible": true,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "База банды",
+      "unlockLevel": null,
+      "accessLabel": "Нужна банда",
+      "pvpBadgeVisible": false,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "Гетто",
+      "unlockLevel": null,
+      "accessLabel": "Нужно гетто",
+      "pvpBadgeVisible": true,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "Личная камера",
+      "unlockLevel": null,
+      "accessLabel": null,
+      "pvpBadgeVisible": false,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "Нефтезавод",
+      "unlockLevel": 12,
+      "accessLabel": "12 уровень",
+      "pvpBadgeVisible": true,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    },
+    {
+      "name": "Карьеры",
+      "unlockLevel": 16,
+      "accessLabel": "16 уровень",
+      "pvpBadgeVisible": false,
+      "evidence": [
+        "image_7"
+      ],
+      "limitation": "Absent level/badge on an available card does not establish an unlock level or PvP rule."
+    }
+  ],
+  "visibleBlockPalettes": [
+    {
+      "location": "Тюрьма",
+      "evidence": [
+        "image_1"
+      ],
+      "visibleSlots": 3,
+      "visualLabels": [
+        "земля",
+        "песок",
+        "гравий"
+      ],
+      "exactMaterialIds": null,
+      "certainty": "visual identification of icons only; labels and IDs not displayed"
+    },
+    {
+      "location": "Паучье логово",
+      "evidence": [
+        "image_2",
+        "image_3",
+        "image_4",
+        "image_6"
+      ],
+      "visibleSlots": 2,
+      "visualLabels": [
+        "белый блок",
+        "паутина"
+      ],
+      "exactMaterialIds": null,
+      "certainty": "white block unresolved; no block name tooltip supplied",
+      "bossIcon": {
+        "visible": true,
+        "visualLabel": "паук",
+        "bossName": null
+      }
+    },
+    {
+      "location": "Древо",
+      "evidence": [
+        "image_5"
+      ],
+      "visibleSlots": 1,
+      "visualLabels": [
+        "белый блок"
+      ],
+      "exactMaterialIds": null,
+      "certainty": "material unresolved; no block name tooltip supplied"
+    },
+    {
+      "location": "Подвал",
+      "evidence": [
+        "image_7"
+      ],
+      "visibleSlots": 3,
+      "visualLabels": [
+        "земля",
+        "песок",
+        "гравий"
+      ],
+      "exactMaterialIds": null,
+      "certainty": "visual identification of icons only; labels and IDs not displayed"
+    }
+  ],
+  "levelTransitions": [
+    {
+      "fromLevel": 8,
+      "toLevel": 9,
+      "evidence": [
+        "image_9"
+      ],
+      "requirements": {
+        "blocks": {
+          "display": "34.1K",
+          "exactValue": null,
+          "approximateValue": 34100,
+          "precision": "abbreviated UI value"
+        },
+        "money": {
+          "display": "440",
+          "exactValue": 440,
+          "currency": "game money"
+        }
+      },
+      "unlocks": {
+        "location": "Пирамида",
+        "heartsBefore": 13.5,
+        "heartsAfter": 14.0
+      },
+      "limitations": [
+        "Screenshot does not establish whether the block threshold is cumulative or per-level.",
+        "Screenshot does not establish which counters are spent/reset on level-up.",
+        "Do not derive all other level prices or a progression formula from this one transition."
+      ]
+    }
+  ],
+  "supplementaryDatasets": {
+    "resourceLabels": "prison-plus-mine-content.json",
+    "bossesAndLocations": "boss-menu-recovery.json",
+    "note": "This file preserves the original 9-frame evidence scope; later /pp observations are separate."
+  },
+  "corrections": [
+    "Mine IDs mine_1..mine_14 from localization are not the current menu roster or unlock levels.",
+    "Current supplied menu contains a location requiring level 49; the February 2026 cap of 37 cannot describe this menu state.",
+    "Level 49 is the highest displayed unlock, not proof of the maximum obtainable player level.",
+    "Лесопилка and Лесная чаща are not visible in the supplied mine-tab screenshots; removal is not proven.",
+    "Left-hand block/boss details belong to the selected location, not every card visible on the right."
+  ],
+  "remainingUnknowns": [
+    "Exact unlock levels of the three already accessible mines",
+    "Other unseen menu entries, if any, and exact current realm variant",
+    "Block material IDs, percentage composition, dimensions, prices, reset intervals and tools",
+    "Boss statistics and complete spawn periods; 17 named locations/rewards recovered separately in boss-menu-recovery.json",
+    "Player level requirement table beyond transition 8 to 9"
+  ]
+}

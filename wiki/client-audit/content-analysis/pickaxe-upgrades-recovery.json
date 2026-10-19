@@ -1,0 +1,1000 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "user supplied in-game upgrade previews",
+  "item": "Обычная кирка",
+  "realmVariant": null,
+  "sources": [
+    {
+      "id": "pickaxe_image_1",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-86658091-d130-431b-aa6c-4dc5a37606bb.png",
+      "originalSha256": "2aec04d0904f122bdde534f1f56fc77bb843a2e410add0bcfecf8f6bd115b237",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-01.png",
+      "evidenceSha256": "eb5d97f29dd3e35a461ec7e53f8f8c5eafb061687b065dc3bfba789e8ab0625a"
+    },
+    {
+      "id": "pickaxe_image_2",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-263f533a-1ec1-4075-ad8d-651cec66471e.png",
+      "originalSha256": "7d6f40f98fbf349efd1fe6918050e70019b0358183d1c4424983bf392933570e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-02.png",
+      "evidenceSha256": "f6a62cb6d578b8ea56b26b8b20b913f79b9ce4cec7cb3bb4664be828df145167"
+    },
+    {
+      "id": "pickaxe_image_3",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-c02217b0-4a38-4497-8714-2ecf6f378f66.png",
+      "originalSha256": "40f828f458c423e60961da5fc38e93dc743fb646d0230ef0f16ac1c87c4e2c8f",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-03.png",
+      "evidenceSha256": "c4ba60a8a9337ccc6a81c59e9ec5fe9149bf7f08751eb57ef67ba287870c3e64"
+    },
+    {
+      "id": "pickaxe_image_4",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-2d36e092-e9d4-4fd1-953e-a2ea010836ce.png",
+      "originalSha256": "78fa99be68ecad358b152a087021dcf264d2881197cdb197a771b1b5c6cbd0bc",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-04.png",
+      "evidenceSha256": "3b25d786691e4e2eddd3e4bf1f66a7317e39640c12c29127bb8a873b906c5660"
+    },
+    {
+      "id": "pickaxe_image_5",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-0218620f-bcc7-4224-b988-d763b62477db.png",
+      "originalSha256": "ba701aaa43e87f83193bdd73600618c4af633e2ef0ee25c8f9f602ead84805a9",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-05.png",
+      "evidenceSha256": "cc17bcc49146ae056b481aabf9b77a5c8f53c60e7057e45834d490bec2db0372"
+    },
+    {
+      "id": "pickaxe_image_6",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-a7653861-0c32-4b78-a733-2c5862b991fd.png",
+      "originalSha256": "b1bf5152bbaff4067954e9503ce944223de64c79210f2704bbaaa34fbb006829",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-06.png",
+      "evidenceSha256": "7b9edc0e1cea107c913d7d2df26939bdad80d76f9b9c5a29582c66413ac877f2"
+    },
+    {
+      "id": "pickaxe_image_7",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-6e3e415e-f267-4b08-a0aa-3a7bcbd6243f.png",
+      "originalSha256": "e68ca693b1f42a98e17d1af1e7e020d28cc84789ddeea959a8c5f1cae9c59b5b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-07.png",
+      "evidenceSha256": "1246aedcaf742d29951284da9a637a79964a9f63187d2ccae2708b7c85ebbec8"
+    },
+    {
+      "id": "pickaxe_image_8",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-474def8a-e7b1-4529-9a8d-fe97fc164646.png",
+      "originalSha256": "e092725514ace5c228412fc492562c874dcfc74377a72598fee134e38dd10b93",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-08.png",
+      "evidenceSha256": "54021079b1af8ddcd786df1d4e0282f4b34115a2ec9ce668fe774a50f2169015"
+    },
+    {
+      "id": "pickaxe_image_9",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-5450755e-10ab-4e0b-8c96-5ad5841f737d.png",
+      "originalSha256": "990eede584cfc77c4ddebadc9f0bb53a749c1bff1163979d7bcd408135dd428d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-09.png",
+      "evidenceSha256": "68c5f66bff42e9803e0ccdcdd4df76ca60d1a6c413781098f8020e70ef8b91ff"
+    },
+    {
+      "id": "pickaxe_image_10",
+      "attachmentNumber": 10,
+      "originalFilename": "codex-clipboard-413225db-dedb-4668-b333-b7ffc4c944f3.png",
+      "originalSha256": "835d7724bc4e888952bd4f627554c7d2d85a394a7de7e976b296c88716ec7809",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-10.png",
+      "evidenceSha256": "1e532e8e792b68c8fb7a6b77eccd0fabf63f62664525868969135a8112e9388d"
+    },
+    {
+      "id": "pickaxe_image_11",
+      "attachmentNumber": 11,
+      "originalFilename": "codex-clipboard-bdfeb69f-5426-4af7-b80b-6128765e6e61.png",
+      "originalSha256": "cb256ffd5e57ab9ec31c7f3940159fd67c44110b284a13e01d576125176ffdf1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-11.png",
+      "evidenceSha256": "b81d6d17ff03bf9973d2b41a88926244fdb6f2f3d17caf3cc5d3c1d60198364e"
+    },
+    {
+      "id": "pickaxe_image_12",
+      "attachmentNumber": 12,
+      "originalFilename": "codex-clipboard-7600f766-0e79-4ad0-add1-0fead257c5f3.png",
+      "originalSha256": "6ca1a617a02037159aef8553eb64ea59c39ad76f7a9792ce64d73e230c76be84",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-12.png",
+      "evidenceSha256": "d0b82ed9141ec5fff0ec37a44ef67b733381bf0f7b6a2587dbf4290b6ef12b93"
+    },
+    {
+      "id": "pickaxe_image_13",
+      "attachmentNumber": 13,
+      "originalFilename": "codex-clipboard-c4995ecc-2118-4569-8ef9-5a2a3412a740.png",
+      "originalSha256": "ac7ead4662ffb207a22f24fed98717486de4b672eeb78368367d678d22d1cd83",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-13.png",
+      "evidenceSha256": "73814a816f99df701319c01f81d52c473d412fb3f75a09ba9487486cfb70bff9"
+    },
+    {
+      "id": "pickaxe_image_14",
+      "attachmentNumber": 14,
+      "originalFilename": "codex-clipboard-c2e9de9b-1414-4dd3-bae6-7faad3ca78e6.png",
+      "originalSha256": "4b643693b91d74957227b4b841f428451627476949beca94b58f1c405e508919",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-14.png",
+      "evidenceSha256": "ba59aef0882c250c102f0c609a00c65629cc6c083da38d4d3ff7179d2669b168"
+    },
+    {
+      "id": "pickaxe_image_15",
+      "attachmentNumber": 15,
+      "originalFilename": "codex-clipboard-4e3df248-1cfb-4351-941e-bbc6f21453aa.png",
+      "originalSha256": "cf9ae7f7273c701aa04ea4ab2a5717828fe71085ca53025d8c1f9ae15989b7e3",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-15.png",
+      "evidenceSha256": "912aaaef45abc09449016e35768e24e6258de2ceb0463746ce26582be979f5d0"
+    },
+    {
+      "id": "pickaxe_image_16",
+      "attachmentNumber": 16,
+      "originalFilename": "codex-clipboard-a4feb0ce-fd4d-47eb-9ea4-2f92fb055831.png",
+      "originalSha256": "9fe68b0c652364b8b017d01d9dd249522b735ee5a39fa8ce8a33f648fecd2f04",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        612,
+        300,
+        1310,
+        762
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/pickaxe-menu-evidence/pickaxe-16.png",
+      "evidenceSha256": "6184af9ebd8b721a199a59404c3ad1de029a74df43206e6dc1b61414946e4bbf"
+    }
+  ],
+  "transitions": [
+    {
+      "fromLevel": 1,
+      "toLevel": 2,
+      "cost": {
+        "currency": "game money",
+        "display": "25",
+        "exactValue": 25
+      },
+      "requirements": {
+        "Камень": {
+          "display": "145",
+          "exactValue": 145,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Каменный уголь": {
+          "display": "5",
+          "exactValue": 5,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 0,
+        "after": 1
+      },
+      "leftPreview": {
+        "name": "Деревянная кирка",
+        "displayedLevel": 1
+      },
+      "rightUpgradeRow": {
+        "name": "Деревянная кирка",
+        "fromLevel": 1,
+        "toLevel": 2
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_1"
+      ]
+    },
+    {
+      "fromLevel": 2,
+      "toLevel": 3,
+      "cost": {
+        "currency": "game money",
+        "display": "37",
+        "exactValue": 37
+      },
+      "requirements": {
+        "Камень": {
+          "display": "285",
+          "exactValue": 285,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Каменный уголь": {
+          "display": "15",
+          "exactValue": 15,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 1,
+        "after": 2
+      },
+      "leftPreview": {
+        "name": "Деревянная кирка",
+        "displayedLevel": 2
+      },
+      "rightUpgradeRow": {
+        "name": "Деревянная кирка",
+        "fromLevel": 2,
+        "toLevel": 3
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_2"
+      ]
+    },
+    {
+      "fromLevel": 3,
+      "toLevel": 4,
+      "cost": {
+        "currency": "game money",
+        "display": "47",
+        "exactValue": 47
+      },
+      "requirements": {
+        "Камень": {
+          "display": "520",
+          "exactValue": 520,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Каменный уголь": {
+          "display": "75",
+          "exactValue": 75,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 2,
+        "after": 3
+      },
+      "leftPreview": {
+        "name": "Деревянная кирка",
+        "displayedLevel": 3
+      },
+      "rightUpgradeRow": {
+        "name": "Деревянная кирка",
+        "fromLevel": 3,
+        "toLevel": 4
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_3"
+      ]
+    },
+    {
+      "fromLevel": 4,
+      "toLevel": 5,
+      "cost": {
+        "currency": "game money",
+        "display": "90",
+        "exactValue": 90
+      },
+      "requirements": {
+        "Камень": {
+          "display": "1.05K",
+          "exactValue": null,
+          "approximateValue": 1050,
+          "precision": "abbreviated UI value"
+        },
+        "Каменный уголь": {
+          "display": "150",
+          "exactValue": 150,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": null,
+      "leftPreview": {
+        "name": "Каменная кирка",
+        "displayedLevel": 4
+      },
+      "rightUpgradeRow": {
+        "name": "Деревянная кирка",
+        "fromLevel": 4,
+        "toLevel": 5
+      },
+      "labelMismatch": true,
+      "evidence": [
+        "pickaxe_image_4"
+      ]
+    },
+    {
+      "fromLevel": 5,
+      "toLevel": 6,
+      "cost": {
+        "currency": "game money",
+        "display": "180",
+        "exactValue": 180
+      },
+      "requirements": {
+        "Камень": {
+          "display": "1.5K",
+          "exactValue": null,
+          "approximateValue": 1500,
+          "precision": "abbreviated UI value"
+        },
+        "Каменный уголь": {
+          "display": "250",
+          "exactValue": 250,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Железная руда": {
+          "display": "10",
+          "exactValue": 10,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 0,
+        "after": 1
+      },
+      "leftPreview": {
+        "name": "Каменная кирка",
+        "displayedLevel": 5
+      },
+      "rightUpgradeRow": {
+        "name": "Каменная кирка",
+        "fromLevel": 5,
+        "toLevel": 6
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_5"
+      ]
+    },
+    {
+      "fromLevel": 6,
+      "toLevel": 7,
+      "cost": {
+        "currency": "game money",
+        "display": "270",
+        "exactValue": 270
+      },
+      "requirements": {
+        "Камень": {
+          "display": "2K",
+          "exactValue": null,
+          "approximateValue": 2000,
+          "precision": "abbreviated UI value"
+        },
+        "Каменный уголь": {
+          "display": "350",
+          "exactValue": 350,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Железная руда": {
+          "display": "25",
+          "exactValue": 25,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 1,
+        "after": 2
+      },
+      "leftPreview": {
+        "name": "Каменная кирка",
+        "displayedLevel": 6
+      },
+      "rightUpgradeRow": {
+        "name": "Каменная кирка",
+        "fromLevel": 6,
+        "toLevel": 7
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_6"
+      ]
+    },
+    {
+      "fromLevel": 7,
+      "toLevel": 8,
+      "cost": {
+        "currency": "game money",
+        "display": "540",
+        "exactValue": 540
+      },
+      "requirements": {
+        "Камень": {
+          "display": "3.25K",
+          "exactValue": null,
+          "approximateValue": 3250,
+          "precision": "abbreviated UI value"
+        },
+        "Каменный уголь": {
+          "display": "500",
+          "exactValue": 500,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Железная руда": {
+          "display": "60",
+          "exactValue": 60,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 2,
+        "after": 3
+      },
+      "leftPreview": {
+        "name": "Каменная кирка",
+        "displayedLevel": 7
+      },
+      "rightUpgradeRow": {
+        "name": "Каменная кирка",
+        "fromLevel": 7,
+        "toLevel": 8
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_7"
+      ]
+    },
+    {
+      "fromLevel": 8,
+      "toLevel": 9,
+      "cost": {
+        "currency": "game money",
+        "display": "830",
+        "exactValue": 830
+      },
+      "requirements": {
+        "Камень": {
+          "display": "7.8K",
+          "exactValue": null,
+          "approximateValue": 7800,
+          "precision": "abbreviated UI value"
+        },
+        "Железная руда": {
+          "display": "165",
+          "exactValue": 165,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": null,
+      "leftPreview": {
+        "name": "Железная кирка",
+        "displayedLevel": 8
+      },
+      "rightUpgradeRow": {
+        "name": "Каменная кирка",
+        "fromLevel": 8,
+        "toLevel": 9
+      },
+      "labelMismatch": true,
+      "evidence": [
+        "pickaxe_image_8"
+      ]
+    },
+    {
+      "fromLevel": 9,
+      "toLevel": 10,
+      "cost": {
+        "currency": "game money",
+        "display": "1,330",
+        "exactValue": 1330
+      },
+      "requirements": {
+        "Камень": {
+          "display": "10.7K",
+          "exactValue": null,
+          "approximateValue": 10700,
+          "precision": "abbreviated UI value"
+        },
+        "Железная руда": {
+          "display": "335",
+          "exactValue": 335,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Золотая руда": {
+          "display": "165",
+          "exactValue": 165,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 0,
+        "after": 1
+      },
+      "leftPreview": {
+        "name": "Железная кирка",
+        "displayedLevel": 9
+      },
+      "rightUpgradeRow": {
+        "name": "Железная кирка",
+        "fromLevel": 9,
+        "toLevel": 10
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_9"
+      ]
+    },
+    {
+      "fromLevel": 10,
+      "toLevel": 11,
+      "cost": {
+        "currency": "game money",
+        "display": "3,000",
+        "exactValue": 3000
+      },
+      "requirements": {
+        "Камень": {
+          "display": "15.8K",
+          "exactValue": null,
+          "approximateValue": 15800,
+          "precision": "abbreviated UI value"
+        },
+        "Железная руда": {
+          "display": "680",
+          "exactValue": 680,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        },
+        "Золотая руда": {
+          "display": "375",
+          "exactValue": 375,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 1,
+        "after": 2
+      },
+      "leftPreview": {
+        "name": "Железная кирка",
+        "displayedLevel": 10
+      },
+      "rightUpgradeRow": {
+        "name": "Железная кирка",
+        "fromLevel": 10,
+        "toLevel": 11
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_10"
+      ]
+    },
+    {
+      "fromLevel": 11,
+      "toLevel": 12,
+      "cost": {
+        "currency": "game money",
+        "display": "6,000",
+        "exactValue": 6000
+      },
+      "requirements": {
+        "Камень": {
+          "display": "23.2K",
+          "exactValue": null,
+          "approximateValue": 23200,
+          "precision": "abbreviated UI value"
+        },
+        "Железная руда": {
+          "display": "1.01K",
+          "exactValue": null,
+          "approximateValue": 1010,
+          "precision": "abbreviated UI value"
+        },
+        "Золотая руда": {
+          "display": "560",
+          "exactValue": 560,
+          "approximateValue": null,
+          "precision": "integer UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 2,
+        "after": 3
+      },
+      "leftPreview": {
+        "name": "Железная кирка",
+        "displayedLevel": 11
+      },
+      "rightUpgradeRow": {
+        "name": "Железная кирка",
+        "fromLevel": 11,
+        "toLevel": 12
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_11"
+      ]
+    },
+    {
+      "fromLevel": 12,
+      "toLevel": 13,
+      "cost": {
+        "currency": "game money",
+        "display": "7,500",
+        "exactValue": 7500
+      },
+      "requirements": {
+        "Камень": {
+          "display": "33.8K",
+          "exactValue": null,
+          "approximateValue": 33800,
+          "precision": "abbreviated UI value"
+        },
+        "Золотая руда": {
+          "display": "1.12K",
+          "exactValue": null,
+          "approximateValue": 1120,
+          "precision": "abbreviated UI value"
+        }
+      },
+      "efficiencyChange": null,
+      "leftPreview": {
+        "name": "Алмазная кирка",
+        "displayedLevel": 12
+      },
+      "rightUpgradeRow": {
+        "name": "Железная кирка",
+        "fromLevel": 12,
+        "toLevel": 13
+      },
+      "labelMismatch": true,
+      "evidence": [
+        "pickaxe_image_12"
+      ]
+    },
+    {
+      "fromLevel": 13,
+      "toLevel": 14,
+      "cost": {
+        "currency": "game money",
+        "display": "9,000",
+        "exactValue": 9000
+      },
+      "requirements": {
+        "Камень": {
+          "display": "49.7K",
+          "exactValue": null,
+          "approximateValue": 49700,
+          "precision": "abbreviated UI value"
+        },
+        "Золотая руда": {
+          "display": "1.8K",
+          "exactValue": null,
+          "approximateValue": 1800,
+          "precision": "abbreviated UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 0,
+        "after": 1
+      },
+      "leftPreview": {
+        "name": "Алмазная кирка",
+        "displayedLevel": 13
+      },
+      "rightUpgradeRow": {
+        "name": "Алмазная кирка",
+        "fromLevel": 13,
+        "toLevel": 14
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_13"
+      ]
+    },
+    {
+      "fromLevel": 14,
+      "toLevel": 15,
+      "cost": {
+        "currency": "game money",
+        "display": "11,200",
+        "exactValue": 11200
+      },
+      "requirements": {
+        "Камень": {
+          "display": "67.2K",
+          "exactValue": null,
+          "approximateValue": 67200,
+          "precision": "abbreviated UI value"
+        },
+        "Золотая руда": {
+          "display": "2.7K",
+          "exactValue": null,
+          "approximateValue": 2700,
+          "precision": "abbreviated UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 1,
+        "after": 2
+      },
+      "leftPreview": {
+        "name": "Алмазная кирка",
+        "displayedLevel": 14
+      },
+      "rightUpgradeRow": {
+        "name": "Алмазная кирка",
+        "fromLevel": 14,
+        "toLevel": 15
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_14"
+      ]
+    },
+    {
+      "fromLevel": 15,
+      "toLevel": 16,
+      "cost": {
+        "currency": "game money",
+        "display": "14,900",
+        "exactValue": 14900
+      },
+      "requirements": {
+        "Камень": {
+          "display": "93.1K",
+          "exactValue": null,
+          "approximateValue": 93100,
+          "precision": "abbreviated UI value"
+        },
+        "Золотая руда": {
+          "display": "4.75K",
+          "exactValue": null,
+          "approximateValue": 4750,
+          "precision": "abbreviated UI value"
+        }
+      },
+      "efficiencyChange": {
+        "before": 2,
+        "after": 3
+      },
+      "leftPreview": {
+        "name": "Алмазная кирка",
+        "displayedLevel": 15
+      },
+      "rightUpgradeRow": {
+        "name": "Алмазная кирка",
+        "fromLevel": 15,
+        "toLevel": 16
+      },
+      "labelMismatch": false,
+      "evidence": [
+        "pickaxe_image_15"
+      ]
+    }
+  ],
+  "terminalPreview": {
+    "displayedLevel": 16,
+    "bottomLabel": "Уровень 16",
+    "rightUpgradeRow": "Алмазная кирка 16 → 16",
+    "displayedCost": 14900,
+    "displayedRequirements": {
+      "Камень": {
+        "display": "93.1K",
+        "exactValue": null,
+        "approximateValue": 93100,
+        "precision": "abbreviated UI value"
+      },
+      "Золотая руда": {
+        "display": "4.75K",
+        "exactValue": null,
+        "approximateValue": 4750,
+        "precision": "abbreviated UI value"
+      }
+    },
+    "evidence": [
+      "pickaxe_image_16"
+    ],
+    "interpretation": "The supplied preview ends at 16 and repeats previous cost/requirements; not a transition to 17.",
+    "absoluteServerMaximum": null
+  },
+  "inferredTierLayout": [
+    {
+      "material": "Деревянная",
+      "levels": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "material": "Каменная",
+      "levels": [
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "material": "Железная",
+      "levels": [
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "material": "Алмазная",
+      "levels": [
+        13,
+        14,
+        15,
+        16
+      ]
+    }
+  ],
+  "tierLayoutStatus": "Interpretation across adjacent previews; raw labels preserved because boundary screens disagree.",
+  "nominalTotalUpgradeMoney": 54949,
+  "totalMoneyScope": "Sum of 15 displayed transition costs from 1 to 16; excludes initial purchase and any unshown modifiers.",
+  "caveats": [
+    "Screenshots are previews, not evidence that upgrades were purchased or the player owns all shown levels.",
+    "Requirements are displayed counters, not proven consumed inventory recipes.",
+    "Do not sum all resource thresholds as a total required amount; counter/reset/spending semantics unverified.",
+    "K values preserve display precision and are not exact recovered integers.",
+    "On 4→5, 8→9 and 12→13 left/right material names disagree; efficiency change is absent on those screens.",
+    "Efficiencies reset to a displayed before-value of 0 in the following previews, but no time-to-break or vanilla speed formula is established.",
+    "No evidence for upgrade prices of other tools, armor or special pickaxes."
+  ]
+}

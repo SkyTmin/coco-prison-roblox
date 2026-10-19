@@ -1,0 +1,18 @@
+{
+  "suppliedScreenshots": 127,
+  "uniqueOriginals": 126,
+  "originalHashesChecked": 127,
+  "evidenceHashesChecked": 127,
+  "reportsChecked": 10,
+  "localLinksChecked": 292,
+  "originalScreenshotBatches": 8,
+  "newScreenshots": 61,
+  "observedMineRows": 26,
+  "distinctMineNamesWithBlockLabels": 25,
+  "bossMenuEntries": 17,
+  "storeOffers": 31,
+  "numericStorePrices": 28,
+  "teleportDestinations": 9,
+  "itemUpgradeTransitions": 44,
+  "status": "All integrity, coverage and local-link checks passed; numeric server rules remain unknown where not demonstrated."
+}

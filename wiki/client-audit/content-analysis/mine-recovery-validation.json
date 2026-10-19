@@ -1,0 +1,16 @@
+{
+  "screenshots": 9,
+  "uniqueOriginalImages": 8,
+  "mineTabLocations": 25,
+  "exactMineUnlockLevels": 21,
+  "accessibleMineUpperBounds": 3,
+  "skyMineLevels": 7,
+  "otherLocations": 8,
+  "otherExactUnlockLevels": 2,
+  "levelTransitions": 1,
+  "exactBlockPriceTables": 0,
+  "resetIntervals": 0,
+  "evidenceHashesVerified": true,
+  "transcription": "manual, visually inspected",
+  "limitations": "Checks verify structure and file integrity, not a complete server configuration."
+}

@@ -1,0 +1,100 @@
+[
+  {
+    "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-25a8d380e3ff.zip",
+    "entries": 320,
+    "classes": 287,
+    "unsupportedClassFormat": 0,
+    "matchingNames": [],
+    "hits": [],
+    "errors": [],
+    "metadata": {
+      "mod.properties": "#Thu Oct 15 01:01:04 UTC 2026\nasyncModLoad=on\nauthor=Cristalix Team\ndisableInitModPlease=on\nmain=gg.cristalix.SocialsMod\nname=Socials\noptimize=on\npersistent=off\nprofiler=off\nversion=2.2.2+01a6d45\n",
+      "META-INF/MANIFEST.MF": "Manifest-Version: 1.0\r\n\r\n"
+    }
+  },
+  {
+    "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-b8ab8e19b366.zip",
+    "entries": 861,
+    "classes": 844,
+    "unsupportedClassFormat": 0,
+    "matchingNames": [],
+    "hits": [
+      {
+        "class": "oS.class",
+        "matches": [
+          "\tШестеренка\t17\tGEAR",
+          "\tШестеренка ржавая\t17\tGEAR_RUSTY",
+          "\tТуалетная бумага (lvl1)\t11\tTOILET_PAPER_LVL1",
+          "\tТуалетная бумага (lvl2)\t11\tTOILET_PAPER_LVL2",
+          "\tТуалетная бумага (lvl3)\t11\tTOILET_PAPER_LVL3",
+          "\tТуалетная бумага (lvl4)\t11\tTOILET_PAPER_LVL4",
+          "\tТуалетная бумага (lvl5)\t11\tTOILET_PAPER_LVL5",
+          "\tТуалетная бумага (lvl6)\t11\tTOILET_PAPER_LVL6"
+        ]
+      }
+    ],
+    "errors": [],
+    "metadata": {
+      "mod.properties": "#Thu Oct 15 01:01:05 UTC 2026\nasyncModLoad=on\nauthor=Cristalix Team\ndisableInitModPlease=on\nmain=cY\nname=Gama\noptimizationPasses=3\npersistent=off\nversion=1.9.1+a750c595\n",
+      "META-INF/MANIFEST.MF": "Manifest-Version: 1.0\n\n"
+    }
+  },
+  {
+    "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-d2cae0873b9f.zip",
+    "entries": 1157,
+    "classes": 1141,
+    "unsupportedClassFormat": 0,
+    "matchingNames": [],
+    "hits": [],
+    "errors": [],
+    "metadata": {
+      "mod.properties": "#Thu Oct 15 01:01:05 UTC 2026\nasyncModLoad=on\nauthor=Cristalix Team\ndisableInitModPlease=off\nmain=gg.cristalix.wada.c\nname=Wada\noptimizationPasses=0\npersistent=off\nversion=4.18.6+e7eb5c33d\n",
+      "META-INF/MANIFEST.MF": "Manifest-Version: 1.0\n\n"
+    }
+  },
+  {
+    "archive": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\assets-addon.jar",
+    "entries": 7150,
+    "classes": 0,
+    "unsupportedClassFormat": 0,
+    "matchingNames": [
+      "assets/p13n/models/pets/prisoneer.model"
+    ],
+    "hits": [],
+    "errors": [],
+    "metadata": {}
+  },
+  {
+    "archive": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\minecraft.jar",
+    "entries": 7300,
+    "classes": 7291,
+    "unsupportedClassFormat": 7291,
+    "matchingNames": [],
+    "hits": [],
+    "errors": [],
+    "metadata": {}
+  },
+  {
+    "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\full-decompilation\\inputs\\minecraft-reconstructed.jar",
+    "entries": 7291,
+    "classes": 7291,
+    "unsupportedClassFormat": 0,
+    "matchingNames": [],
+    "hits": [
+      {
+        "class": "#UVdrl.class",
+        "matches": [
+          "models/pets/prisoneer.model"
+        ]
+      },
+      {
+        "class": "#cUxRK.class",
+        "matches": [
+          "prisoneer"
+        ]
+      }
+    ],
+    "errors": [],
+    "metadata": {}
+  }
+]

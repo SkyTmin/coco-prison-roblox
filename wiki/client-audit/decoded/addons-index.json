@@ -1,0 +1,55 @@
+{
+  "addons": [
+    {
+      "name": "socials",
+      "displayName": "Socials Mod",
+      "authors": [
+        "Cristalix Team"
+      ],
+      "description": [
+        "Socials! Socials! Socials!"
+      ],
+      "side": "SERVER",
+      "permanent": true,
+      "version": "mod",
+      "hash": "25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+      "url": "https://webdata.c7x.dev/client/addon/0d5fd1fd7f6598000d5fd05c6602c081/25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5.addon",
+      "sign": "F43I2CkhVuA7gBc/G5+H97pQTQH8QZR8PBLJBpExxSDrlsAKKK1qMfIl22gFZ0LtMmlySaX+buqa3chw+pFPwEm8JBzHtyPMz3QRY+umL9ZcqqU5cTAtlJBr9TaAlNi/aKuuobZv3gC8/PbJ4Lkdyu+viE75QAgQ4JsGyX4Io8f6RrvPGQG269zUXkV3PK8Qv0n4+CRkTRakrW65A382d4rVZmgHoEhoq967DBHhQR7MvJQi8ioAeTgNZ46nWVZI3f3jqcLq8rL0yG0WQPwDd1q7aoXot4K7oriBjh3rKixclZVHEtRBiAm+izitf3ZwcBNfdT5O7lyzv7iMF6Rfvv7qiUrCUKbJbQc81p8plC6jNtyZNDY8gex1IoZARBZj2S1Bb3LHex+RD4yZTXhduuLiSKSJxeKyYtBs6mDWnPnQLqA+gGanyz43QEWsmX+h5QJ84ZDXnWkXu/xkmtOcuVtDImEiMpHGVCmge5qZs8FCpeZPiavpWMxnCLM/yScI8qHkbywHG1i660eSelJn5bVS7Z0AMvi+Vvshm/Di6oQO2tqSp8fkzzWP+Yz7fP14aO1nwEM+ZPfn1xWSIMsuG9YsNaieQLMsb3X6ZJAr1uV+7C7oYE2hMb02AN/pezc0BzzBF+BuWjnqSDOB0SR+c+YKGkMBh+NVOM/tMNIFgRM="
+    },
+    {
+      "name": "gama",
+      "displayName": "Gama Mod",
+      "authors": [
+        "Cristalix Team"
+      ],
+      "description": [
+        "gama! gama! gama!"
+      ],
+      "side": "SERVER",
+      "coating": 0,
+      "permanent": true,
+      "version": "bundle",
+      "hash": "b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+      "url": "https://webdata.c7x.dev/client/addon/0d5fd1fd7f6598000d5fd05c6602c081/b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6.addon",
+      "sign": "K61rpt9Kd3XAitj8t72Wfyku/q7yBIBD3Tw2p12zlDdBFUBwPzVLYEqRxuHbduduZ016M9LOtnp33RTiTCquNY5xuqBOOR0hMW24snQ5oC52vn3l5UWMGBIwBZOfPOPvizQzaNJ2cegmK1Xo6hkE5viz5aSeMefTTC05W5YB2yKNspGkwCBZombVpSUm89Dfjgt2Hhe/jNnQh/giQgi6Y4aiNdHihxPmSEl9bDUFzHZ3URE51zTvp42NhjT/CmpGXJ4FnmjPaxFShYUjbalrbjmRj2OKfwH5wZO4k8ULBxVveyJjFcIecU1uaS8QM0U8GQ2F3np6K3+bk48x7qkpGJR8ZpFBJ9ncSBsxB1FBcBBcFnGZQhiBxG5pW+qUO/FVokDCTR227DjwwYvNfvct1Joc/hsRkrnhOe7WcHgGxNvADqRhKmUjKZ19K0UOc84MA5N1OyFK1eVMocMPC/86hV5TDyBoSJy/euNEiNUjpUHQsyYvWw3SS8MDXeB1gAHzWPbJtkQ0kpATogW44KdyGvChDRZ0RMm2xXYzMHmI0EylKrK/XD38CirPBNu2AnKkagvXWVVYXYAtaFicY4CjhfUJh8sOxdERtKKl4py/9WgnflVyYFJzwuq4dLl18MCDTOhOf2LVmTfOuiC4hB9WnVv4YT0WmLmsZDsjaEwIVSw="
+    },
+    {
+      "name": "wada",
+      "displayName": "Wada Mod",
+      "authors": [
+        "Cristalix Team"
+      ],
+      "description": [
+        "wada! wada! wada!"
+      ],
+      "side": "SERVER",
+      "coating": 0,
+      "permanent": true,
+      "version": "4.18.6",
+      "hash": "d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+      "url": "https://webdata.c7x.dev/client/addon/0d5fd1fd7f6598000d5fd05c6602c081/d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59.addon",
+      "sign": "DL8n7DdI0tw23XUjjeD4SoX7lNl229kiy1AIXv+2UpuRaAoe+1KpbIwKtXKK2Ev65I8IxB1/riZAHf4MGPkePcvQz+aKg0ug37+rTlL1Fj9ReUUEoa8P2f33laPqRzv5D6/7QpGHNfgfJwcElQDct+XLJ392OeoSQxZyMjAMFe90gLnVv6LPc1GDXjEu03OX1d7iYfGVvzyhpDf0YrBsghNr7RD+ZkF82PPxJ3ckuuIxBNsDGECcf1jaVYn3SsMnxg7JS/uXbrEhdQn4Ky/ZpeDYWleOtst9kr+Nq7I1uMvU8dmJdMrexigYtMPyqhhJsT6QedMmxcpHY43tsU+i6S4MQzaWq1Mw01RChfr1zQWrTMblNC/pdED2OcnLtWn9XJ9p4Ag2CGNSZnSPcwvDgeX0HrzJQiKbd0Cv5zGYXUotbBriEX2/nFFkUMTjSk8hVCtZznFMnId3TMIOS+fx0O5nLLs9yjCncw2AXeddsEknTGpcG0GiYygn+UGjxNp0a4zvATXhxghSLeo+U9kvzUamPMf8sZhLExBgq05tIzr94K/I5Zv0TWFYgC6/ONJk8qweDpHjrTkARfuNQywIMa04DVUfYoV50FCLkV6IH2jPLVDp+DKvVPslpo881ngmPR4IiQQxVQ3EstCAuS7ZSTa/Q3xOJqWLbFLUr8RNlnM="
+    }
+  ],
+  "sign": "JxLDO5loVs/PXAVSLCqmyZnKnIarTr5ZQeSZX1P1y52ZsA4bj08OWblJRNagPyeWR+uruUVXKAVr7abRLNx41ClV0309vvTwacZjzj1PHsfUpQLcsCVaB41KTaky4AXhsQ1Wov/5xnobUKg2ybdSWknUJfcIiUg7vmRCuxK7xBkvHHxRh1frUkd3eztumicENEUQWR5uLgUB1Zm7rkl2xmPDJDzCLi2W3PtEVWgG6ivW5aAcXN0OCR+UnTASC7y98MaesD6V8XB/RYS1zdO8UVECqPEL5lw1twPy094894CoyBP6Xw5FneyKU4VzwtLenByAupK8KpM0ZK+lgUg41C7SASPGc9fJRidaC//RIg36v2sLOM+mrCT680RWIgPNULtVzoAK5nS4DuwP9zZXfulOyuljtBh+ikCEsojB+96gomdtGaOEO+cTPuYyo3JSEEm9VWUWQdk/yIiZ9vHzGOhOBwmKBaIFkOlltSkczO7Bpn4hf+Gsjd5DmFozWoe6KNffcinaqzl3l1DpdUOCMQq6tQ36y93apdO3MhdEEAK6s6viTNO1B6mro6luGrBRVJMqBvIjvPMbpSRnEmygN74tDLOsMdOkDgtSDM/AHNIRPCxIZJH5Hf7OSSC3MA8YDWBDw7+U7gLwAA93jGnELKLhG8HRzYZj5rwUBfHFs5A="
+}

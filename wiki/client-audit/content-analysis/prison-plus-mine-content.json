@@ -1,0 +1,1221 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "manually transcribed supplied game screenshots",
+  "sourcesManifest": "late-menu-sources.json",
+  "sourceIds": [
+    "shop_mines_8",
+    "shop_mines_9",
+    "shop_mines_10",
+    "shop_mines_11",
+    "shop_mines_12",
+    "shop_mines_13",
+    "shop_mines_14",
+    "shop_mines_15",
+    "shop_mines_16",
+    "shop_mines_17",
+    "shop_mines_18",
+    "shop_mines_19",
+    "shop_mines_20",
+    "shop_mines_21",
+    "shop_mines_22",
+    "shop_mines_23",
+    "shop_mines_24",
+    "shop_mines_25",
+    "shop_mines_26",
+    "shop_mines_27",
+    "shop_mines_28",
+    "shop_mines_29",
+    "shop_mines_30",
+    "shop_mines_31",
+    "shop_mines_32",
+    "shop_mines_33"
+  ],
+  "menuCountDisplay": "26 / 26",
+  "entries": [
+    {
+      "observationId": "shop_mines_8",
+      "serverId": null,
+      "name": "Подножье горы",
+      "evidence": [
+        "shop_mines_8"
+      ],
+      "materials": [
+        {
+          "displayName": "Красный песок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Железная руда",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Золотая руда",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_9",
+      "serverId": null,
+      "name": "Преисподняя",
+      "evidence": [
+        "shop_mines_9"
+      ],
+      "materials": [
+        {
+          "displayName": "Незерит",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Незер-кварцевая руда",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Песок душ",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_10",
+      "serverId": null,
+      "name": "Пирамида",
+      "evidence": [
+        "shop_mines_10"
+      ],
+      "materials": [
+        {
+          "displayName": "Красный песчаник",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Песчаник",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 9,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1",
+          "image_9"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_11",
+      "serverId": null,
+      "name": "Королевский сад",
+      "evidence": [
+        "shop_mines_11"
+      ],
+      "materials": [
+        {
+          "displayName": "Розовые листья глицинии",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Вишнёвое дерево",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 11,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1",
+          "image_2"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_12",
+      "serverId": null,
+      "name": "Затопленный маяк",
+      "evidence": [
+        "shop_mines_12"
+      ],
+      "materials": [
+        {
+          "displayName": "Призмарин",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Призмариновые кирпичи",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Бирюзовый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 13,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1",
+          "image_2"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_13",
+      "serverId": null,
+      "name": "Пустотная крепость",
+      "evidence": [
+        "shop_mines_13"
+      ],
+      "materials": [
+        {
+          "displayName": "Эндерняковые кирпичи",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Пурпур",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 15,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_2"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_14",
+      "serverId": null,
+      "name": "Паучье логово",
+      "evidence": [
+        "shop_mines_14"
+      ],
+      "materials": [
+        {
+          "displayName": "Паутина",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Белая шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 17,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_2",
+          "image_3",
+          "image_6"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_15",
+      "serverId": null,
+      "name": "Снежная длань",
+      "evidence": [
+        "shop_mines_15"
+      ],
+      "materials": [
+        {
+          "displayName": "Лёд",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Плотный лёд",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 19,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_2",
+          "image_3"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_16",
+      "serverId": null,
+      "name": "Рынок",
+      "evidence": [
+        "shop_mines_16"
+      ],
+      "materials": [
+        {
+          "displayName": "Красная шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Жёлтая шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Лаймовая шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 21,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_2",
+          "image_3"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_17",
+      "serverId": null,
+      "name": "Лепреконовая долина",
+      "evidence": [
+        "shop_mines_17"
+      ],
+      "materials": [
+        {
+          "displayName": "Жёлтый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Оранжевый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Лаймовый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Фиолетовый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Красный цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 23,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_3"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_18",
+      "serverId": null,
+      "name": "Замок",
+      "evidence": [
+        "shop_mines_18"
+      ],
+      "materials": [
+        {
+          "displayName": "Кварцевый блок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Резной кварцевый блок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 25,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_3"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_19",
+      "serverId": null,
+      "name": "Изнанка",
+      "evidence": [
+        "shop_mines_19"
+      ],
+      "materials": [
+        {
+          "displayName": "Листья мрачного дуба",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 27,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_3",
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_20",
+      "serverId": null,
+      "name": "Киото",
+      "evidence": [
+        "shop_mines_20"
+      ],
+      "materials": [
+        {
+          "displayName": "Розовая шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Морской фонарь",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 29,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_3",
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_21",
+      "serverId": null,
+      "name": "Ферма",
+      "evidence": [
+        "shop_mines_21"
+      ],
+      "materials": [
+        {
+          "displayName": "Арбуз",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Тыква",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Зелёная шерсть",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 31,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_22",
+      "serverId": null,
+      "name": "Тюрьма",
+      "evidence": [
+        "shop_mines_22"
+      ],
+      "materials": [
+        {
+          "displayName": "Земля",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Песок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Гравий",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Дуб",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Арбуз",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": null,
+      "startingLocationLabel": true,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1",
+          "image_2",
+          "image_3",
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": 1,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_23",
+      "serverId": null,
+      "name": "Тюрьма",
+      "evidence": [
+        "shop_mines_23"
+      ],
+      "materials": [
+        {
+          "displayName": "Земля",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Песок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Гравий",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Дуб",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Арбуз",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": null,
+      "startingLocationLabel": true,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1",
+          "image_2",
+          "image_3",
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": 2,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_24",
+      "serverId": null,
+      "name": "Амбар",
+      "evidence": [
+        "shop_mines_24"
+      ],
+      "materials": [
+        {
+          "displayName": "Светильник Джека",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 33,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_25",
+      "serverId": null,
+      "name": "Врата края",
+      "evidence": [
+        "shop_mines_25"
+      ],
+      "materials": [
+        {
+          "displayName": "Пурпурный цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Чёрное стекло",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 35,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_4"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_26",
+      "serverId": null,
+      "name": "Древо",
+      "evidence": [
+        "shop_mines_26"
+      ],
+      "materials": [
+        {
+          "displayName": "Белый цемент",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 37,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_27",
+      "serverId": null,
+      "name": "Церковь",
+      "evidence": [
+        "shop_mines_27"
+      ],
+      "materials": [
+        {
+          "displayName": "Глина",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 39,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_28",
+      "serverId": null,
+      "name": "Чистилище",
+      "evidence": [
+        "shop_mines_28"
+      ],
+      "materials": [
+        {
+          "displayName": "Резной песчаник",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 41,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_29",
+      "serverId": null,
+      "name": "Эдем",
+      "evidence": [
+        "shop_mines_29"
+      ],
+      "materials": [
+        {
+          "displayName": "Гриб",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 43,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": "brown-looking preview"
+    },
+    {
+      "observationId": "shop_mines_30",
+      "serverId": null,
+      "name": "Херувимы",
+      "evidence": [
+        "shop_mines_30"
+      ],
+      "materials": [
+        {
+          "displayName": "Снег",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 45,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_31",
+      "serverId": null,
+      "name": "Врата",
+      "evidence": [
+        "shop_mines_31"
+      ],
+      "materials": [
+        {
+          "displayName": "Гладкий песчаник",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 47,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    },
+    {
+      "observationId": "shop_mines_32",
+      "serverId": null,
+      "name": "Рай",
+      "evidence": [
+        "shop_mines_32"
+      ],
+      "materials": [
+        {
+          "displayName": "Гриб",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": 49,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": null,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_5"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:00:48",
+        "seconds": 48,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": "red-looking preview"
+    },
+    {
+      "observationId": "shop_mines_33",
+      "serverId": null,
+      "name": "Каменоломня",
+      "evidence": [
+        "shop_mines_33"
+      ],
+      "materials": [
+        {
+          "displayName": "Камень",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Железная руда",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Каменный уголь",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        },
+        {
+          "displayName": "Угольный блок",
+          "materialId": null,
+          "weight": null,
+          "salePrice": null
+        }
+      ],
+      "unlockLevel": null,
+      "startingLocationLabel": false,
+      "observedAccessibleAtLevel": 8,
+      "unlockEvidence": {
+        "dataset": "mine-menu-recovery.json",
+        "evidence": [
+          "image_1"
+        ],
+        "match": "exact display name; not server ID"
+      },
+      "displayedTime": {
+        "label": "Время до респавна",
+        "display": "00:01:48",
+        "seconds": 108,
+        "meaning": "remaining-time snapshot; server update cadence unverified"
+      },
+      "resetIntervalSeconds": null,
+      "dimensions": null,
+      "requiredTool": null,
+      "duplicateNameOccurrence": null,
+      "visualVariant": null
+    }
+  ],
+  "scope": "26 selected rows, 25 distinct displayed names; all 25 names from earlier /mines tabs are covered",
+  "caveats": [
+    "Two separate rows display Тюрьма with the same five resource labels; their server IDs and relationship to Малая шахта are unknown.",
+    "Resource labels are literal menu names; do not normalize Незерит to Незеррак or цемент to a guessed Minecraft ID.",
+    "Гриб appears for both Эдем and Рай with different preview colors; identical labels do not prove identical IDs.",
+    "00:00:48 repeats across 25 cards; it is a remaining-time observation, not proof of a 48-second reset interval.",
+    "A raw PRISON.CLASSIC.PRISON_PLUS.GUI.RESPAWN_COOLDOWN localization key overlaps/clips near the timer; it is not a numeric rule.",
+    "Percent composition, block prices, dimensions, tools and complete reset intervals are not shown.",
+    "Earlier /mines icon palettes are visual observations and are not exhaustive resource lists."
+  ]
+}

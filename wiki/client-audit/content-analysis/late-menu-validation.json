@@ -1,0 +1,22 @@
+{
+  "screenshotsProcessed": 61,
+  "uniqueOriginals": 61,
+  "sourcesAllAssignedOnce": true,
+  "originalAndEvidenceHashesMatched": true,
+  "mineRows": 26,
+  "distinctMineNames": 25,
+  "priorMineNamesAllCovered": true,
+  "preciseUnlocksJoined": 21,
+  "bossMenuEntries": 17,
+  "localizationNamesNotObserved": [
+    "Зомбарь",
+    "Сплинтер",
+    "Воид"
+  ],
+  "storeOffers": 31,
+  "numericPrices": 28,
+  "purchasedWithUnknownPrice": 3,
+  "teleporterDestinations": 9,
+  "noResetIntervalsOrDropProbabilitiesInvented": true,
+  "localLinksChecked": 95
+}

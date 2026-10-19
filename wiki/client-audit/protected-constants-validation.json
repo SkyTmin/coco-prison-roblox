@@ -1,0 +1,169 @@
+{
+  "classes": 7291,
+  "nameMatches": 7291,
+  "errors": [],
+  "samples": [
+    {
+      "class": "#hqsNq.class",
+      "decodedName": "#hqsNq",
+      "strings": [
+        {
+          "index": 1,
+          "value": "#hqsNq"
+        },
+        {
+          "index": 3,
+          "value": "#UxTwY"
+        },
+        {
+          "index": 5,
+          "value": "java/io/Serializable"
+        },
+        {
+          "index": 7,
+          "value": "<init>"
+        },
+        {
+          "index": 8,
+          "value": "(L#hqsNq;)V"
+        },
+        {
+          "index": 9,
+          "value": "(L#UxTwY;)V"
+        },
+        {
+          "index": 12,
+          "value": "(Ljava/awt/Color;)V"
+        },
+        {
+          "index": 13,
+          "value": "java/awt/Color"
+        },
+        {
+          "index": 15,
+          "value": "getRed"
+        },
+        {
+          "index": 16,
+          "value": "()I"
+        },
+        {
+          "index": 19,
+          "value": "getGreen"
+        },
+        {
+          "index": 22,
+          "value": "getBlue"
+        }
+      ]
+    },
+    {
+      "class": "#iRrnH.class",
+      "decodedName": "#iRrnH",
+      "strings": [
+        {
+          "index": 1,
+          "value": "#iRrnH"
+        },
+        {
+          "index": 3,
+          "value": "Ljava/lang/Object;L#luRKv;L!#wtAgu;"
+        },
+        {
+          "index": 4,
+          "value": "java/lang/Object"
+        },
+        {
+          "index": 6,
+          "value": "#luRKv"
+        },
+        {
+          "index": 8,
+          "value": "!#wtAgu"
+        },
+        {
+          "index": 10,
+          "value": "aaD"
+        },
+        {
+          "index": 11,
+          "value": "()L!#wOeJl;"
+        },
+        {
+          "index": 12,
+          "value": "#cAQTK"
+        },
+        {
+          "index": 14,
+          "value": "sjtp"
+        },
+        {
+          "index": 15,
+          "value": "(L#iRrnH;)L!#wOeJl;"
+        },
+        {
+          "index": 18,
+          "value": "bPN"
+        },
+        {
+          "index": 19,
+          "value": "()L#mctxc;"
+        }
+      ]
+    },
+    {
+      "class": "#aKmTm.class",
+      "decodedName": "#aKmTm",
+      "strings": [
+        {
+          "index": 1,
+          "value": "#aKmTm"
+        },
+        {
+          "index": 3,
+          "value": "#DLsou"
+        },
+        {
+          "index": 5,
+          "value": "<init>"
+        },
+        {
+          "index": 6,
+          "value": "(Ljava/lang/String;IZL#mBwWz;)V"
+        },
+        {
+          "index": 9,
+          "value": "bhv"
+        },
+        {
+          "index": 10,
+          "value": "(L#OoaEK;L#kuERe;L#XcSSz;L#prEtM;IF)V"
+        },
+        {
+          "index": 11,
+          "value": "hic"
+        },
+        {
+          "index": 12,
+          "value": "(L#aKmTm;L#OoaEK;L#kuERe;L#XcSSz;L#prEtM;IF)V"
+        },
+        {
+          "index": 17,
+          "value": "#Hdopj"
+        },
+        {
+          "index": 19,
+          "value": "saUK"
+        },
+        {
+          "index": 20,
+          "value": "(I)I"
+        },
+        {
+          "index": 23,
+          "value": "#XcSSz"
+        }
+      ]
+    }
+  ]
+}

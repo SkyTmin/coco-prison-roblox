@@ -1,0 +1,5683 @@
+{
+  "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-prison.json",
+  "sourceSha256": "32f22b91814d90ac78a92cd3cf9e24cca4c04c0d4ab9538e9347efff1a4e71af",
+  "sourceType": "client_localization_not_server_execution",
+  "entries": 663,
+  "families": {
+    "pickaxe": 81,
+    "battlepass": 60,
+    "command": 36,
+    "gui": 34,
+    "mine": 33,
+    "quest": 33,
+    "fishing": 23,
+    "daily": 19,
+    "lootbox": 16,
+    "booster": 13,
+    "slain": 11,
+    "key": 10,
+    "reward": 10,
+    "npc": 9,
+    "key_keeper": 9,
+    "prestige": 9,
+    "detonator": 9,
+    "top": 9,
+    "key_converter": 8,
+    "blackmarket": 8,
+    "slimey": 8,
+    "bar": 7,
+    "orepit": 7,
+    "rank": 7,
+    "error": 6,
+    "bind": 6,
+    "insurer": 5,
+    "treasure": 5,
+    "kills10": 4,
+    "blocks-mined1000": 2,
+    "blocks-mined10000": 2,
+    "blocks-mined100000": 2,
+    "blocks-mined1000000": 2,
+    "blocks-mined7000000": 2,
+    "level5": 2,
+    "level10": 2,
+    "level20": 2,
+    "level30": 2,
+    "level40": 2,
+    "level50": 2,
+    "skill-levels10": 2,
+    "skill-levels20": 2,
+    "balance100000": 2,
+    "balance1000000": 2,
+    "balance10000000": 2,
+    "balance100000000": 2,
+    "sales-money100000": 2,
+    "sales-money10000000": 2,
+    "sales-money500000000": 2,
+    "boosters5": 2,
+    "boosters50": 2,
+    "kills100": 2,
+    "kills500": 2,
+    "kills2000": 2,
+    "deaths100": 2,
+    "kills1": 2,
+    "kills50": 2,
+    "kills200": 2,
+    "variety6": 2,
+    "variety11": 2,
+    "rats100": 2,
+    "rats1000": 2,
+    "rats10000": 2,
+    "zombies100": 2,
+    "zombies1000": 2,
+    "zombies10000": 2,
+    "bats100": 2,
+    "bats1000": 2,
+    "opened10": 2,
+    "opened100": 2,
+    "opened500": 2,
+    "upgrades10": 2,
+    "upgrades50": 2,
+    "upgrades200": 2,
+    "max-level10": 2,
+    "max-level15": 2,
+    "max-level20": 2,
+    "join": 2,
+    "quests10": 2,
+    "quests100": 2,
+    "points1": 2,
+    "points25": 2,
+    "points100": 2,
+    "ghetto-chests1": 2,
+    "ghetto-chests10": 2,
+    "level3": 2,
+    "level6": 2,
+    "job-level10": 2,
+    "job-level25": 2,
+    "job-level51": 2,
+    "hours10": 2,
+    "hours100": 2,
+    "hours500": 2,
+    "hours1000": 2,
+    "daily7": 2,
+    "daily30": 2,
+    "daily100": 2,
+    "created1": 2,
+    "created10": 2,
+    "created50": 2,
+    "epic": 2,
+    "fraction": 2,
+    "disease": 2,
+    "gifts1": 2,
+    "gifts25": 2,
+    "legend": 2,
+    "receive": 2,
+    "orepit_pass": 2,
+    "settings": 2,
+    "unknown": 1,
+    "no_minerals": 1,
+    "no_balance": 1,
+    "no_key": 1,
+    "no_key_all": 1,
+    "no_relic": 1,
+    "no_treasure": 1,
+    "full_inventory": 1
+  },
+  "records": [
+    {
+      "key": "prison.mine.blocks-mined1000.name",
+      "family": "blocks-mined1000",
+      "text": "Первая смена",
+      "raw": "Первая смена",
+      "sourceLine": 3,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined1000.description",
+      "family": "blocks-mined1000",
+      "text": "Добудь 1 000 блоков в шахтах",
+      "raw": "Добудь 1 000 блоков в шахтах",
+      "sourceLine": 4,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined10000.name",
+      "family": "blocks-mined10000",
+      "text": "Шахтёр",
+      "raw": "Шахтёр",
+      "sourceLine": 5,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined10000.description",
+      "family": "blocks-mined10000",
+      "text": "Добудь 10 000 блоков в шахтах",
+      "raw": "Добудь 10 000 блоков в шахтах",
+      "sourceLine": 6,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined100000.name",
+      "family": "blocks-mined100000",
+      "text": "Забойщик",
+      "raw": "Забойщик",
+      "sourceLine": 7,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined100000.description",
+      "family": "blocks-mined100000",
+      "text": "Добудь 100 000 блоков в шахтах",
+      "raw": "Добудь 100 000 блоков в шахтах",
+      "sourceLine": 8,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined1000000.name",
+      "family": "blocks-mined1000000",
+      "text": "Проходчик",
+      "raw": "Проходчик",
+      "sourceLine": 9,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined1000000.description",
+      "family": "blocks-mined1000000",
+      "text": "Добудь 1 000 000 блоков в шахтах",
+      "raw": "Добудь 1 000 000 блоков в шахтах",
+      "sourceLine": 10,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined7000000.name",
+      "family": "blocks-mined7000000",
+      "text": "Повелитель недр",
+      "raw": "Повелитель недр",
+      "sourceLine": 11,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mine.blocks-mined7000000.description",
+      "family": "blocks-mined7000000",
+      "text": "Добудь 7 000 000 блоков в шахтах",
+      "raw": "Добудь 7 000 000 блоков в шахтах",
+      "sourceLine": 12,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level5.name",
+      "family": "level5",
+      "text": "Новичок за решёткой",
+      "raw": "Новичок за решёткой",
+      "sourceLine": 13,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level5.description",
+      "family": "level5",
+      "text": "Достигни 5 уровня",
+      "raw": "Достигни 5 уровня",
+      "sourceLine": 14,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level10.name",
+      "family": "level10",
+      "text": "Бывалый зэк",
+      "raw": "Бывалый зэк",
+      "sourceLine": 15,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level10.description",
+      "family": "level10",
+      "text": "Достигни 10 уровня",
+      "raw": "Достигни 10 уровня",
+      "sourceLine": 16,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level20.name",
+      "family": "level20",
+      "text": "Авторитет",
+      "raw": "Авторитет",
+      "sourceLine": 17,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level20.description",
+      "family": "level20",
+      "text": "Достигни 20 уровня",
+      "raw": "Достигни 20 уровня",
+      "sourceLine": 18,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level30.name",
+      "family": "level30",
+      "text": "Смотрящий",
+      "raw": "Смотрящий",
+      "sourceLine": 19,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level30.description",
+      "family": "level30",
+      "text": "Достигни 30 уровня",
+      "raw": "Достигни 30 уровня",
+      "sourceLine": 20,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level40.name",
+      "family": "level40",
+      "text": "Вор в законе",
+      "raw": "Вор в законе",
+      "sourceLine": 21,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level40.description",
+      "family": "level40",
+      "text": "Достигни 40 уровня",
+      "raw": "Достигни 40 уровня",
+      "sourceLine": 22,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level50.name",
+      "family": "level50",
+      "text": "Хозяин зоны",
+      "raw": "Хозяин зоны",
+      "sourceLine": 23,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.level50.description",
+      "family": "level50",
+      "text": "Достигни 50 уровня",
+      "raw": "Достигни 50 уровня",
+      "sourceLine": 24,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.skill-levels10.name",
+      "family": "skill-levels10",
+      "text": "Самоучка",
+      "raw": "Самоучка",
+      "sourceLine": 25,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.skill-levels10.description",
+      "family": "skill-levels10",
+      "text": "Вложи 10 очков в навыки",
+      "raw": "Вложи 10 очков в навыки",
+      "sourceLine": 26,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.skill-levels20.name",
+      "family": "skill-levels20",
+      "text": "Мастер на все руки",
+      "raw": "Мастер на все руки",
+      "sourceLine": 27,
+      "placeholders": []
+    },
+    {
+      "key": "prison.progress.skill-levels20.description",
+      "family": "skill-levels20",
+      "text": "Вложи 20 очков в навыки",
+      "raw": "Вложи 20 очков в навыки",
+      "sourceLine": 28,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance100000.name",
+      "family": "balance100000",
+      "text": "Копилка",
+      "raw": "Копилка",
+      "sourceLine": 29,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance100000.description",
+      "family": "balance100000",
+      "text": "Накопи 100 000 монет на балансе",
+      "raw": "Накопи 100 000 монет на балансе",
+      "sourceLine": 30,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance1000000.name",
+      "family": "balance1000000",
+      "text": "Миллионер",
+      "raw": "Миллионер",
+      "sourceLine": 31,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance1000000.description",
+      "family": "balance1000000",
+      "text": "Накопи 1 000 000 монет на балансе",
+      "raw": "Накопи 1 000 000 монет на балансе",
+      "sourceLine": 32,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance10000000.name",
+      "family": "balance10000000",
+      "text": "Магнат",
+      "raw": "Магнат",
+      "sourceLine": 33,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance10000000.description",
+      "family": "balance10000000",
+      "text": "Накопи 10 000 000 монет на балансе",
+      "raw": "Накопи 10 000 000 монет на балансе",
+      "sourceLine": 34,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance100000000.name",
+      "family": "balance100000000",
+      "text": "Олигарх",
+      "raw": "Олигарх",
+      "sourceLine": 35,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.balance100000000.description",
+      "family": "balance100000000",
+      "text": "Накопи 100 000 000 монет на балансе",
+      "raw": "Накопи 100 000 000 монет на балансе",
+      "sourceLine": 36,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money100000.name",
+      "family": "sales-money100000",
+      "text": "Барыга",
+      "raw": "Барыга",
+      "sourceLine": 37,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money100000.description",
+      "family": "sales-money100000",
+      "text": "Заработай 100 000 монет на продаже",
+      "raw": "Заработай 100 000 монет на продаже",
+      "sourceLine": 38,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money10000000.name",
+      "family": "sales-money10000000",
+      "text": "Торговец",
+      "raw": "Торговец",
+      "sourceLine": 39,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money10000000.description",
+      "family": "sales-money10000000",
+      "text": "Заработай 10 000 000 монет на продаже",
+      "raw": "Заработай 10 000 000 монет на продаже",
+      "sourceLine": 40,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money500000000.name",
+      "family": "sales-money500000000",
+      "text": "Король скупки",
+      "raw": "Король скупки",
+      "sourceLine": 41,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.sales-money500000000.description",
+      "family": "sales-money500000000",
+      "text": "Заработай 500 000 000 монет на продаже",
+      "raw": "Заработай 500 000 000 монет на продаже",
+      "sourceLine": 42,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.boosters5.name",
+      "family": "boosters5",
+      "text": "Ускоритель",
+      "raw": "Ускоритель",
+      "sourceLine": 43,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.boosters5.description",
+      "family": "boosters5",
+      "text": "Активируй 5 бустеров",
+      "raw": "Активируй 5 бустеров",
+      "sourceLine": 44,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.boosters50.name",
+      "family": "boosters50",
+      "text": "На форсаже",
+      "raw": "На форсаже",
+      "sourceLine": 45,
+      "placeholders": []
+    },
+    {
+      "key": "prison.economy.boosters50.description",
+      "family": "boosters50",
+      "text": "Активируй 50 бустеров",
+      "raw": "Активируй 50 бустеров",
+      "sourceLine": 46,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills10.name",
+      "family": "kills10",
+      "text": "Драчун",
+      "raw": "Драчун",
+      "sourceLine": 47,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills10.description",
+      "family": "kills10",
+      "text": "Убей 10 игроков",
+      "raw": "Убей 10 игроков",
+      "sourceLine": 48,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills100.name",
+      "family": "kills100",
+      "text": "Головорез",
+      "raw": "Головорез",
+      "sourceLine": 49,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills100.description",
+      "family": "kills100",
+      "text": "Убей 100 игроков",
+      "raw": "Убей 100 игроков",
+      "sourceLine": 50,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills500.name",
+      "family": "kills500",
+      "text": "Беспредельщик",
+      "raw": "Беспредельщик",
+      "sourceLine": 51,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills500.description",
+      "family": "kills500",
+      "text": "Убей 500 игроков",
+      "raw": "Убей 500 игроков",
+      "sourceLine": 52,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills2000.name",
+      "family": "kills2000",
+      "text": "Гроза тюрьмы",
+      "raw": "Гроза тюрьмы",
+      "sourceLine": 53,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.kills2000.description",
+      "family": "kills2000",
+      "text": "Убей 2 000 игроков",
+      "raw": "Убей 2 000 игроков",
+      "sourceLine": 54,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.deaths100.name",
+      "family": "deaths100",
+      "text": "Мальчик для битья",
+      "raw": "Мальчик для битья",
+      "sourceLine": 55,
+      "placeholders": []
+    },
+    {
+      "key": "prison.combat.deaths100.description",
+      "family": "deaths100",
+      "text": "Погибни 100 раз",
+      "raw": "Погибни 100 раз",
+      "sourceLine": 56,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills1.name",
+      "family": "kills1",
+      "text": "Первый трофей",
+      "raw": "Первый трофей",
+      "sourceLine": 57,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills1.description",
+      "family": "kills1",
+      "text": "Убей 1 боссов",
+      "raw": "Убей 1 боссов",
+      "sourceLine": 58,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills10.name",
+      "family": "kills10",
+      "text": "Охотник на боссов",
+      "raw": "Охотник на боссов",
+      "sourceLine": 59,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills10.description",
+      "family": "kills10",
+      "text": "Убей 10 боссов",
+      "raw": "Убей 10 боссов",
+      "sourceLine": 60,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills50.name",
+      "family": "kills50",
+      "text": "Гроза чудовищ",
+      "raw": "Гроза чудовищ",
+      "sourceLine": 61,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills50.description",
+      "family": "kills50",
+      "text": "Убей 50 боссов",
+      "raw": "Убей 50 боссов",
+      "sourceLine": 62,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills200.name",
+      "family": "kills200",
+      "text": "Легенда арены",
+      "raw": "Легенда арены",
+      "sourceLine": 63,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.kills200.description",
+      "family": "kills200",
+      "text": "Убей 200 боссов",
+      "raw": "Убей 200 боссов",
+      "sourceLine": 64,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.variety6.name",
+      "family": "variety6",
+      "text": "Охотник за головами",
+      "raw": "Охотник за головами",
+      "sourceLine": 65,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.variety6.description",
+      "family": "variety6",
+      "text": "Победи 6 разных боссов",
+      "raw": "Победи 6 разных боссов",
+      "sourceLine": 66,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.giant-zombie.name",
+      "family": "slain",
+      "text": "Зомбарь",
+      "raw": "Зомбарь",
+      "sourceLine": 67,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.splinter.name",
+      "family": "slain",
+      "text": "Сплинтер",
+      "raw": "Сплинтер",
+      "sourceLine": 68,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.piglin.name",
+      "family": "slain",
+      "text": "Король Пиглинов",
+      "raw": "Король Пиглинов",
+      "sourceLine": 69,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.skeleton.name",
+      "family": "slain",
+      "text": "Скелетон",
+      "raw": "Скелетон",
+      "sourceLine": 70,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.knight.name",
+      "family": "slain",
+      "text": "Рыцарь",
+      "raw": "Рыцарь",
+      "sourceLine": 71,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.illusionist.name",
+      "family": "slain",
+      "text": "Иллюзионист",
+      "raw": "Иллюзионист",
+      "sourceLine": 72,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.spider-queen.name",
+      "family": "slain",
+      "text": "Паучья матка",
+      "raw": "Паучья матка",
+      "sourceLine": 73,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.vecna.name",
+      "family": "slain",
+      "text": "Векна",
+      "raw": "Векна",
+      "sourceLine": 74,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.ent.name",
+      "family": "slain",
+      "text": "Грут",
+      "raw": "Грут",
+      "sourceLine": 75,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.mole.name",
+      "family": "slain",
+      "text": "Моль",
+      "raw": "Моль",
+      "sourceLine": 76,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.slain.reaper.name",
+      "family": "slain",
+      "text": "Жнец",
+      "raw": "Жнец",
+      "sourceLine": 77,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.variety11.name",
+      "family": "variety11",
+      "text": "Истребитель легенд",
+      "raw": "Истребитель легенд",
+      "sourceLine": 78,
+      "placeholders": []
+    },
+    {
+      "key": "prison.boss.variety11.description",
+      "family": "variety11",
+      "text": "Победи всех 11 боссов",
+      "raw": "Победи всех 11 боссов",
+      "sourceLine": 79,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats100.name",
+      "family": "rats100",
+      "text": "Крысолов",
+      "raw": "Крысолов",
+      "sourceLine": 80,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats100.description",
+      "family": "rats100",
+      "text": "Убей 100 крыс",
+      "raw": "Убей 100 крыс",
+      "sourceLine": 81,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats1000.name",
+      "family": "rats1000",
+      "text": "Гроза крыс",
+      "raw": "Гроза крыс",
+      "sourceLine": 82,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats1000.description",
+      "family": "rats1000",
+      "text": "Убей 1 000 крыс",
+      "raw": "Убей 1 000 крыс",
+      "sourceLine": 83,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats10000.name",
+      "family": "rats10000",
+      "text": "Крысиный король",
+      "raw": "Крысиный король",
+      "sourceLine": 84,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.rats10000.description",
+      "family": "rats10000",
+      "text": "Убей 10 000 крыс",
+      "raw": "Убей 10 000 крыс",
+      "sourceLine": 85,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies100.name",
+      "family": "zombies100",
+      "text": "Санитар",
+      "raw": "Санитар",
+      "sourceLine": 86,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies100.description",
+      "family": "zombies100",
+      "text": "Убей 100 зомби",
+      "raw": "Убей 100 зомби",
+      "sourceLine": 87,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies1000.name",
+      "family": "zombies1000",
+      "text": "Зомбоборец",
+      "raw": "Зомбоборец",
+      "sourceLine": 88,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies1000.description",
+      "family": "zombies1000",
+      "text": "Убей 1 000 зомби",
+      "raw": "Убей 1 000 зомби",
+      "sourceLine": 89,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies10000.name",
+      "family": "zombies10000",
+      "text": "Гроза мертвецов",
+      "raw": "Гроза мертвецов",
+      "sourceLine": 90,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.zombies10000.description",
+      "family": "zombies10000",
+      "text": "Убей 10 000 зомби",
+      "raw": "Убей 10 000 зомби",
+      "sourceLine": 91,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.bats100.name",
+      "family": "bats100",
+      "text": "Ночной охотник",
+      "raw": "Ночной охотник",
+      "sourceLine": 92,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.bats100.description",
+      "family": "bats100",
+      "text": "Убей 100 летучих мышей",
+      "raw": "Убей 100 летучих мышей",
+      "sourceLine": 93,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.bats1000.name",
+      "family": "bats1000",
+      "text": "Гроза летучих мышей",
+      "raw": "Гроза летучих мышей",
+      "sourceLine": 94,
+      "placeholders": []
+    },
+    {
+      "key": "prison.mobs.bats1000.description",
+      "family": "bats1000",
+      "text": "Убей 1 000 летучих мышей",
+      "raw": "Убей 1 000 летучих мышей",
+      "sourceLine": 95,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened10.name",
+      "family": "opened10",
+      "text": "Любопытный",
+      "raw": "Любопытный",
+      "sourceLine": 96,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened10.description",
+      "family": "opened10",
+      "text": "Открой 10 кейсов",
+      "raw": "Открой 10 кейсов",
+      "sourceLine": 97,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened100.name",
+      "family": "opened100",
+      "text": "Азартный",
+      "raw": "Азартный",
+      "sourceLine": 98,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened100.description",
+      "family": "opened100",
+      "text": "Открой 100 кейсов",
+      "raw": "Открой 100 кейсов",
+      "sourceLine": 99,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened500.name",
+      "family": "opened500",
+      "text": "Кейсоман",
+      "raw": "Кейсоман",
+      "sourceLine": 100,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cases.opened500.description",
+      "family": "opened500",
+      "text": "Открой 500 кейсов",
+      "raw": "Открой 500 кейсов",
+      "sourceLine": 101,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades10.name",
+      "family": "upgrades10",
+      "text": "Кузнец",
+      "raw": "Кузнец",
+      "sourceLine": 102,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades10.description",
+      "family": "upgrades10",
+      "text": "Улучши предметы 10 раз",
+      "raw": "Улучши предметы 10 раз",
+      "sourceLine": 103,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades50.name",
+      "family": "upgrades50",
+      "text": "Оружейник",
+      "raw": "Оружейник",
+      "sourceLine": 104,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades50.description",
+      "family": "upgrades50",
+      "text": "Улучши предметы 50 раз",
+      "raw": "Улучши предметы 50 раз",
+      "sourceLine": 105,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades200.name",
+      "family": "upgrades200",
+      "text": "Мастер ковки",
+      "raw": "Мастер ковки",
+      "sourceLine": 106,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.upgrades200.description",
+      "family": "upgrades200",
+      "text": "Улучши предметы 200 раз",
+      "raw": "Улучши предметы 200 раз",
+      "sourceLine": 107,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level10.name",
+      "family": "max-level10",
+      "text": "Прокачанный",
+      "raw": "Прокачанный",
+      "sourceLine": 108,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level10.description",
+      "family": "max-level10",
+      "text": "Улучши предмет до 10 уровня",
+      "raw": "Улучши предмет до 10 уровня",
+      "sourceLine": 109,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level15.name",
+      "family": "max-level15",
+      "text": "Экипирован до зубов",
+      "raw": "Экипирован до зубов",
+      "sourceLine": 110,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level15.description",
+      "family": "max-level15",
+      "text": "Улучши предмет до 15 уровня",
+      "raw": "Улучши предмет до 15 уровня",
+      "sourceLine": 111,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level20.name",
+      "family": "max-level20",
+      "text": "Легендарная кирка",
+      "raw": "Легендарная кирка",
+      "sourceLine": 112,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gear.max-level20.description",
+      "family": "max-level20",
+      "text": "Улучши предмет до 20 уровня",
+      "raw": "Улучши предмет до 20 уровня",
+      "sourceLine": 113,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.join.name",
+      "family": "join",
+      "text": "Свои люди",
+      "raw": "Свои люди",
+      "sourceLine": 114,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.join.description",
+      "family": "join",
+      "text": "Вступи в банду",
+      "raw": "Вступи в банду",
+      "sourceLine": 115,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.quests10.name",
+      "family": "quests10",
+      "text": "Шестёрка",
+      "raw": "Шестёрка",
+      "sourceLine": 116,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.quests10.description",
+      "family": "quests10",
+      "text": "Выполни 10 заданий банды",
+      "raw": "Выполни 10 заданий банды",
+      "sourceLine": 117,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.quests100.name",
+      "family": "quests100",
+      "text": "Правая рука",
+      "raw": "Правая рука",
+      "sourceLine": 118,
+      "placeholders": []
+    },
+    {
+      "key": "prison.gang.quests100.description",
+      "family": "quests100",
+      "text": "Выполни 100 заданий банды",
+      "raw": "Выполни 100 заданий банды",
+      "sourceLine": 119,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points1.name",
+      "family": "points1",
+      "text": "Захватчик",
+      "raw": "Захватчик",
+      "sourceLine": 120,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points1.description",
+      "family": "points1",
+      "text": "Захвати 1 точек на варзоне",
+      "raw": "Захвати 1 точек на варзоне",
+      "sourceLine": 121,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points25.name",
+      "family": "points25",
+      "text": "Штурмовик",
+      "raw": "Штурмовик",
+      "sourceLine": 122,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points25.description",
+      "family": "points25",
+      "text": "Захвати 25 точек на варзоне",
+      "raw": "Захвати 25 точек на варзоне",
+      "sourceLine": 123,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points100.name",
+      "family": "points100",
+      "text": "Полководец",
+      "raw": "Полководец",
+      "sourceLine": 124,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.points100.description",
+      "family": "points100",
+      "text": "Захвати 100 точек на варзоне",
+      "raw": "Захвати 100 точек на варзоне",
+      "sourceLine": 125,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.ghetto-chests1.name",
+      "family": "ghetto-chests1",
+      "text": "Трофей гетто",
+      "raw": "Трофей гетто",
+      "sourceLine": 126,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.ghetto-chests1.description",
+      "family": "ghetto-chests1",
+      "text": "Вскрой 1 сундуков гетто",
+      "raw": "Вскрой 1 сундуков гетто",
+      "sourceLine": 127,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.ghetto-chests10.name",
+      "family": "ghetto-chests10",
+      "text": "Хозяин гетто",
+      "raw": "Хозяин гетто",
+      "sourceLine": 128,
+      "placeholders": []
+    },
+    {
+      "key": "prison.warzone.ghetto-chests10.description",
+      "family": "ghetto-chests10",
+      "text": "Вскрой 10 сундуков гетто",
+      "raw": "Вскрой 10 сундуков гетто",
+      "sourceLine": 129,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.level3.name",
+      "family": "level3",
+      "text": "Уютная камера",
+      "raw": "Уютная камера",
+      "sourceLine": 130,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.level3.description",
+      "family": "level3",
+      "text": "Улучши камеру до 3 уровня",
+      "raw": "Улучши камеру до 3 уровня",
+      "sourceLine": 131,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.level6.name",
+      "family": "level6",
+      "text": "Люкс за решёткой",
+      "raw": "Люкс за решёткой",
+      "sourceLine": 132,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.level6.description",
+      "family": "level6",
+      "text": "Улучши камеру до 6 уровня",
+      "raw": "Улучши камеру до 6 уровня",
+      "sourceLine": 133,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level10.name",
+      "family": "job-level10",
+      "text": "Трудяга",
+      "raw": "Трудяга",
+      "sourceLine": 134,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level10.description",
+      "family": "job-level10",
+      "text": "Прокачай любую работу до 10 уровня",
+      "raw": "Прокачай любую работу до 10 уровня",
+      "sourceLine": 135,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level25.name",
+      "family": "job-level25",
+      "text": "Передовик",
+      "raw": "Передовик",
+      "sourceLine": 136,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level25.description",
+      "family": "job-level25",
+      "text": "Прокачай любую работу до 25 уровня",
+      "raw": "Прокачай любую работу до 25 уровня",
+      "sourceLine": 137,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level51.name",
+      "family": "job-level51",
+      "text": "Стахановец",
+      "raw": "Стахановец",
+      "sourceLine": 138,
+      "placeholders": []
+    },
+    {
+      "key": "prison.cell.job-level51.description",
+      "family": "job-level51",
+      "text": "Прокачай любую работу до 51 уровня",
+      "raw": "Прокачай любую работу до 51 уровня",
+      "sourceLine": 139,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours10.name",
+      "family": "hours10",
+      "text": "Первый срок",
+      "raw": "Первый срок",
+      "sourceLine": 140,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours10.description",
+      "family": "hours10",
+      "text": "Проведи в тюрьме 10 часов",
+      "raw": "Проведи в тюрьме 10 часов",
+      "sourceLine": 141,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours100.name",
+      "family": "hours100",
+      "text": "Рецидивист",
+      "raw": "Рецидивист",
+      "sourceLine": 142,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours100.description",
+      "family": "hours100",
+      "text": "Проведи в тюрьме 100 часов",
+      "raw": "Проведи в тюрьме 100 часов",
+      "sourceLine": 143,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours500.name",
+      "family": "hours500",
+      "text": "Пожизненное",
+      "raw": "Пожизненное",
+      "sourceLine": 144,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours500.description",
+      "family": "hours500",
+      "text": "Проведи в тюрьме 500 часов",
+      "raw": "Проведи в тюрьме 500 часов",
+      "sourceLine": 145,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours1000.name",
+      "family": "hours1000",
+      "text": "Старожил",
+      "raw": "Старожил",
+      "sourceLine": 146,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.hours1000.description",
+      "family": "hours1000",
+      "text": "Проведи в тюрьме 1 000 часов",
+      "raw": "Проведи в тюрьме 1 000 часов",
+      "sourceLine": 147,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily7.name",
+      "family": "daily7",
+      "text": "Отметка в журнале",
+      "raw": "Отметка в журнале",
+      "sourceLine": 148,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily7.description",
+      "family": "daily7",
+      "text": "Забери ежедневную награду 7 раз",
+      "raw": "Забери ежедневную награду 7 раз",
+      "sourceLine": 149,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily30.name",
+      "family": "daily30",
+      "text": "Примерный заключённый",
+      "raw": "Примерный заключённый",
+      "sourceLine": 150,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily30.description",
+      "family": "daily30",
+      "text": "Забери ежедневную награду 30 раз",
+      "raw": "Забери ежедневную награду 30 раз",
+      "sourceLine": 151,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily100.name",
+      "family": "daily100",
+      "text": "Режимник",
+      "raw": "Режимник",
+      "sourceLine": 152,
+      "placeholders": []
+    },
+    {
+      "key": "prison.time.daily100.description",
+      "family": "daily100",
+      "text": "Забери ежедневную награду 100 раз",
+      "raw": "Забери ежедневную награду 100 раз",
+      "sourceLine": 153,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created1.name",
+      "family": "created1",
+      "text": "Археолог",
+      "raw": "Археолог",
+      "sourceLine": 154,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created1.description",
+      "family": "created1",
+      "text": "Собери 1 артефактов",
+      "raw": "Собери 1 артефактов",
+      "sourceLine": 155,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created10.name",
+      "family": "created10",
+      "text": "Собиратель древностей",
+      "raw": "Собиратель древностей",
+      "sourceLine": 156,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created10.description",
+      "family": "created10",
+      "text": "Собери 10 артефактов",
+      "raw": "Собери 10 артефактов",
+      "sourceLine": 157,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created50.name",
+      "family": "created50",
+      "text": "Хранитель артефактов",
+      "raw": "Хранитель артефактов",
+      "sourceLine": 158,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.created50.description",
+      "family": "created50",
+      "text": "Собери 50 артефактов",
+      "raw": "Собери 50 артефактов",
+      "sourceLine": 159,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.epic.name",
+      "family": "epic",
+      "text": "Эпическая находка",
+      "raw": "Эпическая находка",
+      "sourceLine": 160,
+      "placeholders": []
+    },
+    {
+      "key": "prison.artifacts.epic.description",
+      "family": "epic",
+      "text": "Собери эпический артефакт",
+      "raw": "Собери эпический артефакт",
+      "sourceLine": 161,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.fraction.name",
+      "family": "fraction",
+      "text": "Под флагом",
+      "raw": "Под флагом",
+      "sourceLine": 162,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.fraction.description",
+      "family": "fraction",
+      "text": "Вступи во фракцию",
+      "raw": "Вступи во фракцию",
+      "sourceLine": 163,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.disease.name",
+      "family": "disease",
+      "text": "Больничный",
+      "raw": "Больничный",
+      "sourceLine": 164,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.disease.description",
+      "family": "disease",
+      "text": "Подхвати болезнь",
+      "raw": "Подхвати болезнь",
+      "sourceLine": 165,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.gifts1.name",
+      "family": "gifts1",
+      "text": "Щедрая душа",
+      "raw": "Щедрая душа",
+      "sourceLine": 166,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.gifts1.description",
+      "family": "gifts1",
+      "text": "Подари предметы 1 раз",
+      "raw": "Подари предметы 1 раз",
+      "sourceLine": 167,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.gifts25.name",
+      "family": "gifts25",
+      "text": "Меценат",
+      "raw": "Меценат",
+      "sourceLine": 168,
+      "placeholders": []
+    },
+    {
+      "key": "prison.misc.gifts25.description",
+      "family": "gifts25",
+      "text": "Подари предметы 25 раз",
+      "raw": "Подари предметы 25 раз",
+      "sourceLine": 169,
+      "placeholders": []
+    },
+    {
+      "key": "prison.root.legend.name",
+      "family": "legend",
+      "text": "Легенда тюрьмы",
+      "raw": "Легенда тюрьмы",
+      "sourceLine": 170,
+      "placeholders": []
+    },
+    {
+      "key": "prison.root.legend.description",
+      "family": "legend",
+      "text": "Получи высшие ачивки уровня, шахты, боссов, экономики и срока",
+      "raw": "Получи высшие ачивки уровня, шахты, боссов, экономики и срока",
+      "sourceLine": 171,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.unknown",
+      "family": "unknown",
+      "text": "UNKNOWN",
+      "raw": "UNKNOWN",
+      "sourceLine": 2009,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.player.not_found",
+      "family": "error",
+      "text": "Такого игрока не существует.",
+      "raw": "§c Такого игрока не существует.",
+      "sourceLine": 2010,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.player.not_joined",
+      "family": "error",
+      "text": "Этот игрок не заходил на режим.",
+      "raw": "§c Этот игрок не заходил на режим.",
+      "sourceLine": 2011,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.command.unknown",
+      "family": "error",
+      "text": "Произошла неизвестная ошибка при выполнении команды!",
+      "raw": "§c Произошла неизвестная ошибка при выполнении команды!",
+      "sourceLine": 2012,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.command.cooldown",
+      "family": "error",
+      "text": "Нельзя выполнять эту команду так часто.",
+      "raw": "§c Нельзя выполнять эту команду так часто.",
+      "sourceLine": 2013,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.command.no_perms",
+      "family": "error",
+      "text": "У Вас нет прав на выполнение этой команды.",
+      "raw": "§c У Вас нет прав на выполнение этой команды.",
+      "sourceLine": 2014,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.error.command.enter_subcommand",
+      "family": "error",
+      "text": "Введите дочернюю команду.",
+      "raw": "§c Введите дочернюю команду.",
+      "sourceLine": 2015,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.relic.master.name",
+      "family": "npc",
+      "text": "Мастер реликвий",
+      "raw": "Мастер реликвий",
+      "sourceLine": 2016,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.black.market.name",
+      "family": "npc",
+      "text": "Черный рынок",
+      "raw": "Черный рынок",
+      "sourceLine": 2017,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.trader.name",
+      "family": "npc",
+      "text": "Обменник ключей",
+      "raw": "Обменник ключей",
+      "sourceLine": 2018,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.keys.purchaser.name",
+      "family": "npc",
+      "text": "Скупщик ключей",
+      "raw": "Скупщик ключей",
+      "sourceLine": 2019,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.daily.rewards.name",
+      "family": "npc",
+      "text": "Ежедневные награды",
+      "raw": "Ежедневные награды",
+      "sourceLine": 2020,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.battlepass.name",
+      "family": "npc",
+      "text": "Батлпасс",
+      "raw": "Батлпасс",
+      "sourceLine": 2021,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.insurer.name",
+      "family": "npc",
+      "text": "Страховщик",
+      "raw": "Страховщик",
+      "sourceLine": 2022,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.fishing.name",
+      "family": "npc",
+      "text": "Рыбалка",
+      "raw": "Рыбалка",
+      "sourceLine": 2023,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.npc.blacksmith.name",
+      "family": "npc",
+      "text": "Кузнец",
+      "raw": "Кузнец",
+      "sourceLine": 2024,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.enchantments.efficiency",
+      "family": "bar",
+      "text": "Эффективность",
+      "raw": "§fЭффективность",
+      "sourceLine": 2025,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.enchantments.luck",
+      "family": "bar",
+      "text": "Удача",
+      "raw": "§fУдача",
+      "sourceLine": 2026,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.enchantments.advantage",
+      "family": "bar",
+      "text": "Поиск",
+      "raw": "§fПоиск",
+      "sourceLine": 2027,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.enchantments.skill",
+      "family": "bar",
+      "text": "Мастерство",
+      "raw": "§fМастерство",
+      "sourceLine": 2028,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.balance",
+      "family": "bar",
+      "text": "Деньги",
+      "raw": "Деньги",
+      "sourceLine": 2029,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.minerals",
+      "family": "bar",
+      "text": "Минералы",
+      "raw": "Минералы",
+      "sourceLine": 2030,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bar.prestige",
+      "family": "bar",
+      "text": "Престиж",
+      "raw": "Престиж",
+      "sourceLine": 2031,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_minerals",
+      "family": "no_minerals",
+      "text": "Недостаточно минералов",
+      "raw": "§c Недостаточно минералов",
+      "sourceLine": 2032,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_balance",
+      "family": "no_balance",
+      "text": "Недостаточно баланса",
+      "raw": "§c Недостаточно баланса",
+      "sourceLine": 2033,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_key",
+      "family": "no_key",
+      "text": "Недостаточно ключей данного типа",
+      "raw": "§c Недостаточно ключей данного §cтипа",
+      "sourceLine": 2034,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_key_all",
+      "family": "no_key_all",
+      "text": "В инвентаре не найдено ключей",
+      "raw": "§c В инвентаре не найдено ключей",
+      "sourceLine": 2035,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_relic",
+      "family": "no_relic",
+      "text": "В инвентаре не найдена данная реликвия",
+      "raw": "§c В инвентаре не §cнайдена §cданная реликвия",
+      "sourceLine": 2036,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.no_treasure",
+      "family": "no_treasure",
+      "text": "В инвентаре не найдено данное сокровище",
+      "raw": "§c В инвентаре не §cнайдено §cданное сокровище",
+      "sourceLine": 2037,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.full_inventory",
+      "family": "full_inventory",
+      "text": "Инвентарь полон",
+      "raw": "§c Инвентарь полон",
+      "sourceLine": 2038,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.receive.balance",
+      "family": "receive",
+      "text": "Вы получили %s",
+      "raw": "§a §6Вы получили §6%s",
+      "sourceLine": 2039,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.receive.minerals",
+      "family": "receive",
+      "text": "Вы получили %s",
+      "raw": "§a §6Вы получили ¨ff0d0d%s",
+      "sourceLine": 2040,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.mine.rank_ready",
+      "family": "mine",
+      "text": "Вам доступна эта шахта!",
+      "raw": "§aВам доступна эта шахта!",
+      "sourceLine": 2041,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.rank_not_ready",
+      "family": "mine",
+      "text": "Доступно с ранга %s",
+      "raw": "§7Доступно с ранга %s",
+      "sourceLine": 2042,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.mine.rank_text",
+      "family": "mine",
+      "text": "Ранг: %s",
+      "raw": "Ранг: %s",
+      "sourceLine": 2043,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.mine.hover_text",
+      "family": "mine",
+      "text": "Перейти",
+      "raw": "Перейти",
+      "sourceLine": 2044,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mine_text",
+      "family": "mine",
+      "text": "Шахты",
+      "raw": "Шахты",
+      "sourceLine": 2045,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.lore",
+      "family": "mine",
+      "text": "Повышай ранг и открывай новые шахты",
+      "raw": "§7Повышай ранг и открывай новые шахты",
+      "sourceLine": 2046,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.menu_button",
+      "family": "mine",
+      "text": "Назад",
+      "raw": "  Назад",
+      "sourceLine": 2047,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.a",
+      "family": "mine",
+      "text": "Тюремный дворик",
+      "raw": "Тюремный дворик",
+      "sourceLine": 2048,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.b",
+      "family": "mine",
+      "text": "Мацумото",
+      "raw": "Мацумото",
+      "sourceLine": 2049,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.c",
+      "family": "mine",
+      "text": "Преисподня",
+      "raw": "Преисподня",
+      "sourceLine": 2050,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.d",
+      "family": "mine",
+      "text": "Альпы",
+      "raw": "Альпы",
+      "sourceLine": 2051,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.e",
+      "family": "mine",
+      "text": "Пустошь",
+      "raw": "Пустошь",
+      "sourceLine": 2052,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.f",
+      "family": "mine",
+      "text": "Водный рай",
+      "raw": "Водный рай",
+      "sourceLine": 2053,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.g",
+      "family": "mine",
+      "text": "Криптон",
+      "raw": "Криптон",
+      "sourceLine": 2054,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.h",
+      "family": "mine",
+      "text": "Фуджи",
+      "raw": "Фуджи",
+      "sourceLine": 2055,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.i",
+      "family": "mine",
+      "text": "Метеор",
+      "raw": "Метеор",
+      "sourceLine": 2056,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.j",
+      "family": "mine",
+      "text": "Хайперлуп",
+      "raw": "Хайперлуп",
+      "sourceLine": 2057,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.k",
+      "family": "mine",
+      "text": "Провинция",
+      "raw": "Провинция",
+      "sourceLine": 2058,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.l",
+      "family": "mine",
+      "text": "Колдовской покой",
+      "raw": "Колдовской покой",
+      "sourceLine": 2059,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.m",
+      "family": "mine",
+      "text": "Ядро науки",
+      "raw": "Ядро науки",
+      "sourceLine": 2060,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.n",
+      "family": "mine",
+      "text": "Станция \"Мороз\"",
+      "raw": "Станция \"Мороз\"",
+      "sourceLine": 2061,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.o",
+      "family": "mine",
+      "text": "Тайга",
+      "raw": "Тайга",
+      "sourceLine": 2062,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.p",
+      "family": "mine",
+      "text": "Татуин",
+      "raw": "Татуин",
+      "sourceLine": 2063,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.q",
+      "family": "mine",
+      "text": "Амазонка",
+      "raw": "Амазонка",
+      "sourceLine": 2064,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.r",
+      "family": "mine",
+      "text": "Карьер",
+      "raw": "Карьер",
+      "sourceLine": 2065,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.s",
+      "family": "mine",
+      "text": "Заповедник",
+      "raw": "Заповедник",
+      "sourceLine": 2066,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.t",
+      "family": "mine",
+      "text": "Гармония",
+      "raw": "Гармония",
+      "sourceLine": 2067,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.u",
+      "family": "mine",
+      "text": "Тропики",
+      "raw": "Тропики",
+      "sourceLine": 2068,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.v",
+      "family": "mine",
+      "text": "Агония",
+      "raw": "Агония",
+      "sourceLine": 2069,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.w",
+      "family": "mine",
+      "text": "Небеса",
+      "raw": "Небеса",
+      "sourceLine": 2070,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.x",
+      "family": "mine",
+      "text": "Стадион",
+      "raw": "Стадион",
+      "sourceLine": 2071,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.y",
+      "family": "mine",
+      "text": "Глубина",
+      "raw": "Глубина",
+      "sourceLine": 2072,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.mine.mines.final",
+      "family": "mine",
+      "text": "Олимп",
+      "raw": "Олимп",
+      "sourceLine": 2073,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.all",
+      "family": "key_keeper",
+      "text": "Тип: Все",
+      "raw": "Тип: Все",
+      "sourceLine": 2074,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.common",
+      "family": "key_keeper",
+      "text": "Тип: Обычный",
+      "raw": "Тип: Обычный",
+      "sourceLine": 2075,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.rare",
+      "family": "key_keeper",
+      "text": "Тип: Редкий",
+      "raw": "Тип: Редкий",
+      "sourceLine": 2076,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.epic",
+      "family": "key_keeper",
+      "text": "Тип: Эпический",
+      "raw": "Тип: Эпический",
+      "sourceLine": 2077,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.mythic",
+      "family": "key_keeper",
+      "text": "Тип: Мифический",
+      "raw": "Тип: Мифический",
+      "sourceLine": 2078,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.key.legendary",
+      "family": "key_keeper",
+      "text": "Тип: Легендарный",
+      "raw": "Тип: Легендарный",
+      "sourceLine": 2079,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.gui.title",
+      "family": "key_keeper",
+      "text": "Скупщик ключей",
+      "raw": "Скупщик ключей",
+      "sourceLine": 2080,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.gui.sell.button",
+      "family": "key_keeper",
+      "text": "Продать по типу",
+      "raw": "Продать по типу",
+      "sourceLine": 2081,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_keeper.gui.sell.description",
+      "family": "key_keeper",
+      "text": "Продать: %d [ЛКМ]",
+      "raw": "\n§fПродать: §c%d§f §8[ЛКМ]§f",
+      "sourceLine": 2082,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.key_converter.title",
+      "family": "key_converter",
+      "text": "Обменник ключей",
+      "raw": "Обменник ключей",
+      "sourceLine": 2083,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.key.common",
+      "family": "key_converter",
+      "text": "Обычный",
+      "raw": "¨0ae90aОбычный",
+      "sourceLine": 2084,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.key.rare",
+      "family": "key_converter",
+      "text": "Редкий",
+      "raw": "¨30fff4Редкий",
+      "sourceLine": 2085,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.key.epic",
+      "family": "key_converter",
+      "text": "Эпический",
+      "raw": "¨d1179eЭпический",
+      "sourceLine": 2086,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.key.mythic",
+      "family": "key_converter",
+      "text": "Мифический",
+      "raw": "¨ffce06Мифический",
+      "sourceLine": 2087,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.key.legendary",
+      "family": "key_converter",
+      "text": "Легендарный",
+      "raw": "¨f72508Легендарный",
+      "sourceLine": 2088,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.price",
+      "family": "key_converter",
+      "text": "Цена:",
+      "raw": "Цена:",
+      "sourceLine": 2089,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key_converter.covert",
+      "family": "key_converter",
+      "text": "Обменять",
+      "raw": "Обменять",
+      "sourceLine": 2090,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.insurer.no_relic",
+      "family": "insurer",
+      "text": "Вы должны держать реликвию в руке!",
+      "raw": "§c Вы должны держать реликвию в §cруке!",
+      "sourceLine": 2091,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.insurer.gui.upgrade",
+      "family": "insurer",
+      "text": "Повысить шанс",
+      "raw": "Повысить шанс",
+      "sourceLine": 2092,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.insurer.gui.recycle.name",
+      "family": "insurer",
+      "text": "Переработать",
+      "raw": "Переработать",
+      "sourceLine": 2093,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.insurer.gui.recycle.description",
+      "family": "insurer",
+      "text": "Ваша реликвия будет переработана в повышалку с шансом %d%",
+      "raw": "Ваша реликвия будет переработана в повышалку с шансом ¨d70ad0%d%",
+      "sourceLine": 2094,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.insurer.close",
+      "family": "insurer",
+      "text": "Закрыть",
+      "raw": "Закрыть",
+      "sourceLine": 2095,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.pass_active",
+      "family": "orepit",
+      "text": "Вы успешно активировали пропуск на Рудник!",
+      "raw": "§a §6Вы успешно активировали пропуск на Рудник!",
+      "sourceLine": 2096,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.no_passes",
+      "family": "orepit",
+      "text": "У Вас нет пропуска на Рудник!",
+      "raw": "§c У Вас нет пропуска на Рудник!",
+      "sourceLine": 2097,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.generate",
+      "family": "orepit",
+      "text": "Рудник открыт!\n Событие, в котором реакция и скорость решат, \nкто одержит триумф, а кто уйдёт ни с чем.\nПоторопись, места ограничены!",
+      "raw": "\n§a  §6Рудник открыт!\n §7Событие, в котором реакция и скорость решат, \n§7кто одержит триумф, а кто уйдёт ни с чем.\n§7Поторопись, места ограничены!\n",
+      "sourceLine": 2098,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.degenerate",
+      "family": "orepit",
+      "text": "Рудник закрыт\n Ждем тебя через час!",
+      "raw": "\n§a §cРудник закрыт\n §7Ждем тебя через час!\n",
+      "sourceLine": 2099,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.not_active",
+      "family": "orepit",
+      "text": "Рудник закрыт, приходите позже",
+      "raw": "§cРудник закрыт, приходите позже",
+      "sourceLine": 2100,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.already_competing",
+      "family": "orepit",
+      "text": "Вы уже учавствуете в этом ивенте",
+      "raw": "§cВы уже учавствуете в этом ивенте",
+      "sourceLine": 2101,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit.mining",
+      "family": "orepit",
+      "text": "Рудник уже копают, приходите позже",
+      "raw": "§cРудник уже копают, приходите позже",
+      "sourceLine": 2102,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.blackmarket.title",
+      "family": "blackmarket",
+      "text": "Чёрный рынок",
+      "raw": "Чёрный рынок",
+      "sourceLine": 2103,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.blackmarket.refresh",
+      "family": "blackmarket",
+      "text": "Черный рынок обновлен",
+      "raw": "§a\n§a §6Черный рынок обновлен\n",
+      "sourceLine": 2104,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.blackmarket.refresh_alarm",
+      "family": "blackmarket",
+      "text": "Черный рынок обновлен",
+      "raw": "§a §6Черный рынок обновлен",
+      "sourceLine": 2105,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.blackmarket.force_refresh",
+      "family": "blackmarket",
+      "text": "Черный рынок обновлен игроком %s",
+      "raw": "§a §6Черный рынок обновлен игроком %s\n",
+      "sourceLine": 2106,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.blackmarket.available_count",
+      "family": "blackmarket",
+      "text": "В наличии: %d шт.",
+      "raw": "В наличии: %d шт.",
+      "sourceLine": 2107,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.blackmarket.no_amount",
+      "family": "blackmarket",
+      "text": "Этот товар закончился :(",
+      "raw": "§c Этот товар закончился :(",
+      "sourceLine": 2108,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.blackmarket.button.refresh",
+      "family": "blackmarket",
+      "text": "Обновить: %s",
+      "raw": "Обновить: %s",
+      "sourceLine": 2109,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.blackmarket.button.buy",
+      "family": "blackmarket",
+      "text": "Купить: %s",
+      "raw": "Купить: %s",
+      "sourceLine": 2110,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.fishing.fish_alarm",
+      "family": "fishing",
+      "text": "Рыба клюнула! Слови её, пока не поздно!",
+      "raw": "§a §6Рыба клюнула! Слови её, пока не поздно!",
+      "sourceLine": 2111,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.tuna",
+      "family": "fishing",
+      "text": "Тунец",
+      "raw": "Тунец",
+      "sourceLine": 2112,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.carp",
+      "family": "fishing",
+      "text": "Карп",
+      "raw": "Карп",
+      "sourceLine": 2113,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.zander",
+      "family": "fishing",
+      "text": "Судак",
+      "raw": "Судак",
+      "sourceLine": 2114,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.salmon",
+      "family": "fishing",
+      "text": "Лосось",
+      "raw": "Лосось",
+      "sourceLine": 2115,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.trout",
+      "family": "fishing",
+      "text": "Форель",
+      "raw": "Форель",
+      "sourceLine": 2116,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.treasure",
+      "family": "fishing",
+      "text": "Сокровище",
+      "raw": "Сокровище",
+      "sourceLine": 2117,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.pickaxe_scheme",
+      "family": "fishing",
+      "text": "Чертеж кирки",
+      "raw": "Чертеж кирки",
+      "sourceLine": 2118,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.legendary_key",
+      "family": "fishing",
+      "text": "Легендарный ключ",
+      "raw": "Легендарный ключ",
+      "sourceLine": 2119,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.drops.booster",
+      "family": "fishing",
+      "text": "Бустер",
+      "raw": "Бустер",
+      "sourceLine": 2120,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.key.epic",
+      "family": "fishing",
+      "text": "Эпический ключ",
+      "raw": "Эпический ключ",
+      "sourceLine": 2121,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.key.mythic",
+      "family": "fishing",
+      "text": "Мифический ключ",
+      "raw": "Мифический ключ",
+      "sourceLine": 2122,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.key.legendary",
+      "family": "fishing",
+      "text": "Легендарный ключ",
+      "raw": "Легендарный ключ",
+      "sourceLine": 2123,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.treasure",
+      "family": "fishing",
+      "text": "Сокровище",
+      "raw": "Сокровище",
+      "sourceLine": 2124,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.booster",
+      "family": "fishing",
+      "text": "Бустер комбо 2.0х",
+      "raw": "Бустер комбо 2.0х",
+      "sourceLine": 2125,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.items.pickaxe_scheme",
+      "family": "fishing",
+      "text": "Чертёж кирки",
+      "raw": "Чертёж кирки",
+      "sourceLine": 2126,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.alarm",
+      "family": "fishing",
+      "text": "Вы словили %a",
+      "raw": "§a §6Вы словили %a",
+      "sourceLine": 2127,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.fishing.fisher.name",
+      "family": "fishing",
+      "text": "Рыбак",
+      "raw": "Рыбак",
+      "sourceLine": 2128,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.fisher.no_points",
+      "family": "fishing",
+      "text": "Недостаточно рыбацких очков",
+      "raw": "§c Недостаточно рыбацких очков",
+      "sourceLine": 2129,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.fisher.buy",
+      "family": "fishing",
+      "text": "Успешная покупка!",
+      "raw": "§a §6Успешная покупка!",
+      "sourceLine": 2130,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.item.name",
+      "family": "fishing",
+      "text": "Удочка",
+      "raw": "§aУдочка",
+      "sourceLine": 2131,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.fishing.item.fish",
+      "family": "fishing",
+      "text": "Словленной рыбы: %s",
+      "raw": "§fСловленной рыбы: §a%s",
+      "sourceLine": 2132,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.fishing.item.points",
+      "family": "fishing",
+      "text": "Рыбацких очков: %s",
+      "raw": "§fРыбацких очков: §a%s",
+      "sourceLine": 2133,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.rank.up",
+      "family": "rank",
+      "text": "Ранг повышен! Следующий ранг - %s.",
+      "raw": "Ранг повышен! Следующий ранг - %s.",
+      "sourceLine": 2134,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.rank.up_max",
+      "family": "rank",
+      "text": "Вы достигли максимального ранга!",
+      "raw": "§c Вы достигли максимального ранга!",
+      "sourceLine": 2135,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.rank.no_money",
+      "family": "rank",
+      "text": "Недостаточно баланса для повышения ранга!",
+      "raw": "§c Недостаточно баланса для повышения ранга!",
+      "sourceLine": 2136,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.rank.menu",
+      "family": "rank",
+      "text": "Повышение ранга",
+      "raw": "Повышение ранга",
+      "sourceLine": 2137,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.rank.current",
+      "family": "rank",
+      "text": "Текущий ранг: %s",
+      "raw": "Текущий ранг: %s",
+      "sourceLine": 2138,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.rank.bar.current",
+      "family": "rank",
+      "text": "Ранг: %s [%s⁒]",
+      "raw": "Ранг: %s §f[%s⁒]",
+      "sourceLine": 2139,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.rank.bar.ready",
+      "family": "rank",
+      "text": "Максимальный ранг",
+      "raw": "Максимальный ранг",
+      "sourceLine": 2140,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.name",
+      "family": "pickaxe",
+      "text": "Алмазная кирка",
+      "raw": "§bАлмазная кирка",
+      "sourceLine": 2141,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.scheme.name",
+      "family": "pickaxe",
+      "text": "Чертеж кирки",
+      "raw": "§bЧертеж кирки",
+      "sourceLine": 2142,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.scheme.lore",
+      "family": "pickaxe",
+      "text": "Собери 4, чтобы открыть новый вид кирки!",
+      "raw": "§fСобери 4, чтобы открыть новый вид кирки!",
+      "sourceLine": 2143,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.scheme.alarm",
+      "family": "pickaxe",
+      "text": "Недостаточно чертежей",
+      "raw": "§c Недостаточно чертежей",
+      "sourceLine": 2144,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.default.name",
+      "family": "pickaxe",
+      "text": "Алмазная кирка",
+      "raw": "§bАлмазная кирка",
+      "sourceLine": 2145,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.default.description",
+      "family": "pickaxe",
+      "text": "Обычная кирка, ничего особенного",
+      "raw": "§7Обычная кирка, ничего особенного",
+      "sourceLine": 2146,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.slimey.name",
+      "family": "pickaxe",
+      "text": "Кирка Слайми",
+      "raw": "§bКирка Слайми",
+      "sourceLine": 2147,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.slimey.description",
+      "family": "pickaxe",
+      "text": "Даёт х2 урона по Слайми",
+      "raw": "§7Даёт х2 урона по Слайми",
+      "sourceLine": 2148,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.key.name",
+      "family": "pickaxe",
+      "text": "Кирка Ключника",
+      "raw": "§bКирка Ключника",
+      "sourceLine": 2149,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.key.description",
+      "family": "pickaxe",
+      "text": "Даёт шанс на получение двух ключей, вместо одного",
+      "raw": "§7Даёт шанс на получение двух ключей, вместо одного",
+      "sourceLine": 2150,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.minerals.name",
+      "family": "pickaxe",
+      "text": "Минеральная кирка",
+      "raw": "§bМинеральная кирка",
+      "sourceLine": 2151,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.minerals.description",
+      "family": "pickaxe",
+      "text": "Даёт шанс на получение х2 минералов со вскопанного блока",
+      "raw": "§7Даёт шанс на получение х2 минералов со вскопанного блока",
+      "sourceLine": 2152,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.treasure.name",
+      "family": "pickaxe",
+      "text": "Кирка Сокровищ",
+      "raw": "§bКирка Сокровищ",
+      "sourceLine": 2153,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.treasure.description",
+      "family": "pickaxe",
+      "text": "Даёт шанс на получение двух сокровищ, вместо одного",
+      "raw": "§7Даёт шанс на получение двух сокровищ, вместо одного",
+      "sourceLine": 2154,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.miner.name",
+      "family": "pickaxe",
+      "text": "Кирка Шахтёра",
+      "raw": "§bКирка Шахтёра",
+      "sourceLine": 2155,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.miner.description",
+      "family": "pickaxe",
+      "text": "Даёт шанс на получение х2 баланса со вскопанного блока",
+      "raw": "§7Даёт шанс на получение х2 баланса со вскопанного блока",
+      "sourceLine": 2156,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.premium.name",
+      "family": "pickaxe",
+      "text": "Премиум-кирка",
+      "raw": "§bПремиум-кирка",
+      "sourceLine": 2157,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.type.premium.description",
+      "family": "pickaxe",
+      "text": "Обьединяет бонусы кирок шахтера, минералов и ключника",
+      "raw": "§7Обьединяет бонусы кирок шахтера, минералов и ключника",
+      "sourceLine": 2158,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.lore.efficiency",
+      "family": "pickaxe",
+      "text": "Эффективность: %a",
+      "raw": "§fЭффективность: §b%a",
+      "sourceLine": 2159,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.lore.luck",
+      "family": "pickaxe",
+      "text": "Удача: %a",
+      "raw": "§fУдача: §b%a",
+      "sourceLine": 2160,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.lore.advantage",
+      "family": "pickaxe",
+      "text": "Поиск: %a",
+      "raw": "§fПоиск: §b%a",
+      "sourceLine": 2161,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.lore.skill",
+      "family": "pickaxe",
+      "text": "Мастерство: %a",
+      "raw": "§fМастерство: §b%a",
+      "sourceLine": 2162,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.efficiency.title",
+      "family": "pickaxe",
+      "text": "Эффективность",
+      "raw": "§bЭффективность",
+      "sourceLine": 2163,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.efficiency.description",
+      "family": "pickaxe",
+      "text": "Повышает скорость копания",
+      "raw": "Повышает скорость копания",
+      "sourceLine": 2164,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.luck.title",
+      "family": "pickaxe",
+      "text": "Удача",
+      "raw": "§bУдача",
+      "sourceLine": 2165,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.luck.description",
+      "family": "pickaxe",
+      "text": "Повышает шанс на нахождение минералов",
+      "raw": "Повышает шанс на нахождение минералов",
+      "sourceLine": 2166,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.advantage.title",
+      "family": "pickaxe",
+      "text": "Поиск",
+      "raw": "§bПоиск",
+      "sourceLine": 2167,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.advantage.description",
+      "family": "pickaxe",
+      "text": "Повышает шанс на нахождение сокровища",
+      "raw": "Повышает шанс на нахождение сокровища",
+      "sourceLine": 2168,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.skill.title",
+      "family": "pickaxe",
+      "text": "Мастерство",
+      "raw": "§bМастерство",
+      "sourceLine": 2169,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.skill.description",
+      "family": "pickaxe",
+      "text": "Повышает множитель денег",
+      "raw": "Повышает множитель денег",
+      "sourceLine": 2170,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.gui.max_level",
+      "family": "pickaxe",
+      "text": "Уровень: %d/%d\nМаксимальный уровень",
+      "raw": "\nУровень: %d/%d\nМаксимальный уровень",
+      "sourceLine": 2171,
+      "placeholders": [
+        "%d",
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.enchantment.gui.upgrade",
+      "family": "pickaxe",
+      "text": "Уровень: %d/%d\nУлучшить: %s [ЛКМ]",
+      "raw": "\nУровень: %d/%d\n§fУлучшить: §c%s§f §8[ЛКМ]§f",
+      "sourceLine": 2172,
+      "placeholders": [
+        "%d",
+        "%d",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.increase.title",
+      "family": "pickaxe",
+      "text": "Повышение шанса",
+      "raw": "Повышение шанса",
+      "sourceLine": 2173,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.increase.button",
+      "family": "pickaxe",
+      "text": "Повысить шанс реликвии [%d⁒]",
+      "raw": "Повысить шанс реликвии [%d⁒]",
+      "sourceLine": 2174,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.increase.chance",
+      "family": "pickaxe",
+      "text": "Реликвия: %d%",
+      "raw": "Реликвия: %d%",
+      "sourceLine": 2175,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.container.title",
+      "family": "pickaxe",
+      "text": "Контейнер для реликвии",
+      "raw": "Контейнер для реликвии",
+      "sourceLine": 2176,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.container.description",
+      "family": "pickaxe",
+      "text": "Используется для разблокировки слотов для реликвий",
+      "raw": "Используется для разблокировки слотов для реликвий",
+      "sourceLine": 2177,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.diffuser.title",
+      "family": "pickaxe",
+      "text": "Развеиватель реликвии",
+      "raw": "Развеиватель реликвии",
+      "sourceLine": 2178,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.diffuser.description",
+      "family": "pickaxe",
+      "text": "Используется для развеивания реликвии с кирки",
+      "raw": "Используется для развеивания реликвии с кирки",
+      "sourceLine": 2179,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.diffuser.chaos_error",
+      "family": "pickaxe",
+      "text": "Эту реликвию сейчас нельзя развеять из-за Реликвии Хаоса",
+      "raw": "§c Эту реликвию сейчас нельзя развеять из-за Реликвии Хаоса",
+      "sourceLine": 2180,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.item.percentage",
+      "family": "pickaxe",
+      "text": "Шанс наложения: %d%",
+      "raw": "Шанс наложения: %d%",
+      "sourceLine": 2181,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.free",
+      "family": "pickaxe",
+      "text": "Слот свободен",
+      "raw": "Слот свободен",
+      "sourceLine": 2182,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.locked",
+      "family": "pickaxe",
+      "text": "Слот заблокирован",
+      "raw": "Слот заблокирован",
+      "sourceLine": 2183,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.upgrade",
+      "family": "pickaxe",
+      "text": "Улучшить [ЛКМ]",
+      "raw": "Улучшить [ЛКМ]",
+      "sourceLine": 2184,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.tooltip.locked",
+      "family": "pickaxe",
+      "text": "Разблокируй слот у Мастера Реликвий",
+      "raw": "Разблокируй слот у Мастера Реликвий",
+      "sourceLine": 2185,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.tooltip.put",
+      "family": "pickaxe",
+      "text": "Наложи реликвию у Мастера Реликвий",
+      "raw": "Наложи реликвию у Мастера Реликвий",
+      "sourceLine": 2186,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.tooltip.lore",
+      "family": "pickaxe",
+      "text": "Уровень: %d",
+      "raw": "\nУровень: %d",
+      "sourceLine": 2187,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.tooltip.can_upgrade",
+      "family": "pickaxe",
+      "text": "Улучши у Мастера Реликвий",
+      "raw": "Улучши у Мастера Реликвий",
+      "sourceLine": 2188,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.tooltip.max_level",
+      "family": "pickaxe",
+      "text": "Макс. уровень",
+      "raw": "Макс. уровень",
+      "sourceLine": 2189,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.slot.chaos_error",
+      "family": "pickaxe",
+      "text": "Эту реликвию сейчас нельзя наложить из-за Реликвии Хаоса",
+      "raw": "§c Эту реликвию сейчас нельзя наложить из-за Реликвии Хаоса",
+      "sourceLine": 2190,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.button",
+      "family": "pickaxe",
+      "text": "Улучшение реликвии",
+      "raw": "Улучшение реликвии",
+      "sourceLine": 2191,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.title",
+      "family": "pickaxe",
+      "text": "",
+      "raw": "",
+      "sourceLine": 2192,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.back",
+      "family": "pickaxe",
+      "text": "Назад",
+      "raw": " Назад",
+      "sourceLine": 2193,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.level",
+      "family": "pickaxe",
+      "text": "Уровень %d",
+      "raw": "Уровень %d",
+      "sourceLine": 2194,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.max_level",
+      "family": "pickaxe",
+      "text": "Макс. уровень",
+      "raw": "Макс. уровень",
+      "sourceLine": 2195,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.buy",
+      "family": "pickaxe",
+      "text": "Улучшить за %s",
+      "raw": "Улучшить за %s",
+      "sourceLine": 2196,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.gui.master.upgrade.chaos_error",
+      "family": "pickaxe",
+      "text": "Эту реликвию сейчас нельзя улучшить из-за Реликвии Хаоса",
+      "raw": "§c Эту реликвию сейчас нельзя улучшить из-за Реликвии Хаоса",
+      "sourceLine": 2197,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.explosion.name",
+      "family": "pickaxe",
+      "text": "Реликвия взрыва",
+      "raw": "¨eb3320Реликвия взрыва",
+      "sourceLine": 2198,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.explosion.lore",
+      "family": "pickaxe",
+      "text": "При ломании блока, есть\nшанс, что он взорвётся.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7При ломании блока, есть\n§7шанс, что он взорвётся.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2199,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.speed.name",
+      "family": "pickaxe",
+      "text": "Реликвия скорости",
+      "raw": "¨f2fff3Реликвия скорости",
+      "sourceLine": 2200,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.speed.lore",
+      "family": "pickaxe",
+      "text": "Копая блоки с такой реликвией\nна кирке, Вы будете получать\nпостоянный эффект скорости.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Копая блоки с такой реликвией\n§7на кирке, Вы будете получать\n§7постоянный эффект скорости.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2201,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.fortune.name",
+      "family": "pickaxe",
+      "text": "Реликвия фортуны",
+      "raw": "¨f7a200Реликвия фортуны",
+      "sourceLine": 2202,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.fortune.lore",
+      "family": "pickaxe",
+      "text": "Повышает количество минералов\nполучаемых при копании блоков.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Повышает количество минералов\n§7получаемых при копании блоков.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2203,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.haste.name",
+      "family": "pickaxe",
+      "text": "Реликвия спешки",
+      "raw": "¨455fefРеликвия спешки",
+      "sourceLine": 2204,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.haste.lore",
+      "family": "pickaxe",
+      "text": "Данная реликвия иногда накладывает\nна Ваши руки эффект, из-за которого\nВы сможете копать быстрее.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Данная реликвия иногда накладывает\n§7на Ваши руки эффект, из-за которого\n§7Вы сможете копать быстрее.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2205,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.key_keeper.name",
+      "family": "pickaxe",
+      "text": "Реликвия ключника",
+      "raw": "¨ec38ecРеликвия ключника",
+      "sourceLine": 2206,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.key_keeper.lore",
+      "family": "pickaxe",
+      "text": "Данная реликвия увеличивает шанс\nвыпадения ключей при копании блоков.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Данная реликвия увеличивает шанс\n§7выпадения ключей при копании блоков.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2207,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.impulse.name",
+      "family": "pickaxe",
+      "text": "Реликвия импульса",
+      "raw": "¨30fff5Реликвия импульса",
+      "sourceLine": 2208,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.impulse.lore",
+      "family": "pickaxe",
+      "text": "Позволяет ломать сразу\nнесколько блоков за раз.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Позволяет ломать сразу\n§7несколько блоков за раз.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2209,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.chaos.name",
+      "family": "pickaxe",
+      "text": "Реликвия хаоса",
+      "raw": "¨473e47Реликвия хаоса",
+      "sourceLine": 2210,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.chaos.alarm",
+      "family": "pickaxe",
+      "text": "Хаос: %a",
+      "raw": "¨2b2351Хаос: %a",
+      "sourceLine": 2211,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.chaos.lore",
+      "family": "pickaxe",
+      "text": "Временно добавляет на Вашу\nкирку случайную реликвию.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Временно добавляет на Вашу\n§7кирку случайную реликвию.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2212,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.jewel.name",
+      "family": "pickaxe",
+      "text": "Реликвия кладези",
+      "raw": "¨ffd700Реликвия кладези",
+      "sourceLine": 2213,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.jewel.lore",
+      "family": "pickaxe",
+      "text": "Повышает шансы на выпадение\nсокровища из блоков при копании.\n\nШанс наложения: %s⁒\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Повышает шансы на выпадение\n§7сокровища из блоков при копании.\n\n§7Шанс наложения: §f%s⁒\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2214,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.container.name",
+      "family": "pickaxe",
+      "text": "Контейнер для реликвии",
+      "raw": "¨f7a200Контейнер для реликвии",
+      "sourceLine": 2215,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.container.lore",
+      "family": "pickaxe",
+      "text": "Добавляет дополнительные слоты\nдля реликвий Вашей кирке.\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Добавляет дополнительные слоты\n§7для реликвий Вашей кирке.\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2216,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.diffuser.name",
+      "family": "pickaxe",
+      "text": "Развеиватель реликвии",
+      "raw": "¨f7a200Развеиватель реликвии",
+      "sourceLine": 2217,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.diffuser.lore",
+      "family": "pickaxe",
+      "text": "Позволяет удалить реликвию\nс Вашей кирки.\n\n  Можно использовать у Мастера\nреликвий на спавне.",
+      "raw": "§7Позволяет удалить реликвию\n§7с Вашей кирки.\n\n§c  §8Можно использовать у Мастера\n§8реликвий на спавне.",
+      "sourceLine": 2218,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.chance.name",
+      "family": "pickaxe",
+      "text": "Повышалка [%s⁒]",
+      "raw": "¨d70ad0Повышалка [%s⁒]",
+      "sourceLine": 2219,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.pickaxe.relic.chance.lore",
+      "family": "pickaxe",
+      "text": "Позволяет увеличить шансы\nналожения реликвии на кирку.\n\n  Можно использовать у\nСтраховщика на спавне.",
+      "raw": "§7Позволяет увеличить шансы\n§7наложения реликвии на кирку.\n\n§c  §8Можно использовать у\n§8Страховщика на спавне.",
+      "sourceLine": 2220,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.pickaxe.blocks",
+      "family": "pickaxe",
+      "text": "Блоков вскопано: %s",
+      "raw": "§fБлоков вскопано: §b%s",
+      "sourceLine": 2221,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.key.common.name",
+      "family": "key",
+      "text": "Обычный ключ",
+      "raw": "¨0ae90aОбычный ключ",
+      "sourceLine": 2222,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.common.lore",
+      "family": "key",
+      "text": "Данным ключом ты можешь открыть\nкейс, который находится на спавне.\n\nТип » Обычный",
+      "raw": "§7Данным ключом ты можешь открыть\n§7кейс, который находится на спавне.\n\n§7Тип §8» ¨0ae90aОбычный",
+      "sourceLine": 2223,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.rare.name",
+      "family": "key",
+      "text": "Редкий ключ",
+      "raw": "¨30fff4Редкий ключ",
+      "sourceLine": 2224,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.rare.lore",
+      "family": "key",
+      "text": "Данным ключом ты можешь открыть\nкейс, который находится на спавне.\n\nТип » Редкий",
+      "raw": "§7Данным ключом ты можешь открыть\n§7кейс, который находится на спавне.\n\n§7Тип §8» ¨30fff4Редкий",
+      "sourceLine": 2225,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.epic.name",
+      "family": "key",
+      "text": "Эпический ключ",
+      "raw": "¨d1179eЭпический ключ",
+      "sourceLine": 2226,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.epic.lore",
+      "family": "key",
+      "text": "Данным ключом ты можешь открыть\nкейс, который находится на спавне.\n\nТип » Эпический",
+      "raw": "§7Данным ключом ты можешь открыть\n§7кейс, который находится на спавне.\n\n§7Тип §8» ¨d1179eЭпический",
+      "sourceLine": 2227,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.mythic.name",
+      "family": "key",
+      "text": "Мифический ключ",
+      "raw": "¨ffce06Мифический ключ",
+      "sourceLine": 2228,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.mythic.lore",
+      "family": "key",
+      "text": "Данным ключом ты можешь открыть\nкейс, который находится на спавне.\n\nТип » Мифический",
+      "raw": "§7Данным ключом ты можешь открыть\n§7кейс, который находится на спавне.\n\n§7Тип §8» ¨ffce06Мифический",
+      "sourceLine": 2229,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.legendary.name",
+      "family": "key",
+      "text": "Легендарный ключ",
+      "raw": "¨f72508Легендарный ключ",
+      "sourceLine": 2230,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.key.legendary.lore",
+      "family": "key",
+      "text": "Данным ключом ты можешь открыть\nкейс, который находится на спавне.\n\nТип » Легендарный",
+      "raw": "§7Данным ключом ты можешь открыть\n§7кейс, который находится на спавне.\n\n§7Тип §8» ¨f72508Легендарный",
+      "sourceLine": 2231,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.name",
+      "family": "lootbox",
+      "text": "Кейс\n[ПКМ]",
+      "raw": "§6Кейс\n§7[ПКМ]",
+      "sourceLine": 2232,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.rewards",
+      "family": "lootbox",
+      "text": "Возможные награды",
+      "raw": "Возможные награды",
+      "sourceLine": 2233,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.open",
+      "family": "lootbox",
+      "text": "Открыть лутбокс",
+      "raw": "Открыть лутбокс",
+      "sourceLine": 2234,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.open_confirm",
+      "family": "lootbox",
+      "text": "Вы уверены, что хотите открыть все ключи в руке?",
+      "raw": "Вы уверены, что хотите открыть все ключи в руке?",
+      "sourceLine": 2235,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.booster",
+      "family": "lootbox",
+      "text": "%a бустер %a x%s",
+      "raw": "%a бустер %a x%s",
+      "sourceLine": 2236,
+      "placeholders": [
+        "%a",
+        "%a",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.minerals",
+      "family": "lootbox",
+      "text": "Минералы x%s",
+      "raw": "Минералы x%s",
+      "sourceLine": 2237,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.dynamite",
+      "family": "lootbox",
+      "text": "Динамит x%s",
+      "raw": "Динамит x%s",
+      "sourceLine": 2238,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.orepit_pass",
+      "family": "lootbox",
+      "text": "Пропуск на Рудник",
+      "raw": "Пропуск на Рудник",
+      "sourceLine": 2239,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.key",
+      "family": "lootbox",
+      "text": "%a",
+      "raw": "%a",
+      "sourceLine": 2240,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.relic",
+      "family": "lootbox",
+      "text": "%a",
+      "raw": "%a",
+      "sourceLine": 2241,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.slimey_spawn",
+      "family": "lootbox",
+      "text": "Дух Слайми",
+      "raw": "¨0bb52dДух Слайми",
+      "sourceLine": 2242,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.relic_container",
+      "family": "lootbox",
+      "text": "Контейнер для реликвии",
+      "raw": "¨f7a200Контейнер для реликвии",
+      "sourceLine": 2243,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.relic_diffuser",
+      "family": "lootbox",
+      "text": "Развеиватель реликвии",
+      "raw": "¨f7a200Развеиватель реликвии",
+      "sourceLine": 2244,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.reward.relic_chance",
+      "family": "lootbox",
+      "text": "Повышалка [%s⁒]",
+      "raw": "¨d70ad0Повышалка [%s⁒]",
+      "sourceLine": 2245,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.lootbox.mode.slow",
+      "family": "lootbox",
+      "text": "Медленно",
+      "raw": "Медленно",
+      "sourceLine": 2246,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.lootbox.mode.fast",
+      "family": "lootbox",
+      "text": "Быстро",
+      "raw": "Быстро",
+      "sourceLine": 2247,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.up",
+      "family": "prestige",
+      "text": "Престиж повышен!",
+      "raw": "Престиж повышен!",
+      "sourceLine": 2248,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.no_money",
+      "family": "prestige",
+      "text": "Недостаточно баланса для повышения престижа!",
+      "raw": "§c Недостаточно баланса для повышения престижа!",
+      "sourceLine": 2249,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.menu",
+      "family": "prestige",
+      "text": "Повышение престижа",
+      "raw": "Повышение престижа",
+      "sourceLine": 2250,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.reward",
+      "family": "prestige",
+      "text": "Награда: +0.05x, +0.05x",
+      "raw": "Награда: ¨94ff41+0.05x¨ffffff, ¨ff0d0d+0.05x¨ffffff",
+      "sourceLine": 2251,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.button",
+      "family": "prestige",
+      "text": "Перерождение",
+      "raw": "Перерождение ",
+      "sourceLine": 2252,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.balance",
+      "family": "prestige",
+      "text": "Ваш баланс: %s",
+      "raw": "Ваш баланс: ¨94ff41%s",
+      "sourceLine": 2253,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.prestiges",
+      "family": "prestige",
+      "text": "Перерождений: %d",
+      "raw": "Перерождений: %d",
+      "sourceLine": 2254,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.upgrade",
+      "family": "prestige",
+      "text": "Престиж повышен",
+      "raw": "§eПрестиж повышен",
+      "sourceLine": 2255,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.prestige.gui.congrats",
+      "family": "prestige",
+      "text": "Множители увеличены!",
+      "raw": "§6Множители увеличены!",
+      "sourceLine": 2256,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.type.MONEY",
+      "family": "booster",
+      "text": "денег",
+      "raw": "§2денег",
+      "sourceLine": 2257,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.type.MINERALS",
+      "family": "booster",
+      "text": "минералов",
+      "raw": "§cминералов",
+      "sourceLine": 2258,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.type.COMBO",
+      "family": "booster",
+      "text": "\"Комбо\"",
+      "raw": "§e\"Комбо\"",
+      "sourceLine": 2259,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.scope.LOCAL",
+      "family": "booster",
+      "text": "Локальный",
+      "raw": "Локальный",
+      "sourceLine": 2260,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.scope.GLOBAL",
+      "family": "booster",
+      "text": "Глобальный",
+      "raw": "Глобальный",
+      "sourceLine": 2261,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.booster",
+      "family": "booster",
+      "text": "%a бустер %a [ПКМ]",
+      "raw": "%a бустер %a [ПКМ]",
+      "sourceLine": 2262,
+      "placeholders": [
+        "%a",
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.booster.lore",
+      "family": "booster",
+      "text": "Множитель: %s\nДлительность: %s минут\n\nДанный бустер ты можешь активировать\nдля повышения своего множителя.",
+      "raw": "§fМножитель: %s\n§fДлительность: %s §fминут\n\n§7Данный бустер ты можешь активировать\n§7для повышения своего множителя.",
+      "sourceLine": 2263,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.booster.thx.no_boosters",
+      "family": "booster",
+      "text": "В данный момент нет активных глобальных бустеров.",
+      "raw": "§7В данный момент нет активных глобальных бустеров.",
+      "sourceLine": 2264,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.thx.already_thx",
+      "family": "booster",
+      "text": "Вы уже поблагодарили всех владельцев бустеров.",
+      "raw": "§7Вы уже поблагодарили всех владельцев бустеров.",
+      "sourceLine": 2265,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.thx.success",
+      "family": "booster",
+      "text": "Вы поблагодарили игрока %s за бустер и получили %s и %s.",
+      "raw": "§7Вы поблагодарили игрока %s§r за бустер и получили %s и %s.",
+      "sourceLine": 2266,
+      "placeholders": [
+        "%s",
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.booster.thx.get",
+      "family": "booster",
+      "text": "Игрок %s поблагодарил Вас за бустер. Вы получили: %s и %s.",
+      "raw": "Игрок %s§r поблагодарил Вас за бустер. Вы получили: %s и %s.",
+      "sourceLine": 2267,
+      "placeholders": [
+        "%s",
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.booster.activate",
+      "family": "booster",
+      "text": "Бустер успешно активирован!",
+      "raw": "Бустер успешно активирован!",
+      "sourceLine": 2268,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.booster.add_to_queue",
+      "family": "booster",
+      "text": "Бустер успешно добавлен в очередь!",
+      "raw": "Бустер успешно добавлен в очередь!",
+      "sourceLine": 2269,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.title",
+      "family": "quest",
+      "text": "Список квестов",
+      "raw": "Список квестов",
+      "sourceLine": 2270,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.point_amount",
+      "family": "quest",
+      "text": "Квест-очков: %s",
+      "raw": "Квест-очков: %s",
+      "sourceLine": 2271,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.rewards",
+      "family": "quest",
+      "text": "Награды",
+      "raw": "Награды",
+      "sourceLine": 2272,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.reward",
+      "family": "quest",
+      "text": "Награда: %d",
+      "raw": "Награда: %d",
+      "sourceLine": 2273,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.requirements",
+      "family": "quest",
+      "text": "Требования",
+      "raw": "Требования",
+      "sourceLine": 2274,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.completed",
+      "family": "quest",
+      "text": "Выполнено: %d из %d",
+      "raw": "Выполнено: %d из %d",
+      "sourceLine": 2275,
+      "placeholders": [
+        "%d",
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.alarm",
+      "family": "quest",
+      "text": "Вы выполнили квест!",
+      "raw": "§a §6Вы выполнили квест!",
+      "sourceLine": 2276,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.competed",
+      "family": "quest",
+      "text": "Выполнено",
+      "raw": "Выполнено",
+      "sourceLine": 2277,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.not_completed",
+      "family": "quest",
+      "text": "Не выполнено",
+      "raw": "Не выполнено",
+      "sourceLine": 2278,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.reward.received",
+      "family": "quest",
+      "text": "Награда получена",
+      "raw": "Награда получена",
+      "sourceLine": 2279,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.reward.available",
+      "family": "quest",
+      "text": "Награда доступна",
+      "raw": "Награда доступна",
+      "sourceLine": 2280,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.reward.not_available",
+      "family": "quest",
+      "text": "Награда недоступна",
+      "raw": "Награда недоступна",
+      "sourceLine": 2281,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.button.received",
+      "family": "quest",
+      "text": "Получено",
+      "raw": "Получено",
+      "sourceLine": 2282,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.button.receive",
+      "family": "quest",
+      "text": "Получить",
+      "raw": "Получить",
+      "sourceLine": 2283,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.status.button.points_needed",
+      "family": "quest",
+      "text": "Треб. %d",
+      "raw": "Треб. %d",
+      "sourceLine": 2284,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.balance.type",
+      "family": "quest",
+      "text": "Заработок",
+      "raw": "Заработок",
+      "sourceLine": 2285,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.balance.title",
+      "family": "quest",
+      "text": "Заработать %s",
+      "raw": "Заработать %s",
+      "sourceLine": 2286,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.balance.lore",
+      "family": "quest",
+      "text": "Деньги -",
+      "raw": "Деньги - ",
+      "sourceLine": 2287,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.balance.description",
+      "family": "quest",
+      "text": "Зарабатывай баланс, чтобы\nполучить вознаграждение",
+      "raw": "Зарабатывай баланс, чтобы\nполучить вознаграждение",
+      "sourceLine": 2288,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.block.type",
+      "family": "quest",
+      "text": "Добытчик",
+      "raw": "Добытчик",
+      "sourceLine": 2289,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.block.title",
+      "family": "quest",
+      "text": "Вскопать %s блоков",
+      "raw": "Вскопать %s блоков",
+      "sourceLine": 2290,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.block.lore",
+      "family": "quest",
+      "text": "Блоки -",
+      "raw": "Блоки - ",
+      "sourceLine": 2291,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.block.description",
+      "family": "quest",
+      "text": "Трудись на шахте, чтобы\nполучить вознаграждение",
+      "raw": "Трудись на шахте, чтобы\nполучить вознаграждение",
+      "sourceLine": 2292,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.rank.type",
+      "family": "quest",
+      "text": "Ранги",
+      "raw": "Ранги",
+      "sourceLine": 2293,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.rank.title",
+      "family": "quest",
+      "text": "Добиться ранга %s",
+      "raw": "Добиться ранга %s",
+      "sourceLine": 2294,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.rank.lore",
+      "family": "quest",
+      "text": "Ранг -",
+      "raw": "Ранг - ",
+      "sourceLine": 2295,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.rank.description",
+      "family": "quest",
+      "text": "Повышай свой ранг, чтобы\nполучить вознаграждение",
+      "raw": "Повышай свой ранг, чтобы\nполучить вознаграждение",
+      "sourceLine": 2296,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.prestige.type",
+      "family": "quest",
+      "text": "Престиж",
+      "raw": "Престиж",
+      "sourceLine": 2297,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.prestige.title",
+      "family": "quest",
+      "text": "Добиться престижа %s",
+      "raw": "Добиться престижа %s",
+      "sourceLine": 2298,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.quest.prestige.lore",
+      "family": "quest",
+      "text": "Престиж -",
+      "raw": "Престиж - ",
+      "sourceLine": 2299,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.prestige.description",
+      "family": "quest",
+      "text": "Повышай свой престиж, чтобы\nполучить вознаграждение",
+      "raw": "Повышай свой престиж, чтобы\nполучить вознаграждение",
+      "sourceLine": 2300,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.quests",
+      "family": "quest",
+      "text": "Квесты",
+      "raw": "Квесты",
+      "sourceLine": 2301,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.quest.points",
+      "family": "quest",
+      "text": "квест-очков",
+      "raw": "квест-очков",
+      "sourceLine": 2302,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.reward",
+      "family": "reward",
+      "text": "Награда",
+      "raw": "Награда",
+      "sourceLine": 2303,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.rewards",
+      "family": "reward",
+      "text": "Награды",
+      "raw": "Награды",
+      "sourceLine": 2304,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.minerals_bar",
+      "family": "reward",
+      "text": "Вы нашли %s минералов",
+      "raw": "§a §6Вы нашли §c%s минералов",
+      "sourceLine": 2305,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.reward.key_bar",
+      "family": "reward",
+      "text": "Вы нашли %a",
+      "raw": "§a §6Вы нашли %a",
+      "sourceLine": 2306,
+      "placeholders": [
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.reward.requirements",
+      "family": "reward",
+      "text": "Требования",
+      "raw": "Требования",
+      "sourceLine": 2307,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.get",
+      "family": "reward",
+      "text": "Получить награду",
+      "raw": "Получить награду",
+      "sourceLine": 2308,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.get_all",
+      "family": "reward",
+      "text": "Получить все награды",
+      "raw": "Получить все награды",
+      "sourceLine": 2309,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.status.rewarded",
+      "family": "reward",
+      "text": "Награда получена",
+      "raw": "Награда получена",
+      "sourceLine": 2310,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.status.available",
+      "family": "reward",
+      "text": "Награда доступна",
+      "raw": "Награда доступна",
+      "sourceLine": 2311,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.reward.status.not_available",
+      "family": "reward",
+      "text": "Недоступно",
+      "raw": "Недоступно",
+      "sourceLine": 2312,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.name",
+      "family": "detonator",
+      "text": "Детонатор",
+      "raw": "§cДетонатор",
+      "sourceLine": 2313,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.lore",
+      "family": "detonator",
+      "text": "Выпускает заряд динамита [R]",
+      "raw": "§8Выпускает заряд динамита [R]",
+      "sourceLine": 2314,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.none",
+      "family": "detonator",
+      "text": "У Вас нет детонатора!",
+      "raw": "§c У Вас нет детонатора!",
+      "sourceLine": 2315,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.cooldown",
+      "family": "detonator",
+      "text": "Детонатор на перезарядке!",
+      "raw": "§c Детонатор на перезарядке!",
+      "sourceLine": 2316,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.alarm.buy_success",
+      "family": "detonator",
+      "text": "Вы успешно получили Детонатор",
+      "raw": "Вы успешно получили Детонатор",
+      "sourceLine": 2317,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.alarm.already_own",
+      "family": "detonator",
+      "text": "У Вас уже имеется Детонатор, поэтому Вы получаете 3 Легендарных ключа",
+      "raw": "§cУ Вас уже имеется Детонатор, поэтому Вы получаете 3 Легендарных ключа",
+      "sourceLine": 2318,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.status.available",
+      "family": "detonator",
+      "text": "Детонатор доступен",
+      "raw": "Детонатор доступен",
+      "sourceLine": 2319,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.status.not_available",
+      "family": "detonator",
+      "text": "Детонатор недоступен",
+      "raw": "Детонатор недоступен",
+      "sourceLine": 2320,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.detonator.mine_is_too_large",
+      "family": "detonator",
+      "text": "Нельзя запускать детонатор слишком далеко от шахты!",
+      "raw": "§c Нельзя запускать детонатор §cслишком далеко от шахты!",
+      "sourceLine": 2321,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit_pass.name",
+      "family": "orepit_pass",
+      "text": "Пропуск на рудник",
+      "raw": "Пропуск на рудник",
+      "sourceLine": 2322,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.orepit_pass.lore",
+      "family": "orepit_pass",
+      "text": "Одноразовый пропуск,\nна ивент \"Рудник\".",
+      "raw": "§7Одноразовый пропуск,\n§7на ивент \"Рудник\".",
+      "sourceLine": 2323,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.tip",
+      "family": "daily",
+      "text": "Ваша награда",
+      "raw": "Ваша награда",
+      "sourceLine": 2324,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.day",
+      "family": "daily",
+      "text": "День %d",
+      "raw": "День %d",
+      "sourceLine": 2325,
+      "placeholders": [
+        "%d"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.status.not_available",
+      "family": "daily",
+      "text": "Недоступно",
+      "raw": "Недоступно",
+      "sourceLine": 2326,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.status.collected",
+      "family": "daily",
+      "text": "Получено",
+      "raw": "Получено",
+      "sourceLine": 2327,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.status.can_collect",
+      "family": "daily",
+      "text": "Получить",
+      "raw": "Получить",
+      "sourceLine": 2328,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.booster.balance",
+      "family": "daily",
+      "text": "Бустер денег %s",
+      "raw": "Бустер денег %s",
+      "sourceLine": 2329,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.booster.minerals",
+      "family": "daily",
+      "text": "Бустер минералов %s",
+      "raw": "Бустер минералов %s",
+      "sourceLine": 2330,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.booster.combo",
+      "family": "daily",
+      "text": "Бустер комбо %s",
+      "raw": "Бустер комбо %s",
+      "sourceLine": 2331,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.key.common",
+      "family": "daily",
+      "text": "Обычный ключ x%s",
+      "raw": "¨0ae90aОбычный ключ x%s",
+      "sourceLine": 2332,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.key.rare",
+      "family": "daily",
+      "text": "Редкий ключ x%s",
+      "raw": "¨30fff4Редкий ключ x%s",
+      "sourceLine": 2333,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.key.epic",
+      "family": "daily",
+      "text": "Эпический ключ x%s",
+      "raw": "¨d1179eЭпический ключ x%s",
+      "sourceLine": 2334,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.key.mythic",
+      "family": "daily",
+      "text": "Мифический ключ x%s",
+      "raw": "¨ffce06Мифический ключ x%s",
+      "sourceLine": 2335,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.key.legendary",
+      "family": "daily",
+      "text": "Легендарный ключ x%s",
+      "raw": "¨f72508Легендарный ключ x%s",
+      "sourceLine": 2336,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.minerals",
+      "family": "daily",
+      "text": "%s минералов",
+      "raw": "§c%s минералов",
+      "sourceLine": 2337,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.detonator",
+      "family": "daily",
+      "text": "Детонатор",
+      "raw": "Детонатор",
+      "sourceLine": 2338,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.slimey_item",
+      "family": "daily",
+      "text": "Дух Слайми",
+      "raw": "¨0bb52dДух Слайми",
+      "sourceLine": 2339,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.orepit_pass",
+      "family": "daily",
+      "text": "Пропуск на рудник",
+      "raw": "Пропуск на рудник",
+      "sourceLine": 2340,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.daily.rewards.relic_chance",
+      "family": "daily",
+      "text": "Повышалка [%s⁒]",
+      "raw": "¨d70ad0Повышалка [%s⁒]",
+      "sourceLine": 2341,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.daily.gui.title",
+      "family": "daily",
+      "text": "Ежедневные награды",
+      "raw": "Ежедневные награды",
+      "sourceLine": 2342,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.treasure.name.name",
+      "family": "treasure",
+      "text": "Сокровище [ПКМ]",
+      "raw": "§6Сокровище §7[ПКМ]",
+      "sourceLine": 2343,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.treasure.name.lore",
+      "family": "treasure",
+      "text": "Используйте в любой момент,\nчтобы получить ценные вещи.",
+      "raw": "§7Используйте в любой момент,\n§7чтобы получить ценные вещи.",
+      "sourceLine": 2344,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.treasure.choose",
+      "family": "treasure",
+      "text": "Выбери свою награду",
+      "raw": "Выбери свою награду",
+      "sourceLine": 2345,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.treasure.collect",
+      "family": "treasure",
+      "text": "Забрать",
+      "raw": "Забрать",
+      "sourceLine": 2346,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.treasure.alarm",
+      "family": "treasure",
+      "text": "Вы нашли сокровище!",
+      "raw": "§a §6Вы нашли сокровище!",
+      "sourceLine": 2347,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.alarm.already_own",
+      "family": "battlepass",
+      "text": "§сВы уже приобрели премиальный BattlePass",
+      "raw": "§сВы уже приобрели премиальный BattlePass",
+      "sourceLine": 2348,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.alarm.already_own_gift",
+      "family": "battlepass",
+      "text": "§сДанный игрок уже имеет премиальный BattlePass",
+      "raw": "§сДанный игрок уже имеет премиальный BattlePass",
+      "sourceLine": 2349,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.skip.title",
+      "family": "battlepass",
+      "text": "Пропустить уровень за %s кристалликов?",
+      "raw": "Пропустить уровень за %s кристалликов?",
+      "sourceLine": 2350,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.skip.yes",
+      "family": "battlepass",
+      "text": "Да",
+      "raw": "Да",
+      "sourceLine": 2351,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.skip.no",
+      "family": "battlepass",
+      "text": "Нет",
+      "raw": "Нет",
+      "sourceLine": 2352,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.purchase.title",
+      "family": "battlepass",
+      "text": "Приобрести премиальный BattlePass за 449 кристалликов?",
+      "raw": "Приобрести премиальный BattlePass за 449 кристалликов?",
+      "sourceLine": 2353,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.title",
+      "family": "battlepass",
+      "text": "Подарить 399",
+      "raw": "Подарить 399",
+      "sourceLine": 2354,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.input",
+      "family": "battlepass",
+      "text": "Введите ник игрока",
+      "raw": "Введите ник игрока",
+      "sourceLine": 2355,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.attempt_gift_yourself",
+      "family": "battlepass",
+      "text": "§сНельзя подарить премиальный BattlePass самому себе.",
+      "raw": "§сНельзя подарить премиальный BattlePass самому себе.",
+      "sourceLine": 2356,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.already_has",
+      "family": "battlepass",
+      "text": "§сЭтот игрок уже имеет премиальный BattlePass.",
+      "raw": "§сЭтот игрок уже имеет премиальный BattlePass.",
+      "sourceLine": 2357,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.success_buy",
+      "family": "battlepass",
+      "text": "Вы подарили премиальный BattlePass игроку %s!",
+      "raw": "Вы подарили премиальный BattlePass игроку %s§r!",
+      "sourceLine": 2358,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.gift.success_get",
+      "family": "battlepass",
+      "text": "Игрок %s подарил Вам премиальный BattlePass!",
+      "raw": "Игрок %s§r подарил Вам премиальный BattlePass!",
+      "sourceLine": 2359,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.keys.common",
+      "family": "battlepass",
+      "text": "Обычный ключ x%s",
+      "raw": "¨0ae90aОбычный ключ x%s",
+      "sourceLine": 2360,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.keys.rare",
+      "family": "battlepass",
+      "text": "Редкий ключ x%s",
+      "raw": "¨30fff4Редкий ключ x%s",
+      "sourceLine": 2361,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.keys.epic",
+      "family": "battlepass",
+      "text": "Эпический ключ x%s",
+      "raw": "¨d1179eЭпический ключ x%s",
+      "sourceLine": 2362,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.keys.mythic",
+      "family": "battlepass",
+      "text": "Мифический ключ x%s",
+      "raw": "¨ffce06Мифический ключ x%s",
+      "sourceLine": 2363,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.keys.legendary",
+      "family": "battlepass",
+      "text": "Легендарный ключ x%s",
+      "raw": "¨f72508Легендарный ключ x%s",
+      "sourceLine": 2364,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.explosion",
+      "family": "battlepass",
+      "text": "Реликвия взрыва",
+      "raw": "¨eb3320Реликвия взрыва",
+      "sourceLine": 2365,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.speed",
+      "family": "battlepass",
+      "text": "Реликвия скорости",
+      "raw": "¨f2fff3Реликвия скорости",
+      "sourceLine": 2366,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.fortune",
+      "family": "battlepass",
+      "text": "Реликвия фортуны",
+      "raw": "¨f7a200Реликвия фортуны",
+      "sourceLine": 2367,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.haste",
+      "family": "battlepass",
+      "text": "Реликвия спешки",
+      "raw": "¨455fefРеликвия спешки",
+      "sourceLine": 2368,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.key_keeper",
+      "family": "battlepass",
+      "text": "Реликвия ключника",
+      "raw": "¨ec38ecРеликвия ключника",
+      "sourceLine": 2369,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.impulse",
+      "family": "battlepass",
+      "text": "Реликвия импульса",
+      "raw": "¨30fff5Реликвия импульса",
+      "sourceLine": 2370,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.chaos",
+      "family": "battlepass",
+      "text": "Реликвия хаоса",
+      "raw": "¨473e47Реликвия хаоса",
+      "sourceLine": 2371,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.jewel",
+      "family": "battlepass",
+      "text": "Реликвия кладези",
+      "raw": "¨ffd700Реликвия кладези",
+      "sourceLine": 2372,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.container",
+      "family": "battlepass",
+      "text": "Контейнер для реликвии",
+      "raw": "¨f7a200Контейнер для реликвии",
+      "sourceLine": 2373,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.diffuser",
+      "family": "battlepass",
+      "text": "Развеиватель реликвии",
+      "raw": "¨f7a200Развеиватель реликвии",
+      "sourceLine": 2374,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.relic.chance",
+      "family": "battlepass",
+      "text": "Повышалка [%s⁒]",
+      "raw": "¨d70ad0Повышалка [%s⁒]",
+      "sourceLine": 2375,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.minerals",
+      "family": "battlepass",
+      "text": "%s минералов",
+      "raw": "§c%s минералов",
+      "sourceLine": 2376,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.balance",
+      "family": "battlepass",
+      "text": "%s⁒ баланса от ранга",
+      "raw": "%s⁒ баланса от ранга",
+      "sourceLine": 2377,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.orepit_pass",
+      "family": "battlepass",
+      "text": "Пропуск на рудник",
+      "raw": "Пропуск на рудник",
+      "sourceLine": 2378,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.treasure",
+      "family": "battlepass",
+      "text": "Сокровище х%s",
+      "raw": "§6Сокровище х%s",
+      "sourceLine": 2379,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.booster.balance",
+      "family": "battlepass",
+      "text": "Бустер денег x%s",
+      "raw": "Бустер денег x%s",
+      "sourceLine": 2380,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.booster.minerals",
+      "family": "battlepass",
+      "text": "Бустер минералов x%s",
+      "raw": "Бустер минералов x%s",
+      "sourceLine": 2381,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.booster.combo",
+      "family": "battlepass",
+      "text": "Бустер комбо x%s",
+      "raw": "Бустер комбо x%s",
+      "sourceLine": 2382,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.slimey_item",
+      "family": "battlepass",
+      "text": "Дух Слайми",
+      "raw": "¨0bb52dДух Слайми",
+      "sourceLine": 2383,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.personalization.mini_detonator",
+      "family": "battlepass",
+      "text": "Питомец Мини-детонатор",
+      "raw": "Питомец §cМини-детонатор",
+      "sourceLine": 2384,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.rewards.personalization.minerals_backpack",
+      "family": "battlepass",
+      "text": "Спина Рюкзак с минералами",
+      "raw": "Спина §cРюкзак с минералами",
+      "sourceLine": 2385,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.mine_blocks",
+      "family": "battlepass",
+      "text": "Вскопать %s блоков [%s очков]",
+      "raw": "Вскопать %s блоков [%s очков]",
+      "sourceLine": 2386,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_key.COMMON",
+      "family": "battlepass",
+      "text": "Открыть %s Обычных ключей [%s очков]",
+      "raw": "Открыть %s Обычных ключей [%s очков]",
+      "sourceLine": 2387,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_key.RARE",
+      "family": "battlepass",
+      "text": "Открыть %s Редких ключей [%s очков]",
+      "raw": "Открыть %s Редких ключей [%s очков]",
+      "sourceLine": 2388,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_key.EPIC",
+      "family": "battlepass",
+      "text": "Открыть %s Эпических ключей [%s очков]",
+      "raw": "Открыть %s Эпических ключей [%s очков]",
+      "sourceLine": 2389,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_key.MYTHIC",
+      "family": "battlepass",
+      "text": "Открыть %s Мифических ключей [%s очков]",
+      "raw": "Открыть %s Мифических ключей [%s очков]",
+      "sourceLine": 2390,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_key.LEGENDARY",
+      "family": "battlepass",
+      "text": "Открыть %s Легендарных ключей [%s очков]",
+      "raw": "Открыть %s Легендарных ключей [%s очков]",
+      "sourceLine": 2391,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.collect_minerals",
+      "family": "battlepass",
+      "text": "Добыть %s минералов [%s очков]",
+      "raw": "Добыть %s минералов [%s очков]",
+      "sourceLine": 2392,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.open_treasure",
+      "family": "battlepass",
+      "text": "Открыть %s сокровищ [%s очков]",
+      "raw": "Открыть %s сокровищ [%s очков]",
+      "sourceLine": 2393,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.up_rebirth",
+      "family": "battlepass",
+      "text": "Повысить престиж [%s очков]",
+      "raw": "Повысить престиж [%s очков]",
+      "sourceLine": 2394,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.up_rank",
+      "family": "battlepass",
+      "text": "Повысить ранг [%s очков]",
+      "raw": "Повысить ранг [%s очков]",
+      "sourceLine": 2395,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.visit_orepit",
+      "family": "battlepass",
+      "text": "Посетить Рудник [%s очков]",
+      "raw": "Посетить Рудник [%s очков]",
+      "sourceLine": 2396,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.hit_slimey",
+      "family": "battlepass",
+      "text": "Нанести %s урона Слайми [%s очков]",
+      "raw": "Нанести %s урона Слайми [%s очков]",
+      "sourceLine": 2397,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.unlock_relic_slot",
+      "family": "battlepass",
+      "text": "Разблокировать слот реликвии [%s очков]",
+      "raw": "Разблокировать слот реликвии [%s очков]",
+      "sourceLine": 2398,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.black_market_buy",
+      "family": "battlepass",
+      "text": "Купить на Черном рынке %s раз [%s очков]",
+      "raw": "Купить на Черном рынке %s раз [%s очков]",
+      "sourceLine": 2399,
+      "placeholders": [
+        "%s",
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.upgrade_pickaxe",
+      "family": "battlepass",
+      "text": "Улучшить кирку [%s очков]",
+      "raw": "Улучшить кирку [%s очков]",
+      "sourceLine": 2400,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.title",
+      "family": "battlepass",
+      "text": "ОСЕННИЙ СЕЗОН\nБАТЛПАССА",
+      "raw": "ОСЕННИЙ СЕЗОН\nБАТЛПАССА",
+      "sourceLine": 2401,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.subscribe.title",
+      "family": "battlepass",
+      "text": "Подписка",
+      "raw": "§6 §fПодписка",
+      "sourceLine": 2402,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.subscribe.features",
+      "family": "battlepass",
+      "text": "— Доступ к дополнительным заданиям\n— Дополнительная персонализация\n— Больше полезных наград\n— Радость в жизни",
+      "raw": "— Доступ к дополнительным заданиям\n— Дополнительная персонализация\n— Больше полезных наград\n— Радость в жизни",
+      "sourceLine": 2403,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.subscribe.buy",
+      "family": "battlepass",
+      "text": "Купить",
+      "raw": "Купить",
+      "sourceLine": 2404,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.subscribe.gift",
+      "family": "battlepass",
+      "text": "Подарить",
+      "raw": "Подарить",
+      "sourceLine": 2405,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.level.current",
+      "family": "battlepass",
+      "text": "Текущий уровень",
+      "raw": " Текущий уровень",
+      "sourceLine": 2406,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.battlepass.gui.level.skip",
+      "family": "battlepass",
+      "text": "Пропустить уровень",
+      "raw": "Пропустить уровень",
+      "sourceLine": 2407,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.spawn_item.name",
+      "family": "slimey",
+      "text": "Дух Слайми [ПКМ]",
+      "raw": "¨0bb52dДух Слайми §7[ПКМ]",
+      "sourceLine": 2408,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.spawn_item.lore",
+      "family": "slimey",
+      "text": "Используйте на любой шахте,\nчтобы призвать Слайми.",
+      "raw": "§7Используйте на любой шахте,\n§7чтобы призвать Слайми.",
+      "sourceLine": 2409,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.command.can.spawn",
+      "family": "slimey",
+      "text": "Слайми можно призвать",
+      "raw": "§a §6Слайми можно призвать",
+      "sourceLine": 2410,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.command.cant.spawn",
+      "family": "slimey",
+      "text": "Слайми можно будет призвать через %s",
+      "raw": "§c Слайми можно будет призвать через %s",
+      "sourceLine": 2411,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.slimey.generate",
+      "family": "slimey",
+      "text": "Слайми был призван игроком %s на шахте %a",
+      "raw": "§a §6Слайми был призван игроком %s §6на шахте %a",
+      "sourceLine": 2412,
+      "placeholders": [
+        "%s",
+        "%a"
+      ]
+    },
+    {
+      "key": "prison.oldschool.slimey.bar",
+      "family": "slimey",
+      "text": "Слайми",
+      "raw": "Слайми",
+      "sourceLine": 2413,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.wrong_world",
+      "family": "slimey",
+      "text": "В этом мире нельзя призвать Слайми",
+      "raw": "§c В этом мире нельзя призвать §cСлайми",
+      "sourceLine": 2414,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.slimey.cooldown",
+      "family": "slimey",
+      "text": "Слайми был недавно призван, подождите немного",
+      "raw": "§c Слайми был недавно призван, §cподождите немного",
+      "sourceLine": 2415,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.prestige.title",
+      "family": "top",
+      "text": "Топ по престижу\nСезон I: Классический",
+      "raw": "Топ по §6престижу\n§7Сезон I: Классический",
+      "sourceLine": 2416,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.prestige.column.name",
+      "family": "top",
+      "text": "Игрок",
+      "raw": "Игрок",
+      "sourceLine": 2417,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.prestige.column.prestige",
+      "family": "top",
+      "text": "Престиж",
+      "raw": "Престиж",
+      "sourceLine": 2418,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.rank.title",
+      "family": "top",
+      "text": "Топ по рангу\nСезон I: Классический",
+      "raw": "Топ по §6рангу\n§7Сезон I: Классический",
+      "sourceLine": 2419,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.rank.column.name",
+      "family": "top",
+      "text": "Игрок",
+      "raw": "Игрок",
+      "sourceLine": 2420,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.rank.column.prestige",
+      "family": "top",
+      "text": "Ранг",
+      "raw": "Ранг",
+      "sourceLine": 2421,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.blocks.title",
+      "family": "top",
+      "text": "Топ по блокам\nСезон I: Классический",
+      "raw": "Топ по §6блокам\n§7Сезон I: Классический",
+      "sourceLine": 2422,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.blocks.column.name",
+      "family": "top",
+      "text": "Игрок",
+      "raw": "Игрок",
+      "sourceLine": 2423,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.top.blocks.column.prestige",
+      "family": "top",
+      "text": "Блоки",
+      "raw": "Блоки",
+      "sourceLine": 2424,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.menu",
+      "family": "bind",
+      "text": "Главное меню",
+      "raw": "Главное меню",
+      "sourceLine": 2425,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.mines",
+      "family": "bind",
+      "text": "Меню шахт",
+      "raw": "Меню шахт",
+      "sourceLine": 2426,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.quests",
+      "family": "bind",
+      "text": "Меню квестов",
+      "raw": "Меню квестов",
+      "sourceLine": 2427,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.pickaxe_upgrade",
+      "family": "bind",
+      "text": "Улучшение кирки",
+      "raw": "Улучшение кирки",
+      "sourceLine": 2428,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.detonator",
+      "family": "bind",
+      "text": "Детонатор",
+      "raw": "Детонатор",
+      "sourceLine": 2429,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.bind.ender_chest",
+      "family": "bind",
+      "text": "Эндер сундук",
+      "raw": "Эндер сундук",
+      "sourceLine": 2430,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.banner.title",
+      "family": "gui",
+      "text": "Скидка 50⁒ на наборы",
+      "raw": "Скидка 50⁒ на наборы",
+      "sourceLine": 2431,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.banner.button",
+      "family": "gui",
+      "text": "Перейти",
+      "raw": "Перейти",
+      "sourceLine": 2432,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.mines.title",
+      "family": "gui",
+      "text": "Шахты",
+      "raw": "Шахты",
+      "sourceLine": 2433,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.mines.description",
+      "family": "gui",
+      "text": "Ваш ранг: %s",
+      "raw": "¨a8a8a8Ваш ранг: %s",
+      "sourceLine": 2434,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.pickaxe_upgrade.title",
+      "family": "gui",
+      "text": "Улучшение кирки",
+      "raw": "Улучшение кирки",
+      "sourceLine": 2435,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.pickaxe_upgrade.description",
+      "family": "gui",
+      "text": "Блоков: %s",
+      "raw": "¨a8a8a8Блоков: %s",
+      "sourceLine": 2436,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.title",
+      "family": "gui",
+      "text": "Рудник [%s пропусков]",
+      "raw": "Рудник [%s пропусков]",
+      "sourceLine": 2437,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.open",
+      "family": "gui",
+      "text": "Открыто",
+      "raw": "¨c2e855Открыто",
+      "sourceLine": 2438,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.close",
+      "family": "gui",
+      "text": "Закрыто",
+      "raw": "§cЗакрыто",
+      "sourceLine": 2439,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.cooldown",
+      "family": "gui",
+      "text": "Открытие через %s",
+      "raw": "Открытие через %s",
+      "sourceLine": 2440,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.join",
+      "family": "gui",
+      "text": "Телепортация через %s",
+      "raw": "Телепортация через %s",
+      "sourceLine": 2441,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.ore_pit.event",
+      "family": "gui",
+      "text": "Рудник закроется через %s",
+      "raw": "Рудник закроется через %s",
+      "sourceLine": 2442,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.donate_title",
+      "family": "gui",
+      "text": "Донат",
+      "raw": "Донат",
+      "sourceLine": 2443,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.battle_pass_title",
+      "family": "gui",
+      "text": "BattlePass",
+      "raw": "BattlePass",
+      "sourceLine": 2444,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.quests_title",
+      "family": "gui",
+      "text": "Квесты",
+      "raw": "Квесты",
+      "sourceLine": 2445,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.rank_title",
+      "family": "gui",
+      "text": "Ранг",
+      "raw": "Ранг",
+      "sourceLine": 2446,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.rebirth_title",
+      "family": "gui",
+      "text": "Престиж",
+      "raw": "Престиж",
+      "sourceLine": 2447,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.menu.button.settings_title",
+      "family": "gui",
+      "text": "Настройки",
+      "raw": "Настройки",
+      "sourceLine": 2448,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.current_rank",
+      "family": "gui",
+      "text": "Текущий ранг: %s",
+      "raw": "Текущий ранг: %s",
+      "sourceLine": 2449,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.rank",
+      "family": "gui",
+      "text": "Ранг %s",
+      "raw": "Ранг %s",
+      "sourceLine": 2450,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.max_rank",
+      "family": "gui",
+      "text": "Максимальный ранг",
+      "raw": "Максимальный ранг",
+      "sourceLine": 2451,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.balance",
+      "family": "gui",
+      "text": "Ваш баланс: %s",
+      "raw": "Ваш баланс: ¨94ff41%s",
+      "sourceLine": 2452,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.congrats",
+      "family": "gui",
+      "text": "Ваш ранг повышен!",
+      "raw": "§eВаш ранг повышен!",
+      "sourceLine": 2453,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.reward",
+      "family": "gui",
+      "text": "Доступна новая шахта!",
+      "raw": "§6Доступна новая шахта!",
+      "sourceLine": 2454,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.button.upgrade.title",
+      "family": "gui",
+      "text": "Повысить",
+      "raw": "Повысить",
+      "sourceLine": 2455,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.rank_up.button.upgrade.max",
+      "family": "gui",
+      "text": "Макс. ур.",
+      "raw": "Макс. ур.",
+      "sourceLine": 2456,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.relic.master.title",
+      "family": "gui",
+      "text": "Мастер реликвий",
+      "raw": "Мастер реликвий",
+      "sourceLine": 2457,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.relic.master.applied",
+      "family": "gui",
+      "text": "Наложенные реликвии",
+      "raw": "Наложенные реликвии",
+      "sourceLine": 2458,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.relic.master.inventory",
+      "family": "gui",
+      "text": "Инвентарь реликвий",
+      "raw": "Инвентарь реликвий",
+      "sourceLine": 2459,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.settings.title",
+      "family": "gui",
+      "text": "Настройки",
+      "raw": "Настройки",
+      "sourceLine": 2460,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.treasures.title",
+      "family": "gui",
+      "text": "Выбери карту",
+      "raw": "Выбери карту",
+      "sourceLine": 2461,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.treasures.completed",
+      "family": "gui",
+      "text": "Выбор сделан: %s",
+      "raw": "Выбор сделан: %s",
+      "sourceLine": 2462,
+      "placeholders": [
+        "%s"
+      ]
+    },
+    {
+      "key": "prison.oldschool.gui.upgrade.relics",
+      "family": "gui",
+      "text": "Реликвии",
+      "raw": "Реликвии",
+      "sourceLine": 2463,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.gui.upgrade.enchantments",
+      "family": "gui",
+      "text": "Зачарования",
+      "raw": "Зачарования",
+      "sourceLine": 2464,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.settings.hide.on",
+      "family": "settings",
+      "text": "Вы успешно скрыли всех игроков!",
+      "raw": "§a Вы успешно скрыли всех игроков!",
+      "sourceLine": 2465,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.settings.hide.off",
+      "family": "settings",
+      "text": "Вы успешно показали всех игроков!",
+      "raw": "§a Вы успешно показали всех игроков!",
+      "sourceLine": 2466,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.help.hover",
+      "family": "command",
+      "text": "Нажмите, чтобы ввести",
+      "raw": "Нажмите, чтобы ввести ",
+      "sourceLine": 2467,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.mine",
+      "family": "command",
+      "text": "Открыть меню шахт",
+      "raw": "Открыть меню шахт",
+      "sourceLine": 2468,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.enderchest",
+      "family": "command",
+      "text": "Открыть эндер-сундук",
+      "raw": "Открыть эндер-сундук",
+      "sourceLine": 2469,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.rankup",
+      "family": "command",
+      "text": "Открыть меню повышения ранга",
+      "raw": "Открыть меню повышения ранга",
+      "sourceLine": 2470,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.relic",
+      "family": "command",
+      "text": "Реликвии",
+      "raw": "Реликвии",
+      "sourceLine": 2471,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.relic.container",
+      "family": "command",
+      "text": "Выдать Контейнер для реликвии",
+      "raw": "Выдать Контейнер для реликвии",
+      "sourceLine": 2472,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.relic.chance",
+      "family": "command",
+      "text": "Выдать Повышалку",
+      "raw": "Выдать Повышалку",
+      "sourceLine": 2473,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.relic.diffuser",
+      "family": "command",
+      "text": "Выдать Развеиватель реликвии",
+      "raw": "Выдать Развеиватель реликвии",
+      "sourceLine": 2474,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.thx",
+      "family": "command",
+      "text": "Поблагодарить за бустеры",
+      "raw": "Поблагодарить за бустеры",
+      "sourceLine": 2475,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.orepit",
+      "family": "command",
+      "text": "Рудник",
+      "raw": "Рудник",
+      "sourceLine": 2476,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.orepit.item",
+      "family": "command",
+      "text": "Выдать Пропуск на рудник",
+      "raw": "Выдать Пропуск на рудник",
+      "sourceLine": 2477,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.menu",
+      "family": "command",
+      "text": "Открыть главное меню",
+      "raw": "Открыть главное меню",
+      "sourceLine": 2478,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.rebirth",
+      "family": "command",
+      "text": "Открыть меню перерождений",
+      "raw": "Открыть меню перерождений",
+      "sourceLine": 2479,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.booster",
+      "family": "command",
+      "text": "Бустеры",
+      "raw": "Бустеры",
+      "sourceLine": 2480,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.booster.give",
+      "family": "command",
+      "text": "Выдать бустер",
+      "raw": "Выдать бустер",
+      "sourceLine": 2481,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.battlepass",
+      "family": "command",
+      "text": "BattlePass",
+      "raw": "BattlePass",
+      "sourceLine": 2482,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.battlepass.level",
+      "family": "command",
+      "text": "Установить уровень BattlePass",
+      "raw": "Установить уровень BattlePass",
+      "sourceLine": 2483,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.daily",
+      "family": "command",
+      "text": "Ежедневные награды",
+      "raw": "Ежедневные награды",
+      "sourceLine": 2484,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.daily.day",
+      "family": "command",
+      "text": "Установить день в ежедневных наградах",
+      "raw": "Установить день в ежедневных наградах",
+      "sourceLine": 2485,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.slimey",
+      "family": "command",
+      "text": "Слайми",
+      "raw": "Слайми",
+      "sourceLine": 2486,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.slimey.item",
+      "family": "command",
+      "text": "Выдать Дух слайми",
+      "raw": "Выдать Дух слайми",
+      "sourceLine": 2487,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.slimey.spawn",
+      "family": "command",
+      "text": "Заспавнить слайми",
+      "raw": "Заспавнить слайми",
+      "sourceLine": 2488,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.slimey.hp",
+      "family": "command",
+      "text": "Установить здоровье слайми",
+      "raw": "Установить здоровье слайми",
+      "sourceLine": 2489,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.help",
+      "family": "command",
+      "text": "Посмотреть список доступных команд",
+      "raw": "Посмотреть список доступных команд",
+      "sourceLine": 2490,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.hide",
+      "family": "command",
+      "text": "Скрыть/показать игроков",
+      "raw": "Скрыть/показать игроков",
+      "sourceLine": 2491,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.spawn",
+      "family": "command",
+      "text": "Телепортироваться на спавн",
+      "raw": "Телепортироваться на спавн",
+      "sourceLine": 2492,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.donate",
+      "family": "command",
+      "text": "Открыть меню доната",
+      "raw": "Открыть меню доната",
+      "sourceLine": 2493,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.donate.set",
+      "family": "command",
+      "text": "Установить донат игроку",
+      "raw": "Установить донат игроку",
+      "sourceLine": 2494,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user",
+      "family": "command",
+      "text": "Управление игроком",
+      "raw": "Управление игроком",
+      "sourceLine": 2495,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user.minerals",
+      "family": "command",
+      "text": "Выдать игроку минералы",
+      "raw": "Выдать игроку минералы",
+      "sourceLine": 2496,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user.balance",
+      "family": "command",
+      "text": "Выдать игроку баланс",
+      "raw": "Выдать игроку баланс",
+      "sourceLine": 2497,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user.rank",
+      "family": "command",
+      "text": "Установить игроку ранг",
+      "raw": "Установить игроку ранг",
+      "sourceLine": 2498,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user.prestige",
+      "family": "command",
+      "text": "Установить игроку престиж",
+      "raw": "Установить игроку престиж",
+      "sourceLine": 2499,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.user.type",
+      "family": "command",
+      "text": "Установить тип игрока",
+      "raw": "Установить тип игрока",
+      "sourceLine": 2500,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.lootbox",
+      "family": "command",
+      "text": "Кейсы",
+      "raw": "Кейсы",
+      "sourceLine": 2501,
+      "placeholders": []
+    },
+    {
+      "key": "prison.oldschool.command.description.lootbox.key",
+      "family": "command",
+      "text": "Выдать ключ от кейса",
+      "raw": "Выдать ключ от кейса",
+      "sourceLine": 2502,
+      "placeholders": []
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+[
+  {
+    "id": "vampirism",
+    "name": "Вампиризм",
+    "description": "При нанесении противнику урона\nпредметом с этим зачарованием ты\nрегенерируешь некоторое количество здоровья,\nзависящее от нанесённого урона и уровня\nэтого Древнего Зачарования.",
+    "nameKey": "prison.classic.ancient_enchantment.list.vampirism.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.vampirism.lore"
+  },
+  {
+    "id": "sacred",
+    "name": "Просвещённый",
+    "description": "При получении урона есть\nшанс восстановить определённое\nколичество здоровья.",
+    "nameKey": "prison.classic.ancient_enchantment.list.sacred.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.sacred.lore"
+  },
+  {
+    "id": "blindness",
+    "name": "Слепота",
+    "description": "Есть шанс наложить на противника\nслепоту, если нанести ему урон\nпредметом с этим зачарованием.",
+    "nameKey": "prison.classic.ancient_enchantment.list.blindness.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.blindness.lore"
+  },
+  {
+    "id": "toxic",
+    "name": "Токсичный",
+    "description": "При нанесении урона предметом\nс таким зачарованием есть\nшанс отравить врага.",
+    "nameKey": "prison.classic.ancient_enchantment.list.toxic.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.toxic.lore"
+  },
+  {
+    "id": "slowness",
+    "name": "Бульдозер",
+    "description": "При получении урона есть\nшанс замедлить противника.",
+    "nameKey": "prison.classic.ancient_enchantment.list.slowness.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.slowness.lore"
+  },
+  {
+    "id": "fired",
+    "name": "Раскалённый",
+    "description": "При получении урона есть\nшанс поджечь противника.",
+    "nameKey": "prison.classic.ancient_enchantment.list.fired.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.fired.lore"
+  },
+  {
+    "id": "rage",
+    "name": "Ярость",
+    "description": "С каждым ударом по противнику\nтвой урон по нему возрастает.",
+    "nameKey": "prison.classic.ancient_enchantment.list.rage.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.rage.lore"
+  },
+  {
+    "id": "vortex",
+    "name": "Вихрь",
+    "description": "Вихрь клинков! Дезориентируй\nПротивника огромной волной ударов.",
+    "nameKey": "prison.classic.ancient_enchantment.list.vortex.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.vortex.lore"
+  },
+  {
+    "id": "ninja",
+    "name": "Ниндзя",
+    "description": "При нанесении удара у Вас есть\nшанс получить скорость. Будьте быстрее\nпротивника!",
+    "nameKey": "prison.classic.ancient_enchantment.list.ninja.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.ninja.lore"
+  },
+  {
+    "id": "hulk",
+    "name": "Халк",
+    "description": "Навсегда даётся эффект\nсопротивление урону I и\nзамедление I. Как... танк?...",
+    "nameKey": "prison.classic.ancient_enchantment.list.hulk.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.hulk.lore"
+  },
+  {
+    "id": "frost",
+    "name": "Мороз",
+    "description": "При попадании стрелой\nесть возможность снизить скорость\nигрока на короткое время.",
+    "nameKey": "prison.classic.ancient_enchantment.list.frost.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.frost.lore"
+  },
+  {
+    "id": "fire",
+    "name": "Пожар",
+    "description": "При попадании стрелой\nспавнит с шансом огненный\nвзрыв под игроком.",
+    "nameKey": "prison.classic.ancient_enchantment.list.fire.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.fire.lore"
+  },
+  {
+    "id": "saving",
+    "name": "Экономия",
+    "description": "При выстреле из лука\nесть шанс сохранить стрелу\nу себя в инвентаре.",
+    "nameKey": "prison.classic.ancient_enchantment.list.saving.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.saving.lore"
+  },
+  {
+    "id": "springs",
+    "name": "Пружины",
+    "description": "Вечный эффект прыгучести.",
+    "nameKey": "prison.classic.ancient_enchantment.list.springs.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.springs.lore"
+  },
+  {
+    "id": "thor",
+    "name": "Громовержец",
+    "description": "При нанесении урона предметом с таким зачарованием\nесть шанс свергнуть молнию на врага.",
+    "nameKey": "prison.classic.ancient_enchantment.list.thor.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.thor.lore"
+  },
+  {
+    "id": "boxer",
+    "name": "Боксёр",
+    "description": "При нанесении урона предметом с таким зачарованием\nесть шанс нанести противнику значительный\nурон и подкинуть его.",
+    "nameKey": "prison.classic.ancient_enchantment.list.boxer.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.boxer.lore"
+  },
+  {
+    "id": "hammer",
+    "name": "Молот",
+    "description": "При копании есть шанс вскопать\nслучайные блоки в определённом\nрадиусе.",
+    "nameKey": "prison.classic.ancient_enchantment.list.hammer.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.hammer.lore"
+  },
+  {
+    "id": "archeologist",
+    "name": "Археолог",
+    "description": "При копании есть шанс получить\nэффект ускоренного копания.",
+    "nameKey": "prison.classic.ancient_enchantment.list.archeologist.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.archeologist.lore"
+  },
+  {
+    "id": "confusion",
+    "name": "Замешательство",
+    "description": "При нанесении урона предметом с таким зачарованием\nесть шанс наложить на противника тошноту.",
+    "nameKey": "prison.classic.ancient_enchantment.list.confusion.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.confusion.lore"
+  },
+  {
+    "id": "glutton",
+    "name": "Обжора",
+    "description": "Позволяет восстановить голод\nво время сражений.\nБольше не нужно заботиться о еде\nво время боя!",
+    "nameKey": "prison.classic.ancient_enchantment.list.glutton.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.glutton.lore"
+  },
+  {
+    "id": "wither",
+    "name": "Иссушение",
+    "description": "При получении урона\nесть шанс наложить на противника\nэффект иссушения.",
+    "nameKey": "prison.classic.ancient_enchantment.list.wither.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.wither.lore"
+  },
+  {
+    "id": "fortification",
+    "name": "Укрепление",
+    "description": "При получении урона\nесть шанс наложить на противника\nэффект слабости.",
+    "nameKey": "prison.classic.ancient_enchantment.list.fortification.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.fortification.lore"
+  },
+  {
+    "id": "tornado",
+    "name": "Торнадо",
+    "description": "При получении урона\nесть шанс перемешать все\nвещи в инвентаре противника.",
+    "nameKey": "prison.classic.ancient_enchantment.list.tornado.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.tornado.lore"
+  },
+  {
+    "id": "tank",
+    "name": "Танк",
+    "description": "Даёт постоянные дополнительные\nсердца к Вашему здоровью.",
+    "nameKey": "prison.classic.ancient_enchantment.list.tank.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.tank.lore"
+  },
+  {
+    "id": "berserk",
+    "name": "Берсерк",
+    "description": "Если у Вас меньше 10 сердец,\nто есть шанс, что Вы\nнанесёте x2 урон.",
+    "nameKey": "prison.classic.ancient_enchantment.list.berserk.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.berserk.lore"
+  },
+  {
+    "id": "lifestiller",
+    "name": "Гнев",
+    "description": "При нанесении урона\nпредметом с таким зачарованием\nесть шанс украсть у противника\nнекоторое количество здоровья.",
+    "nameKey": "prison.classic.ancient_enchantment.list.lifestiller.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.lifestiller.lore"
+  },
+  {
+    "id": "mason",
+    "name": "Муляр",
+    "description": "",
+    "nameKey": "prison.classic.ancient_enchantment.list.mason.display_name",
+    "descriptionKey": null
+  },
+  {
+    "id": "digger",
+    "name": "Землекоп",
+    "description": "",
+    "nameKey": "prison.classic.ancient_enchantment.list.digger.display_name",
+    "descriptionKey": null
+  },
+  {
+    "id": "lumberjack",
+    "name": "Дровосек",
+    "description": "",
+    "nameKey": "prison.classic.ancient_enchantment.list.lumberjack.display_name",
+    "descriptionKey": null
+  },
+  {
+    "id": "hunter",
+    "name": "Охотник",
+    "description": "",
+    "nameKey": "prison.classic.ancient_enchantment.list.hunter.display_name",
+    "descriptionKey": null
+  },
+  {
+    "id": "plastolom",
+    "name": "Пластолом",
+    "description": "С небольшим шансом при копании\nсносит весь слой шахты,\nна котором ты стоишь.\nВ статистику идёт половина\nблоков слоя, до 200 штук.",
+    "nameKey": "prison.classic.ancient_enchantment.list.plastolom.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.plastolom.lore"
+  },
+  {
+    "id": "curse",
+    "name": "Проклятие",
+    "description": "При ударе по игроку есть шанс\nпроклясть его: на несколько секунд\nон не может восстанавливать здоровье.\nВампиризм и Просвещённый\nтоже не сработают.\nПосле проклятия игрок 5 секунд\nзащищён от нового.",
+    "nameKey": "prison.classic.ancient_enchantment.list.curse.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.curse.lore"
+  },
+  {
+    "id": "neat",
+    "name": "Чистюля",
+    "description": "Ты следишь за собой, поэтому\nнужды (туалет, душ и сон)\nнаступают реже.",
+    "nameKey": "prison.classic.ancient_enchantment.list.neat.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.neat.lore"
+  },
+  {
+    "id": "baryga",
+    "name": "Барыга",
+    "description": "При копании в шахте есть шанс\nполучить ещё один такой же блок.\nРаботает и с автопродажей.",
+    "nameKey": "prison.classic.ancient_enchantment.list.baryga.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.baryga.lore"
+  },
+  {
+    "id": "snitch",
+    "name": "Стукач",
+    "description": "Тот, кто тебя ударил,\nначинает светиться и виден\nвсем вокруг несколько секунд.",
+    "nameKey": "prison.classic.ancient_enchantment.list.snitch.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.snitch.lore"
+  },
+  {
+    "id": "shnyr",
+    "name": "Шныр",
+    "description": "Есть шанс увернуться\nот удара другого игрока\nи не получить урон.",
+    "nameKey": "prison.classic.ancient_enchantment.list.shnyr.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.shnyr.lore"
+  },
+  {
+    "id": "obshak",
+    "name": "Общак",
+    "description": "Увеличивает твою долю денег\nиз банка босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+    "nameKey": "prison.classic.ancient_enchantment.list.obshak.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.obshak.lore"
+  },
+  {
+    "id": "prospector",
+    "name": "Старатель",
+    "description": "Увеличивает количество звёзд\nс босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+    "nameKey": "prison.classic.ancient_enchantment.list.prospector.display_name",
+    "descriptionKey": "prison.classic.ancient_enchantment.list.prospector.lore"
+  }
+]

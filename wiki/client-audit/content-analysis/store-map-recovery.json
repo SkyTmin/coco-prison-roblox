@@ -1,0 +1,681 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourcesManifest": "late-menu-sources.json",
+  "sourceIds": [
+    "shop_mines_1",
+    "shop_mines_2",
+    "shop_mines_3",
+    "shop_mines_4",
+    "shop_mines_5",
+    "shop_mines_6",
+    "shop_mines_7",
+    "bosses_18",
+    "map_1",
+    "map_2",
+    "map_3",
+    "map_4",
+    "map_5",
+    "map_6",
+    "map_7",
+    "map_8",
+    "map_9",
+    "map_10"
+  ],
+  "storeOffers": [
+    {
+      "name": "Игровая подписка Prison+",
+      "category": "Верхняя карточка",
+      "price": null,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": true,
+      "evidence": [
+        "shop_mines_1",
+        "shop_mines_2",
+        "shop_mines_3",
+        "shop_mines_4",
+        "shop_mines_5",
+        "shop_mines_6",
+        "shop_mines_7"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Рубины",
+      "category": "Верхняя карточка",
+      "price": 1,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1",
+        "shop_mines_2",
+        "shop_mines_3",
+        "shop_mines_4",
+        "shop_mines_5"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Авто-продажа",
+      "category": "Способности",
+      "price": null,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": true,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Вакцина",
+      "category": "Способности",
+      "price": 449,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Перезарядка стойки",
+      "category": "Способности",
+      "price": 39,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Мыло",
+      "category": "Способности",
+      "price": 10,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Спальный мешок",
+      "category": "Способности",
+      "price": 10,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Туалетная бумага",
+      "category": "Способности",
+      "price": 7,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_1"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Локальный Бустер блоков",
+      "category": "Бустеры",
+      "price": 139,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Локальный"
+    },
+    {
+      "name": "Локальный Бустер денег",
+      "category": "Бустеры",
+      "price": 139,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Локальный"
+    },
+    {
+      "name": "Локальный Бустер мобов",
+      "category": "Бустеры",
+      "price": 129,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Локальный"
+    },
+    {
+      "name": "Набор Локальных Бустеров",
+      "category": "Бустеры",
+      "price": 399,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Локальный"
+    },
+    {
+      "name": "Фракционный Бустер блоков",
+      "category": "Бустеры",
+      "price": 199,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Фракционный"
+    },
+    {
+      "name": "Фракционный Бустер денег",
+      "category": "Бустеры",
+      "price": 199,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Фракционный"
+    },
+    {
+      "name": "Фракционный Бустер мобов",
+      "category": "Бустеры",
+      "price": 189,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Фракционный"
+    },
+    {
+      "name": "Набор Фракционных Бустеров",
+      "category": "Бустеры",
+      "price": 579,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Фракционный"
+    },
+    {
+      "name": "Глобальный Бустер блоков",
+      "category": "Бустеры",
+      "price": 249,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Глобальный"
+    },
+    {
+      "name": "Глобальный Бустер денег",
+      "category": "Бустеры",
+      "price": 249,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_2",
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Глобальный"
+    },
+    {
+      "name": "Глобальный Бустер мобов",
+      "category": "Бустеры",
+      "price": 239,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Глобальный"
+    },
+    {
+      "name": "Набор Глобальных Бустеров",
+      "category": "Бустеры",
+      "price": 729,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_3"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null,
+      "scopeLabel": "Глобальный"
+    },
+    {
+      "name": "Свиток забвения",
+      "category": "Ключи и предметы",
+      "price": 129,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Улучшенный древний ключ",
+      "category": "Ключи и предметы",
+      "price": 349,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Древний ключ",
+      "category": "Ключи и предметы",
+      "price": 149,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Ключ с кличками",
+      "category": "Ключи и предметы",
+      "price": 99,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Ключ от обычного кейса",
+      "category": "Ключи и предметы",
+      "price": 10,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Набор Древних звёзд",
+      "category": "Ключи и предметы",
+      "price": 169,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Древняя звезда",
+      "category": "Ключи и предметы",
+      "price": 25,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Древний порошок",
+      "category": "Ключи и предметы",
+      "price": 17,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Развеиватель",
+      "category": "Ключи и предметы",
+      "price": 199,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_4"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Дополнительный слот на Аукционе",
+      "category": "Аукцион",
+      "price": 69,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": false,
+      "evidence": [
+        "shop_mines_5"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    },
+    {
+      "name": "Удаление комиссии на Аукционе",
+      "category": "Аукцион",
+      "price": null,
+      "currencyDisplay": "blue store-currency icon",
+      "currencyId": null,
+      "purchasedLabelVisible": true,
+      "evidence": [
+        "shop_mines_5"
+      ],
+      "quantity": null,
+      "durationSeconds": null,
+      "multiplier": null
+    }
+  ],
+  "subscription": {
+    "name": "Prison+",
+    "evidence": [
+      "shop_mines_6",
+      "shop_mines_7"
+    ],
+    "purchasedLabelVisible": true,
+    "price": null,
+    "durationDisplay": "Действует лишь до конца текущего сезона",
+    "features": [
+      {
+        "name": "Настройки Авто-копания блоков",
+        "command": "/pp"
+      },
+      {
+        "name": "Уникальный префикс перед ником"
+      },
+      {
+        "name": "Слоты на Аукционе",
+        "before": 5,
+        "after": 10
+      },
+      {
+        "name": "Комиссия при продаже предметов на Аукционе",
+        "beforePercent": 5,
+        "afterPercent": 0
+      },
+      {
+        "name": "Изменение игрового времени",
+        "command": "/pp"
+      },
+      {
+        "name": "Подробная информация о голоде и восстановлении здоровья",
+        "command": "/pp"
+      },
+      {
+        "name": "Просмотр времени респавна шахт",
+        "command": "/pp",
+        "botMarkerVisible": true
+      },
+      {
+        "name": "Просмотр времени респавна боссов",
+        "command": "/pp",
+        "botMarkerVisible": true
+      }
+    ],
+    "botReferenceDisplay": "t.me/prison_classic_bot",
+    "botUsed": false
+  },
+  "settings": {
+    "evidence": [
+      "bosses_18"
+    ],
+    "labels": [
+      "Включение ночи",
+      "Авто-копание",
+      "AppleSkin"
+    ],
+    "interactionPerformed": false
+  },
+  "teleporter": {
+    "header": "Телепортатор",
+    "overviewEvidence": [
+      "map_1"
+    ],
+    "entries": [
+      {
+        "name": "Баня",
+        "evidence": [
+          "map_2"
+        ],
+        "flagColor": "бирюзовый",
+        "boardPosition": "верхнее левое здание",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Задания",
+        "evidence": [
+          "map_3"
+        ],
+        "flagColor": "фиолетовый",
+        "boardPosition": "ниже верхней большой круглой площадки",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Шахта",
+        "evidence": [
+          "map_4"
+        ],
+        "flagColor": "светло-серый",
+        "boardPosition": "верхняя большая круглая площадка",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Рынок",
+        "evidence": [
+          "map_5"
+        ],
+        "flagColor": "зелёный",
+        "boardPosition": "верхнее правое здание",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Спальня",
+        "evidence": [
+          "map_6"
+        ],
+        "flagColor": "синий",
+        "boardPosition": "нижнее левое здание с белой крышей",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Спавн",
+        "evidence": [
+          "map_7"
+        ],
+        "flagColor": "жёлтый",
+        "boardPosition": "центр, круглая площадь с фонтаном",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Столовая",
+        "evidence": [
+          "map_8"
+        ],
+        "flagColor": "оранжевый",
+        "boardPosition": "правое продолговатое здание",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Малая шахта",
+        "evidence": [
+          "map_9"
+        ],
+        "flagColor": "коричневый",
+        "boardPosition": "нижняя малая круглая площадка",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      },
+      {
+        "name": "Тренер",
+        "evidence": [
+          "map_10"
+        ],
+        "flagColor": "красный",
+        "boardPosition": "нижняя площадка справа от малой шахты",
+        "actionDisplay": "Телепортироваться",
+        "worldCoordinates": null,
+        "price": null,
+        "accessRequirements": null,
+        "actualTeleportObserved": false
+      }
+    ]
+  },
+  "caveats": [
+    "Prices are displayed beside a blue currency icon; these observations do not establish rubles, Robux, debit behavior or exchange rates.",
+    "Куплено replaces the price on subscription, auto-sell and auction commission removal; null is unknown, not zero/free.",
+    "Перезарядка стойки is the literal offer name; it is not a confirmed trainer reset.",
+    "Booster duration, multiplier, stacking and bundle quantity were not shown.",
+    "Hover tooltips establish nine named teleporter destinations; activation, cost, access and world coordinates were not demonstrated.",
+    "Шахта and Малая шахта on the board are not assigned to the two Тюрьма rows without IDs or travel evidence."
+  ]
+}

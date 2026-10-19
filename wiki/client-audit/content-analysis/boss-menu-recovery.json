@@ -1,0 +1,857 @@
+{
+  "recordedDate": "2026-10-19",
+  "sourceType": "supplied boss menu screenshots",
+  "sourcesManifest": "late-menu-sources.json",
+  "sourceIds": [
+    "bosses_1",
+    "bosses_2",
+    "bosses_3",
+    "bosses_4",
+    "bosses_5",
+    "bosses_6",
+    "bosses_7",
+    "bosses_8",
+    "bosses_9",
+    "bosses_10",
+    "bosses_11",
+    "bosses_12",
+    "bosses_13",
+    "bosses_14",
+    "bosses_15",
+    "bosses_16",
+    "bosses_17"
+  ],
+  "menuCountDisplay": "17 / 17",
+  "entries": [
+    {
+      "observationId": "bosses_1",
+      "evidence": [
+        "bosses_1"
+      ],
+      "name": "Жнец",
+      "location": "Врата края",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "reaper",
+        "name": "Жнец",
+        "sourceKey": "prison.classic.boss.reaper.name"
+      },
+      "locationUnlockLevel": 35,
+      "status": "spawned",
+      "displayedRespawn": {
+        "display": "Босс возрождён",
+        "remainingSeconds": null
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 18500,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x12-19",
+          "min": 12,
+          "max": 19
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-50%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 50,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": {
+          "displayName": "Огненный осколок",
+          "count": null,
+          "dropChance": null
+        },
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_2",
+      "evidence": [
+        "bosses_2"
+      ],
+      "name": "Древесный хранитель",
+      "location": "Амбар",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "forest_guardian",
+        "name": "Древесный хранитель",
+        "sourceKey": "prison.classic.boss.forest_guardian.name"
+      },
+      "locationUnlockLevel": 33,
+      "status": "spawned",
+      "displayedRespawn": {
+        "display": "Босс возрождён",
+        "remainingSeconds": null
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 17300,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x11-18",
+          "min": 11,
+          "max": 18
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-50%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 50,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": {
+          "displayName": "Огненный осколок",
+          "count": null,
+          "dropChance": null
+        },
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_3",
+      "evidence": [
+        "bosses_3"
+      ],
+      "name": "Самурай",
+      "location": "Киото",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "the_lovers",
+        "name": "Самурай",
+        "sourceKey": "prison.classic.boss.the_lovers.name"
+      },
+      "locationUnlockLevel": 29,
+      "status": "spawned",
+      "displayedRespawn": {
+        "display": "Босс возрождён",
+        "remainingSeconds": null
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 10000,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x10-16",
+          "min": 10,
+          "max": 16
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-50%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 50,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": {
+          "displayName": "Огненный осколок",
+          "count": null,
+          "dropChance": null
+        },
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_4",
+      "evidence": [
+        "bosses_4"
+      ],
+      "name": "Рыцарь",
+      "location": "Королевский сад",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "knight",
+        "name": "Рыцарь",
+        "sourceKey": "prison.classic.boss.knight.name"
+      },
+      "locationUnlockLevel": 11,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:07:48",
+        "remainingSeconds": 468
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 3100,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x3-5",
+          "min": 3,
+          "max": 5
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-8%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 8,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_5",
+      "evidence": [
+        "bosses_5"
+      ],
+      "name": "Базальтовый страж",
+      "location": "Каменоломня",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "basalt_guardian",
+        "name": "Базальтовый страж",
+        "sourceKey": "prison.classic.boss.basalt_guardian.name"
+      },
+      "locationUnlockLevel": null,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:08:52",
+        "remainingSeconds": 532
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 350,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": null,
+        "ancientPowder": null,
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_6",
+      "evidence": [
+        "bosses_6"
+      ],
+      "name": "Минотавр",
+      "location": "Подножье горы",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "minotaur",
+        "name": "Минотавр",
+        "sourceKey": "prison.classic.boss.minotaur.name"
+      },
+      "locationUnlockLevel": null,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:13:04",
+        "remainingSeconds": 784
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 450,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": null,
+        "ancientPowder": null,
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_7",
+      "evidence": [
+        "bosses_7"
+      ],
+      "name": "Король Пиглинов",
+      "location": "Преисподняя",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "piglin",
+        "name": "Король Пиглинов",
+        "sourceKey": "prison.classic.boss.piglin.name"
+      },
+      "locationUnlockLevel": null,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:15:04",
+        "remainingSeconds": 904
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 420,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": null,
+        "ancientPowder": {
+          "display": "Древний порошок (1-3%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 3,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_8",
+      "evidence": [
+        "bosses_8"
+      ],
+      "name": "Скелетон",
+      "location": "Пирамида",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "skeleton",
+        "name": "Скелетон",
+        "sourceKey": "prison.classic.boss.skeleton.name"
+      },
+      "locationUnlockLevel": 9,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:19:58",
+        "remainingSeconds": 1198
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 2200,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x1-3",
+          "min": 1,
+          "max": 3
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-5%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 5,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_9",
+      "evidence": [
+        "bosses_9"
+      ],
+      "name": "Иллюзионист",
+      "location": "Пустотная крепость",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "illusionist",
+        "name": "Иллюзионист",
+        "sourceKey": "prison.classic.boss.illusionist.name"
+      },
+      "locationUnlockLevel": 15,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:40:04",
+        "remainingSeconds": 2404
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 6500,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x5-9",
+          "min": 5,
+          "max": 9
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-12%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 12,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_10",
+      "evidence": [
+        "bosses_10"
+      ],
+      "name": "Векна",
+      "location": "Изнанка",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "vecna",
+        "name": "Векна",
+        "sourceKey": "prison.classic.boss.vecna.name"
+      },
+      "locationUnlockLevel": 27,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:40:10",
+        "remainingSeconds": 2410
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 6400,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x7-12",
+          "min": 7,
+          "max": 12
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-25%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 25,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_11",
+      "evidence": [
+        "bosses_11"
+      ],
+      "name": "Посейдон",
+      "location": "Затопленный маяк",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "poseidon",
+        "name": "Посейдон",
+        "sourceKey": "prison.classic.boss.poseidon.name"
+      },
+      "locationUnlockLevel": 13,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "00:50:32",
+        "remainingSeconds": 3032
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 3800,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x4-7",
+          "min": 4,
+          "max": 7
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-10%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 10,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_12",
+      "evidence": [
+        "bosses_12"
+      ],
+      "name": "Паучья матка",
+      "location": "Паучье логово",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "spider_queen",
+        "name": "Паучья матка",
+        "sourceKey": "prison.classic.boss.spider_queen.name"
+      },
+      "locationUnlockLevel": 17,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "01:33:43",
+        "remainingSeconds": 5623
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 7700,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x7-12",
+          "min": 7,
+          "max": 12
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-25%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 25,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_13",
+      "evidence": [
+        "bosses_13"
+      ],
+      "name": "Лесной дух",
+      "location": "Лепреконовая долина",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "forest_spirit",
+        "name": "Лесной дух",
+        "sourceKey": "prison.classic.boss.forest_spirit.name"
+      },
+      "locationUnlockLevel": 23,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "01:42:55",
+        "remainingSeconds": 6175
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 8600,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x9-14",
+          "min": 9,
+          "max": 14
+        },
+        "ancientPowder": null,
+        "specialItem": {
+          "displayName": "Лунная сталь",
+          "count": null,
+          "dropChance": null
+        },
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_14",
+      "evidence": [
+        "bosses_14"
+      ],
+      "name": "Грут",
+      "location": "Ферма",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "ent",
+        "name": "Грут",
+        "sourceKey": "prison.classic.boss.ent.name"
+      },
+      "locationUnlockLevel": 31,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "02:04:47",
+        "remainingSeconds": 7487
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 15000,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x11-17",
+          "min": 11,
+          "max": 17
+        },
+        "ancientPowder": null,
+        "specialItem": {
+          "displayName": "Лунная сталь",
+          "count": null,
+          "dropChance": null
+        },
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_15",
+      "evidence": [
+        "bosses_15"
+      ],
+      "name": "Моль",
+      "location": "Снежная длань",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "mole",
+        "name": "Моль",
+        "sourceKey": "prison.classic.boss.mole.name"
+      },
+      "locationUnlockLevel": 19,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "03:51:45",
+        "remainingSeconds": 13905
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 7900,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x8-13",
+          "min": 8,
+          "max": 13
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-35%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 35,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_16",
+      "evidence": [
+        "bosses_16"
+      ],
+      "name": "Вороний рыцарь",
+      "location": "Замок",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "raven_knight",
+        "name": "Вороний рыцарь",
+        "sourceKey": "prison.classic.boss.raven_knight.name"
+      },
+      "locationUnlockLevel": 25,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "04:08:51",
+        "remainingSeconds": 14931
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 9000,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x9-15",
+          "min": 9,
+          "max": 15
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-35%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 35,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    },
+    {
+      "observationId": "bosses_17",
+      "evidence": [
+        "bosses_17"
+      ],
+      "name": "Король нежити",
+      "location": "Рынок",
+      "serverId": null,
+      "localizationMatch": {
+        "id": "un_king",
+        "name": "Король нежити",
+        "sourceKey": "prison.classic.boss.un_king.name"
+      },
+      "locationUnlockLevel": 21,
+      "status": "countdown",
+      "displayedRespawn": {
+        "display": "05:25:42",
+        "remainingSeconds": 19542
+      },
+      "respawnIntervalSeconds": null,
+      "hp": null,
+      "damage": null,
+      "possibleRewards": {
+        "label": "Возможные награды",
+        "money": {
+          "min": 0,
+          "max": 9500,
+          "currencyDisplay": "$"
+        },
+        "ancientStars": {
+          "display": "x10-15",
+          "min": 10,
+          "max": 15
+        },
+        "ancientPowder": {
+          "display": "Древний порошок (1-35%)",
+          "percentQualifier": {
+            "min": 1,
+            "max": 35,
+            "interpretation": null
+          },
+          "dropChance": null,
+          "count": null
+        },
+        "specialItem": null,
+        "actualDropObserved": false,
+        "distributionRule": null
+      }
+    }
+  ],
+  "localizationOnlyNotObserved": [
+    {
+      "id": "giant_zombie",
+      "name": "Зомбарь",
+      "sourceKey": "prison.classic.boss.giant_zombie.name"
+    },
+    {
+      "id": "splinter",
+      "name": "Сплинтер",
+      "sourceKey": "prison.classic.boss.splinter.name"
+    },
+    {
+      "id": "void",
+      "name": "Воид",
+      "sourceKey": "prison.classic.boss.void.name"
+    }
+  ],
+  "caveats": [
+    "All 17 entries in this displayed menu were selected; this does not establish every season/realm roster.",
+    "Rewards are marked possible, not guaranteed; absent rows mean not shown in this menu, not proof of impossibility.",
+    "Powder percentage ranges retain an unknown interpretation; no drop probability was recovered.",
+    "Countdowns are remaining-time snapshots; no complete respawn interval was measured.",
+    "Flavor descriptions hint at attacks, shields and minions but do not reveal AI implementation or numeric combat stats.",
+    "No boss fight, kill, payout or actual drop was observed in this screenshot series."
+  ]
+}

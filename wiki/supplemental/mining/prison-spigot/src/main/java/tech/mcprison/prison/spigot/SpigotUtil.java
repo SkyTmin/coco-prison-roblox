@@ -1,0 +1,1066 @@
+/*
+ *  Prison is a Minecraft plugin for the prison game mode.
+ *  Copyright (C) 2017-2021 The Prison Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package tech.mcprison.prison.spigot;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.cryptomorin.xseries.XMaterial;
+
+import tech.mcprison.prison.Prison;
+import tech.mcprison.prison.integration.CustomBlockIntegration;
+import tech.mcprison.prison.integration.Integration;
+import tech.mcprison.prison.integration.IntegrationType;
+import tech.mcprison.prison.internal.block.PrisonBlock;
+import tech.mcprison.prison.internal.inventory.InventoryType;
+import tech.mcprison.prison.internal.inventory.Viewable;
+import tech.mcprison.prison.output.Output;
+import tech.mcprison.prison.spigot.backpacks.BackpacksUtil;
+import tech.mcprison.prison.spigot.block.PrisonItemStackNotSupportedRuntimeException;
+import tech.mcprison.prison.spigot.block.SpigotBlock;
+import tech.mcprison.prison.spigot.block.SpigotItemStack;
+import tech.mcprison.prison.spigot.compat.BlockTestStats;
+import tech.mcprison.prison.spigot.compat.SpigotCompatibility;
+import tech.mcprison.prison.spigot.game.SpigotWorld;
+import tech.mcprison.prison.spigot.integrations.IntegrationBackpackAPI;
+import tech.mcprison.prison.spigot.integrations.IntegrationMinepacksPlugin;
+import tech.mcprison.prison.util.Location;
+import tech.mcprison.prison.util.Text;
+import tech.mcprison.prison.util.Vector;
+
+/**
+ * Utilities for converting Prison-Core types to Spigot types.
+ *
+ * @author Faizaan A. Datoo
+ */
+public class SpigotUtil {
+
+    private SpigotUtil() {
+    	super();
+    }
+
+  /*
+   * BlockType and Material
+   */
+
+    public static XMaterial getXMaterial( Material material) {
+    	return XMaterial.matchXMaterial(material);
+    }
+    
+    public static XMaterial getXMaterial( String materialName ) {
+    	return XMaterial.matchXMaterial( materialName ).orElse( null );
+    }
+    
+    
+	public static XMaterial getXMaterial( PrisonBlock prisonBlock ) {
+
+		XMaterial xMat = SpigotCompatibility.getInstance().getXMaterial( prisonBlock );
+
+		return xMat;
+	}
+    
+
+	/**
+	 * <p>Returns a stack of PrisonBlock or a stack of air.
+	 * </p>
+	 * 
+	 * @param prisonBlockType
+	 * @param amount
+	 * @return
+	 */
+	public static ItemStack getItemStack( PrisonBlock prisonBlock, int amount ) {
+		ItemStack bukkitStack = null;
+        XMaterial xMat = getXMaterial( prisonBlock );
+        if ( xMat != null ) {
+        	bukkitStack = xMat.parseItem();
+        	bukkitStack.setAmount( amount );
+        }
+        else {
+        	bukkitStack = getXMaterial( "air" ).parseItem();
+        	bukkitStack.setAmount( 1 );
+        }
+        return bukkitStack;
+	}
+	
+	public static ItemStack getItemStack( Material material, int amount ) {
+		XMaterial xMat = getXMaterial( material );
+		ItemStack bukkitStack = xMat.parseItem();
+		bukkitStack.setAmount( amount );
+		return bukkitStack;
+	}
+    
+	
+	public static ItemStack getItemStack( XMaterial xMaterial, int amount ) {
+		ItemStack bukkitStack = xMaterial.parseItem();
+		bukkitStack.setAmount( amount );
+		return bukkitStack;
+	}
+	
+	public static SpigotItemStack getSpigotItemStackXMat( XMaterial xMaterial, int amount ) {
+		SpigotItemStack itemStack = null;
+		
+		if ( xMaterial != null ) {
+			
+			try {
+				itemStack = new SpigotItemStack( getItemStack( xMaterial, amount ) );
+			} 
+			catch (PrisonItemStackNotSupportedRuntimeException e) {
+				// ignore
+			}
+		}
+		
+		return itemStack;
+	}
+
+	public static SpigotItemStack getSpigotItemStack( PrisonBlock material, int amount ) {
+		
+		XMaterial xMat = SpigotCompatibility.getInstance().getXMaterial( material );
+		   
+		SpigotItemStack iStack = getSpigotItemStackXMat( xMat, amount );
+		
+		return iStack;
+	}
+	
+	
+	/**
+	 * Used in AutoManagerFeatures.
+	 *
+	 * @param player
+	 * @param itemStack
+	 * @return
+	 */
+	public static HashMap<Integer, SpigotItemStack> addItemToPlayerInventory(
+															Player player, SpigotItemStack itemStack ) {
+		HashMap<Integer, SpigotItemStack> results = new HashMap<>();
+		
+		if ( itemStack != null && itemStack.getBukkitStack() != null ) {
+			HashMap<Integer, ItemStack> overflow = player.getInventory().addItem( itemStack.getBukkitStack() );
+			player.updateInventory();
+			
+			// Insert overflow in to Prison's backpack:
+			if ( BackpacksUtil.getInstance().isEnabled() ) {
+				
+				BackpacksUtil bpUtil = BackpacksUtil.get();
+				if (overflow.size() > 0 && 
+						bpUtil.getBackpacksConfig().getString("Options.BackPack_AutoPickup_Usable").equalsIgnoreCase("true")) {
+					String worldName = player.getWorld().getName();
+					List<String> disabledWorlds = bpUtil.getBackpacksConfig().getStringList("Options.DisabledWorlds");
+					if (!disabledWorlds.contains(worldName)){
+						if (bpUtil.isMultipleBackpacksEnabled()) {
+							for (String id : bpUtil.getBackpacksIDs(player)) {
+								if (overflow.size() > 0) {
+//									if (id == null) {
+//										Inventory inv = bpUtil.getBackpack(player);
+//										overflow = inv.addItem(overflow.values().toArray(new ItemStack[0]));
+//										bpUtil.setInventory(player, inv);
+//									} else {
+										Inventory inv = bpUtil.getBackpack(player, id);
+										overflow = inv.addItem(overflow.values().toArray(new ItemStack[0]));
+										bpUtil.setInventory(player, inv, id);
+//									}
+								}
+							}
+						} else {
+							String id = null;
+							Inventory inv = bpUtil.getBackpack(player, id);
+							overflow = inv.addItem(overflow.values().toArray(new ItemStack[0]));
+							bpUtil.setInventory(player, inv, id);
+						}
+					}
+				}
+			}
+			
+			
+			// Insert overflow in to Minepacks backpack:
+			if ( overflow.size() > 0 && IntegrationMinepacksPlugin.getInstance().isEnabled() ) {
+				overflow = IntegrationMinepacksPlugin.getInstance().addItemsBukkit( player, overflow );						
+			}
+			
+			
+			// Insert overflow in to the backpack API:
+			if ( overflow.size() > 0 && IntegrationBackpackAPI.getInstance().isEnabled() ) {
+				overflow = IntegrationBackpackAPI.getInstance().addItemsBukkit( player, overflow );						
+			}
+			
+			
+			// Cannot stick it anywhere else, so return the extras:
+			for ( Integer key : overflow.keySet() ) {
+				ItemStack iStack = overflow.get(key);
+				if ( iStack != null ) {
+					SpigotItemStack siStack = new SpigotItemStack(iStack);
+					if ( siStack != null ) {
+						
+						results.put(key, siStack);
+					}
+				}
+			}
+		}
+		
+
+		return results;
+	}
+	
+	
+	public static int itemStackCount(XMaterial xMat, Inventory inv ) {
+		int count = 0;
+		if ( xMat != null && inv != null ) {
+			ItemStack testStack = xMat.parseItem();
+
+			for (ItemStack is : inv.getContents() ) {
+				if ( is != null && is.isSimilar( testStack ) ) {
+					count += is.getAmount();
+				}
+			}
+		}
+		return count;
+	}
+	
+	
+	public static  HashMap<Integer, SpigotItemStack> itemStackAddAll( Player player, 
+												XMaterial source, int count ) {
+		
+		ItemStack sourceItems = source.parseItem();
+		sourceItems.setAmount( count );
+
+		SpigotItemStack sourceItemStack = new SpigotItemStack( sourceItems );
+		
+		return addItemToPlayerInventory( player, sourceItemStack );
+	}
+	
+	
+	public static HashMap<Integer, SpigotItemStack> itemStackReplaceItems( Player player, 
+							XMaterial source, XMaterial target, int ratio ) {
+		
+		HashMap<Integer, SpigotItemStack> overflow = new HashMap<>();
+		
+		// Removes all of the specified source types from all inventories:
+		int sourceRemoved = itemStackRemoveAll( player, source );
+		
+		// The number of sources that need to be added back since it's the remainder:
+		int sourceAdd = sourceRemoved % ratio;
+		
+		int targetCount = sourceRemoved / ratio;
+		
+		
+		if ( sourceAdd > 0 ) {
+			for ( SpigotItemStack sItemStack : itemStackAddAll( player, source, sourceAdd ).values() ) {
+				overflow.put( Integer.valueOf( overflow.size() ), sItemStack );
+			}
+		}
+
+		
+		if ( targetCount > 0 ) {
+			for ( SpigotItemStack sItemStack : itemStackAddAll( player, target, targetCount ).values() ) {
+				overflow.put( Integer.valueOf( overflow.size() ), sItemStack );
+			}
+		}
+		
+
+		return overflow;
+	}
+	
+	public static int itemStackRemoveAll(Player player, XMaterial xMat ) {
+		int removed = 0;
+
+		// First remove from the player's inventory:
+		removed += itemStackRemoveAll( xMat, player.getInventory() );
+
+		
+		// Then remove from Prison's backpack:
+		if ( SpigotPrison.getInstance().getConfig().getString("backpacks").equalsIgnoreCase("true")) {
+		
+			String id = null;
+			Inventory inv = BackpacksUtil.get().getBackpack(player, id);
+			removed += itemStackRemoveAll( xMat, inv );
+			BackpacksUtil.get().setInventory( player, inv, id );
+		}
+		
+		
+		// Then remove from Minepacks backpack:
+		if ( IntegrationMinepacksPlugin.getInstance().isEnabled() ) {
+			removed += IntegrationMinepacksPlugin.getInstance().itemStackRemoveAll(player, xMat);
+		}
+		
+		
+		// Then remove from the backpack API:
+		if ( IntegrationBackpackAPI.getInstance().isEnabled() ) {
+			removed += IntegrationBackpackAPI.getInstance().itemStackRemoveAll(player, xMat);
+		}
+		
+		return removed;
+	}
+
+	/**
+	 * <p>This function will remove a given XMaterial from an Inventory and as 
+	 * a result, this function will return a count of how many were removed.
+	 * </p>
+	 * 
+	 * @param xMat The XMaterial that needs to b removed from the inventory
+	 * @param inv The Inventory object
+	 * @return count of how many items were removed
+	 */
+	public static int itemStackRemoveAll( XMaterial xMat, Inventory inv ) {
+		int count = 0;
+		if ( xMat != null && inv != null ) {
+			
+			// This holds ItemStacks to be deleted. The key is the amount in the ItemStack.
+			List<ItemStack> deleteHolder = new ArrayList<>();
+			
+			for (ItemStack is : inv.getContents() ) {
+				if ( is != null ) {
+					
+					try {
+						XMaterial invXMat = XMaterial.matchXMaterial( is );
+						if ( xMat == invXMat ) {
+							
+							count += is.getAmount();
+							deleteHolder.add( is );
+						}
+					}
+					catch ( Exception e ) {
+						
+						// Ignore: This exception is normal since enchanting plugins assign custom data values which
+						//         which will cause a mis-mapping on pre v1.13 platforms.
+//						Output.get().logWarn( 
+//								String.format( "SpigotUtil.itemStackRemoveAll: Failure trying to convert " +
+//								"an ItemStack to an XMaterial. Trying to remove xMat: %s  ItemStack: %s", 
+//								xMat.name(), mapToString( is.serialize() ) ) );
+					}
+					
+				}
+			}
+			
+			// Now remove the items stacks from the inventory:
+			for ( ItemStack itemStack : deleteHolder ) {
+				inv.remove( itemStack );
+			}
+			
+		}
+		return count;
+	}
+
+	
+	/**
+	 * <p>This function will take a given XMaterial and remove all occurrences of it
+	 * from a player's inventory, and add the quantity removed, to the ItemStack drop
+	 * amount. This basically moves an item from the player's inventory, to the drop
+	 * ItemStack.
+	 * </p>
+	 * 
+	 * @param player
+	 * @param xMat
+	 * @param drop
+	 */
+	public static void getAllDroppedItemTypesFromPlayerInventory( 
+			Player player, XMaterial xMat, SpigotItemStack drop ) {
+
+		if ( xMat != null ) {
+			
+			int inventoryCount = itemStackRemoveAll(player, xMat);
+			
+			if ( inventoryCount > 0 ) {
+				
+				int count = drop.getAmount();
+				drop.setAmount( count + inventoryCount );
+			}
+		}
+	}
+	
+	/**
+	 * <p>This function is used to convert a map to a String. It has been created to provide a
+	 * String conversion for ItemStack.serialize() functions.  
+	 * What this produces may look similar to json but it isn't json.  Largest difference is that
+	 * no Strings in the output are quote and there isn't any code to properly handle numbers and
+	 * Booleans, or even arrays for that matter.  It's able to deal with ItemStacks, so be careful
+	 * with the use of any other Maps.
+	 * </p>
+	 * @param map
+	 * @return
+	 */
+	@SuppressWarnings( "unchecked" )
+	public static String mapToString( Map<String, Object> map ) {
+		StringBuilder sb = new StringBuilder();
+		
+		Set<String> keys = map.keySet();
+		for (String key : keys) {
+			if ( sb.length() > 0 ) {
+				sb.append( ", " );
+			}
+			sb.append( key ).append( "=" );
+			
+			Object obj = map.get( key );
+			if ( obj instanceof String ) {
+				
+				sb.append( (String) obj );
+			}
+			else if ( obj instanceof Map ) {
+				
+				sb.append( mapToString( (Map<String, Object>) obj ) );
+			}
+			else {
+				sb.append( obj );
+			}
+	    }
+		
+		sb.insert( 0, "{" );
+		sb.append( "}" );
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * <p>This version of itemStackReplaceItems is focused on replacing items within 
+	 * the stacks collection only.  It serves as the source and the target locations for the
+	 * conversions.
+	 * </p>
+	 * 
+	 * @param stacks
+	 * @param source
+	 * @param target
+	 * @param ratio
+	 */
+	public static void itemStackReplaceItems( List<SpigotItemStack> stacks,
+											XMaterial source, XMaterial target, int ratio,
+											StringBuilder debugInfo ) {
+		// Removes all of the specified source types from all inventories:
+		int sourceRemoved = itemStackRemoveAll( source, stacks );
+		
+		// The number of sources that need to be added back since it's the remainder:
+		int sourceAdd = sourceRemoved % ratio;
+		
+		int targetCount = sourceRemoved / ratio;
+		
+		
+		if ( sourceAdd > 0 ) {
+			itemStackAddAll( stacks, source, sourceAdd );
+		}
+		
+		
+		if ( targetCount > 0 ) {
+			itemStackAddAll( stacks, target, targetCount );
+		}
+		
+		debugInfo.append( "&d[&b" ).append( source.name() ).append( "&c:&b" ).append( sourceRemoved )
+					.append( " &7->&b " )
+					.append( target.name() ).append( "&c:&b" ).append( targetCount ).append( "&d]&3" );
+	}
+	
+	
+	private static void itemStackAddAll( List<SpigotItemStack> stacks, XMaterial source, int amount ) {
+		ItemStack iStack = source.parseItem();
+		iStack.setAmount( amount );
+		
+		SpigotItemStack sItemStack = new SpigotItemStack( iStack );
+		stacks.add( sItemStack );
+	}
+
+	public static int itemStackRemoveAll( XMaterial xMat, List<SpigotItemStack> stacks ) {
+		int count = 0;
+		if ( xMat != null && stacks != null ) {
+//			ItemStack testStack = xMat.parseItem();
+			
+			// This holds ItemStacks to be deleted. The key is the amount in the ItemStack.
+			List<SpigotItemStack> deleteHolder = new ArrayList<>();
+//			HashMap<Integer,ItemStack> deleteHolder = new HashMap<>();
+			
+			for (SpigotItemStack is : stacks ) {
+				if ( is != null ) {
+					
+					try {
+						XMaterial invXMat = XMaterial.matchXMaterial( is.getBukkitStack() );
+						if ( xMat == invXMat ) {
+							
+							count += is.getAmount();
+							deleteHolder.add( is );
+						}
+					}
+					catch ( Exception e ) {
+				
+						// Ignore: This exception is normal since enchanting plugins assign custom data values which
+						//         which will cause a mis-mapping on pre v1.13 platforms.
+//						Output.get().logWarn( 
+//								String.format( "SpigotUtil.itemStackRemoveAll:: Failure trying to convert " +
+//								"an ItemStack to an XMaterial. Trying to remove xMat: %s  ItemStack: %s", 
+//								xMat.name(), mapToString( is.serialize() ) ) );
+					}
+					
+				}
+			}
+			
+			// Now remove the items stacks from the inventory:
+			for ( SpigotItemStack itemStack : deleteHolder ) {
+				stacks.remove( itemStack );
+			}
+			
+		}
+		return count;
+	}
+
+	
+	/**
+	 * Used in AutoManagerFeatures.
+	 * @param player
+	 * @param itemStack
+	 */
+	public static void dropPlayerItems( Player player, SpigotItemStack itemStack ) {
+		if ( itemStack != null && itemStack.getAmount() > 0 ) {
+			
+			org.bukkit.Location dropPoint = player.getLocation().add( player.getLocation().getDirection());
+			
+			player.getWorld().dropItem( dropPoint, itemStack.getBukkitStack() );
+		}
+	}
+	
+	
+	public static void dropItems( SpigotBlock block, SpigotItemStack itemStack ) {
+		
+		
+		block.getWrapper().getLocation().getWorld().dropItem( 
+						block.getWrapper().getLocation(), itemStack.getBukkitStack() );
+		
+	}
+	
+	public static boolean playerInventoryContainsAtLeast( Player player, 
+						SpigotItemStack itemStack, int quantity ) {
+		boolean results = player.getInventory().containsAtLeast( 
+								itemStack.getBukkitStack(), quantity );
+		
+		return results;
+	}
+	
+	public static HashMap<Integer, ItemStack> playerInventoryRemoveItem( Player player, SpigotItemStack itemStack ) {
+		HashMap<Integer, ItemStack> results = player.getInventory().removeItem( itemStack.getBukkitStack() );
+		
+		return results;
+	}
+	
+	/**
+	 * Note that XMaterial.parseMaterial() may work well for v1.13.x and higher,
+	 * but it does not represent the correct block types in lower versions, 
+	 * such as with 1.8.x. This has everything to do with magic numbers.
+	 * Instead convert it to an ItemStack.
+	 */
+	public static List<PrisonBlock> getAllPlatformBlockTypes() {
+		List<PrisonBlock> blockTypes = new ArrayList<>();
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for ( XMaterial xMat : XMaterial.values() ) {
+			if ( xMat.isSupported() ) {
+				
+				ItemStack itemStack = null;
+
+				boolean itemStackFailed = false;
+				
+				try {
+					itemStack = xMat.parseItem();
+				} 
+				catch (Exception e) {
+					itemStackFailed = true;
+				}
+				
+				if ( xMat.name().toLowerCase().contains( "_wood" ) ) {
+					
+					// This validates that XMaterials can map to a Material and back to the correct XMaterial
+					// Bukkit versions < 1.13.0 fails on _WOOD blocks since XMaterial maps them to logs.
+					Material bMat = xMat.parseMaterial();
+					XMaterial xMatCheck = XMaterial.matchXMaterial( bMat );
+
+					if ( bMat != null  && xMat != xMatCheck ) {
+						// Incorrect mapping:
+						continue;
+					}
+				}
+				
+				if ( itemStack != null ) {
+					
+					//if ( itemStack.getType().isBlock() ) 
+					{
+						
+						PrisonBlock block = new PrisonBlock( xMat.name().toLowerCase() );
+						
+						block.setValid( true );
+						block.setBlock( itemStack.getType().isBlock() );
+						
+						blockTypes.add( block );
+					}
+				}
+				
+				else {
+					
+					// NOTE: Wall hangings, water, and potted plants can be placed as blocks, but cannot
+					//       created as ItemStacks:
+					if ( canItemStackMaterial( xMat ) ) {
+						
+						sb.append( xMat.name() ).append( " " );
+					}
+					
+					
+//					Output.get().logInfo(
+//							"Notice: invalid XMaterial type encountered when trying to use 'parseItem()'. %s " +
+//							"Contact prison support. XSeries may need to be updated to support " +
+//							"the current version of spigot. ",
+//							xMat.name()
+//							);
+					
+				}
+			}
+		}
+		
+		if ( sb.length() > 0 ) {
+			
+			Output.get().logInfo( "### SpigotUtil.testAllPrisonBlockTypes: "
+					+ "The following XMaterial items could not generate an ItemStack. "
+					+ "This is not an error. This list could be beneficial if there are any "
+					+ "issues with XMaterial and new versions of Spigot/Paper. "
+					+ "Igoring '*water*', '*wall*', and '*potted*' [%s] ",
+					sb.toString() );
+		}
+		
+		return blockTypes;
+	}
+	
+	
+	public static boolean canItemStackMaterial( Material max ) {
+		return canItemStackMaterial( max.name() );
+	}
+	
+	public static boolean canItemStackMaterial( XMaterial max ) {
+		return canItemStackMaterial( max.name() );
+	}
+	
+	public static boolean canItemStackMaterial( String name ) {
+		boolean results = true;
+		
+		name = name.toLowerCase();
+		
+		if ( name.contains( "wall") || name.contains( "potted" ) || name.contains( "water" ) || 
+				name.contains("") ) {
+			
+			results = false;
+		}
+		
+		return results;
+	}
+	
+	
+	public static List<PrisonBlock> getAllCustomBlockTypes() {
+		List<PrisonBlock> blockTypes = new ArrayList<>();
+		
+		List<Integration> customBlockInterfaces = 
+				Prison.get().getIntegrationManager().getAllForType( IntegrationType.CUSTOMBLOCK );
+
+		for ( Integration integration : customBlockInterfaces )
+		{
+			if ( integration.hasIntegrated() && integration instanceof CustomBlockIntegration ) {
+				CustomBlockIntegration blkInt = (CustomBlockIntegration) integration;
+				
+				List<PrisonBlock> blocks = blkInt.getCustomBlockList();
+				
+				if ( blocks.size() > 0 ) {
+					blockTypes.addAll( blocks );
+				}
+				
+				Output.get().logInfo( "&3Custom Block Integration: &7%s &3registered &7%d &3blocks " +
+						"&with the PrisonBlockType of &7%s&3.",
+						blkInt.getDisplayName(), blocks.size(), 
+						blkInt.getBlockType().name() );
+			}
+		}
+
+		return blockTypes;
+	}
+	
+	
+	/**
+	 * <p>This will take a string name of a block, and convert it to the
+	 * String name of a XMaterial.  If it cannot directly perform the
+	 * conversion, then it will fall back to using the old prison's
+	 * BlockType to perform the conversion.
+	 * </p>
+	 * 
+	 * @param blockName
+	 * @return
+	 */
+	public static PrisonBlock getPrisonBlock( String blockName ) {
+		return getPrisonBlock( blockName, null );
+	}
+	public static PrisonBlock getPrisonBlock( String blockName, String displayName ) {
+		
+		PrisonBlock results = new PrisonBlock( blockName, displayName );
+		results.setValid( false );
+		
+		return results;
+	}
+	
+	public static PrisonBlock getPrisonBlock( XMaterial xMat ) {
+		return getPrisonBlock( xMat, null );
+	}
+	public static PrisonBlock getPrisonBlock( XMaterial xMat, String displayName ) {
+		
+		PrisonBlock results = null;
+		
+		if ( xMat != null ) {
+			results = new PrisonBlock( xMat.name(), displayName );
+			
+		}
+		
+		if ( results == null ) {
+			results = getPrisonBlock( xMat.name(), displayName );
+		}
+		
+		return results;
+	}
+	
+	
+	public static void testAllPrisonBlockTypes() {
+		double version = XMaterial.getVersion();
+		
+		StringBuilder sbNoMap = new StringBuilder();
+		StringBuilder sbNotSupported = new StringBuilder();
+		StringBuilder sbSpigotNotSupported = new StringBuilder();
+		
+		int supportedBlockCountPrison = 0;
+		int supportedBlockCountXMaterial = 0;
+		
+		
+		// Validate which XMaterial 
+		for ( XMaterial xMat : XMaterial.values() ) {
+			if ( xMat.isSupported() ) {
+				
+				Material mat = xMat.parseMaterial();
+				if ( mat != null ) {
+					if ( mat.isBlock() ) {
+						supportedBlockCountXMaterial++;
+					}
+				}
+				else {
+					Output.get().logWarn( "### SpigotUtil.testAllPrisonBlockTypes: " +
+							"Possible XMaterial FAIL: XMaterial " + xMat.name() +
+							" is supported for this version, but the XMaterial cannot " +
+							"be mapped to an actual Material.");
+				}
+			}
+		}
+		
+		
+		for ( Material spigotMaterial : Material.values() ) {
+			
+			XMaterial xMat = null;
+			
+			try {
+				xMat = XMaterial.matchXMaterial( spigotMaterial );
+			} 
+			catch (Exception e) {
+				// Ignore since this version of spigot/paper does not support this block type
+				// within XMaterial.
+			}
+			
+			if ( spigotMaterial.isBlock() &&
+					
+					xMat == null
+//					XMaterial.matchXMaterial( spigotMaterial ) == null
+					
+//					BlockType.getBlock( spigotMaterial.name() ) == null 
+					) {
+				
+				String name = spigotMaterial.name().toLowerCase();
+				if ( !name.contains( "banner" ) && !name.contains( "button" ) && 
+						!name.contains( "pressure_plate" ) && !name.contains( "potted_" ) && 
+						!name.contains( "_head" ) && !name.contains( "_skull" ) && 
+						!name.contains( "_bed" ) && !name.contains( "_trapdoor" ) && 
+						!name.contains( "stem" ) && !name.contains( "stairs" ) && 
+						!name.contains( "_slab" ) ) {
+					
+					sbSpigotNotSupported.append( spigotMaterial.name() );
+					sbSpigotNotSupported.append( " " );
+				}
+				
+			}
+			
+		}
+		
+		// Next test all of the spigot/bukkit Materials:
+		BlockTestStats stats = SpigotCompatibility.getInstance()
+										.testCountAllBlockTypes();
+		
+		
+		Output.get().logWarn( "### SpigotUtil.testAllPrisonBlockTypes: Bukkit version: " + version + 
+									"  Supported Prison Blocks: " + supportedBlockCountPrison +
+									"  Supported XMaterial Blocks: " + supportedBlockCountXMaterial );
+		
+		Output.get().logWarn( "### SpigotUtil.testAllPrisonBlockTypes: Raw Bukkit/Spigot " + stats.toString() );
+		
+		logTestBlocks( sbNoMap, "### SpigotUtil.testAllPrisonBlockTypes:  " +
+										"Prison Blocks no maps to XMaterial: " );
+		logTestBlocks( sbNotSupported, "### SpigotUtil.testAllPrisonBlockTypes:  " +
+										"Prison Blocks not supported: " );
+		
+		
+		Output.get().logWarn( "### SpigotUtil.testAllPrisonBlockTypes: Spigot blocks ignored: " +
+				"banner, button, pressure_plate, potted, head, skull, bed, trapdoor, stem, stairs, slab "  );
+		logTestBlocks( sbSpigotNotSupported, "### SpigotUtil.testAllPrisonBlockTypes:  " +
+				"Spigot blocks not supported: " );
+	}
+    
+	
+	private static void logTestBlocks( StringBuilder sb, String message ) {
+		
+		int start = 0;
+		int end = 100;
+		
+		while ( sb.length() > end ) {
+			end = sb.lastIndexOf( " ", end );
+			Output.get().logWarn( message + 
+					(end < 0 ? sb.substring( start ) : sb.substring( start, end )));
+
+			start = end;
+			end += 100;
+		}
+		
+		Output.get().logWarn( message + sb.substring( start ));
+	}
+	
+
+
+	/*
+	 * Location
+	 */
+
+	public static Location bukkitLocationToPrison( org.bukkit.Location bukkitLocation ) {
+
+		Location loc = new Location( new SpigotWorld( bukkitLocation.getWorld() ), bukkitLocation.getX(),
+				bukkitLocation.getY(), bukkitLocation.getZ(), bukkitLocation.getPitch(),
+				bukkitLocation.getYaw() );
+
+		double x = bukkitLocation.getDirection().getX();
+		double y = bukkitLocation.getDirection().getY();
+		double z = bukkitLocation.getDirection().getZ();
+
+		Vector direction = new Vector( x, y, z );
+
+		loc.setDirection( direction );
+
+		return loc;
+
+//    	org.bukkit.util.Vector v = bukkitLocation.getDirection();
+//    	Vector direction = new Vector( v.getX(), v.getY(), v.getZ() );
+//    	
+//        return new Location(new SpigotWorld(bukkitLocation.getWorld()), bukkitLocation.getX(),
+//            bukkitLocation.getY(), bukkitLocation.getZ(), bukkitLocation.getPitch(),
+//            bukkitLocation.getYaw(), 
+//            direction );
+	}
+
+    public static org.bukkit.Location prisonLocationToBukkit(Location prisonLocation) {
+        org.bukkit.Location loc = new org.bukkit.Location(
+        			Bukkit.getWorld(prisonLocation.getWorld().getName()),
+		            prisonLocation.getX(), prisonLocation.getY(), prisonLocation.getZ(),
+		            prisonLocation.getYaw(), prisonLocation.getPitch() );
+        
+//        Vector v = prisonLocation.getDirection();
+//        org.bukkit.util.Vector vec = new org.bukkit.util.Vector( v.getX(), v.getY(), v.getZ() );
+//        loc.setDirection( vec );
+        
+        return loc;
+    }
+
+	/*
+	 * ItemStack
+	 */
+
+	public static SpigotItemStack bukkitItemStackToPrison( ItemStack bukkitStack ) {
+
+		SpigotItemStack results = null;
+
+		if ( bukkitStack != null ) {
+			try {
+				results = new SpigotItemStack( bukkitStack );
+			} catch ( PrisonItemStackNotSupportedRuntimeException e ) {
+				// ignore...
+			}
+		}
+
+		return results;
+	}
+
+	/**
+	 * <p>
+	 * This function will try to use the 'prisonStack' parameter, and then construct an org.bukkit.inventory.ItemStack
+	 * object and return it. If the provided prisonStack already contains a bukkit ItemStack, then it will be returned from
+	 * this function, otherwise it will have to construct one.
+	 * </p>
+	 * 
+	 * <p>
+	 * If it has to construct one, it will add the lore and custom name. It may have to also handle enchantments too. Not
+	 * sure right now.
+	 * </p>
+	 * 
+	 * <p>
+	 * The idea is that hopefully the prisonStack will always have an included bukkit ItemStack so everything will
+	 * faithfully copy over.
+	 * </p>
+	 * 
+	 * @param prisonStack
+	 * @return
+	 */
+	public static ItemStack prisonItemStackToBukkit(
+			tech.mcprison.prison.internal.ItemStack prisonStack ) {
+
+		ItemStack bukkitStack = null;
+
+		int amount = prisonStack.getAmount();
+
+		if ( prisonStack instanceof SpigotItemStack ) {
+
+			SpigotItemStack sItemStack = (SpigotItemStack) prisonStack;
+
+			if ( sItemStack.getBukkitStack() != null ) {
+				bukkitStack = sItemStack.getBukkitStack();
+			}
+		}
+
+
+		if ( bukkitStack == null ) {
+
+			bukkitStack = getItemStack( prisonStack.getMaterial(), amount );
+
+			ItemMeta meta;
+			if ( bukkitStack.getItemMeta() == null || !bukkitStack.hasItemMeta() ) {
+				meta = Bukkit.getItemFactory().getItemMeta( bukkitStack.getType() );
+			}
+			else {
+				meta = bukkitStack.getItemMeta();
+			}
+
+			if ( meta != null ) {
+				if ( prisonStack.getDisplayName() != null ) {
+					meta.setDisplayName( Text.translateAmpColorCodes( prisonStack.getDisplayName() ) );
+				}
+				if ( prisonStack.getLore() != null ) {
+					List<String> colored = new ArrayList<>();
+					for ( String uncolor : prisonStack.getLore() ) {
+						colored.add( Text.translateAmpColorCodes( uncolor ) );
+					}
+					meta.setLore( colored );
+				}
+				bukkitStack.setItemMeta( meta );
+			}
+
+			// Need to copy enchantments?
+
+			// Need to copy lore:
+			// No, this does not make sense... if prisonStack has NBT data, then
+			// it would also have a getBukkitStack() entry, so this part of the
+			// code would never be reached. So if there is no bukkitStack in the
+			// prisonStack, then there would be no NBT data either.
+//        	PrisonNBTUtil.copyCustomNBT(bukkitStack, bukkitStack)
+		}
+
+		return bukkitStack;
+	}
+    
+    
+    
+    
+    /**
+     * <p>Drops for lapis_ore is odd before the flattening (bukkit 1.8.x through 1.12.2) since it
+     * drops as blue_dye, but when it makes it to the player's inventory, it is then converted to
+     * lapis_lazuli.  So in order for auto sell to work, it has to sell on blue_dye and not 
+     * lapis_lazuli, or it will be placed in the player's inventory.  So it's important that
+     * blue_dye is added to the shop for the same price as lapis_lazuli.
+     * </p>
+     * 
+     * @param block
+     * @param tool
+     * @return
+     */
+	public static List<SpigotItemStack> getDrops(SpigotBlock block, SpigotItemStack tool) {
+		List<SpigotItemStack> ret = new ArrayList<>();
+		
+		Collection<ItemStack> drops = block.getWrapper().getDrops( tool.getBukkitStack() );
+		
+		for ( ItemStack drop : drops ) {
+			ret.add( SpigotUtil.bukkitItemStackToPrison(drop) );
+		}
+		
+		return ret;
+	}
+    
+  
+  
+  /*
+   * InventoryType
+   */
+
+    public static InventoryType bukkitInventoryTypeToPrison( org.bukkit.event.inventory.InventoryType type) {
+        return InventoryType.valueOf(type.name());
+    }
+
+    public static org.bukkit.event.inventory.InventoryType prisonInventoryTypeToBukkit(
+        InventoryType type) {
+        return org.bukkit.event.inventory.InventoryType.valueOf(type.name());
+    }
+
+    public static InventoryType.SlotType bukkitSlotTypeToPrison(
+        org.bukkit.event.inventory.InventoryType.SlotType type) {
+
+        return InventoryType.SlotType.valueOf(type.name());
+    }
+
+  /*
+   * Property
+   */
+
+    public static InventoryView.Property prisonPropertyToBukkit(Viewable.Property property) {
+        return InventoryView.Property.valueOf(property.name());
+    }
+
+    
+	/**
+	 * <p>
+	 * Vault economy requires the parameter of bukkit's OfflinePlayer. That was never exposed for good reasons, and do not
+	 * want to use bukkit/spigot specific code within that integration. So, this is where this code will live since it is a
+	 * Spigot untility.
+	 * </p>
+	 * 
+	 * @param uuid
+	 * @return OfflinePlayer
+	 */
+	public static OfflinePlayer getBukkitOfflinePlayer( UUID uuid ) {
+
+		OfflinePlayer results = Bukkit.getOfflinePlayer( uuid );
+
+		return results;
+	}
+}

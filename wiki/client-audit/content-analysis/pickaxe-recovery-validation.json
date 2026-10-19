@@ -1,0 +1,12 @@
+{
+  "screenshots": 16,
+  "observedTransitions": 15,
+  "terminalScreens": 1,
+  "priceTotal": 54949,
+  "labelMismatchScreens": 3,
+  "exactIntegerPriceRows": 15,
+  "blockRequirementsIncludeAbbreviatedValues": true,
+  "evidenceHashesVerified": true,
+  "manualTranscription": true,
+  "absoluteMaximumProven": false
+}

@@ -1,0 +1,229 @@
+[
+  {
+    "relative": "cache/addons/addons.json",
+    "compressedBytes": 2607,
+    "decodedBytes": 3986,
+    "magic": "43584f440e2236616430323564312d66",
+    "jsonOffset": 19,
+    "kind": "json",
+    "keys": [
+      "addons",
+      "sign"
+    ],
+    "sample": [
+      {
+        "key": "addons",
+        "type": "object",
+        "keys": [
+          "0",
+          "1",
+          "2"
+        ]
+      },
+      {
+        "key": "sign",
+        "type": "string",
+        "keys": []
+      }
+    ]
+  },
+  {
+    "relative": "cache/lang/lang.json",
+    "compressedBytes": 96733,
+    "decodedBytes": 157015,
+    "magic": "43584f44102236616434323234382d32",
+    "jsonOffset": 21,
+    "kind": "json",
+    "keys": [
+      "langs",
+      "commit",
+      "sign"
+    ],
+    "sample": [
+      {
+        "key": "langs",
+        "type": "object",
+        "keys": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "key": "commit",
+        "type": "string",
+        "keys": []
+      },
+      {
+        "key": "sign",
+        "type": "string",
+        "keys": []
+      }
+    ]
+  },
+  {
+    "relative": "cache\\addons\\25\\a8\\25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+    "compressedBytes": 624781,
+    "decodedBytes": 675902,
+    "magic": "504b0304140008080800000021000000",
+    "kind": "zip"
+  },
+  {
+    "relative": "cache\\addons\\b8\\ab\\b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+    "compressedBytes": 1276545,
+    "decodedBytes": 1359678,
+    "magic": "504b0304140008080800000021000000",
+    "kind": "zip"
+  },
+  {
+    "relative": "cache\\addons\\d2\\ca\\d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+    "compressedBytes": 1999285,
+    "decodedBytes": 2154018,
+    "magic": "504b0304140008080800000021000000",
+    "kind": "zip"
+  },
+  {
+    "relative": "cache\\lang\\05\\1a\\051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+    "compressedBytes": 52727,
+    "decodedBytes": 206711,
+    "magic": "7b2270726f70657274696573223a7b22",
+    "jsonOffset": 0,
+    "kind": "json",
+    "keys": [
+      "properties"
+    ],
+    "sample": [
+      {
+        "key": "properties",
+        "type": "object",
+        "keys": [
+          "prison.mine.blocks-mined1000.name",
+          "prison.mine.blocks-mined1000.description",
+          "prison.mine.blocks-mined10000.name",
+          "prison.mine.blocks-mined10000.description",
+          "prison.mine.blocks-mined100000.name",
+          "prison.mine.blocks-mined100000.description",
+          "prison.mine.blocks-mined1000000.name",
+          "prison.mine.blocks-mined1000000.description",
+          "prison.mine.blocks-mined7000000.name",
+          "prison.mine.blocks-mined7000000.description",
+          "prison.progress.level5.name",
+          "prison.progress.level5.description",
+          "prison.progress.level10.name",
+          "prison.progress.level10.description",
+          "prison.progress.level20.name",
+          "prison.progress.level20.description"
+        ]
+      }
+    ]
+  },
+  {
+    "relative": "cache\\lang\\36\\50\\3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+    "compressedBytes": 3938,
+    "decodedBytes": 18285,
+    "magic": "7b2270726f70657274696573223a7b22",
+    "jsonOffset": 0,
+    "kind": "json",
+    "keys": [
+      "properties"
+    ],
+    "sample": [
+      {
+        "key": "properties",
+        "type": "object",
+        "keys": [
+          "prisonevo.root.all-rounder.name",
+          "prisonevo.root.all-rounder.description",
+          "prisonevo.root.grand-slam.name",
+          "prisonevo.root.grand-slam.description",
+          "prisonevo.blocks.broken1000.name",
+          "prisonevo.blocks.broken1000.description",
+          "prisonevo.blocks.broken10000.name",
+          "prisonevo.blocks.broken10000.description",
+          "prisonevo.blocks.broken100000.name",
+          "prisonevo.blocks.broken100000.description",
+          "prisonevo.blocks.broken500000.name",
+          "prisonevo.blocks.broken500000.description",
+          "prisonevo.blocks.broken1000000.name",
+          "prisonevo.blocks.broken1000000.description",
+          "prisonevo.blocks.broken5000000.name",
+          "prisonevo.blocks.broken5000000.description"
+        ]
+      }
+    ]
+  },
+  {
+    "relative": "cache\\lang\\9c\\6b\\9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+    "compressedBytes": 65788,
+    "decodedBytes": 282160,
+    "magic": "7b2270726f70657274696573223a7b22",
+    "jsonOffset": 0,
+    "kind": "json",
+    "keys": [
+      "properties"
+    ],
+    "sample": [
+      {
+        "key": "properties",
+        "type": "object",
+        "keys": [
+          "prison.mine.blocks-mined1000.name",
+          "prison.mine.blocks-mined1000.description",
+          "prison.mine.blocks-mined10000.name",
+          "prison.mine.blocks-mined10000.description",
+          "prison.mine.blocks-mined100000.name",
+          "prison.mine.blocks-mined100000.description",
+          "prison.mine.blocks-mined1000000.name",
+          "prison.mine.blocks-mined1000000.description",
+          "prison.mine.blocks-mined7000000.name",
+          "prison.mine.blocks-mined7000000.description",
+          "prison.progress.level5.name",
+          "prison.progress.level5.description",
+          "prison.progress.level10.name",
+          "prison.progress.level10.description",
+          "prison.progress.level20.name",
+          "prison.progress.level20.description"
+        ]
+      }
+    ]
+  },
+  {
+    "relative": "cache\\lang\\1b\\97\\1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+    "compressedBytes": 4958,
+    "decodedBytes": 22962,
+    "magic": "7b2270726f70657274696573223a7b22",
+    "jsonOffset": 0,
+    "kind": "json",
+    "keys": [
+      "properties"
+    ],
+    "sample": [
+      {
+        "key": "properties",
+        "type": "object",
+        "keys": [
+          "prisonevo.root.all-rounder.name",
+          "prisonevo.root.all-rounder.description",
+          "prisonevo.root.grand-slam.name",
+          "prisonevo.root.grand-slam.description",
+          "prisonevo.blocks.broken1000.name",
+          "prisonevo.blocks.broken1000.description",
+          "prisonevo.blocks.broken10000.name",
+          "prisonevo.blocks.broken10000.description",
+          "prisonevo.blocks.broken100000.name",
+          "prisonevo.blocks.broken100000.description",
+          "prisonevo.blocks.broken500000.name",
+          "prisonevo.blocks.broken500000.description",
+          "prisonevo.blocks.broken1000000.name",
+          "prisonevo.blocks.broken1000000.description",
+          "prisonevo.blocks.broken5000000.name",
+          "prisonevo.blocks.broken5000000.description"
+        ]
+      }
+    ]
+  }
+]

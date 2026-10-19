@@ -1,0 +1,212 @@
+{
+  "repository": "PrisonTeam/Prison",
+  "revision": "6914aa0a687c26a44e10d150ae5e4b17bf733b04",
+  "method": "Selected UTF-8 sources via approved GitHub connector; static reading only; no plugin execution",
+  "files": [
+    {
+      "path": "docs/prison_docs_117_setting_up_backpacks.md",
+      "blobSha": "b39dc6646b73b8bc9b4f9f1edca5eb3cdbdff18c",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/docs/prison_docs_117_setting_up_backpacks.md"
+    },
+    {
+      "path": "docs/prison_docs_130_Prison_Mine_Bombs.md",
+      "blobSha": "21cfa818e7808ff5eba1951a7ae06bc296f0f817",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/docs/prison_docs_130_Prison_Mine_Bombs.md"
+    },
+    {
+      "path": "prison-core/module_conf/mines/mineBombsConfig.json",
+      "blobSha": "166b714fb61f5ac94488ad9890b5bf1ed7d55ee3",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/module_conf/mines/mineBombsConfig.json"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCache.java",
+      "blobSha": "34a62c2eb79968b4e87540999c7ffe62102d7581",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCache.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheEvents.java",
+      "blobSha": "7a5691ae1395cd0f71e6b7d7406de5ee8112a357",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheEvents.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheFiles.java",
+      "blobSha": "0109b0ddbfa0e80c4a27b5144af4c332fb68471e",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheFiles.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheLoadPlayerTask.java",
+      "blobSha": "f341b07d69b67e95dcf938444c16e72ba61e3d06",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheLoadPlayerTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCachePlayerData.java",
+      "blobSha": "ccb299b9593b5927ff6b9fbc129734a97e1e5370",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCachePlayerData.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheRunnable.java",
+      "blobSha": "cd55ca89db21c7ad1ac15da7dc99d1be35aad02c",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheRunnable.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheSaveAllPlayersTask.java",
+      "blobSha": "5315cd4a05d62bc10c61511013333d408118eedc",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheSaveAllPlayersTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheStats.java",
+      "blobSha": "2f671aa68b8fa65eb7e57a1c2b4d1949acef03a6",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheStats.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheTask.java",
+      "blobSha": "972f2bc6ef78bcc728c122f3b0bc1ec47ff88578",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheUnloadPlayerTask.java",
+      "blobSha": "1e71430eaef7ff3c9066c09f27be2cbbe2da0630",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackCacheUnloadPlayerTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackConverterOldPrisonBackpacks.java",
+      "blobSha": "50b3e78120f6d08de6e930b8f255fda29b0d3944",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackConverterOldPrisonBackpacks.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackEnums.java",
+      "blobSha": "3498090bcba21c420bafc7378dc52d3cf40f3ca9",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/BackpackEnums.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/PlayerBackpack.java",
+      "blobSha": "cdb8e3e5bc8f7774c9db7c8cd986cc4be453effa",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/PlayerBackpack.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/PlayerBackpackSiloData.java",
+      "blobSha": "338888adadba828c232674c222ce34f327fb6857",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/PlayerBackpackSiloData.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/backpacks/PrisonCoreBackpackMessages.java",
+      "blobSha": "d6876114940023eaa562c2341059202e8661924e",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/backpacks/PrisonCoreBackpackMessages.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/GeometricShapes.java",
+      "blobSha": "e40ea2c383742d2cf03c4efcdf20561e8b77e07e",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/GeometricShapes.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombCooldownException.java",
+      "blobSha": "360b4d62bdaedfb5750312399a4075be7fac76b8",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombCooldownException.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombCooldownTask.java",
+      "blobSha": "68b8a079aa59b441d6cb5560d898cfc271fa8bc2",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombCooldownTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombData.java",
+      "blobSha": "92bce35495ba568e02f2fe9955f71ae04744a200",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombData.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombDefaultConfigSettings.java",
+      "blobSha": "0edaf20b6093e3ef0fadb4650a30cd9da6739f0d",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombDefaultConfigSettings.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombDetonateTask.java",
+      "blobSha": "ffc748c10bf84ccc4fcf5b1d15832f466a7f58da",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombDetonateTask.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombEffectsData.java",
+      "blobSha": "28debab782bb9aee4ca9cd349a5e607123ec0ea6",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombEffectsData.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombMessages.java",
+      "blobSha": "58451dd7568db09dda02e4ab741b5fdd35e5aaec",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombMessages.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombs.java",
+      "blobSha": "b794ed91d0f7443bfd7a2f42a3fbca15dccaa53c",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombs.java"
+    },
+    {
+      "path": "prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombsConfigData.java",
+      "blobSha": "9cd28575f443ea8a3f46eee7979791f077881fa9",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-core/src/main/java/tech/mcprison/prison/bombs/MineBombsConfigData.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/BackpacksListeners.java",
+      "blobSha": "74c95c85df0dcafdb23560a50d059a76a1763ffc",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/BackpacksListeners.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/BackpacksUtil.java",
+      "blobSha": "0d4cb278ed02087d5d971b81babf760a26edea14",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/BackpacksUtil.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/NewBackpacksUtil.java",
+      "blobSha": "c31340a21c100a41a1304beb9173fdad864b77ba",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/backpacks/NewBackpacksUtil.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/commands/PrisonSpigotBackpackCommands.java",
+      "blobSha": "4e48d08746823ed2e576179778dab9acf7bc23b9",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/commands/PrisonSpigotBackpackCommands.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/configs/BackpacksConfig.java",
+      "blobSha": "60bccaae98e5dd77e70a455468ec8547eb5f5b3f",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/configs/BackpacksConfig.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonBombListener.java",
+      "blobSha": "4ce3344e44d311d9404d20aa9a53f13a23270474",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonBombListener.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonUtilsMineBombs.java",
+      "blobSha": "85763389106df5fbe8604e05da239c64053d115b",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonUtilsMineBombs.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/commands/PrisonSpigotGUIBackPackCommands.java",
+      "blobSha": "fb113e0a2e9571355bced0881d17fe77e726f64d",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/commands/PrisonSpigotGUIBackPackCommands.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonUtilsMineBombsTasks.java",
+      "blobSha": "7e3b19c40dcfe89af221765825b18ce01f235a10",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/utils/PrisonUtilsMineBombsTasks.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/autofeatures/events/AutoManagerPrisonsExplosiveBlockBreakEvents.java",
+      "blobSha": "014e20770a882389d2ca7edcc70c8780c210b5e3",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/autofeatures/events/AutoManagerPrisonsExplosiveBlockBreakEvents.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/autofeatures/AutoManagerFeatures.java",
+      "blobSha": "0e43ba34dec39d43f811b56cb722b04c9c9ba02d",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/autofeatures/AutoManagerFeatures.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/api/BackpackEvent.java",
+      "blobSha": "61e65422cb20ffb0957e4ddb3c9db55ce0c83faf",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/api/BackpackEvent.java"
+    },
+    {
+      "path": "prison-spigot/src/main/java/tech/mcprison/prison/spigot/SpigotUtil.java",
+      "blobSha": "15129baf5a736cca0c6e880bfd6f4309b1715e0a",
+      "url": "https://github.com/PrisonTeam/Prison/blob/6914aa0a687c26a44e10d150ae5e4b17bf733b04/prison-spigot/src/main/java/tech/mcprison/prison/spigot/SpigotUtil.java"
+    }
+  ]
+}

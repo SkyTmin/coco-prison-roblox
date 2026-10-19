@@ -1,0 +1,119 @@
+{
+  "collectedOn": "2026-10-18",
+  "gameRoot": "C:/Users/user/.cristalix/updates/Minigames",
+  "scope": "Cached public addon files and Prison translations only; no account, launcher, session, chat or player files copied.",
+  "files": [
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/addons/addons.json",
+      "copy": "snapshot/cache/addons/addons.json",
+      "bytes": 2607,
+      "sha256": "88ab0e6a6fc914637b378700398c366837a6979ff16aabbab35ddebe34fcfd72"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/lang/lang.json",
+      "copy": "snapshot/cache/lang/lang.json",
+      "bytes": 96733,
+      "sha256": "812eee687b4b927885886c2cafa8d1ea0c63969552e9945f29c7331e71c931e1"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/addons/25/a8/25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+      "copy": "snapshot/cache/addons/25/a8/25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+      "bytes": 624781,
+      "sha256": "eb3ea6ca4c6a0ea9a148d92db1dce9eca92c6fb96b357ae1b232c217e506dbcb"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/addons/b8/ab/b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+      "copy": "snapshot/cache/addons/b8/ab/b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+      "bytes": 1276545,
+      "sha256": "6c1221120aac504fed009758ec41fba2104349e17a6df3ce04fbb3d67fdf0218"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/addons/d2/ca/d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+      "copy": "snapshot/cache/addons/d2/ca/d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+      "bytes": 1999285,
+      "sha256": "3a7dc50065a00d36d2610c67e18f8b5f2719c5fa0c0fef0c74f6f5b1d2287633"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/lang/05/1a/051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+      "copy": "snapshot/cache/lang/05/1a/051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+      "bytes": 52727,
+      "sha256": "278f38a648abe0efaa30c27b80600dbfa71ae1107f4f83bc5a518ed532850cf6"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/lang/36/50/3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+      "copy": "snapshot/cache/lang/36/50/3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+      "bytes": 3938,
+      "sha256": "d2a6d3386c03d292c01e9b69210f868c34837536c1ef18ed59fc472e8906543b"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/lang/9c/6b/9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+      "copy": "snapshot/cache/lang/9c/6b/9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+      "bytes": 65788,
+      "sha256": "e98a20c15cf3a37ec156e1db8fead093d473c9eeddb8261b79964dd3c623ab3b"
+    },
+    {
+      "source": "C:/Users/user/.cristalix/updates/Minigames/cache/lang/1b/97/1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+      "copy": "snapshot/cache/lang/1b/97/1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+      "bytes": 4958,
+      "sha256": "c26e74964423953d89fbdab14e1b7e351aae19d0dc880d23e3e236d5e76301d9"
+    }
+  ],
+  "addons": [
+    {
+      "name": "socials",
+      "displayName": "Socials Mod",
+      "version": "mod",
+      "hash": "25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5"
+    },
+    {
+      "name": "gama",
+      "displayName": "Gama Mod",
+      "version": "bundle",
+      "hash": "b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6"
+    },
+    {
+      "name": "wada",
+      "displayName": "Wada Mod",
+      "version": "4.18.6",
+      "hash": "d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59"
+    }
+  ],
+  "scan": [
+    {
+      "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-25a8d380e3ff.zip",
+      "entries": 320,
+      "classes": 287,
+      "matchingClasses": 0,
+      "parseErrors": 0
+    },
+    {
+      "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-b8ab8e19b366.zip",
+      "entries": 861,
+      "classes": 844,
+      "matchingClasses": 1,
+      "parseErrors": 0
+    },
+    {
+      "archive": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\addon-d2cae0873b9f.zip",
+      "entries": 1157,
+      "classes": 1141,
+      "matchingClasses": 0,
+      "parseErrors": 0
+    },
+    {
+      "archive": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\assets-addon.jar",
+      "entries": 7150,
+      "classes": 0,
+      "matchingClasses": 0,
+      "parseErrors": 0
+    },
+    {
+      "archive": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\minecraft.jar",
+      "entries": 7300,
+      "classes": 7291,
+      "matchingClasses": 0,
+      "parseErrors": 0
+    }
+  ],
+  "limits": "Name and JVM constant-pool scan does not resolve obfuscated strings or prove absence of hidden functionality."
+}

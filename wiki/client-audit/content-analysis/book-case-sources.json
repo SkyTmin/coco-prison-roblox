@@ -1,0 +1,618 @@
+{
+  "recordedDate": "2026-10-20",
+  "sources": [
+    {
+      "id": "book_case_1",
+      "attachmentNumber": 1,
+      "originalFilename": "codex-clipboard-f11804a3-840a-415a-8e2c-94b60e53e447.png",
+      "originalSha256": "51adf6ed0c24c2eeb6894af726248d28614235e78478c9e9bfcbc3833901747f",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        500,
+        24,
+        1910,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/01.png",
+      "evidenceSha256": "98fd0b434cf4348626779a33773308f052d64c3517b542558369fbbccc8df343"
+    },
+    {
+      "id": "book_case_2",
+      "attachmentNumber": 2,
+      "originalFilename": "codex-clipboard-4b9688ee-6c5f-4277-9099-33bc646daed0.png",
+      "originalSha256": "bfbf2f86cdbfa4b0ef37fa1ceccc0f31de59f7236100d18b4f5bca7a27756695",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        385,
+        100,
+        1537,
+        1018
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/02.png",
+      "evidenceSha256": "e76a24e47d3e373b07db79fff62b3326c36216a6ce983ae1fc57bb5f8ccc7125"
+    },
+    {
+      "id": "book_case_3",
+      "attachmentNumber": 3,
+      "originalFilename": "codex-clipboard-d0b7ddce-ab18-497b-8d68-592c1d5c7c4f.png",
+      "originalSha256": "91c5b6054da05eca07d786f142a37ddf6afa056fcc46de3bae730eeb64c0ad8b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/03.png",
+      "evidenceSha256": "5b001dc00efcfa5c233263cd83cb68e4699ee56c4e26e45299d65a4e1a2f7d66"
+    },
+    {
+      "id": "book_case_4",
+      "attachmentNumber": 4,
+      "originalFilename": "codex-clipboard-709befb7-4479-4cfe-956c-748b947dc436.png",
+      "originalSha256": "539f75490d0d8c63132eb88c77f6c0e697d885880b5504397443bd3f88545cda",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/04.png",
+      "evidenceSha256": "18b68584039d0fe187ebd0594299c3b6a882b94cd7f27fb4220684784d30854c"
+    },
+    {
+      "id": "book_case_5",
+      "attachmentNumber": 5,
+      "originalFilename": "codex-clipboard-8899245f-3558-4d05-b201-88c80626c3b9.png",
+      "originalSha256": "ba502cf03dcb493a8e2621a21eb4ee75913fb26bacc3ff1fe674cba6fdfaac1e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/05.png",
+      "evidenceSha256": "9727fff23a83dcf18ea43242da410b6a5e2081f48be1da2ca9909743cd7b72da"
+    },
+    {
+      "id": "book_case_6",
+      "attachmentNumber": 6,
+      "originalFilename": "codex-clipboard-1b990311-0a41-4446-bd3f-bb1ba8822a41.png",
+      "originalSha256": "4748d588525bd10f1a57911d6acfe1655ab029ea8ee726609e2e0c24b2f9074b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/06.png",
+      "evidenceSha256": "add2440fc127ddc55ca92bf74c542d1c300aec99c4079682b934c94506407361"
+    },
+    {
+      "id": "book_case_7",
+      "attachmentNumber": 7,
+      "originalFilename": "codex-clipboard-55aec94f-736a-4694-ab5d-9968fb85d6f6.png",
+      "originalSha256": "c38f818b4b0884d8b57a5ce83f20873f18f267d89a6b259b6df0f3131ad5d7f5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/07.png",
+      "evidenceSha256": "b23e0ce040cbfb5697169daaa2503cd033bf2d8ae7bf57e739876e3d6a20b0ca"
+    },
+    {
+      "id": "book_case_8",
+      "attachmentNumber": 8,
+      "originalFilename": "codex-clipboard-9cdfe1bb-7420-4d12-9e13-5912920d9a2b.png",
+      "originalSha256": "c38f818b4b0884d8b57a5ce83f20873f18f267d89a6b259b6df0f3131ad5d7f5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/08.png",
+      "evidenceSha256": "b23e0ce040cbfb5697169daaa2503cd033bf2d8ae7bf57e739876e3d6a20b0ca"
+    },
+    {
+      "id": "book_case_9",
+      "attachmentNumber": 9,
+      "originalFilename": "codex-clipboard-e36e826d-b457-497a-9941-2eca782d7f6f.png",
+      "originalSha256": "ca0d16da62856cf1515197ce825a08c54c1634000e98002515623db40167cc30",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/09.png",
+      "evidenceSha256": "9aee3e987828d210e69c36a19f1a69ce497f8b3b5965f62f5e088b752997c8c8"
+    },
+    {
+      "id": "book_case_10",
+      "attachmentNumber": 10,
+      "originalFilename": "codex-clipboard-950ffa9b-9234-4a1e-9585-730d26359b46.png",
+      "originalSha256": "25c992cdb984e6a6cd2b8c9205d6cddc46b4a71fbac7efc424949e4a2576f153",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/10.png",
+      "evidenceSha256": "5d9a756385afb643e6ba92c308a4ca21e3c10bbe61a78195c71c13b54a6f518c"
+    },
+    {
+      "id": "book_case_11",
+      "attachmentNumber": 11,
+      "originalFilename": "codex-clipboard-3168c576-c657-4e70-9e15-6ac984fb2cfe.png",
+      "originalSha256": "f53f75757b982719a6a19782332c46bd0f65d32c814f25a35958867f6515261a",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/11.png",
+      "evidenceSha256": "5edefe42e8650f8e2718243efe34e901c2933ba115b218031c6fb12e9be76daa"
+    },
+    {
+      "id": "book_case_12",
+      "attachmentNumber": 12,
+      "originalFilename": "codex-clipboard-8a1041e2-1c6b-438a-b85d-45613b487d18.png",
+      "originalSha256": "521a5c01b6073580ba386394a758b9a319eb0252d1f615764016b8befacfe340",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/12.png",
+      "evidenceSha256": "00d90d422b1b69c841d8a4791c113d5cf54551c427802e762c2f809c0d80f766"
+    },
+    {
+      "id": "book_case_13",
+      "attachmentNumber": 13,
+      "originalFilename": "codex-clipboard-216a91a9-d4f2-43f1-9abd-5d19fb3ef562.png",
+      "originalSha256": "bf9ba4d982b8a87c6afca1a815aa93dd90d34685c34873fd2c1e117edeead459",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/13.png",
+      "evidenceSha256": "2676e7fe01ff612783931a660f58082c3a39e4b2d8e5974f2824b3da77b9a9c2"
+    },
+    {
+      "id": "book_case_14",
+      "attachmentNumber": 14,
+      "originalFilename": "codex-clipboard-af41fe33-4aa4-4665-8a26-bc5f70c62e14.png",
+      "originalSha256": "b3c6fe8ad54539c94589d42956bc2d4f6b6be1a8fb0d218280f137ce12193020",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/14.png",
+      "evidenceSha256": "3316fa97bb9966dd6aa32ffd6384efa05c4c0c5a9f48e6208f3113b62e3d47cc"
+    },
+    {
+      "id": "book_case_15",
+      "attachmentNumber": 15,
+      "originalFilename": "codex-clipboard-b7ef8152-1b9c-44bf-8746-6e06cefded75.png",
+      "originalSha256": "87693975c26b14ba4954d1be89f03211bab58f5193cd2ff7f218e72fa58fe47b",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/15.png",
+      "evidenceSha256": "bfc41a88a84f632762381053cca74abd16fabeeb38464d90da3b4786290b4724"
+    },
+    {
+      "id": "book_case_16",
+      "attachmentNumber": 16,
+      "originalFilename": "codex-clipboard-df31462f-22a9-479b-8091-0e71036039e7.png",
+      "originalSha256": "d0c07564dced90caaac26ef0dd5e906628f972f529cc6aefe6a7b44c94cf7ce1",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/16.png",
+      "evidenceSha256": "8a1ac43c377843f2152d6c1e445ab56c265d9695ccda43185efab319d883512b"
+    },
+    {
+      "id": "book_case_17",
+      "attachmentNumber": 17,
+      "originalFilename": "codex-clipboard-97add7d6-19c2-4104-8351-5ef15845bdef.png",
+      "originalSha256": "ac03e4481d20b1580e196cc46545df053939ec201d43f7e05081580c683aebfd",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/17.png",
+      "evidenceSha256": "88f826c102044617fa0b392341b124d8fde462263c4c43d763ac166f5d22cd55"
+    },
+    {
+      "id": "book_case_18",
+      "attachmentNumber": 18,
+      "originalFilename": "codex-clipboard-da21e9ea-8a18-47b4-9fda-a9584504577e.png",
+      "originalSha256": "985a558ba26db432219272adaaa4dcc67468aef4453632fd64db99d6e89cd592",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/18.png",
+      "evidenceSha256": "f8ff3b2e6559f1f51e066451b168eeb05409434410ca3401435c8c6865bc220d"
+    },
+    {
+      "id": "book_case_19",
+      "attachmentNumber": 19,
+      "originalFilename": "codex-clipboard-df83634a-712d-4d1a-b203-a47d5b6e7b91.png",
+      "originalSha256": "5bf79a778d825b3bad8503cb7bad44d3f8b5f71747253b245ec908cbcdc2567e",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/19.png",
+      "evidenceSha256": "4ff1027ff4bc93c66790712b90c638de5ebb64cbe913aff3e9814ef6f032b7bb"
+    },
+    {
+      "id": "book_case_20",
+      "attachmentNumber": 20,
+      "originalFilename": "codex-clipboard-7e7f5e58-d292-4f2e-847d-3899fc7ac631.png",
+      "originalSha256": "635e9968c8de19e193fb1554cdcf604a3f149d05f6ba8c97be3c9f6e31613f86",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/20.png",
+      "evidenceSha256": "2694a3499a34ce0533edf515d0e7fac18e5ea24419c7d78c6fb52ae168a0f9be"
+    },
+    {
+      "id": "book_case_21",
+      "attachmentNumber": 21,
+      "originalFilename": "codex-clipboard-e5d67dd0-d598-4b6b-b6a0-442fb0f64e5c.png",
+      "originalSha256": "099f9b9bf5c724e76e70c0225618e89c0732f6b0d18aa3c50dce5bac77988e7d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/21.png",
+      "evidenceSha256": "22ba49961b79dea8b07e70d50c1623a7cc636c68f3d688fe90b68292518a302a"
+    },
+    {
+      "id": "book_case_22",
+      "attachmentNumber": 22,
+      "originalFilename": "codex-clipboard-847b5d16-d596-43ea-8be3-645c605fae01.png",
+      "originalSha256": "1c39b0ab13d2fb44c89897cd8115132396396196ed70c0c2d07adbb63553c84d",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/22.png",
+      "evidenceSha256": "25ea0f96e27bf3cd55f0cbeda68fff87b3f8d3de2d7ffb170e4605feb1ecb0ea"
+    },
+    {
+      "id": "book_case_23",
+      "attachmentNumber": 23,
+      "originalFilename": "codex-clipboard-354c0fa4-f9f3-460d-8d43-3de70f9a94b2.png",
+      "originalSha256": "d6b30ca98d67b7314af4dd4dd58cb87a2a3c18ec08a8937a8326020436aeeecd",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/23.png",
+      "evidenceSha256": "ce1a76a8a25abbc3b286792e7414f916e3e124c1661677b5b559209e2a7e34b8"
+    },
+    {
+      "id": "book_case_24",
+      "attachmentNumber": 24,
+      "originalFilename": "codex-clipboard-4aabce64-c0fa-463a-a275-b2c6b684fe18.png",
+      "originalSha256": "970a0b028a9c4d35db42c306c81d412683d93719344eae133a834120fb622bf2",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/24.png",
+      "evidenceSha256": "a57443beb446b8b6b61485ea0e7fb5514a0d082823acf63c475e9cec17ccfab1"
+    },
+    {
+      "id": "book_case_25",
+      "attachmentNumber": 25,
+      "originalFilename": "codex-clipboard-d52914e0-2d16-4e79-9ce9-80216eff77a5.png",
+      "originalSha256": "d2c71a51dd3a180b56603990ae6359ca03f390d7060404e12337ac369d8a54af",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/25.png",
+      "evidenceSha256": "104b551f35a19692dbdccd097b0210713c7c8580c35683b819ac9f0a24e5bce4"
+    },
+    {
+      "id": "book_case_26",
+      "attachmentNumber": 26,
+      "originalFilename": "codex-clipboard-6c24f4d8-4495-4d7c-86d0-e38dee1a66d1.png",
+      "originalSha256": "43ec8a5a7148e5ea374b2edccf2fb0ffa2bbafbd3b27b781de5675f5ac404aec",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/26.png",
+      "evidenceSha256": "b76c5bf19700207d027981af5623f2d0e1f5ad4074f03e6be418ac26707850b7"
+    },
+    {
+      "id": "book_case_27",
+      "attachmentNumber": 27,
+      "originalFilename": "codex-clipboard-3340aeb5-75c5-4776-b9a1-c0936e4b4a10.png",
+      "originalSha256": "3efbb1c0f3b6317f1c196c8be1b20003302cfe29fc9a99b5fd725345e6f26cb8",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/27.png",
+      "evidenceSha256": "71fcaab5c9d6d122c4f6148df7d7c655046ce3c10efee969a1adacd1a169cf17"
+    },
+    {
+      "id": "book_case_28",
+      "attachmentNumber": 28,
+      "originalFilename": "codex-clipboard-0e5cc1c1-73ed-4243-abd7-a206fb09fa3b.png",
+      "originalSha256": "5ac4be9adef3335fd7d9a4a7e018b1a7b5eabc5b14ae33a23c8de382ce9965e5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/28.png",
+      "evidenceSha256": "5da7220f3dae8139c8c6953e843391917c59eee2695b59d9a7f263ef581c8c9b"
+    },
+    {
+      "id": "book_case_29",
+      "attachmentNumber": 29,
+      "originalFilename": "codex-clipboard-91547e5a-f05b-4687-8ffa-3bb06be829a5.png",
+      "originalSha256": "bce81fa42a474c23c5b97893df29a5d9ddf6f14d1e40ae61b2b7f06eba458614",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/29.png",
+      "evidenceSha256": "16412895867399aa5663286f706632e28f9953b7c31d8c6ef97af9d2a23b58cd"
+    },
+    {
+      "id": "book_case_30",
+      "attachmentNumber": 30,
+      "originalFilename": "codex-clipboard-14e16040-2c9d-48c1-8613-078d3b7cece8.png",
+      "originalSha256": "3f7006fffb945e56d4f1f4c6f72f0693c1a554b865f8adbeb0279b335b1c1995",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/30.png",
+      "evidenceSha256": "424bcc741a17d114c804ce119445d02f5f8ae8d62c09598ff322838df6dd3177"
+    },
+    {
+      "id": "book_case_31",
+      "attachmentNumber": 31,
+      "originalFilename": "codex-clipboard-e195033a-5dd5-4d57-a4a5-20d10f840099.png",
+      "originalSha256": "a52249d8c5b506c8fbeffef28c1b96d7060613686ac77054939c01cfc7d4ac98",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/31.png",
+      "evidenceSha256": "b9248d2dc63b5f8132c8849c9dd3673cd7d4aef0fa7af831805e116e238b0fce"
+    },
+    {
+      "id": "book_case_32",
+      "attachmentNumber": 32,
+      "originalFilename": "codex-clipboard-668b484d-60ac-4f99-9658-43749b557881.png",
+      "originalSha256": "9c3aa3a0b15ccf2b391fbec7d8c3d25b693469688defe1ddcaf45f6359314896",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/32.png",
+      "evidenceSha256": "b169312c6bd5db3fddcc46648913661b19e8eddd8a41fa6d6ffaff7c294d9f78"
+    },
+    {
+      "id": "book_case_33",
+      "attachmentNumber": 33,
+      "originalFilename": "codex-clipboard-1ccd8b20-ffb2-4745-b0b5-3ea30eeef31e.png",
+      "originalSha256": "a226c9332c512152417c801b6ee5e7baf5453af0b3546006c9b28c789debd3e5",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/33.png",
+      "evidenceSha256": "42b35a60218a80f46960441c35ff92da40ddc935098befc6488795f947c36a63"
+    },
+    {
+      "id": "book_case_34",
+      "attachmentNumber": 34,
+      "originalFilename": "codex-clipboard-ec3b3dae-3153-4bd9-b036-4044434da52f.png",
+      "originalSha256": "31db2a0c76da61c3b5f40cc979de465b38275d491a8c3f86cd62f8d6a41f5995",
+      "originalDimensions": [
+        3840,
+        1080
+      ],
+      "cropBox": [
+        620,
+        315,
+        1770,
+        1040
+      ],
+      "evidencePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/book-case-evidence/34.png",
+      "evidenceSha256": "05cb16b7ffafcb5c5bb753e4adb94b7aacfa976652f3385d5dd784b82f78b0ae"
+    }
+  ],
+  "userStatement": "Books are obtained with keys, which can be bought through donations or exchanged for stars at the market."
+}

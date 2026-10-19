@@ -1,0 +1,118 @@
+{
+  "checkedAt": "2026-10-18",
+  "primaryReference": "Cristalix historical Prison; user-confirmed project, year unknown",
+  "sources": [
+    {
+      "id": "C18",
+      "title": "Cristalix: гайд Prison",
+      "url": "https://forum.cristalix.gg/threads/3961/",
+      "date": "2018-04-10/11",
+      "kind": "guide_on_project_forum",
+      "scope": "historical_Prison"
+    },
+    {
+      "id": "C18N",
+      "title": "Cristalix: предложение об уменьшении частоты потребностей",
+      "url": "https://forum.cristalix.gg/threads/4132/",
+      "date": "2018-04-14",
+      "kind": "player_proposal_and_staff_reply",
+      "scope": "historical_Prison_not_implemented_proposal"
+    },
+    {
+      "id": "C19",
+      "title": "Cristalix: обсуждение ошибки Prison light",
+      "url": "https://forum.cristalix.gg/threads/21118/",
+      "date": "2019-04/05",
+      "kind": "player_reports",
+      "scope": "historical_Prison_Light"
+    },
+    {
+      "id": "C26",
+      "title": "Cristalix: вайп и обновление Prison Classic",
+      "url": "https://forum.cristalix.gg/threads/303993/",
+      "date": "2026-02-13",
+      "kind": "project_news",
+      "scope": "Classic_2026"
+    },
+    {
+      "id": "E24",
+      "title": "Cristalix: гайд PrisonEvo",
+      "url": "https://forum.cristalix.gg/threads/273126/",
+      "date": "2024-03-16; edited 2024-07-02",
+      "kind": "guide_on_project_forum",
+      "scope": "Evo_2024"
+    },
+    {
+      "id": "E25",
+      "title": "Cristalix: обновление PrisonEvo",
+      "url": "https://forum.cristalix.gg/threads/298624/",
+      "date": null,
+      "kind": "project_update",
+      "scope": "Evo_later_do_not_apply_to_2018"
+    },
+    {
+      "id": "O24",
+      "title": "Cristalix: Prison OldSchool, глобальное обновление",
+      "url": "https://forum.cristalix.gg/threads/286935/",
+      "date": "2024-10-28",
+      "kind": "developer_update",
+      "scope": "OldSchool_2024"
+    },
+    {
+      "id": "O25",
+      "title": "Cristalix: гайд Prison OldSchool",
+      "url": "https://forum.cristalix.gg/threads/298521/",
+      "date": "edited 2025-08-18",
+      "kind": "guide_on_project_forum",
+      "scope": "OldSchool_2025"
+    },
+    {
+      "id": "V19",
+      "title": "VimeWorld: вики-гайд Prison 2.0",
+      "url": "https://forum.vimeworld.com/topic/363799-%D0%B3%D0%B0%D0%B9%D0%B4-%D0%B2%D0%B8%D0%BA%D0%B8%D0%BF%D0%B5%D0%B4%D0%B8%D1%8F-%D0%BF%D0%BE-%D1%80%D0%B5%D0%B6%D0%B8%D0%BC%D1%83-prison-20/",
+      "date": "2019-08-01",
+      "kind": "player_guide",
+      "scope": "Vime_historical_comparison"
+    },
+    {
+      "id": "V20",
+      "title": "VimeWorld: Prison, советы",
+      "url": "https://forum.vimeworld.com/topic/667700-%D0%B3%D0%B0%D0%B9%D0%B4-prison-%D1%81%D0%BE%D0%B2%D0%B5%D1%82%D1%8B-%D0%B8-%D0%B4%D1%80%D1%83%D0%B3%D0%BE%D0%B5/",
+      "date": "2020-11-18",
+      "kind": "player_guide",
+      "scope": "Vime_historical_comparison"
+    },
+    {
+      "id": "V23",
+      "title": "VimeWorld: осеннее обновление Prison",
+      "url": "https://forum.vimeworld.com/topic/1272461-%D0%BE%D1%81%D0%B5%D0%BD%D0%BD%D0%B5%D0%B5-%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-prison/",
+      "date": null,
+      "kind": "project_news",
+      "scope": "Vime_later_comparison"
+    },
+    {
+      "id": "V24",
+      "title": "VimeWorld: обновление и вайп Prison Classic",
+      "url": "https://forum.vimeworld.com/topic/1341747-%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B8-%D0%B2%D0%B0%D0%B9%D0%BF-prison-classic/",
+      "date": "2024-08-23",
+      "kind": "administrator_news",
+      "scope": "Vime_Classic_2024"
+    },
+    {
+      "id": "VL23",
+      "title": "VimeWorld: первый сезон Prison Lite",
+      "url": "https://forum.vimeworld.com/topic/1263935-%D0%BF%D0%B5%D1%80%D0%B2%D1%8B%D0%B9-%D1%81%D0%B5%D0%B7%D0%BE%D0%BD-prison-lite/",
+      "date": "2023-09-15",
+      "kind": "administrator_news",
+      "scope": "Vime_Lite_2023"
+    }
+  ],
+  "unverifiedUserMemory": [
+    "Ghast tear used as the chest key in the remembered season",
+    "Exact historical needs debuff coefficients"
+  ],
+  "notes": [
+    "Sources describe different branches and years, not a single feature-complete server version.",
+    "Source pages were read through public web search; no game server runtime check."
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "status": "superseded_mining_only_v0.1",
+  "scope": "Archive only: does not estimate the Cristalix-inspired RPG chapter",
+  "assumptions": {
+    "runs": 1000,
+    "seed": 20261018,
+    "idealActivePlay": true,
+    "includesTokenBonus": false,
+    "includesBombs": false,
+    "includesIdleTime": false,
+    "includesLatency": false,
+    "finishPoint": "first prestige",
+    "maximumSimulatedSeconds": 14400
+  },
+  "formulas": {
+    "sale": "sum(ore quantity * sale price); first cycle multiplier = 1",
+    "mining": "max(minimumMineSeconds, baseMineSeconds * hardness / pickaxePower)",
+    "bag": "one unit per block; no yield bonus modeled",
+    "purchases": "after full-bag sale: next eligible pickaxe, next eligible backpack, next rank, prestige"
+  },
+  "resetModel": "Common-mine contention, reset pauses and player movement variation are excluded.",
+  "mineStats": [
+    {
+      "id": "A",
+      "expectedValue": 1.7999999999999998,
+      "expectedMineSeconds": 0.8440000000000001,
+      "expectedCashPerSecond": 1.645338208409506
+    },
+    {
+      "id": "B",
+      "expectedValue": 4.55,
+      "expectedMineSeconds": 0.9960000000000001,
+      "expectedCashPerSecond": 3.651685393258427
+    },
+    {
+      "id": "C",
+      "expectedValue": 13.2,
+      "expectedMineSeconds": 1.4120000000000001,
+      "expectedCashPerSecond": 7.942238267148014
+    }
+  ],
+  "routes": [
+    {
+      "id": "no_upgrades",
+      "label": "Без улучшений",
+      "metrics": {
+        "firstBag": {
+          "p10": 43.04000000000001,
+          "median": 43.76000000000002,
+          "p90": 44.64000000000001
+        },
+        "firstUpgrade": null,
+        "B": {
+          "p10": 176.08000000000018,
+          "median": 217.68000000000055,
+          "p90": 219.28000000000057
+        },
+        "C": {
+          "p10": 623.7600000000001,
+          "median": 665.4400000000011,
+          "p90": 672.7200000000008
+        },
+        "prestige": {
+          "p10": 1377.5200000000075,
+          "median": 1433.0400000000075,
+          "p90": 1468.2400000000073
+        },
+        "mined": {
+          "p10": 960,
+          "median": 1000,
+          "p90": 1040
+        },
+        "tokens": {
+          "p10": 9,
+          "median": 10,
+          "p90": 10
+        }
+      },
+      "sample": {
+        "firstBag": 42.16000000000002,
+        "firstUpgrade": null,
+        "B": 216.7200000000006,
+        "C": 664.0000000000008,
+        "prestige": 1409.1200000000058,
+        "mined": 1000,
+        "earned": 807200,
+        "spent": 790000,
+        "cashBeforeReset": 17200,
+        "tokens": 10,
+        "purchases": []
+      }
+    },
+    {
+      "id": "pickaxes",
+      "label": "С покупкой доступных кирок",
+      "metrics": {
+        "firstBag": {
+          "p10": 43.04000000000001,
+          "median": 43.76000000000002,
+          "p90": 44.64000000000001
+        },
+        "firstUpgrade": {
+          "p10": 43.280000000000015,
+          "median": 44.00000000000001,
+          "p90": 86.07999999999993
+        },
+        "B": {
+          "p10": 180.46857142857178,
+          "median": 190.22857142857185,
+          "p90": 215.10857142857205
+        },
+        "C": {
+          "p10": 500.2171428571456,
+          "median": 529.8228571428592,
+          "p90": 559.7314285714314
+        },
+        "prestige": {
+          "p10": 944.3542857142903,
+          "median": 973.3942857142908,
+          "p90": 1005.1485714285762
+        },
+        "mined": {
+          "p10": 1160,
+          "median": 1200,
+          "p90": 1240
+        },
+        "tokens": {
+          "p10": 11,
+          "median": 12,
+          "p90": 12
+        }
+      },
+      "sample": {
+        "firstBag": 42.16000000000002,
+        "firstUpgrade": 85.35999999999991,
+        "B": 221.64571428571514,
+        "C": 538.4628571428591,
+        "prestige": 960.3485714285758,
+        "mined": 1160,
+        "earned": 944100,
+        "spent": 944000,
+        "cashBeforeReset": 100,
+        "tokens": 11,
+        "purchases": [
+          {
+            "kind": "pickaxe",
+            "level": 1,
+            "time": 85.35999999999991,
+            "cost": 6000
+          },
+          {
+            "kind": "pickaxe",
+            "level": 2,
+            "time": 297.70285714285785,
+            "cost": 28000
+          },
+          {
+            "kind": "pickaxe",
+            "level": 3,
+            "time": 656.062857142859,
+            "cost": 120000
+          }
+        ]
+      }
+    },
+    {
+      "id": "pickaxes_backpacks",
+      "label": "С кирками и рюкзаками",
+      "metrics": {
+        "firstBag": {
+          "p10": 43.04000000000001,
+          "median": 43.76000000000002,
+          "p90": 44.64000000000001
+        },
+        "firstUpgrade": {
+          "p10": 43.04000000000001,
+          "median": 43.76000000000002,
+          "p90": 44.64000000000001
+        },
+        "B": {
+          "p10": 209.3942857142864,
+          "median": 218.4114285714295,
+          "p90": 220.3542857142865
+        },
+        "C": {
+          "p10": 532.8914285714311,
+          "median": 538.6628571428598,
+          "p90": 543.4628571428605
+        },
+        "prestige": {
+          "p10": 907.4857142857197,
+          "median": 915.8171428571493,
+          "p90": 924.497142857148
+        },
+        "mined": {
+          "p10": 1440,
+          "median": 1440,
+          "p90": 1440
+        },
+        "tokens": {
+          "p10": 14,
+          "median": 14,
+          "p90": 14
+        }
+      },
+      "sample": {
+        "firstBag": 42.16000000000002,
+        "firstUpgrade": 42.16000000000002,
+        "B": 276.6400000000013,
+        "C": 599.7257142857177,
+        "prestige": 980.0971428571488,
+        "mined": 1500,
+        "earned": 1151700,
+        "spent": 1014000,
+        "cashBeforeReset": 137700,
+        "tokens": 15,
+        "purchases": [
+          {
+            "kind": "backpack",
+            "level": 1,
+            "time": 42.16000000000002,
+            "cost": 4000
+          },
+          {
+            "kind": "pickaxe",
+            "level": 1,
+            "time": 135.83999999999975,
+            "cost": 6000
+          },
+          {
+            "kind": "pickaxe",
+            "level": 2,
+            "time": 359.32571428571566,
+            "cost": 28000
+          },
+          {
+            "kind": "backpack",
+            "level": 2,
+            "time": 359.32571428571566,
+            "cost": 16000
+          },
+          {
+            "kind": "pickaxe",
+            "level": 3,
+            "time": 766.3257142857179,
+            "cost": 120000
+          },
+          {
+            "kind": "backpack",
+            "level": 3,
+            "time": 766.3257142857179,
+            "cost": 50000
+          }
+        ]
+      }
+    }
+  ]
+}
