@@ -289,6 +289,7 @@ Prison+ содержит интерфейс времени восстановл�
 
 ## Проверяемые материалы
 
+- [Самостоятельный поиск по оставшимся пробелам: 14 уточнений, публичные патчи и повторная проверка кэша](C:/Users/user/Documents/roblox-prison-research/client-audit/INDEPENDENT-GAP-RESEARCH.md). Клиентские описания, исторические изменения и текущая статистика имеют отдельные статусы; полной серверной конфигурацией не объявлены.
 - [Названия, неизвестные поля и 27 закреплённых выводов](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/classic-content-data.json).
 - [Все 1837 записей Classic с ключами и номерами строк](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/classic-content-index.json).
 - [Остальные 663 записи Prison](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-prison-text-index.json): 169 общих текстов достижений и 494 OldSchool. Общие достижения не объявлены автоматически активным набором Classic.

@@ -11170,10 +11170,24 @@
         "status": "client text; actual server action not observed"
       },
       {
+        "key": "prison.classic.gang.blacksmith.type_and_level_incompatible",
+        "text": "Тип книги или уровень не совпадают с выбранной!",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 831,
+        "status": "client text; actual server action not observed"
+      },
+      {
         "key": "prison.classic.gang.blacksmith.chance",
         "text": "Шанс: %d%",
         "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
         "sourceLine": 833,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.gang.blacksmith.merge_for",
+        "text": "Объединить за %d звёзд",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 834,
         "status": "client text; actual server action not observed"
       }
     ],
@@ -11460,6 +11474,400 @@
       "baseBlockSalePrice": null,
       "note": "Still frames show mining feedback; exact block-to-payment pairing, bonuses and combo formula were not established."
     }
+  },
+  "independentGapResearch": {
+    "recordedDate": "2026-10-20",
+    "scope": "Independent public/local gap research. No game state modified; no server execution or current balance configuration obtained.",
+    "publicArchive": {
+      "visiblePosts": 35,
+      "minId": 1,
+      "maxId": 43,
+      "limitation": "Visible posts include service/media entries; this is not 35 distinct patch notes or proof deleted posts were recovered."
+    },
+    "cacheReaudit": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/current-cache/cache-reaudit.json",
+    "findings": [
+      {
+        "id": "FILES-BLACKSMITH",
+        "claim": "Кузница объединяет две книги; проверяются совпадение типа и уровня, оплата указана в звёздах.",
+        "status": "client_description_not_runtime_test",
+        "sources": [
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.gang.upgrades.blacksmith_description",
+            "line": 797,
+            "text": "Открыв Кузницу, Ваша банда сможет \nскрещивать книги одного типа для \nпрокачки уровня"
+          },
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.gang.blacksmith.choice_similar_books",
+            "line": 832,
+            "text": "Выберите две книги одного типа"
+          },
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.gang.blacksmith.type_and_level_incompatible",
+            "line": 831,
+            "text": "Тип книги или уровень не совпадают с выбранной!"
+          },
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.gang.blacksmith.chance",
+            "line": 833,
+            "text": "Шанс: %d%"
+          },
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.gang.blacksmith.merge_for",
+            "line": 834,
+            "text": "Объединить за %d звёзд"
+          }
+        ],
+        "remainingUnknowns": [
+          "Exact price, success formula, resulting application chance and failure outcome."
+        ]
+      },
+      {
+        "id": "FILES-AUCTION-REFRESH",
+        "claim": "Локальная подсказка задаёт автообновление Аукциона раз в 30 секунд.",
+        "status": "client_description_not_runtime_test",
+        "sources": [
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.auction.gui.refresh_tooltip_auto",
+            "line": 1031,
+            "text": "Сам обновляется раз в 30 секунд"
+          }
+        ],
+        "remainingUnknowns": [
+          "Whether this is only listing refresh and how it behaves in the current UI."
+        ]
+      },
+      {
+        "id": "FILES-GROUND-CLEANUP",
+        "claim": "Совет описывает удаление предметов, лежащих на полу более 5 минут.",
+        "status": "client_description_not_runtime_test",
+        "sources": [
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.advice.50",
+            "line": 1584,
+            "text": "[Совет] Предметы, которые лежат на полу более 5-ти минут - будут автоматически удалены"
+          }
+        ],
+        "remainingUnknowns": [
+          "Protected item exceptions and actual cleanup scheduling."
+        ]
+      },
+      {
+        "id": "FILES-BOOSTER",
+        "claim": "Шаблон донатного бустера описывает увеличение соответствующего множителя на 100%; область действия и минуты подставляются.",
+        "status": "client_description_not_runtime_test",
+        "sources": [
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.donate.list.booster.description",
+            "line": 1112,
+            "text": "%a увеличивает %a множитель при %a на 100%\n\nПри активации действует %a. После покупки будет помещён в /boosters\n%a\nВремя действия бустера — %d минут"
+          }
+        ],
+        "remainingUnknowns": [
+          "Exact per-offer duration, booster stacking and which multiplier the template refers to."
+        ]
+      },
+      {
+        "id": "FILES-DEATH",
+        "claim": "Есть сообщение потери денег после смерти и предупреждение о выпадении некоторых предметов в PvP-шахте.",
+        "status": "client_description_not_runtime_test",
+        "sources": [
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.combat.target_message",
+            "line": 1520,
+            "text": "Вы потеряли %d после смерти!"
+          },
+          {
+            "path": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+            "sha256": "c0390c993ff4778f222c70279f1f66effb9ae10c1987a102abdca63a63944470",
+            "key": "prison.classic.location.pvp_tooltip",
+            "line": 169,
+            "text": "На данной шахте другие\nигроки могут Вас убить!\n\nНекоторые вещи выпадают при смерти!"
+          }
+        ],
+        "remainingUnknowns": [
+          "Amount or fraction of money lost, protected slots/items and anti-logout behavior."
+        ]
+      },
+      {
+        "id": "PATCH-GHETTO-TEAM-DAMAGE",
+        "claim": "Патч разрешает наносить урон игрокам той же фракции на Гетто.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2025-12-07T09:44:51+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/10",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+            "sha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule."
+        ]
+      },
+      {
+        "id": "PATCH-RETURN-LOCATION",
+        "claim": "Патч описывает возвращение в прежнюю локацию при входе; сохранение места сбрасывается через 20 минут после выхода.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2025-12-12T04:47:17+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/14",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+            "sha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule."
+        ]
+      },
+      {
+        "id": "PATCH-NEEDS-DEATH",
+        "claim": "Исправлено обнуление нужд после смерти: описанное исправление означает сохранение нужд при смерти.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2025-12-13T10:25:18+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/15",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+            "sha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule.",
+          "Need accumulation timers, penalties and treatment duration."
+        ]
+      },
+      {
+        "id": "PATCH-FORTIFICATION",
+        "claim": "В декабрьском патче сила эффекта слабости Укрепления понижена с 3 до 2.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2025-12-13T10:25:18+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/15",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+            "sha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule.",
+          "Not a full mapping of book I/II/III to effect strength; later February patch weakens it again without values."
+        ]
+      },
+      {
+        "id": "PATCH-PROCESSING-TRADE",
+        "claim": "Патч разрешает выставлять щебень на Аукцион и продавать полученную переработкой пыль.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2026-02-14T08:55:32+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/24",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+            "sha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule."
+        ]
+      },
+      {
+        "id": "PATCH-GANG-LEVEL",
+        "claim": "Вступление в банду и создание своей банды ограничено минимум 5-м уровнем игрока.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2026-02-16T20:24:30+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/25",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+            "sha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule."
+        ]
+      },
+      {
+        "id": "PATCH-BLOCK-ACCESS",
+        "claim": "Для блоков из значительно более высоких шахт ограничены поднятие, выбрасывание и продажа; передача блоков через /gift запрещена.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2026-02-16T20:24:30+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/25",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+            "sha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule.",
+          "Allowed level gap is not specified; items other than blocks are not covered by this sentence."
+        ]
+      },
+      {
+        "id": "PATCH-APPLES",
+        "claim": "SHIFT при покупке яблок на Рынке позволяет покупать сразу 64.",
+        "status": "dated_classic_patch_note_not_current_runtime_test",
+        "publishedAt": "2026-02-16T20:24:30+00:00",
+        "sources": [
+          {
+            "url": "https://t.me/prison_classic/25",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+            "sha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+          }
+        ],
+        "remainingUnknowns": [
+          "Later seasons may change this rule."
+        ]
+      },
+      {
+        "id": "TOP-SEPARATE-COUNTERS",
+        "claim": "Официальный сайт статистики различает blocks/blocks_clean и rats/rats_clean; это отдельные поля.",
+        "status": "public_site_metadata_not_game_formula",
+        "sources": [
+          {
+            "url": "https://top.cristalix.gg/",
+            "path": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/top-home.html",
+            "sha256": "d8f3c976c6fbff518bfd64a872e0222cb37d6e93460f8632ec54f8d6a0e6d4c9"
+          }
+        ],
+        "remainingUnknowns": [
+          "Exact clean/dirty counting rules, realm variant and level requirements."
+        ]
+      }
+    ],
+    "excludedCrossModeOrHistoricalSources": [
+      {
+        "url": "https://forum.cristalix.gg/threads/298521/",
+        "reason": "Prison OldSchool: numeric rank/relic tables belong to a different mode."
+      },
+      {
+        "url": "https://forum.cristalix.gg/threads/273126/",
+        "reason": "PrisonEvo: scroll effects are not Classic ancient-book coefficients."
+      },
+      {
+        "url": "https://forum.cristalix.gg/threads/307724/",
+        "reason": "SkyBlock OLD: its blacksmith and item destruction rules do not establish Classic rules."
+      },
+      {
+        "url": "https://forum.vimeworld.com/topic/1379712-новый-сезон-prison-classic/",
+        "reason": "VimeWorld Classic: deletion of its Plastolom is not deletion in Cristalix."
+      },
+      {
+        "url": "https://t.me/prison_classic/40",
+        "reason": "Following the explicit Quick announcement in post 39; do not apply its 50-level/strength/price changes automatically to current Classic."
+      },
+      {
+        "url": "https://forum.cristalix.gg/threads/3961/",
+        "reason": "Historical April 2018 guide; old tool prices and early mine levels not adopted as current values."
+      }
+    ],
+    "gapMatrix": [
+      {
+        "system": "Книги",
+        "result": "Частично: установлены совпадение типа/уровня и оплата Кузницы звёздами.",
+        "missing": "Сумма и формула объединения, лимит зачарований, генерация шанса книги, вероятности выпадения, коэффициенты и задержки эффектов.",
+        "nextEvidence": "Текущий ответ меню /wiki или Кузницы; фактическое применение и серия наблюдений.",
+        "findings": [
+          "FILES-BLACKSMITH"
+        ]
+      },
+      {
+        "system": "Способности и тренер",
+        "result": "Повторно проверены RU/EN: в найденных строках ключевые числа остаются подстановками.",
+        "missing": "Полные ступени, требования и числовые эффекты.",
+        "nextEvidence": "Серверные данные меню; показанные UI-цены из клиента не вычисляются.",
+        "findings": []
+      },
+      {
+        "system": "Уровни персонажа",
+        "result": "Сайт статистики публикует текущие показатели, а не таблицу требований.",
+        "missing": "Переходы помимо снятого 8 → 9 и абсолютный предел текущего варианта.",
+        "nextEvidence": "Меню /level или явно соответствующая сезону таблица.",
+        "findings": [
+          "TOP-SEPARATE-COUNTERS"
+        ]
+      },
+      {
+        "system": "Шахты и экономика",
+        "result": "Найдены ограничения передачи блоков; подтверждены раздельные счётчики.",
+        "missing": "Текущие цены блоков, доли, размеры, таймеры, формула комбо и разрешённая разница уровней для блоков.",
+        "nextEvidence": "Данные продажи/шахт и измерения; октябрьский патч менял цены.",
+        "findings": [
+          "PATCH-BLOCK-ACCESS",
+          "TOP-SEPARATE-COUNTERS"
+        ]
+      },
+      {
+        "system": "Оставшиеся инструменты",
+        "result": "Новой достоверной таблицы Classic для лука, ножниц, мотыги и особых инструментов не найдено.",
+        "missing": "Цены, стадии, характеристики и требования.",
+        "nextEvidence": "Серверное меню /upgrade; чужие режимы не подставлены.",
+        "findings": []
+      },
+      {
+        "system": "Бой, смерть и боссы",
+        "result": "Дополнены Гетто, смерть/нужды, денежная потеря и исторический патч Укрепления.",
+        "missing": "HP, урон, фазы, распределение наград и точные потери при смерти.",
+        "nextEvidence": "Текущая справка и игровые наблюдения; коэффициенты сервером не получены.",
+        "findings": [
+          "PATCH-GHETTO-TEAM-DAMAGE",
+          "PATCH-NEEDS-DEATH",
+          "PATCH-FORTIFICATION",
+          "FILES-DEATH"
+        ]
+      },
+      {
+        "system": "Быт, банды и переработка",
+        "result": "Установлены сохранение нужд после смерти, порог банды и торгуемость щебня/пыли в датированных патчах.",
+        "missing": "Таймеры нужд, числовые бонусы, цены развития камеры и производительность помощников.",
+        "nextEvidence": "Текущие меню камеры/банды и наблюдения работы.",
+        "findings": [
+          "PATCH-NEEDS-DEATH",
+          "PATCH-GANG-LEVEL",
+          "PATCH-PROCESSING-TRADE"
+        ]
+      },
+      {
+        "system": "Бустеры и интерфейс",
+        "result": "Есть описание +100% соответствующего множителя, обновление Аукциона 30 с и уборка пола после 5 мин.",
+        "missing": "Длительность каждой покупки, взаимодействие бустеров и реальные серверные исключения.",
+        "nextEvidence": "Подсказки отдельных бустеров и фактическая активация.",
+        "findings": [
+          "FILES-BOOSTER",
+          "FILES-AUCTION-REFRESH",
+          "FILES-GROUND-CLEANUP"
+        ]
+      }
+    ],
+    "searchScope": "Targeted web searches for Classic books, blacksmith, trainer, skills, needs, block prices, levels, public code and wiki; official-forum tag and visible mode-channel archive reviewed. Not exhaustive internet coverage.",
+    "unresolvedPublicAccess": [
+      {
+        "url": "https://ruwebdata.c7x.dev/client/addons.json",
+        "result": "HTTP 404 during this pass; a historically recovered URL is not a current usable index endpoint."
+      },
+      {
+        "url": "https://cristalix.gg/info/minigames/prisonclassic",
+        "result": "404 page; not a public Classic wiki."
+      }
+    ]
   },
   "screenshotCoverage": {
     "supplied": 289,

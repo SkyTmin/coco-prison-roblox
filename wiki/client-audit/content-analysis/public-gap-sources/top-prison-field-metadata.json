@@ -1,0 +1,94 @@
+{
+  "source": "https://top.cristalix.gg/",
+  "retrievedAt": "2026-10-19T23:08:54.184427+00:00",
+  "sourceSha256": "d8f3c976c6fbff518bfd64a872e0222cb37d6e93460f8632ec54f8d6a0e6d4c9",
+  "sourcePath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/top-home.html",
+  "prisonModeMetadata": {
+    "id": "98e09282-ce1e-4127-90b6-5433d2457641",
+    "title": "Prison",
+    "season": "default",
+    "seasons": [
+      "default"
+    ],
+    "modes": [
+      {
+        "id": "prison",
+        "label": "Prison",
+        "submodes": [
+          {
+            "id": "default",
+            "label": "Обычный"
+          }
+        ],
+        "fields": [
+          {
+            "key": "level",
+            "label": "Уровень",
+            "type": "OTHER"
+          },
+          {
+            "key": "blocks",
+            "label": "Блоков вскопано",
+            "type": "OTHER"
+          },
+          {
+            "key": "blocks_clean",
+            "label": "Блоков вскопано (Чистые)",
+            "type": "OTHER"
+          },
+          {
+            "key": "balance",
+            "label": "Денег",
+            "type": "OTHER"
+          },
+          {
+            "key": "killed_bosses",
+            "label": "Убито боссов",
+            "type": "OTHER"
+          },
+          {
+            "key": "rats",
+            "label": "Крыс убито",
+            "type": "OTHER"
+          },
+          {
+            "key": "rats_clean",
+            "label": "Крыс убито (Чистые)",
+            "type": "OTHER"
+          },
+          {
+            "key": "kills",
+            "label": "Убийств",
+            "type": "KILLS"
+          },
+          {
+            "key": "deaths",
+            "label": "Смертей",
+            "type": "DEATHS"
+          },
+          {
+            "key": "online_time",
+            "label": "Наиграно времени",
+            "type": "TIME"
+          }
+        ],
+        "fieldsWithData": [
+          "balance",
+          "blocks",
+          "blocks_clean",
+          "deaths",
+          "killed_bosses",
+          "kills",
+          "level",
+          "online_time",
+          "rats",
+          "rats_clean"
+        ],
+        "hasDimensions": true,
+        "hasStats": true,
+        "hasCheckpoints": false
+      }
+    ]
+  },
+  "limitation": "Public statistics field metadata, not item/mine/level requirements or game balance configuration; default does not identify realm variant."
+}

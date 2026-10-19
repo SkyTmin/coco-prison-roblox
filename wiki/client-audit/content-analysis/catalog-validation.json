@@ -9,7 +9,7 @@
   "bossNames": 20,
   "findingsWithSourceKeys": 27,
   "sourceHashesMatched": true,
-  "localLinksChecked": 36,
+  "localLinksChecked": 37,
   "perMineUnlockLevelsRecovered": 21,
   "pickaxeUpgradeTransitionsRecovered": 15,
   "swordUpgradeTransitionsRecovered": 14,
@@ -26,6 +26,7 @@
   "allItemUpgradeTransitions": 115,
   "observedAncientBookTemplates": 31,
   "auctionBookObservationFrames": 35,
+  "independentResearchFindings": 14,
   "completeItemUpgradeTablesRecovered": 0,
   "status": "Corrected 289-frame inventory; 115 item transitions, 31 book templates, 26 mine rows, 17 bosses; not server configuration."
 }

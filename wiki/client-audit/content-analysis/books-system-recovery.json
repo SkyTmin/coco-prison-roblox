@@ -1633,10 +1633,24 @@
       "status": "client text; actual server action not observed"
     },
     {
+      "key": "prison.classic.gang.blacksmith.type_and_level_incompatible",
+      "text": "Тип книги или уровень не совпадают с выбранной!",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 831,
+      "status": "client text; actual server action not observed"
+    },
+    {
       "key": "prison.classic.gang.blacksmith.chance",
       "text": "Шанс: %d%",
       "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
       "sourceLine": 833,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.gang.blacksmith.merge_for",
+      "text": "Объединить за %d звёзд",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 834,
       "status": "client text; actual server action not observed"
     }
   ],

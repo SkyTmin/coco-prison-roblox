@@ -24,6 +24,7 @@ observed_books=json.loads((OUT/'books-system-recovery.json').read_text(encoding=
 observed_auction_scenes=json.loads((OUT/'auction-and-scenes-recovery.json').read_text(encoding='utf-8'))
 missed_sources=json.loads((OUT/'missed-menu-sources.json').read_text(encoding='utf-8'))
 book_sources=json.loads((OUT/'book-case-sources.json').read_text(encoding='utf-8'))
+independent_research=json.loads((OUT/'independent-gap-research.json').read_text(encoding='utf-8'))
 all_screenshot_sources=(observed_mines['sources']+observed_pickaxe['sources']+
     observed_other_items['sources']+observed_npcs['sources']+late_sources['sources']+
     missed_sources['sources']+book_sources['sources'])
@@ -152,6 +153,7 @@ data=dict(created='2026-10-20',sourceType='client localization and supplied game
           observedStoreAndTeleporter=observed_store_map,
           observedArmorAndAxe=observed_armor_axe,observedBooks=observed_books,
           observedAuctionAndScenes=observed_auction_scenes,
+          independentGapResearch=independent_research,
           screenshotCoverage=dict(supplied=len(all_screenshot_sources),
               uniqueOriginals=len({s['originalSha256'] for s in all_screenshot_sources})),
           publishedCareerAccess=dict(date='2026-05-08',
@@ -382,6 +384,7 @@ Prison+ содержит интерфейс времени восстановл�
 
 ## Проверяемые материалы
 
+- [Самостоятельный поиск по оставшимся пробелам: 14 уточнений, публичные патчи и повторная проверка кэша](C:/Users/user/Documents/roblox-prison-research/client-audit/INDEPENDENT-GAP-RESEARCH.md). Клиентские описания, исторические изменения и текущая статистика имеют отдельные статусы; полной серверной конфигурацией не объявлены.
 - [Названия, неизвестные поля и {len(proof)} закреплённых выводов](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/classic-content-data.json).
 - [Все 1837 записей Classic с ключами и номерами строк](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/classic-content-index.json).
 - [Остальные 663 записи Prison](C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/other-prison-text-index.json): 169 общих текстов достижений и 494 OldSchool. Общие достижения не объявлены автоматически активным набором Classic.
@@ -436,6 +439,7 @@ summary=dict(classicEntries=1837,otherPrisonEntries=663,sharedAchievementEntries
     allItemUpgradeTransitions=total_item_transitions,
     observedAncientBookTemplates=len(observed_books['templates']),
     auctionBookObservationFrames=len(observed_books['auctionBookObservations']),
+    independentResearchFindings=len(independent_research['findings']),
     completeItemUpgradeTablesRecovered=0,
     status='Corrected 289-frame inventory; 115 item transitions, 31 book templates, 26 mine rows, 17 bosses; not server configuration.')
 (OUT/'catalog-validation.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

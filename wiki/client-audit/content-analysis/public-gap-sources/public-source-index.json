@@ -1,0 +1,531 @@
+{
+  "recordedDate": "2026-10-20",
+  "scope": "Public primary channel posts and official-forum tag; modes and dates require per-post classification.",
+  "pages": [
+    {
+      "url": "https://t.me/s/prison_classic",
+      "retrievedAt": "2026-10-19T23:05:14.548410+00:00",
+      "status": 200,
+      "bytes": 145883,
+      "sha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef",
+      "localPath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html"
+    },
+    {
+      "url": "https://t.me/s/prison_classic?before=22",
+      "retrievedAt": "2026-10-19T23:05:15.326641+00:00",
+      "status": 200,
+      "bytes": 106022,
+      "sha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a",
+      "localPath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html"
+    },
+    {
+      "url": "https://forum.cristalix.gg/tags/prison-classic/",
+      "retrievedAt": "2026-10-19T23:05:16.657138+00:00",
+      "status": 200,
+      "bytes": 112160,
+      "sha256": "b500a6b8fe5cf3328584ab5d12322b9b7f034357995086f9aeb19016787842ee",
+      "localPath": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/forum-classic-tag.html"
+    }
+  ],
+  "posts": [
+    {
+      "id": "prison_classic/1",
+      "url": "https://t.me/prison_classic/1",
+      "date": "2025-11-13T17:49:45+00:00",
+      "text": "Channel created",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/4",
+      "url": "https://t.me/prison_classic/4",
+      "date": "2025-11-29T14:35:19+00:00",
+      "text": "👉 Уже в следующую пятницу (05.12) в 18:00 по МСК состоится открытие Prison Classic! \n\n🪖 Хочешь чего-то добиться в этой тюрьме? Что ж, для начала... Постарайся выжить. Собери свою банду, торгуйся и внушай страх каждому, кто осмелится перейти тебе дорогу. \n\n⭐️ А что это? Новенький трейлер? Быстрее смотреть!\nhttps://youtu.be/jmkZ-wAJv3I\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk",
+        "https://youtu.be/jmkZ-wAJv3I"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/7",
+      "url": "https://t.me/prison_classic/7",
+      "date": "2025-12-04T15:47:26+00:00",
+      "text": "👉 Уже завтра (05.12) в 18:00 по МСК состоится долгожданное возвращение культового режима Prison Classic! \n\n🪖 Хочешь чего-то добиться в этой тюрьме? Что ж, для начала... Постарайся выжить. Собери свою банду, торгуйся и внушай страх каждому, кто осмелится перейти тебе дорогу. \n\n⭐️ Ты еще не видел? Быстрее смотреть!\nhttps://youtu.be/jmkZ-wAJv3I\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk",
+        "https://youtu.be/jmkZ-wAJv3I"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/8",
+      "url": "https://t.me/prison_classic/8",
+      "date": "2025-12-05T13:01:07+00:00",
+      "text": "😎 Напоминаем, что до открытия осталось 2 часа!\n\nℹ️ Сейчас самое подходящее время, чтобы собраться с друзьями в войсе и обсудить, как вы собираетесь забирать топ. \n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/9",
+      "url": "https://t.me/prison_classic/9",
+      "date": "2025-12-05T15:32:28+00:00",
+      "text": "👉 Prison Classic уже открыт! \n\n🪖 Хочешь чего-то добиться в этой тюрьме? Что ж, для начала... Постарайся выжить. Собери свою банду, торгуйся и внушай страх каждому, кто осмелится перейти тебе дорогу. \n\n😎 Для тех, кто всё ещё не в курсе! \nhttps://youtu.be/jmkZ-wAJv3I\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk",
+        "https://youtu.be/jmkZ-wAJv3I"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/10",
+      "url": "https://t.me/prison_classic/10",
+      "date": "2025-12-07T09:44:51+00:00",
+      "text": "🔄 На Prison Classic был проведён запланированный рестарт\n\n✏️ Список изменений:\n— Добавлена возможность просматривать следующие и предыдущие улучшения предметов в меню (/up)\n— Повышен шанс на срабатывание зачарования «Археолог»\n— Цвет фракции «Афро» был изменен на более подходящий\n— Исправлена длительность спешки с точки на Дворах\n— Во время Авто-копания вновь можно кушать\n— Исправлено открытие сундуков на Базе банды\n— Исправлена сортировка по Зачарованиям на Аукционе\n— Изменена сортировка предметов на Аукционе по умолчанию\n— Урон топора был понижен\n— На Гетто теперь можно наносить урон игрокам из одной фракции\n— Исправлены баги, связанные со способностями боссов\n— Спавн боссов теперь сопровождается характерным звуком\n— Добавлено отображение здоровья босса на экране\n— И многое другое!\n\n✨ Приятной игры!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/11",
+      "url": "https://t.me/prison_classic/11",
+      "date": "2025-12-09T08:02:49+00:00",
+      "text": "Все незадействованные реалмы были выключены и будут масштабироваться по мере необходимости (повышения онлайна)",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/12",
+      "url": "https://t.me/prison_classic/12",
+      "date": "2025-12-09T08:18:26+00:00",
+      "text": "На всём проекте наблюдаются проблемы. Будьте на чеку и в связи обнаружения каких-либо проблем - сообщайте в техническую поддержку.",
+      "links": [
+        "https://t.me/c7xsup_bot"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/13",
+      "url": "https://t.me/prison_classic/13",
+      "date": "2025-12-11T14:13:07+00:00",
+      "text": "Напоминаем про существование правила 4.2!\n\n4.2 PRISON - Запрещено иметь твинки (АККАУНТ ДРУГА — НЕ ТВИНК).\nНаказание: бан всех аккаунтов на 1 день.\n\nЭто означает, что запрещено иметь запущенным более одного аккаунта!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/14",
+      "url": "https://t.me/prison_classic/14",
+      "date": "2025-12-12T04:47:17+00:00",
+      "text": "🔄 На Prison Classic был проведён запланированный рестарт\n\n✏️ Список изменений:\n— Повышена цена блоков на локации «Королевский сад»\n— Уменьшено КД респавна шахты на локации «Пирамида»\n— При заходе Вас будет телепортировать на локацию перед выходом, а не на спавн (Сбрасывается через 20 минут с момента выхода)\n— Понижен урон с луков\n— Древнее зачарование «Бульдозер» было ослаблено\n— Теперь все КД на респавны в меню подписки отображаются без каких-либо ограничений\n— Добавлен бинд на скрытие/показ игроков - по умолчанию с помощью кнопки H\n— Исправлена система дропа наград с боссов относительно нанесённого урона\n— Множество визуальных багфиксов\n\n✨ Приятной игры!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/15",
+      "url": "https://t.me/prison_classic/15",
+      "date": "2025-12-13T10:25:18+00:00",
+      "text": "🔄 На Prison Classic был проведён запланированный рестарт\n\n✏️ Список изменений:\n— Предметы на Базе банды теперь отображаются и поднимаются только членами банды\n— Древние звёзды с боссов теперь падают в нормальном количестве\n— Уведомления о возрождении боссов «Сплинтер» и «Зомбарь» теперь отображаются на всех реалмах\n— Советы теперь могут быть выключены в настройках\n— Исправлено, что после телепортации с другого реалма вас не телепортировало на ту локацию, которую вы выбрали\n— В меню шахт теперь отображается метка на локации, когда босс возрождён\n— Добавлены команды /balance и /blocks\n— Исправлено кривое отображение предметов на Аукционе\n— Исправлено то, что потребности сбрасывались после смерти\n— Урон боссов «Скелетон» и «Рыцарь» был повышен\n— Слабость от древнего зачарования «Укрепление» была понижена: 3 -> 2\n\n✨ Приятной игры!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/16",
+      "url": "https://t.me/prison_classic/16",
+      "date": "2025-12-13T10:32:23+00:00",
+      "text": "Создали чат для обсуждений и просто общения — https://t.me/prison_classic_chat",
+      "links": [
+        "https://t.me/prison_classic_chat"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/17",
+      "url": "https://t.me/prison_classic/17",
+      "date": "2025-12-27T23:19:03+00:00",
+      "text": "Запущены скидки в размере 50% на весь донат, а также добавлены бонусы при пополнении ЛК!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/18",
+      "url": "https://t.me/prison_classic/18",
+      "date": "2025-12-31T15:45:52+00:00",
+      "text": "❄️ В новогоднюю ночь будут активны все виды бустеров на 24 часа!\n\n🍾 Встречайте новый год вместе с нами!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/19",
+      "url": "https://t.me/prison_classic/19",
+      "date": "2025-12-31T19:21:08+00:00",
+      "text": "👍 Активировали бустеры всех видов и всех типов на сутки!\n\n🎉 С наступающим новым годом!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/20",
+      "url": "https://t.me/prison_classic/20",
+      "date": "2026-02-10T20:14:28+00:00",
+      "text": "📦 Спешим уведомить Вас, что плановый старт следующего сезона состоится уже в эту пятницу, 13.02, в 18:00!\n\n⭐️ Закрытие игровых серверов будет в ночь с 12.02 на 13.02, ориентировочно в полночь.",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/21",
+      "url": "https://t.me/prison_classic/21",
+      "date": "2026-02-11T03:23:02+00:00",
+      "text": "По многочисленным просьбам...",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-02.html",
+      "sourceSha256": "ca7851df3b9d9ea167843e16a866c72ac5f42b707e04410aaebebbff5d34775a"
+    },
+    {
+      "id": "prison_classic/22",
+      "url": "https://t.me/prison_classic/22",
+      "date": "2026-02-12T11:25:51+00:00",
+      "text": "⛏️ Масштабное обновление и вайп на Prison Classic уже завтра в 18:00 по МСК!\n\n🔥 Что ж, теперь вы сможете обзавестись своими личными шестерками, готовыми в любой момент метнуться куда-угодно по вашему приказу. Помимо этого обновление включает в себя новые профессии, шахты, прокачки для банд с персонализированными квестами и многое другое!\n\n⭐️ А что это? Новенький трейлер? Быстрее смотреть!\nhttps://youtu.be/_-OOWC-UlkE?si=bQMk5920AbTzqm7S\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk",
+        "https://youtu.be/_-OOWC-UlkE?si=bQMk5920AbTzqm7S"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/23",
+      "url": "https://t.me/prison_classic/23",
+      "date": "2026-02-13T16:30:18+00:00",
+      "text": "⛏️ Новый сезон на Prison Classic уже начался!\n\n⛑️ Игроки, занявшие места в топе по блокам, получат следующие награды:\n1 место — GotFatYTS\nНаграда: Уникальная персонализация  + 1.100 💎 \n\n2 место — psd2\nНаграда: Уникальная персонализация + 1.000 💎\n\n3 место — aym0nd\nНаграда: Уникальная персонализация + 950 💎\n\n4 место — priceofscales\nНаграда: Уникальная персонализация + 850 💎\n\n5 место — nyawamyawa\nНаграда: Уникальная персонализация + 800 💎\n\n6 место — denystormqueen\nНаграда: Уникальная персонализация + 750 💎\n\n7 место — w1tchblades\nНаграда: Уникальная персонализация + 700 💎\n\n8 место — Апология\nНаграда: Уникальная персонализация + 650 💎\n\n9 место — 0_PHOENIX_0\nНаграда: Уникальная персонализация + 600 💎\n\n10 место — xyasp1z\nНаграда: Уникальная персонализация + 550 💎\n\n💰 За каждый миллион добытыx блоков, игроки получат дополнительные 100 бонусов.\n\n🐀 Игроки, занявшие места в топе по крысам, получат следующие награды:\n1 место — UNLUCKYPAW\nНаграда: Уникальная персонализация  + 1.100 💎\n\n2 место — artem2283356\nНаграда: Уникальная персонализация + 1.000 💎\n\n3 место — GotFatYTS\nНаграда: Уникальная персонализация + 950 💎\n\n4 место — kolya_ni\nНаграда: Уникальная персонализация + 850 💎\n\n5 место — warcrafti\nНаграда: Уникальная персонализация + 800 💎\n\n6 место — AveFertiL\nНаграда: Уникальная персонализация + 750 💎\n\n7 место — Gold_Coin_\nНаграда: Уникальная персонализация + 700 💎\n\n8 место — malckolm0200\nНаграда: Уникальная персонализация + 650 💎\n\n9 место — GreenHit\nНаграда: Уникальная персонализация + 600 💎\n\n10 место — _KJlaDMeN_\nНаграда: Уникальная персонализация + 550 💎\n\n✏️ Список изменений:\n— Добавлены шестерки (личные НПС для переработки ресурсов):\n— Добавлены квесты для банд;\n— Обновлена система профессий;\n— Еще больше новыx шаxт;\n— Введена система поддержки мульти-чатов.\nПодробности обновления\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Баг-бот | Discord\n  ∟ Тех.поддержка TG | Тех.поддержка VK\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://forum.cristalix.gg/threads/303993/",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/24",
+      "url": "https://t.me/prison_classic/24",
+      "date": "2026-02-14T08:55:32+00:00",
+      "text": "💣 На Prison Classic был проведён запланированный рестарт\n\n🎇 Список изменений:\n— Добавлены наборы скинов «Набор Купидона» и «Снежный набор», приобрести их можно в /donate\n— Исправлено открытие эндер-сундука в Личной камере\n— Щебень теперь можно выставить на Аукцион\n— Пыль после переработки теперь продаваема\n— Исправлен баг с очисткой чата после перемещения между локациями\n— Исправлены баги с начислением опыта во время выполнения работ\n— Исправлена покупка улучшений в Банде обычными участниками\n— Исправлено отображение всех видов кличек в /names\n— Добавлена возможность пополнять баланс при недостатке средств прямо из /donate с помощью СБП\n\n🥰 Также, на сервере активна скидка 14% в честь Дня Святого Валентина\n\n🧸 С праздником!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/25",
+      "url": "https://t.me/prison_classic/25",
+      "date": "2026-02-16T20:24:30+00:00",
+      "text": "💣 На режиме был проведён запланированный рестарт\n\n🎇 Список изменений:\n— Теперь на Рынке можно покупать сразу по 64 яблока за раз. Для этого необходимо зажать кнопку SHIFT при покупке\n— Теперь игроки ниже 5-го уровня не могут находиться в банде/создавать собственную банду \n— Исправлена проблема со вскапыванием блоков ножницами на локации «Изнанка»\n— Подключили сайт статистики. Теперь там можно просматривать свою игровую статистику по большинству́ параметров. Статистика за предыдущий сезон будет загружена в скором времени в полном объёме.\n— Блоки, которые можно добыть лишь на шахте, необходимый уровень для которой значительно выше Вашего — Вам больше нельзя будет поднимать, скидывать и продавать. Данное изменение вступит в силу после ночного рестарта, ориентировочно в 4 часа ночи.\n— Передавать блоки с помощью /gift больше нельзя\n— Добавлены уведомления о запуске бустера\n\n👍 Приятной игры!",
+      "links": [
+        "https://top.cristalix.gg/"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/26",
+      "url": "https://t.me/prison_classic/26",
+      "date": "2026-03-09T20:18:53+00:00",
+      "text": "🎙Залили войс-чат на все игровые сервера Prison Classic!\n\nДля привязки клавиши для разговора используйте: Настройки —> Управление —> Привязка клавиш —> Voice Chat \n\n👍 Приятной игры!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/27",
+      "url": "https://t.me/prison_classic/27",
+      "date": null,
+      "text": "🪄 Тест анимаций зачарований в Prison+\n\n🔖 Ярость, Вихрь, Бульдозер",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/30",
+      "url": "https://t.me/prison_classic/30",
+      "date": "2026-04-15T13:21:11+00:00",
+      "text": "😱 Представляем вам наградную персонализацию для лучших игроков нашего режима!\n\n🔝 За основной топ (Уровень + блоки) предназначены следующие награды:\n1-3 место — Аура заключённого\n4-15 место — Узник\n16-50 место — Шлем рыцаря\n\n🐭За топ по крысам (1-10 место) игроки получат же своего личного питомца — Подвальную крысу!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/31",
+      "url": "https://t.me/prison_classic/31",
+      "date": "2026-04-15T13:21:17+00:00",
+      "text": "",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/32",
+      "url": "https://t.me/prison_classic/32",
+      "date": "2026-04-15T13:21:17+00:00",
+      "text": "",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/33",
+      "url": "https://t.me/prison_classic/33",
+      "date": "2026-04-15T13:21:17+00:00",
+      "text": "",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/34",
+      "url": "https://t.me/prison_classic/34",
+      "date": "2026-04-15T13:21:17+00:00",
+      "text": "",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/35",
+      "url": "https://t.me/prison_classic/35",
+      "date": "2026-05-03T16:00:30+00:00",
+      "text": "📦 Спешим уведомить Вас, что плановый старт следующего сезона состоится уже в эту пятницу, 08.05, в 18:00!\n\n⭐️ Закрытие игровых серверов будет в ночь с 07.05 на 08.05, ориентировочно в полночь.",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/36",
+      "url": "https://t.me/prison_classic/36",
+      "date": "2026-05-08T15:31:59+00:00",
+      "text": "⛏️ Новый сезон на Prison Classic уже начался!\n\n⛑️ Игроки, занявшие места в топе по блокам, получат следующие награды:\n1 место — blatantNakoso - 29.000.000 блоков\nНаграда: Персонализация \"Цепи заключенного\"  + 1.100 💎 \n\n2 место — GotFatYTS - 20.000.000 блоков\nНаграда: Персонализация \"Цепи заключенного\" + 1.000 💎\n\n3 место — TeMHbIuPrince - 10.032.067 блоков\nНаграда: Персонализация \"Цепи заключенного\" + 950 💎\n\n4 место — fr_lordius - 7.631.428 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 850 💎\n\n5 место — doubleblues - 5.039.408 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 800 💎\n\n6 место — IJustWantPlay - 5.035.338 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 750 💎\n\n7 место — 6E3YMHBIU_AKIM - 5.028.469 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 700 💎\n\n8 место — WhenYouFindMe - 4.616.186 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 650 💎\n\n9 место — Stogo - 3.998.548 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 600 💎\n\n10 место — MishaV10 - 4.251.239 блоков\nНаграда: Персонализация \"Клетка заключенного\" + 550 💎\n\n💰 За каждый миллион добытыx блоков, игроки из ТОП-3 получат дополнительные 100 бонусов.\n\n🎁 Также игроки, занявшие 11-50 места, получат уникальную персонализацию \"Шлем рыцаря\".\n\n🐀 Игроки, занявшие места в топе по крысам, получат следующие награды:\n1 место — TeMHbIuPrince\nНаграда: Уникальная персонализация  + 1.100 💎\n\n2 место — GotFatYTS\nНаграда: Уникальная персонализация + 1.000 💎\n\n3 место — psd2\nНаграда: Уникальная персонализация + 950 💎\n\n4 место — WhenYouFindMe\nНаграда: Уникальная персонализация + 850 💎\n\n5 место — Arbuzuwu\nНаграда: Уникальная персонализация + 800 💎\n\n6 место — Titrus\nНаграда: Уникальная персонализация + 750 💎\n\n7 место — maysky\nНаграда: Уникальная персонализация + 700 💎\n\n8 место — denistormqueen\nНаграда: Уникальная персонализация + 650 💎\n\n9 место — Super_Drive23\nНаграда: Уникальная персонализация + 600 💎\n\n10 место — mooosa\nНаграда: Уникальная персонализация + 550 💎\n\n✏️ Список изменений:\n— Добавлены Карьеры (новые локации для банд):\n— Добавлена личная шахта;\n— Обновлена шахта Изнанка, добавлен новый босс Векна;\n— Обновлены банды.\nПодробности обновления\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Discord\n  ∟ Тех.поддержка | Сообщить о баге\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://forum.cristalix.gg/threads/306667/",
+        "https://t.me/c7xbugs_bot",
+        "https://t.me/c7xsup_bot",
+        "https://t.me/deadles_bot",
+        "https://vk.com/cristalixhelpdesk"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/39",
+      "url": "https://t.me/prison_classic/39",
+      "date": "2026-08-15T16:34:11+00:00",
+      "text": "⛏️ Открытие Prison Quick состоится в пятницу (21.08) в 18:00 по МСК!\n\nℹ️ Отличается от классика ускоренной прокачкой, пониженными требованиями к уровню и повышенными ценами на продажу блоков.\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Discord\n  ∟ Тех.поддержка | Сообщить о баге\n\n#cristalix #minigames #prisonquick",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonquick",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xbugs_bot",
+        "https://t.me/c7xsup_bot",
+        "https://vk.com/cristalixhelpdesk"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/40",
+      "url": "https://t.me/prison_classic/40",
+      "date": "2026-08-21T16:18:20+00:00",
+      "text": "😱 Список нововведений:\n\n- Количество уровней увеличено до 50\n- Коллекции: Получайте фрагменты за игру, коллекционируйте альбомы и получайте за это ключи от кейса с артефактами \n- Ежедневные цели для банд: Выполняйте ежедневные поставленные цели по копке блоков и получайте бустер для всех участников банды\n- Ускорен весь геймплей, понижена стоимость позиций в /donate\n- Заговор огня теперь срабатывает в разы реже \n- Стейки больше нельзя получить в столовой и приобрести у торговца\n- Сила теперь выдаётся за каждые 2 уровня прокачки после 5-го уровня\n- Шанс на звёзды из обычного лутбокса был повышен\n- Урон от кактусов был отключен\n- Эфекты от работы зачарований у обладателей подписки Prison+ теперь можно отключать в /settings\n- Добавлены небесные шахты. После достижения 37-го уровня Вы можете получить доступ к ним, при этом прокачка до 37-го уровня была облегчена\n- Исправлены баги, связанные с покупкой товаров на чёрном рынке\n\n👍 Приятной игры!",
+      "links": [],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/41",
+      "url": "https://t.me/prison_classic/41",
+      "date": "2026-08-22T06:15:54+00:00",
+      "text": "🗡 Игровой бот пополнился новыми фичами!\n\nТеперь игроки с подпиской могут писать в чат банды находясь оффлайн, через личные сообщения с ботом. \nТакже можно настроить отправку уведомлений о включении бустеров, захвате точек на локации «Дворы» и их освобождении, ну и конечно же актуальные бустеры/актуальное состояние точек",
+      "links": [
+        "https://t.me/prison_classic_bot"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/42",
+      "url": "https://t.me/prison_classic/42",
+      "date": "2026-10-11T13:18:29+00:00",
+      "text": "⛏️ Новый сезон на Prison Classic стартует в пятницу (16.10) в 18:00 по МСК!\n\nℹ️ Информация об обновлении и итоги текущего сезона будут опубликованы к открытию. \n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Discord\n  ∟ Тех.поддержка | Сообщить о баге\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xbugs_bot",
+        "https://t.me/c7xsup_bot"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    },
+    {
+      "id": "prison_classic/43",
+      "url": "https://t.me/prison_classic/43",
+      "date": "2026-10-16T15:36:07+00:00",
+      "text": "⛏️ Новый сезон на Prison Classic уже начался!\n\n⛑️ Игроки, занявшие места в топе по блокам, получат следующие награды:\n1 место — Moglicshik\nНаграда: Персонализация \"Цепи заключенного\"  + 1.100 💎 \n\n2 место — Capta1n_\nНаграда: Персонализация \"Цепи заключенного\" + 1.000 💎\n\n3 место — Leshakush_\nНаграда: Персонализация \"Цепи заключенного\" + 950 💎\n\n4 место — x_Enot_x\nНаграда: Персонализация \"Клетка заключенного\" + 850 💎\n\n5 место — DepressionKas1k\nНаграда: Персонализация \"Клетка заключенного\" + 800 💎\n\n6 место — Imaginary\nНаграда: Персонализация \"Клетка заключенного\" + 750 💎\n\n7 место — Hestli0\nНаграда: Персонализация \"Клетка заключенного\" + 700 💎\n\n8 место — Halluzinierendes\nНаграда: Персонализация \"Клетка заключенного\" + 650 💎\n\n9 место — xunstoppablex\nНаграда: Персонализация \"Клетка заключенного\" + 600 💎\n\n10 место — 6E3YMHBIU_AKIM\nНаграда: Персонализация \"Клетка заключенного\" + 550 💎\n\n💰 За каждый миллион добытыx блоков, игроки из ТОП-3 получат дополнительные 100 бонусов.\n\n🎁 Также игроки, занявшие 11-15 места, получат персонализацию \"Клетка заключенного\".\n\n🐀 Игроки, занявшие места в топе по крысам, получат следующие награды:\n1 место — whylollycryy\nНаграда: Уникальная персонализация  + 1.100 💎\n\n2 место — doublebless\nНаграда: Уникальная персонализация + 1.000 💎\n\n3 место — MidnightSolitude\nНаграда: Уникальная персонализация + 950 💎\n\n4 место — smilykid999\nНаграда: Уникальная персонализация + 850 💎\n\n5 место — Detonator_69\nНаграда: Уникальная персонализация + 800 💎\n\n6 место — Capta1n_ \nНаграда: Уникальная персонализация + 750 💎\n\n7 место — doublebleary\nНаграда: Уникальная персонализация + 700 💎\n\n8 место — hermaeus\nНаграда: Уникальная персонализация + 650 💎\n\n9 место — _R_O_K_K_E_R_\nНаграда: Уникальная персонализация + 600 💎\n\n10 место — xunstoppablex\nНаграда: Уникальная персонализация + 550 💎\n\n✏️ Список изменений:\n— Добавлено целых 8 новых боссов и 8 древних зачарований;\n— Добавлен Боевой пропуск;\n— Каждые 20 минут в игре активируется случайный ивент;\n— Добавлен комбо-бустер;\n— Добавлен ИИ-помощник Дюфрейн и википедия - /wiki;\n— Теперь каждая локация сопровождается своими звуками, частицами и НПС;\n— Обновлены все игровые меню;\n— Обновлены блоки и их стоимость в некоторых шахтах.\n\n✨ Приятной игры!\n\n🔗 Полезные ссылки: \n  ∟ Сайт | Discord\n  ∟ Тех.поддержка | Сообщить о баге\n\n#cristalix #minigames #prisonclassic",
+      "links": [
+        "?q=%23cristalix",
+        "?q=%23minigames",
+        "?q=%23prisonclassic",
+        "https://cristalix.gg/",
+        "https://discord.gg/cristalix",
+        "https://t.me/c7xbugs_bot",
+        "https://t.me/c7xsup_bot"
+      ],
+      "sourcePage": "C:/Users/user/Documents/roblox-prison-research/client-audit/content-analysis/public-gap-sources/telegram-page-01.html",
+      "sourceSha256": "de053ad0b5f4fcecc33c6424a82440e77a50d743b3e9ea1d1caca0db54b013ef"
+    }
+  ],
+  "tagThreads": [
+    {
+      "title": "Prison Вайп и обновление Prison Classic",
+      "url": "https://forum.cristalix.gg/threads/306667/"
+    },
+    {
+      "title": "Prison Classic Вайп и обновление Prison Classic",
+      "url": "https://forum.cristalix.gg/threads/303993/"
+    },
+    {
+      "title": "Что с режимом \"PRISON CLASSIC\"?",
+      "url": "https://forum.cristalix.gg/threads/296084/"
+    },
+    {
+      "title": "Prison classic",
+      "url": "https://forum.cristalix.gg/threads/271244/"
+    },
+    {
+      "title": "Квесты Prison",
+      "url": "https://forum.cristalix.gg/threads/269149/"
+    },
+    {
+      "title": "Prison",
+      "url": "https://forum.cristalix.gg/threads/268397/"
+    },
+    {
+      "title": "Вайп Prison Classic",
+      "url": "https://forum.cristalix.gg/threads/259859/"
+    },
+    {
+      "title": "Ошибка Призон класик",
+      "url": "https://forum.cristalix.gg/threads/216361/"
+    },
+    {
+      "title": "Решено Пропали деньги при передачи через /pay| Prison Classic",
+      "url": "https://forum.cristalix.gg/threads/193024/"
+    },
+    {
+      "title": "АвтоСелл на призон классик",
+      "url": "https://forum.cristalix.gg/threads/183413/"
+    },
+    {
+      "title": "Решено Prison | Проблема с боссом (Воин)",
+      "url": "https://forum.cristalix.gg/threads/173125/"
+    },
+    {
+      "title": "Решено Персональный сундук (/band) на Prison Classic #1",
+      "url": "https://forum.cristalix.gg/threads/154915/"
+    },
+    {
+      "title": "Продажа услуг за реальные деньги.",
+      "url": "https://forum.cristalix.gg/threads/151152/"
+    },
+    {
+      "title": "Твинк",
+      "url": "https://forum.cristalix.gg/threads/143194/"
+    },
+    {
+      "title": "Призон классик нюкер",
+      "url": "https://forum.cristalix.gg/threads/137994/"
+    },
+    {
+      "title": "Перенос доната призон",
+      "url": "https://forum.cristalix.gg/threads/99515/"
+    },
+    {
+      "title": "Не могу писать на prison classic normal",
+      "url": "https://forum.cristalix.gg/threads/73829/"
+    },
+    {
+      "title": "Prison classic (normal)",
+      "url": "https://forum.cristalix.gg/threads/67358/"
+    },
+    {
+      "title": "Prison(Classic)-Валюта.",
+      "url": "https://forum.cristalix.gg/threads/66425/"
+    },
+    {
+      "title": "Prison Classic (Normal)",
+      "url": "https://forum.cristalix.gg/threads/25649/"
+    }
+  ]
+}

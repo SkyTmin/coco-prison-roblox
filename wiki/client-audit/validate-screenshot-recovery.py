@@ -110,7 +110,8 @@ reports = [ROOT.parent / 'README.md'] + [ROOT / name for name in [
     'RECOVERED-GAME-DATA.md', 'MINE-RECOVERY.md', 'MINE-COMPOSITION.md',
     'PICKAXE-UPGRADES.md', 'SWORD-AND-SHOVEL-UPGRADES.md', 'NPC-MENU-RECOVERY.md',
     'BOSS-MENU-RECOVERY.md', 'STORE-AND-TELEPORTS.md', 'CLASSIC-CONTENT-CATALOG.md',
-    'ARMOR-AND-AXE-UPGRADES.md', 'BOOKS-SYSTEM.md', 'AUCTION-AND-FACTION-RECOVERY.md']]
+    'ARMOR-AND-AXE-UPGRADES.md', 'BOOKS-SYSTEM.md', 'AUCTION-AND-FACTION-RECOVERY.md',
+    'INDEPENDENT-GAP-RESEARCH.md']]
 # The summary links the validation output itself; create it before checking links.
 validation_path = OUT / 'screenshot-recovery-validation.json'
 validation_path.write_text(json.dumps({'status': 'Validation in progress.'}) + '\n', encoding='utf-8')

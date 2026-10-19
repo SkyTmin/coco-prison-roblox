@@ -1,0 +1,17 @@
+{
+  "findings": 14,
+  "statusCounts": {
+    "client_description_not_runtime_test": 5,
+    "dated_classic_patch_note_not_current_runtime_test": 8,
+    "public_site_metadata_not_game_formula": 1
+  },
+  "gapCategories": 8,
+  "publicChannelVisiblePosts": 35,
+  "preservedPublicPages": 4,
+  "uniqueFindingSourceHashes": 4,
+  "localLinksChecked": 17,
+  "addonContentUnchanged": true,
+  "languagePropertiesUnchanged": true,
+  "fullCurrentServerBalanceRecovered": false,
+  "status": "Source hashes, localization anchors, counts and report links passed."
+}

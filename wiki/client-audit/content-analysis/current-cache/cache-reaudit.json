@@ -1,0 +1,121 @@
+{
+  "checkedDate": "2026-10-20",
+  "scope": "Public addon/language cache only. No game logs, account/session data or process memory read.",
+  "addonIndex": {
+    "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\addons\\addons.json",
+    "originalSha256": "88ab0e6a6fc914637b378700398c366837a6979ff16aabbab35ddebe34fcfd72",
+    "decodedSha256": "75a74fb2f9a8a5441a4228e27db114cda8523c8179f97c2b999b6e6a19911433",
+    "bytes": 2607,
+    "modifiedAt": "2026-10-19T21:13:16.168Z",
+    "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\addons-index.json"
+  },
+  "languageIndex": {
+    "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\lang\\lang.json",
+    "originalSha256": "45df844d91a6041ce624232cab3f7e8f30d74008cf141bb6460c8211d71702b8",
+    "decodedSha256": "22fe40dbec761da2c2040b3abce8372288d452302800ee7adfaf0afa4cc6846f",
+    "bytes": 98506,
+    "modifiedAt": "2026-10-19T15:49:01.504Z",
+    "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\lang-index.json"
+  },
+  "addonComparison": [
+    {
+      "name": "socials",
+      "version": "mod",
+      "contentHash": "25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+      "previousContentHash": "25a8d380e3ffda087e76dec3e4c07648dc174fa9de29acf99c762f89170bdbd5",
+      "contentChanged": false
+    },
+    {
+      "name": "gama",
+      "version": "bundle",
+      "contentHash": "b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+      "previousContentHash": "b8ab8e19b366b4d20df6925e1bb04bf5498ba2446d69c9e71dc886247189adc6",
+      "contentChanged": false
+    },
+    {
+      "name": "wada",
+      "version": "4.18.6",
+      "contentHash": "d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+      "previousContentHash": "d2cae0873b9fcaf39398ab2e1a7c96c48dc43bb9866664d9bff11edb4c780f59",
+      "contentChanged": false
+    }
+  ],
+  "languageRecords": [
+    {
+      "language": "en_US",
+      "pie": "prison",
+      "contentHash": "051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+      "cached": true,
+      "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\lang\\05\\1a\\051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+      "originalSha256": "278f38a648abe0efaa30c27b80600dbfa71ae1107f4f83bc5a518ed532850cf6",
+      "decodedSha256": "051ad0f3c124e69ca48c0fca8a480a8f9814b0061dfa97e8879f5c651fdf8d15",
+      "bytes": 52727,
+      "modifiedAt": "2026-10-18T16:28:06.538Z",
+      "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\en_US-prison.json",
+      "propertyCount": 2323,
+      "classicPropertyCount": 1705,
+      "added": [],
+      "changed": [],
+      "removed": []
+    },
+    {
+      "language": "en_US",
+      "pie": "prisonevo",
+      "contentHash": "3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+      "cached": true,
+      "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\lang\\36\\50\\3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+      "originalSha256": "d2a6d3386c03d292c01e9b69210f868c34837536c1ef18ed59fc472e8906543b",
+      "decodedSha256": "3650ef2e1783f923a982f915ea9162de28c695a98e9b43b83266864506088ceb",
+      "bytes": 3938,
+      "modifiedAt": "2026-10-18T16:28:06.619Z",
+      "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\en_US-prisonevo.json",
+      "propertyCount": 300,
+      "classicPropertyCount": 0,
+      "added": [],
+      "changed": [],
+      "removed": []
+    },
+    {
+      "language": "ru_RU",
+      "pie": "prison",
+      "contentHash": "9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+      "cached": true,
+      "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\lang\\9c\\6b\\9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+      "originalSha256": "e98a20c15cf3a37ec156e1db8fead093d473c9eeddb8261b79964dd3c623ab3b",
+      "decodedSha256": "9c6bed6de221ff2a8f6d51d9021f8ce0255e500bc9139e9d717115fb162a1208",
+      "bytes": 65788,
+      "modifiedAt": "2026-10-18T16:28:07.029Z",
+      "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\ru_RU-prison.json",
+      "propertyCount": 2500,
+      "classicPropertyCount": 1837,
+      "added": [],
+      "changed": [],
+      "removed": []
+    },
+    {
+      "language": "ru_RU",
+      "pie": "prisonevo",
+      "contentHash": "1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+      "cached": true,
+      "source": "C:\\Users\\user\\.cristalix\\updates\\Minigames\\cache\\lang\\1b\\97\\1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+      "originalSha256": "c26e74964423953d89fbdab14e1b7e351aae19d0dc880d23e3e236d5e76301d9",
+      "decodedSha256": "1b97832fdf0af73fde1cf3786205104a03f8cbe78672414bd2f645abca5126e8",
+      "bytes": 4958,
+      "modifiedAt": "2026-10-18T16:28:07.116Z",
+      "savedPath": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\content-analysis\\current-cache\\ru_RU-prisonevo.json",
+      "propertyCount": 300,
+      "classicPropertyCount": 0,
+      "added": [],
+      "changed": [],
+      "removed": []
+    }
+  ],
+  "cacheCounts": {
+    "addons": 4,
+    "lang": 99,
+    "p13n": 474,
+    "textures": 464
+  },
+  "cacheModsDirectoryPresent": false,
+  "limitation": "Unchanged cache or absent cache/mods does not prove absence of in-memory server-delivered modules or server configuration."
+}
