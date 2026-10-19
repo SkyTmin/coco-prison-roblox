@@ -1,0 +1,104 @@
+{
+  "source": "Меню «Скупщик блоков», Prison Classic, скриншоты владельца 20.10.2026",
+  "status": "confirmed_in_game_menu",
+  "shownMultiplier": 1.04,
+  "note": "shown = цена на экране с множителем игрока; base = shown / 1.04, округлено",
+  "locations": [
+    { "id": "prison", "name": "Тюрьма", "level": 1, "blocks": [
+      { "id": "sand", "name": "Песок", "shown": 0.012, "base": 0.0115 },
+      { "id": "gravel", "name": "Гравий", "shown": 0.012, "base": 0.0115 },
+      { "id": "dirt", "name": "Земля", "shown": 0.014, "base": 0.0135 },
+      { "id": "oak_log", "name": "Дуб", "shown": 0.073, "base": 0.07 },
+      { "id": "melon", "name": "Арбуз", "shown": 1.46, "base": 1.4 } ] },
+    { "id": "quarry", "name": "Каменоломня", "level": 3, "blocks": [
+      { "id": "cobblestone", "name": "Булыжник", "shown": 0.047, "base": 0.045 },
+      { "id": "stone", "name": "Камень", "shown": 0.057, "base": 0.055 },
+      { "id": "coal", "name": "Уголь", "shown": 0.081, "base": 0.078 },
+      { "id": "coal_ore", "name": "Каменный уголь", "shown": 0.092, "base": 0.088 },
+      { "id": "iron_ore", "name": "Железная руда", "shown": 0.156, "base": 0.15 },
+      { "id": "coal_block", "name": "Угольный блок", "shown": 1.04, "base": 1.0 } ] },
+    { "id": "mountain_foot", "name": "Подножье горы", "level": 5, "blocks": [
+      { "id": "red_sand", "name": "Красный песок", "shown": 0.074, "base": 0.071 },
+      { "id": "iron_ore", "name": "Железная руда", "shown": 0.156, "base": 0.15 },
+      { "id": "gold_ore", "name": "Золотая руда", "shown": 0.419, "base": 0.403 } ] },
+    { "id": "underworld", "name": "Преисподняя", "level": 7, "blocks": [
+      { "id": "netherite", "name": "Незерит", "shown": 0.094, "base": 0.09 },
+      { "id": "soul_sand", "name": "Песок душ", "shown": 0.156, "base": 0.15 },
+      { "id": "quartz", "name": "Незер-кварц", "shown": 0.156, "base": 0.15 },
+      { "id": "quartz_ore", "name": "Незер-кварцевая руда", "shown": 0.208, "base": 0.2 } ] },
+    { "id": "pyramid", "name": "Пирамида", "level": 9, "blocks": [
+      { "id": "sandstone", "name": "Песчаник", "shown": 0.218, "base": 0.21 },
+      { "id": "red_sandstone", "name": "Красный песчаник", "shown": 0.218, "base": 0.21 } ] },
+    { "id": "royal_garden", "name": "Королевский сад", "level": 11, "blocks": [
+      { "id": "wisteria_leaves", "name": "Розовые листья глицинии", "shown": 0.281, "base": 0.27 },
+      { "id": "cherry_log", "name": "Вишнёвое дерево", "shown": 0.374, "base": 0.36 } ] },
+    { "id": "sunken_lighthouse", "name": "Затопленный маяк", "level": 13, "blocks": [
+      { "id": "cyan_concrete", "name": "Бирюзовый цемент", "shown": 0.333, "base": 0.32 },
+      { "id": "prismarine", "name": "Призмарин", "shown": 0.468, "base": 0.45 },
+      { "id": "prismarine_bricks", "name": "Призмариновые кирпичи", "shown": 0.468, "base": 0.45 } ] },
+    { "id": "end_castle", "name": "Пустотная крепость", "level": 15, "blocks": [
+      { "id": "end_stone_bricks", "name": "Эндерняковые кирпичи", "shown": 0.624, "base": 0.6 },
+      { "id": "purpur", "name": "Пурпур", "shown": 0.676, "base": 0.65 } ] },
+    { "id": "spider_lair", "name": "Паучье логово", "level": 17, "blocks": [
+      { "id": "white_wool", "name": "Белая шерсть", "shown": 0.728, "base": 0.7 },
+      { "id": "cobweb", "name": "Паутина", "shown": 1.04, "base": 1.0 } ] },
+    { "id": "snowy_hand", "name": "Снежная длань", "level": 19, "blocks": [
+      { "id": "ice", "name": "Лёд", "shown": 0.78, "base": 0.75 },
+      { "id": "packed_ice", "name": "Плотный лёд", "shown": 0.78, "base": 0.75 } ] },
+    { "id": "market", "name": "Рынок", "level": 21, "blocks": [
+      { "id": "yellow_wool", "name": "Жёлтая шерсть", "shown": 0.79, "base": 0.76 },
+      { "id": "red_wool", "name": "Красная шерсть", "shown": 0.79, "base": 0.76 },
+      { "id": "lime_wool", "name": "Лаймовая шерсть", "shown": 0.832, "base": 0.8 } ] },
+    { "id": "leprechaun_valley", "name": "Лепреконовая долина", "level": 23, "blocks": [
+      { "id": "orange_concrete", "name": "Оранжевый цемент", "shown": 0.853, "base": 0.82 },
+      { "id": "yellow_concrete", "name": "Жёлтый цемент", "shown": 0.853, "base": 0.82 },
+      { "id": "lime_concrete", "name": "Лаймовый цемент", "shown": 0.853, "base": 0.82 },
+      { "id": "purple_concrete", "name": "Фиолетовый цемент", "shown": 0.853, "base": 0.82 },
+      { "id": "red_concrete", "name": "Красный цемент", "shown": 0.853, "base": 0.82 } ] },
+    { "id": "castle", "name": "Замок", "level": 25, "blocks": [
+      { "id": "quartz_block", "name": "Кварцевый блок", "shown": 0.884, "base": 0.85 },
+      { "id": "chiseled_quartz", "name": "Резной кварцевый блок", "shown": 0.957, "base": 0.92 } ] },
+    { "id": "inside_out", "name": "Изнанка", "level": 27, "blocks": [
+      { "id": "dark_oak_leaves", "name": "Листья мрачного дуба", "shown": 0.936, "base": 0.9 } ] },
+    { "id": "kyoto", "name": "Киото", "level": 29, "blocks": [
+      { "id": "pink_wool", "name": "Розовая шерсть", "shown": 0.988, "base": 0.95 },
+      { "id": "sea_lantern", "name": "Морской фонарь", "shown": 1.01, "base": 0.97 } ] },
+    { "id": "farm", "name": "Ферма", "level": 31, "blocks": [
+      { "id": "pumpkin", "name": "Тыква", "shown": 1.46, "base": 1.4 },
+      { "id": "melon", "name": "Арбуз", "shown": 1.46, "base": 1.4 },
+      { "id": "green_wool", "name": "Зелёная шерсть", "shown": 1.77, "base": 1.7 } ] },
+    { "id": "barn", "name": "Амбар", "level": 33, "blocks": [
+      { "id": "jack_o_lantern", "name": "Светильник Джека", "shown": 1.72, "base": 1.65 } ] },
+    { "id": "edge_gate", "name": "Врата края", "level": 35, "blocks": [
+      { "id": "magenta_concrete", "name": "Пурпурный цемент", "shown": 1.7, "base": 1.63 },
+      { "id": "black_glass", "name": "Чёрное стекло", "shown": 2.78, "base": 2.67 } ] },
+    { "id": "tree", "name": "Древо", "level": 37, "blocks": [
+      { "id": "white_concrete", "name": "Белый цемент", "shown": 1.87, "base": 1.8 } ] },
+    { "id": "church", "name": "Церковь", "level": 39, "blocks": [
+      { "id": "clay", "name": "Глина", "shown": 1.96, "base": 1.88 } ] },
+    { "id": "purgatory", "name": "Чистилище", "level": 41, "blocks": [
+      { "id": "chiseled_sandstone", "name": "Резной песчаник", "shown": 2.04, "base": 1.96 } ] },
+    { "id": "eden", "name": "Эдем", "level": 43, "blocks": [
+      { "id": "brown_mushroom_block", "name": "Гриб (коричневый)", "shown": 2.13, "base": 2.05 } ] },
+    { "id": "cherubim", "name": "Херувимы", "level": 45, "blocks": [
+      { "id": "snow", "name": "Снег", "shown": 2.29, "base": 2.2 } ] },
+    { "id": "gate", "name": "Врата", "level": 47, "blocks": [
+      { "id": "smooth_sandstone", "name": "Гладкий песчаник", "shown": 2.39, "base": 2.3 } ] },
+    { "id": "paradise", "name": "Рай", "level": 49, "blocks": [
+      { "id": "red_mushroom_block", "name": "Гриб (красный)", "shown": 2.5, "base": 2.4 } ] },
+    { "id": "basement", "name": "Подвал", "level": 5, "requiresPass": true, "blocks": [
+      { "id": "sand", "name": "Песок", "shown": 0.012, "base": 0.0115 },
+      { "id": "gravel", "name": "Гравий", "shown": 0.012, "base": 0.0115 },
+      { "id": "dirt", "name": "Земля", "shown": 0.014, "base": 0.0135 },
+      { "id": "lapis_block", "name": "Лазуритовый блок", "shown": 0.156, "base": 0.15 },
+      { "id": "iron_block", "name": "Железный блок", "shown": 0.312, "base": 0.3 },
+      { "id": "gold_block", "name": "Золотой блок", "shown": 0.52, "base": 0.5 },
+      { "id": "diamond_block", "name": "Алмазный блок", "shown": 1.04, "base": 1.0 } ] },
+    { "id": "fraction_base", "name": "База фракций", "level": 5, "blocks": [
+      { "id": "cobblestone", "name": "Булыжник", "shown": 0.047, "base": 0.045 },
+      { "id": "stone", "name": "Камень", "shown": 0.057, "base": 0.055 },
+      { "id": "coal", "name": "Уголь", "shown": 0.081, "base": 0.078 },
+      { "id": "coal_ore", "name": "Каменный уголь", "shown": 0.092, "base": 0.088 },
+      { "id": "iron_ore", "name": "Железная руда", "shown": 0.156, "base": 0.15 } ] }
+  ]
+}
