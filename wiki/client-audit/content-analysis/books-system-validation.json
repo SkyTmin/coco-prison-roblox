@@ -1,0 +1,25 @@
+{
+  "caseScreenshots": 34,
+  "uniqueCaseOriginals": 33,
+  "distinctObservedBookTemplates": 31,
+  "rarityCounts": {
+    "обычное": 13,
+    "редкое": 10,
+    "легендарное": 8
+  },
+  "auctionBookObservationScreenshots": 35,
+  "otherMissedScreenshots": 15,
+  "totalAssignedSources": 84,
+  "localizationOnlyNames": [
+    "Экономия",
+    "Торнадо",
+    "Гнев",
+    "Муляр",
+    "Землекоп",
+    "Дровосек",
+    "Охотник"
+  ],
+  "applicationChanceSeparatedFromProcChance": true,
+  "caseDropProbabilitiesUnknown": true,
+  "hashesAndLinksMatched": true
+}

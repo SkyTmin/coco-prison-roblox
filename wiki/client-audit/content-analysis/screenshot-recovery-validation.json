@@ -1,18 +1,34 @@
 {
-  "suppliedScreenshots": 127,
-  "uniqueOriginals": 126,
-  "originalHashesChecked": 127,
-  "evidenceHashesChecked": 127,
-  "reportsChecked": 10,
-  "localLinksChecked": 292,
-  "originalScreenshotBatches": 8,
-  "newScreenshots": 61,
+  "suppliedScreenshots": 289,
+  "uniqueOriginals": 287,
+  "originalHashesChecked": 289,
+  "evidenceHashesChecked": 289,
+  "reportsChecked": 13,
+  "localLinksChecked": 490,
+  "sourceManifestFiles": 7,
+  "previousIncompleteCount": 127,
+  "previouslyMissedGameplayFrames": 128,
+  "newBookCaseFrames": 34,
+  "newlyAddedFramesAssignedExactlyOnce": 162,
   "observedMineRows": 26,
   "distinctMineNamesWithBlockLabels": 25,
   "bossMenuEntries": 17,
   "storeOffers": 31,
   "numericStorePrices": 28,
   "teleportDestinations": 9,
-  "itemUpgradeTransitions": 44,
-  "status": "All integrity, coverage and local-link checks passed; numeric server rules remain unknown where not demonstrated."
+  "itemUpgradeTransitions": 115,
+  "armorUpgradeTransitions": 56,
+  "axeUpgradeTransitions": 15,
+  "observedBookTemplates": 31,
+  "bookRarityCounts": {
+    "обычное": 13,
+    "редкое": 10,
+    "легендарное": 8
+  },
+  "auctionBookObservationFrames": 35,
+  "unclassifiedClipboardFilesNotInProvidedAttachmentLists": [
+    "codex-clipboard-aa985c70-19f7-4b9e-bf92-29ebb9b52483.png"
+  ],
+  "scope": "Explicit registered gameplay attachment inventory; cache files alone do not establish attachment provenance.",
+  "status": "Registered evidence integrity, new-frame assignment and local-link checks passed; numeric server rules remain unknown where not demonstrated."
 }

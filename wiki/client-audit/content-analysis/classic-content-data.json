@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-19",
+  "created": "2026-10-20",
   "sourceType": "client localization and supplied game menu screenshots; not server source/configuration",
   "mines": [
     {
@@ -7482,9 +7482,3988 @@
       "Шахта and Малая шахта on the board are not assigned to the two Тюрьма rows without IDs or travel evidence."
     ]
   },
+  "observedArmorAndAxe": {
+    "recordedDate": "2026-10-20",
+    "sourceType": "Manual reading of 78 supplied game screenshots omitted from the initial inventory",
+    "sourcesManifest": "missed-menu-sources.json",
+    "sourceIds": [
+      "coverage_3",
+      "coverage_4",
+      "coverage_5",
+      "coverage_6",
+      "coverage_7",
+      "coverage_8",
+      "coverage_9",
+      "coverage_10",
+      "coverage_11",
+      "coverage_12",
+      "coverage_13",
+      "coverage_14",
+      "coverage_15",
+      "coverage_16",
+      "coverage_17",
+      "coverage_18",
+      "coverage_19",
+      "coverage_20",
+      "coverage_21",
+      "coverage_22",
+      "coverage_23",
+      "coverage_24",
+      "coverage_25",
+      "coverage_26",
+      "coverage_27",
+      "coverage_28",
+      "coverage_29",
+      "coverage_30",
+      "coverage_31",
+      "coverage_32",
+      "coverage_33",
+      "coverage_34",
+      "coverage_35",
+      "coverage_36",
+      "coverage_37",
+      "coverage_38",
+      "coverage_39",
+      "coverage_40",
+      "coverage_41",
+      "coverage_42",
+      "coverage_43",
+      "coverage_44",
+      "coverage_45",
+      "coverage_46",
+      "coverage_47",
+      "coverage_48",
+      "coverage_49",
+      "coverage_50",
+      "coverage_51",
+      "coverage_52",
+      "coverage_53",
+      "coverage_54",
+      "coverage_55",
+      "coverage_56",
+      "coverage_57",
+      "coverage_58",
+      "coverage_59",
+      "coverage_60",
+      "coverage_61",
+      "coverage_62",
+      "coverage_63",
+      "coverage_64",
+      "coverage_65",
+      "coverage_66",
+      "coverage_67",
+      "coverage_68",
+      "coverage_69",
+      "coverage_70",
+      "coverage_71",
+      "coverage_72",
+      "coverage_73",
+      "coverage_74",
+      "coverage_75",
+      "coverage_76",
+      "coverage_77",
+      "coverage_78",
+      "coverage_79",
+      "coverage_80"
+    ],
+    "items": {
+      "helmet": {
+        "transitions": [
+          {
+            "fromLevel": 1,
+            "toLevel": 2,
+            "evidence": [
+              "coverage_3"
+            ],
+            "moneyCost": 20,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "5",
+              "exactValue": 5,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаный шлем",
+            "displayedLeftLevel": 1,
+            "displayedRightName": "Кожаный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 2,
+            "toLevel": 3,
+            "evidence": [
+              "coverage_4"
+            ],
+            "moneyCost": 34,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "10",
+              "exactValue": 10,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаный шлем",
+            "displayedLeftLevel": 2,
+            "displayedRightName": "Кожаный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 3,
+            "toLevel": 4,
+            "evidence": [
+              "coverage_5"
+            ],
+            "moneyCost": 60,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "20",
+              "exactValue": 20,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаный шлем",
+            "displayedLeftLevel": 3,
+            "displayedRightName": "Кожаный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 4,
+            "toLevel": 5,
+            "evidence": [
+              "coverage_6"
+            ],
+            "moneyCost": 150,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "35",
+              "exactValue": 35,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Койф",
+            "displayedLeftLevel": 4,
+            "displayedRightName": "Кожаный шлем",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 5,
+            "toLevel": 6,
+            "evidence": [
+              "coverage_7"
+            ],
+            "moneyCost": 225,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "60",
+              "exactValue": 60,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Койф",
+            "displayedLeftLevel": 5,
+            "displayedRightName": "Койф",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 6,
+            "toLevel": 7,
+            "evidence": [
+              "coverage_8"
+            ],
+            "moneyCost": 325,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "100",
+              "exactValue": 100,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Койф",
+            "displayedLeftLevel": 6,
+            "displayedRightName": "Койф",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 7,
+            "toLevel": 8,
+            "evidence": [
+              "coverage_9"
+            ],
+            "moneyCost": 550,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "175",
+              "exactValue": 175,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Койф",
+            "displayedLeftLevel": 7,
+            "displayedRightName": "Койф",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 8,
+            "toLevel": 9,
+            "evidence": [
+              "coverage_10"
+            ],
+            "moneyCost": 970,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "335",
+              "exactValue": 335,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный шлем",
+            "displayedLeftLevel": 8,
+            "displayedRightName": "Койф",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 9,
+            "toLevel": 10,
+            "evidence": [
+              "coverage_11"
+            ],
+            "moneyCost": 1840,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "820",
+              "exactValue": 820,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный шлем",
+            "displayedLeftLevel": 9,
+            "displayedRightName": "Железный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 10,
+            "toLevel": 11,
+            "evidence": [
+              "coverage_12"
+            ],
+            "moneyCost": 2600,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.24K",
+              "exactValue": null,
+              "approximateValue": 1240
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный шлем",
+            "displayedLeftLevel": 10,
+            "displayedRightName": "Железный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 11,
+            "toLevel": 12,
+            "evidence": [
+              "coverage_13"
+            ],
+            "moneyCost": 3700,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.8K",
+              "exactValue": null,
+              "approximateValue": 1800
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный шлем",
+            "displayedLeftLevel": 11,
+            "displayedRightName": "Железный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 12,
+            "toLevel": 13,
+            "evidence": [
+              "coverage_14"
+            ],
+            "moneyCost": 5550,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "2.8K",
+              "exactValue": null,
+              "approximateValue": 2800
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный шлем",
+            "displayedLeftLevel": 12,
+            "displayedRightName": "Железный шлем",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 13,
+            "toLevel": 14,
+            "evidence": [
+              "coverage_15"
+            ],
+            "moneyCost": 6900,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 3,
+            "displayedLeftName": "Алмазный шлем",
+            "displayedLeftLevel": 13,
+            "displayedRightName": "Алмазный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 14,
+            "toLevel": 15,
+            "evidence": [
+              "coverage_16"
+            ],
+            "moneyCost": 11500,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 5,
+            "displayedLeftName": "Алмазный шлем",
+            "displayedLeftLevel": 14,
+            "displayedRightName": "Алмазный шлем",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          }
+        ],
+        "terminalPreview": {
+          "evidence": [
+            "coverage_17"
+          ],
+          "level": 15,
+          "display": "15 → 15",
+          "repeatedPreviousCost": 11500,
+          "repeatedPreviousRequirement": null,
+          "repeatedArmorerLevel": 5,
+          "countedAsAdditionalTransition": false
+        },
+        "nominalTotalUpgradeMoney": 34424,
+        "totalExcludesInitialPurchase": true,
+        "namesByObservedMaterial": [
+          "Кожаный шлем",
+          "Койф",
+          "Железный шлем",
+          "Алмазный шлем"
+        ],
+        "highestShownLevel": 15,
+        "absoluteMaximumLevel": null
+      },
+      "chestplate": {
+        "transitions": [
+          {
+            "fromLevel": 1,
+            "toLevel": 2,
+            "evidence": [
+              "coverage_18"
+            ],
+            "moneyCost": 25,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "4",
+              "exactValue": 4,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаная куртка",
+            "displayedLeftLevel": 1,
+            "displayedRightName": "Кожаная куртка",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 2,
+            "toLevel": 3,
+            "evidence": [
+              "coverage_19"
+            ],
+            "moneyCost": 40,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "8",
+              "exactValue": 8,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаная куртка",
+            "displayedLeftLevel": 2,
+            "displayedRightName": "Кожаная куртка",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 3,
+            "toLevel": 4,
+            "evidence": [
+              "coverage_20"
+            ],
+            "moneyCost": 60,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "14",
+              "exactValue": 14,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаная куртка",
+            "displayedLeftLevel": 3,
+            "displayedRightName": "Кожаная куртка",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 4,
+            "toLevel": 5,
+            "evidence": [
+              "coverage_21"
+            ],
+            "moneyCost": 150,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "35",
+              "exactValue": 35,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчуга",
+            "displayedLeftLevel": 4,
+            "displayedRightName": "Кожаная куртка",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 5,
+            "toLevel": 6,
+            "evidence": [
+              "coverage_22"
+            ],
+            "moneyCost": 225,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "60",
+              "exactValue": 60,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчуга",
+            "displayedLeftLevel": 5,
+            "displayedRightName": "Кольчуга",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 6,
+            "toLevel": 7,
+            "evidence": [
+              "coverage_23"
+            ],
+            "moneyCost": 325,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "110",
+              "exactValue": 110,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчуга",
+            "displayedLeftLevel": 6,
+            "displayedRightName": "Кольчуга",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 7,
+            "toLevel": 8,
+            "evidence": [
+              "coverage_24"
+            ],
+            "moneyCost": 550,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "240",
+              "exactValue": 240,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчуга",
+            "displayedLeftLevel": 7,
+            "displayedRightName": "Кольчуга",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 8,
+            "toLevel": 9,
+            "evidence": [
+              "coverage_25"
+            ],
+            "moneyCost": 1650,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "600",
+              "exactValue": 600,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный нагрудник",
+            "displayedLeftLevel": 8,
+            "displayedRightName": "Кольчуга",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 9,
+            "toLevel": 10,
+            "evidence": [
+              "coverage_26",
+              "coverage_28"
+            ],
+            "moneyCost": 2250,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.05K",
+              "exactValue": null,
+              "approximateValue": 1050
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный нагрудник",
+            "displayedLeftLevel": 9,
+            "displayedRightName": "Железный нагрудник",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 10,
+            "toLevel": 11,
+            "evidence": [
+              "coverage_27"
+            ],
+            "moneyCost": 3200,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.95K",
+              "exactValue": null,
+              "approximateValue": 1950
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный нагрудник",
+            "displayedLeftLevel": 10,
+            "displayedRightName": "Железный нагрудник",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 11,
+            "toLevel": 12,
+            "evidence": [
+              "coverage_29"
+            ],
+            "moneyCost": 4950,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "3K",
+              "exactValue": null,
+              "approximateValue": 3000
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный нагрудник",
+            "displayedLeftLevel": 11,
+            "displayedRightName": "Железный нагрудник",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 12,
+            "toLevel": 13,
+            "evidence": [
+              "coverage_30",
+              "coverage_31"
+            ],
+            "moneyCost": 5850,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "4.9K",
+              "exactValue": null,
+              "approximateValue": 4900
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный нагрудник",
+            "displayedLeftLevel": 12,
+            "displayedRightName": "Железный нагрудник",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 13,
+            "toLevel": 14,
+            "evidence": [
+              "coverage_32"
+            ],
+            "moneyCost": 7400,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 3,
+            "displayedLeftName": "Алмазный нагрудник",
+            "displayedLeftLevel": 13,
+            "displayedRightName": "Алмазный нагрудник",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 14,
+            "toLevel": 15,
+            "evidence": [
+              "coverage_33"
+            ],
+            "moneyCost": 14800,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 5,
+            "displayedLeftName": "Алмазный нагрудник",
+            "displayedLeftLevel": 14,
+            "displayedRightName": "Алмазный нагрудник",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          }
+        ],
+        "terminalPreview": {
+          "evidence": [
+            "coverage_34"
+          ],
+          "level": 15,
+          "display": "15 → 15",
+          "repeatedPreviousCost": 14800,
+          "repeatedPreviousRequirement": null,
+          "repeatedArmorerLevel": 5,
+          "countedAsAdditionalTransition": false
+        },
+        "nominalTotalUpgradeMoney": 41475,
+        "totalExcludesInitialPurchase": true,
+        "namesByObservedMaterial": [
+          "Кожаная куртка",
+          "Кольчуга",
+          "Железный нагрудник",
+          "Алмазный нагрудник"
+        ],
+        "highestShownLevel": 15,
+        "absoluteMaximumLevel": null
+      },
+      "leggings": {
+        "transitions": [
+          {
+            "fromLevel": 1,
+            "toLevel": 2,
+            "evidence": [
+              "coverage_35"
+            ],
+            "moneyCost": 25,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "3",
+              "exactValue": 3,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные штаны",
+            "displayedLeftLevel": 1,
+            "displayedRightName": "Кожаные штаны",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 2,
+            "toLevel": 3,
+            "evidence": [
+              "coverage_36"
+            ],
+            "moneyCost": 37,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "7",
+              "exactValue": 7,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные штаны",
+            "displayedLeftLevel": 2,
+            "displayedRightName": "Кожаные штаны",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 3,
+            "toLevel": 4,
+            "evidence": [
+              "coverage_37"
+            ],
+            "moneyCost": 75,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "15",
+              "exactValue": 15,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные штаны",
+            "displayedLeftLevel": 3,
+            "displayedRightName": "Кожаные штаны",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 4,
+            "toLevel": 5,
+            "evidence": [
+              "coverage_38"
+            ],
+            "moneyCost": 150,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "27",
+              "exactValue": 27,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные поножи",
+            "displayedLeftLevel": 4,
+            "displayedRightName": "Кожаные штаны",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 5,
+            "toLevel": 6,
+            "evidence": [
+              "coverage_39"
+            ],
+            "moneyCost": 300,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "45",
+              "exactValue": 45,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные поножи",
+            "displayedLeftLevel": 5,
+            "displayedRightName": "Кольчужные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 6,
+            "toLevel": 7,
+            "evidence": [
+              "coverage_40"
+            ],
+            "moneyCost": 450,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "75",
+              "exactValue": 75,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные поножи",
+            "displayedLeftLevel": 6,
+            "displayedRightName": "Кольчужные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 7,
+            "toLevel": 8,
+            "evidence": [
+              "coverage_41"
+            ],
+            "moneyCost": 830,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "160",
+              "exactValue": 160,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные поножи",
+            "displayedLeftLevel": 7,
+            "displayedRightName": "Кольчужные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 8,
+            "toLevel": 9,
+            "evidence": [
+              "coverage_42"
+            ],
+            "moneyCost": 1880,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "405",
+              "exactValue": 405,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные поножи",
+            "displayedLeftLevel": 8,
+            "displayedRightName": "Кольчужные поножи",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 9,
+            "toLevel": 10,
+            "evidence": [
+              "coverage_43"
+            ],
+            "moneyCost": 3000,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "720",
+              "exactValue": 720,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные поножи",
+            "displayedLeftLevel": 9,
+            "displayedRightName": "Железные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 10,
+            "toLevel": 11,
+            "evidence": [
+              "coverage_44"
+            ],
+            "moneyCost": 3100,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.42K",
+              "exactValue": null,
+              "approximateValue": 1420
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные поножи",
+            "displayedLeftLevel": 10,
+            "displayedRightName": "Железные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 11,
+            "toLevel": 12,
+            "evidence": [
+              "coverage_45"
+            ],
+            "moneyCost": 4500,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "2.55K",
+              "exactValue": null,
+              "approximateValue": 2550
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные поножи",
+            "displayedLeftLevel": 11,
+            "displayedRightName": "Железные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 12,
+            "toLevel": 13,
+            "evidence": [
+              "coverage_46"
+            ],
+            "moneyCost": 5250,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "3.8K",
+              "exactValue": null,
+              "approximateValue": 3800
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазные поножи",
+            "displayedLeftLevel": 12,
+            "displayedRightName": "Железные поножи",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 13,
+            "toLevel": 14,
+            "evidence": [
+              "coverage_47"
+            ],
+            "moneyCost": 6000,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 3,
+            "displayedLeftName": "Алмазные поножи",
+            "displayedLeftLevel": 13,
+            "displayedRightName": "Алмазные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 14,
+            "toLevel": 15,
+            "evidence": [
+              "coverage_48"
+            ],
+            "moneyCost": 13400,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 5,
+            "displayedLeftName": "Алмазные поножи",
+            "displayedLeftLevel": 14,
+            "displayedRightName": "Алмазные поножи",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          }
+        ],
+        "terminalPreview": {
+          "evidence": [
+            "coverage_49"
+          ],
+          "level": 15,
+          "display": "15 → 15",
+          "repeatedPreviousCost": 13400,
+          "repeatedPreviousRequirement": null,
+          "repeatedArmorerLevel": 5,
+          "countedAsAdditionalTransition": false
+        },
+        "nominalTotalUpgradeMoney": 38997,
+        "totalExcludesInitialPurchase": true,
+        "namesByObservedMaterial": [
+          "Кожаные штаны",
+          "Кольчужные поножи",
+          "Железные поножи",
+          "Алмазные поножи"
+        ],
+        "highestShownLevel": 15,
+        "absoluteMaximumLevel": null
+      },
+      "boots": {
+        "transitions": [
+          {
+            "fromLevel": 1,
+            "toLevel": 2,
+            "evidence": [
+              "coverage_50"
+            ],
+            "moneyCost": 20,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "5",
+              "exactValue": 5,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные ботинки",
+            "displayedLeftLevel": 1,
+            "displayedRightName": "Кожаные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 2,
+            "toLevel": 3,
+            "evidence": [
+              "coverage_51"
+            ],
+            "moneyCost": 34,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "10",
+              "exactValue": 10,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные ботинки",
+            "displayedLeftLevel": 2,
+            "displayedRightName": "Кожаные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 3,
+            "toLevel": 4,
+            "evidence": [
+              "coverage_52"
+            ],
+            "moneyCost": 60,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "20",
+              "exactValue": 20,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кожаные ботинки",
+            "displayedLeftLevel": 3,
+            "displayedRightName": "Кожаные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 4,
+            "toLevel": 5,
+            "evidence": [
+              "coverage_53"
+            ],
+            "moneyCost": 150,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "30",
+              "exactValue": 30,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные ботинки",
+            "displayedLeftLevel": 4,
+            "displayedRightName": "Кожаные ботинки",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 5,
+            "toLevel": 6,
+            "evidence": [
+              "coverage_54"
+            ],
+            "moneyCost": 225,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "45",
+              "exactValue": 45,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные ботинки",
+            "displayedLeftLevel": 5,
+            "displayedRightName": "Кольчужные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 6,
+            "toLevel": 7,
+            "evidence": [
+              "coverage_55"
+            ],
+            "moneyCost": 325,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "80",
+              "exactValue": 80,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные ботинки",
+            "displayedLeftLevel": 6,
+            "displayedRightName": "Кольчужные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 7,
+            "toLevel": 8,
+            "evidence": [
+              "coverage_56"
+            ],
+            "moneyCost": 550,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "160",
+              "exactValue": 160,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Кольчужные ботинки",
+            "displayedLeftLevel": 7,
+            "displayedRightName": "Кольчужные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 8,
+            "toLevel": 9,
+            "evidence": [
+              "coverage_57"
+            ],
+            "moneyCost": 970,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "335",
+              "exactValue": 335,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные ботинки",
+            "displayedLeftLevel": 8,
+            "displayedRightName": "Кольчужные ботинки",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 9,
+            "toLevel": 10,
+            "evidence": [
+              "coverage_58"
+            ],
+            "moneyCost": 1840,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "980",
+              "exactValue": 980,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные ботинки",
+            "displayedLeftLevel": 9,
+            "displayedRightName": "Железные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 10,
+            "toLevel": 11,
+            "evidence": [
+              "coverage_59"
+            ],
+            "moneyCost": 2600,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.35K",
+              "exactValue": null,
+              "approximateValue": 1350
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные ботинки",
+            "displayedLeftLevel": 10,
+            "displayedRightName": "Железные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 11,
+            "toLevel": 12,
+            "evidence": [
+              "coverage_60"
+            ],
+            "moneyCost": 3700,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "1.95K",
+              "exactValue": null,
+              "approximateValue": 1950
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железные ботинки",
+            "displayedLeftLevel": 11,
+            "displayedRightName": "Железные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 12,
+            "toLevel": 13,
+            "evidence": [
+              "coverage_61"
+            ],
+            "moneyCost": 5550,
+            "currencyDisplay": "$",
+            "requiredCounter": "Крысы",
+            "counterThreshold": {
+              "display": "2.85K",
+              "exactValue": null,
+              "approximateValue": 2850
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазные ботинки",
+            "displayedLeftLevel": 12,
+            "displayedRightName": "Железные ботинки",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 13,
+            "toLevel": 14,
+            "evidence": [
+              "coverage_62"
+            ],
+            "moneyCost": 6900,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 3,
+            "displayedLeftName": "Алмазные ботинки",
+            "displayedLeftLevel": 13,
+            "displayedRightName": "Алмазные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 14,
+            "toLevel": 15,
+            "evidence": [
+              "coverage_63"
+            ],
+            "moneyCost": 11900,
+            "currencyDisplay": "$",
+            "requiredCounter": "Оружейник",
+            "counterThreshold": null,
+            "armorerLevel": 5,
+            "displayedLeftName": "Алмазные ботинки",
+            "displayedLeftLevel": 14,
+            "displayedRightName": "Алмазные ботинки",
+            "enchantmentChangeShown": {
+              "displayName": "Защита",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          }
+        ],
+        "terminalPreview": {
+          "evidence": [
+            "coverage_64"
+          ],
+          "level": 15,
+          "display": "15 → 15",
+          "repeatedPreviousCost": 11900,
+          "repeatedPreviousRequirement": null,
+          "repeatedArmorerLevel": 5,
+          "countedAsAdditionalTransition": false
+        },
+        "nominalTotalUpgradeMoney": 34824,
+        "totalExcludesInitialPurchase": true,
+        "namesByObservedMaterial": [
+          "Кожаные ботинки",
+          "Кольчужные ботинки",
+          "Железные ботинки",
+          "Алмазные ботинки"
+        ],
+        "highestShownLevel": 15,
+        "absoluteMaximumLevel": null
+      },
+      "axe": {
+        "transitions": [
+          {
+            "fromLevel": 1,
+            "toLevel": 2,
+            "evidence": [
+              "coverage_65"
+            ],
+            "moneyCost": 2,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "25",
+              "exactValue": 25,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Деревянный топор",
+            "displayedLeftLevel": 1,
+            "displayedRightName": "Деревянный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 2,
+            "toLevel": 3,
+            "evidence": [
+              "coverage_66"
+            ],
+            "moneyCost": 5,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "50",
+              "exactValue": 50,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Деревянный топор",
+            "displayedLeftLevel": 2,
+            "displayedRightName": "Деревянный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 3,
+            "toLevel": 4,
+            "evidence": [
+              "coverage_67"
+            ],
+            "moneyCost": 10,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "100",
+              "exactValue": 100,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Деревянный топор",
+            "displayedLeftLevel": 3,
+            "displayedRightName": "Деревянный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 4,
+            "toLevel": 5,
+            "evidence": [
+              "coverage_68"
+            ],
+            "moneyCost": 20,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "200",
+              "exactValue": 200,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Каменный топор",
+            "displayedLeftLevel": 4,
+            "displayedRightName": "Деревянный топор",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 5,
+            "toLevel": 6,
+            "evidence": [
+              "coverage_69"
+            ],
+            "moneyCost": 40,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "400",
+              "exactValue": 400,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Каменный топор",
+            "displayedLeftLevel": 5,
+            "displayedRightName": "Каменный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 6,
+            "toLevel": 7,
+            "evidence": [
+              "coverage_70"
+            ],
+            "moneyCost": 80,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "800",
+              "exactValue": 800,
+              "approximateValue": null
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Каменный топор",
+            "displayedLeftLevel": 6,
+            "displayedRightName": "Каменный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 7,
+            "toLevel": 8,
+            "evidence": [
+              "coverage_71"
+            ],
+            "moneyCost": 160,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "1.1K",
+              "exactValue": null,
+              "approximateValue": 1100
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Каменный топор",
+            "displayedLeftLevel": 7,
+            "displayedRightName": "Каменный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 8,
+            "toLevel": 9,
+            "evidence": [
+              "coverage_72"
+            ],
+            "moneyCost": 240,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "1.9K",
+              "exactValue": null,
+              "approximateValue": 1900
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный топор",
+            "displayedLeftLevel": 8,
+            "displayedRightName": "Каменный топор",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 9,
+            "toLevel": 10,
+            "evidence": [
+              "coverage_73"
+            ],
+            "moneyCost": 480,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "2.5K",
+              "exactValue": null,
+              "approximateValue": 2500
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный топор",
+            "displayedLeftLevel": 9,
+            "displayedRightName": "Железный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 10,
+            "toLevel": 11,
+            "evidence": [
+              "coverage_74"
+            ],
+            "moneyCost": 1070,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "4.2K",
+              "exactValue": null,
+              "approximateValue": 4200
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный топор",
+            "displayedLeftLevel": 10,
+            "displayedRightName": "Железный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 11,
+            "toLevel": 12,
+            "evidence": [
+              "coverage_75"
+            ],
+            "moneyCost": 2900,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "6.75K",
+              "exactValue": null,
+              "approximateValue": 6750
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Железный топор",
+            "displayedLeftLevel": 11,
+            "displayedRightName": "Железный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 12,
+            "toLevel": 13,
+            "evidence": [
+              "coverage_76"
+            ],
+            "moneyCost": 3750,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "11.2K",
+              "exactValue": null,
+              "approximateValue": 11200
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный топор",
+            "displayedLeftLevel": 12,
+            "displayedRightName": "Железный топор",
+            "enchantmentChangeShown": null,
+            "materialBoundary": true,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 13,
+            "toLevel": 14,
+            "evidence": [
+              "coverage_77"
+            ],
+            "moneyCost": 7500,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "14.2K",
+              "exactValue": null,
+              "approximateValue": 14200
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный топор",
+            "displayedLeftLevel": 13,
+            "displayedRightName": "Алмазный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 0,
+              "after": 1
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 14,
+            "toLevel": 15,
+            "evidence": [
+              "coverage_78"
+            ],
+            "moneyCost": 9000,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "18.8K",
+              "exactValue": null,
+              "approximateValue": 18800
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный топор",
+            "displayedLeftLevel": 14,
+            "displayedRightName": "Алмазный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 1,
+              "after": 2
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          },
+          {
+            "fromLevel": 15,
+            "toLevel": 16,
+            "evidence": [
+              "coverage_79"
+            ],
+            "moneyCost": 13400,
+            "currencyDisplay": "$",
+            "requiredCounter": "Дерево",
+            "counterThreshold": {
+              "display": "22.3K",
+              "exactValue": null,
+              "approximateValue": 22300
+            },
+            "armorerLevel": null,
+            "displayedLeftName": "Алмазный топор",
+            "displayedLeftLevel": 15,
+            "displayedRightName": "Алмазный топор",
+            "enchantmentChangeShown": {
+              "displayName": "Эффективность",
+              "before": 2,
+              "after": 3
+            },
+            "materialBoundary": false,
+            "requirementsSpentOnUpgrade": null,
+            "playerActuallyUpgraded": false
+          }
+        ],
+        "terminalPreview": {
+          "evidence": [
+            "coverage_80"
+          ],
+          "level": 16,
+          "display": "16 → 16",
+          "repeatedPreviousCost": 13400,
+          "repeatedPreviousRequirement": {
+            "display": "22.3K",
+            "exactValue": null,
+            "approximateValue": 22300
+          },
+          "repeatedArmorerLevel": null,
+          "countedAsAdditionalTransition": false
+        },
+        "nominalTotalUpgradeMoney": 38657,
+        "totalExcludesInitialPurchase": true,
+        "namesByObservedMaterial": [
+          "Деревянный топор",
+          "Каменный топор",
+          "Железный топор",
+          "Алмазный топор"
+        ],
+        "highestShownLevel": 16,
+        "absoluteMaximumLevel": null
+      }
+    },
+    "caveats": [
+      "Four armor categories each contain 14 shown transitions 1→15; axe contains 15 transitions 1→16.",
+      "Protection and Efficiency are displayed enchantment levels, not recovered damage reduction/mining speed coefficients.",
+      "At 4→5, 8→9 and 12→13 the left preview already names the next material while the right row retains the old material name; both raw labels are saved.",
+      "The same chestplate 9→10 and 12→13 transitions appear twice; repeats are evidence, not extra purchases.",
+      "Terminal 15→15 and 16→16 screens repeat previous costs/requirements; these values are not additional upgrade stages.",
+      "K is abbreviated UI precision. Resource thresholds are not summed and their spending/reset semantics are unknown.",
+      "The four armor menus show Armorer 3 at 13→14 and 5 at 14→15, replacing the rats row; no hidden rats threshold is invented.",
+      "No numeric defense coefficient, durability, actual purchase or absolute server maximum is established by these previews."
+    ]
+  },
+  "observedBooks": {
+    "recordedDate": "2026-10-20",
+    "sourceType": "Observed ancient-case previews, auction books, NPC exchange menus and separately attributed localization",
+    "sourceManifests": [
+      "book-case-sources.json",
+      "missed-menu-sources.json"
+    ],
+    "sourceIds": [
+      "book_case_1",
+      "book_case_2",
+      "book_case_3",
+      "book_case_4",
+      "book_case_5",
+      "book_case_6",
+      "book_case_7",
+      "book_case_8",
+      "book_case_9",
+      "book_case_10",
+      "book_case_11",
+      "book_case_12",
+      "book_case_13",
+      "book_case_14",
+      "book_case_15",
+      "book_case_16",
+      "book_case_17",
+      "book_case_18",
+      "book_case_19",
+      "book_case_20",
+      "book_case_21",
+      "book_case_22",
+      "book_case_23",
+      "book_case_24",
+      "book_case_25",
+      "book_case_26",
+      "book_case_27",
+      "book_case_28",
+      "book_case_29",
+      "book_case_30",
+      "book_case_31",
+      "book_case_32",
+      "book_case_33",
+      "book_case_34",
+      "coverage_92",
+      "coverage_93",
+      "coverage_94",
+      "coverage_95",
+      "coverage_96",
+      "coverage_97",
+      "coverage_98",
+      "coverage_99",
+      "coverage_100",
+      "coverage_101",
+      "coverage_102",
+      "coverage_103",
+      "coverage_104",
+      "coverage_105",
+      "coverage_106",
+      "coverage_107",
+      "coverage_108",
+      "coverage_109",
+      "coverage_110",
+      "coverage_111",
+      "coverage_112",
+      "coverage_113",
+      "coverage_114",
+      "coverage_115",
+      "coverage_116",
+      "coverage_117",
+      "coverage_118",
+      "coverage_119",
+      "coverage_120",
+      "coverage_121",
+      "coverage_122",
+      "coverage_123",
+      "coverage_124",
+      "coverage_125",
+      "coverage_126"
+    ],
+    "userStatement": "Books are obtained with keys, which can be bought through donations or exchanged for stars at the market.",
+    "caseName": "Древний кейс",
+    "templates": [
+      {
+        "name": "Чистюля",
+        "serverId": null,
+        "localizationId": "neat",
+        "evidence": [
+          "book_case_3"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 2,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "observedDescriptionSummary": "Нужды — туалет, душ и сон — наступают реже.",
+        "localizationDescription": "Ты следишь за собой, поэтому\nнужды (туалет, душ и сон)\nнаступают реже.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.neat.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Барыга",
+        "serverId": null,
+        "localizationId": "baryga",
+        "evidence": [
+          "book_case_4"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Кирка",
+          "Топор",
+          "Лопата",
+          "Ножницы"
+        ],
+        "observedDescriptionSummary": "При добыче есть шанс получить ещё один такой же блок; работает и с автопродажей.",
+        "localizationDescription": "При копании в шахте есть шанс\nполучить ещё один такой же блок.\nРаботает и с автопродажей.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.baryga.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Токсичный",
+        "serverId": null,
+        "localizationId": "toxic",
+        "evidence": [
+          "book_case_5"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч"
+        ],
+        "observedDescriptionSummary": "При нанесении урона есть шанс отравить врага.",
+        "localizationDescription": "При нанесении урона предметом\nс таким зачарованием есть\nшанс отравить врага.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.toxic.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Раскалённый",
+        "serverId": null,
+        "localizationId": "fired",
+        "evidence": [
+          "book_case_6"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Поножи"
+        ],
+        "observedDescriptionSummary": "При получении урона есть шанс поджечь противника.",
+        "localizationDescription": "При получении урона есть\nшанс поджечь противника.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fired.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Мороз",
+        "serverId": null,
+        "localizationId": "frost",
+        "evidence": [
+          "book_case_7",
+          "book_case_8"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При попадании стрелой возможно кратковременно снизить скорость игрока.",
+        "localizationDescription": "При попадании стрелой\nесть возможность снизить скорость\nигрока на короткое время.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.frost.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Пружины",
+        "serverId": null,
+        "localizationId": "springs",
+        "evidence": [
+          "book_case_9"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "Постоянный эффект прыгучести.",
+        "localizationDescription": "Вечный эффект прыгучести.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.springs.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Громовержец",
+        "serverId": null,
+        "localizationId": "thor",
+        "evidence": [
+          "book_case_10"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При нанесении урона есть шанс вызвать молнию на врага.",
+        "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс свергнуть молнию на врага.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.thor.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Боксёр",
+        "serverId": null,
+        "localizationId": "boxer",
+        "evidence": [
+          "book_case_11"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При нанесении урона есть шанс нанести дополнительный значительный урон и подкинуть противника.",
+        "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс нанести противнику значительный\nурон и подкинуть его.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.boxer.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Замешательство",
+        "serverId": null,
+        "localizationId": "confusion",
+        "evidence": [
+          "book_case_12"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При нанесении урона есть шанс наложить тошноту.",
+        "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс наложить на противника тошноту.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.confusion.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Пожар",
+        "serverId": null,
+        "localizationId": "fire",
+        "evidence": [
+          "book_case_13"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При попадании стрелой есть шанс создать огненный взрыв под игроком.",
+        "localizationDescription": "При попадании стрелой\nспавнит с шансом огненный\nвзрыв под игроком.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fire.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Берсерк",
+        "serverId": null,
+        "localizationId": "berserk",
+        "evidence": [
+          "book_case_14"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч"
+        ],
+        "observedDescriptionSummary": "Если меньше 10 сердец, есть шанс нанести двойной урон.",
+        "localizationDescription": "Если у Вас меньше 10 сердец,\nто есть шанс, что Вы\nнанесёте x2 урон.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.berserk.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "healthBelowHearts": 10,
+          "possibleDamageMultiplier": 2
+        }
+      },
+      {
+        "name": "Бульдозер",
+        "serverId": null,
+        "localizationId": "slowness",
+        "evidence": [
+          "book_case_15"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "При получении урона есть шанс замедлить противника.",
+        "localizationDescription": "При получении урона есть\nшанс замедлить противника.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.slowness.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Укрепление",
+        "serverId": null,
+        "localizationId": "fortification",
+        "evidence": [
+          "book_case_16"
+        ],
+        "rarityDisplay": "обычное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Нагрудник"
+        ],
+        "observedDescriptionSummary": "При получении урона есть шанс наложить слабость на противника.",
+        "localizationDescription": "При получении урона\nесть шанс наложить на противника\nэффект слабости.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fortification.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Иссушение",
+        "serverId": null,
+        "localizationId": "wither",
+        "evidence": [
+          "book_case_17"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Поножи"
+        ],
+        "observedDescriptionSummary": "При получении урона есть шанс наложить иссушение на противника.",
+        "localizationDescription": "При получении урона\nесть шанс наложить на противника\nэффект иссушения.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.wither.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Вихрь",
+        "serverId": null,
+        "localizationId": "vortex",
+        "evidence": [
+          "book_case_18"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Описание обещает дезориентацию волной ударов; число ударов и точная механика не раскрыты.",
+        "localizationDescription": "Вихрь клинков! Дезориентируй\nПротивника огромной волной ударов.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.vortex.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Слепота",
+        "serverId": null,
+        "localizationId": "blindness",
+        "evidence": [
+          "book_case_19"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "При нанесении урона есть шанс наложить слепоту.",
+        "localizationDescription": "Есть шанс наложить на противника\nслепоту, если нанести ему урон\nпредметом с этим зачарованием.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.blindness.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Халк",
+        "serverId": null,
+        "localizationId": "hulk",
+        "evidence": [
+          "book_case_20"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 1,
+        "applicableItems": [
+          "Нагрудник"
+        ],
+        "observedDescriptionSummary": "Постоянные Сопротивление урону I и Замедление I.",
+        "localizationDescription": "Навсегда даётся эффект\nсопротивление урону I и\nзамедление I. Как... танк?...",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.hulk.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "resistanceLevel": 1,
+          "slownessLevel": 1
+        }
+      },
+      {
+        "name": "Танк",
+        "serverId": null,
+        "localizationId": "tank",
+        "evidence": [
+          "book_case_21"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "Даёт постоянные дополнительные сердца.",
+        "localizationDescription": "Даёт постоянные дополнительные\nсердца к Вашему здоровью.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.tank.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Обжора",
+        "serverId": null,
+        "localizationId": "glutton",
+        "evidence": [
+          "book_case_22"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "observedDescriptionSummary": "Восстанавливает голод во время сражений.",
+        "localizationDescription": "Позволяет восстановить голод\nво время сражений.\nБольше не нужно заботиться о еде\nво время боя!",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.glutton.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Ниндзя",
+        "serverId": null,
+        "localizationId": "ninja",
+        "evidence": [
+          "book_case_23"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "При нанесении удара есть шанс получить скорость.",
+        "localizationDescription": "При нанесении удара у Вас есть\nшанс получить скорость. Будьте быстрее\nпротивника!",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.ninja.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Стукач",
+        "serverId": null,
+        "localizationId": "snitch",
+        "evidence": [
+          "book_case_24"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 1,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "observedDescriptionSummary": "Ударивший игрок начинает светиться и виден окружающим несколько секунд.",
+        "localizationDescription": "Тот, кто тебя ударил,\nначинает светиться и виден\nвсем вокруг несколько секунд.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.snitch.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Шныр",
+        "serverId": null,
+        "localizationId": "shnyr",
+        "evidence": [
+          "book_case_25"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 2,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "Есть шанс уклониться от удара другого игрока без получения урона.",
+        "localizationDescription": "Есть шанс увернуться\nот удара другого игрока\nи не получить урон.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.shnyr.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Проклятие",
+        "serverId": null,
+        "localizationId": "curse",
+        "evidence": [
+          "book_case_26"
+        ],
+        "rarityDisplay": "редкое",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Удар может временно запретить восстановление здоровья, включая Вампиризм и Просвещённого; после эффекта 5 секунд защиты от повторного проклятия.",
+        "localizationDescription": "При ударе по игроку есть шанс\nпроклясть его: на несколько секунд\nон не может восстанавливать здоровье.\nВампиризм и Просвещённый\nтоже не сработают.\nПосле проклятия игрок 5 секунд\nзащищён от нового.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.curse.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "postEffectReapplyImmunitySeconds": 5,
+          "blocksHealingEffects": [
+            "Вампиризм",
+            "Просвещённый"
+          ],
+          "effectDurationSeconds": null
+        }
+      },
+      {
+        "name": "Ярость",
+        "serverId": null,
+        "localizationId": "rage",
+        "evidence": [
+          "book_case_27"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Каждый удар по противнику увеличивает последующий урон по нему.",
+        "localizationDescription": "С каждым ударом по противнику\nтвой урон по нему возрастает.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.rage.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Археолог",
+        "serverId": null,
+        "localizationId": "archeologist",
+        "evidence": [
+          "book_case_28"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Кирка",
+          "Топор",
+          "Лопата",
+          "Ножницы"
+        ],
+        "observedDescriptionSummary": "При добыче есть шанс получить ускоренное копание.",
+        "localizationDescription": "При копании есть шанс получить\nэффект ускоренного копания.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.archeologist.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Просвещённый",
+        "serverId": null,
+        "localizationId": "sacred",
+        "evidence": [
+          "book_case_29"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "observedDescriptionSummary": "При получении урона есть шанс восстановить здоровье.",
+        "localizationDescription": "При получении урона есть\nшанс восстановить определённое\nколичество здоровья.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.sacred.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Пластолом",
+        "serverId": null,
+        "localizationId": "plastolom",
+        "evidence": [
+          "book_case_30"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Кирка"
+        ],
+        "observedDescriptionSummary": "Может убрать весь слой шахты под игроком; в статистику идёт половина блоков слоя, до 200 штук.",
+        "localizationDescription": "С небольшим шансом при копании\nсносит весь слой шахты,\nна котором ты стоишь.\nВ статистику идёт половина\nблоков слоя, до 200 штук.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.plastolom.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "statisticsLayerFraction": 0.5,
+          "statisticsMaxBlocks": 200,
+          "layerDimensions": null,
+          "procChance": null
+        }
+      },
+      {
+        "name": "Молот",
+        "serverId": null,
+        "localizationId": "hammer",
+        "evidence": [
+          "book_case_31"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Кирка",
+          "Топор",
+          "Лопата",
+          "Ножницы"
+        ],
+        "observedDescriptionSummary": "При добыче может вскопать случайные блоки в некотором радиусе.",
+        "localizationDescription": "При копании есть шанс вскопать\nслучайные блоки в определённом\nрадиусе.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.hammer.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      },
+      {
+        "name": "Старатель",
+        "serverId": null,
+        "localizationId": "prospector",
+        "evidence": [
+          "book_case_32"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Увеличивает звёзды с босса в зависимости от доли урона, нанесённого этим оружием.",
+        "localizationDescription": "Увеличивает количество звёзд\nс босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.prospector.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "observedThresholdText": "Меньше 35урона: бонуса нет.",
+          "localizationThresholdText": "Меньше 35% урона: бонуса нет.",
+          "damageShareThresholdPercentInLocalization": 35,
+          "thresholdInterpretation": "Screenshot loses the percent glyph; 35% is stated by the matching client localization, not a measured server threshold.",
+          "countedDamageSource": "this enchanted weapon",
+          "bonusFormula": null
+        }
+      },
+      {
+        "name": "Общак",
+        "serverId": null,
+        "localizationId": "obshak",
+        "evidence": [
+          "book_case_33"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Увеличивает долю денег из банка босса в зависимости от доли урона, нанесённого этим оружием.",
+        "localizationDescription": "Увеличивает твою долю денег\nиз банка босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.obshak.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null,
+        "numericTooltipRules": {
+          "observedThresholdText": "Меньше 35урона: бонуса нет.",
+          "localizationThresholdText": "Меньше 35% урона: бонуса нет.",
+          "damageShareThresholdPercentInLocalization": 35,
+          "thresholdInterpretation": "Screenshot loses the percent glyph; 35% is stated by the matching client localization, not a measured server threshold.",
+          "countedDamageSource": "this enchanted weapon",
+          "bonusFormula": null
+        }
+      },
+      {
+        "name": "Вампиризм",
+        "serverId": null,
+        "localizationId": "vampirism",
+        "evidence": [
+          "book_case_34"
+        ],
+        "rarityDisplay": "легендарное",
+        "displayedLevelMin": 1,
+        "displayedLevelMax": 3,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "observedDescriptionSummary": "Лечит при нанесении урона; величина зависит от урона и уровня зачарования.",
+        "localizationDescription": "При нанесении противнику урона\nпредметом с этим зачарованием ты\nрегенерируешь некоторое количество здоровья,\nзависящее от нанесённого урона и уровня\nэтого Древнего Зачарования.",
+        "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.vampirism.lore",
+        "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+        "improvedKeyGivesMaximumLevel": true,
+        "templateApplicationChance": null,
+        "caseDropProbability": null,
+        "procProbabilityByLevel": null,
+        "effectMagnitudeByLevel": null,
+        "durationByLevelSeconds": null
+      }
+    ],
+    "auctionBookObservations": [
+      {
+        "observationId": "coverage_92",
+        "evidence": [
+          "coverage_92"
+        ],
+        "name": "Берсерк",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 17,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч"
+        ],
+        "askingPrice": 6000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_93",
+        "evidence": [
+          "coverage_93"
+        ],
+        "name": "Громовержец",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 20,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 7000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_94",
+        "evidence": [
+          "coverage_94"
+        ],
+        "name": "Громовержец",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 56,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 7777,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_95",
+        "evidence": [
+          "coverage_95"
+        ],
+        "name": "Чистюля",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 31,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "askingPrice": 3000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_96",
+        "evidence": [
+          "coverage_96"
+        ],
+        "name": "Пожар",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 69,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Лук"
+        ],
+        "askingPrice": 10000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_97",
+        "evidence": [
+          "coverage_97"
+        ],
+        "name": "Боксёр",
+        "enchantmentLevel": 1,
+        "applicationSuccessPercent": 38,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 5000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_98",
+        "evidence": [
+          "coverage_98"
+        ],
+        "name": "Берсерк",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 31,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч"
+        ],
+        "askingPrice": 20000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_99",
+        "evidence": [
+          "coverage_99"
+        ],
+        "name": "Замешательство",
+        "enchantmentLevel": 1,
+        "applicationSuccessPercent": 23,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 5000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_100",
+        "evidence": [
+          "coverage_100"
+        ],
+        "name": "Танк",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 21,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "askingPrice": 40000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_101",
+        "evidence": [
+          "coverage_101"
+        ],
+        "name": "Шныр",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 43,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "askingPrice": 10000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_102",
+        "evidence": [
+          "coverage_102"
+        ],
+        "name": "Укрепление",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 74,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Нагрудник"
+        ],
+        "askingPrice": 14500,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_103",
+        "evidence": [
+          "coverage_103"
+        ],
+        "name": "Иссушение",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 11,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Поножи"
+        ],
+        "askingPrice": 15000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_104",
+        "evidence": [
+          "coverage_104"
+        ],
+        "name": "Громовержец",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 62,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 17000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_105",
+        "evidence": [
+          "coverage_105"
+        ],
+        "name": "Громовержец",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 62,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 17000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": "coverage_104"
+      },
+      {
+        "observationId": "coverage_106",
+        "evidence": [
+          "coverage_106"
+        ],
+        "name": "Проклятие",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 76,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 80000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_107",
+        "evidence": [
+          "coverage_107"
+        ],
+        "name": "Укрепление",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 3,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Нагрудник"
+        ],
+        "askingPrice": 22500,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_108",
+        "evidence": [
+          "coverage_108"
+        ],
+        "name": "Берсерк",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 99,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч"
+        ],
+        "askingPrice": 50000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_109",
+        "evidence": [
+          "coverage_109"
+        ],
+        "name": "Укрепление",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 64,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Нагрудник"
+        ],
+        "askingPrice": 65000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_110",
+        "evidence": [
+          "coverage_110"
+        ],
+        "name": "Танк",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 41,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "askingPrice": 40000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_111",
+        "evidence": [
+          "coverage_111"
+        ],
+        "name": "Общак",
+        "enchantmentLevel": 1,
+        "applicationSuccessPercent": 50,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 10000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_112",
+        "evidence": [
+          "coverage_112"
+        ],
+        "name": "Бульдозер",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 36,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Ботинки"
+        ],
+        "askingPrice": 35000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_113",
+        "evidence": [
+          "coverage_113"
+        ],
+        "name": "Пластолом",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 100,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Кирка"
+        ],
+        "askingPrice": 80000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_114",
+        "evidence": [
+          "coverage_114"
+        ],
+        "name": "Пожар",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 30,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Лук"
+        ],
+        "askingPrice": 15000,
+        "askingCurrency": "игровые деньги",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_115",
+        "evidence": [
+          "coverage_115"
+        ],
+        "name": "Археолог",
+        "enchantmentLevel": 1,
+        "applicationSuccessPercent": 89,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Кирка",
+          "Топор",
+          "Лопата",
+          "Ножницы"
+        ],
+        "askingPrice": 150,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_116",
+        "evidence": [
+          "coverage_116"
+        ],
+        "name": "Обжора",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 95,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "askingPrice": 200,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_117",
+        "evidence": [
+          "coverage_117"
+        ],
+        "name": "Просвещённый",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 47,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "askingPrice": 1500,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_118",
+        "evidence": [
+          "coverage_118"
+        ],
+        "name": "Пластолом",
+        "enchantmentLevel": 2,
+        "applicationSuccessPercent": 28,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Кирка"
+        ],
+        "askingPrice": 199,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_119",
+        "evidence": [
+          "coverage_119"
+        ],
+        "name": "Пластолом",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 1,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Кирка"
+        ],
+        "askingPrice": 499,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_120",
+        "evidence": [
+          "coverage_120"
+        ],
+        "name": "Просвещённый",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 54,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "askingPrice": 1800,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_121",
+        "evidence": [
+          "coverage_121"
+        ],
+        "name": "Ярость",
+        "enchantmentLevel": 1,
+        "applicationSuccessPercent": 65,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 200,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_122",
+        "evidence": [
+          "coverage_122"
+        ],
+        "name": "Проклятие",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 69,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 699,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_123",
+        "evidence": [
+          "coverage_123"
+        ],
+        "name": "Обжора",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 80,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем"
+        ],
+        "askingPrice": 300,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_124",
+        "evidence": [
+          "coverage_124"
+        ],
+        "name": "Проклятие",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 60,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Меч",
+          "Лук"
+        ],
+        "askingPrice": 700,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_125",
+        "evidence": [
+          "coverage_125"
+        ],
+        "name": "Археолог",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 49,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Кирка",
+          "Топор",
+          "Лопата",
+          "Ножницы"
+        ],
+        "askingPrice": 2500,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      },
+      {
+        "observationId": "coverage_126",
+        "evidence": [
+          "coverage_126"
+        ],
+        "name": "Просвещённый",
+        "enchantmentLevel": 3,
+        "applicationSuccessPercent": 24,
+        "applicationChanceLabel": "Шанс зачарования предмета",
+        "procChance": null,
+        "applicableItems": [
+          "Шлем",
+          "Нагрудник",
+          "Поножи",
+          "Ботинки"
+        ],
+        "askingPrice": 2500,
+        "askingCurrency": "рубины",
+        "priceSource": "player auction asking price; not NPC price or completed sale",
+        "repeatOfObservation": null
+      }
+    ],
+    "localizationOnlyNotObserved": [
+      {
+        "name": "Экономия",
+        "localizationId": "saving"
+      },
+      {
+        "name": "Торнадо",
+        "localizationId": "tornado"
+      },
+      {
+        "name": "Гнев",
+        "localizationId": "lifestiller"
+      },
+      {
+        "name": "Муляр",
+        "localizationId": "mason"
+      },
+      {
+        "name": "Землекоп",
+        "localizationId": "digger"
+      },
+      {
+        "name": "Дровосек",
+        "localizationId": "lumberjack"
+      },
+      {
+        "name": "Охотник",
+        "localizationId": "hunter"
+      }
+    ],
+    "clientTextRules": [
+      {
+        "key": "prison.classic.ancient_enchantment.not_applied",
+        "text": "При попытке наложить Древнее Зачарование %a на предмет %a книга порвалась... Зачарование не наложилось",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 558,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.ancient_enchantment.too_many_enchantments",
+        "text": "Вы не можете наложить на этот предмет более %d-х Древних зачарований!",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 556,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.ancient_enchantment.already_casted",
+        "text": "Это Древнее Зачарование уже имеется на этом предмете!",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 557,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.donate.list.powder.description",
+        "text": "Используйте Древний порошок для повышения шанса у Древних зачарований\n\nЭффективность Древнего порошка — 10%\n\nКаждый процент эффективности Древнего порошка равен дополнительному проценту к шансу успешного наложения Древнего зачарования\n\nНажмите Древним порошком по Древнему зачарованию для применения",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 1134,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.ancient_enchantment.powder.already_max_chance",
+        "text": "На этой книге уже максимальный шанс наложения!",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 664,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.gang.upgrades.blacksmith_description",
+        "text": "Открыв Кузницу, Ваша банда сможет \nскрещивать книги одного типа для \nпрокачки уровня",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 797,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.gang.blacksmith.choice_similar_books",
+        "text": "Выберите две книги одного типа",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 832,
+        "status": "client text; actual server action not observed"
+      },
+      {
+        "key": "prison.classic.gang.blacksmith.chance",
+        "text": "Шанс: %d%",
+        "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+        "sourceLine": 833,
+        "status": "client text; actual server action not observed"
+      }
+    ],
+    "keyAcquisition": {
+      "starExchange": [
+        {
+          "name": "Древний ключ",
+          "costStars": 10,
+          "evidence": [
+            "npc_image_6",
+            "npc_image_9"
+          ],
+          "description": "Данный ключ используется для открытия Древнего кейса на Спавне",
+          "booksReturned": null
+        },
+        {
+          "name": "Улучшенный древний ключ",
+          "costStars": 60,
+          "evidence": [
+            "npc_image_7",
+            "npc_image_9"
+          ],
+          "description": "Данный ключ используется для открытия Древнего кейса на Спавне",
+          "booksReturned": null
+        },
+        {
+          "name": "Развеиватель",
+          "costStars": 15,
+          "evidence": [
+            "npc_image_8",
+            "npc_image_9"
+          ],
+          "description": "Используйте, чтобы свеять Древние Зачарования с предмета. При использовании книга, с помощью которой было наложено это зачарование — возвращена не будет.",
+          "booksReturned": false
+        }
+      ],
+      "donateStore": [
+        {
+          "name": "Древний ключ",
+          "displayedPrice": 149
+        },
+        {
+          "name": "Улучшенный древний ключ",
+          "displayedPrice": 349
+        },
+        {
+          "name": "Древний порошок",
+          "displayedPrice": 17
+        },
+        {
+          "name": "Развеиватель",
+          "displayedPrice": 199
+        }
+      ],
+      "donateCurrency": "blue store-currency icon; debit currency and real-money exchange rate untested",
+      "donateEvidence": [
+        "book_case_2"
+      ],
+      "starsFromBosses": "boss-menu-recovery.json",
+      "starsAlsoFromOrdinaryCase": {
+        "evidence": [
+          "coverage_89",
+          "coverage_129"
+        ],
+        "status": "item tooltip statement"
+      }
+    },
+    "application": {
+      "displayedAction": "Нажать книгой по желаемому предмету",
+      "explicitCompatibleItemLists": true,
+      "bookLevelAndSuccessChanceSeparate": true,
+      "powder": {
+        "evidence": [
+          "coverage_91"
+        ],
+        "observedEffectivenessPercent": 2,
+        "description": "Очищает книгу от пыли, увеличивая её шанс наложения.",
+        "increaseFormula": null,
+        "increaseRuleInClientText": "Each efficiency percentage point adds one application success percentage point",
+        "capPercent": null,
+        "applicationActionObserved": false
+      },
+      "disenchanter": {
+        "costStars": 15,
+        "booksReturned": false,
+        "evidence": [
+          "npc_image_8",
+          "npc_image_9"
+        ]
+      },
+      "failureConsequences": null,
+      "duplicateEnchantBehavior": null,
+      "enchantSlotLimit": null,
+      "minimumItemLevel": null,
+      "bookCombinationRule": null
+    },
+    "caveats": [
+      "31 distinct template names are observed; no claim that these exhaust all seasons or every possible case reward.",
+      "The 38-name localization inventory is wider; seven entries remain localization-only in these screenshots.",
+      "Case rarity is an explicit label, not a recovered drop probability.",
+      "Roman book level, per-instance application success, and effect activation chance are three separate parameters.",
+      "Improved ancient keys guarantee maximum displayed book level according to the tooltip, not 100% application or a selected rarity.",
+      "No case was successfully opened in this series; the first image reports no key.",
+      "35 auction book observations include one revisited lot; asking prices are not fixed balance values or proof of sales.",
+      "Screenshot 7 and 8 in the new case batch are byte-identical.",
+      "Boss-bonus threshold percent is disambiguated using client localization; screenshot itself renders 35урона."
+    ]
+  },
+  "observedAuctionAndScenes": {
+    "recordedDate": "2026-10-20",
+    "sourceManifests": [
+      "missed-menu-sources.json"
+    ],
+    "sourceIds": [
+      "coverage_81",
+      "coverage_82",
+      "coverage_83",
+      "coverage_84",
+      "coverage_85",
+      "coverage_86",
+      "coverage_87",
+      "coverage_88",
+      "coverage_89",
+      "coverage_90",
+      "coverage_91",
+      "coverage_127",
+      "coverage_128",
+      "coverage_129",
+      "coverage_130"
+    ],
+    "auctionOverview": {
+      "evidence": [
+        "coverage_85"
+      ],
+      "tabs": [
+        "Аукцион",
+        "Личные товары"
+      ],
+      "currencies": [
+        "Деньги",
+        "Рубины"
+      ],
+      "filters": [
+        "Тип",
+        "Цена от/до",
+        "Уровень от/до"
+      ],
+      "sorting": [
+        "По уровню",
+        "По времени",
+        "По стоимости"
+      ],
+      "search": true,
+      "pagination": true,
+      "sellButton": true
+    },
+    "otherAuctionOffers": [
+      {
+        "evidence": [
+          "coverage_86",
+          "coverage_127"
+        ],
+        "name": "Редкая деревянная кирка",
+        "level": 1,
+        "shownEnchantments": [
+          "Шёлковое касание I"
+        ],
+        "askingPrice": 350,
+        "askingCurrency": "игровые деньги",
+        "note": "Same seller/item revisited through the Tools filter; unique lot identity not exposed."
+      },
+      {
+        "evidence": [
+          "coverage_87"
+        ],
+        "name": "Пропуск в подвал",
+        "askingPrice": 100,
+        "askingCurrency": "игровые деньги",
+        "effect": "Активация даёт доступ в Подвал; продолжительность на подсказке не указана."
+      },
+      {
+        "evidence": [
+          "coverage_88"
+        ],
+        "name": "Ключ от Обычного кейса",
+        "askingPrice": 90,
+        "askingCurrency": "игровые деньги",
+        "effect": "Открывает Обычный кейс на Спавне."
+      },
+      {
+        "evidence": [
+          "coverage_89"
+        ],
+        "name": "Древняя звезда",
+        "askingPrice": 1459,
+        "askingCurrency": "игровые деньги",
+        "effect": "Возможна с босса или Обычного кейса; обменивается на ключи у Обменника звёзд на Рынке."
+      },
+      {
+        "evidence": [
+          "coverage_90"
+        ],
+        "name": "Гнилая плоть",
+        "askingPrice": 1000,
+        "askingCurrency": "игровые деньги"
+      },
+      {
+        "evidence": [
+          "coverage_91"
+        ],
+        "name": "Древний порошок",
+        "effectivenessPercent": 2,
+        "askingPrice": 999,
+        "askingCurrency": "игровые деньги"
+      },
+      {
+        "evidence": [
+          "coverage_128"
+        ],
+        "name": "Питьевое зелье",
+        "effectDisplay": "Регенерация (0:34)",
+        "attributeDisplay": "При применении: +3 Урон",
+        "playerCraftedLabelVisible": true,
+        "askingPrice": 200,
+        "askingCurrency": "игровые деньги",
+        "recipe": null,
+        "note": "Unexpected +3 damage is preserved literally, not silently corrected or promoted to a verified effect."
+      },
+      {
+        "evidence": [
+          "coverage_129"
+        ],
+        "name": "Древняя звезда",
+        "askingPrice": 3670,
+        "askingCurrency": "игровые деньги"
+      },
+      {
+        "evidence": [
+          "coverage_130"
+        ],
+        "name": "Туалетная бумага",
+        "askingPrice": 3000,
+        "askingCurrency": "игровые деньги",
+        "effect": "Позволяет удовлетворить туалетную нужду вне туалета."
+      }
+    ],
+    "faction": {
+      "evidence": [
+        "coverage_83",
+        "coverage_84"
+      ],
+      "displayedPlayerFaction": "Славяне",
+      "observedPointTypes": [
+        "Деньги",
+        "Блоки",
+        "Мобы",
+        "Спешка"
+      ],
+      "observedPointOwners": {
+        "Деньги": "Афро",
+        "Блоки": "Афро",
+        "Мобы": "Латиносы",
+        "Спешка": "Афро"
+      },
+      "menuCapturedPointsDisplay": "0/4",
+      "leaveConfirmationCost": 2500,
+      "currency": "игровые деньги",
+      "costMeaning": "leave faction confirmation, not proven cost to join/switch",
+      "numericBonuses": null,
+      "leavePerformed": false
+    },
+    "mining": {
+      "evidence": [
+        "coverage_81",
+        "coverage_82"
+      ],
+      "moneyPopupDisplay": "+0.012 $",
+      "comboMultiplierDisplay": "x1",
+      "comboCounterDisplays": [
+        "22/1000",
+        "27/1000"
+      ],
+      "counterMeaning": "displayed combo progress, not tool durability",
+      "baseBlockSalePrice": null,
+      "note": "Still frames show mining feedback; exact block-to-payment pairing, bonuses and combo formula were not established."
+    }
+  },
   "screenshotCoverage": {
-    "supplied": 127,
-    "uniqueOriginals": 126
+    "supplied": 289,
+    "uniqueOriginals": 287
   },
   "publishedCareerAccess": {
     "date": "2026-05-08",
@@ -8165,7 +12144,8 @@
   ],
   "unknowns": [
     "Exact unlock levels of 3 already accessible mines; block IDs, weights, prices, reset intervals and dimensions",
-    "Armor and other item tables; absolute maximums; previews recovered for pickaxe/shovel through 16 and sword through 15",
+    "Other item tables and absolute maximums; observed armor/sword through 15 and pickaxe/shovel/axe through 16",
+    "Book drop probabilities, per-level proc stats and verified application/combination behavior",
     "Boss combat stats, reward probabilities/distribution and full respawn intervals",
     "Current server probabilities and content activation",
     "Faction-specific numeric bonuses"

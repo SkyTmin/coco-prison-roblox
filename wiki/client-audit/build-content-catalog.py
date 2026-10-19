@@ -19,8 +19,17 @@ observed_composition=json.loads((OUT/'prison-plus-mine-content.json').read_text(
 observed_bosses=json.loads((OUT/'boss-menu-recovery.json').read_text(encoding='utf-8'))
 observed_store_map=json.loads((OUT/'store-map-recovery.json').read_text(encoding='utf-8'))
 late_sources=json.loads((OUT/'late-menu-sources.json').read_text(encoding='utf-8'))
+observed_armor_axe=json.loads((OUT/'armor-and-axe-recovery.json').read_text(encoding='utf-8'))
+observed_books=json.loads((OUT/'books-system-recovery.json').read_text(encoding='utf-8'))
+observed_auction_scenes=json.loads((OUT/'auction-and-scenes-recovery.json').read_text(encoding='utf-8'))
+missed_sources=json.loads((OUT/'missed-menu-sources.json').read_text(encoding='utf-8'))
+book_sources=json.loads((OUT/'book-case-sources.json').read_text(encoding='utf-8'))
 all_screenshot_sources=(observed_mines['sources']+observed_pickaxe['sources']+
-    observed_other_items['sources']+observed_npcs['sources']+late_sources['sources'])
+    observed_other_items['sources']+observed_npcs['sources']+late_sources['sources']+
+    missed_sources['sources']+book_sources['sources'])
+total_item_transitions=(len(observed_pickaxe['transitions'])+
+    len(observed_other_items['sword']['transitions'])+len(observed_other_items['shovel']['transitions'])+
+    sum(len(g['transitions']) for g in observed_armor_axe['items'].values()))
 rows={r['key']:r for r in classic['records']+other['records']}
 proof=[]
 def value(key):return rows[key]['text']
@@ -135,12 +144,14 @@ ev('KARATEL','Текст Карателя не раскрывает ясного
 conflicts=[dict(id='gang_mine_duration',sources=['GANG-MINE-PASS','GANG-MINE-DEALER'],values=[10,30],unit='minutes',resolution=None),
            dict(id='achievement_scope',sources=['unqualified prison.* achievements'],
                 issue='level50 and all-11-bosses texts cannot establish current Classic cap or roster.',resolution=None)]
-data=dict(created='2026-10-19',sourceType='client localization and supplied game menu screenshots; not server source/configuration',
+data=dict(created='2026-10-20',sourceType='client localization and supplied game menu screenshots; not server source/configuration',
           mines=mines,locations=locations,itemCategories=categories,specialItems=special,bosses=bosses,
           observedMineMenu=observed_mines,observedPickaxeUpgrades=observed_pickaxe,
           observedSwordAndShovel=observed_other_items,observedNpcMenus=observed_npcs,
           observedPrisonPlusMineComposition=observed_composition,observedBossMenu=observed_bosses,
           observedStoreAndTeleporter=observed_store_map,
+          observedArmorAndAxe=observed_armor_axe,observedBooks=observed_books,
+          observedAuctionAndScenes=observed_auction_scenes,
           screenshotCoverage=dict(supplied=len(all_screenshot_sources),
               uniqueOriginals=len({s['originalSha256'] for s in all_screenshot_sources})),
           publishedCareerAccess=dict(date='2026-05-08',
@@ -149,7 +160,8 @@ data=dict(created='2026-10-19',sourceType='client localization and supplied game
               status='Dated official announcement; current mine-menu screenshot only confirms entry Карьеры at 16.'),
           itemAchievementMilestones=milestones,conflicts=conflicts,findings=proof,
           unknowns=['Exact unlock levels of 3 already accessible mines; block IDs, weights, prices, reset intervals and dimensions',
-                    'Armor and other item tables; absolute maximums; previews recovered for pickaxe/shovel through 16 and sword through 15',
+                    'Other item tables and absolute maximums; observed armor/sword through 15 and pickaxe/shovel/axe through 16',
+                    'Book drop probabilities, per-level proc stats and verified application/combination behavior',
                     'Boss combat stats, reward probabilities/distribution and full respawn intervals',
                     'Current server probabilities and content activation','Faction-specific numeric bonuses'],
           sources=[dict(path=classic['source'],sha256=classic['sourceSha256'],entries=classic['entries']),
@@ -158,7 +170,9 @@ data=dict(created='2026-10-19',sourceType='client localization and supplied game
 
 mine_table='\n'.join(f"| `{r['id']}` | {r['name']} |" for r in mines)
 location_table='\n'.join(f"| `{r['id']}` | {r['name']} |" for r in locations)
-category_table='\n'.join(f"| `{r['id']}` | {r['name']} | Не восстановлена |" for r in categories)
+observed_ranges={'pickaxe':'1 → 16','shovel':'1 → 16','axe':'1 → 16','sword':'1 → 15',
+    'helmet':'1 → 15','chestplate':'1 → 15','leggings':'1 → 15','boots':'1 → 15'}
+category_table='\n'.join(f"| `{r['id']}` | {r['name']} | {observed_ranges.get(r['id'],'Переходы не получены')} |" for r in categories)
 milestone_table='\n'.join(f"| {r['level']} | {r['title']} | {link(r['sourceKey'],'Текст достижения')} |" for r in milestones)
 boss_table='\n'.join(f"| `{r['id']}` | {r['name']} |" for r in bosses)
 family_table='\n'.join(f'| `{k}` | {v} |' for k,v in classic['families'].items())
@@ -167,9 +181,11 @@ observed_mine_table='\n'.join(
     for r in observed_mines['mineLocations'])
 report=f'''# Prison Classic: шахты, уровни предметов и остальной контент
 
-19 октября 2026 года. Каталог составлен из локализации установленного клиента, ресурспака, датированных публикаций и присланных снимков игрового меню. Факты из снимков выделены отдельно от словаря названий. Серверная конфигурация и реализация расчётов не получены.
+20 октября 2026 года. Каталог составлен из локализации установленного клиента, ресурспака, датированных публикаций и присланных снимков игрового меню. Факты из снимков выделены отдельно от словаря названий. Серверная конфигурация и реализация расчётов не получены.
 
-**По {len(all_screenshot_sources)} присланным снимкам ({len({s['originalSha256'] for s in all_screenshot_sources})} уникальных оригиналов) восстановлены 21 точный порог доступа к шахтам, списки блоков 26 строк / 25 названий, все 17 боссов показанного меню с локациями и возможными наградами, 31 предложение магазина и 9 целей телепортатора.** Ранее прочитаны 44 перехода предметов: кирка 1 → 16, лопата 1 → 16, меч 1 → 15 — с ценами, требованиями и зачарованиями, начальные требования тренера и предложения NPC. Не получены цены/доли блоков, полные интервалы обновления, параметры боёв и таблицы брони. Вариант под-сервера Classic на снимках не установлен.
+**В сводном реестре {len(all_screenshot_sources)} игровых снимков ({len({s['originalSha256'] for s in all_screenshot_sources})} уникальных оригиналов).** Восстановлены 21 точный порог шахт, блоки 26 строк / 25 названий, 17 боссов с локациями и возможными наградами, **{total_item_transitions} переходов предметов**, 31 предложение магазина, 9 целей телепортатора, **31 наблюдаемое древнее зачарование** и 35 кадров конкретных книг на Аукционе.
+
+**Исправление полноты:** прежние 127 кадров были неполным реестром; проверка их хешей не означала, что просмотрены все вложения. Повторный просмотр добавил 128 ранее пропущенных игровых кадров (броня, топор, Аукцион, добыча, фракции) и новую серию 34 кадров Древнего кейса. Переходы теперь покрывают кирку/лопату/топор 1 → 16, меч и четыре части брони 1 → 15. Не получены цены/доли блоков, полные интервалы обновления, параметры боёв и вероятности выпадения книг. Вариант под-сервера Classic на снимках не установлен.
 
 ## 1. Какие шахты и локации найдены
 
@@ -241,9 +257,11 @@ Prison+ содержит интерфейс времени восстановл�
 
 Это не одно и то же, что уровень игрока, уровень профессии или уровень древнего зачарования.
 
-| Категория | Название | Полная таблица уровней/цен |
+| Категория | Название | Показанные переходы с ценами/требованиями |
 | --- | --- | --- |
 {category_table}
+
+Таблица объединяет категории локализации с диапазонами наблюдаемых переходов; абсолютные пределы сервера не установлены. По снимкам восстановлены **{total_item_transitions} переходов**: [кирка](C:/Users/user/Documents/roblox-prison-research/client-audit/PICKAXE-UPGRADES.md), [меч и лопата](C:/Users/user/Documents/roblox-prison-research/client-audit/SWORD-AND-SHOVEL-UPGRADES.md), [четыре части брони и топор](C:/Users/user/Documents/roblox-prison-research/client-audit/ARMOR-AND-AXE-UPGRADES.md). У каждой части брони поздние переходы требуют Оружейника **3 / 5**; цена и крысы различаются между частями. Алмазная броня заканчивает показанную последовательность Защитой **II**, топор — Эффективностью **III**. Конечные повторные экраны не посчитаны дополнительными улучшениями.
 
 «Особые кирки» — подкатегория, не дополнительный тип обычного инструмента. По названиям найдены редкие деревянная, каменная, железная, алмазная кирки и Лунный топор. Наличие четырёх названий редких кирок не устанавливает их характеристики или последовательность получения.
 
@@ -271,6 +289,10 @@ Prison+ содержит интерфейс времени восстановл�
 ### Древние зачарования — ещё один слой
 
 В Classic 38 именованных древних зачарований. Их описания вынесены в { '[предыдущий каталог](C:/Users/user/Documents/roblox-prison-research/client-audit/CLASSIC-CLIENT-FINDINGS.md)' }. Для них описаны уровень книги, шанс наложения, разрушение книги при неудаче, повышение шанса порошком, снятие развеивателем и объединение книг одного типа в кузнице банды.
+
+Новая [полная таблица наблюдений книг](C:/Users/user/Documents/roblox-prison-research/client-audit/BOOKS-SYSTEM.md) содержит **31 название**: 13 обычных, 10 редких, 8 легендарных, уровни и совместимые предметы. На Аукционе прочитано 35 кадров отдельных экземпляров: Берсерк III с шансами наложения 31% и 99%, Пластолом II с 100% и 28%. Уровень, шанс наложения и вероятность срабатывания эффекта разделены.
+
+Ключи доступны за **10 / 60 звёзд** у обменника и по показанным ценам магазина **149 / 349**. Улучшенный ключ по подсказке гарантирует максимальный уровень книги, но не 100% наложение. Показаны порошок с эффективностью **2%**, снятие без возврата книги, запрет лечения Проклятием, особый учёт блоков Пластолома и бонусы звёзд/денег за урон боссу. [Аукцион, добыча и фракции](C:/Users/user/Documents/roblox-prison-research/client-audit/AUCTION-AND-FACTION-RECOVERY.md) сохранены отдельно; цены игроков не выданы за постоянные цены NPC.
 
 В донатном описании порошка указана эффективность **10%**, причём каждый процент повышает шанс наложения на дополнительный процент. Это описание конкретного порошка; ограничения итогового шанса и все варианты качества порошков не восстановлены. {link('prison.classic.donate.list.powder.description','Источник')}.
 
@@ -356,7 +378,7 @@ Prison+ содержит интерфейс времени восстановл�
 
 Для шахт ещё нужны ID, точные уровни трёх ранних локаций, доли блоков, цены, инструменты, размеры и полные интервалы обновления. У 17 боссов теперь установлены локации и возможные награды, но не HP, урон, AI, вероятности и правила разделения дропа. Для остальных категорий предметов нужны стадии, цены, требования, характеристики и ограничения Оружейника.
 
-Присланные меню уже позволили заполнить 21 порог шахт, списки блоков 25 названий, 17 боссов и 44 перехода предметов. Подробные таблицы: [кирка](C:/Users/user/Documents/roblox-prison-research/client-audit/PICKAXE-UPGRADES.md), [меч и лопата](C:/Users/user/Documents/roblox-prison-research/client-audit/SWORD-AND-SHOVEL-UPGRADES.md), [тренер и NPC](C:/Users/user/Documents/roblox-prison-research/client-audit/NPC-MENU-RECOVERY.md). Остальные значения следует брать из игровых меню, фактических измерений либо опубликованных конфигураций соответствующего сервера. Неизвестные значения в JSON оставлены `null`.
+Присланные меню уже позволили заполнить 21 порог шахт, списки блоков 25 названий, 17 боссов, {total_item_transitions} переходов предметов и 31 тип книги. Остальные значения следует брать из игровых меню, фактических измерений либо опубликованных конфигураций соответствующего сервера. Неизвестные значения в JSON оставлены `null`.
 
 ## Проверяемые материалы
 
@@ -380,8 +402,9 @@ for s in (classic,other):
     assert hashlib.sha256(Path(s['source']).read_bytes()).hexdigest()==s['sourceSha256']
 for s in all_screenshot_sources:
     assert hashlib.sha256(Path(s['evidencePath']).read_bytes()).hexdigest()==s['evidenceSha256']
-assert len(all_screenshot_sources)==127
-assert len({s['originalSha256'] for s in all_screenshot_sources})==126
+assert len(all_screenshot_sources)==289
+assert len({s['originalSha256'] for s in all_screenshot_sources})==287
+assert total_item_transitions==115
 assert len(rows)==2500
 assert sum(1 for k in rows if k.startswith('prison.oldschool.'))==494
 assert len(other['records'])-494==169
@@ -408,7 +431,12 @@ summary=dict(classicEntries=1837,otherPrisonEntries=663,sharedAchievementEntries
     observedBossesWithPossibleRewards=len(observed_bosses['entries']),
     storeOffers=len(observed_store_map['storeOffers']),
     teleporterDestinations=len(observed_store_map['teleporter']['entries']),
+    armorUpgradeTransitions=sum(len(observed_armor_axe['items'][k]['transitions']) for k in ['helmet','chestplate','leggings','boots']),
+    axeUpgradeTransitions=len(observed_armor_axe['items']['axe']['transitions']),
+    allItemUpgradeTransitions=total_item_transitions,
+    observedAncientBookTemplates=len(observed_books['templates']),
+    auctionBookObservationFrames=len(observed_books['auctionBookObservations']),
     completeItemUpgradeTablesRecovered=0,
-    status='Localization inventory plus 127 supplied screenshots; 44 item transitions, 26 mine rows, 17 bosses; not server configuration.')
+    status='Corrected 289-frame inventory; 115 item transitions, 31 book templates, 26 mine rows, 17 bosses; not server configuration.')
 (OUT/'catalog-validation.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(json.dumps(summary,ensure_ascii=False,indent=2))

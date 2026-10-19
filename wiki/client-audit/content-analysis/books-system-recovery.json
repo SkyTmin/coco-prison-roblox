@@ -1,0 +1,1747 @@
+{
+  "recordedDate": "2026-10-20",
+  "sourceType": "Observed ancient-case previews, auction books, NPC exchange menus and separately attributed localization",
+  "sourceManifests": [
+    "book-case-sources.json",
+    "missed-menu-sources.json"
+  ],
+  "sourceIds": [
+    "book_case_1",
+    "book_case_2",
+    "book_case_3",
+    "book_case_4",
+    "book_case_5",
+    "book_case_6",
+    "book_case_7",
+    "book_case_8",
+    "book_case_9",
+    "book_case_10",
+    "book_case_11",
+    "book_case_12",
+    "book_case_13",
+    "book_case_14",
+    "book_case_15",
+    "book_case_16",
+    "book_case_17",
+    "book_case_18",
+    "book_case_19",
+    "book_case_20",
+    "book_case_21",
+    "book_case_22",
+    "book_case_23",
+    "book_case_24",
+    "book_case_25",
+    "book_case_26",
+    "book_case_27",
+    "book_case_28",
+    "book_case_29",
+    "book_case_30",
+    "book_case_31",
+    "book_case_32",
+    "book_case_33",
+    "book_case_34",
+    "coverage_92",
+    "coverage_93",
+    "coverage_94",
+    "coverage_95",
+    "coverage_96",
+    "coverage_97",
+    "coverage_98",
+    "coverage_99",
+    "coverage_100",
+    "coverage_101",
+    "coverage_102",
+    "coverage_103",
+    "coverage_104",
+    "coverage_105",
+    "coverage_106",
+    "coverage_107",
+    "coverage_108",
+    "coverage_109",
+    "coverage_110",
+    "coverage_111",
+    "coverage_112",
+    "coverage_113",
+    "coverage_114",
+    "coverage_115",
+    "coverage_116",
+    "coverage_117",
+    "coverage_118",
+    "coverage_119",
+    "coverage_120",
+    "coverage_121",
+    "coverage_122",
+    "coverage_123",
+    "coverage_124",
+    "coverage_125",
+    "coverage_126"
+  ],
+  "userStatement": "Books are obtained with keys, which can be bought through donations or exchanged for stars at the market.",
+  "caseName": "Древний кейс",
+  "templates": [
+    {
+      "name": "Чистюля",
+      "serverId": null,
+      "localizationId": "neat",
+      "evidence": [
+        "book_case_3"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 2,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "observedDescriptionSummary": "Нужды — туалет, душ и сон — наступают реже.",
+      "localizationDescription": "Ты следишь за собой, поэтому\nнужды (туалет, душ и сон)\nнаступают реже.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.neat.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Барыга",
+      "serverId": null,
+      "localizationId": "baryga",
+      "evidence": [
+        "book_case_4"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Кирка",
+        "Топор",
+        "Лопата",
+        "Ножницы"
+      ],
+      "observedDescriptionSummary": "При добыче есть шанс получить ещё один такой же блок; работает и с автопродажей.",
+      "localizationDescription": "При копании в шахте есть шанс\nполучить ещё один такой же блок.\nРаботает и с автопродажей.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.baryga.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Токсичный",
+      "serverId": null,
+      "localizationId": "toxic",
+      "evidence": [
+        "book_case_5"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч"
+      ],
+      "observedDescriptionSummary": "При нанесении урона есть шанс отравить врага.",
+      "localizationDescription": "При нанесении урона предметом\nс таким зачарованием есть\nшанс отравить врага.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.toxic.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Раскалённый",
+      "serverId": null,
+      "localizationId": "fired",
+      "evidence": [
+        "book_case_6"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Поножи"
+      ],
+      "observedDescriptionSummary": "При получении урона есть шанс поджечь противника.",
+      "localizationDescription": "При получении урона есть\nшанс поджечь противника.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fired.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Мороз",
+      "serverId": null,
+      "localizationId": "frost",
+      "evidence": [
+        "book_case_7",
+        "book_case_8"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При попадании стрелой возможно кратковременно снизить скорость игрока.",
+      "localizationDescription": "При попадании стрелой\nесть возможность снизить скорость\nигрока на короткое время.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.frost.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Пружины",
+      "serverId": null,
+      "localizationId": "springs",
+      "evidence": [
+        "book_case_9"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "Постоянный эффект прыгучести.",
+      "localizationDescription": "Вечный эффект прыгучести.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.springs.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Громовержец",
+      "serverId": null,
+      "localizationId": "thor",
+      "evidence": [
+        "book_case_10"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При нанесении урона есть шанс вызвать молнию на врага.",
+      "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс свергнуть молнию на врага.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.thor.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Боксёр",
+      "serverId": null,
+      "localizationId": "boxer",
+      "evidence": [
+        "book_case_11"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При нанесении урона есть шанс нанести дополнительный значительный урон и подкинуть противника.",
+      "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс нанести противнику значительный\nурон и подкинуть его.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.boxer.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Замешательство",
+      "serverId": null,
+      "localizationId": "confusion",
+      "evidence": [
+        "book_case_12"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При нанесении урона есть шанс наложить тошноту.",
+      "localizationDescription": "При нанесении урона предметом с таким зачарованием\nесть шанс наложить на противника тошноту.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.confusion.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Пожар",
+      "serverId": null,
+      "localizationId": "fire",
+      "evidence": [
+        "book_case_13"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При попадании стрелой есть шанс создать огненный взрыв под игроком.",
+      "localizationDescription": "При попадании стрелой\nспавнит с шансом огненный\nвзрыв под игроком.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fire.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Берсерк",
+      "serverId": null,
+      "localizationId": "berserk",
+      "evidence": [
+        "book_case_14"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч"
+      ],
+      "observedDescriptionSummary": "Если меньше 10 сердец, есть шанс нанести двойной урон.",
+      "localizationDescription": "Если у Вас меньше 10 сердец,\nто есть шанс, что Вы\nнанесёте x2 урон.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.berserk.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "healthBelowHearts": 10,
+        "possibleDamageMultiplier": 2
+      }
+    },
+    {
+      "name": "Бульдозер",
+      "serverId": null,
+      "localizationId": "slowness",
+      "evidence": [
+        "book_case_15"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "При получении урона есть шанс замедлить противника.",
+      "localizationDescription": "При получении урона есть\nшанс замедлить противника.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.slowness.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Укрепление",
+      "serverId": null,
+      "localizationId": "fortification",
+      "evidence": [
+        "book_case_16"
+      ],
+      "rarityDisplay": "обычное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Нагрудник"
+      ],
+      "observedDescriptionSummary": "При получении урона есть шанс наложить слабость на противника.",
+      "localizationDescription": "При получении урона\nесть шанс наложить на противника\nэффект слабости.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.fortification.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Иссушение",
+      "serverId": null,
+      "localizationId": "wither",
+      "evidence": [
+        "book_case_17"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Поножи"
+      ],
+      "observedDescriptionSummary": "При получении урона есть шанс наложить иссушение на противника.",
+      "localizationDescription": "При получении урона\nесть шанс наложить на противника\nэффект иссушения.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.wither.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Вихрь",
+      "serverId": null,
+      "localizationId": "vortex",
+      "evidence": [
+        "book_case_18"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Описание обещает дезориентацию волной ударов; число ударов и точная механика не раскрыты.",
+      "localizationDescription": "Вихрь клинков! Дезориентируй\nПротивника огромной волной ударов.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.vortex.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Слепота",
+      "serverId": null,
+      "localizationId": "blindness",
+      "evidence": [
+        "book_case_19"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "При нанесении урона есть шанс наложить слепоту.",
+      "localizationDescription": "Есть шанс наложить на противника\nслепоту, если нанести ему урон\nпредметом с этим зачарованием.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.blindness.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Халк",
+      "serverId": null,
+      "localizationId": "hulk",
+      "evidence": [
+        "book_case_20"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 1,
+      "applicableItems": [
+        "Нагрудник"
+      ],
+      "observedDescriptionSummary": "Постоянные Сопротивление урону I и Замедление I.",
+      "localizationDescription": "Навсегда даётся эффект\nсопротивление урону I и\nзамедление I. Как... танк?...",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.hulk.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "resistanceLevel": 1,
+        "slownessLevel": 1
+      }
+    },
+    {
+      "name": "Танк",
+      "serverId": null,
+      "localizationId": "tank",
+      "evidence": [
+        "book_case_21"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "Даёт постоянные дополнительные сердца.",
+      "localizationDescription": "Даёт постоянные дополнительные\nсердца к Вашему здоровью.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.tank.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Обжора",
+      "serverId": null,
+      "localizationId": "glutton",
+      "evidence": [
+        "book_case_22"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "observedDescriptionSummary": "Восстанавливает голод во время сражений.",
+      "localizationDescription": "Позволяет восстановить голод\nво время сражений.\nБольше не нужно заботиться о еде\nво время боя!",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.glutton.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Ниндзя",
+      "serverId": null,
+      "localizationId": "ninja",
+      "evidence": [
+        "book_case_23"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "При нанесении удара есть шанс получить скорость.",
+      "localizationDescription": "При нанесении удара у Вас есть\nшанс получить скорость. Будьте быстрее\nпротивника!",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.ninja.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Стукач",
+      "serverId": null,
+      "localizationId": "snitch",
+      "evidence": [
+        "book_case_24"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 1,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "observedDescriptionSummary": "Ударивший игрок начинает светиться и виден окружающим несколько секунд.",
+      "localizationDescription": "Тот, кто тебя ударил,\nначинает светиться и виден\nвсем вокруг несколько секунд.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.snitch.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Шныр",
+      "serverId": null,
+      "localizationId": "shnyr",
+      "evidence": [
+        "book_case_25"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 2,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "Есть шанс уклониться от удара другого игрока без получения урона.",
+      "localizationDescription": "Есть шанс увернуться\nот удара другого игрока\nи не получить урон.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.shnyr.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Проклятие",
+      "serverId": null,
+      "localizationId": "curse",
+      "evidence": [
+        "book_case_26"
+      ],
+      "rarityDisplay": "редкое",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Удар может временно запретить восстановление здоровья, включая Вампиризм и Просвещённого; после эффекта 5 секунд защиты от повторного проклятия.",
+      "localizationDescription": "При ударе по игроку есть шанс\nпроклясть его: на несколько секунд\nон не может восстанавливать здоровье.\nВампиризм и Просвещённый\nтоже не сработают.\nПосле проклятия игрок 5 секунд\nзащищён от нового.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.curse.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "postEffectReapplyImmunitySeconds": 5,
+        "blocksHealingEffects": [
+          "Вампиризм",
+          "Просвещённый"
+        ],
+        "effectDurationSeconds": null
+      }
+    },
+    {
+      "name": "Ярость",
+      "serverId": null,
+      "localizationId": "rage",
+      "evidence": [
+        "book_case_27"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Каждый удар по противнику увеличивает последующий урон по нему.",
+      "localizationDescription": "С каждым ударом по противнику\nтвой урон по нему возрастает.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.rage.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Археолог",
+      "serverId": null,
+      "localizationId": "archeologist",
+      "evidence": [
+        "book_case_28"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Кирка",
+        "Топор",
+        "Лопата",
+        "Ножницы"
+      ],
+      "observedDescriptionSummary": "При добыче есть шанс получить ускоренное копание.",
+      "localizationDescription": "При копании есть шанс получить\nэффект ускоренного копания.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.archeologist.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Просвещённый",
+      "serverId": null,
+      "localizationId": "sacred",
+      "evidence": [
+        "book_case_29"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "observedDescriptionSummary": "При получении урона есть шанс восстановить здоровье.",
+      "localizationDescription": "При получении урона есть\nшанс восстановить определённое\nколичество здоровья.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.sacred.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Пластолом",
+      "serverId": null,
+      "localizationId": "plastolom",
+      "evidence": [
+        "book_case_30"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Кирка"
+      ],
+      "observedDescriptionSummary": "Может убрать весь слой шахты под игроком; в статистику идёт половина блоков слоя, до 200 штук.",
+      "localizationDescription": "С небольшим шансом при копании\nсносит весь слой шахты,\nна котором ты стоишь.\nВ статистику идёт половина\nблоков слоя, до 200 штук.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.plastolom.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "statisticsLayerFraction": 0.5,
+        "statisticsMaxBlocks": 200,
+        "layerDimensions": null,
+        "procChance": null
+      }
+    },
+    {
+      "name": "Молот",
+      "serverId": null,
+      "localizationId": "hammer",
+      "evidence": [
+        "book_case_31"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Кирка",
+        "Топор",
+        "Лопата",
+        "Ножницы"
+      ],
+      "observedDescriptionSummary": "При добыче может вскопать случайные блоки в некотором радиусе.",
+      "localizationDescription": "При копании есть шанс вскопать\nслучайные блоки в определённом\nрадиусе.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.hammer.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    },
+    {
+      "name": "Старатель",
+      "serverId": null,
+      "localizationId": "prospector",
+      "evidence": [
+        "book_case_32"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Увеличивает звёзды с босса в зависимости от доли урона, нанесённого этим оружием.",
+      "localizationDescription": "Увеличивает количество звёзд\nс босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.prospector.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "observedThresholdText": "Меньше 35урона: бонуса нет.",
+        "localizationThresholdText": "Меньше 35% урона: бонуса нет.",
+        "damageShareThresholdPercentInLocalization": 35,
+        "thresholdInterpretation": "Screenshot loses the percent glyph; 35% is stated by the matching client localization, not a measured server threshold.",
+        "countedDamageSource": "this enchanted weapon",
+        "bonusFormula": null
+      }
+    },
+    {
+      "name": "Общак",
+      "serverId": null,
+      "localizationId": "obshak",
+      "evidence": [
+        "book_case_33"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Увеличивает долю денег из банка босса в зависимости от доли урона, нанесённого этим оружием.",
+      "localizationDescription": "Увеличивает твою долю денег\nиз банка босса.\nБонус зависит от того, какую часть\nурона по боссу ты нанёс этим оружием.\nМеньше 35% урона: бонуса нет.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.obshak.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null,
+      "numericTooltipRules": {
+        "observedThresholdText": "Меньше 35урона: бонуса нет.",
+        "localizationThresholdText": "Меньше 35% урона: бонуса нет.",
+        "damageShareThresholdPercentInLocalization": 35,
+        "thresholdInterpretation": "Screenshot loses the percent glyph; 35% is stated by the matching client localization, not a measured server threshold.",
+        "countedDamageSource": "this enchanted weapon",
+        "bonusFormula": null
+      }
+    },
+    {
+      "name": "Вампиризм",
+      "serverId": null,
+      "localizationId": "vampirism",
+      "evidence": [
+        "book_case_34"
+      ],
+      "rarityDisplay": "легендарное",
+      "displayedLevelMin": 1,
+      "displayedLevelMax": 3,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "observedDescriptionSummary": "Лечит при нанесении урона; величина зависит от урона и уровня зачарования.",
+      "localizationDescription": "При нанесении противнику урона\nпредметом с этим зачарованием ты\nрегенерируешь некоторое количество здоровья,\nзависящее от нанесённого урона и уровня\nэтого Древнего Зачарования.",
+      "localizationDescriptionKey": "prison.classic.ancient_enchantment.list.vampirism.lore",
+      "improvedKeyRuleDisplay": "Открыв лутбокс с улучшенным древним ключом — книга выпадет с максимальным уровнем!",
+      "improvedKeyGivesMaximumLevel": true,
+      "templateApplicationChance": null,
+      "caseDropProbability": null,
+      "procProbabilityByLevel": null,
+      "effectMagnitudeByLevel": null,
+      "durationByLevelSeconds": null
+    }
+  ],
+  "auctionBookObservations": [
+    {
+      "observationId": "coverage_92",
+      "evidence": [
+        "coverage_92"
+      ],
+      "name": "Берсерк",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 17,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч"
+      ],
+      "askingPrice": 6000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_93",
+      "evidence": [
+        "coverage_93"
+      ],
+      "name": "Громовержец",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 20,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 7000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_94",
+      "evidence": [
+        "coverage_94"
+      ],
+      "name": "Громовержец",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 56,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 7777,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_95",
+      "evidence": [
+        "coverage_95"
+      ],
+      "name": "Чистюля",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 31,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "askingPrice": 3000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_96",
+      "evidence": [
+        "coverage_96"
+      ],
+      "name": "Пожар",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 69,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Лук"
+      ],
+      "askingPrice": 10000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_97",
+      "evidence": [
+        "coverage_97"
+      ],
+      "name": "Боксёр",
+      "enchantmentLevel": 1,
+      "applicationSuccessPercent": 38,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 5000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_98",
+      "evidence": [
+        "coverage_98"
+      ],
+      "name": "Берсерк",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 31,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч"
+      ],
+      "askingPrice": 20000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_99",
+      "evidence": [
+        "coverage_99"
+      ],
+      "name": "Замешательство",
+      "enchantmentLevel": 1,
+      "applicationSuccessPercent": 23,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 5000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_100",
+      "evidence": [
+        "coverage_100"
+      ],
+      "name": "Танк",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 21,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "askingPrice": 40000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_101",
+      "evidence": [
+        "coverage_101"
+      ],
+      "name": "Шныр",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 43,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "askingPrice": 10000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_102",
+      "evidence": [
+        "coverage_102"
+      ],
+      "name": "Укрепление",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 74,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Нагрудник"
+      ],
+      "askingPrice": 14500,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_103",
+      "evidence": [
+        "coverage_103"
+      ],
+      "name": "Иссушение",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 11,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Поножи"
+      ],
+      "askingPrice": 15000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_104",
+      "evidence": [
+        "coverage_104"
+      ],
+      "name": "Громовержец",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 62,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 17000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_105",
+      "evidence": [
+        "coverage_105"
+      ],
+      "name": "Громовержец",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 62,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 17000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": "coverage_104"
+    },
+    {
+      "observationId": "coverage_106",
+      "evidence": [
+        "coverage_106"
+      ],
+      "name": "Проклятие",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 76,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 80000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_107",
+      "evidence": [
+        "coverage_107"
+      ],
+      "name": "Укрепление",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 3,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Нагрудник"
+      ],
+      "askingPrice": 22500,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_108",
+      "evidence": [
+        "coverage_108"
+      ],
+      "name": "Берсерк",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 99,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч"
+      ],
+      "askingPrice": 50000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_109",
+      "evidence": [
+        "coverage_109"
+      ],
+      "name": "Укрепление",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 64,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Нагрудник"
+      ],
+      "askingPrice": 65000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_110",
+      "evidence": [
+        "coverage_110"
+      ],
+      "name": "Танк",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 41,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "askingPrice": 40000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_111",
+      "evidence": [
+        "coverage_111"
+      ],
+      "name": "Общак",
+      "enchantmentLevel": 1,
+      "applicationSuccessPercent": 50,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 10000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_112",
+      "evidence": [
+        "coverage_112"
+      ],
+      "name": "Бульдозер",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 36,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Ботинки"
+      ],
+      "askingPrice": 35000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_113",
+      "evidence": [
+        "coverage_113"
+      ],
+      "name": "Пластолом",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 100,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Кирка"
+      ],
+      "askingPrice": 80000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_114",
+      "evidence": [
+        "coverage_114"
+      ],
+      "name": "Пожар",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 30,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Лук"
+      ],
+      "askingPrice": 15000,
+      "askingCurrency": "игровые деньги",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_115",
+      "evidence": [
+        "coverage_115"
+      ],
+      "name": "Археолог",
+      "enchantmentLevel": 1,
+      "applicationSuccessPercent": 89,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Кирка",
+        "Топор",
+        "Лопата",
+        "Ножницы"
+      ],
+      "askingPrice": 150,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_116",
+      "evidence": [
+        "coverage_116"
+      ],
+      "name": "Обжора",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 95,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "askingPrice": 200,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_117",
+      "evidence": [
+        "coverage_117"
+      ],
+      "name": "Просвещённый",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 47,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "askingPrice": 1500,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_118",
+      "evidence": [
+        "coverage_118"
+      ],
+      "name": "Пластолом",
+      "enchantmentLevel": 2,
+      "applicationSuccessPercent": 28,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Кирка"
+      ],
+      "askingPrice": 199,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_119",
+      "evidence": [
+        "coverage_119"
+      ],
+      "name": "Пластолом",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 1,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Кирка"
+      ],
+      "askingPrice": 499,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_120",
+      "evidence": [
+        "coverage_120"
+      ],
+      "name": "Просвещённый",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 54,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "askingPrice": 1800,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_121",
+      "evidence": [
+        "coverage_121"
+      ],
+      "name": "Ярость",
+      "enchantmentLevel": 1,
+      "applicationSuccessPercent": 65,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 200,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_122",
+      "evidence": [
+        "coverage_122"
+      ],
+      "name": "Проклятие",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 69,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 699,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_123",
+      "evidence": [
+        "coverage_123"
+      ],
+      "name": "Обжора",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 80,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем"
+      ],
+      "askingPrice": 300,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_124",
+      "evidence": [
+        "coverage_124"
+      ],
+      "name": "Проклятие",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 60,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Меч",
+        "Лук"
+      ],
+      "askingPrice": 700,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_125",
+      "evidence": [
+        "coverage_125"
+      ],
+      "name": "Археолог",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 49,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Кирка",
+        "Топор",
+        "Лопата",
+        "Ножницы"
+      ],
+      "askingPrice": 2500,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    },
+    {
+      "observationId": "coverage_126",
+      "evidence": [
+        "coverage_126"
+      ],
+      "name": "Просвещённый",
+      "enchantmentLevel": 3,
+      "applicationSuccessPercent": 24,
+      "applicationChanceLabel": "Шанс зачарования предмета",
+      "procChance": null,
+      "applicableItems": [
+        "Шлем",
+        "Нагрудник",
+        "Поножи",
+        "Ботинки"
+      ],
+      "askingPrice": 2500,
+      "askingCurrency": "рубины",
+      "priceSource": "player auction asking price; not NPC price or completed sale",
+      "repeatOfObservation": null
+    }
+  ],
+  "localizationOnlyNotObserved": [
+    {
+      "name": "Экономия",
+      "localizationId": "saving"
+    },
+    {
+      "name": "Торнадо",
+      "localizationId": "tornado"
+    },
+    {
+      "name": "Гнев",
+      "localizationId": "lifestiller"
+    },
+    {
+      "name": "Муляр",
+      "localizationId": "mason"
+    },
+    {
+      "name": "Землекоп",
+      "localizationId": "digger"
+    },
+    {
+      "name": "Дровосек",
+      "localizationId": "lumberjack"
+    },
+    {
+      "name": "Охотник",
+      "localizationId": "hunter"
+    }
+  ],
+  "clientTextRules": [
+    {
+      "key": "prison.classic.ancient_enchantment.not_applied",
+      "text": "При попытке наложить Древнее Зачарование %a на предмет %a книга порвалась... Зачарование не наложилось",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 558,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.ancient_enchantment.too_many_enchantments",
+      "text": "Вы не можете наложить на этот предмет более %d-х Древних зачарований!",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 556,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.ancient_enchantment.already_casted",
+      "text": "Это Древнее Зачарование уже имеется на этом предмете!",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 557,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.donate.list.powder.description",
+      "text": "Используйте Древний порошок для повышения шанса у Древних зачарований\n\nЭффективность Древнего порошка — 10%\n\nКаждый процент эффективности Древнего порошка равен дополнительному проценту к шансу успешного наложения Древнего зачарования\n\nНажмите Древним порошком по Древнему зачарованию для применения",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 1134,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.ancient_enchantment.powder.already_max_chance",
+      "text": "На этой книге уже максимальный шанс наложения!",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 664,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.gang.upgrades.blacksmith_description",
+      "text": "Открыв Кузницу, Ваша банда сможет \nскрещивать книги одного типа для \nпрокачки уровня",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 797,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.gang.blacksmith.choice_similar_books",
+      "text": "Выберите две книги одного типа",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 832,
+      "status": "client text; actual server action not observed"
+    },
+    {
+      "key": "prison.classic.gang.blacksmith.chance",
+      "text": "Шанс: %d%",
+      "source": "C:\\Users\\user\\Documents\\roblox-prison-research\\client-audit\\decoded\\ru_RU-classic.json",
+      "sourceLine": 833,
+      "status": "client text; actual server action not observed"
+    }
+  ],
+  "keyAcquisition": {
+    "starExchange": [
+      {
+        "name": "Древний ключ",
+        "costStars": 10,
+        "evidence": [
+          "npc_image_6",
+          "npc_image_9"
+        ],
+        "description": "Данный ключ используется для открытия Древнего кейса на Спавне",
+        "booksReturned": null
+      },
+      {
+        "name": "Улучшенный древний ключ",
+        "costStars": 60,
+        "evidence": [
+          "npc_image_7",
+          "npc_image_9"
+        ],
+        "description": "Данный ключ используется для открытия Древнего кейса на Спавне",
+        "booksReturned": null
+      },
+      {
+        "name": "Развеиватель",
+        "costStars": 15,
+        "evidence": [
+          "npc_image_8",
+          "npc_image_9"
+        ],
+        "description": "Используйте, чтобы свеять Древние Зачарования с предмета. При использовании книга, с помощью которой было наложено это зачарование — возвращена не будет.",
+        "booksReturned": false
+      }
+    ],
+    "donateStore": [
+      {
+        "name": "Древний ключ",
+        "displayedPrice": 149
+      },
+      {
+        "name": "Улучшенный древний ключ",
+        "displayedPrice": 349
+      },
+      {
+        "name": "Древний порошок",
+        "displayedPrice": 17
+      },
+      {
+        "name": "Развеиватель",
+        "displayedPrice": 199
+      }
+    ],
+    "donateCurrency": "blue store-currency icon; debit currency and real-money exchange rate untested",
+    "donateEvidence": [
+      "book_case_2"
+    ],
+    "starsFromBosses": "boss-menu-recovery.json",
+    "starsAlsoFromOrdinaryCase": {
+      "evidence": [
+        "coverage_89",
+        "coverage_129"
+      ],
+      "status": "item tooltip statement"
+    }
+  },
+  "application": {
+    "displayedAction": "Нажать книгой по желаемому предмету",
+    "explicitCompatibleItemLists": true,
+    "bookLevelAndSuccessChanceSeparate": true,
+    "powder": {
+      "evidence": [
+        "coverage_91"
+      ],
+      "observedEffectivenessPercent": 2,
+      "description": "Очищает книгу от пыли, увеличивая её шанс наложения.",
+      "increaseFormula": null,
+      "increaseRuleInClientText": "Each efficiency percentage point adds one application success percentage point",
+      "capPercent": null,
+      "applicationActionObserved": false
+    },
+    "disenchanter": {
+      "costStars": 15,
+      "booksReturned": false,
+      "evidence": [
+        "npc_image_8",
+        "npc_image_9"
+      ]
+    },
+    "failureConsequences": null,
+    "duplicateEnchantBehavior": null,
+    "enchantSlotLimit": null,
+    "minimumItemLevel": null,
+    "bookCombinationRule": null
+  },
+  "caveats": [
+    "31 distinct template names are observed; no claim that these exhaust all seasons or every possible case reward.",
+    "The 38-name localization inventory is wider; seven entries remain localization-only in these screenshots.",
+    "Case rarity is an explicit label, not a recovered drop probability.",
+    "Roman book level, per-instance application success, and effect activation chance are three separate parameters.",
+    "Improved ancient keys guarantee maximum displayed book level according to the tooltip, not 100% application or a selected rarity.",
+    "No case was successfully opened in this series; the first image reports no key.",
+    "35 auction book observations include one revisited lot; asking prices are not fixed balance values or proof of sales.",
+    "Screenshot 7 and 8 in the new case batch are byte-identical.",
+    "Boss-bonus threshold percent is disambiguated using client localization; screenshot itself renders 35урона."
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "recordedDate": "2026-10-20",
+  "sourceManifests": [
+    "missed-menu-sources.json"
+  ],
+  "sourceIds": [
+    "coverage_81",
+    "coverage_82",
+    "coverage_83",
+    "coverage_84",
+    "coverage_85",
+    "coverage_86",
+    "coverage_87",
+    "coverage_88",
+    "coverage_89",
+    "coverage_90",
+    "coverage_91",
+    "coverage_127",
+    "coverage_128",
+    "coverage_129",
+    "coverage_130"
+  ],
+  "auctionOverview": {
+    "evidence": [
+      "coverage_85"
+    ],
+    "tabs": [
+      "Аукцион",
+      "Личные товары"
+    ],
+    "currencies": [
+      "Деньги",
+      "Рубины"
+    ],
+    "filters": [
+      "Тип",
+      "Цена от/до",
+      "Уровень от/до"
+    ],
+    "sorting": [
+      "По уровню",
+      "По времени",
+      "По стоимости"
+    ],
+    "search": true,
+    "pagination": true,
+    "sellButton": true
+  },
+  "otherAuctionOffers": [
+    {
+      "evidence": [
+        "coverage_86",
+        "coverage_127"
+      ],
+      "name": "Редкая деревянная кирка",
+      "level": 1,
+      "shownEnchantments": [
+        "Шёлковое касание I"
+      ],
+      "askingPrice": 350,
+      "askingCurrency": "игровые деньги",
+      "note": "Same seller/item revisited through the Tools filter; unique lot identity not exposed."
+    },
+    {
+      "evidence": [
+        "coverage_87"
+      ],
+      "name": "Пропуск в подвал",
+      "askingPrice": 100,
+      "askingCurrency": "игровые деньги",
+      "effect": "Активация даёт доступ в Подвал; продолжительность на подсказке не указана."
+    },
+    {
+      "evidence": [
+        "coverage_88"
+      ],
+      "name": "Ключ от Обычного кейса",
+      "askingPrice": 90,
+      "askingCurrency": "игровые деньги",
+      "effect": "Открывает Обычный кейс на Спавне."
+    },
+    {
+      "evidence": [
+        "coverage_89"
+      ],
+      "name": "Древняя звезда",
+      "askingPrice": 1459,
+      "askingCurrency": "игровые деньги",
+      "effect": "Возможна с босса или Обычного кейса; обменивается на ключи у Обменника звёзд на Рынке."
+    },
+    {
+      "evidence": [
+        "coverage_90"
+      ],
+      "name": "Гнилая плоть",
+      "askingPrice": 1000,
+      "askingCurrency": "игровые деньги"
+    },
+    {
+      "evidence": [
+        "coverage_91"
+      ],
+      "name": "Древний порошок",
+      "effectivenessPercent": 2,
+      "askingPrice": 999,
+      "askingCurrency": "игровые деньги"
+    },
+    {
+      "evidence": [
+        "coverage_128"
+      ],
+      "name": "Питьевое зелье",
+      "effectDisplay": "Регенерация (0:34)",
+      "attributeDisplay": "При применении: +3 Урон",
+      "playerCraftedLabelVisible": true,
+      "askingPrice": 200,
+      "askingCurrency": "игровые деньги",
+      "recipe": null,
+      "note": "Unexpected +3 damage is preserved literally, not silently corrected or promoted to a verified effect."
+    },
+    {
+      "evidence": [
+        "coverage_129"
+      ],
+      "name": "Древняя звезда",
+      "askingPrice": 3670,
+      "askingCurrency": "игровые деньги"
+    },
+    {
+      "evidence": [
+        "coverage_130"
+      ],
+      "name": "Туалетная бумага",
+      "askingPrice": 3000,
+      "askingCurrency": "игровые деньги",
+      "effect": "Позволяет удовлетворить туалетную нужду вне туалета."
+    }
+  ],
+  "faction": {
+    "evidence": [
+      "coverage_83",
+      "coverage_84"
+    ],
+    "displayedPlayerFaction": "Славяне",
+    "observedPointTypes": [
+      "Деньги",
+      "Блоки",
+      "Мобы",
+      "Спешка"
+    ],
+    "observedPointOwners": {
+      "Деньги": "Афро",
+      "Блоки": "Афро",
+      "Мобы": "Латиносы",
+      "Спешка": "Афро"
+    },
+    "menuCapturedPointsDisplay": "0/4",
+    "leaveConfirmationCost": 2500,
+    "currency": "игровые деньги",
+    "costMeaning": "leave faction confirmation, not proven cost to join/switch",
+    "numericBonuses": null,
+    "leavePerformed": false
+  },
+  "mining": {
+    "evidence": [
+      "coverage_81",
+      "coverage_82"
+    ],
+    "moneyPopupDisplay": "+0.012 $",
+    "comboMultiplierDisplay": "x1",
+    "comboCounterDisplays": [
+      "22/1000",
+      "27/1000"
+    ],
+    "counterMeaning": "displayed combo progress, not tool durability",
+    "baseBlockSalePrice": null,
+    "note": "Still frames show mining feedback; exact block-to-payment pairing, bonuses and combo formula were not established."
+  }
+}
