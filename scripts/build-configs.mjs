@@ -176,6 +176,7 @@ write("keys.json", { source: "[решение]; цены ключей у обм�
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
 write("rules.json", { source: "[решение]", death: decisions.death, combo: decisions.combo, money: decisions.money });
 write("textures.json", { source: "assets/textures/ids.json — Codex image gen + Studio upload", ...read("assets/textures/ids.json") });
+write("previews.json", { source: "assets/previews/ids.json — Codex image gen + Studio upload; пусто = процедурная диорама", ...read("assets/previews/ids.json") });
 // Rojo nested project for MaterialService: one MaterialVariant per texture (edit-time instances).
 {
 	const ids = read("assets/textures/ids.json");

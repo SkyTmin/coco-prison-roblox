@@ -23,6 +23,7 @@ Config.books = load("books")
 Config.rules = load("rules")
 Config.trainer = load("trainer")
 Config.textures = load("textures")
+Config.previews = load("previews")
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

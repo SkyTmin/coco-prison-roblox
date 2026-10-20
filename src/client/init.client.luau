@@ -699,7 +699,19 @@ local function locationPreview(
 	location: Config.Location,
 	size: UDim2,
 	position: UDim2
-): ViewportFrame
+): ViewportFrame | ImageLabel
+	local previewId = Config.previews and Config.previews.previews[location.id]
+	if typeof(previewId) == "string" and previewId ~= "" then
+		local image = Instance.new("ImageLabel")
+		image.Name = "Preview_" .. location.id
+		image.Size, image.Position = size, position
+		image.BackgroundColor3 = Ui.colors.slot
+		image.BorderSizePixel = 0
+		image.Image = previewId
+		image.ScaleType = Enum.ScaleType.Crop
+		image.Parent = parent
+		return image
+	end
 	local view = Instance.new("ViewportFrame")
 	view.Name = "Preview_" .. location.id
 	view.Size, view.Position = size, position
@@ -822,7 +834,7 @@ local function buildLocations(): Frame
 		panel: Frame,
 		name: TextLabel,
 		level: TextLabel,
-		preview: ViewportFrame,
+		preview: ViewportFrame | ImageLabel,
 	}
 	local cards: { Card } = {}
 	local function updateAvailability()
