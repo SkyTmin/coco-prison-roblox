@@ -176,3 +176,4 @@ write("trainer.json", { source: "первые требования [меню]; �
 write("keys.json", { source: "[решение]; цены ключей у обменника [меню]", starExchange: { ancient_key: 10, improved_ancient_key: 60, dispeller: 15 }, ...decisions.keys });
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
 write("rules.json", { source: "[решение]", death: decisions.death, combo: decisions.combo, money: decisions.money });
+write("professions.json", { source: "[меню] Работы/Прокачки; формула опыта [решение]", ...decisions.professions, boosters: decisions.boosters });

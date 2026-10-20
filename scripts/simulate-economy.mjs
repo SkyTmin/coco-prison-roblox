@@ -49,7 +49,7 @@ const milestones = [];
 const log = [];
 
 function priceMultiplier() {
-	return 1 + 0.01 * (player.level - 1);
+	return 1; // upgrade multiplier is earned via profession points; ignored in the conservative model
 }
 function bestMine() {
 	let best = null;

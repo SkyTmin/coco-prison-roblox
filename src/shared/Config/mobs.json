@@ -3,14 +3,15 @@
   "mobs": {
     "rat": {
       "name": "Крыса",
-      "hp": 12,
+      "hp": 20,
       "damage": 2,
       "money": 0.5,
       "statKey": "rats",
       "locations": [
         "prison",
         "basement"
-      ]
+      ],
+      "_source": "[владелец] 20 HP"
     },
     "zombie": {
       "name": "Зомби",

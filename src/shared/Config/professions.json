@@ -1,0 +1,40 @@
+{
+  "source": "[меню] Работы/Прокачки; формула опыта [решение]",
+  "_source": "[меню] Работы",
+  "levels": 50,
+  "jobs": {
+    "mason": {
+      "name": "Каменщик",
+      "xp": "blocks_by_pickaxe"
+    },
+    "surveyor": {
+      "name": "Геодезист",
+      "xp": "blocks_by_shovel"
+    },
+    "blademaster": {
+      "name": "Мастер клинка",
+      "xp": "kills_rat_zombie_bat"
+    }
+  },
+  "xpThresholds": {
+    "_note": "[меню] точки: Мастер клинка L3=84, Геодезист L4=5000, Каменщик L6=25000; формула [решение]",
+    "formula": "base * 1.6^(level-1)",
+    "base": {
+      "mason": 600,
+      "surveyor": 1200,
+      "blademaster": 20
+    }
+  },
+  "pointPerLevel": 1,
+  "upgrades": {
+    "blocks": 0.01,
+    "money": 0.01,
+    "mobs": 0.01,
+    "maxLevel": 50
+  },
+  "boosters": {
+    "_source": "[меню] награда достижения: локальный бустер денег 30 минут; [клиент] +100 % к множителю",
+    "durationMinutes": 30,
+    "multiplierBonus": 1
+  }
+}

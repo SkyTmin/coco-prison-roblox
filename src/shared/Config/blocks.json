@@ -3,7 +3,9 @@
   "money": {
     "scale": 10000,
     "displayDecimals": 3,
-    "priceMultiplierPerLevel": 0.01
+    "priceMultiplierPerLevel": 0,
+    "upgradeMultiplierPerPoint": 0.01,
+    "_note": "[меню] множитель цен = 1 + 0.01 × уровень Прокачки «Бустер денег»; очки за уровни профессий"
   },
   "blocks": {
     "sand": {

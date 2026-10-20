@@ -3,7 +3,9 @@
   "money": {
     "scale": 10000,
     "displayDecimals": 3,
-    "priceMultiplierPerLevel": 0.01
+    "priceMultiplierPerLevel": 0,
+    "upgradeMultiplierPerPoint": 0.01,
+    "_note": "[меню] множитель цен = 1 + 0.01 × уровень Прокачки «Бустер денег»; очки за уровни профессий"
   },
   "hearts": {
     "base": 10,
@@ -403,14 +405,15 @@
   "mobs": {
     "rat": {
       "name": "Крыса",
-      "hp": 12,
+      "hp": 20,
       "damage": 2,
       "money": 0.5,
       "statKey": "rats",
       "locations": [
         "prison",
         "basement"
-      ]
+      ],
+      "_source": "[владелец] 20 HP"
     },
     "zombie": {
       "name": "Зомби",
@@ -552,39 +555,60 @@
     "luckyBonusPerLevel": 0.2,
     "ordinaryCase": [
       {
-        "id": "money",
-        "weight": 25,
-        "min": 10,
-        "max": 50
-      },
-      {
-        "id": "blocks",
-        "weight": 20,
-        "count": 32
-      },
-      {
         "id": "food",
-        "weight": 15
+        "weight": 75,
+        "items": [
+          "apple",
+          "cooked_chicken",
+          "rotten_flesh"
+        ],
+        "count": [
+          1,
+          3
+        ]
       },
       {
-        "id": "hygiene",
-        "weight": 15
+        "id": "money",
+        "weight": 40,
+        "min": 0.37,
+        "max": 1.4,
+        "_note": "[меню] 7 из 17 открытий"
+      },
+      {
+        "id": "arrow",
+        "weight": 8
+      },
+      {
+        "id": "toilet_paper",
+        "weight": 6
+      },
+      {
+        "id": "golden_apple",
+        "weight": 4
       },
       {
         "id": "ancient_star",
-        "weight": 15
+        "weight": 3
+      },
+      {
+        "id": "leather_armor_piece",
+        "weight": 2
+      },
+      {
+        "id": "wooden_sword_or_bow",
+        "weight": 2
       },
       {
         "id": "basement_pass",
-        "weight": 3
+        "weight": 1
       },
       {
-        "id": "ancient_powder",
-        "weight": 3
+        "id": "rare_wooden_pickaxe_silk_touch",
+        "weight": 1
       },
       {
-        "id": "rare_wooden_pickaxe",
-        "weight": 2
+        "id": "oblivion_scroll",
+        "weight": 1
       }
     ],
     "ancientCase": {
@@ -606,7 +630,8 @@
         40,
         100
       ]
-    }
+    },
+    "_ordinaryCaseNote": "[меню] 15 предметов в окне кейса; веса — оценка по 17 открытиям владельца; кейс выдаёт 2–4 предмета за открытие"
   },
   "books": {
     "limits": {
@@ -680,5 +705,44 @@
     "stepBonus": 0.1,
     "maxMultiplier": 2,
     "breakAfterIdleSeconds": 10
+  },
+  "professions": {
+    "_source": "[меню] Работы",
+    "levels": 50,
+    "jobs": {
+      "mason": {
+        "name": "Каменщик",
+        "xp": "blocks_by_pickaxe"
+      },
+      "surveyor": {
+        "name": "Геодезист",
+        "xp": "blocks_by_shovel"
+      },
+      "blademaster": {
+        "name": "Мастер клинка",
+        "xp": "kills_rat_zombie_bat"
+      }
+    },
+    "xpThresholds": {
+      "_note": "[меню] точки: Мастер клинка L3=84, Геодезист L4=5000, Каменщик L6=25000; формула [решение]",
+      "formula": "base * 1.6^(level-1)",
+      "base": {
+        "mason": 600,
+        "surveyor": 1200,
+        "blademaster": 20
+      }
+    },
+    "pointPerLevel": 1,
+    "upgrades": {
+      "blocks": 0.01,
+      "money": 0.01,
+      "mobs": 0.01,
+      "maxLevel": 50
+    }
+  },
+  "boosters": {
+    "_source": "[меню] награда достижения: локальный бустер денег 30 минут; [клиент] +100 % к множителю",
+    "durationMinutes": 30,
+    "multiplierBonus": 1
   }
 }
