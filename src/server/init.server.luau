@@ -22,6 +22,10 @@ for _, name in ipairs({
 	"OpenCase",
 	"ClaimAchievement",
 	"CaseOpened",
+	"CaseUpdated",
+	"CaseOpen",
+	"CaseMove",
+	"CaseClose",
 	"ProfileUpdated",
 	"Toast",
 	"MineReset",
@@ -45,7 +49,11 @@ local AchievementService = require(script.Services.AchievementService)
 local CaseService = require(script.Services.CaseService)
 local LocationService = require(script.Services.LocationService)
 local CombatService = require(script.Services.CombatService)
+local HungerService = require(script.Services.HungerService)
+local DeathService = require(script.Services.DeathService)
 
+HungerService.Start()
+DeathService.Start()
 ProfileService.Start()
 ProfessionService.Start()
 TextureService.Start()

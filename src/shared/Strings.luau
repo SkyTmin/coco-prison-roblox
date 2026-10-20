@@ -6,6 +6,30 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+	ender_chest = {
+		ru = "Эндер-сундук",
+		en = "Ender chest",
+		es = "Cofre de Ender",
+		fr = "Coffre de l’Ender",
+	},
+	hunger_restored = {
+		ru = "Сытость восстановлена!",
+		en = "Hunger restored!",
+		es = "¡Hambre restaurada!",
+		fr = "Faim restaurée !",
+	},
+	health_tooltip = {
+		ru = "Здоровье: %.1f / %.1f",
+		en = "Health: %.1f / %.1f",
+		es = "Salud: %.1f / %.1f",
+		fr = "Santé : %.1f / %.1f",
+	},
+	hunger_tooltip = {
+		ru = "Сытость: %.1f / %.1f",
+		en = "Hunger: %.1f / %.1f",
+		es = "Hambre: %.1f / %.1f",
+		fr = "Faim : %.1f / %.1f",
+	},
 	coins = { ru = "Баланс", en = "Balance", es = "Saldo", fr = "Solde" },
 	level = { ru = "Уровень", en = "Level", es = "Nivel", fr = "Niveau" },
 	blocks = { ru = "Блоки", en = "Blocks", es = "Bloques", fr = "Blocs" },

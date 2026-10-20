@@ -10,6 +10,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local Types = require(Shared.Types)
 
 type Reward = {
 	id: string,
@@ -30,7 +31,7 @@ local CASES: { [string]: { key: string, text: string } } = {
 	ordinaryCase = { key = "ordinary_key", text = "ordinary_case" },
 	ancientCase = { key = "ancient_key", text = "ancient_case" },
 }
-local TAGS = { "OrdinaryCase", "AncientCase" }
+local TAGS = { "OrdinaryCase", "AncientCase", "EnderChest" }
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
@@ -39,7 +40,18 @@ local sessions: { [Player]: Session } = {}
 local started = false
 local CaseService = {}
 
+local function containerTitle(id: string): string
+	return if id == "enderChest" then "ender_chest" else CASES[id].text
+end
+
+local function contentsFor(profile: Types.Profile, id: string): { [number]: Types.ItemStack }
+	return if id == "enderChest" then profile.enderChest else profile.caseContents[id]
+end
+
 local function caseId(part: Instance): string?
+	if CollectionService:HasTag(part, "EnderChest") then
+		return "enderChest"
+	end
 	if
 		not CollectionService:HasTag(part, "OrdinaryCase")
 		and not CollectionService:HasTag(part, "AncientCase")
@@ -74,7 +86,7 @@ local function close(player: Player)
 end
 
 local function validate(player: Player, id: any): Session?
-	if typeof(id) ~= "string" or not CASES[id] then
+	if typeof(id) ~= "string" or (not CASES[id] and id ~= "enderChest") then
 		return nil
 	end
 	local session = sessions[player]
@@ -139,7 +151,9 @@ local function openChest(player: Player, part: BasePart)
 	sessions[player] =
 		{ id = id, part = part, rolledAt = -math.huge, tokens = 80, tokenAt = os.clock() }
 	ProfileService.Mutate(player, function(p)
-		p.caseContents[id] = p.caseContents[id] or {}
+		if id ~= "enderChest" then
+			p.caseContents[id] = p.caseContents[id] or {}
+		end
 	end)
 	Remotes.event("CaseOpened"):FireClient(player, id)
 end
@@ -150,7 +164,7 @@ end
 
 local function openCase(player: Player, id: any)
 	local session = validate(player, id)
-	if not session or os.clock() - session.rolledAt < 0.4 then
+	if not session or session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
 		return
 	end
 	session.rolledAt = os.clock()
@@ -268,7 +282,7 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any)
 	end
 	session.tokens -= 1
 	ProfileService.Mutate(player, function(p)
-		local contents = p.caseContents[session.id]
+		local contents = contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
 		if not source[from.index] then
@@ -300,7 +314,7 @@ local function bind(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "CasePrompt"
-	prompt.ActionText = Strings.t(CASES[id].text)
+	prompt.ActionText = Strings.t(containerTitle(id))
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = RANGE
 	prompt.Parent = part
@@ -310,7 +324,7 @@ local function bind(part: Instance)
 			local current = caseId(part)
 			prompt.Enabled = current ~= nil
 			if current then
-				prompt.ActionText = Strings.t(CASES[current].text)
+				prompt.ActionText = Strings.t(containerTitle(current))
 			end
 		end),
 		connection = prompt.Triggered:Connect(function(player)

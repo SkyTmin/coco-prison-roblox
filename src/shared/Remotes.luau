@@ -6,6 +6,7 @@
 --                           ClaimProfessionPoints(job), UseConsumable(slot),
 --                           CaseOpen(caseId), CaseClose(caseId),
 --                           CaseMove(caseId, {container = "case"|"inv", index}, destination)
+--                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
 -- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
 

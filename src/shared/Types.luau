@@ -26,12 +26,14 @@ export type Profile = {
 	counters: { [string]: number }, -- upgrade counters by display name ("Земля", "Крысы", …)
 	inventory: { [number]: ItemStack }, -- slots 1..36 (1..9 = hotbar)
 	caseContents: { [string]: { [number]: ItemStack } }, -- per case kind, sparse slots 1..27; schema stays v3
+	enderChest: { [number]: ItemStack }, -- personal sparse slots 1..27; schema stays v3
 	armor: { [string]: ItemStack }, -- helmet / chestplate / leggings / boots
 	selectedSlot: number,
 	professions: Professions,
 	keys: { [string]: number },
 	passes: { [string]: boolean }, -- basement = true
 	needs: Needs,
+	hunger: number, -- 0..20
 	achievements: { [string]: number }, -- digger_dirt = claimed tier
 	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
 	location: string,

@@ -16,6 +16,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
 local ProfessionService = require(script.Parent.ProfessionService)
+local HungerService = require(script.Parent.HungerService)
 
 local MAX_DISTANCE = 10 -- studs from root to block centre (block is 4 wide)
 local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
@@ -196,6 +197,7 @@ local function onDigFinish(player: Player, part: any)
 			keyFound = true
 		end
 	end)
+	HungerService.OnBlockDug(player)
 	if overflow > 0 then
 		toast(player, "bag_full")
 	end

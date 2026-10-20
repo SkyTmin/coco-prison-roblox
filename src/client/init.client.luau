@@ -9,6 +9,7 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -221,6 +222,142 @@ for i = 1, 9 do
 	hotbarSlots[i], hotbarNames[i], hotbarCounts[i] = f, name, count
 	hotbarImages[i] = image
 end
+
+-- Both meters inherit the hotbar's viewport scale, with an extra reduction on touch.
+local survivalHud = Instance.new("Frame")
+survivalHud.Name = "SurvivalHud"
+survivalHud.BackgroundTransparency = 1
+survivalHud.AnchorPoint = Vector2.new(0.5, 1)
+survivalHud.Position = UDim2.new(0.5, 0, 0, -4)
+survivalHud.Size = UDim2.fromOffset(408, 24)
+survivalHud.Parent = hotbar
+local survivalScale = Instance.new("UIScale")
+survivalScale.Parent = survivalHud
+type SurvivalMeter = { fills: { Frame }, tooltip: TextLabel }
+local function buildMeter(x: number, glyph: string, color: Color3): SurvivalMeter
+	local group = Instance.new("Frame")
+	group.BackgroundTransparency = 1
+	group.Size = UDim2.fromOffset(190, 24)
+	group.Position = UDim2.fromOffset(x, 0)
+	group.Parent = survivalHud
+	local function drawIcon(parent: Frame, filled: boolean)
+		local tint = if filled then color else Ui.colors.border
+		local zIndex = if filled then 2 else 1
+		if glyph == "♥" then
+			local heart =
+				Ui.label(parent, glyph, UDim2.fromOffset(18, 24), UDim2.fromOffset(0, 0), 22, tint)
+			heart.Font = Enum.Font.SourceSansBold
+			heart.TextXAlignment = Enum.TextXAlignment.Center
+			heart.TextStrokeTransparency = 0
+			heart.ZIndex = zIndex
+			return
+		end
+		-- Frame drumsticks avoid platform-dependent colour emoji and clip cleanly at half hunger.
+		local icon = Instance.new("Frame")
+		icon.BackgroundTransparency = 1
+		icon.Size = UDim2.fromOffset(18, 24)
+		icon.ZIndex = zIndex
+		icon.Parent = parent
+		for index, geometry in ipairs({
+			{ 7, 10, 4, 10 }, -- bone
+			{ 5, 17, 8, 4 }, -- knuckle
+			{ 3, 2, 12, 14 }, -- meat
+		}) do
+			local shape = Instance.new("Frame")
+			shape.Position = UDim2.fromOffset(geometry[1], geometry[2])
+			shape.Size = UDim2.fromOffset(geometry[3], geometry[4])
+			shape.BackgroundColor3 = if filled and index < 3
+				then Color3.fromRGB(230, 215, 185)
+				else tint
+			shape.BorderSizePixel = 0
+			shape.ZIndex = zIndex
+			local rounding = Instance.new("UICorner")
+			rounding.CornerRadius = UDim.new(0.5, 0)
+			rounding.Parent = shape
+			local outline = Instance.new("UIStroke")
+			outline.Color = Ui.colors.panel
+			outline.Thickness = 1
+			outline.Parent = shape
+			shape.Parent = icon
+		end
+	end
+	local tooltip = Ui.label(group, "", UDim2.fromOffset(220, 22), UDim2.new(0.5, -110, 0, -26), 12)
+	tooltip.TextXAlignment = Enum.TextXAlignment.Center
+	tooltip.BackgroundColor3 = Ui.colors.panel
+	tooltip.BackgroundTransparency = 0.15
+	tooltip.Visible = false
+	group.MouseEnter:Connect(function()
+		tooltip.Visible = true
+	end)
+	group.MouseLeave:Connect(function()
+		tooltip.Visible = false
+	end)
+	local fills: { Frame } = {}
+	for i = 1, 10 do
+		local cell = Instance.new("Frame")
+		cell.Size = UDim2.fromOffset(18, 24)
+		cell.Position = UDim2.fromOffset((i - 1) * 19, 0)
+		cell.BackgroundTransparency = 1
+		cell.Parent = group
+		drawIcon(cell, false)
+		local clip = Instance.new("Frame")
+		clip.Size = UDim2.fromScale(1, 1)
+		clip.BackgroundTransparency = 1
+		clip.ClipsDescendants = true
+		clip.Parent = cell
+		drawIcon(clip, true)
+		fills[i] = clip
+	end
+	return { fills = fills, tooltip = tooltip }
+end
+local hearts = buildMeter(0, "♥", Color3.fromRGB(235, 55, 55))
+local drumsticks = buildMeter(218, "🍗", Color3.fromRGB(225, 150, 65))
+local trackedHumanoid: Humanoid? = nil
+local healthConnections: { RBXScriptConnection } = {}
+local function fillMeter(meter: SurvivalMeter, value: number)
+	-- Any partially filled icon is a half; full icons require both points.
+	local points = math.clamp(value, 0, 20)
+	local fullPoints = math.floor(points / 2) * 2
+	local halves = fullPoints + (if points > fullPoints then 1 else 0)
+	for i, fill in ipairs(meter.fills) do
+		fill.Size = UDim2.fromScale(math.clamp(halves - (i - 1) * 2, 0, 2) / 2, 1)
+	end
+end
+local function renderSurvival()
+	local humanoid = trackedHumanoid
+	local health = if humanoid then humanoid.Health else 0
+	local maxHealth = if humanoid then humanoid.MaxHealth else 20
+	fillMeter(hearts, if maxHealth > 0 then health / maxHealth * 20 else 0)
+	hearts.tooltip.Text = T("health_tooltip", health, maxHealth)
+	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
+	fillMeter(drumsticks, hunger / Config.rules.survival.hunger.max * 20)
+	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
+end
+local function watchHealth(character: Model)
+	for _, connection in ipairs(healthConnections) do
+		connection:Disconnect()
+	end
+	table.clear(healthConnections)
+	trackedHumanoid = nil
+	renderSurvival()
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not humanoid or not humanoid:IsA("Humanoid") or player.Character ~= character then
+		return
+	end
+	trackedHumanoid = humanoid
+	table.insert(healthConnections, humanoid.HealthChanged:Connect(renderSurvival))
+	table.insert(
+		healthConnections,
+		humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(renderSurvival)
+	)
+	renderSurvival()
+end
+player.CharacterAdded:Connect(watchHealth)
+if player.Character then
+	task.spawn(watchHealth, player.Character)
+end
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+renderSurvival()
 
 -- All menu builders use this viewport clamp, including menus rebuilt after profile updates.
 type WindowLayout = { size: UDim2, position: UDim2, anchor: Vector2, scale: UIScale }
@@ -1418,9 +1555,10 @@ end
 
 -- ---------------------------------------------------------------- profile rendering
 local function render(p: Types.Profile)
-	local rebuild = locale ~= p.locale or (profile ~= nil and profile.location ~= p.location)
+	local nextLocale = p.locale or Config.defaultLocale
+	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
 	profile = p
-	locale = p.locale or Config.defaultLocale
+	locale = nextLocale
 	languageButton.Text = T("language_code")
 	renderCameraButton()
 	for button, key in pairs(localizedButtons) do
@@ -1443,6 +1581,7 @@ local function render(p: Types.Profile)
 		needValues[need].Text = tostring(math.floor(value))
 	end
 	renderHotbar()
+	renderSurvival()
 	refreshWindow(rebuild)
 end
 Remotes.event("ProfileUpdated").OnClientEvent:Connect(render)
@@ -1861,6 +2000,7 @@ local function updateLayout()
 	hotbar.AnchorPoint = Vector2.new(0.5, 1)
 	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
 	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
+	survivalScale.Scale = if mobile then 0.85 else 1
 	for i, slot in ipairs(hotbarSlots) do
 		slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
 		slotScales[i].Scale = size / SLOT

@@ -33,6 +33,7 @@ function ProfileService.defaultProfile(): Profile
 		counters = {},
 		inventory = { [1] = { id = "shovel", count = 1, level = 1, books = {} } }, -- starting shovel [владелец]
 		caseContents = {},
+		enderChest = {},
 		armor = {},
 		selectedSlot = 1,
 		professions = {
@@ -44,6 +45,7 @@ function ProfileService.defaultProfile(): Profile
 		keys = {},
 		passes = {},
 		needs = { hygiene = 100, sleep = 100, toilet = 100 },
+		hunger = Config.rules.survival.hunger.max,
 		achievements = {},
 		stats = {},
 		location = "prison",
@@ -85,6 +87,16 @@ local function migrate(data: any): Profile
 			(profile :: any)[field] = value
 		end
 		profile.inventory = decodeInventory(data.inventory)
+		profile.enderChest = decodeInventory(data.enderChest)
+		for slot in pairs(profile.enderChest) do
+			if
+				slot < 1
+				or slot > Config.rules.survival.enderChest.slots
+				or slot ~= math.floor(slot)
+			then
+				profile.enderChest[slot] = nil
+			end
+		end
 		profile.caseContents = {}
 		if typeof(data.caseContents) == "table" then
 			for _, id in ipairs({ "ordinaryCase", "ancientCase" }) do
@@ -100,6 +112,10 @@ local function migrate(data: any): Profile
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
+	local hunger = profile.hunger
+	profile.hunger = if typeof(hunger) == "number" and hunger == hunger
+		then math.clamp(hunger, 0, Config.rules.survival.hunger.max)
+		else Config.rules.survival.hunger.max
 	if
 		typeof(profile.locale) ~= "string"
 		or not table.find(Config.rules.ui.locales, profile.locale)
@@ -142,6 +158,7 @@ local function save(player: Player, session: Session)
 	session.saving = true
 	local snapshot = table.clone(session.profile) :: any
 	snapshot.inventory = encodeInventory(session.profile.inventory)
+	snapshot.enderChest = encodeInventory(session.profile.enderChest)
 	snapshot.caseContents = {}
 	for id, contents in pairs(session.profile.caseContents) do
 		snapshot.caseContents[id] = encodeInventory(contents)

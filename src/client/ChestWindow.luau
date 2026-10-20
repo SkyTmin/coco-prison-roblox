@@ -23,9 +23,15 @@ function ChestWindow.build(
 	local function t(key: string): string
 		return Strings.t(key, locale)
 	end
+	local isEnder = id == "enderChest"
 	local win, content = createWindow(
 		parent,
-		t(if id == "ancientCase" then "ancient_case" else "ordinary_case"),
+		t(
+			if isEnder
+				then "ender_chest"
+				elseif id == "ancientCase" then "ancient_case"
+				else "ordinary_case"
+		),
 		UDim2.fromOffset(452, 478),
 		onClose
 	)
@@ -45,6 +51,7 @@ function ChestWindow.build(
 		end
 		local container = if address.container == "inv"
 			then profile.inventory
+			elseif isEnder then profile.enderChest
 			else profile.caseContents[id]
 		return if container then container[address.index] else nil
 	end
@@ -86,6 +93,7 @@ function ChestWindow.build(
 	grid("inv", 1, 1, 324)
 	local open =
 		Ui.button(content, t("case_open"), UDim2.fromOffset(142, 30), UDim2.fromOffset(4, 380))
+	open.Visible = not isEnder
 	local take = Ui.button(
 		content,
 		t("case_take_all"),
@@ -93,6 +101,9 @@ function ChestWindow.build(
 		UDim2.fromOffset(152, 380),
 		Ui.colors.buttonGreen
 	)
+	if isEnder then
+		take.Position = UDim2.fromOffset(4, 380)
+	end
 	local hint = Ui.label(
 		content,
 		"",
@@ -138,6 +149,9 @@ function ChestWindow.build(
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
 			view.name.Visible = icon == nil
 			view.count.Text = if stack and stack.count > 1 then tostring(stack.count) else ""
+		end
+		if isEnder then
+			return
 		end
 		local config = Config.keys[id]
 		local rewards = if typeof(config) == "table" then config.rewards or config else {}

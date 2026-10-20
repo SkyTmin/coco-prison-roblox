@@ -120,8 +120,9 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	f.Parent = parent
 	local image = Instance.new("ImageLabel")
 	image.Name = "Icon"
-	image.Size = UDim2.new(1, -4, 1, -4)
-	image.Position = UDim2.fromOffset(2, 2)
+	image.AnchorPoint = Vector2.new(0.5, 0.5)
+	image.Size = UDim2.fromScale(0.76, 0.76)
+	image.Position = UDim2.fromScale(0.5, 0.5)
 	image.ScaleType = Enum.ScaleType.Fit
 	image.BackgroundTransparency = 1
 	image.Visible = false
@@ -134,6 +135,7 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	local count =
 		Ui.label(f, "", UDim2.new(1, -4, 0, 12), UDim2.new(0, 2, 1, -14), 11, Ui.colors.text)
 	count.TextXAlignment = Enum.TextXAlignment.Right
+	count.TextStrokeTransparency = 0
 	count.ZIndex = image.ZIndex + 1
 	return f, name, count, image
 end

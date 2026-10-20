@@ -146,10 +146,11 @@ local function useConsumable(player: Player, slot: any)
 			break
 		end
 	end
-	if not need then
+	local food = Config.rules.survival.food[stack.id]
+	if not need and not food then
 		return
 	end
-	local matchingNeed: Need = need
+	local matchingNeed = need
 	local consumed = false
 	ProfileService.Mutate(player, function(p)
 		-- remove() searches backwards by id. Swap temporarily so it consumes this exact slot,
@@ -159,11 +160,23 @@ local function useConsumable(player: Player, slot: any)
 		consumed = InventoryService.remove(p, stack.id, 1) == 1
 		p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
 		if consumed then
-			p.needs[matchingNeed] = 100
+			if matchingNeed then
+				p.needs[matchingNeed] = 100
+			end
+			if food then
+				p.hunger = math.min(Config.rules.survival.hunger.max, p.hunger + food)
+			end
 		end
 	end)
 	if consumed then
-		restored(player, matchingNeed)
+		if matchingNeed then
+			restored(player, matchingNeed)
+		elseif food then
+			toast(player, "hunger_restored")
+		end
+		if stack.id == "golden_apple" then
+			humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 4 * 2)
+		end
 	end
 end
 
