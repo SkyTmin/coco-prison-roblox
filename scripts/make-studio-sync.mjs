@@ -1,7 +1,8 @@
 // Generates a Luau snippet that pushes src/ into an open Studio place via Studio MCP execute_luau,
 // without the Rojo plugin: for every script in default.project.json's tree it sets .Source (creating
 // instances by path); JSON configs become ModuleScripts that JSONDecode their content.
-// Usage: node scripts/make-studio-sync.mjs > <out.luau>   (the agent then runs it in Studio)
+// Usage: node scripts/make-studio-sync.mjs [only1,only2,...] > <out.luau>   (the agent then runs it in Studio)
+// The optional comma list limits the output to scripts whose file path contains one of the items.
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, basename, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,7 +10,8 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const project = JSON.parse(readFileSync(join(root, "default.project.json"), "utf8"));
 
-const entries = []; // { path: ["ReplicatedStorage","Shared",...], className, source }
+const only = (process.argv[2] || "").split(",").filter(Boolean);
+const entries = []; // { path: ["ReplicatedStorage","Shared",...], className, source, file }
 
 function classFor(file) {
 	if (file.endsWith(".server.luau")) return ["Script", file.replace(/\.server\.luau$/, "")];
@@ -28,7 +30,7 @@ function walkDir(dir, pathParts) {
 		[containerClass] = classFor(init);
 		containerSource = readFileSync(join(dir, init), "utf8");
 	}
-	entries.push({ path: pathParts, className: containerClass, source: containerSource });
+	entries.push({ path: pathParts, className: containerClass, source: containerSource, file: init ? join(dir, init) : "" });
 	for (const f of files) {
 		if (f === init) continue;
 		const full = join(dir, f);
@@ -42,7 +44,7 @@ function walkDir(dir, pathParts) {
 		if (f.endsWith(".json")) {
 			source = `return game:GetService("HttpService"):JSONDecode([==[${source}]==])`;
 		}
-		entries.push({ path: [...pathParts, c[1]], className: c[0], source });
+		entries.push({ path: [...pathParts, c[1]], className: c[0], source, file: full });
 	}
 }
 
@@ -58,6 +60,9 @@ function walkTree(node, pathParts) {
 	}
 }
 walkTree(project.tree, []);
+const selected = only.length
+	? entries.filter((e) => e.source == null || only.some((o) => e.file.split("\\").join("/").includes(o)))
+	: entries;
 
 const lua = [];
 lua.push(`local function at(path, className)
@@ -75,7 +80,7 @@ lua.push(`local function at(path, className)
 	return inst
 end
 local n = 0`);
-for (const e of entries) {
+for (const e of selected) {
 	const path = JSON.stringify(e.path).replace(/\[/g, "{").replace(/\]/g, "}");
 	if (e.source == null) {
 		lua.push(`at(${path}, "${e.className}")`);

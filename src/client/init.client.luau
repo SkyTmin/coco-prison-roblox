@@ -1,7 +1,7 @@
 --!strict
 -- Client: digging input (hold on PC / touch button / gamepad), target highlight with progress,
 -- HUD (right stats panel, hotkeys), hotbar, inventory [E], shop/sell/food windows (prompts),
--- upgrade [J], level [U], jobs [O], achievements [L], case results (server event).
+-- upgrade [J], level [U], jobs [O], achievements [L], locations [M], case results (server event).
 
 local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
@@ -146,7 +146,9 @@ end
 -- ---------------------------------------------------------------- windows
 local openWindow: Frame? = nil
 local currentWindowKind: string? = nil
+local refreshLocations: (() -> ())? = nil
 local function closeWindow()
+	refreshLocations = nil
 	if openWindow then
 		openWindow:Destroy()
 		openWindow = nil
@@ -659,6 +661,464 @@ local function buildCase(): Frame
 	return win
 end
 
+-- Locations [M]. Procedural previews need no uploaded assets or streamed world geometry.
+local locationTab = "mines"
+local selectedLocations: { [string]: string } = {}
+local locationScroll: { [string]: number } = {}
+local lastLocationClick: string? = nil
+local lastLocationClickAt = -math.huge
+local DESCRIBED_LOCATIONS: { [string]: boolean } = {
+	prison = true,
+	quarry = true,
+	mountain_foot = true,
+	underworld = true,
+	pyramid = true,
+	basement = true,
+}
+
+local function locationCategory(location: Config.Location): string
+	if location.kind == "social" or location.id == "basement" then
+		return "other"
+	elseif location.kind == "mine" and location.unlockLevel >= 37 then
+		return "sky"
+	elseif location.kind == "mine" and location.unlockLevel <= 35 then
+		return "mines"
+	end
+	return ""
+end
+
+local function locationAvailable(location: Config.Location): boolean
+	local p = profile
+	return p ~= nil
+		and p.level >= location.unlockLevel
+		and (not location.requiresPass or p.passes[location.id] == true)
+end
+
+local function locationPreview(
+	parent: Instance,
+	location: Config.Location,
+	size: UDim2,
+	position: UDim2
+): ViewportFrame
+	local view = Instance.new("ViewportFrame")
+	view.Name = "Preview_" .. location.id
+	view.Size, view.Position = size, position
+	view.BackgroundColor3 = Ui.colors.slot
+	view.BorderSizePixel = 0
+	view.Ambient = Color3.fromRGB(170, 170, 180)
+	view.LightColor = Color3.fromRGB(255, 225, 185)
+	view.LightDirection = Vector3.new(-1, -2, -1)
+	view.Parent = parent
+	local camera = Instance.new("Camera")
+	camera.CFrame = CFrame.lookAt(Vector3.new(23, 23, 27), Vector3.new(0, 1, 0))
+	camera.FieldOfView = 40
+	camera.Parent = view
+	view.CurrentCamera = camera
+	local colors: { [string]: Color3 } = {
+		prison = Color3.fromRGB(125, 145, 100),
+		quarry = Color3.fromRGB(115, 120, 130),
+		mountain_foot = Color3.fromRGB(175, 100, 65),
+		underworld = Color3.fromRGB(150, 45, 35),
+		pyramid = Color3.fromRGB(215, 175, 90),
+		basement = Color3.fromRGB(70, 80, 65),
+	}
+	local color = colors[location.id]
+		or (
+			if locationCategory(location) == "sky"
+				then Color3.fromRGB(175, 195, 220)
+				else Color3.fromHSV((location.unlockLevel * 0.037) % 1, 0.3, 0.6)
+		)
+	local function block(blockSize: Vector3, cf: CFrame, tint: Color3)
+		local part = Instance.new("Part")
+		part.Size, part.CFrame, part.Color = blockSize, cf, tint
+		part.Anchored = true
+		part.Material = Enum.Material.Slate
+		part.Parent = view
+	end
+	block(Vector3.new(20, 1, 20), CFrame.new(0, -2, 0), color)
+	block(Vector3.new(11, 1, 11), CFrame.new(0, -1, 0), color:Lerp(Color3.new(), 0.45))
+	for i = 1, 12 do
+		local angle = i * math.pi / 6
+		block(
+			Vector3.new(4.2, 3, 3),
+			CFrame.new(math.sin(angle) * 7, 0, math.cos(angle) * 7) * CFrame.Angles(0, angle, 0),
+			color
+		)
+	end
+	for i = 1, math.min(5, #location.sellList) do
+		block(
+			Vector3.new(2, 1.5, 2),
+			CFrame.new((i % 3 - 1) * 3, 0, math.floor((i - 1) / 3) * 3 - 2),
+			color:Lerp(Ui.colors.header, i / 8)
+		)
+	end
+	if location.id == "pyramid" then
+		for i = 1, 4 do
+			block(Vector3.new(11 - i * 2, 2, 11 - i * 2), CFrame.new(-5, i * 2, -6), color)
+		end
+	else
+		for i = 1, 3 do
+			local height = if location.id == "basement" then 7 else 3 + i * 2
+			block(Vector3.new(2, height, 2), CFrame.new(i * 5 - 10, height / 2, -8), color)
+		end
+	end
+	return view
+end
+
+local function buildLocations(): Frame
+	local win, content = Ui.window(gui, T("locations"), UDim2.fromOffset(900, 560), closeWindow)
+	win.Name = "Window_locations"
+	-- Keep the full layout visible on smaller screens without changing the UI kit.
+	local scale = Instance.new("UIScale")
+	local viewport = if workspace.CurrentCamera
+		then workspace.CurrentCamera.ViewportSize
+		else Vector2.new(900, 560)
+	scale.Scale = math.clamp(math.min((viewport.X - 20) / 900, (viewport.Y - 20) / 560), 0.1, 1)
+	scale.Parent = win
+	win.AnchorPoint = Vector2.new(0.5, 0.5)
+	win.Position = UDim2.fromScale(0.5, 0.5)
+	local playerLevel =
+		Ui.label(win, "", UDim2.fromOffset(300, 28), UDim2.new(1, -350, 0, 6), 14, Ui.colors.level)
+	playerLevel.TextXAlignment = Enum.TextXAlignment.Right
+	local left = Ui.panel(content, UDim2.new(0, 304, 1, -42), UDim2.fromOffset(0, 42))
+	local detail = Instance.new("ScrollingFrame")
+	detail.Name = "LocationDetails"
+	detail.Size = UDim2.new(1, -12, 1, -92)
+	detail.Position = UDim2.fromOffset(6, 6)
+	detail.BackgroundTransparency = 1
+	detail.BorderSizePixel = 0
+	detail.ScrollBarThickness = 4
+	detail.CanvasSize = UDim2.new()
+	detail.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	detail.Parent = left
+	local refusal =
+		Ui.label(left, "", UDim2.new(1, -16, 0, 32), UDim2.new(0, 8, 1, -82), 12, Ui.colors.muted)
+	refusal.TextWrapped = true
+	local teleportButton =
+		Ui.button(left, T("teleport"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -44))
+	local grid = Instance.new("ScrollingFrame")
+	grid.Name = "LocationCards"
+	grid.Size = UDim2.new(1, -316, 1, -68)
+	grid.Position = UDim2.fromOffset(314, 44)
+	grid.BackgroundTransparency = 1
+	grid.BorderSizePixel = 0
+	grid.ScrollBarThickness = 4
+	grid.CanvasSize = UDim2.new()
+	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	grid.Parent = content
+	Ui.label(
+		content,
+		T("locations_double_click"),
+		UDim2.new(1, -320, 0, 20),
+		UDim2.new(0, 318, 1, -20),
+		12,
+		Ui.colors.muted
+	)
+
+	local selected: Config.Location? = nil
+	local tabButtons: { [string]: TextButton } = {}
+	type Card = {
+		location: Config.Location,
+		panel: Frame,
+		name: TextLabel,
+		level: TextLabel,
+		preview: ViewportFrame,
+	}
+	local cards: { Card } = {}
+	local function updateAvailability()
+		playerLevel.Text = T("locations_player_level", if profile then profile.level else 1)
+		local available = selected ~= nil and locationAvailable(selected)
+		teleportButton.Interactable = available
+		teleportButton.AutoButtonColor = available
+		teleportButton.BackgroundColor3 = if available
+			then Ui.colors.buttonBlue
+			else Ui.colors.buttonGrey
+		refusal.Text = ""
+		if selected then
+			if not profile then
+				refusal.Text = T("teleport_not_ready")
+			elseif profile.level < selected.unlockLevel then
+				refusal.Text = T("level_too_low", selected.unlockLevel)
+			elseif not available then
+				refusal.Text = T("location_pass_required")
+			end
+		end
+		for _, card in ipairs(cards) do
+			local unlocked = locationAvailable(card.location)
+			card.name.Text = (if unlocked then "" else "🔒 ") .. card.location.name
+			card.name.TextColor3 = if unlocked then Ui.colors.text else Ui.colors.muted
+			card.level.TextColor3 = if unlocked then Ui.colors.level else Ui.colors.muted
+			card.preview.ImageColor3 = if unlocked
+				then Color3.new(1, 1, 1)
+				else Color3.fromRGB(135, 135, 145)
+			local stroke = card.panel:FindFirstChildOfClass("UIStroke")
+			if stroke then
+				stroke.Color = if selected == card.location
+					then Ui.colors.buttonBlue
+					else Ui.colors.border
+				stroke.Thickness = if selected == card.location then 2 else 1
+			end
+		end
+	end
+	local function selectLocation(location: Config.Location)
+		selected = location
+		selectedLocations[locationTab] = location.id
+		detail:ClearAllChildren()
+		detail.CanvasPosition = Vector2.zero
+		local detailLayout = Instance.new("UIListLayout")
+		detailLayout.Padding = UDim.new(0, 6)
+		detailLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		detailLayout.Parent = detail
+		local preview = locationPreview(detail, location, UDim2.new(1, -6, 0, 128), UDim2.new())
+		preview.LayoutOrder = 1
+		local name = Ui.label(
+			detail,
+			location.name,
+			UDim2.new(1, -8, 0, 40),
+			UDim2.fromOffset(2, 134),
+			18,
+			Ui.colors.header
+		)
+		name.LayoutOrder = 2
+		name.TextWrapped = true
+		local key = if DESCRIBED_LOCATIONS[location.id] then location.id else "generic"
+		local description = Ui.label(
+			detail,
+			T("location_description_" .. key),
+			UDim2.new(1, -12, 0, 0),
+			UDim2.fromOffset(2, 178),
+			13
+		)
+		description.LayoutOrder = 3
+		description.AutomaticSize = Enum.AutomaticSize.Y
+		description.TextWrapped = true
+		description.TextYAlignment = Enum.TextYAlignment.Top
+		-- A vertical layout below the preview keeps translations and long block lists scrollable.
+		local sections = Instance.new("Frame")
+		sections.Size = UDim2.new(1, -10, 0, 0)
+		sections.AutomaticSize = Enum.AutomaticSize.Y
+		sections.BackgroundTransparency = 1
+		sections.LayoutOrder = 4
+		sections.Parent = detail
+		local layout = Instance.new("UIListLayout")
+		layout.Padding = UDim.new(0, 6)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = sections
+		if #location.sellList > 0 then
+			local heading = Ui.label(
+				sections,
+				T("blocks"),
+				UDim2.new(1, 0, 0, 22),
+				UDim2.new(),
+				15,
+				Ui.colors.header
+			)
+			heading.LayoutOrder = 1
+			local chips = Instance.new("Frame")
+			chips.Size = UDim2.new(1, -4, 0, math.ceil(#location.sellList / 2) * 36 - 4)
+			chips.BackgroundTransparency = 1
+			chips.LayoutOrder = 2
+			chips.Parent = sections
+			local chipLayout = Instance.new("UIGridLayout")
+			chipLayout.CellSize = UDim2.new(0.5, -4, 0, 32)
+			chipLayout.CellPadding = UDim2.fromOffset(4, 4)
+			chipLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			chipLayout.Parent = chips
+			for i, id in ipairs(location.sellList) do
+				local chip = Ui.panel(chips, UDim2.new(), UDim2.new())
+				chip.LayoutOrder = i
+				chip.BackgroundColor3 = Ui.colors.slot
+				local blockName = Ui.label(
+					chip,
+					Strings.itemName(id, nil, locale),
+					UDim2.new(1, -12, 1, 0),
+					UDim2.fromOffset(6, 0),
+					12
+				)
+				blockName.TextWrapped = true
+			end
+		end
+		local bossNames: { string } = {}
+		local bossLevels: { string } = {}
+		for _, boss in ipairs(Config.bosses.bosses) do
+			if boss.location == location.name then
+				table.insert(bossNames, boss.name)
+				table.insert(
+					bossLevels,
+					boss.name .. " · " .. T("location_level", boss.unlockLevel)
+				)
+			end
+		end
+		if #bossNames > 0 then
+			local heading = Ui.label(
+				sections,
+				T("bosses"),
+				UDim2.new(1, 0, 0, 22),
+				UDim2.new(),
+				15,
+				Ui.colors.header
+			)
+			heading.LayoutOrder = 100
+			local bosses = Ui.label(
+				sections,
+				table.concat(bossNames, "\n"),
+				UDim2.new(1, -4, 0, 0),
+				UDim2.new(),
+				13
+			)
+			bosses.TextWrapped = true
+			bosses.AutomaticSize = Enum.AutomaticSize.Y
+			bosses.LayoutOrder = 101
+			local more =
+				Ui.button(sections, T("more_details"), UDim2.new(1, -4, 0, 25), UDim2.new())
+			more.LayoutOrder = 102
+			more.Activated:Connect(function()
+				bosses.Text = if bosses.Text == table.concat(bossNames, "\n")
+					then table.concat(bossLevels, "\n")
+					else table.concat(bossNames, "\n")
+			end)
+		end
+		updateAvailability()
+	end
+	local function requestTeleport(location: Config.Location)
+		if locationAvailable(location) then
+			Remotes.event("Teleport"):FireServer(location.id)
+		end
+	end
+	teleportButton.Activated:Connect(function()
+		if selected then
+			requestTeleport(selected)
+		end
+	end)
+	local drawingTab = false
+	local function drawTab()
+		drawingTab = true
+		local scrollY = locationScroll[locationTab] or 0
+		grid:ClearAllChildren()
+		cards = {}
+		lastLocationClick = nil
+		local layout = Instance.new("UIListLayout")
+		layout.Padding = UDim.new(0, 10)
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
+		layout.Parent = grid
+		local locations: { Config.Location } = {}
+		for _, location in ipairs(Config.locationsFile.locations) do
+			if locationCategory(location) == locationTab then
+				table.insert(locations, location)
+			end
+		end
+		table.sort(locations, function(a, b)
+			return if a.unlockLevel == b.unlockLevel
+				then a.id < b.id
+				else a.unlockLevel < b.unlockLevel
+		end)
+		local row: Frame? = nil
+		local column = 0
+		for i, location in ipairs(locations) do
+			local starting = location.id == "prison"
+			if column == 0 or starting then
+				row = Instance.new("Frame")
+				row.Size = UDim2.new(1, -8, 0, if starting then 110 else 144)
+				row.BackgroundTransparency = 1
+				row.LayoutOrder = i
+				row.Parent = grid
+			end
+			local card = Ui.panel(
+				row :: Frame,
+				UDim2.new(if starting then 1 else 0.5, if starting then -4 else -7, 1, -4),
+				UDim2.new(column * 0.5, 2, 0, 2)
+			)
+			card.Name = "Location_" .. location.id
+			local preview = locationPreview(
+				card,
+				location,
+				if starting then UDim2.new(0.3, -8, 1, -12) else UDim2.new(1, -12, 0, 76),
+				UDim2.fromOffset(6, 6)
+			)
+			local name = Ui.label(
+				card,
+				"",
+				if starting then UDim2.new(0.7, -18, 0, 38) else UDim2.new(1, -12, 0, 32),
+				if starting then UDim2.new(0.3, 6, 0, 12) else UDim2.fromOffset(6, 84),
+				13
+			)
+			name.TextWrapped = true
+			local level = Ui.label(
+				card,
+				if starting then T("location_start") else T("location_level", location.unlockLevel),
+				if starting then UDim2.new(0.7, -18, 0, 20) else UDim2.new(1, -12, 0, 18),
+				if starting then UDim2.new(0.3, 6, 0, 58) else UDim2.fromOffset(6, 118),
+				12
+			)
+			if location.pvp then
+				local badge =
+					Ui.label(card, T("pvp"), UDim2.fromOffset(38, 20), UDim2.new(1, -44, 0, 8), 12)
+				badge.BackgroundTransparency = 0
+				badge.BackgroundColor3 = Ui.colors.close
+				badge.TextXAlignment = Enum.TextXAlignment.Center
+			end
+			table.insert(
+				cards,
+				{ location = location, panel = card, name = name, level = level, preview = preview }
+			)
+			local hit = Ui.button(card, "", UDim2.fromScale(1, 1), UDim2.new())
+			hit.BackgroundTransparency = 1
+			hit.Activated:Connect(function()
+				local now = os.clock()
+				local doubleClick = lastLocationClick == location.id
+					and now - lastLocationClickAt <= 0.35
+				lastLocationClick, lastLocationClickAt = location.id, now
+				selectLocation(location)
+				if doubleClick then
+					lastLocationClick = nil
+					requestTeleport(location)
+				end
+			end)
+			column = if starting then 0 else (column + 1) % 2
+		end
+		for tab, button in pairs(tabButtons) do
+			button.BackgroundColor3 = if tab == locationTab
+				then Ui.colors.buttonBlue
+				else Ui.colors.buttonGrey
+		end
+		grid.CanvasPosition = Vector2.new(0, scrollY)
+		drawingTab = false
+		for _, location in ipairs(locations) do
+			if location.id == selectedLocations[locationTab] then
+				selectLocation(location)
+				return
+			end
+		end
+		if locations[1] then
+			selectLocation(locations[1])
+		end
+	end
+	for i, tab in ipairs({ "mines", "sky", "other" }) do
+		local button = Ui.button(
+			content,
+			T("locations_" .. tab),
+			UDim2.new(1 / 3, -6, 0, 32),
+			UDim2.new((i - 1) / 3, 2, 0, 0)
+		)
+		tabButtons[tab] = button
+		button.Activated:Connect(function()
+			if locationTab ~= tab then
+				locationScroll[locationTab] = grid.CanvasPosition.Y
+				locationTab = tab
+				drawTab()
+			end
+		end)
+	end
+	grid:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+		if not drawingTab then
+			locationScroll[locationTab] = grid.CanvasPosition.Y
+		end
+	end)
+	drawTab()
+	refreshLocations = updateAvailability
+	return win
+end
+
 local windowBuilders: { [string]: () -> Frame } = {
 	inventory = buildInventory,
 	sell = buildSell,
@@ -673,6 +1133,7 @@ local windowBuilders: { [string]: () -> Frame } = {
 	jobs = buildJobs,
 	achievements = buildAchievements,
 	case = buildCase,
+	locations = buildLocations,
 }
 local function open(kind: string)
 	local builder = windowBuilders[kind]
@@ -689,6 +1150,10 @@ local function open(kind: string)
 	openWindow = builder()
 end
 local function refreshWindow()
+	if currentWindowKind == "locations" and refreshLocations then
+		refreshLocations()
+		return
+	end
 	if currentWindowKind and openWindow then
 		local kind = currentWindowKind
 		openWindow:Destroy()
@@ -959,6 +1424,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("jobs")
 	elseif k == Enum.KeyCode.L then
 		open("achievements")
+	elseif k == Enum.KeyCode.M then
+		open("locations")
 	elseif k == Enum.KeyCode.F and profile then
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	elseif k.Value >= Enum.KeyCode.One.Value and k.Value <= Enum.KeyCode.Nine.Value then

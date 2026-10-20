@@ -212,6 +212,21 @@ spawn.Transparency = 1
 spawn.CanCollide = false
 spawn.Parent = root
 
+local arrival = part("LocationSpawn", Vector3.new(4, 1, 4), CFrame.new(0, 1, 16), STONE)
+arrival.Transparency = 1
+arrival.CanCollide = false
+arrival.CanTouch = false
+arrival.CanQuery = false
+arrival:SetAttribute("LocationId", "prison")
+CollectionService:AddTag(arrival, "LocationSpawn")
+
+local teleporter =
+	part("Teleporter", Vector3.new(10, 6, 1), CFrame.new(0, 4, 30), WOOD, Enum.Material.Wood)
+part("TeleporterPost", Vector3.new(1, 4, 1), CFrame.new(-4, 2, 30), WOOD, Enum.Material.Wood)
+part("TeleporterPost", Vector3.new(1, 4, 1), CFrame.new(4, 2, 30), WOOD, Enum.Material.Wood)
+CollectionService:AddTag(teleporter, "Teleporter")
+sign(teleporter, "Телепортатор")
+
 -- NPCs around the plaza
 local function npc(name: string, tag: string, cf: CFrame, text: string): Part
 	local p = part(name, Vector3.new(3, 7, 3), cf, WOOD, Enum.Material.Wood)
