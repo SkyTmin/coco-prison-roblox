@@ -59,6 +59,7 @@ function bestMine() {
 		let total = 0;
 		let detail = [];
 		for (const [bid, share] of Object.entries(loc.mine.shares)) {
+			if (bid === "air") { total += share; continue; } // empty cells: nothing to dig, nothing to earn
 			const b = blocks[bid];
 			const toolLevel = player.tools[b.tool];
 			const tool = toolLevel > 0 ? toolState(b.tool, toolLevel) : null;
@@ -83,7 +84,7 @@ function tryUpgrades() {
 		const t = toolsCfg.tools[toolId];
 		if (player.tools[toolId] === 0) {
 			// buy when the first mine that needs it is unlocked
-			const needed = locations.some((l) => l.kind === "mine" && l.unlockLevel <= player.level && !l.requiresPass && Object.keys(l.mine.shares).some((b) => blocks[b].tool === toolId));
+			const needed = locations.some((l) => l.kind === "mine" && l.unlockLevel <= player.level && !l.requiresPass && Object.keys(l.mine.shares).some((b) => blocks[b] && blocks[b].tool === toolId));
 			if (needed && player.money >= t.buyPrice) {
 				player.money -= t.buyPrice;
 				player.tools[toolId] = 1;

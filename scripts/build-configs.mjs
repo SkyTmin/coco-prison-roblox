@@ -20,6 +20,7 @@ const pickaxeWiki = read("wiki/client-audit/content-analysis/pickaxe-upgrades-re
 const otherWiki = read("wiki/client-audit/content-analysis/other-upgrades-recovery.json");
 const armorWiki = read("wiki/client-audit/content-analysis/armor-and-axe-recovery.json");
 const bossWiki = read("wiki/client-audit/content-analysis/boss-menu-recovery.json");
+const sharesWiki = read("wiki/in-game-wiki/mine-shares.json");
 
 // ---------------------------------------------------------------- levels
 const levels = levelsWiki.levels.map((l) => ({
@@ -48,7 +49,12 @@ const locations = [];
 for (const loc of pricesWiki.locations) {
 	const dec = decisions.mines[loc.id] || {};
 	const def = decisions.mines._default;
-	const shares = dec.shares || Object.fromEntries(loc.blocks.map((b) => [b.id, 1 / loc.blocks.length]));
+	// Mine composition: confirmed menu tooltips ([меню]) win over design decisions; "air" = empty cells.
+	const wikiShares = sharesWiki.mines[loc.id];
+	const shares = wikiShares
+		? Object.fromEntries(Object.entries(wikiShares).map(([k, v]) => [k, v / 100]))
+		: dec.shares || Object.fromEntries(loc.blocks.map((b) => [b.id, 1 / loc.blocks.length]));
+	if (wikiShares) for (const k of Object.keys(wikiShares)) if (k !== "air" && !loc.blocks.some((b) => b.id === k)) throw new Error(`share block ${k} not in price list of ${loc.id}`);
 	for (const b of loc.blocks) {
 		const phys = decisions.blocks[b.id];
 		if (!phys) throw new Error(`no physics for block ${b.id}`);
@@ -78,6 +84,7 @@ for (const loc of pricesWiki.locations) {
 			shares,
 		},
 		sellList: loc.blocks.map((b) => b.id),
+		sharesSource: wikiShares ? "[меню]" : "[решение]",
 	});
 }
 write("blocks.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; твёрдость [ваниль]", money: decisions.money, blocks });

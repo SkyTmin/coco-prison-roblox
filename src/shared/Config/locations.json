@@ -17,11 +17,9 @@
         "resetSeconds": 300,
         "warnSeconds": 15,
         "shares": {
-          "dirt": 0.6,
-          "sand": 0.2,
-          "gravel": 0.12,
-          "oak_log": 0.05,
-          "melon": 0.03
+          "dirt": 0.34,
+          "sand": 0.33,
+          "gravel": 0.33
         }
       },
       "sellList": [
@@ -30,7 +28,8 @@
         "dirt",
         "oak_log",
         "melon"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "quarry",
@@ -48,10 +47,10 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "stone": 0.7,
-          "coal_ore": 0.18,
-          "iron_ore": 0.09,
-          "coal_block": 0.03
+          "stone": 0.81,
+          "coal_ore": 0.12,
+          "iron_ore": 0.05,
+          "coal_block": 0.02
         }
       },
       "sellList": [
@@ -61,7 +60,8 @@
         "coal_ore",
         "iron_ore",
         "coal_block"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "mountain_foot",
@@ -79,16 +79,17 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "red_sand": 0.7,
-          "iron_ore": 0.2,
-          "gold_ore": 0.1
+          "red_sand": 0.91,
+          "iron_ore": 0.06,
+          "gold_ore": 0.03
         }
       },
       "sellList": [
         "red_sand",
         "iron_ore",
         "gold_ore"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "underworld",
@@ -106,9 +107,10 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "netherite": 0.55,
-          "soul_sand": 0.2,
-          "quartz_ore": 0.25
+          "netherite": 0.75,
+          "quartz_ore": 0.1,
+          "soul_sand": 0.1,
+          "air": 0.05
         }
       },
       "sellList": [
@@ -116,7 +118,8 @@
         "soul_sand",
         "quartz",
         "quartz_ore"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "pyramid",
@@ -134,14 +137,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "sandstone": 0.5,
-          "red_sandstone": 0.5
+          "sandstone": 0.61,
+          "red_sandstone": 0.39
         }
       },
       "sellList": [
         "sandstone",
         "red_sandstone"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "royal_garden",
@@ -159,14 +163,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "wisteria_leaves": 0.5,
-          "cherry_log": 0.5
+          "wisteria_leaves": 0.7,
+          "cherry_log": 0.3
         }
       },
       "sellList": [
         "wisteria_leaves",
         "cherry_log"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "sunken_lighthouse",
@@ -184,16 +189,16 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "cyan_concrete": 0.3333333333333333,
-          "prismarine": 0.3333333333333333,
-          "prismarine_bricks": 0.3333333333333333
+          "cyan_concrete": 0.7,
+          "prismarine": 0.3
         }
       },
       "sellList": [
         "cyan_concrete",
         "prismarine",
         "prismarine_bricks"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "end_castle",
@@ -218,7 +223,8 @@
       "sellList": [
         "end_stone_bricks",
         "purpur"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "spider_lair",
@@ -236,14 +242,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "white_wool": 0.5,
-          "cobweb": 0.5
+          "white_wool": 0.9,
+          "cobweb": 0.1
         }
       },
       "sellList": [
         "white_wool",
         "cobweb"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "snowy_hand",
@@ -268,7 +275,8 @@
       "sellList": [
         "ice",
         "packed_ice"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "market",
@@ -286,16 +294,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "yellow_wool": 0.3333333333333333,
-          "red_wool": 0.3333333333333333,
-          "lime_wool": 0.3333333333333333
+          "red_wool": 1
         }
       },
       "sellList": [
         "yellow_wool",
         "red_wool",
         "lime_wool"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "leprechaun_valley",
@@ -313,11 +320,7 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "orange_concrete": 0.2,
-          "yellow_concrete": 0.2,
-          "lime_concrete": 0.2,
-          "purple_concrete": 0.2,
-          "red_concrete": 0.2
+          "yellow_concrete": 1
         }
       },
       "sellList": [
@@ -326,7 +329,8 @@
         "lime_concrete",
         "purple_concrete",
         "red_concrete"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "castle",
@@ -344,14 +348,14 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "quartz_block": 0.5,
-          "chiseled_quartz": 0.5
+          "quartz_block": 1
         }
       },
       "sellList": [
         "quartz_block",
         "chiseled_quartz"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "inside_out",
@@ -374,7 +378,8 @@
       },
       "sellList": [
         "dark_oak_leaves"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "kyoto",
@@ -392,14 +397,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "pink_wool": 0.5,
-          "sea_lantern": 0.5
+          "pink_wool": 0.9,
+          "sea_lantern": 0.1
         }
       },
       "sellList": [
         "pink_wool",
         "sea_lantern"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "farm",
@@ -417,16 +423,17 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "pumpkin": 0.3333333333333333,
-          "melon": 0.3333333333333333,
-          "green_wool": 0.3333333333333333
+          "melon": 0.46,
+          "pumpkin": 0.46,
+          "green_wool": 0.09
         }
       },
       "sellList": [
         "pumpkin",
         "melon",
         "green_wool"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "barn",
@@ -449,7 +456,8 @@
       },
       "sellList": [
         "jack_o_lantern"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "edge_gate",
@@ -467,14 +475,15 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "magenta_concrete": 0.5,
-          "black_glass": 0.5
+          "magenta_concrete": 0.91,
+          "black_glass": 0.09
         }
       },
       "sellList": [
         "magenta_concrete",
         "black_glass"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "tree",
@@ -497,7 +506,8 @@
       },
       "sellList": [
         "white_concrete"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "church",
@@ -520,7 +530,8 @@
       },
       "sellList": [
         "clay"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "purgatory",
@@ -543,7 +554,8 @@
       },
       "sellList": [
         "chiseled_sandstone"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "eden",
@@ -566,7 +578,8 @@
       },
       "sellList": [
         "brown_mushroom_block"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "cherubim",
@@ -589,7 +602,8 @@
       },
       "sellList": [
         "snow"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "gate",
@@ -612,7 +626,8 @@
       },
       "sellList": [
         "smooth_sandstone"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "paradise",
@@ -635,7 +650,8 @@
       },
       "sellList": [
         "red_mushroom_block"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "basement",
@@ -653,13 +669,9 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "dirt": 0.3,
-          "sand": 0.3,
-          "gravel": 0.3,
-          "lapis_block": 0.04,
-          "iron_block": 0.03,
-          "gold_block": 0.02,
-          "diamond_block": 0.01
+          "dirt": 0.34,
+          "sand": 0.33,
+          "gravel": 0.33
         }
       },
       "sellList": [
@@ -670,7 +682,8 @@
         "iron_block",
         "gold_block",
         "diamond_block"
-      ]
+      ],
+      "sharesSource": "[меню]"
     },
     {
       "id": "fraction_base",
@@ -688,11 +701,9 @@
         "resetSeconds": 480,
         "warnSeconds": 15,
         "shares": {
-          "cobblestone": 0.2,
-          "stone": 0.2,
-          "coal": 0.2,
-          "coal_ore": 0.2,
-          "iron_ore": 0.2
+          "stone": 0.85,
+          "coal_ore": 0.1,
+          "iron_ore": 0.05
         }
       },
       "sellList": [
@@ -701,7 +712,8 @@
         "coal",
         "coal_ore",
         "iron_ore"
-      ]
+      ],
+      "sharesSource": "[меню]"
     }
   ]
 }
