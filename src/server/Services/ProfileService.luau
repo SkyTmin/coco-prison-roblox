@@ -112,6 +112,37 @@ local function migrate(data: any): Profile
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
+	-- v3 remains compatible. Seed absent chain counters once, without paying legacy progress.
+	local seeds: { [string]: number } = { pickaxe = 0, shovel = 0, axe = 0, sword = 0 }
+	local seen: { [string]: boolean } = {}
+	for _, block in pairs(Config.blocks) do
+		local counter = block.upgradeCounter
+		local chain = block.tool
+		if counter and seeds[chain] ~= nil and not seen[counter] then
+			seen[counter] = true
+			seeds[chain] += profile.counters[counter] or 0
+		end
+	end
+	local cfg = Config.achievementsCfg
+	for chain, definition in pairs(cfg.chains) do
+		if profile.counters[definition.counter] == nil then
+			local count = seeds[chain] or 0
+			profile.counters[definition.counter] = count
+			local satisfied = 0
+			for tier = 1, cfg.tiers do
+				if count < math.round(cfg.thresholdBase * cfg.thresholdGrowth ^ (tier - 1)) then
+					break
+				end
+				satisfied = tier
+			end
+			profile.achievements[chain] = math.max(profile.achievements[chain] or 0, satisfied)
+		end
+	end
+	for id in pairs(profile.achievements) do
+		if string.sub(id, 1, 7) == "digger_" then
+			profile.achievements[id] = nil
+		end
+	end
 	local hunger = profile.hunger
 	profile.hunger = if typeof(hunger) == "number" and hunger == hunger
 		then math.clamp(hunger, 0, Config.rules.survival.hunger.max)

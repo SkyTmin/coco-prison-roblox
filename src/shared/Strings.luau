@@ -6,6 +6,86 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+	kd_label = { ru = "У/С", en = "K/D", es = "B/M", fr = "É/M" },
+	exchange = { ru = "Обменять", en = "Exchange", es = "Canjear", fr = "Échanger" },
+	exchange_stars = {
+		ru = "Обмен звёзд",
+		en = "Star exchange",
+		es = "Canje de estrellas",
+		fr = "Échange d’étoiles",
+	},
+	exchange_shards = {
+		ru = "Обмен осколков",
+		en = "Shard exchange",
+		es = "Canje de fragmentos",
+		fr = "Échange de fragments",
+	},
+	exchange_need_items = {
+		ru = "Недостаточно предметов для обмена",
+		en = "Not enough items to exchange",
+		es = "No tienes suficientes objetos para el canje",
+		fr = "Pas assez d’objets pour l’échange",
+	},
+	exchanged = {
+		ru = "Получено: %s",
+		en = "Received: %s",
+		es = "Recibiste: %s",
+		fr = "Reçu : %s",
+	},
+	item_ancient_key = {
+		ru = "Древний ключ",
+		en = "Ancient key",
+		es = "Llave antigua",
+		fr = "Clé ancienne",
+	},
+	item_improved_ancient_key = {
+		ru = "Улучшенный древний ключ",
+		en = "Improved ancient key",
+		es = "Llave antigua mejorada",
+		fr = "Clé ancienne améliorée",
+	},
+	item_moon_steel = {
+		ru = "Лунная сталь",
+		en = "Moon steel",
+		es = "Acero lunar",
+		fr = "Acier lunaire",
+	},
+	item_fire_shard = {
+		ru = "Огненный осколок",
+		en = "Fire shard",
+		es = "Fragmento de fuego",
+		fr = "Fragment de feu",
+	},
+	item_moon_blade = {
+		ru = "Лунное лезвие",
+		en = "Moon blade",
+		es = "Hoja lunar",
+		fr = "Lame lunaire",
+	},
+	item_volcanic_stone = {
+		ru = "Вулканический камень",
+		en = "Volcanic stone",
+		es = "Piedra volcánica",
+		fr = "Pierre volcanique",
+	},
+	item_dispeller = {
+		ru = "Развеиватель",
+		en = "Dispeller",
+		es = "Disipador",
+		fr = "Dissipateur",
+	},
+	item_ancient_powder = {
+		ru = "Древний порошок",
+		en = "Ancient powder",
+		es = "Polvo antiguo",
+		fr = "Poudre ancienne",
+	},
+	item_nickname_key = {
+		ru = "Ключ смены ника",
+		en = "Nickname key",
+		es = "Llave de apodo",
+		fr = "Clé de pseudonyme",
+	},
 	ender_chest = {
 		ru = "Эндер-сундук",
 		en = "Ender chest",

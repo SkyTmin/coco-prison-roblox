@@ -890,17 +890,17 @@
     "hunger": {
       "max": 20,
       "drainPerMinuteIdle": 0,
-      "drainPerBlockDug": 0.025,
-      "drainPerWalkSecond": 0.01,
-      "drainPerSprintSecond": 0.05,
-      "drainPerJump": 0.05,
-      "drainPerHealthRegen": 0.6,
+      "drainPerBlockDug": 0.00125,
+      "drainPerWalkSecond": 0,
+      "drainPerSprintSecond": 0.1,
+      "drainPerJump": 0.0125,
+      "drainPerHealthRegen": 1.5,
       "regenHealthAbove": 18,
       "regenHealthPerSecond": 1,
       "starveBelow": 0,
       "starveDamagePerSecond": 0.5,
       "starveMinHealth": 1,
-      "_source": "[владелец] 21.10: голод по Minecraft, от действий. [решение] ванильное истощение пересчитано в очки голода: ~40 блоков или ~100 с ходьбы или ~20 прыжков = 1 очко; регенерация 1 HP стоит 0.6 очка"
+      "_source": "[владелец] 21.10: как в Minecraft — без урона еда почти не тратится. [ваниль] истощение: блок 0.005, прыжок 0.05, спринт 0.1/м, регенерация 6 на 1 HP; 4 истощения = 1 очко голода → блок 0.00125, прыжок 0.0125, регенерация 1 HP = 1.5 очка, ходьба 0"
     },
     "food": {
       "apple": 4,

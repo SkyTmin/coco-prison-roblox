@@ -19,6 +19,7 @@ local BLOCK_TAG = "MineBlock"
 local CHUNK = 512 -- parts created per frame during rebuild
 
 export type Mine = {
+	shares: { [string]: number },
 	id: string,
 	location: Config.Location,
 	anchor: BasePart,
@@ -144,7 +145,7 @@ local function rebuild(mine: Mine)
 	local rng = Random.new()
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
 	for i = 1, total do
-		mine.cells[i] = pickBlock(mine.location.mine.shares, rng)
+		mine.cells[i] = pickBlock(mine.shares, rng)
 		if i % 4096 == 0 then
 			task.wait()
 		end
@@ -263,9 +264,12 @@ local function register(anchor: Instance)
 	local top = anchor.Position + Vector3.new(0, anchor.Size.Y / 2, 0)
 	local origin = top
 		+ Vector3.new(-(size[1] - 1) * BLOCK / 2, -BLOCK / 2, -(size[3] - 1) * BLOCK / 2)
+	-- per-mine composition override from locations.json (e.g. prison_small: only melon + oak)
+	local override = (location :: any).mines and (location :: any).mines[mineId]
 	local mine: Mine = {
 		id = mineId,
 		location = location,
+		shares = if override and override.shares then override.shares else location.mine.shares,
 		anchor = anchor,
 		folder = folder,
 		size = size,

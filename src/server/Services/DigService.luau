@@ -17,6 +17,7 @@ local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local HungerService = require(script.Parent.HungerService)
+local AchievementService = require(script.Parent.AchievementService)
 
 local MAX_DISTANCE = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks from the eye
 local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
@@ -198,6 +199,10 @@ local function onDigFinish(player: Player, part: any)
 		end
 	end)
 	HungerService.OnBlockDug(player)
+	local chain = if block.tool == "any" then (toolNow or "shovel") else block.tool
+	if chain == "pickaxe" or chain == "shovel" or chain == "axe" then
+		AchievementService.AddProgress(player, chain, 1)
+	end
 	if overflow > 0 then
 		toast(player, "bag_full")
 	end

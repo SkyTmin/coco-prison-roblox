@@ -215,6 +215,26 @@ npc({
 	apron = Color3.fromRGB(250, 250, 250),
 })
 npc({
+	name = "StarExchange",
+	tag = "StarExchange",
+	cf = facing(136, -100, 136, -90),
+	label = "Обменник звёзд",
+	skin = SKIN[2],
+	shirt = Color3.fromRGB(60, 50, 110),
+	pants = Color3.fromRGB(40, 35, 60),
+	hat = "cap",
+})
+npc({
+	name = "ShardExchange",
+	tag = "ShardExchange",
+	cf = facing(92, -110, 100, -110),
+	label = "Обменник осколков",
+	skin = SKIN[3],
+	shirt = Color3.fromRGB(120, 40, 40),
+	pants = Color3.fromRGB(50, 40, 40),
+	hat = "band",
+})
+npc({
 	name = "Trainer",
 	tag = "TrainerNpc",
 	cf = facing(78, 132, 70, 132),
@@ -352,6 +372,15 @@ chest("AncientCase", "AncientCase", Vector3.new(26, 0, -34), centre, {
 	glow = Color3.fromRGB(140, 90, 255),
 	label = "Древний кейс",
 	caseId = "ancientCase",
+	pedestal = "px_stone",
+})
+chest("ArtifactCase", "ArtifactCase", Vector3.new(36, 0, 14), centre, {
+	wood = Color3.fromRGB(40, 90, 100),
+	band = Color3.fromRGB(220, 180, 70),
+	lock = Color3.fromRGB(255, 240, 200),
+	glow = Color3.fromRGB(120, 230, 255),
+	label = "Кейс артефактов",
+	caseId = "artifactCase",
 	pedestal = "px_stone",
 })
 chest("EnderChest", "EnderChest", Vector3.new(-36, 0, 14), centre, {

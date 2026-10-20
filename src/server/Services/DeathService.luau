@@ -9,6 +9,7 @@ local Config = require(Shared.Config)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local AchievementService = require(script.Parent.AchievementService)
 
 local KEPT_TOOLS = { pickaxe = true, shovel = true, axe = true, sword = true, shears = true }
 local ARMOR = { helmet = true, chestplate = true, leggings = true, boots = true }
@@ -112,7 +113,34 @@ end
 
 local function died(player: Player, character: Model)
 	local profile = ProfileService.Get(player)
-	if not profile or not character:IsDescendantOf(workspace) or not inPvp(character, profile) then
+	if not profile then
+		return
+	end
+	ProfileService.Mutate(player, function(p)
+		p.stats.deaths = (p.stats.deaths or 0) + 1
+	end)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local userId = humanoid and humanoid:GetAttribute("LastHitBy")
+	local hitAt = humanoid and humanoid:GetAttribute("LastHitAt")
+	if
+		typeof(userId) == "number"
+		and typeof(hitAt) == "number"
+		and os.clock() - hitAt >= 0
+		and os.clock() - hitAt <= 10
+	then
+		local killer = Players:GetPlayerByUserId(userId)
+		if killer and killer ~= player and ProfileService.Get(killer) then
+			local swordHeld = false
+			ProfileService.Mutate(killer, function(p)
+				p.stats.kills = (p.stats.kills or 0) + 1
+				swordHeld = InventoryService.heldTool(p) == "sword"
+			end)
+			if swordHeld then
+				AchievementService.AddProgress(killer, "sword", 1)
+			end
+		end
+	end
+	if not character:IsDescendantOf(workspace) or not inPvp(character, profile) then
 		return
 	end
 	local root = character:FindFirstChild("HumanoidRootPart")

@@ -16,7 +16,13 @@ local ProfessionService = require(script.Parent.ProfessionService)
 
 local SHOP_PRICES: { [string]: number } = { shovel = 4, axe = 4, pickaxe = 22.5, shears = 4000 } -- [меню]
 local FOOD_PRICES: { [string]: number } = { apple = 0.03, bread = 0.25, cooked_chicken = 0.5 } -- [меню]
-local PROMPTS = { SellPoint = "sell", ItemShop = "shop", FoodShop = "food" }
+local PROMPTS = {
+	SellPoint = "sell",
+	ItemShop = "shop",
+	FoodShop = "food",
+	StarExchange = "stars",
+	ShardExchange = "shards",
+}
 
 local EconomyService = {}
 
@@ -33,15 +39,65 @@ end
 local NPC_RANGE = 14
 local function nearNpc(player: Player, tag: string): boolean
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root or not root:IsA("BasePart") then
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not root or not root:IsA("BasePart") or not humanoid or humanoid.Health <= 0 then
 		return false
 	end
 	for _, npc in ipairs(CollectionService:GetTagged(tag)) do
-		if npc:IsA("BasePart") and (npc.Position - root.Position).Magnitude <= NPC_RANGE then
+		if
+			npc:IsA("BasePart")
+			and npc:IsDescendantOf(workspace)
+			and (npc.Position - root.Position).Magnitude <= NPC_RANGE
+		then
 			return true
 		end
 	end
 	return false
+end
+
+local function exchange(player: Player, kind: any, id: any)
+	if typeof(kind) ~= "string" or typeof(id) ~= "string" then
+		return
+	end
+	local input: string
+	local cost: number
+	local tag: string
+	if kind == "stars" then
+		local price = Config.market.starExchange[id]
+		if typeof(price) ~= "number" then
+			return
+		end
+		input, cost, tag = "ancient_star", price, "StarExchange"
+	elseif kind == "shards" then
+		local offer = Config.market.shardExchange[id]
+		if typeof(offer) ~= "table" then
+			return
+		end
+		input, cost, tag = offer.input, offer.count, "ShardExchange"
+	else
+		return
+	end
+	if not ProfileService.Get(player) or not nearNpc(player, tag) then
+		return
+	end
+	local result = ""
+	ProfileService.Mutate(player, function(p)
+		if InventoryService.count(p, input) < cost then
+			result = "exchange_need_items"
+			return
+		end
+		if not InventoryService.canAdd(p, id, 1) then
+			result = "bag_full"
+			return
+		end
+		-- No yields: inputs and output change atomically, using only the server offer.
+		InventoryService.remove(p, input, cost)
+		InventoryService.add(p, id, 1)
+		result = "exchanged"
+	end)
+	if result ~= "" then
+		toast(player, result, Strings.itemName(id, nil, Strings.localeOf(player)))
+	end
 end
 
 local function sell(player: Player)
@@ -177,36 +233,35 @@ local function levelUp(player: Player)
 	toast(player, "level_reached", rule.level)
 end
 
-local function bindPrompt(part: Instance, kind: string)
+local function bindPrompt(part: Instance, kind: string, tag: string)
 	if not part:IsA("BasePart") then
 		return
 	end
 	local prompt = part:FindFirstChildOfClass("ProximityPrompt") or Instance.new("ProximityPrompt")
-	prompt.ActionText = Strings.t(
-		if kind == "sell"
-			then "sell_prompt"
-			elseif kind == "shop" then "shop_prompt"
-			else "food_prompt"
-	)
+	prompt.ActionText =
+		Strings.t(if kind == "stars" or kind == "shards" then "exchange" else kind .. "_prompt")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 8
 	prompt.Parent = part
 	prompt.Triggered:Connect(function(player)
-		Remotes.event("OpenMenu"):FireClient(player, kind)
+		if part:IsDescendantOf(workspace) and nearNpc(player, tag) then
+			Remotes.event("OpenMenu"):FireClient(player, kind)
+		end
 	end)
 end
 
 function EconomyService.Start()
 	for tag, kind in pairs(PROMPTS) do
 		for _, part in ipairs(CollectionService:GetTagged(tag)) do
-			bindPrompt(part, kind)
+			bindPrompt(part, kind, tag)
 		end
 		CollectionService:GetInstanceAddedSignal(tag):Connect(function(part)
-			bindPrompt(part, kind)
+			bindPrompt(part, kind, tag)
 		end)
 	end
 	Remotes.event("Sell").OnServerEvent:Connect(sell)
 	Remotes.event("BuyItem").OnServerEvent:Connect(buy)
+	Remotes.event("Exchange").OnServerEvent:Connect(exchange)
 	Remotes.event("UpgradeItem").OnServerEvent:Connect(upgrade)
 	Remotes.event("LevelUp").OnServerEvent:Connect(levelUp)
 	Remotes.event("InventoryMove").OnServerEvent:Connect(function(player, from, to)

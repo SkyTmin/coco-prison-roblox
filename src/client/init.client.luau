@@ -20,6 +20,8 @@ local Types = require(Shared.Types)
 local Ui = require(script.Ui)
 local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
+local AchievementsWindow = require(script.AchievementsWindow)
+local ExchangeWindow = require(script.ExchangeWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
@@ -89,14 +91,15 @@ end
 cameraButton.Activated:Connect(toggleFirstPerson)
 
 -- ---------------------------------------------------------------- HUD: stats panel (right), hints, toast, combo
-local stats = Ui.panel(gui, UDim2.fromOffset(190, 96), UDim2.new(1, -200, 0.42, 0))
+local stats = Ui.panel(gui, UDim2.fromOffset(190, 114), UDim2.new(1, -200, 0.42, 0))
 Ui.label(stats, "PRISON", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 2), 13, Ui.colors.header)
 local statLevel = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 20), 14)
 local statMoney = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 38), 14)
 local statBlocks = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 56), 14)
 local statRats = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 74), 14)
+local statKD = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 92), 14)
 
-local needsPanel = Ui.panel(gui, UDim2.fromOffset(190, 78), UDim2.new(1, -200, 0.42, 102))
+local needsPanel = Ui.panel(gui, UDim2.fromOffset(190, 78), UDim2.new(1, -200, 0.42, 120))
 type Need = "hygiene" | "sleep" | "toilet"
 local needNames: { Need } = { "hygiene", "sleep", "toilet" }
 local needBars: { [string]: Frame } = {}
@@ -485,12 +488,14 @@ local currentWindowKind: string? = nil
 local refreshLocations: (() -> ())? = nil
 local refreshInventory: (() -> ())? = nil
 local refreshChest: (() -> ())? = nil
+local refreshMenu: ((Types.Profile?) -> ())? = nil
 local openedCaseId = "ordinaryCase"
 local function closeWindow()
 	if currentWindowKind == "case" then
 		Remotes.event("CaseClose"):FireServer(openedCaseId)
 	end
 	refreshLocations = nil
+	refreshMenu = nil
 	refreshInventory, refreshChest = nil, nil
 	if openWindow then
 		openWindow:Destroy()
@@ -908,96 +913,6 @@ local function buildJobs(): Frame
 				Remotes.event("SpendPoint"):FireServer(kind)
 			end)
 		end
-	end
-	return win
-end
-
--- [решение] Same owner-specified thresholds and rewards as AchievementService.
-local function buildAchievements(): Frame
-	local win, content =
-		createWindow(gui, T("achievements"), UDim2.fromOffset(772, 486), closeWindow)
-	local p = profile
-	if not p then
-		return win
-	end
-	for i, blockId in ipairs({ "dirt", "sand", "gravel", "coal_ore", "oak_log" }) do
-		local id = "digger_" .. blockId
-		local claimed = math.clamp(p.achievements[id] or 0, 0, 12)
-		local tier = math.min(claimed + 1, 12)
-		local threshold = math.floor(64 * 1.7 ^ (tier - 1) + 0.5)
-		local counter = Config.blocks[blockId].upgradeCounter
-		local progress = p.counters[counter] or 0
-		local claimable = claimed < 12 and progress >= threshold
-		local card = Ui.panel(
-			content,
-			UDim2.fromOffset(244, 210),
-			UDim2.fromOffset(4 + ((i - 1) % 3) * 252, 4 + math.floor((i - 1) / 3) * 218)
-		)
-		local title = Ui.label(
-			card,
-			T(id),
-			UDim2.new(1, -12, 0, 36),
-			UDim2.fromOffset(6, 4),
-			14,
-			Ui.colors.header
-		)
-		title.TextWrapped = true
-		local stars = Ui.label(
-			card,
-			'<font color="#FFAA28">'
-				.. string.rep("★", claimed)
-				.. '</font><font color="#96969E">'
-				.. string.rep("☆", 12 - claimed)
-				.. "</font>",
-			UDim2.new(1, -12, 0, 24),
-			UDim2.fromOffset(6, 42),
-			18
-		)
-		stars.RichText = true
-		local track = Ui.panel(card, UDim2.new(1, -12, 0, 24), UDim2.fromOffset(6, 74))
-		local fill = Instance.new("Frame")
-		fill.Size = UDim2.fromScale(math.clamp(progress / threshold, 0, 1), 1)
-		fill.BackgroundColor3 = Ui.colors.buttonGreen
-		fill.BorderSizePixel = 0
-		fill.Parent = track
-		local value = Ui.label(
-			track,
-			string.format("%s / %s", Strings.big(progress), Strings.big(threshold)),
-			UDim2.fromScale(1, 1),
-			UDim2.fromOffset(0, 0),
-			13
-		)
-		value.TextXAlignment = Enum.TextXAlignment.Center
-		value.ZIndex = fill.ZIndex + 1
-		local reward = if claimed == 12
-			then T("achievement_complete")
-			else T("reward") .. ": " .. tostring(tier * 10) .. " $"
-		if claimed < 12 and tier % 4 == 0 then
-			reward ..= " + " .. T("item_booster_money") .. " ×1"
-		end
-		local rewardLabel = Ui.label(
-			card,
-			reward,
-			UDim2.new(1, -12, 0, 64),
-			UDim2.fromOffset(6, 102),
-			12,
-			Ui.colors.money
-		)
-		rewardLabel.TextWrapped = true
-		local button = Ui.button(
-			card,
-			T("claim"),
-			UDim2.new(1, -12, 0, 30),
-			UDim2.new(0, 6, 1, -36),
-			if claimable then Ui.colors.buttonGreen else Ui.colors.buttonGrey
-		)
-		button.Interactable = claimable
-		button.AutoButtonColor = claimable
-		button.Activated:Connect(function()
-			if claimable then
-				Remotes.event("ClaimAchievement"):FireServer(id, tier)
-			end
-		end)
 	end
 	return win
 end
@@ -1540,7 +1455,24 @@ local windowBuilders: { [string]: () -> Frame } = {
 	upgrade = buildUpgrade,
 	level = buildLevel,
 	jobs = buildJobs,
-	achievements = buildAchievements,
+	achievements = function()
+		local win, refresh =
+			AchievementsWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
+	stars = function()
+		local win, refresh =
+			ExchangeWindow.build(gui, "stars", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
+	shards = function()
+		local win, refresh =
+			ExchangeWindow.build(gui, "shards", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	case = buildCase,
 	locations = buildLocations,
 }
@@ -1559,6 +1491,10 @@ local function open(kind: string)
 	openWindow = builder()
 end
 local function refreshWindow(force: boolean?)
+	if not force and refreshMenu then
+		refreshMenu(profile)
+		return
+	end
 	if not force and currentWindowKind == "inventory" and refreshInventory then
 		refreshInventory()
 		return
@@ -1598,6 +1534,8 @@ local function render(p: Types.Profile)
 	statMoney.TextColor3 = Ui.colors.money
 	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
+	statKD.Text =
+		string.format("%s  %d / %d", T("kd_label"), p.stats.kills or 0, p.stats.deaths or 0)
 	for _, need in ipairs(needNames) do
 		needLabels[need].Text = T("need_" .. need)
 		local value = math.clamp(p.needs[need], 0, 100)
@@ -2014,8 +1952,8 @@ local function updateLayout()
 	statsScale.Scale, needsScale.Scale = if mobile then 0.65 else 1, if mobile then 0.65 else 1
 	stats.Position = if mobile then UDim2.new(1, -132, 0, 64) else UDim2.new(1, -200, 0.42, 0)
 	needsPanel.Position = if mobile
-		then UDim2.new(1, -132, 0, 130)
-		else UDim2.new(1, -200, 0.42, 102)
+		then UDim2.new(1, -132, 0, 142)
+		else UDim2.new(1, -200, 0.42, 120)
 	cameraButton.Parent = if mobile then touchActions else gui
 	cameraButton.Size = if mobile then UDim2.fromOffset(64, 48) else UDim2.fromOffset(150, 28)
 	cameraButton.Position = if mobile

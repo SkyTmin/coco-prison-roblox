@@ -10,13 +10,50 @@ local CombatService = {}
 local lastCombat: { [Player]: number } = {}
 local started = false
 
-function CombatService.MarkHit(player: Player, source: "player" | "boss" | "mob")
+function CombatService.MarkHit(player: Player, source: "player" | "boss" | "mob", attacker: Player?)
+	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid:SetAttribute(
+			"LastHitBy",
+			if source == "player" and attacker then attacker.UserId else nil
+		)
+		humanoid:SetAttribute("LastHitAt", os.clock())
+	end
 	if source ~= "player" and source ~= "boss" then
 		return
 	end
 	local now = os.clock()
 	lastCombat[player] = now
 	player:SetAttribute("LastCombatAt", now)
+end
+
+-- Validated combat callers use this entry point so attribution precedes a lethal hit.
+function CombatService.ApplyDamage(
+	humanoid: Humanoid,
+	amount: number,
+	source: "player" | "boss" | "mob",
+	attacker: Player?
+)
+	if amount ~= amount or amount <= 0 or amount == math.huge or humanoid.Health <= 0 then
+		return
+	end
+	local character = humanoid.Parent
+	if character and character:FindFirstChildOfClass("ForceField") then
+		return
+	end
+	local victim = if character and character:IsA("Model")
+		then Players:GetPlayerFromCharacter(character)
+		else nil
+	if victim then
+		CombatService.MarkHit(victim, source, attacker)
+	else
+		humanoid:SetAttribute(
+			"LastHitBy",
+			if source == "player" and attacker then attacker.UserId else nil
+		)
+		humanoid:SetAttribute("LastHitAt", os.clock())
+	end
+	humanoid:TakeDamage(amount)
 end
 
 function CombatService.remainingSeconds(player: Player): number
