@@ -5,7 +5,7 @@
 -- per item id and cloned for every character that holds the item.
 --
 -- Model frame: the sprite lies in the Y–Z plane of the root part (thickness along X, like the old
--- decal plane): image up = +Y, image right = −Z. Root part = sprite bounds, invisible.
+-- decal plane): image up = +Y, image right = +Z. Root part = sprite bounds, invisible.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
@@ -61,7 +61,7 @@ local function build(key: string, voxels: Voxels, pixel: number, depth: number):
 		-- centre of the rect in sprite space, origin at the sprite centre
 		local cx = (x + w / 2 - voxels.w / 2) * pixel
 		local cy = (voxels.h / 2 - (y + h / 2)) * pixel
-		local offset = CFrame.new(0, cy, -cx)
+		local offset = CFrame.new(0, cy, cx) -- image right = +Z (checked on the live character)
 		p.CFrame = root.CFrame * offset
 		p.Color = hexColor(voxels.p[pi + 1])
 		p.Material = Enum.Material.SmoothPlastic
