@@ -4,32 +4,67 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local CombatService = require(script.Parent.CombatService)
 
 local LocationService = {}
 local started = false
 local lastTeleport: { [Player]: number } = {}
 local prompts: { [Instance]: { prompt: ProximityPrompt, connection: RBXScriptConnection } } = {}
 local TELEPORT_INTERVAL = 0.5 -- [решение] throttle repeated client intents
+type Channel = {
+	character: Model,
+	humanoid: Humanoid,
+	root: BasePart,
+	spawn: BasePart,
+	locationId: string,
+	position: Vector3,
+	finishesAt: number,
+	died: RBXScriptConnection?,
+}
+local pending: { [Player]: Channel } = {}
 
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
+end
+
+local function clearChannel(player: Player)
+	local channel = pending[player]
+	if channel and channel.died then
+		channel.died:Disconnect()
+	end
+	pending[player] = nil
+end
+
+local function cancel(player: Player)
+	if not pending[player] then
+		return
+	end
+	clearChannel(player)
+	Remotes.event("TeleportChannel"):FireClient(player, nil)
+	toast(player, "teleport_cancelled")
 end
 
 local function teleport(player: Player, locationId: any)
 	if typeof(locationId) ~= "string" then
 		return
 	end
+	cancel(player)
 	local now = os.clock()
 	if now - (lastTeleport[player] or -math.huge) < TELEPORT_INTERVAL then
 		return
 	end
 	lastTeleport[player] = now
+	if CombatService.inCombat(player) then
+		toast(player, "teleport_in_combat", math.ceil(CombatService.remainingSeconds(player)))
+		return
+	end
 	local location = Config.location(locationId)
 	if not location then
 		toast(player, "location_unknown")
@@ -76,12 +111,61 @@ local function teleport(player: Player, locationId: any)
 		toast(player, "teleport_not_ready")
 		return
 	end
-	character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
-	root.AssemblyLinearVelocity = Vector3.zero
-	root.AssemblyAngularVelocity = Vector3.zero
-	ProfileService.Mutate(player, function(p)
-		p.location = locationId
+	local channel: Channel = {
+		character = character,
+		humanoid = humanoid,
+		root = root,
+		spawn = spawn,
+		locationId = locationId,
+		position = root.Position,
+		finishesAt = os.clock() + Config.rules.teleport.channelSeconds,
+	}
+	pending[player] = channel
+	channel.died = humanoid.Died:Connect(function()
+		if pending[player] == channel then
+			cancel(player)
+		end
 	end)
+	Remotes.event("TeleportChannel"):FireClient(player, Config.rules.teleport.channelSeconds)
+end
+
+local function updateChannels()
+	for player, channel in pairs(pending) do
+		if
+			player.Character ~= channel.character
+			or not channel.character:IsDescendantOf(workspace)
+			or channel.humanoid.Parent ~= channel.character
+			or channel.humanoid.Health <= 0
+			or channel.root.Parent ~= channel.character
+			or (channel.root.Position - channel.position).Magnitude > Config.rules.teleport.cancelMoveStuds
+			or CombatService.inCombat(player)
+		then
+			cancel(player)
+		elseif os.clock() >= channel.finishesAt then
+			local profile = ProfileService.Get(player)
+			local location = Config.location(channel.locationId)
+			if
+				not profile
+				or not location
+				or profile.level < location.unlockLevel
+				or (location.requiresPass and not profile.passes[channel.locationId])
+				or not channel.spawn:IsDescendantOf(workspace)
+				or not CollectionService:HasTag(channel.spawn, "LocationSpawn")
+				or channel.spawn:GetAttribute("LocationId") ~= channel.locationId
+			then
+				cancel(player)
+				continue
+			end
+			clearChannel(player)
+			channel.character:PivotTo(channel.spawn.CFrame + Vector3.new(0, 4, 0))
+			channel.root.AssemblyLinearVelocity = Vector3.zero
+			channel.root.AssemblyAngularVelocity = Vector3.zero
+			ProfileService.Mutate(player, function(p)
+				p.location = channel.locationId
+			end)
+			Remotes.event("TeleportChannel"):FireClient(player, nil)
+		end
+	end
 end
 
 local function bindPrompt(part: Instance)
@@ -126,8 +210,10 @@ function LocationService.Start()
 		bindPrompt(part)
 	end
 	Remotes.event("Teleport").OnServerEvent:Connect(teleport)
+	RunService.Heartbeat:Connect(updateChannels)
 	Players.PlayerRemoving:Connect(function(player)
 		lastTeleport[player] = nil
+		clearChannel(player)
 	end)
 end
 

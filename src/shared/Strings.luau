@@ -35,6 +35,31 @@ local STRINGS: { [string]: Entry } = {
 		es = "Teletransportarse",
 		fr = "Se téléporter",
 	},
+	teleport_cancelled = {
+		ru = "Телепортация отменена",
+		en = "Teleport cancelled",
+		es = "Teletransporte cancelado",
+		fr = "Téléportation annulée",
+	},
+	teleport_in_combat = {
+		ru = "Телепортация недоступна после боя ещё %d с",
+		en = "Teleport locked after combat for %d more s",
+		es = "Teletransporte bloqueado tras el combate durante %d s más",
+		fr = "Téléportation bloquée après le combat pendant encore %d s",
+	},
+	teleport_channel = {
+		ru = "Телепортация через %d с — не двигайтесь",
+		en = "Teleporting in %d s — stand still",
+		es = "Teletransporte en %d s — no te muevas",
+		fr = "Téléportation dans %d s — restez immobile",
+	},
+	language_code = { ru = "RU", en = "EN", es = "ES", fr = "FR" },
+	combo = {
+		ru = "Комбо ×%.1f   %d/%d",
+		en = "Combo ×%.1f   %d/%d",
+		es = "Combo ×%.1f   %d/%d",
+		fr = "Combo ×%.1f   %d/%d",
+	},
 	teleporter_prompt = {
 		ru = "Телепортатор",
 		en = "Teleporter",
@@ -543,9 +568,9 @@ local Strings = {}
 
 function Strings.localeOf(player: Player?): string
 	if player then
-		local short = string.sub(string.lower(player.LocaleId), 1, 2)
-		if table.find(Config.locales, short) then
-			return short
+		local locale = player:GetAttribute("Locale")
+		if typeof(locale) == "string" and table.find(Config.locales, locale) then
+			return locale
 		end
 	end
 	return Config.defaultLocale

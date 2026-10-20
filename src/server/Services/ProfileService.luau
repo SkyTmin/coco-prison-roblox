@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Types = require(Shared.Types)
 local Remotes = require(Shared.Remotes)
+local Config = require(Shared.Config)
 
 type Profile = Types.Profile
 type Session = { profile: Profile, loadFailed: boolean, dirty: boolean, saving: boolean }
@@ -86,6 +87,12 @@ local function migrate(data: any): Profile
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
+	if
+		typeof(profile.locale) ~= "string"
+		or not table.find(Config.rules.ui.locales, profile.locale)
+	then
+		profile.locale = nil
+	end
 	return profile
 end
 
@@ -153,11 +160,24 @@ end
 function ProfileService.Replicate(player: Player)
 	local session = sessions[player]
 	if session then
+		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
 		Remotes.event("ProfileUpdated"):FireClient(player, session.profile)
 	end
 end
 
 function ProfileService.Start()
+	Remotes.event("SetLocale").OnServerEvent:Connect(function(player: Player, locale: any)
+		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then
+			return
+		end
+		local profile = ProfileService.Get(player)
+		if not profile or profile.locale == locale then
+			return
+		end
+		ProfileService.Mutate(player, function(p)
+			p.locale = locale
+		end)
+	end)
 	local ok, result = pcall(function()
 		return DataStoreService:GetDataStore(STORE_NAME)
 	end)

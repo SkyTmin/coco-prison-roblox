@@ -19,7 +19,7 @@ local Types = require(Shared.Types)
 local Ui = require(script.Ui)
 
 local player = Players.LocalPlayer
-local locale = Strings.localeOf(player)
+local locale = Config.defaultLocale
 local camera = workspace.CurrentCamera
 local T = function(key: string, ...: any)
 	return Strings.t(key, locale, ...)
@@ -46,9 +46,16 @@ type Need = "hygiene" | "sleep" | "toilet"
 local needNames: { Need } = { "hygiene", "sleep", "toilet" }
 local needBars: { [string]: Frame } = {}
 local needValues: { [string]: TextLabel } = {}
+local needLabels: { [string]: TextLabel } = {}
 for i, need in ipairs(needNames) do
 	local y = 5 + (i - 1) * 24
-	Ui.label(needsPanel, T("need_" .. need), UDim2.fromOffset(82, 20), UDim2.fromOffset(6, y), 12)
+	needLabels[need] = Ui.label(
+		needsPanel,
+		T("need_" .. need),
+		UDim2.fromOffset(82, 20),
+		UDim2.fromOffset(6, y),
+		12
+	)
 	local track = Ui.panel(needsPanel, UDim2.fromOffset(90, 16), UDim2.fromOffset(94, y + 2))
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.fromScale(1, 1)
@@ -71,6 +78,52 @@ local hints = Ui.label(
 hints.TextXAlignment = Enum.TextXAlignment.Right
 hints.TextWrapped = true
 
+local languageButton = Ui.button(
+	gui,
+	T("language_code"),
+	UDim2.fromOffset(64, 28),
+	UDim2.new(1, -74, 1, -38),
+	Ui.colors.buttonGrey
+)
+languageButton.Activated:Connect(function()
+	local index = table.find(Config.locales, locale) or 1
+	Remotes.event("SetLocale"):FireServer(Config.locales[index % #Config.locales + 1])
+end)
+
+local teleportCountdown = Ui.label(
+	gui,
+	"",
+	UDim2.fromOffset(520, 28),
+	UDim2.new(0.5, -260, 1, -180),
+	16,
+	Ui.colors.header
+)
+teleportCountdown.TextXAlignment = Enum.TextXAlignment.Center
+teleportCountdown.Visible = false
+local teleportEndsAt: number? = nil
+local function renderTeleportCountdown()
+	local endsAt = teleportEndsAt
+	teleportCountdown.Visible = endsAt ~= nil
+	if endsAt then
+		teleportCountdown.Text = T("teleport_channel", math.max(0, math.ceil(endsAt - os.clock())))
+	end
+end
+Remotes.event("TeleportChannel").OnClientEvent:Connect(function(seconds: any)
+	if seconds == nil then
+		teleportEndsAt = nil
+	elseif typeof(seconds) == "number" and seconds > 0 and seconds < math.huge then
+		teleportEndsAt = os.clock() + seconds
+	else
+		return
+	end
+	renderTeleportCountdown()
+end)
+RunService.Heartbeat:Connect(function()
+	if teleportEndsAt then
+		renderTeleportCountdown()
+	end
+end)
+
 local toast = Ui.panel(gui, UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12))
 local toastText =
 	Ui.label(toast, "", UDim2.new(1, -12, 1, 0), UDim2.fromOffset(6, 0), 14, Ui.colors.header)
@@ -91,6 +144,13 @@ end
 
 local combo =
 	Ui.label(gui, "", UDim2.fromOffset(200, 18), UDim2.new(0.5, 120, 1, -112), 13, Ui.colors.muted)
+local comboMultiplier: number? = nil
+local comboBlocks = 0
+local function renderCombo()
+	if comboMultiplier then
+		combo.Text = T("combo", comboMultiplier, comboBlocks, Config.rules.combo.blocksPerStep)
+	end
+end
 
 -- ---------------------------------------------------------------- hotbar
 local SLOT = 44
@@ -102,10 +162,12 @@ local hotbar = Ui.panel(
 local hotbarSlots: { Frame } = {}
 local hotbarNames: { TextLabel } = {}
 local hotbarCounts: { TextLabel } = {}
+local hotbarImages: { ImageLabel } = {}
 for i = 1, 9 do
-	local f, name, count = Ui.slot(hotbar, SLOT)
+	local f, name, count, image = Ui.slot(hotbar, SLOT)
 	f.Position = UDim2.fromOffset(6 + (i - 1) * (SLOT + 4), 6)
 	hotbarSlots[i], hotbarNames[i], hotbarCounts[i] = f, name, count
+	hotbarImages[i] = image
 end
 
 local function stackLabel(stack: Types.ItemStack?): (string, string)
@@ -119,14 +181,26 @@ local function stackLabel(stack: Types.ItemStack?): (string, string)
 	return name, if stack.count > 1 then tostring(stack.count) else ""
 end
 
+local function renderSlot(
+	name: TextLabel,
+	count: TextLabel,
+	image: ImageLabel,
+	stack: Types.ItemStack?
+)
+	local n, c = stackLabel(stack)
+	local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
+	name.Text, count.Text = n, c
+	name.Visible = icon == nil
+	image.Image = icon or ""
+	image.Visible = icon ~= nil
+end
+
 local function renderHotbar()
 	if not profile then
 		return
 	end
 	for i = 1, 9 do
-		local n, c = stackLabel(profile.inventory[i])
-		hotbarNames[i].Text = n
-		hotbarCounts[i].Text = c
+		renderSlot(hotbarNames[i], hotbarCounts[i], hotbarImages[i], profile.inventory[i])
 		local s = hotbarSlots[i]:FindFirstChildOfClass("UIStroke")
 		if s then
 			s.Color = if profile.selectedSlot == i then Ui.colors.slotSelected else Ui.colors.border
@@ -166,10 +240,9 @@ local function buildInventory(): Frame
 		closeWindow
 	)
 	local function slotAt(index: number, x: number, y: number)
-		local f, name, count = Ui.slot(content, SLOT)
+		local f, name, count, image = Ui.slot(content, SLOT)
 		f.Position = UDim2.fromOffset(x, y)
-		local n, c = stackLabel(if profile then profile.inventory[index] else nil)
-		name.Text, count.Text = n, c
+		renderSlot(name, count, image, if profile then profile.inventory[index] else nil)
 		local btn = Instance.new("TextButton")
 		btn.Size = UDim2.fromScale(1, 1)
 		btn.BackgroundTransparency = 1
@@ -200,12 +273,13 @@ local function buildInventory(): Frame
 	end
 	local y = 0
 	for _, part in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
-		local f, name = Ui.slot(content, SLOT)
+		local f, name, count, image = Ui.slot(content, SLOT)
 		f.Position = UDim2.fromOffset(9 * (SLOT + 4) + 12, y)
 		local armor = if profile then profile.armor[part] else nil
-		name.Text = if armor
-			then Strings.itemName(part, armor.level, locale)
-			else T("item_" .. part)
+		renderSlot(name, count, image, armor)
+		if not armor then
+			name.Text = T("item_" .. part)
+		end
 		name.TextColor3 = if armor then Ui.colors.text else Ui.colors.muted
 		y += SLOT + 4
 	end
@@ -646,7 +720,7 @@ local caseDrops: { CaseDrop } = {}
 local function buildCase(): Frame
 	local win, content = Ui.window(gui, T("ordinary_case"), UDim2.fromOffset(420, 160), closeWindow)
 	for i, drop in ipairs(caseDrops) do
-		local slot, name, count = Ui.slot(content, 94)
+		local slot, name, count, image = Ui.slot(content, 94)
 		slot.Position = UDim2.fromOffset(4 + (i - 1) * 102, 4)
 		if drop.id == "money" then
 			name.Text = T("coins")
@@ -654,7 +728,7 @@ local function buildCase(): Frame
 			count.Text = Strings.money(drop.count) .. " $"
 		else
 			local level = if Config.tools[drop.id] then 1 else nil
-			name.Text = Strings.itemName(drop.id, level, locale)
+			renderSlot(name, count, image, { id = drop.id, count = drop.count, level = level })
 			count.Text = "×" .. tostring(drop.count)
 		end
 	end
@@ -1176,6 +1250,11 @@ end
 -- ---------------------------------------------------------------- profile rendering
 local function render(p: Types.Profile)
 	profile = p
+	locale = p.locale or Config.defaultLocale
+	languageButton.Text = T("language_code")
+	hints.Text = T("keys_hint")
+	renderTeleportCountdown()
+	renderCombo()
 	statLevel.Text = string.format("%s  %d", T("level"), p.level)
 	statLevel.TextColor3 = Ui.colors.level
 	statMoney.Text = string.format("%s  %s $", T("coins"), Strings.money(p.coins))
@@ -1183,6 +1262,7 @@ local function render(p: Types.Profile)
 	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
 	for _, need in ipairs(needNames) do
+		needLabels[need].Text = T("need_" .. need)
 		local value = math.clamp(p.needs[need], 0, 100)
 		needBars[need].Size = UDim2.fromScale(value / 100, 1)
 		needBars[need].BackgroundColor3 = if value < 25 then Ui.colors.close else Ui.colors.money
@@ -1203,8 +1283,8 @@ Remotes.event("CaseOpened").OnClientEvent:Connect(function(drops: { CaseDrop })
 	open("case")
 end)
 Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
-	combo.Text =
-		string.format("Комбо ×%.1f   %d/%d", mult, n, Config.rules.combo.blocksPerStep)
+	comboMultiplier, comboBlocks = mult, n
+	renderCombo()
 end)
 
 -- Camera changes run after Roblox's camera update; remove our previous roll when needed so a

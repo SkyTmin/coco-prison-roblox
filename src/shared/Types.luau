@@ -19,6 +19,7 @@ export type Professions = {
 
 export type Profile = {
 	schemaVersion: number,
+	locale: string?, -- nil uses Config.rules.ui.defaultLocale; schema stays v3
 	level: number,
 	coins: number, -- integer, in 1/moneyScale
 	blocksTotal: number, -- cumulative blocks with multipliers (never spent)

@@ -110,7 +110,7 @@ function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> 
 	return win, content
 end
 
-function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel)
+function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, ImageLabel)
 	local f = Instance.new("Frame")
 	f.Size = UDim2.fromOffset(size, size)
 	f.BackgroundColor3 = Ui.colors.slot
@@ -118,6 +118,14 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel)
 	corner(f, 3)
 	stroke(f, Ui.colors.border, 1)
 	f.Parent = parent
+	local image = Instance.new("ImageLabel")
+	image.Name = "Icon"
+	image.Size = UDim2.new(1, -4, 1, -4)
+	image.Position = UDim2.fromOffset(2, 2)
+	image.ScaleType = Enum.ScaleType.Fit
+	image.BackgroundTransparency = 1
+	image.Visible = false
+	image.Parent = f
 	local name =
 		Ui.label(f, "", UDim2.new(1, -4, 1, -14), UDim2.fromOffset(2, 2), 11, Ui.colors.text)
 	name.TextXAlignment = Enum.TextXAlignment.Center
@@ -126,7 +134,8 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel)
 	local count =
 		Ui.label(f, "", UDim2.new(1, -4, 0, 12), UDim2.new(0, 2, 1, -14), 11, Ui.colors.text)
 	count.TextXAlignment = Enum.TextXAlignment.Right
-	return f, name, count
+	count.ZIndex = image.ZIndex + 1
+	return f, name, count, image
 end
 
 return Ui

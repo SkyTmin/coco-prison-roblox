@@ -28,6 +28,8 @@ for _, name in ipairs({
 	"Combo",
 	"OpenMenu",
 	"Teleport",
+	"TeleportChannel",
+	"SetLocale",
 }) do
 	Remotes.event(name)
 end
@@ -42,6 +44,7 @@ local NeedsService = require(script.Services.NeedsService)
 local AchievementService = require(script.Services.AchievementService)
 local CaseService = require(script.Services.CaseService)
 local LocationService = require(script.Services.LocationService)
+local CombatService = require(script.Services.CombatService)
 
 ProfileService.Start()
 ProfessionService.Start()
@@ -52,6 +55,7 @@ EconomyService.Start()
 NeedsService.Start()
 AchievementService.Start()
 CaseService.Start()
+CombatService.Start()
 LocationService.Start()
 
 -- Hearts by level on spawn
