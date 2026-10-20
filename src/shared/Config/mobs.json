@@ -8,22 +8,25 @@
       "money": 0.5,
       "statKey": "rats",
       "locations": [
-        "prison",
-        "basement"
+        "basement",
+        "fraction_base",
+        "ghetto"
       ],
       "_source": "[владелец] 20 HP"
     },
     "zombie": {
       "name": "Зомби",
-      "hp": 20,
+      "hp": 25,
       "damage": 3,
       "money": 1.5,
       "statKey": "zombies",
       "drop": "rotten_flesh",
       "locations": [
         "basement",
-        "quarry"
-      ]
+        "fraction_base",
+        "ghetto"
+      ],
+      "_source": "[владелец] 25 HP"
     },
     "bat": {
       "name": "Летучая мышь",
@@ -33,8 +36,9 @@
       "statKey": "bats",
       "locations": [
         "basement",
-        "underworld"
+        "fraction_base"
       ]
-    }
+    },
+    "_note": "[владелец] мобы только в прочих локациях: Подвал, База фракций, Гетто"
   }
 }

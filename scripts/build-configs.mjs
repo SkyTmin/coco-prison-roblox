@@ -165,8 +165,7 @@ const bosses = bossWiki.entries.map((e) => {
 		respawnSeconds: dec.respawnSeconds ?? null,
 	};
 });
-const rb = decisions.bosses.rat_boss;
-bosses.push({ id: "rat_boss", name: rb.name, location: "Подвал", unlockLevel: 5, money: rb.money, ancientStars: rb.ancientStars, powderChance: null, shard: null, hp: rb.hp, damage: rb.damage, respawnSeconds: rb.respawnSeconds });
+for (const [id, b] of Object.entries(decisions.bosses)) if (b.name && !bosses.some((x) => x.id === id)) bosses.push({ id, name: b.name, location: b.location, unlockLevel: b.unlockLevel, money: b.money, ancientStars: b.ancientStars ?? null, powderChance: b.powderChance ?? null, shard: null, hp: b.hp, damage: b.damage, respawnSeconds: b.respawnSeconds });
 write("bosses.json", { source: "boss-menu-recovery.json [меню]; hp/damage/respawn [решение]", rewards: decisions.bossRewards, bosses });
 
 // ---------------------------------------------------------------- pure decisions

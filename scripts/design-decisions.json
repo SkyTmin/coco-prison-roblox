@@ -380,19 +380,38 @@
       ],
       "requiresPass": true,
       "pvp": true,
-      "shares": {
-        "dirt": 0.3,
-        "sand": 0.3,
-        "gravel": 0.3,
-        "lapis_block": 0.04,
-        "iron_block": 0.03,
-        "gold_block": 0.02,
-        "diamond_block": 0.01
+      "resetSeconds": 30,
+      "_note": "[меню] две шахты, обновление 30 с; состав рудной шахты [решение]",
+      "oreMine": {
+        "size": [
+          16,
+          6,
+          16
+        ],
+        "shares": {
+          "gold_block": 0.3,
+          "lapis_block": 0.3,
+          "diamond_block": 0.2,
+          "iron_block": 0.2
+        }
       }
     },
     "fraction_base": {
       "kind": "social",
-      "note": "База фракций: не шахта, продаются блоки Каменоломни с точек захвата"
+      "miniMine": {
+        "size": [
+          12,
+          6,
+          12
+        ],
+        "resetSeconds": 120
+      },
+      "spawns": 4,
+      "storage": {
+        "enderChest": 1,
+        "doubleChests": 8
+      },
+      "_note": "[владелец] 4 спавна с хранилищем и мини-шахтой, арена босса в центре, крысы по базе"
     }
   },
   "pvpFromLevel": 9,
@@ -410,22 +429,25 @@
       "money": 0.5,
       "statKey": "rats",
       "locations": [
-        "prison",
-        "basement"
+        "basement",
+        "fraction_base",
+        "ghetto"
       ],
       "_source": "[владелец] 20 HP"
     },
     "zombie": {
       "name": "Зомби",
-      "hp": 20,
+      "hp": 25,
       "damage": 3,
       "money": 1.5,
       "statKey": "zombies",
       "drop": "rotten_flesh",
       "locations": [
         "basement",
-        "quarry"
-      ]
+        "fraction_base",
+        "ghetto"
+      ],
+      "_source": "[владелец] 25 HP"
     },
     "bat": {
       "name": "Летучая мышь",
@@ -435,9 +457,10 @@
       "statKey": "bats",
       "locations": [
         "basement",
-        "underworld"
+        "fraction_base"
       ]
-    }
+    },
+    "_note": "[владелец] мобы только в прочих локациях: Подвал, База фракций, Гетто"
   },
   "bosses": {
     "basalt_guardian": {
@@ -460,20 +483,37 @@
       "damage": 7,
       "respawnSeconds": 2400
     },
-    "rat_boss": {
-      "name": "Босс-крыса",
-      "location": "basement",
-      "hp": 1200,
-      "damage": 6,
-      "respawnSeconds": 1200,
+    "splinter": {
+      "name": "Сплинтер",
+      "location": "Подвал",
+      "unlockLevel": 5,
       "money": [
         0,
-        600
+        1800
       ],
       "ancientStars": [
+        1,
+        2
+      ],
+      "powderChance": "1-5%",
+      "hp": 1200,
+      "damage": 6,
+      "respawnSeconds": 1500,
+      "_source": "[меню] награды и ~23 мин до респауна; hp/damage [решение]"
+    },
+    "giant_zombie": {
+      "name": "Зомбарь",
+      "location": "База фракций",
+      "unlockLevel": 5,
+      "money": [
         0,
-        1
-      ]
+        650
+      ],
+      "ancientStars": null,
+      "hp": 800,
+      "damage": 5,
+      "respawnSeconds": 480,
+      "_source": "[меню] награды и ~7 мин до респауна; hp/damage [решение]"
     }
   },
   "bossRewards": {

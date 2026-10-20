@@ -666,7 +666,7 @@
           10,
           24
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 30,
         "warnSeconds": 15,
         "shares": {
           "dirt": 0.34,

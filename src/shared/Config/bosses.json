@@ -439,23 +439,39 @@
       "respawnSeconds": null
     },
     {
-      "id": "rat_boss",
-      "name": "Босс-крыса",
+      "id": "splinter",
+      "name": "Сплинтер",
       "location": "Подвал",
       "unlockLevel": 5,
       "money": [
         0,
-        600
+        1800
       ],
       "ancientStars": [
-        0,
-        1
+        1,
+        2
       ],
-      "powderChance": null,
+      "powderChance": "1-5%",
       "shard": null,
       "hp": 1200,
       "damage": 6,
-      "respawnSeconds": 1200
+      "respawnSeconds": 1500
+    },
+    {
+      "id": "giant_zombie",
+      "name": "Зомбарь",
+      "location": "База фракций",
+      "unlockLevel": 5,
+      "money": [
+        0,
+        650
+      ],
+      "ancientStars": null,
+      "powderChance": null,
+      "shard": null,
+      "hp": 800,
+      "damage": 5,
+      "respawnSeconds": 480
     }
   ]
 }
