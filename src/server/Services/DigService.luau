@@ -103,6 +103,10 @@ local function check(player: Player, part: any): (number?, MineService.Mine?, nu
 	if profile.needs.hygiene <= 0 then
 		slowdown += Config.needs.hygiene.digSlowdownAtZero
 	end
+	local character = player.Character
+	if character and character:GetAttribute("Haste") == 1 then
+		needed /= 1.2 -- vanilla Haste I
+	end
 	return needed * (1 + slowdown), mine, i
 end
 
@@ -178,8 +182,6 @@ local function onDigFinish(player: Player, part: any)
 		if block.upgradeCounter then
 			p.counters[block.upgradeCounter] = (p.counters[block.upgradeCounter] or 0) + 1
 		end
-		p.needs.hygiene =
-			math.max(0, p.needs.hygiene - 100 / (Config.needs.hygiene.minutesToZero * 60) * needed)
 		local toolId = InventoryService.heldTool(p)
 		if toolId == "pickaxe" then
 			ProfessionService.addXp(p, "mason", 1)

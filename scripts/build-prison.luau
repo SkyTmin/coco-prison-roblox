@@ -1,4 +1,4 @@
---!nocheck
+--!strict
 -- Builds the Тюрьма (spawn) location blockout, following the Телепортатор map
 -- (wiki/in-game-wiki/JOBS-CASES-SPAWN.md): spawn with a fountain in the centre, Шахта north,
 -- Малая шахта south, Баня NW, Рынок NE, Спальня SW, Столовая E, Задания under the mine, Тренер SE,
@@ -33,7 +33,14 @@ local GRASS = Color3.fromRGB(80, 130, 60)
 local PATH = Color3.fromRGB(150, 140, 125)
 local WATER = Color3.fromRGB(60, 120, 200)
 
-local function part(name, size, cf, color, material, parent)
+local function part(
+	name: string,
+	size: Vector3,
+	cf: CFrame,
+	color: Color3,
+	material: Enum.Material?,
+	parent: Instance?
+): Part
 	local p = Instance.new("Part")
 	p.Name = name
 	p.Size = size
@@ -47,7 +54,7 @@ local function part(name, size, cf, color, material, parent)
 	return p
 end
 
-local function sign(target, text, offset)
+local function sign(target: BasePart, text: string, offset: number?)
 	local gui = Instance.new("BillboardGui")
 	gui.Size = UDim2.fromOffset(220, 40)
 	gui.StudsOffset = Vector3.new(0, (offset or target.Size.Y / 2) + 3, 0)
@@ -78,7 +85,7 @@ local pits = {
 		label = "Малая шахта",
 	},
 }
-local holes = {}
+local holes: { { x0: number, x1: number, z0: number, z1: number } } = {}
 for _, m in ipairs(pits) do
 	local w, d = m.sx * B, m.sz * B
 	table.insert(holes, {
@@ -90,7 +97,7 @@ for _, m in ipairs(pits) do
 end
 
 -- Ground as slabs around the holes: split the map into column strips and cut each strip by the holes.
-local function groundSlab(x0, x1, z0, z1)
+local function groundSlab(x0: number, x1: number, z0: number, z1: number)
 	if x1 - x0 < 1 or z1 - z0 < 1 then
 		return
 	end
@@ -206,7 +213,7 @@ spawn.CanCollide = false
 spawn.Parent = root
 
 -- NPCs around the plaza
-local function npc(name, tag, cf, text)
+local function npc(name: string, tag: string, cf: CFrame, text: string): Part
 	local p = part(name, Vector3.new(3, 7, 3), cf, WOOD, Enum.Material.Wood)
 	CollectionService:AddTag(p, tag)
 	sign(p, text)
@@ -217,17 +224,76 @@ npc("ItemShop", "ItemShop", CFrame.new(22, 3.5, 12), "Продавец пред�
 npc("FoodShop", "FoodShop", CFrame.new(22, 3.5, -12), "Продавец еды")
 
 -- Buildings (blockout with signs; decoration pass comes later)
-local function building(name, size, pos, text)
-	local b = part(name, size, CFrame.new(pos.X, size.Y / 2, pos.Z), STONE, Enum.Material.Brick)
-	sign(b, text)
+local function building(
+	name: string,
+	size: Vector3,
+	pos: Vector3,
+	text: string,
+	open: boolean?
+): Part
+	-- Restore buildings need accessible interiors: keep the blockout footprint as a roof.
+	local b = part(
+		name,
+		if open then Vector3.new(size.X, 1, size.Z) else size,
+		CFrame.new(pos.X, if open then size.Y else size.Y / 2, pos.Z),
+		STONE,
+		Enum.Material.Brick
+	)
+	if open then
+		for _, corner in ipairs({ { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } }) do
+			part(
+				name .. "Pillar",
+				Vector3.new(2, size.Y, 2),
+				CFrame.new(
+					pos.X + corner[1] * (size.X / 2 - 1),
+					size.Y / 2,
+					pos.Z + corner[2] * (size.Z / 2 - 1)
+				),
+				STONE,
+				Enum.Material.Brick,
+				b
+			)
+		end
+	end
+	sign(b, text, if open then 1 else nil)
 	return b
 end
-building("Bath", Vector3.new(56, 16, 36), Vector3.new(-120, 0, -110), "Баня")
+local bath = building("Bath", Vector3.new(56, 16, 36), Vector3.new(-120, 0, -110), "Баня", true)
 building("Market", Vector3.new(56, 16, 36), Vector3.new(120, 0, -110), "Рынок")
-building("Bedroom", Vector3.new(56, 16, 36), Vector3.new(-120, 0, 110), "Спальня")
+local bedroom =
+	building("Bedroom", Vector3.new(56, 16, 36), Vector3.new(-120, 0, 110), "Спальня", true)
 building("Canteen", Vector3.new(36, 16, 80), Vector3.new(140, 0, 10), "Столовая")
 building("Quests", Vector3.new(28, 12, 18), Vector3.new(0, 0, -52), "Задания")
 building("Trainer", Vector3.new(30, 12, 24), Vector3.new(90, 0, 130), "Тренер")
+
+local bathWater = part(
+	"BathWater",
+	Vector3.new(12, 1, 10),
+	CFrame.new(-120, 0.5, -110),
+	WATER,
+	Enum.Material.Glass,
+	bath
+)
+bathWater.Transparency = 0.4
+bathWater.CanCollide = false
+CollectionService:AddTag(bathWater, "RestoreHygiene")
+local bed = part(
+	"Bed",
+	Vector3.new(5, 2, 9),
+	CFrame.new(-120, 1, 110),
+	WATER,
+	Enum.Material.Fabric,
+	bedroom
+)
+CollectionService:AddTag(bed, "RestoreSleep")
+local toilet = part(
+	"Toilet",
+	Vector3.new(3, 3, 3),
+	CFrame.new(-84, 1.5, -100),
+	Color3.fromRGB(225, 225, 230),
+	Enum.Material.SmoothPlastic
+)
+CollectionService:AddTag(toilet, "RestoreToilet")
 
 -- Mine pits: unbreakable rim walls and floor below ground, anchor at ground level, ladders out.
 for _, m in ipairs(pits) do

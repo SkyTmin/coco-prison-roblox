@@ -31,15 +31,19 @@ end
 
 local ProfileService = require(script.Services.ProfileService)
 local ProfessionService = require(script.Services.ProfessionService)
+local TextureService = require(script.Services.TextureService)
 local MineService = require(script.Services.MineService)
 local DigService = require(script.Services.DigService)
 local EconomyService = require(script.Services.EconomyService)
+local NeedsService = require(script.Services.NeedsService)
 
 ProfileService.Start()
 ProfessionService.Start()
+TextureService.Start()
 MineService.Start()
 DigService.Start()
 EconomyService.Start()
+NeedsService.Start()
 
 -- Hearts by level on spawn
 game:GetService("Players").PlayerAdded:Connect(function(player)

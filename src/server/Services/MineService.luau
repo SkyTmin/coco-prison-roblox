@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local TextureService = require(script.Parent.TextureService)
 
 local BLOCK = 4 -- studs per block
 local ANCHOR_TAG = "MineAnchor"
@@ -100,6 +101,7 @@ local function makePart(mine: Mine, i: number)
 	part.Anchored = true
 	part.Material = Enum.Material.SmoothPlastic
 	part.Color = COLORS[id] or Color3.fromRGB(200, 200, 200)
+	TextureService.apply(part, id)
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part:SetAttribute("Block", id)

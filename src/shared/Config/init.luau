@@ -22,6 +22,7 @@ Config.keys = load("keys")
 Config.books = load("books")
 Config.rules = load("rules")
 Config.trainer = load("trainer")
+Config.textures = load("textures")
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

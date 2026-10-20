@@ -5,6 +5,7 @@
 
 local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
+local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -40,11 +41,30 @@ local statMoney = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset
 local statBlocks = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 56), 14)
 local statRats = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 74), 14)
 
+local needsPanel = Ui.panel(gui, UDim2.fromOffset(190, 78), UDim2.new(1, -200, 0.42, 102))
+type Need = "hygiene" | "sleep" | "toilet"
+local needNames: { Need } = { "hygiene", "sleep", "toilet" }
+local needBars: { [string]: Frame } = {}
+local needValues: { [string]: TextLabel } = {}
+for i, need in ipairs(needNames) do
+	local y = 5 + (i - 1) * 24
+	Ui.label(needsPanel, T("need_" .. need), UDim2.fromOffset(82, 20), UDim2.fromOffset(6, y), 12)
+	local track = Ui.panel(needsPanel, UDim2.fromOffset(90, 16), UDim2.fromOffset(94, y + 2))
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = Ui.colors.money
+	fill.BorderSizePixel = 0
+	fill.Parent = track
+	local value = Ui.label(track, "100", UDim2.fromScale(1, 1), UDim2.fromOffset(0, 0), 11)
+	value.TextXAlignment = Enum.TextXAlignment.Center
+	needBars[need], needValues[need] = fill, value
+end
+
 local hints = Ui.label(
 	gui,
 	T("keys_hint"),
-	UDim2.fromOffset(520, 18),
-	UDim2.new(1, -530, 1, -120),
+	UDim2.fromOffset(720, 18),
+	UDim2.new(1, -730, 1, -120),
 	13,
 	Ui.colors.muted
 )
@@ -567,6 +587,12 @@ local function render(p: Types.Profile)
 	statMoney.TextColor3 = Ui.colors.money
 	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
+	for _, need in ipairs(needNames) do
+		local value = math.clamp(p.needs[need], 0, 100)
+		needBars[need].Size = UDim2.fromScale(value / 100, 1)
+		needBars[need].BackgroundColor3 = if value < 25 then Ui.colors.close else Ui.colors.money
+		needValues[need].Text = tostring(math.floor(value))
+	end
 	renderHotbar()
 	refreshWindow()
 end
@@ -581,6 +607,68 @@ Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
 	combo.Text =
 		string.format("Комбо ×%.1f   %d/%d", mult, n, Config.rules.combo.blocksPerStep)
 end)
+
+-- Camera changes run after Roblox's camera update; remove our previous roll when needed so a
+-- stationary/Scriptable camera cannot accumulate it. Only our own blur is ever destroyed.
+local nauseaBlur: BlurEffect? = nil
+local nauseaAttributeConnection: RBXScriptConnection? = nil
+local rolledCamera: Camera? = nil
+local baseCFrame: CFrame? = nil
+local appliedCFrame: CFrame? = nil
+
+local function clearCameraRoll()
+	if rolledCamera and baseCFrame and rolledCamera.CFrame == appliedCFrame then
+		rolledCamera.CFrame = baseCFrame
+	end
+	rolledCamera, baseCFrame, appliedCFrame = nil, nil, nil
+end
+
+local function setNausea(enabled: boolean)
+	RunService:UnbindFromRenderStep("PrisonNausea")
+	clearCameraRoll()
+	if nauseaBlur then
+		nauseaBlur:Destroy()
+		nauseaBlur = nil
+	end
+	if not enabled then
+		return
+	end
+	local blur = Instance.new("BlurEffect")
+	blur.Name = "PrisonNausea"
+	blur.Size = 8
+	blur.Parent = Lighting
+	nauseaBlur = blur
+	RunService:BindToRenderStep("PrisonNausea", Enum.RenderPriority.Camera.Value + 1, function()
+		clearCameraRoll()
+		local currentCamera = workspace.CurrentCamera
+		if currentCamera then
+			local base = currentCamera.CFrame
+			local rolled = base
+				* CFrame.Angles(0, 0, math.rad(2) * math.sin(os.clock() * 2 * math.pi))
+			rolledCamera, baseCFrame, appliedCFrame = currentCamera, base, rolled
+			currentCamera.CFrame = rolled
+		end
+	end)
+end
+
+local function watchNausea(character: Model?)
+	if nauseaAttributeConnection then
+		nauseaAttributeConnection:Disconnect()
+		nauseaAttributeConnection = nil
+	end
+	setNausea(false)
+	if character then
+		nauseaAttributeConnection = character:GetAttributeChangedSignal("Nausea"):Connect(function()
+			setNausea(character:GetAttribute("Nausea") == true)
+		end)
+		setNausea(character:GetAttribute("Nausea") == true)
+	end
+end
+player.CharacterAdded:Connect(watchNausea)
+player.CharacterRemoving:Connect(function()
+	watchNausea(nil)
+end)
+watchNausea(player.Character)
 
 -- ---------------------------------------------------------------- digging
 local highlight = Instance.new("Highlight")
@@ -645,7 +733,20 @@ local function expectedTime(part: BasePart): number?
 	local stack = profile.inventory[profile.selectedSlot]
 	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
 	local level = if stack and stack.level then stack.level else 0
-	return Config.breakTime(block, toolId, level)
+	if profile.needs.sleep <= 0 then
+		return nil
+	end
+	local needed = Config.breakTime(block, toolId, level)
+	if needed then
+		if profile.needs.hygiene <= 0 then
+			needed *= 1 + Config.needs.hygiene.digSlowdownAtZero
+		end
+		local character = player.Character
+		if character and character:GetAttribute("Haste") == 1 then
+			needed /= 1.2
+		end
+	end
+	return needed
 end
 
 local function stopDig()
@@ -729,6 +830,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("level")
 	elseif k == Enum.KeyCode.O then
 		open("jobs")
+	elseif k == Enum.KeyCode.F and profile then
+		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	elseif k == Enum.KeyCode.Escape then
 		closeWindow()
 		currentWindowKind = nil
