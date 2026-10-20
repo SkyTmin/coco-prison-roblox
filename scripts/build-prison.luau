@@ -81,15 +81,12 @@ local pits = {
 local holes = {}
 for _, m in ipairs(pits) do
 	local w, d = m.sx * B, m.sz * B
-	table.insert(
-		holes,
-		{
-			x0 = m.cx - w / 2 - 2 * B,
-			x1 = m.cx + w / 2 + 2 * B,
-			z0 = m.cz - d / 2 - 2 * B,
-			z1 = m.cz + d / 2 + 2 * B,
-		}
-	)
+	table.insert(holes, {
+		x0 = m.cx - w / 2 - 2 * B,
+		x1 = m.cx + w / 2 + 2 * B,
+		z0 = m.cz - d / 2 - 2 * B,
+		z1 = m.cz + d / 2 + 2 * B,
+	})
 end
 
 -- Ground as slabs around the holes: split the map into column strips and cut each strip by the holes.
@@ -157,14 +154,26 @@ for _, d in ipairs({ { -HALF, 0 }, { HALF, 0 } }) do
 	)
 end
 
--- Paths
-part(
-	"PathNS",
-	Vector3.new(14, 0.4, 2 * HALF - 20),
-	CFrame.new(0, 0.2, 0),
-	PATH,
-	Enum.Material.Concrete
-)
+-- Paths (the N–S path is cut where it would cover a mine hole)
+local segs = { -HALF + 10 }
+for _, h in ipairs(holes) do
+	table.insert(segs, h.z0)
+	table.insert(segs, h.z1)
+end
+table.insert(segs, HALF - 10)
+table.sort(segs)
+for i = 1, #segs - 1, 2 do
+	local z0, z1 = segs[i], segs[i + 1]
+	if z1 - z0 > 2 then
+		part(
+			"PathNS",
+			Vector3.new(14, 0.4, z1 - z0),
+			CFrame.new(0, 0.2, (z0 + z1) / 2),
+			PATH,
+			Enum.Material.Concrete
+		)
+	end
+end
 part(
 	"PathEW",
 	Vector3.new(2 * HALF - 20, 0.4, 14),

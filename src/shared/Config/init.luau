@@ -2,7 +2,7 @@
 -- Typed access to the generated configs in Config/*.json (Rojo syncs each JSON as a ModuleScript).
 -- Source of truth: wiki/in-game-wiki/*.json + scripts/design-decisions.json → node scripts/build-configs.mjs.
 
-local folder = script.Parent:WaitForChild("Config")
+local folder = script -- JSON configs are this module's children (Config/init.luau + Config/*.json)
 
 local function load(name: string): any
 	return require(folder:WaitForChild(name)) :: any
