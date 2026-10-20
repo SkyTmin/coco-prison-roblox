@@ -14,8 +14,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 - `src/shared/Config/*.json` — **generated**. Edit `scripts/design-decisions.json` (our choices) or the wiki JSON (confirmed data), then `node scripts/build-configs.mjs`. Never hand-edit the output.
 - `src/shared/` — `Config.luau` (typed access), `Strings.luau` (ru/en/es/fr, ru default), `Remotes.luau`, `Types.luau`.
-- `src/server/Services/` — `ProfileService` (DataStore `PlayerProfiles_v2`, key `User_{UserId}`), `WorkService` (dig validation), `EconomyService` (sell, level-up).
-- `src/client/init.client.luau` — one "Harvest" action (mouse / touch / gamepad), highlight, HUD.
+- `src/server/Services/` — Profile (DataStore `PlayerProfiles_v3`), Inventory, Mine, Dig, Economy, Profession, Needs, Hunger, Death (PvP drops), Achievement, Case (cases + ender chest), Location (teleport channel + spots), Combat (lock), Texture.
+- `src/client/init.client.luau` — HUD, windows, dig input (mouse/touch/first person), mobile layout; modules `Ui`, `ChestWindow` + `DragDrop` (cases, ender chest, inventory), `HeldItem` (attribute `HeldItem`), `ArmorVisual` (attribute `Armor`).
 - World markup: CollectionService tags + attributes (`WorkNode`: `Resource`, `Generation`, `Depleted`; `SellPoint`).
 - `scripts/simulate-economy.mjs [maxLevel]` — minutes-to-level from configs; run after any balance change.
 - `wiki/in-game-wiki/` — confirmed in-game data (md + json). `wiki/client-audit/` — recovered menus, localization. `wiki/web-research/` — web findings. `docs/GAME-DESIGN.md` cites all of them with source tags.
