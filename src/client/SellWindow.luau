@@ -122,7 +122,14 @@ function SellWindow.build(
 		line.BorderSizePixel = 0
 		line.Parent = list
 		y += GROUP + 2
-		for _, blockId in ipairs(ids) do
+		for _, listedId in ipairs(ids) do
+			local listed = Config.block(listedId)
+			-- the buyer takes what actually drops (melon → melon slices) [ваниль]
+			local blockId = if listed
+					and listed.dropsAs
+					and Config.block(listed.dropsAs)
+				then listed.dropsAs
+				else listedId
 			local block = Config.block(blockId)
 			if not block then
 				continue

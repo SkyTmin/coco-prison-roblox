@@ -1,11 +1,19 @@
 --!strict
--- Digging: client sends DigStart(part) then DigFinish(part). The server computes the vanilla break
--- time from the held tool and accepts DigFinish only after that time has passed (small tolerance).
--- Rewards: inventory (dropsAs), blocksTotal (× block upgrade), upgrade counters, profession xp,
--- ordinary key roll, combo.
+-- Digging, server-authoritative like Minecraft: the client sends DigStart(part, hitPoint) and the server
+-- runs the timer itself; when the vanilla break time has passed and the player is still digging the
+-- same block, the block breaks. DigCancel (finger/button released, target changed) stops the timer.
+-- The client is told the server's time with DigAccepted(part, needed) so its progress bar and its
+-- local prediction (hiding the block a few ms before the server does) match the server exactly.
+--
+-- Reach is Minecraft's: 4.5 blocks from the eyes to the *hit point on the block face* [ваниль], never
+-- to the block centre, so a block seen from above at the pit edge is diggable even when its centre is
+-- farther away or hidden behind a neighbour. Line of sight is checked to that same hit point.
+-- Rewards: inventory (dropsAs + dropCount), blocksTotal (× block upgrade), upgrade counters,
+-- profession xp, ordinary key roll, artifact fragments, combo (resets after idle, see rules.combo).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -20,11 +28,14 @@ local HungerService = require(script.Parent.HungerService)
 local AchievementService = require(script.Parent.AchievementService)
 local ArtifactService = require(script.Parent.ArtifactService)
 
-local MAX_DISTANCE = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks from the eye
-local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
+local REACH = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
+local REACH_SLACK = 1.0 -- studs of tolerance for latency / animation (the client checks the real reach)
+local EYE_HEIGHT = 1.5 -- studs above the root when there is no Head
 
 type Dig = {
+	token: number,
 	part: BasePart,
+	hit: Vector3,
 	generation: number,
 	startedAt: number,
 	needed: number,
@@ -36,32 +47,59 @@ type Combo = { count: number, lastAt: number }
 local DigService = {}
 local digs: { [Player]: Dig } = {}
 local combos: { [Player]: Combo } = {}
+local random = Random.new()
+local nextToken = 0
 
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
--- Distance and line of sight from the character to the target block (no digging through walls).
-local function inRange(player: Player, part: BasePart): boolean
+local function eyeOf(character: Model): Vector3?
+	local head = character:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		return head.Position
+	end
+	local root = character:FindFirstChild("HumanoidRootPart")
+	return if root and root:IsA("BasePart")
+		then root.Position + Vector3.new(0, EYE_HEIGHT, 0)
+		else nil
+end
+
+-- The hit point must lie on (or just outside) the block's surface.
+local function onSurface(part: BasePart, hit: Vector3): boolean
+	local offset = part.CFrame:PointToObjectSpace(hit)
+	local half = part.Size / 2
+	local tolerance = 0.25
+	return math.abs(offset.X) <= half.X + tolerance
+		and math.abs(offset.Y) <= half.Y + tolerance
+		and math.abs(offset.Z) <= half.Z + tolerance
+end
+
+-- Minecraft reach and line of sight, both measured to the hit point on the face the player aims at.
+local function inRange(player: Player, part: BasePart, hit: Vector3): boolean
 	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if not root or not root:IsA("BasePart") then
+	local eye = if character then eyeOf(character) else nil
+	if not character or not eye or not onSurface(part, hit) then
 		return false
 	end
-	local eye = root.Position + Vector3.new(0, 1.5, 0)
-	if (part.Position - eye).Magnitude > MAX_DISTANCE + MineService.BLOCK then
+	local delta = hit - eye
+	if delta.Magnitude > REACH + REACH_SLACK then
 		return false
 	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character }
-	local hit = workspace:Raycast(eye, part.Position - eye, params)
-	return hit ~= nil and hit.Instance == part
+	-- stop a hair before the face: a clear path means nothing is in the way
+	local result = workspace:Raycast(eye, delta * 0.98, params)
+	return result == nil or result.Instance == part
 end
 
 -- Validates and returns the server-side break time, or nil (with a toast) when digging is not allowed.
-local function check(player: Player, part: any): (number?, MineService.Mine?, number?)
-	if typeof(part) ~= "Instance" or not part:IsA("BasePart") then
+local function check(player: Player, part: any, hit: any): (number?, MineService.Mine?, number?)
+	if typeof(part) ~= "Instance" or not part:IsA("BasePart") or typeof(hit) ~= "Vector3" then
+		return nil, nil, nil
+	end
+	if hit ~= hit or hit.Magnitude == math.huge then
 		return nil, nil, nil
 	end
 	local mine, i = MineService.lookup(part)
@@ -76,7 +114,7 @@ local function check(player: Player, part: any): (number?, MineService.Mine?, nu
 		toast(player, "level_too_low", mine.location.unlockLevel)
 		return nil, nil, nil
 	end
-	if not inRange(player, part) then
+	if not inRange(player, part, hit) then
 		toast(player, "too_far")
 		return nil, nil, nil
 	end
@@ -113,50 +151,42 @@ local function check(player: Player, part: any): (number?, MineService.Mine?, nu
 	return needed * (1 + slowdown), mine, i
 end
 
-local function onDigStart(player: Player, part: any)
-	local needed, mine = check(player, part)
-	if not needed or not mine then
-		digs[player] = nil
-		return
-	end
-	digs[player] = {
-		part = part,
-		generation = mine.generation,
-		startedAt = os.clock(),
-		needed = needed,
-		toolId = nil,
-		toolLevel = 0,
-	}
-	local profile = ProfileService.Get(player)
-	if profile then
-		local toolId, toolLevel = InventoryService.heldTool(profile)
-		digs[player].toolId = toolId
-		digs[player].toolLevel = toolLevel
-	end
+local function comboMultiplier(combo: Combo): number
+	return math.min(
+		Config.rules.combo.maxMultiplier,
+		1
+			+ math.floor(combo.count / Config.rules.combo.blocksPerStep)
+				* Config.rules.combo.stepBonus
+	)
 end
 
-local function onDigFinish(player: Player, part: any)
+local function sendCombo(player: Player, combo: Combo)
+	Remotes.event("Combo")
+		:FireClient(player, comboMultiplier(combo), combo.count % Config.rules.combo.blocksPerStep)
+end
+
+local function complete(player: Player, token: number)
 	local dig = digs[player]
+	if not dig or dig.token ~= token then
+		return -- cancelled or replaced by another dig
+	end
 	digs[player] = nil
-	if not dig or dig.part ~= part then
-		return
-	end
-	if os.clock() - dig.startedAt < dig.needed * TOLERANCE then
-		return
-	end
-	local needed, mine, i = check(player, part)
+	local part = dig.part
+	local needed, mine, i = check(player, part, dig.hit)
 	if not needed or not mine or not i or mine.generation ~= dig.generation then
+		Remotes.event("DigRejected"):FireClient(player, part)
 		return
 	end
 	local profileNow = ProfileService.Get(player) :: Types.Profile
 	local toolNow, levelNow = InventoryService.heldTool(profileNow)
 	if toolNow ~= dig.toolId or levelNow ~= dig.toolLevel then
-		return -- tool changed mid-dig: start over
+		Remotes.event("DigRejected"):FireClient(player, part) -- tool changed mid-dig: start over
+		return
 	end
-	local brokenCFrame, brokenSize, brokenColor =
-		(part :: BasePart).CFrame, (part :: BasePart).Size, (part :: BasePart).Color
+	local brokenCFrame, brokenSize, brokenColor = part.CFrame, part.Size, part.Color
 	local blockId = MineService.breakBlock(mine, i)
 	if not blockId then
+		Remotes.event("DigRejected"):FireClient(player, part)
 		return
 	end
 	-- other clients play the break sound/particles for blocks they did not dig themselves
@@ -164,8 +194,13 @@ local function onDigFinish(player: Player, part: any)
 		:FireAllClients(player.UserId, brokenCFrame, brokenSize, brokenColor, blockId)
 	local block = Config.block(blockId) :: Config.Block
 	local dropId = block.dropsAs or blockId
+	local dropCount = 1
+	local range = (block :: any).dropCount
+	if typeof(range) == "table" and #range == 2 then
+		dropCount = random:NextInteger(range[1], range[2]) -- [ваниль] e.g. melon → 3–7 slices
+	end
 
-	-- combo
+	-- combo: every block extends it; it resets after rules.combo.breakAfterIdleSeconds without digging
 	local now = os.clock()
 	local combo = combos[player] or { count = 0, lastAt = now }
 	if now - combo.lastAt > Config.rules.combo.breakAfterIdleSeconds then
@@ -174,19 +209,14 @@ local function onDigFinish(player: Player, part: any)
 	combo.count += 1
 	combo.lastAt = now
 	combos[player] = combo
-	local comboMult = math.min(
-		Config.rules.combo.maxMultiplier,
-		1
-			+ math.floor(combo.count / Config.rules.combo.blocksPerStep)
-				* Config.rules.combo.stepBonus
-	)
+	local comboMult = comboMultiplier(combo)
 
 	local keyFound = false
 	local artifactNotices: { ArtifactService.Notice } = {}
 	local keyFull = false
 	local overflow = 0
 	ProfileService.Mutate(player, function(p)
-		overflow = InventoryService.add(p, dropId, 1)
+		overflow = InventoryService.add(p, dropId, dropCount)
 		local blockMult = 1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks
 		p.blocksTotal += blockMult * comboMult
 		if block.upgradeCounter then
@@ -224,17 +254,70 @@ local function onDigFinish(player: Player, part: any)
 	if keyFound then
 		toast(player, "key_found")
 	end
-	Remotes.event("Combo")
-		:FireClient(player, comboMult, combo.count % Config.rules.combo.blocksPerStep)
+	sendCombo(player, combo)
+end
+
+local function onDigStart(player: Player, part: any, hit: any)
+	digs[player] = nil
+	local needed, mine = check(player, part, hit)
+	if not needed or not mine then
+		return
+	end
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return
+	end
+	local toolId, toolLevel = InventoryService.heldTool(profile)
+	nextToken += 1
+	local token = nextToken
+	digs[player] = {
+		token = token,
+		part = part,
+		hit = hit,
+		generation = mine.generation,
+		startedAt = os.clock(),
+		needed = needed,
+		toolId = toolId,
+		toolLevel = toolLevel,
+	}
+	Remotes.event("DigAccepted"):FireClient(player, part, needed)
+	task.delay(needed, complete, player, token)
+end
+
+local function onDigCancel(player: Player)
+	digs[player] = nil
 end
 
 function DigService.Start()
 	Remotes.event("BlockBroken") -- created up front so clients can listen before the first break
+	Remotes.event("DigAccepted")
+	Remotes.event("DigRejected")
 	Remotes.event("DigStart").OnServerEvent:Connect(onDigStart)
-	Remotes.event("DigFinish").OnServerEvent:Connect(onDigFinish)
+	Remotes.event("DigCancel").OnServerEvent:Connect(onDigCancel)
+	-- Legacy name kept for older clients: the server timer decides, the message itself does nothing.
+	Remotes.event("DigFinish").OnServerEvent:Connect(function() end)
 	Players.PlayerRemoving:Connect(function(player)
 		digs[player] = nil
 		combos[player] = nil
+	end)
+	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client
+	local elapsed = 0
+	RunService.Heartbeat:Connect(function(dt)
+		elapsed += dt
+		if elapsed < 1 then
+			return
+		end
+		elapsed = 0
+		local now = os.clock()
+		for player, combo in pairs(combos) do
+			if
+				combo.count > 0
+				and now - combo.lastAt > Config.rules.combo.breakAfterIdleSeconds
+			then
+				combo.count = 0
+				sendCombo(player, combo)
+			end
+		end
 	end)
 end
 

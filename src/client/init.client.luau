@@ -26,6 +26,7 @@ local ArtifactWindow = require(script.ArtifactWindow)
 local SellWindow = require(script.SellWindow)
 local ShopWindow = require(script.ShopWindow)
 local TrainerWindow = require(script.TrainerWindow)
+local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
@@ -78,17 +79,30 @@ local cameraButton = Ui.button(
 	Ui.colors.buttonGrey
 )
 local function renderCameraButton()
-	cameraButton.Text = T(if firstPerson then "camera_third_person" else "camera_first_person")
+	cameraButton.Text = if isMobile()
+		then ""
+		else T(if firstPerson then "camera_third_person" else "camera_first_person")
 	crosshair.Visible = firstPerson or isMobile()
 end
+local THIRD_PERSON_ZOOM = 12
 local function toggleFirstPerson()
 	firstPerson = not firstPerson
-	player.CameraMode = if firstPerson
-		then Enum.CameraMode.LockFirstPerson
-		else Enum.CameraMode.Classic
 	local currentCamera = workspace.CurrentCamera
 	if currentCamera then
 		currentCamera.CameraType = Enum.CameraType.Custom
+	end
+	if firstPerson then
+		player.CameraMode = Enum.CameraMode.LockFirstPerson
+	else
+		-- Classic mode alone keeps the camera glued to the head (zoom 0.5); push it back out by
+		-- clamping the zoom range for one frame, then restore the normal range.
+		player.CameraMode = Enum.CameraMode.Classic
+		player.CameraMinZoomDistance = THIRD_PERSON_ZOOM
+		player.CameraMaxZoomDistance = THIRD_PERSON_ZOOM
+		task.delay(0.1, function()
+			player.CameraMinZoomDistance = 0.5
+			player.CameraMaxZoomDistance = 128
+		end)
 	end
 	renderCameraButton()
 end
@@ -537,7 +551,7 @@ local function buildInventory(): Frame
 		end
 		return profile.inventory[address.index]
 	end
-	local drag = DragDrop.new(win, stackAt, function(from, to)
+	local drag = DragDrop.new(win, stackAt, function(from, to, count)
 		if from.container == "inv" and to.container == "armor" then
 			local stack = stackAt(from)
 			if stack and stack.id == ARMOR_PARTS[to.index] then
@@ -546,7 +560,7 @@ local function buildInventory(): Frame
 		elseif from.container == "armor" and to.container == "inv" then
 			Remotes.event("UnequipArmor"):FireServer(ARMOR_PARTS[from.index], to.index)
 		elseif from.container == "inv" and to.container == "inv" then
-			Remotes.event("InventoryMove"):FireServer(from.index, to.index)
+			Remotes.event("InventoryMove"):FireServer(from.index, to.index, count)
 		end
 	end, function(from)
 		if from.container == "armor" then
@@ -671,81 +685,6 @@ local function buildInventory(): Frame
 			renderArmor(view.part, view.name, view.count, view.image)
 		end
 		renderPreview()
-	end
-	return win
-end
-
--- Upgrade [J]: every owned tool/armor with next upgrade cost and requirements.
-local function buildUpgrade(): Frame
-	local win, content = createWindow(gui, T("upgrade"), UDim2.fromOffset(520, 360), closeWindow)
-	local y = 0
-	if profile then
-		local owned: { { id: string, level: number } } = {}
-		local seen: { [string]: boolean } = {}
-		for _, stack in pairs(profile.inventory) do
-			if Config.tools[stack.id] and not seen[stack.id] then
-				seen[stack.id] = true
-				table.insert(owned, { id = stack.id, level = stack.level or 1 })
-			end
-		end
-		for id, stack in pairs(profile.armor) do
-			if not seen[id] then
-				table.insert(owned, { id = id, level = stack.level or 1 })
-			end
-		end
-		for _, item in ipairs(owned) do
-			local up = Config.upgrade(item.id, item.level)
-			Ui.label(
-				content,
-				Strings.itemName(item.id, item.level, locale) .. "  " .. tostring(item.level),
-				UDim2.new(0.45, 0, 0, 24),
-				UDim2.fromOffset(4, y),
-				14
-			)
-			if up then
-				local req = {}
-				for counter, needed in pairs(up.requirements) do
-					table.insert(
-						req,
-						string.format(
-							"%s %s/%s",
-							counter,
-							Strings.big(profile.counters[counter] or 0),
-							Strings.big(needed)
-						)
-					)
-				end
-				Ui.label(
-					content,
-					string.format(
-						"→ %d: %s $  %s",
-						up.to,
-						Strings.big(up.cost),
-						table.concat(req, " ")
-					),
-					UDim2.new(0.45, 0, 0, 24),
-					UDim2.new(0.45, 0, 0, y),
-					12,
-					Ui.colors.muted
-				)
-				local btn =
-					Ui.button(content, "↑", UDim2.fromOffset(40, 22), UDim2.new(1, -44, 0, y + 1))
-				local id = item.id
-				btn.Activated:Connect(function()
-					Remotes.event("UpgradeItem"):FireServer(id)
-				end)
-			else
-				Ui.label(
-					content,
-					T("upgrade_max"),
-					UDim2.new(0.5, 0, 0, 24),
-					UDim2.new(0.45, 0, 0, y),
-					12,
-					Ui.colors.muted
-				)
-			end
-			y += 28
-		end
 	end
 	return win
 end
@@ -1440,7 +1379,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
-	upgrade = buildUpgrade,
+	upgrade = function()
+		local win, refresh = UpgradeWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	level = buildLevel,
 	jobs = buildJobs,
 	achievements = function()
@@ -1658,7 +1601,28 @@ progressFill.Parent = progress
 progress.Visible = false
 
 local MAX_TARGET = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
-local function targetUnderCursor(point: Vector2?): BasePart?
+type Aim = { part: BasePart, hit: Vector3 }
+
+-- Minecraft measures reach from the eyes to the point on the block face being aimed at [ваниль].
+local function eyePosition(): Vector3?
+	local character = player.Character
+	local currentCamera = workspace.CurrentCamera
+	if not character then
+		return nil
+	end
+	local head = character:FindFirstChild("Head")
+	if firstPerson and currentCamera then
+		return currentCamera.CFrame.Position
+	end
+	if head and head:IsA("BasePart") then
+		return head.Position
+	end
+	local root = character:FindFirstChild("HumanoidRootPart")
+	return if root and root:IsA("BasePart") then root.Position + Vector3.new(0, 1.5, 0) else nil
+end
+
+-- The mine block under a screen point (or under the cursor / crosshair) within reach, with the hit point.
+local function aimAt(point: Vector2?): Aim?
 	local character = player.Character
 	local currentCamera = workspace.CurrentCamera
 	if not character or not currentCamera or currentWindowKind then
@@ -1683,27 +1647,25 @@ local function targetUnderCursor(point: Vector2?): BasePart?
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character }
-	local hit = workspace:Raycast(ray.Origin, ray.Direction * 100, params)
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * 200, params)
 	if not hit or not CollectionService:HasTag(hit.Instance, "MineBlock") then
 		return nil
 	end
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if
-		root
-		and root:IsA("BasePart")
-		and (root.Position - hit.Instance.Position).Magnitude > MAX_TARGET
-	then
+	local eye = eyePosition()
+	if not eye or (hit.Position - eye).Magnitude > MAX_TARGET then
 		return nil
 	end
-	return hit.Instance :: BasePart
+	return { part = hit.Instance :: BasePart, hit = hit.Position }
 end
 
 local digging = false
 local holding = false
 local digTarget: BasePart? = nil
-local tapTarget: BasePart? = nil
 local digStarted = 0
 local digNeeded = 0
+local digPredicted = false -- the client already played the break and hid the block
+local tapTarget: Aim? = nil -- touch: the block under the finger when the hold began
+local pending: { [BasePart]: number } = {} -- blocks hidden locally, waiting for the server to remove them
 
 local function expectedTime(part: BasePart): number?
 	if not profile then
@@ -1733,68 +1695,128 @@ local function expectedTime(part: BasePart): number?
 	return needed
 end
 
-local function stopDig()
+-- Prediction: the block disappears for this client the moment its timer ends; the server removes it
+-- a few ms later. If the server rejects (or nothing arrives in 2 s) the block comes back as it was.
+local function hideLocally(part: BasePart)
+	part.LocalTransparencyModifier = 1
+	part.CanCollide = false
+	part.CanQuery = false
+	pending[part] = os.clock()
+end
+local function restoreLocally(part: BasePart)
+	if pending[part] then
+		pending[part] = nil
+		if part.Parent then
+			part.LocalTransparencyModifier = 0
+			part.CanCollide = true
+			part.CanQuery = true
+		end
+	end
+end
+
+local function stopDig(tellServer: boolean)
+	if digging and tellServer then
+		Remotes.event("DigCancel"):FireServer()
+	end
 	HeldItem.SetDigging(false)
 	BlockBreak.Clear()
 	digging = false
 	digTarget = nil
-	tapTarget = nil
+	digPredicted = false
 	progress.Visible = false
 end
 
+local function startDig(aim: Aim)
+	local needed = expectedTime(aim.part)
+	if not needed then
+		Remotes.event("DigStart"):FireServer(aim.part, aim.hit) -- the server replies with the reason
+		return
+	end
+	digging, digTarget, digStarted, digNeeded, digPredicted =
+		true, aim.part, os.clock(), needed, false
+	Remotes.event("DigStart"):FireServer(aim.part, aim.hit)
+end
+
+Remotes.event("DigAccepted").OnClientEvent:Connect(function(part: BasePart, needed: number)
+	if digging and digTarget == part then
+		digNeeded = needed -- the server's number is the truth; progress keeps its local start
+	end
+end)
+Remotes.event("DigRejected").OnClientEvent:Connect(function(part: BasePart)
+	restoreLocally(part)
+	if digTarget == part then
+		stopDig(false)
+	end
+end)
+
 RunService.RenderStepped:Connect(function()
+	local now = os.clock()
+	for part, at in pairs(pending) do
+		if not part.Parent then
+			pending[part] = nil
+		elseif now - at > 2 then
+			restoreLocally(part) -- the server never confirmed: show it again
+		end
+	end
 	if currentWindowKind then
 		holding = false
-		stopDig()
+		tapTarget = nil
+		stopDig(true)
 		highlight.Enabled = false
 		return
 	end
+	local aim: Aim? = nil
 	if tapTarget then
-		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		-- touch hold: the target is fixed to the block the finger landed on
+		local eye = eyePosition()
 		if
-			not tapTarget:IsDescendantOf(workspace)
-			or not root
-			or not root:IsA("BasePart")
-			or (root.Position - tapTarget.Position).Magnitude > MAX_TARGET
+			tapTarget.part:IsDescendantOf(workspace)
+			and eye
+			and (tapTarget.hit - eye).Magnitude <= MAX_TARGET + 1
 		then
-			stopDig()
+			aim = tapTarget
+		else
+			tapTarget = nil
+			stopDig(true)
 		end
+	else
+		aim = aimAt()
 	end
-	local target = tapTarget or targetUnderCursor()
-	highlight.Adornee = target
-	highlight.Enabled = target ~= nil
-	if digging then
-		if target ~= digTarget then
-			stopDig()
-			if target then
-				local needed = expectedTime(target)
-				if needed then
-					digging, digTarget, digStarted, digNeeded = true, target, os.clock(), needed
-					Remotes.event("DigStart"):FireServer(target)
+	highlight.Adornee = if aim then aim.part else nil
+	highlight.Enabled = aim ~= nil and not pending[aim.part]
+	if digging and digTarget then
+		if digPredicted then
+			if not digTarget.Parent then
+				-- the server removed it: move on to whatever is under the cursor now
+				stopDig(false)
+				if holding and aim and not pending[aim.part] then
+					startDig(aim)
 				end
 			end
-		elseif digTarget then
-			local k = math.clamp((os.clock() - digStarted) / digNeeded, 0, 1)
+		elseif not aim or aim.part ~= digTarget then
+			stopDig(true)
+			if holding and aim and not pending[aim.part] then
+				startDig(aim)
+			end
+		else
+			local k = math.clamp((now - digStarted) / digNeeded, 0, 1)
 			progress.Visible = true
 			progressFill.Size = UDim2.fromScale(k, 1)
 			BlockBreak.Update(digTarget, k)
 			if k >= 1 then
-				Remotes.event("DigFinish"):FireServer(digTarget)
 				BlockBreak.Break(digTarget)
-				stopDig()
+				hideLocally(digTarget)
+				digPredicted = true
+				progress.Visible = false
 			end
 		end
-	elseif holding and target then
-		-- button still held: start on whatever block is under the cursor now
-		local needed = expectedTime(target)
-		if needed then
-			digging, digTarget, digStarted, digNeeded = true, target, os.clock(), needed
-			Remotes.event("DigStart"):FireServer(target)
-		end
+	elseif holding and aim and not pending[aim.part] then
+		startDig(aim)
 	end
-	HeldItem.SetDigging(digging)
+	HeldItem.SetDigging(digging and not digPredicted)
 end)
 
+-- PC / gamepad: hold the mouse button (R2) on a block
 local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 	if state == Enum.UserInputState.Begin then
 		if
@@ -1811,22 +1833,17 @@ local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 				end
 			end
 		end
-		stopDig()
 		holding = true
-		local target = targetUnderCursor()
-		local needed = if target then expectedTime(target) else nil
-		if target and needed then
-			digging, digTarget, digStarted, digNeeded = true, target, os.clock(), needed
-			Remotes.event("DigStart"):FireServer(target)
-		elseif target then
-			Remotes.event("DigStart"):FireServer(target) -- server replies with the reason
+		local aim = aimAt()
+		if aim and not pending[aim.part] then
+			stopDig(true)
+			startDig(aim)
 		end
-		return Enum.ContextActionResult.Sink
 	elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
 		holding = false
-		stopDig()
+		stopDig(true)
 	end
-	return Enum.ContextActionResult.Pass
+	return Enum.ContextActionResult.Sink
 end
 ContextActionService:BindAction(
 	"Dig",
@@ -1836,34 +1853,91 @@ ContextActionService:BindAction(
 	Enum.KeyCode.ButtonR2
 )
 
--- Touch only: leave Roblox's camera, thumbstick and jump controls in charge of movement.
-local touchMenus = Instance.new("ScrollingFrame")
+-- Touch, like Minecraft Bedrock "tap to interact": put a finger on a block and hold it to break it;
+-- moving the finger turns the camera instead (Roblox's touch camera) and the dig stops. Movement
+-- and jumping stay with Roblox's thumbstick and jump button.
+local activeTouch: InputObject? = nil
+local touchOrigin = Vector2.zero
+local TOUCH_SLOP = 14 -- px of finger travel before a hold becomes a camera drag
+local function cancelDigInput()
+	activeTouch = nil
+	tapTarget = nil
+	holding = false
+	stopDig(true)
+end
+UserInputService.TouchStarted:Connect(function(input: InputObject, processed: boolean)
+	if processed or not isMobile() or currentWindowKind or activeTouch then
+		return
+	end
+	local point = Vector2.new(input.Position.X, input.Position.Y)
+	local aim = aimAt(point)
+	if aim and not pending[aim.part] then
+		activeTouch, touchOrigin, tapTarget = input, point, aim
+		stopDig(true)
+		startDig(aim)
+	end
+end)
+UserInputService.TouchMoved:Connect(function(input: InputObject)
+	if input == activeTouch then
+		local point = Vector2.new(input.Position.X, input.Position.Y)
+		if (point - touchOrigin).Magnitude > TOUCH_SLOP then
+			cancelDigInput()
+		end
+	end
+end)
+UserInputService.TouchEnded:Connect(function(input: InputObject)
+	if input == activeTouch then
+		cancelDigInput()
+	end
+end)
+UserInputService.WindowFocusReleased:Connect(cancelDigInput)
+player.CharacterRemoving:Connect(cancelDigInput)
+
+-- Touch HUD in the spirit of Minecraft Bedrock: icon buttons only (no letters). Left column: menus;
+-- right side above the jump button: eat and camera; "•••" next to the hotbar opens the inventory.
+local touchMenus = Instance.new("Frame")
 touchMenus.Name = "TouchMenus"
 touchMenus.Position = UDim2.fromOffset(8, 120)
+touchMenus.Size = UDim2.fromOffset(52, 7 * 52)
 touchMenus.BackgroundTransparency = 1
-touchMenus.BorderSizePixel = 0
-touchMenus.ScrollBarThickness = 2
-touchMenus.CanvasSize = UDim2.fromOffset(0, 8 * 52 - 8)
 touchMenus.Parent = gui
-local menuKeys = {
-	"locations",
-	"inventory",
-	"jobs",
-	"upgrade",
-	"level",
-	"achievements",
-	"artifacts",
-	"language_code",
-}
-local menuGlyphs = { "M", "E", "O", "J", "U", "L", "◆", "" }
-for i, kind in ipairs(menuKeys) do
+local menuKeys =
+	{ "locations", "jobs", "upgrade", "level", "achievements", "artifacts", "language_code" }
+local function touchIconButton(
+	parent: Instance,
+	iconId: string?,
+	fallbackText: string,
+	size: number
+): TextButton
 	local button = Ui.button(
-		touchMenus,
-		menuGlyphs[i],
-		UDim2.fromOffset(44, 44),
-		UDim2.fromOffset(0, (i - 1) * 52),
+		parent,
+		if iconId then "" else fallbackText,
+		UDim2.fromOffset(size, size),
+		UDim2.new(),
 		Ui.colors.buttonGrey
 	)
+	button.BackgroundTransparency = 0.35
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 8)
+	round.Parent = button
+	if iconId then
+		local image = Instance.new("ImageLabel")
+		image.AnchorPoint = Vector2.new(0.5, 0.5)
+		image.Position = UDim2.fromScale(0.5, 0.5)
+		image.Size = UDim2.fromScale(0.7, 0.7)
+		image.BackgroundTransparency = 1
+		image.ScaleType = Enum.ScaleType.Fit
+		image.ResampleMode = Enum.ResamplerMode.Pixelated
+		image.Image = iconId
+		image.Parent = button
+	end
+	return button
+end
+for i, kind in ipairs(menuKeys) do
+	local icon = Config.icons.icons["menu_" .. kind]
+	local button =
+		touchIconButton(touchMenus, icon, if kind == "language_code" then T(kind) else "", 44)
+	button.Position = UDim2.fromOffset(0, (i - 1) * 52)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
@@ -1873,7 +1947,6 @@ for i, kind in ipairs(menuKeys) do
 		end
 	end)
 	if kind == "language_code" then
-		button.Text = T(kind)
 		localizedButtons[button] = kind
 	end
 end
@@ -1882,65 +1955,21 @@ touchActions.Name = "TouchActions"
 touchActions.Size = UDim2.fromScale(1, 1)
 touchActions.BackgroundTransparency = 1
 touchActions.Parent = gui
-local digButton =
-	Ui.button(touchActions, T("touch_dig"), UDim2.fromOffset(80, 80), UDim2.new(1, -96, 1, -188))
-digButton.Name = "TouchDig"
-local round = Instance.new("UICorner")
-round.CornerRadius = UDim.new(0.5, 0)
-round.Parent = digButton
-localizedButtons[digButton] = "touch_dig"
-local useButton = Ui.button(
-	touchActions,
-	T("touch_use"),
-	UDim2.fromOffset(64, 48),
-	UDim2.new(1, -168, 1, -176),
-	Ui.colors.buttonGrey
-)
-useButton.TextScaled = true
-useButton.TextWrapped = true
-localizedButtons[useButton] = "touch_use"
 local function useConsumable()
 	if profile then
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end
+local useButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("touch_use"), 56)
+useButton.Name = "TouchUse"
+useButton.Position = UDim2.new(1, -176, 1, -196)
 useButton.Activated:Connect(useConsumable)
-local digTouch: InputObject? = nil
-digButton.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch and not digTouch and isMobile() then
-		digTouch = input
-		onDig("TouchDig", Enum.UserInputState.Begin)
-	end
+local inventoryButton = touchIconButton(touchActions, nil, "•••", 40)
+inventoryButton.Name = "TouchInventory"
+inventoryButton.TextSize = 20
+inventoryButton.Activated:Connect(function()
+	open("inventory")
 end)
-UserInputService.InputEnded:Connect(function(input)
-	if input == digTouch then
-		digTouch = nil
-		onDig("TouchDig", Enum.UserInputState.End)
-	end
-end)
-UserInputService.TouchTapInWorld:Connect(function(position: Vector2, processed: boolean)
-	if processed or not isMobile() or currentWindowKind or digTouch then
-		return
-	end
-	holding = false
-	stopDig()
-	local target = targetUnderCursor(position)
-	local needed = if target then expectedTime(target) else nil
-	if target and needed then
-		digging, digTarget, tapTarget, digStarted, digNeeded =
-			true, target, target, os.clock(), needed
-		Remotes.event("DigStart"):FireServer(target)
-	elseif target then
-		Remotes.event("DigStart"):FireServer(target)
-	end
-end)
-local function cancelDigInput()
-	digTouch = nil
-	holding = false
-	stopDig()
-end
-UserInputService.WindowFocusReleased:Connect(cancelDigInput)
-player.CharacterRemoving:Connect(cancelDigInput)
 
 local statsScale = Instance.new("UIScale")
 statsScale.Parent = stats
@@ -1959,7 +1988,6 @@ local function updateLayout()
 	local currentCamera = workspace.CurrentCamera
 	local viewport = if currentCamera then currentCamera.ViewportSize else Vector2.new(900, 560)
 	touchMenus.Visible, touchActions.Visible = mobile, mobile
-	touchMenus.Size = UDim2.fromOffset(52, math.clamp(viewport.Y - 260, 52, 356))
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
 	statsScale.Scale, needsScale.Scale = if mobile then 0.65 else 1, if mobile then 0.65 else 1
@@ -1973,6 +2001,25 @@ local function updateLayout()
 		then UDim2.new(1, -168, 1, -120)
 		else UDim2.new(1, -160, 0, 88)
 	cameraButton.TextScaled, cameraButton.TextWrapped = mobile, mobile
+	local cameraIcon = cameraButton:FindFirstChild("Icon")
+	if mobile and not cameraIcon then
+		local image = Instance.new("ImageLabel")
+		image.Name = "Icon"
+		image.AnchorPoint = Vector2.new(0.5, 0.5)
+		image.Position = UDim2.fromScale(0.5, 0.5)
+		image.Size = UDim2.fromScale(0.7, 0.7)
+		image.BackgroundTransparency = 1
+		image.ScaleType = Enum.ScaleType.Fit
+		image.ResampleMode = Enum.ResamplerMode.Pixelated
+		image.Image = Config.icons.icons["menu_camera"] or ""
+		image.Parent = cameraButton
+	elseif cameraIcon then
+		cameraIcon.Visible = mobile
+	end
+	if mobile then
+		cameraButton.Size = UDim2.fromOffset(56, 56)
+		cameraButton.Position = UDim2.new(1, -176, 1, -130)
+	end
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8
 	hotbar.Size = UDim2.fromOffset(width, size + 12)
@@ -1980,6 +2027,8 @@ local function updateLayout()
 	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
 	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
 	survivalScale.Scale = if mobile then 0.85 else 1
+	inventoryButton.Position = UDim2.new(0.5, width / 2 * hotbarScale.Scale + 6, 1, -8 - size - 4)
+	inventoryButton.AnchorPoint = Vector2.new(0, 0)
 	for i, slot in ipairs(hotbarSlots) do
 		slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
 		slotScales[i].Scale = size / SLOT

@@ -77,8 +77,8 @@ function ChestWindow.build(
 			else profile.caseContents[id]
 		return if container then container[address.index] else nil
 	end
-	local function move(from: Address, to: Address)
-		Remotes.event("CaseMove"):FireServer(id, from, to)
+	local function move(from: Address, to: Address, count: number?)
+		Remotes.event("CaseMove"):FireServer(id, from, to, count)
 	end
 	local function quick(from: Address)
 		local container: "case" | "inv" = if from.container == "case" then "inv" else "case"

@@ -254,7 +254,11 @@ local function openCase(player: Player, id: any, requestedKey: any)
 		and (typeof(requestedKey) ~= "string" or not table.find(accepted, requestedKey))
 	then
 		-- a key of another case: refused, and the toast names the key this case wants
-		toast(player, "case_need_key", Strings.itemName(accepted[1] or "ordinary_key", nil, Strings.localeOf(player)))
+		toast(
+			player,
+			"case_need_key",
+			Strings.itemName(accepted[1] or "ordinary_key", nil, Strings.localeOf(player))
+		)
 		return
 	end
 	if session.id == "nicknameCase" then
@@ -430,7 +434,8 @@ local function openCase(player: Player, id: any, requestedKey: any)
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
 
-local function move(player: Player, id: any, rawFrom: any, rawTo: any)
+local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount: any)
+	local count = if typeof(rawCount) == "number" then rawCount else nil
 	local session = validate(player, id)
 	local from, to = address(rawFrom), address(rawTo)
 	if
@@ -457,7 +462,12 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any)
 			return
 		end
 		local stack = source[from.index]
-		if from.container == "case" and to.container == "inv" and stack.id == "money_bag" then
+		if
+			from.container == "case"
+			and to.container == "inv"
+			and stack.id == "money_bag"
+			and count == nil
+		then
 			local amount = stack.coins
 			if
 				typeof(amount) == "number"
@@ -475,7 +485,7 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any)
 		-- Reuse inventory merge/swap and stack limits for both containers.
 		local staged = table.clone(p)
 		staged.inventory = { [1] = source[from.index], [2] = target[to.index] }
-		InventoryService.move(staged, 1, 2)
+		InventoryService.move(staged, 1, 2, count)
 		source[from.index], target[to.index] = staged.inventory[1], staged.inventory[2]
 	end)
 	if claimedMoney > 0 then

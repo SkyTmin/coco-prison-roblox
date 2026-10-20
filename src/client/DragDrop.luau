@@ -1,8 +1,23 @@
 --!strict
--- Shared mouse/touch slot gestures. Only intents leave this module; the server owns stacks.
+-- Slot gestures copied from Minecraft; only intents leave this module, the server owns every stack.
+--
+-- Mouse (Java Edition):
+--   left click          pick up the whole stack / put it down (empty → move, same item → merge,
+--                       other item → swap, the slot it came from → cancel)
+--   right click         pick up half of a stack / put down one item of the held stack
+--   shift + click       quick move to the other container (or hotbar ↔ bag)
+--   drag with the left button held over several free slots → the held stack is spread evenly
+-- Touch (Bedrock Edition, Pocket UI):
+--   tap                 select the stack (it sticks to the finger) / tap a slot to put it there
+--   drag                carry the stack with the finger and drop it on a slot
+--   hold (0.35 s)       split: a green bar appears, slide the finger up or down to choose how many
+--                       to take, lift the finger — that part is now selected
+--   double tap          quick move to the other container
+-- A move is sent as move(from, to, count?) — count nil means "the whole stack".
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local Types = require(ReplicatedStorage.Shared.Types)
 local Strings = require(ReplicatedStorage.Shared.Strings)
@@ -10,8 +25,13 @@ local Ui = require(script.Parent.Ui)
 
 export type Address = { container: "case" | "inv" | "armor", index: number }
 type Binding = { frame: Frame, address: Address }
+type Held = { from: Address, count: number? } -- count nil = whole stack
 
 local DragDrop = {}
+
+local HOLD_SPLIT = 0.35 -- s of touch hold before the split bar appears
+local DRAG_SLOP = 7 -- px before a press becomes a drag
+local DOUBLE_TAP = 0.32 -- s
 
 local function same(a: Address?, b: Address?): boolean
 	return a ~= nil and b ~= nil and a.container == b.container and a.index == b.index
@@ -20,18 +40,22 @@ end
 function DragDrop.new(
 	owner: Frame,
 	getStack: (Address) -> Types.ItemStack?,
-	move: (Address, Address) -> (),
+	move: (Address, Address, number?) -> (),
 	quick: (Address) -> ()
 )
 	local bindings: { Binding } = {}
 	local connections: { RBXScriptConnection } = {}
-	local picked: Address? = nil
-	local active: InputObject? = nil
-	local source: Address? = nil
+	local held: Held? = nil -- the stack "on the cursor"
+	local active: InputObject? = nil -- the press being tracked
+	local pressAddress: Address? = nil
 	local origin = Vector2.zero
 	local moved = false
+	local dragPath: { Address } = {} -- distinct free/same slots crossed while dragging with a held stack
 	local lastTap: Address? = nil
-	local lastTime = 0
+	local lastTapAt = 0
+	local splitting = false
+	local splitCount = 0
+
 	local layer = Instance.new("ScreenGui")
 	layer.Name = "SlotDrag"
 	layer.IgnoreGuiInset = true
@@ -42,26 +66,70 @@ function DragDrop.new(
 	ghost.AnchorPoint = Vector2.new(0.5, 0.5)
 	ghost.BackgroundTransparency = 0.3
 	ghost.Visible = false
-	local function setPicked(address: Address?)
-		picked = address
+	-- Bedrock split bar: green fill shows the part being taken
+	local splitBar = Ui.inset(layer, UDim2.fromOffset(160, 22), UDim2.new())
+	splitBar.AnchorPoint = Vector2.new(0.5, 1)
+	splitBar.Visible = false
+	local splitFill = Instance.new("Frame")
+	splitFill.Size = UDim2.fromScale(0, 1)
+	splitFill.BackgroundColor3 = Ui.colors.money
+	splitFill.BorderSizePixel = 0
+	splitFill.Parent = splitBar
+	local splitText =
+		Ui.label(splitBar, "", UDim2.fromScale(1, 1), UDim2.new(), 13, Ui.colors.white)
+	splitText.TextXAlignment = Enum.TextXAlignment.Center
+	splitText.TextStrokeTransparency = 0
+	splitText.ZIndex = 3
+
+	local function frameOf(address: Address): Frame?
+		for _, binding in ipairs(bindings) do
+			if same(binding.address, address) then
+				return binding.frame
+			end
+		end
+		return nil
+	end
+	local function paintSelection()
 		for _, binding in ipairs(bindings) do
 			local stroke = binding.frame:FindFirstChildOfClass("UIStroke")
 			if stroke then
-				local selected = same(picked, binding.address)
+				local selected = held ~= nil and same(held.from, binding.address)
 				stroke.Color = if selected then Ui.colors.slotSelected else Ui.colors.border
-				-- Minecraft-style slots keep their bevel and show the stroke only while selected
 				if binding.frame:GetAttribute("StrokeHidden") then
 					stroke.Transparency = if selected then 0 else 1
 					stroke.Thickness = 2
 				end
 			end
+			-- the picked-up stack is drawn on the cursor, so the slot shows it dimmed
+			local icon = binding.frame:FindFirstChild("Icon")
+			if icon and icon:IsA("ImageLabel") then
+				local dim = held ~= nil and same(held.from, binding.address)
+				icon.ImageTransparency = if dim then 0.6 else 0
+			end
 		end
 	end
-	local function cancel()
-		active, source = nil, nil
-		lastTap = nil
-		ghost.Visible = false
-		setPicked(nil)
+	local function showGhost(point: Vector2)
+		local stack = if held then getStack(held.from) else nil
+		if not stack then
+			ghost.Visible = false
+			return
+		end
+		local icon = Config.iconFor(stack.id, stack.level)
+		ghostIcon.Image, ghostIcon.Visible = icon or "", icon ~= nil
+		ghostName.Text =
+			Strings.itemName(stack.id, stack.level, Strings.localeOf(Players.LocalPlayer))
+		ghostName.Visible = icon == nil
+		local count = if held and held.count then held.count else stack.count
+		ghostCount.Text = if count > 1 then tostring(count) else ""
+		ghost.Position = UDim2.fromOffset(point.X, point.Y)
+		ghost.Visible = true
+	end
+	local function setHeld(value: Held?)
+		held = value
+		if not held then
+			ghost.Visible = false
+		end
+		paintSelection()
 	end
 	local function position(input: InputObject): Vector2
 		return if input.UserInputType == Enum.UserInputType.Touch
@@ -86,11 +154,114 @@ function DragDrop.new(
 		end
 		return nil
 	end
-	local function update(input: InputObject)
-		if not active then
+	local function shiftDown(): boolean
+		return UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
+			or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+	end
+
+	-- Put the held stack (or `count` of it) on `target`.
+	local function place(target: Address, count: number?)
+		local h = held
+		if not h then
 			return
 		end
-		if active.UserInputType == Enum.UserInputType.Touch and input ~= active then
+		if same(h.from, target) then
+			setHeld(nil) -- back where it came from
+			return
+		end
+		local source = getStack(h.from)
+		if not source then
+			setHeld(nil)
+			return
+		end
+		local amount = count or h.count
+		local destination = getStack(target)
+		if amount and destination and destination.id ~= source.id then
+			return -- Minecraft: a partial stack cannot be dropped on a different item
+		end
+		move(h.from, target, amount)
+		if amount and amount < (h.count or source.count) then
+			-- some of the held stack remains on the cursor
+			setHeld({ from = h.from, count = (h.count or source.count) - amount })
+		else
+			setHeld(nil)
+		end
+	end
+	local function pick(address: Address, half: boolean)
+		local stack = getStack(address)
+		if not stack then
+			return
+		end
+		setHeld({
+			from = address,
+			count = if half and stack.count > 1 then math.ceil(stack.count / 2) else nil,
+		})
+	end
+	local function distribute(path: { Address })
+		local h = held
+		if not h then
+			return
+		end
+		local stack = getStack(h.from)
+		if not stack then
+			setHeld(nil)
+			return
+		end
+		local total = h.count or stack.count
+		local targets: { Address } = {}
+		for _, address in ipairs(path) do
+			if not same(address, h.from) then
+				local at = getStack(address)
+				if at == nil or at.id == stack.id then
+					table.insert(targets, address)
+				end
+			end
+		end
+		if #targets == 0 then
+			return
+		end
+		if #targets == 1 then
+			place(targets[1])
+			return
+		end
+		local each = math.floor(total / #targets)
+		if each == 0 then
+			return
+		end
+		for _, target in ipairs(targets) do
+			move(h.from, target, each)
+		end
+		setHeld(nil)
+	end
+	local function endSplit(point: Vector2)
+		splitting = false
+		splitBar.Visible = false
+		local address = pressAddress
+		local stack = if address then getStack(address) else nil
+		if address and stack and splitCount > 0 and splitCount < stack.count then
+			setHeld({ from = address, count = splitCount })
+			showGhost(point)
+		elseif address and stack then
+			setHeld({ from = address })
+			showGhost(point)
+		end
+	end
+	local function cancel()
+		active, pressAddress = nil, nil
+		moved = false
+		table.clear(dragPath)
+		splitting = false
+		splitBar.Visible = false
+		lastTap = nil
+		setHeld(nil)
+	end
+
+	local function update(input: InputObject)
+		local a = active
+		if not a then
+			return
+		end
+		if a.UserInputType == Enum.UserInputType.Touch and input ~= a then
 			return
 		end
 		if
@@ -100,70 +271,152 @@ function DragDrop.new(
 			return
 		end
 		local point = position(input)
-		moved = moved or (point - origin).Magnitude >= 7
-		local stack = if source then getStack(source) else nil
-		ghost.Visible = moved and stack ~= nil
-		ghost.Position = UDim2.fromOffset(point.X, point.Y)
-		if stack then
-			local icon = Config.iconFor(stack.id, stack.level)
-			ghostIcon.Image, ghostIcon.Visible = icon or "", icon ~= nil
-			ghostName.Text =
-				Strings.itemName(stack.id, stack.level, Strings.localeOf(Players.LocalPlayer))
-			ghostName.Visible = icon == nil
-			ghostCount.Text = if stack.count > 1 then tostring(stack.count) else ""
+		if splitting then
+			-- Bedrock: slide up/down to choose the amount (bar above the finger)
+			local stack = if pressAddress then getStack(pressAddress) else nil
+			if stack then
+				local k = math.clamp((origin.Y - point.Y) / 120 + 0.5, 0, 1)
+				splitCount = math.clamp(math.floor(k * stack.count + 0.5), 1, stack.count)
+				splitFill.Size = UDim2.fromScale(splitCount / stack.count, 1)
+				splitText.Text = string.format("%d / %d", splitCount, stack.count)
+			end
+			return
+		end
+		if not moved and (point - origin).Magnitude >= DRAG_SLOP then
+			moved = true
+			if not held and pressAddress and getStack(pressAddress) then
+				setHeld({ from = pressAddress }) -- dragging straight from a slot picks it up
+			end
+		end
+		if moved and held then
+			showGhost(point)
+			local over = slotUnder(point)
+			if over and a.UserInputType ~= Enum.UserInputType.Touch then
+				local known = false
+				for _, address in ipairs(dragPath) do
+					if same(address, over) then
+						known = true
+					end
+				end
+				if not known then
+					table.insert(dragPath, over)
+				end
+			end
 		end
 	end
 	table.insert(connections, UserInputService.InputChanged:Connect(update))
+
+	local function release(input: InputObject)
+		local a = active
+		if not a then
+			return
+		end
+		if a.UserInputType == Enum.UserInputType.Touch then
+			if input ~= a then
+				return
+			end
+		elseif
+			input.UserInputType ~= Enum.UserInputType.MouseButton1
+			and input.UserInputType ~= Enum.UserInputType.MouseButton2
+		then
+			return
+		end
+		local point = position(input)
+		local isTouch = a.UserInputType == Enum.UserInputType.Touch
+		local rightButton = a.UserInputType == Enum.UserInputType.MouseButton2
+		active = nil
+		if input.UserInputState == Enum.UserInputState.Cancel then
+			cancel()
+			return
+		end
+		if splitting then
+			endSplit(point)
+			pressAddress = nil
+			return
+		end
+		local target = slotUnder(point)
+		local from = pressAddress
+		pressAddress = nil
+		if moved then
+			-- drag and drop
+			if held then
+				if isTouch or #dragPath <= 1 then
+					if target then
+						place(target)
+					elseif from and held and same(held.from, from) and not isTouch then
+						setHeld(nil)
+					end
+				else
+					distribute(dragPath)
+				end
+			end
+			table.clear(dragPath)
+			if held and isTouch then
+				ghost.Visible = false -- touch: a selected stack is shown by its slot highlight, not a ghost
+			end
+			return
+		end
+		if not from or not same(from, target) then
+			return
+		end
+		-- tap / click on a slot
+		local now = os.clock()
+		if isTouch then
+			if same(lastTap, from) and now - lastTapAt <= DOUBLE_TAP and getStack(from) then
+				lastTap = nil
+				setHeld(nil)
+				quick(from)
+				return
+			end
+			lastTap, lastTapAt = from, now
+			if held then
+				place(from)
+			else
+				pick(from, false)
+			end
+			return
+		end
+		if rightButton then
+			if held then
+				place(from, 1)
+			else
+				pick(from, true)
+			end
+		else
+			if held then
+				place(from)
+			else
+				pick(from, false)
+			end
+		end
+	end
+	table.insert(connections, UserInputService.InputEnded:Connect(release))
+	table.insert(connections, UserInputService.WindowFocusReleased:Connect(cancel))
+	-- the ghost follows the mouse while something is held
 	table.insert(
 		connections,
-		UserInputService.InputEnded:Connect(function(input)
+		RunService.RenderStepped:Connect(function()
 			if
-				not active
-				or (input ~= active and input.UserInputType ~= Enum.UserInputType.MouseButton1)
+				held
+				and not active
+				and UserInputService.MouseEnabled
+				and not UserInputService.TouchEnabled
 			then
-				return
+				showGhost(UserInputService:GetMouseLocation())
 			end
-			if active.UserInputType == Enum.UserInputType.Touch and input ~= active then
-				return
-			end
-			if input.UserInputState == Enum.UserInputState.Cancel then
-				cancel()
-				return
-			end
-			local destination = slotUnder(position(input))
-			local from = source
-			active, source = nil, nil
-			ghost.Visible = false
-			if not from then
-				return
-			end
-			if moved then
-				if destination and not same(from, destination) and getStack(from) then
-					move(from, destination)
+			if splitting and active then
+				local f = if pressAddress then frameOf(pressAddress) else nil
+				if f then
+					splitBar.Position = UDim2.fromOffset(
+						f.AbsolutePosition.X + f.AbsoluteSize.X / 2,
+						f.AbsolutePosition.Y - 8
+					)
+					splitBar.Visible = true
 				end
-				setPicked(nil)
-				lastTap = nil
-			elseif same(from, destination) then
-				local now = os.clock()
-				if same(lastTap, from) and now - lastTime <= 0.32 and getStack(from) then
-					setPicked(nil)
-					lastTap = nil
-					quick(from)
-				elseif picked and not same(picked, from) then
-					local previous = picked
-					setPicked(nil)
-					lastTap = nil
-					move(previous, from)
-				else
-					setPicked(if getStack(from) then from else nil)
-					lastTap, lastTime = from, now
-				end
-			else
-				setPicked(nil)
 			end
 		end)
 	)
-	table.insert(connections, UserInputService.WindowFocusReleased:Connect(cancel))
+
 	local controller = {}
 	function controller.Bind(frame: Frame, address: Address)
 		table.insert(bindings, { frame = frame, address = address })
@@ -177,31 +430,46 @@ function DragDrop.new(
 		table.insert(
 			connections,
 			button.InputBegan:Connect(function(input)
+				local kind = input.UserInputType
 				if
 					active
 					or (
-						input.UserInputType ~= Enum.UserInputType.Touch
-						and input.UserInputType ~= Enum.UserInputType.MouseButton1
+						kind ~= Enum.UserInputType.Touch
+						and kind ~= Enum.UserInputType.MouseButton1
+						and kind ~= Enum.UserInputType.MouseButton2
 					)
 				then
 					return
 				end
-				if
-					UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
-					or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
-				then
-					setPicked(nil)
+				if kind ~= Enum.UserInputType.Touch and shiftDown() then
+					setHeld(nil)
 					if getStack(address) then
 						quick(address)
 					end
 					return
 				end
-				active, source, origin, moved = input, address, position(input), false
+				active, pressAddress, origin, moved = input, address, position(input), false
+				table.clear(dragPath)
+				if kind == Enum.UserInputType.Touch and not held then
+					local stack = getStack(address)
+					if stack and stack.count > 1 then
+						local press = input
+						task.delay(HOLD_SPLIT, function()
+							if active == press and not moved and not held then
+								splitting = true
+								splitCount = math.ceil(stack.count / 2)
+								splitFill.Size = UDim2.fromScale(splitCount / stack.count, 1)
+								splitText.Text = string.format("%d / %d", splitCount, stack.count)
+							end
+						end)
+					end
+				end
 			end)
 		)
 	end
+	-- the stack currently on the cursor / selected by a tap
 	function controller.Selected(): Address?
-		return picked
+		return if held then held.from else nil
 	end
 	controller.Clear = cancel
 	owner.Destroying:Once(function()

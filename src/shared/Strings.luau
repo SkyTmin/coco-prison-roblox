@@ -6,6 +6,33 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+	-- upgrade window [меню]
+	upgrades = { ru = "Улучшения", en = "Upgrades", es = "Mejoras", fr = "Améliorations" },
+	upgrade_button = { ru = "Улучшить", en = "Upgrade", es = "Mejorar", fr = "Améliorer" },
+	upgrade_preview = {
+		ru = "Только просмотр",
+		en = "Preview only",
+		es = "Solo vista",
+		fr = "Aperçu seulement",
+	},
+	enchant_efficiency = {
+		ru = "Эффективность",
+		en = "Efficiency",
+		es = "Eficiencia",
+		fr = "Efficacité",
+	},
+	enchant_protection = {
+		ru = "Защита",
+		en = "Protection",
+		es = "Protección",
+		fr = "Protection",
+	},
+	item_melon_slice = {
+		ru = "Ломтик арбуза",
+		en = "Melon slice",
+		es = "Rodaja de sandía",
+		fr = "Tranche de pastèque",
+	},
 
 	-- cases / keys (сессия 8)
 	nickname_case = {

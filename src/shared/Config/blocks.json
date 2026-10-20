@@ -16,6 +16,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Песок"
     },
@@ -27,6 +28,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Гравий"
     },
@@ -38,6 +40,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Земля"
     },
@@ -49,6 +52,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Дерево"
     },
@@ -59,7 +63,11 @@
       "hardness": 1,
       "tool": "axe",
       "minTier": 0,
-      "dropsAs": null,
+      "dropsAs": "melon_slice",
+      "dropCount": [
+        3,
+        7
+      ],
       "itemOnly": false,
       "upgradeCounter": "Арбуз"
     },
@@ -71,6 +79,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Камень"
     },
@@ -82,6 +91,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": "cobblestone",
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Камень"
     },
@@ -93,6 +103,7 @@
       "tool": "none",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": true,
       "upgradeCounter": "Каменный уголь"
     },
@@ -104,6 +115,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": "coal",
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Каменный уголь"
     },
@@ -115,6 +127,7 @@
       "tool": "pickaxe",
       "minTier": 1,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Железная руда"
     },
@@ -126,6 +139,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -137,6 +151,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -148,6 +163,7 @@
       "tool": "pickaxe",
       "minTier": 2,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": "Золотая руда"
     },
@@ -159,6 +175,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -170,6 +187,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -181,6 +199,7 @@
       "tool": "none",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": true,
       "upgradeCounter": null
     },
@@ -192,6 +211,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": "quartz",
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -203,6 +223,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -214,6 +235,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -225,6 +247,7 @@
       "tool": "shears",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -236,6 +259,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -247,6 +271,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -258,6 +283,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -269,6 +295,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -280,6 +307,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -291,6 +319,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -302,6 +331,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -313,6 +343,7 @@
       "tool": "sword",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -324,6 +355,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -335,6 +367,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -346,6 +379,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -357,6 +391,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -368,6 +403,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -379,6 +415,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -390,6 +427,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -401,6 +439,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -412,6 +451,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -423,6 +463,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -434,6 +475,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -445,6 +487,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -456,6 +499,7 @@
       "tool": "shears",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -467,6 +511,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -478,6 +523,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -489,6 +535,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -500,6 +547,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -511,6 +559,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -522,6 +571,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -533,6 +583,7 @@
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -544,6 +595,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -555,6 +607,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -566,6 +619,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -577,6 +631,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -588,6 +643,7 @@
       "tool": "shovel",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -599,6 +655,7 @@
       "tool": "pickaxe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -610,6 +667,7 @@
       "tool": "axe",
       "minTier": 0,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -621,6 +679,7 @@
       "tool": "pickaxe",
       "minTier": 1,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -632,6 +691,7 @@
       "tool": "pickaxe",
       "minTier": 1,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -643,6 +703,7 @@
       "tool": "pickaxe",
       "minTier": 2,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -654,7 +715,20 @@
       "tool": "pickaxe",
       "minTier": 2,
       "dropsAs": null,
+      "dropCount": null,
       "itemOnly": false,
+      "upgradeCounter": null
+    },
+    "melon_slice": {
+      "id": "melon_slice",
+      "name": "Ломтик арбуза",
+      "basePrice": 0.28,
+      "hardness": 0,
+      "tool": "any",
+      "minTier": 0,
+      "dropsAs": null,
+      "dropCount": null,
+      "itemOnly": true,
       "upgradeCounter": null
     }
   }

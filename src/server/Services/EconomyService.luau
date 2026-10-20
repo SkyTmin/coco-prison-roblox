@@ -272,10 +272,10 @@ function EconomyService.Start()
 	Remotes.event("Exchange").OnServerEvent:Connect(exchange)
 	Remotes.event("UpgradeItem").OnServerEvent:Connect(upgrade)
 	Remotes.event("LevelUp").OnServerEvent:Connect(levelUp)
-	Remotes.event("InventoryMove").OnServerEvent:Connect(function(player, from, to)
+	Remotes.event("InventoryMove").OnServerEvent:Connect(function(player, from, to, count)
 		if InventoryService.isSlot(from) and InventoryService.isSlot(to) then
 			ProfileService.Mutate(player, function(p)
-				InventoryService.move(p, from, to)
+				InventoryService.move(p, from, to, if typeof(count) == "number" then count else nil)
 			end)
 		end
 	end)

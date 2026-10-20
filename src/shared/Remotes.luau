@@ -1,16 +1,17 @@
 --!strict
 -- RemoteEvents / RemoteFunctions under ReplicatedStorage.Remotes, created lazily on the server.
 --
--- Client → server events:  DigStart(part), DigFinish(part), Sell(), BuyItem(id), UpgradeItem(id),
---                           LevelUp(), InventoryMove(from, to), SelectSlot(n), SpendPoint(kind),
+-- Client → server events:  DigStart(part, hitPoint), DigCancel(), DigFinish(part) [legacy, ignored], Sell(), BuyItem(id), UpgradeItem(id),
+--                           LevelUp(), InventoryMove(from, to, count?), SelectSlot(n), SpendPoint(kind),
 --                           ClaimProfessionPoints(job), UseConsumable(slot),
 --                           CaseOpen(caseId, keyId?), CaseClose(caseId),
 --                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
---                           CaseMove(caseId, {container = "case"|"inv", index}, destination)
+--                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?)
 --                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
 -- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
 --                          BlockBroken(userId, cframe, size, color, blockId) — for other players' effects
+--                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
 -- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

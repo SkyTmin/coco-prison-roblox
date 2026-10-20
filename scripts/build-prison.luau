@@ -336,8 +336,8 @@ end
 for _, s in ipairs({
 	{ Vector3.new(32, 5, 1.5), CFrame.new(0, 2.5, -15.25) },
 	{ Vector3.new(32, 5, 1.5), CFrame.new(0, 2.5, 15.25) },
-	{ Vector3.new(1.5, 5, 32), CFrame.new(-15.25, 2.5, 0) },
-	{ Vector3.new(1.5, 5, 32), CFrame.new(15.25, 2.5, 0) },
+	{ Vector3.new(1.5, 5, 29), CFrame.new(-15.25, 2.5, 0) }, -- 29: no overlap with the N/S rims (z-fighting)
+	{ Vector3.new(1.5, 5, 29), CFrame.new(15.25, 2.5, 0) },
 }) do
 	textured(part("FountainRim", s[1], s[2], STONE), "px_cobblestone")
 end
@@ -375,8 +375,8 @@ water(0, 0, 0, 28, 4, 28) -- surface at y 4, rim top at 5
 for _, s in ipairs({
 	{ Vector3.new(16, 5, 1.2), CFrame.new(0, 6.5, -7.4) },
 	{ Vector3.new(16, 5, 1.2), CFrame.new(0, 6.5, 7.4) },
-	{ Vector3.new(1.2, 5, 16), CFrame.new(-7.4, 6.5, 0) },
-	{ Vector3.new(1.2, 5, 16), CFrame.new(7.4, 6.5, 0) },
+	{ Vector3.new(1.2, 5, 13.6), CFrame.new(-7.4, 6.5, 0) },
+	{ Vector3.new(1.2, 5, 13.6), CFrame.new(7.4, 6.5, 0) },
 }) do
 	textured(part("FountainTier2", s[1], s[2], STONE), "px_stone")
 end
@@ -628,16 +628,20 @@ for _, m in ipairs(pits) do
 	anchor.CanTouch = false
 	CollectionService:AddTag(anchor, "MineAnchor")
 	sign(anchor, m.label, 10)
-	-- ladders (trusses) on the inner side of every wall
+	-- [владелец] four ladders, 4 blocks (16 studs) wide, centred on every wall, from the floor to the
+	-- rim; MineService keeps the 4-wide shaft in front of each ladder free of blocks forever.
+	local LADDER_W = 4 * B
 	for _, side in ipairs({
-		{ cx, cz - d / 2 + 1 },
-		{ cx, cz + d / 2 - 1 },
-		{ cx - w / 2 + 1, cz },
-		{ cx + w / 2 - 1, cz },
+		{ cx, cz - d / 2 + 1, true },
+		{ cx, cz + d / 2 - 1, true },
+		{ cx - w / 2 + 1, cz, false },
+		{ cx + w / 2 - 1, cz, false },
 	}) do
 		local truss = Instance.new("TrussPart")
 		truss.Name = "Ladder"
-		truss.Size = Vector3.new(2, h + 2, 2)
+		truss.Size = if side[3]
+			then Vector3.new(LADDER_W, h + 2, 2)
+			else Vector3.new(2, h + 2, LADDER_W)
 		truss.CFrame = CFrame.new(side[1], -h / 2 + 1, side[2])
 		truss.Anchored = true
 		truss.Color = STONE

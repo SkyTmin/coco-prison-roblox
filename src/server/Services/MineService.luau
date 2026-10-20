@@ -17,6 +17,18 @@ local BLOCK = 4 -- studs per block
 local ANCHOR_TAG = "MineAnchor"
 local BLOCK_TAG = "MineBlock"
 local CHUNK = 512 -- parts created per frame during rebuild
+local LADDER_WIDTH = 4 -- [владелец] four ladders, 4 blocks wide, centred on every side, always free
+
+-- Cells of the four ladder shafts (one block deep against each wall, 4 wide, full depth). They are
+-- never filled, so the ladders stay reachable whatever the players dig and whenever the mine resets.
+local function ladderShaft(size: { number }, x: number, z: number): boolean
+	local sx, sz = size[1], size[3]
+	local x0 = math.floor(sx / 2) - LADDER_WIDTH / 2 + 1
+	local z0 = math.floor(sz / 2) - LADDER_WIDTH / 2 + 1
+	local midX = x >= x0 and x < x0 + LADDER_WIDTH
+	local midZ = z >= z0 and z < z0 + LADDER_WIDTH
+	return (midX and (z == 1 or z == sz)) or (midZ and (x == 1 or x == sx))
+end
 
 export type Mine = {
 	shares: { [string]: number },
@@ -145,7 +157,8 @@ local function rebuild(mine: Mine)
 	local rng = Random.new()
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
 	for i = 1, total do
-		mine.cells[i] = pickBlock(mine.shares, rng)
+		local x, _, z = coords(mine, i)
+		mine.cells[i] = if ladderShaft(mine.size, x, z) then nil else pickBlock(mine.shares, rng)
 		if i % 4096 == 0 then
 			task.wait()
 		end
@@ -190,6 +203,8 @@ local function evacuate(mine: Mine)
 		end
 	end
 end
+
+MineService.ladderShaft = ladderShaft
 
 function MineService.lookup(part: Instance): (Mine?, number?)
 	local hit = blockLookup[part :: BasePart]

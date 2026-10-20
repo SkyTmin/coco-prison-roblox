@@ -1,6 +1,6 @@
 {
   "source": "assets/icons/ids.json — Codex image gen + Studio upload; lookup: <id>_<material>, then <id>, then block texture",
-  "_source": "Tools, shears and armor: VoxeLibre / Pixel Perfection textures (CC BY-SA 4.0, assets/thirdparty/voxelibre/ATTRIBUTION.md) upscaled ×8 nearest-neighbour; other items: Codex image gen 20.10.2026. Uploaded via Studio MCP upload_image. Keys (improved ancient, nickname, artifact), dispeller, powder, money bag, shard goods and trainer badges: own pixel art, scripts/draw-icons.mjs (21.10.2026).",
+  "_source": "Tools, shears and armor: VoxeLibre / Pixel Perfection textures (CC BY-SA 4.0, assets/thirdparty/voxelibre/ATTRIBUTION.md) upscaled ×8 nearest-neighbour; other items: Codex image gen 20.10.2026. Uploaded via Studio MCP upload_image. Keys (improved ancient, nickname, artifact), dispeller, powder, money bag, shard goods and trainer badges: own pixel art, scripts/draw-icons.mjs (21.10.2026). Touch menu icons: own pixel art (draw-icons.mjs); melon_slice: VoxeLibre farming_melon.png (CC BY-SA 4.0).",
   "icons": {
     "axe_stone": "rbxassetid://109538785154164",
     "boots_iron": "rbxassetid://128018465863690",
@@ -64,7 +64,15 @@
     "fire_shard": "rbxassetid://89225994183703",
     "volcanic_stone": "rbxassetid://121164706591961",
     "trainer_needs": "rbxassetid://73299540394204",
-    "artifact_key": "rbxassetid://123185204110746"
+    "artifact_key": "rbxassetid://123185204110746",
+    "menu_upgrade": "rbxassetid://71918761375199",
+    "menu_camera": "rbxassetid://77110832169825",
+    "menu_artifacts": "rbxassetid://112767233629357",
+    "menu_jobs": "rbxassetid://114562236941595",
+    "menu_locations": "rbxassetid://115321287934992",
+    "melon_slice": "rbxassetid://107861501126051",
+    "menu_achievements": "rbxassetid://128634834029993",
+    "menu_level": "rbxassetid://82789310994325"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557"
 }

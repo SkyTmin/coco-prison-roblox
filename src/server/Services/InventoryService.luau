@@ -103,11 +103,43 @@ function InventoryService.isSlot(n: any): boolean
 	return typeof(n) == "number" and n == n and n == math.floor(n) and n >= 1 and n <= SLOTS
 end
 
-function InventoryService.move(profile: Profile, from: number, to: number): boolean
+function InventoryService.move(profile: Profile, from: number, to: number, count: number?): boolean
 	if from == to or not InventoryService.isSlot(from) or not InventoryService.isSlot(to) then
 		return false
 	end
 	local a, b = profile.inventory[from], profile.inventory[to]
+	-- Partial move (Minecraft right click / split / drag spread): only onto an empty slot or the same item.
+	if count ~= nil and a then
+		if
+			typeof(count) ~= "number"
+			or count ~= count
+			or count < 1
+			or count ~= math.floor(count)
+		then
+			return false
+		end
+		if count >= a.count then
+			count = nil -- the whole stack: fall through to the ordinary move
+		elseif not InventoryService.isStackable(a.id) then
+			return false
+		elseif b == nil then
+			local piece = table.clone(a)
+			piece.count = count
+			profile.inventory[to] = piece
+			a.count -= count
+			return true
+		elseif b.id == a.id then
+			local take = math.min(STACK - b.count, count)
+			if take <= 0 then
+				return false
+			end
+			b.count += take
+			a.count -= take
+			return true
+		else
+			return false
+		end
+	end
 	if a and b and a.id == b.id and InventoryService.isStackable(a.id) then
 		local take = math.min(STACK - b.count, a.count)
 		b.count += take

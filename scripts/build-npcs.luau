@@ -277,8 +277,8 @@ local function chest(name, tag, pos, target, style)
 	end
 	local pedestal = part(
 		"Pedestal",
-		Vector3.new(7, 0.6, 6),
-		at(0, 0.3, 0),
+		Vector3.new(7, 1, 6),
+		at(0, 0.5, 0), -- top at 1.0, clear of the plaza top (0.6): no z-fighting
 		Color3.fromRGB(96, 96, 100),
 		Enum.Material.Plastic,
 		model

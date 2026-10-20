@@ -245,7 +245,7 @@ function HeldItem.Start()
 			end
 		end
 	end)
-	RunService:BindToRenderStep("HeldItemPose", Enum.RenderPriority.Camera.Value + 2, function()
+	RunService:BindToRenderStep("HeldItemPose", Enum.RenderPriority.Last.Value, function()
 		-- Restore our offsets before applying this frame's pose; never accumulate rotations.
 		for motor, base in pairs(posed) do
 			if motor.Parent then
