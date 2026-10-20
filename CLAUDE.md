@@ -60,6 +60,10 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Minecraft layer layout) → upload via `upload_image` → ids in `assets/icons/ids.json`,
    `assets/armor/ids.json` → `node scripts/build-configs.mjs`; `scripts/tools-to-voxels.ps1` + node
    greedy-rectangle merge → `assets/icons/voxels.json` (3D extruded item sprites, `ItemModels.luau`).
+   Block breaking (`src/client/BlockBreak.luau`): crack stages `assets/cracks/ids.json`, sounds
+   `assets/sounds/ids.json` (Roblox library, ProSoundEffects) → `Config/effects.json`. Per-mine
+   composition: `scripts/design-decisions.json` → `mines.<locationId>_<mineId>.shares` →
+   `locations.json` → `mines` → MineService.
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
