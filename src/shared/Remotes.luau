@@ -3,8 +3,11 @@
 --
 -- Client → server events:  DigStart(part), DigFinish(part), Sell(), BuyItem(id), UpgradeItem(id),
 --                           LevelUp(), InventoryMove(from, to), SelectSlot(n), SpendPoint(kind),
---                           ClaimProfessionPoints(job), UseConsumable(slot), OpenCase(kind)
+--                           ClaimProfessionPoints(job), UseConsumable(slot),
+--                           CaseOpen(caseId), CaseClose(caseId),
+--                           CaseMove(caseId, {container = "case"|"inv", index}, destination)
 -- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)
+--                          CaseOpened(caseId), CaseUpdated(caseId, active)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

@@ -32,6 +32,7 @@ function ProfileService.defaultProfile(): Profile
 		blocksTotal = 0,
 		counters = {},
 		inventory = { [1] = { id = "shovel", count = 1, level = 1, books = {} } }, -- starting shovel [владелец]
+		caseContents = {},
 		armor = {},
 		selectedSlot = 1,
 		professions = {
@@ -84,6 +85,18 @@ local function migrate(data: any): Profile
 			(profile :: any)[field] = value
 		end
 		profile.inventory = decodeInventory(data.inventory)
+		profile.caseContents = {}
+		if typeof(data.caseContents) == "table" then
+			for _, id in ipairs({ "ordinaryCase", "ancientCase" }) do
+				local contents = decodeInventory(data.caseContents[id])
+				for slot in pairs(contents) do
+					if slot < 1 or slot > 27 or slot ~= math.floor(slot) then
+						contents[slot] = nil
+					end
+				end
+				profile.caseContents[id] = contents
+			end
+		end
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
@@ -129,6 +142,10 @@ local function save(player: Player, session: Session)
 	session.saving = true
 	local snapshot = table.clone(session.profile) :: any
 	snapshot.inventory = encodeInventory(session.profile.inventory)
+	snapshot.caseContents = {}
+	for id, contents in pairs(session.profile.caseContents) do
+		snapshot.caseContents[id] = encodeInventory(contents)
+	end
 	local ok, err = pcall(function()
 		(store :: DataStore):UpdateAsync(keyFor(player), function()
 			return snapshot
@@ -160,6 +177,14 @@ end
 function ProfileService.Replicate(player: Player)
 	local session = sessions[player]
 	if session then
+		local character = player.Character
+		local stack = session.profile.inventory[session.profile.selectedSlot]
+		if character then
+			character:SetAttribute(
+				"HeldItem",
+				if stack then stack.id .. ":" .. tostring(stack.level or 0) else ""
+			)
+		end
 		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
 		Remotes.event("ProfileUpdated"):FireClient(player, session.profile)
 	end
@@ -191,9 +216,15 @@ function ProfileService.Start()
 		)
 	end
 
-	Players.PlayerAdded:Connect(load)
-	for _, player in ipairs(Players:GetPlayers()) do
+	local function added(player: Player)
+		player.CharacterAdded:Connect(function()
+			ProfileService.Replicate(player)
+		end)
 		task.spawn(load, player)
+	end
+	Players.PlayerAdded:Connect(added)
+	for _, player in ipairs(Players:GetPlayers()) do
+		added(player)
 	end
 	Players.PlayerRemoving:Connect(function(player)
 		local session = sessions[player]

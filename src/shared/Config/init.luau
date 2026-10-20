@@ -154,20 +154,23 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number): num
 	if block.itemOnly then
 		return nil
 	end
-	local mult: number
-	if block.tool == "any" then
-		mult = 1
-	else
-		if toolId ~= block.tool or toolLevel < 1 then
-			return nil
-		end
+	-- [ваниль] with the proper tool: hardness * 1.5 / (toolSpeed + enchant² + 1).
+	-- [владелец 20.10] digging by hand (or with the wrong tool) is always allowed but slow:
+	-- hardness * 1.5 for blocks that need no tool (dirt, sand, logs…), hardness * 5 for pickaxe
+	-- blocks (vanilla "wrong tool" time); the block still drops ([решение]).
+	local proper = toolId == block.tool and toolLevel >= 1
+	if proper then
 		local material = Config.materialForLevel(toolLevel)
-		if Config.tierIndex(material) < block.minTier then
-			return nil
-		end
+		proper = Config.tierIndex(material) >= block.minTier
+	end
+	local mult = 1
+	if block.tool ~= "any" and proper then
+		local material = Config.materialForLevel(toolLevel)
 		local enchant = Config.enchantForLevel(toolId :: string, toolLevel)
 		mult = Config.vanilla.toolSpeed[material]
 			+ (if enchant > 0 then enchant * enchant + 1 else 0)
+	elseif block.tool == "pickaxe" then
+		return math.max(0.05, block.hardness * 5)
 	end
 	return math.max(0.05, block.hardness * 1.5 / mult)
 end

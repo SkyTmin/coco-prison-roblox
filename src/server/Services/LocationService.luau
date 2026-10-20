@@ -18,12 +18,23 @@ local started = false
 local lastTeleport: { [Player]: number } = {}
 local prompts: { [Instance]: { prompt: ProximityPrompt, connection: RBXScriptConnection } } = {}
 local TELEPORT_INTERVAL = 0.5 -- [решение] throttle repeated client intents
+local SPOTS: { [string]: boolean } = {
+	spawn = true,
+	mine = true,
+	small_mine = true,
+	market = true,
+	canteen = true,
+	bedroom = true,
+	bath = true,
+	trainer = true,
+}
 type Channel = {
 	character: Model,
 	humanoid: Humanoid,
 	root: BasePart,
 	spawn: BasePart,
 	locationId: string,
+	spot: string?,
 	position: Vector3,
 	finishesAt: number,
 	died: RBXScriptConnection?,
@@ -51,16 +62,24 @@ local function cancel(player: Player)
 	toast(player, "teleport_cancelled")
 end
 
-local function teleport(player: Player, locationId: any)
-	if typeof(locationId) ~= "string" then
+local function matchesSpot(part: BasePart, spot: string?): boolean
+	local markedSpot = part:GetAttribute("Spot")
+	return if spot then markedSpot == spot else markedSpot == nil or markedSpot == "spawn"
+end
+
+local function teleport(player: Player, locationId: any, spot: any)
+	if
+		typeof(locationId) ~= "string"
+		or (spot ~= nil and (typeof(spot) ~= "string" or not SPOTS[spot]))
+	then
 		return
 	end
-	cancel(player)
 	local now = os.clock()
 	if now - (lastTeleport[player] or -math.huge) < TELEPORT_INTERVAL then
 		return
 	end
 	lastTeleport[player] = now
+	cancel(player)
 	if CombatService.inCombat(player) then
 		toast(player, "teleport_in_combat", math.ceil(CombatService.remainingSeconds(player)))
 		return
@@ -75,11 +94,12 @@ local function teleport(player: Player, locationId: any)
 		toast(player, "teleport_not_ready")
 		return
 	end
-	if profile.level < location.unlockLevel then
+	local withinCurrent = spot ~= nil and profile.location == locationId
+	if not withinCurrent and profile.level < location.unlockLevel then
 		toast(player, "level_too_low", location.unlockLevel)
 		return
 	end
-	if location.requiresPass and not profile.passes[locationId] then
+	if not withinCurrent and location.requiresPass and not profile.passes[locationId] then
 		toast(player, "location_pass_required")
 		return
 	end
@@ -89,6 +109,7 @@ local function teleport(player: Player, locationId: any)
 			part:IsA("BasePart")
 			and part:IsDescendantOf(workspace)
 			and part:GetAttribute("LocationId") == locationId
+			and matchesSpot(part, spot)
 		then
 			spawn = part
 			break
@@ -117,6 +138,7 @@ local function teleport(player: Player, locationId: any)
 		root = root,
 		spawn = spawn,
 		locationId = locationId,
+		spot = spot,
 		position = root.Position,
 		finishesAt = os.clock() + Config.rules.teleport.channelSeconds,
 	}
@@ -144,14 +166,18 @@ local function updateChannels()
 		elseif os.clock() >= channel.finishesAt then
 			local profile = ProfileService.Get(player)
 			local location = Config.location(channel.locationId)
+			local withinCurrent = profile
+				and channel.spot ~= nil
+				and profile.location == channel.locationId
 			if
 				not profile
 				or not location
-				or profile.level < location.unlockLevel
-				or (location.requiresPass and not profile.passes[channel.locationId])
+				or (not withinCurrent and profile.level < location.unlockLevel)
+				or (not withinCurrent and location.requiresPass and not profile.passes[channel.locationId])
 				or not channel.spawn:IsDescendantOf(workspace)
 				or not CollectionService:HasTag(channel.spawn, "LocationSpawn")
 				or channel.spawn:GetAttribute("LocationId") ~= channel.locationId
+				or not matchesSpot(channel.spawn, channel.spot)
 			then
 				cancel(player)
 				continue
@@ -186,7 +212,11 @@ local function bindPrompt(part: Instance)
 			and root:IsA("BasePart")
 			and (root.Position - part.Position).Magnitude <= prompt.MaxActivationDistance
 		then
-			Remotes.event("OpenMenu"):FireClient(player, "locations")
+			local profile = ProfileService.Get(player)
+			local locationId = part:GetAttribute("LocationId")
+			local current = profile and (locationId == nil or locationId == profile.location)
+			Remotes.event("OpenMenu")
+				:FireClient(player, "locations", if current then "spots" else nil)
 		end
 	end)
 	prompts[part] = { prompt = prompt, connection = connection }

@@ -17,10 +17,18 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Ui)
+local DragDrop = require(script.DragDrop)
+local ChestWindow = require(script.ChestWindow)
+local HeldItem = require(script.HeldItem)
+HeldItem.Start()
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale
 local camera = workspace.CurrentCamera
+local function isMobile(): boolean
+	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+end
+local localizedButtons: { [TextButton]: string } = {}
 local T = function(key: string, ...: any)
 	return Strings.t(key, locale, ...)
 end
@@ -32,6 +40,48 @@ gui.Name = "PrisonHud"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
+
+local firstPerson = false
+local crosshair = Instance.new("Frame")
+crosshair.Name = "Crosshair"
+crosshair.Size = UDim2.fromOffset(12, 12)
+crosshair.AnchorPoint = Vector2.new(0.5, 0.5)
+crosshair.Position = UDim2.fromScale(0.5, 0.5)
+crosshair.BackgroundTransparency = 1
+crosshair.Visible = false
+crosshair.Parent = gui
+for _, size in ipairs({ Vector2.new(12, 2), Vector2.new(2, 12) }) do
+	local line = Instance.new("Frame")
+	line.Size = UDim2.fromOffset(size.X, size.Y)
+	line.AnchorPoint = Vector2.new(0.5, 0.5)
+	line.Position = UDim2.fromScale(0.5, 0.5)
+	line.BackgroundColor3 = Color3.new(1, 1, 1)
+	line.BorderSizePixel = 0
+	line.Parent = crosshair
+end
+local cameraButton = Ui.button(
+	gui,
+	T("camera_first_person"),
+	UDim2.fromOffset(150, 28),
+	UDim2.new(1, -160, 0, 88),
+	Ui.colors.buttonGrey
+)
+local function renderCameraButton()
+	cameraButton.Text = T(if firstPerson then "camera_third_person" else "camera_first_person")
+	crosshair.Visible = firstPerson or isMobile()
+end
+local function toggleFirstPerson()
+	firstPerson = not firstPerson
+	player.CameraMode = if firstPerson
+		then Enum.CameraMode.LockFirstPerson
+		else Enum.CameraMode.Classic
+	local currentCamera = workspace.CurrentCamera
+	if currentCamera then
+		currentCamera.CameraType = Enum.CameraType.Custom
+	end
+	renderCameraButton()
+end
+cameraButton.Activated:Connect(toggleFirstPerson)
 
 -- ---------------------------------------------------------------- HUD: stats panel (right), hints, toast, combo
 local stats = Ui.panel(gui, UDim2.fromOffset(190, 96), UDim2.new(1, -200, 0.42, 0))
@@ -86,10 +136,11 @@ local languageButton = Ui.button(
 	UDim2.new(1, -74, 1, -38),
 	Ui.colors.buttonGrey
 )
-languageButton.Activated:Connect(function()
+local function cycleLocale()
 	local index = table.find(Config.locales, locale) or 1
 	Remotes.event("SetLocale"):FireServer(Config.locales[index % #Config.locales + 1])
-end)
+end
+languageButton.Activated:Connect(cycleLocale)
 
 local teleportCountdown = Ui.label(
 	gui,
@@ -171,6 +222,45 @@ for i = 1, 9 do
 	hotbarImages[i] = image
 end
 
+-- All menu builders use this viewport clamp, including menus rebuilt after profile updates.
+type WindowLayout = { size: UDim2, position: UDim2, anchor: Vector2, scale: UIScale }
+local windowLayouts: { [Frame]: WindowLayout } = {}
+local function fitWindow(win: Frame, layout: WindowLayout)
+	local currentCamera = workspace.CurrentCamera
+	if not currentCamera then
+		return
+	end
+	local viewport = currentCamera.ViewportSize
+	local width = layout.size.X.Offset + layout.size.X.Scale * viewport.X
+	local height = layout.size.Y.Offset + layout.size.Y.Scale * viewport.Y
+	layout.scale.Scale =
+		math.clamp(math.min((viewport.X - 20) / width, (viewport.Y - 20) / height), 0.1, 1)
+	if layout.scale.Scale < 1 then
+		win.AnchorPoint = Vector2.new(0.5, 0.5)
+		win.Position = UDim2.fromScale(0.5, 0.5)
+	else
+		win.AnchorPoint, win.Position = layout.anchor, layout.position
+	end
+end
+local function createWindow(
+	parent: Instance,
+	title: string,
+	size: UDim2,
+	onClose: () -> ()
+): (Frame, Frame)
+	local win, content = Ui.window(parent, title, size, onClose)
+	local scale = Instance.new("UIScale")
+	scale.Parent = win
+	local layout: WindowLayout =
+		{ size = size, position = win.Position, anchor = win.AnchorPoint, scale = scale }
+	windowLayouts[win] = layout
+	win.Destroying:Once(function()
+		windowLayouts[win] = nil
+	end)
+	fitWindow(win, layout)
+	return win, content
+end
+
 local function stackLabel(stack: Types.ItemStack?): (string, string)
 	if not stack then
 		return "", ""
@@ -232,8 +322,15 @@ end
 local openWindow: Frame? = nil
 local currentWindowKind: string? = nil
 local refreshLocations: (() -> ())? = nil
+local refreshInventory: (() -> ())? = nil
+local refreshChest: (() -> ())? = nil
+local openedCaseId = "ordinaryCase"
 local function closeWindow()
+	if currentWindowKind == "case" then
+		Remotes.event("CaseClose"):FireServer(openedCaseId)
+	end
 	refreshLocations = nil
+	refreshInventory, refreshChest = nil, nil
 	if openWindow then
 		openWindow:Destroy()
 		openWindow = nil
@@ -241,38 +338,44 @@ local function closeWindow()
 	currentWindowKind = nil
 end
 
--- Inventory [E]: 27 slots + hotbar row + armor; click-to-move.
-local picked: number? = nil
+-- Inventory [E]: shared drag/drop gestures; profile updates repaint slots in place.
 local function buildInventory(): Frame
-	local win, content = Ui.window(
+	local win, content = createWindow(
 		gui,
 		T("inventory"),
 		UDim2.fromOffset(9 * (SLOT + 4) + 160, 5 * (SLOT + 4) + 70),
 		closeWindow
 	)
+	local views: { { index: number, name: TextLabel, count: TextLabel, image: ImageLabel } } = {}
+	local armorViews: { { part: string, name: TextLabel, count: TextLabel, image: ImageLabel } } =
+		{}
+	local function renderArmor(part: string, name: TextLabel, count: TextLabel, image: ImageLabel)
+		local armor = if profile then profile.armor[part] else nil
+		renderSlot(name, count, image, armor or { id = part, level = 1, count = 1 })
+		image.ImageColor3 = if armor then Color3.new(1, 1, 1) else Color3.fromRGB(145, 145, 145)
+		image.ImageTransparency = if armor then 0 else 0.6
+		name.TextColor3 = if armor then Ui.colors.text else Ui.colors.muted
+	end
+	local function stackAt(address: DragDrop.Address): Types.ItemStack?
+		return if profile then profile.inventory[address.index] else nil
+	end
+	local drag = DragDrop.new(win, stackAt, function(from, to)
+		Remotes.event("InventoryMove"):FireServer(from.index, to.index)
+	end, function(from)
+		local first, last = if from.index <= 9 then 10 else 1, if from.index <= 9 then 36 else 9
+		for index = first, last do
+			if not stackAt({ container = "inv", index = index }) then
+				Remotes.event("InventoryMove"):FireServer(from.index, index)
+				break
+			end
+		end
+	end)
 	local function slotAt(index: number, x: number, y: number)
 		local f, name, count, image = Ui.slot(content, SLOT)
 		f.Position = UDim2.fromOffset(x, y)
 		renderSlot(name, count, image, if profile then profile.inventory[index] else nil)
-		local btn = Instance.new("TextButton")
-		btn.Size = UDim2.fromScale(1, 1)
-		btn.BackgroundTransparency = 1
-		btn.Text = ""
-		btn.Parent = f
-		btn.Activated:Connect(function()
-			if picked == nil then
-				if profile and profile.inventory[index] then
-					picked = index
-					local s = f:FindFirstChildOfClass("UIStroke")
-					if s then
-						s.Color = Ui.colors.slotSelected
-					end
-				end
-			else
-				Remotes.event("InventoryMove"):FireServer(picked, index)
-				picked = nil
-			end
-		end)
+		table.insert(views, { index = index, name = name, count = count, image = image })
+		drag.Bind(f, { container = "inv", index = index })
 	end
 	for r = 0, 2 do
 		for c = 0, 8 do
@@ -286,12 +389,8 @@ local function buildInventory(): Frame
 	for _, part in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
 		local f, name, count, image = Ui.slot(content, SLOT)
 		f.Position = UDim2.fromOffset(9 * (SLOT + 4) + 12, y)
-		local armor = if profile then profile.armor[part] else nil
-		renderSlot(name, count, image, armor)
-		if not armor then
-			name.Text = T("item_" .. part)
-		end
-		name.TextColor3 = if armor then Ui.colors.text else Ui.colors.muted
+		renderArmor(part, name, count, image)
+		table.insert(armorViews, { part = part, name = name, count = count, image = image })
 		y += SLOT + 4
 	end
 	local equip = Ui.button(
@@ -302,17 +401,32 @@ local function buildInventory(): Frame
 		Ui.colors.buttonGrey
 	)
 	equip.Activated:Connect(function()
+		local picked = drag.Selected()
 		if picked then
-			Remotes.event("EquipArmor"):FireServer(picked)
-			picked = nil
+			Remotes.event("EquipArmor"):FireServer(picked.index)
+			drag.Clear()
 		end
 	end)
+	refreshInventory = function()
+		for _, view in ipairs(views) do
+			renderSlot(
+				view.name,
+				view.count,
+				view.image,
+				if profile then profile.inventory[view.index] else nil
+			)
+		end
+		for _, view in ipairs(armorViews) do
+			renderArmor(view.part, view.name, view.count, view.image)
+		end
+	end
 	return win
 end
 
 -- Sell window: list of blocks in bag with prices, "sell all".
 local function buildSell(): Frame
-	local win, content = Ui.window(gui, T("sell_prompt"), UDim2.fromOffset(360, 320), closeWindow)
+	local win, content =
+		createWindow(gui, T("sell_prompt"), UDim2.fromOffset(360, 320), closeWindow)
 	local y = 0
 	local totals: { [string]: number } = {}
 	if profile then
@@ -383,7 +497,7 @@ local function buildShop(kind: string): Frame
 			{ id = "shears", price = 4000 },
 			{ id = "shovel", price = 4 },
 		}
-	local win, content = Ui.window(
+	local win, content = createWindow(
 		gui,
 		T(if kind == "food" then "food_prompt" else "shop_prompt"),
 		UDim2.fromOffset(#items * 120 + 40, 180),
@@ -424,7 +538,7 @@ end
 
 -- Upgrade [J]: every owned tool/armor with next upgrade cost and requirements.
 local function buildUpgrade(): Frame
-	local win, content = Ui.window(gui, T("upgrade"), UDim2.fromOffset(520, 360), closeWindow)
+	local win, content = createWindow(gui, T("upgrade"), UDim2.fromOffset(520, 360), closeWindow)
 	local y = 0
 	if profile then
 		local owned: { { id: string, level: number } } = {}
@@ -499,7 +613,7 @@ end
 
 -- Level [U]
 local function buildLevel(): Frame
-	local win, content = Ui.window(gui, T("level_up"), UDim2.fromOffset(360, 180), closeWindow)
+	local win, content = createWindow(gui, T("level_up"), UDim2.fromOffset(360, 180), closeWindow)
 	if profile then
 		local rule = Config.levelRule(profile.level + 1)
 		Ui.label(
@@ -546,7 +660,7 @@ end
 
 -- Jobs [O]: three professions + three boosters, spend points.
 local function buildJobs(): Frame
-	local win, content = Ui.window(gui, T("jobs"), UDim2.fromOffset(560, 300), closeWindow)
+	local win, content = createWindow(gui, T("jobs"), UDim2.fromOffset(560, 300), closeWindow)
 	if profile then
 		local pro = profile.professions
 		local jobs = { "mason", "surveyor", "blademaster" }
@@ -639,7 +753,8 @@ end
 
 -- [решение] Same owner-specified thresholds and rewards as AchievementService.
 local function buildAchievements(): Frame
-	local win, content = Ui.window(gui, T("achievements"), UDim2.fromOffset(772, 486), closeWindow)
+	local win, content =
+		createWindow(gui, T("achievements"), UDim2.fromOffset(772, 486), closeWindow)
 	local p = profile
 	if not p then
 		return win
@@ -726,23 +841,11 @@ local function buildAchievements(): Frame
 	return win
 end
 
-type CaseDrop = { id: string, count: number }
-local caseDrops: { CaseDrop } = {}
 local function buildCase(): Frame
-	local win, content = Ui.window(gui, T("ordinary_case"), UDim2.fromOffset(420, 160), closeWindow)
-	for i, drop in ipairs(caseDrops) do
-		local slot, name, count, image = Ui.slot(content, 94)
-		slot.Position = UDim2.fromOffset(4 + (i - 1) * 102, 4)
-		if drop.id == "money" then
-			name.Text = T("coins")
-			name.TextColor3 = Ui.colors.money
-			count.Text = Strings.money(drop.count) .. " $"
-		else
-			local level = if Config.tools[drop.id] then 1 else nil
-			renderSlot(name, count, image, { id = drop.id, count = drop.count, level = level })
-			count.Text = "×" .. tostring(drop.count)
-		end
-	end
+	local win, refresh = ChestWindow.build(gui, openedCaseId, function()
+		return profile
+	end, locale, closeWindow, createWindow)
+	refreshChest = refresh
 	return win
 end
 
@@ -752,6 +855,16 @@ local selectedLocations: { [string]: string } = {}
 local locationScroll: { [string]: number } = {}
 local lastLocationClick: string? = nil
 local lastLocationClickAt = -math.huge
+local SPOTS = {
+	{ id = "spawn", icon = "⌂" },
+	{ id = "mine", icon = "⛏" },
+	{ id = "small_mine", icon = "⛏" },
+	{ id = "market", icon = "$" },
+	{ id = "canteen", icon = "🍎" },
+	{ id = "bedroom", icon = "☾" },
+	{ id = "bath", icon = "♨" },
+	{ id = "trainer", icon = "⚔" },
+}
 local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	prison = true,
 	quarry = true,
@@ -863,17 +976,8 @@ local function locationPreview(
 end
 
 local function buildLocations(): Frame
-	local win, content = Ui.window(gui, T("locations"), UDim2.fromOffset(900, 560), closeWindow)
+	local win, content = createWindow(gui, T("locations"), UDim2.fromOffset(900, 560), closeWindow)
 	win.Name = "Window_locations"
-	-- Keep the full layout visible on smaller screens without changing the UI kit.
-	local scale = Instance.new("UIScale")
-	local viewport = if workspace.CurrentCamera
-		then workspace.CurrentCamera.ViewportSize
-		else Vector2.new(900, 560)
-	scale.Scale = math.clamp(math.min((viewport.X - 20) / 900, (viewport.Y - 20) / 560), 0.1, 1)
-	scale.Parent = win
-	win.AnchorPoint = Vector2.new(0.5, 0.5)
-	win.Position = UDim2.fromScale(0.5, 0.5)
 	local playerLevel =
 		Ui.label(win, "", UDim2.fromOffset(300, 28), UDim2.new(1, -350, 0, 6), 14, Ui.colors.level)
 	playerLevel.TextXAlignment = Enum.TextXAlignment.Right
@@ -903,7 +1007,7 @@ local function buildLocations(): Frame
 	grid.CanvasSize = UDim2.new()
 	grid.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	grid.Parent = content
-	Ui.label(
+	local clickHint = Ui.label(
 		content,
 		T("locations_double_click"),
 		UDim2.new(1, -320, 0, 20),
@@ -1098,6 +1202,52 @@ local function buildLocations(): Frame
 		layout.Padding = UDim.new(0, 10)
 		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.Parent = grid
+		for tab, button in pairs(tabButtons) do
+			button.BackgroundColor3 = if tab == locationTab
+				then Ui.colors.buttonBlue
+				else Ui.colors.buttonGrey
+		end
+		local spots = locationTab == "spots"
+		left.Visible = not spots
+		clickHint.Visible = not spots
+		grid.Position = UDim2.fromOffset(if spots then 0 else 314, 44)
+		grid.Size = UDim2.new(1, if spots then 0 else -316, 1, if spots then -44 else -68)
+		if spots then
+			selected = nil
+			detail:ClearAllChildren()
+			for i, spot in ipairs(SPOTS) do
+				local card = Ui.panel(grid, UDim2.new(1, -8, 0, 72), UDim2.new())
+				card.Name = "Spot_" .. spot.id
+				card.LayoutOrder = i
+				local icon = Ui.label(
+					card,
+					spot.icon,
+					UDim2.fromOffset(52, 52),
+					UDim2.fromOffset(10, 10),
+					30,
+					Ui.colors.header
+				)
+				icon.TextXAlignment = Enum.TextXAlignment.Center
+				Ui.label(
+					card,
+					T("spot_" .. spot.id),
+					UDim2.new(1, -84, 1, 0),
+					UDim2.fromOffset(76, 0),
+					18
+				)
+				local hit = Ui.button(card, "", UDim2.fromScale(1, 1), UDim2.new())
+				hit.BackgroundTransparency = 1
+				hit.Activated:Connect(function()
+					if profile then
+						Remotes.event("Teleport"):FireServer(profile.location, spot.id)
+					end
+				end)
+			end
+			grid.CanvasPosition = Vector2.new(0, scrollY)
+			drawingTab = false
+			updateAvailability()
+			return
+		end
 		local locations: { Config.Location } = {}
 		for _, location in ipairs(Config.locationsFile.locations) do
 			if locationCategory(location) == locationTab then
@@ -1190,12 +1340,12 @@ local function buildLocations(): Frame
 			selectLocation(locations[1])
 		end
 	end
-	for i, tab in ipairs({ "mines", "sky", "other" }) do
+	for i, tab in ipairs({ "mines", "sky", "other", "spots" }) do
 		local button = Ui.button(
 			content,
 			T("locations_" .. tab),
-			UDim2.new(1 / 3, -6, 0, 32),
-			UDim2.new((i - 1) / 3, 2, 0, 0)
+			UDim2.new(1 / 4, -6, 0, 32),
+			UDim2.new((i - 1) / 4, 2, 0, 0)
 		)
 		tabButtons[tab] = button
 		button.Activated:Connect(function()
@@ -1246,8 +1396,16 @@ local function open(kind: string)
 	currentWindowKind = kind
 	openWindow = builder()
 end
-local function refreshWindow()
-	if currentWindowKind == "locations" and refreshLocations then
+local function refreshWindow(force: boolean?)
+	if not force and currentWindowKind == "inventory" and refreshInventory then
+		refreshInventory()
+		return
+	end
+	if not force and currentWindowKind == "case" and refreshChest then
+		refreshChest()
+		return
+	end
+	if not force and currentWindowKind == "locations" and refreshLocations then
 		refreshLocations()
 		return
 	end
@@ -1260,9 +1418,14 @@ end
 
 -- ---------------------------------------------------------------- profile rendering
 local function render(p: Types.Profile)
+	local rebuild = locale ~= p.locale or (profile ~= nil and profile.location ~= p.location)
 	profile = p
 	locale = p.locale or Config.defaultLocale
 	languageButton.Text = T("language_code")
+	renderCameraButton()
+	for button, key in pairs(localizedButtons) do
+		button.Text = T(key)
+	end
 	hints.Text = T("keys_hint")
 	renderTeleportCountdown()
 	renderCombo()
@@ -1280,18 +1443,32 @@ local function render(p: Types.Profile)
 		needValues[need].Text = tostring(math.floor(value))
 	end
 	renderHotbar()
-	refreshWindow()
+	refreshWindow(rebuild)
 end
 Remotes.event("ProfileUpdated").OnClientEvent:Connect(render)
 Remotes.event("Toast").OnClientEvent:Connect(showToast)
-Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string)
+Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string, tab: string?)
+	if kind == "locations" and tab == "spots" then
+		locationTab = "spots"
+	end
 	closeWindow()
 	open(kind)
 end)
-Remotes.event("CaseOpened").OnClientEvent:Connect(function(drops: { CaseDrop })
-	caseDrops = drops
+Remotes.event("CaseOpened").OnClientEvent:Connect(function(id: string)
+	-- The server has already replaced the session; closing the old UI must not close it.
+	currentWindowKind = nil
 	closeWindow()
+	openedCaseId = id
 	open("case")
+end)
+Remotes.event("CaseUpdated").OnClientEvent:Connect(function(id: string, active: boolean)
+	if currentWindowKind == "case" and id == openedCaseId then
+		if not active then
+			closeWindow()
+		elseif refreshChest then
+			refreshChest()
+		end
+	end
 end)
 Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
 	comboMultiplier, comboBlocks = mult, n
@@ -1375,17 +1552,27 @@ progressFill.Parent = progress
 progress.Visible = false
 
 local MAX_TARGET = 14
-local function targetUnderCursor(): BasePart?
+local function targetUnderCursor(point: Vector2?): BasePart?
 	local character = player.Character
-	if not character then
+	local currentCamera = workspace.CurrentCamera
+	if not character or not currentCamera or currentWindowKind then
 		return nil
 	end
 	local ray: Ray
-	if UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse then
+	if point then
+		ray = currentCamera:ViewportPointToRay(point.X, point.Y)
+	elseif
+		not firstPerson
+		and not isMobile()
+		and UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
+	then
 		local m = UserInputService:GetMouseLocation()
-		ray = camera:ViewportPointToRay(m.X, m.Y)
+		ray = currentCamera:ViewportPointToRay(m.X, m.Y)
 	else
-		ray = camera:ViewportPointToRay(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+		ray = currentCamera:ViewportPointToRay(
+			currentCamera.ViewportSize.X / 2,
+			currentCamera.ViewportSize.Y / 2
+		)
 	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -1408,6 +1595,7 @@ end
 local digging = false
 local holding = false
 local digTarget: BasePart? = nil
+local tapTarget: BasePart? = nil
 local digStarted = 0
 local digNeeded = 0
 
@@ -1440,13 +1628,32 @@ local function expectedTime(part: BasePart): number?
 end
 
 local function stopDig()
+	HeldItem.SetDigging(false)
 	digging = false
 	digTarget = nil
+	tapTarget = nil
 	progress.Visible = false
 end
 
 RunService.RenderStepped:Connect(function()
-	local target = targetUnderCursor()
+	if currentWindowKind then
+		holding = false
+		stopDig()
+		highlight.Enabled = false
+		return
+	end
+	if tapTarget then
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if
+			not tapTarget:IsDescendantOf(workspace)
+			or not root
+			or not root:IsA("BasePart")
+			or (root.Position - tapTarget.Position).Magnitude > MAX_TARGET
+		then
+			stopDig()
+		end
+	end
+	local target = tapTarget or targetUnderCursor()
 	highlight.Adornee = target
 	highlight.Enabled = target ~= nil
 	if digging then
@@ -1476,10 +1683,26 @@ RunService.RenderStepped:Connect(function()
 			Remotes.event("DigStart"):FireServer(target)
 		end
 	end
+	HeldItem.SetDigging(digging)
 end)
 
-local function onDig(_: string, state: Enum.UserInputState)
+local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 	if state == Enum.UserInputState.Begin then
+		if
+			currentWindowKind
+			or (input and isMobile() and input.UserInputType == Enum.UserInputType.MouseButton1)
+		then
+			return Enum.ContextActionResult.Pass
+		end
+		if input and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local point = UserInputService:GetMouseLocation()
+			for _, object in ipairs(player.PlayerGui:GetGuiObjectsAtPosition(point.X, point.Y)) do
+				if object:IsA("GuiButton") or object:IsA("ScrollingFrame") then
+					return Enum.ContextActionResult.Pass
+				end
+			end
+		end
+		stopDig()
 		holding = true
 		local target = targetUnderCursor()
 		local needed = if target then expectedTime(target) else nil
@@ -1499,12 +1722,190 @@ end
 ContextActionService:BindAction(
 	"Dig",
 	onDig,
-	true,
+	false,
 	Enum.UserInputType.MouseButton1,
 	Enum.KeyCode.ButtonR2
 )
-ContextActionService:SetTitle("Dig", "⛏")
-ContextActionService:SetPosition("Dig", UDim2.fromScale(0.72, 0.55))
+
+-- Touch only: leave Roblox's camera, thumbstick and jump controls in charge of movement.
+local touchMenus = Instance.new("ScrollingFrame")
+touchMenus.Name = "TouchMenus"
+touchMenus.Position = UDim2.fromOffset(8, 120)
+touchMenus.BackgroundTransparency = 1
+touchMenus.BorderSizePixel = 0
+touchMenus.ScrollBarThickness = 2
+touchMenus.CanvasSize = UDim2.fromOffset(0, 7 * 52 - 8)
+touchMenus.Parent = gui
+local menuKeys =
+	{ "locations", "inventory", "jobs", "upgrade", "level", "achievements", "language_code" }
+local menuGlyphs = { "M", "E", "O", "J", "U", "L", "" }
+for i, kind in ipairs(menuKeys) do
+	local button = Ui.button(
+		touchMenus,
+		menuGlyphs[i],
+		UDim2.fromOffset(44, 44),
+		UDim2.fromOffset(0, (i - 1) * 52),
+		Ui.colors.buttonGrey
+	)
+	button.Name = "Touch_" .. kind
+	button.Activated:Connect(function()
+		if kind == "language_code" then
+			cycleLocale()
+		else
+			open(kind)
+		end
+	end)
+	if kind == "language_code" then
+		button.Text = T(kind)
+		localizedButtons[button] = kind
+	end
+end
+local touchActions = Instance.new("Frame")
+touchActions.Name = "TouchActions"
+touchActions.Size = UDim2.fromScale(1, 1)
+touchActions.BackgroundTransparency = 1
+touchActions.Parent = gui
+local digButton =
+	Ui.button(touchActions, T("touch_dig"), UDim2.fromOffset(80, 80), UDim2.new(1, -96, 1, -188))
+digButton.Name = "TouchDig"
+local round = Instance.new("UICorner")
+round.CornerRadius = UDim.new(0.5, 0)
+round.Parent = digButton
+localizedButtons[digButton] = "touch_dig"
+local useButton = Ui.button(
+	touchActions,
+	T("touch_use"),
+	UDim2.fromOffset(64, 48),
+	UDim2.new(1, -168, 1, -176),
+	Ui.colors.buttonGrey
+)
+useButton.TextScaled = true
+useButton.TextWrapped = true
+localizedButtons[useButton] = "touch_use"
+local function useConsumable()
+	if profile then
+		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
+	end
+end
+useButton.Activated:Connect(useConsumable)
+local digTouch: InputObject? = nil
+digButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch and not digTouch and isMobile() then
+		digTouch = input
+		onDig("TouchDig", Enum.UserInputState.Begin)
+	end
+end)
+UserInputService.InputEnded:Connect(function(input)
+	if input == digTouch then
+		digTouch = nil
+		onDig("TouchDig", Enum.UserInputState.End)
+	end
+end)
+UserInputService.TouchTapInWorld:Connect(function(position: Vector2, processed: boolean)
+	if processed or not isMobile() or currentWindowKind or digTouch then
+		return
+	end
+	holding = false
+	stopDig()
+	local target = targetUnderCursor(position)
+	local needed = if target then expectedTime(target) else nil
+	if target and needed then
+		digging, digTarget, tapTarget, digStarted, digNeeded =
+			true, target, target, os.clock(), needed
+		Remotes.event("DigStart"):FireServer(target)
+	elseif target then
+		Remotes.event("DigStart"):FireServer(target)
+	end
+end)
+local function cancelDigInput()
+	digTouch = nil
+	holding = false
+	stopDig()
+end
+UserInputService.WindowFocusReleased:Connect(cancelDigInput)
+player.CharacterRemoving:Connect(cancelDigInput)
+
+local statsScale = Instance.new("UIScale")
+statsScale.Parent = stats
+local needsScale = Instance.new("UIScale")
+needsScale.Parent = needsPanel
+local hotbarScale = Instance.new("UIScale")
+hotbarScale.Parent = hotbar
+local slotScales: { UIScale } = {}
+for i, slot in ipairs(hotbarSlots) do
+	local scale = Instance.new("UIScale")
+	scale.Parent = slot
+	slotScales[i] = scale
+end
+local function updateLayout()
+	local mobile = isMobile()
+	local currentCamera = workspace.CurrentCamera
+	local viewport = if currentCamera then currentCamera.ViewportSize else Vector2.new(900, 560)
+	touchMenus.Visible, touchActions.Visible = mobile, mobile
+	touchMenus.Size = UDim2.fromOffset(52, math.clamp(viewport.Y - 260, 52, 356))
+	hints.Visible, languageButton.Visible = not mobile, not mobile
+	statsScale.Scale, needsScale.Scale = if mobile then 0.65 else 1, if mobile then 0.65 else 1
+	stats.Position = if mobile then UDim2.new(1, -132, 0, 64) else UDim2.new(1, -200, 0.42, 0)
+	needsPanel.Position = if mobile
+		then UDim2.new(1, -132, 0, 130)
+		else UDim2.new(1, -200, 0.42, 102)
+	cameraButton.Parent = if mobile then touchActions else gui
+	cameraButton.Size = if mobile then UDim2.fromOffset(64, 48) else UDim2.fromOffset(150, 28)
+	cameraButton.Position = if mobile
+		then UDim2.new(1, -168, 1, -120)
+		else UDim2.new(1, -160, 0, 88)
+	cameraButton.TextScaled, cameraButton.TextWrapped = mobile, mobile
+	local size = if mobile and viewport.X <= 700 then 40 else SLOT
+	local width = 9 * (size + 4) + 8
+	hotbar.Size = UDim2.fromOffset(width, size + 12)
+	hotbar.AnchorPoint = Vector2.new(0.5, 1)
+	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
+	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
+	for i, slot in ipairs(hotbarSlots) do
+		slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
+		slotScales[i].Scale = size / SLOT
+	end
+	if mobile then
+		toast.Size = UDim2.fromOffset(math.min(520, viewport.X - 20), 66)
+		toast.Position = UDim2.new(0.5, -toast.Size.X.Offset / 2, 0, 12)
+		teleportCountdown.Size = UDim2.new(1, -120, 0, 28)
+		teleportCountdown.Position = UDim2.new(0, 60, 1, -224)
+		teleportCountdown.TextScaled = true
+	else
+		toast.Size, toast.Position = UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12)
+		teleportCountdown.Size, teleportCountdown.Position =
+			UDim2.fromOffset(520, 28), UDim2.new(0.5, -260, 1, -180)
+		teleportCountdown.TextScaled = false
+	end
+	for win, layout in pairs(windowLayouts) do
+		fitWindow(win, layout)
+	end
+	cancelDigInput()
+	renderCameraButton()
+end
+local viewportConnection: RBXScriptConnection? = nil
+local function watchViewport()
+	if viewportConnection then
+		viewportConnection:Disconnect()
+	end
+	camera = workspace.CurrentCamera
+	if camera then
+		viewportConnection = camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateLayout)
+	end
+	updateLayout()
+end
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchViewport)
+UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
+UserInputService:GetPropertyChangedSignal("KeyboardEnabled"):Connect(updateLayout)
+watchViewport()
+RunService.RenderStepped:Connect(function()
+	local controlsVisible = isMobile() and currentWindowKind == nil
+	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
+	crosshair.Visible = (firstPerson or isMobile()) and currentWindowKind == nil
+	if currentWindowKind then
+		cancelDigInput()
+	end
+end)
 
 -- ---------------------------------------------------------------- keys
 UserInputService.InputBegan:Connect(function(input, processed)
@@ -1529,8 +1930,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("achievements")
 	elseif k == Enum.KeyCode.M then
 		open("locations")
-	elseif k == Enum.KeyCode.F and profile then
-		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
+	elseif k == Enum.KeyCode.V then
+		toggleFirstPerson()
+	elseif k == Enum.KeyCode.F then
+		useConsumable()
 	elseif k.Value >= Enum.KeyCode.One.Value and k.Value <= Enum.KeyCode.Nine.Value then
 		selectSlot(k.Value - Enum.KeyCode.One.Value + 1)
 	end

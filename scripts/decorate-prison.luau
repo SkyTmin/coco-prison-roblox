@@ -1007,100 +1007,121 @@ for _, h in ipairs({
 end
 
 -- ---------------------------------------------------------------- Малая шахта surroundings: melon patches, orchard, hay
-for _, side in ipairs({ -1, 1 }) do
-	local bx = side * 58
-	for row = 0, 3 do
-		local z = 92 + row * 16
-		part("FieldSoil", Vector3.new(14, 0.5, 6), CFrame.new(bx, 0.25, z), STONE, "px_dirt")
-		for i = -2, 2 do
-			local x = bx + i * 3
-			part("Vine", Vector3.new(1.2, 0.3, 4), CFrame.new(x, 0.6, z), LEAF, Enum.Material.Grass).CanCollide =
-				false
+-- patch(cx, cz, alongX): a 14 × 6 field of melon vines with a low fence.
+local function patch(cx, cz, alongX)
+	local cf = CFrame.new(cx, 0, cz) * CFrame.Angles(0, if alongX then 0 else math.pi / 2, 0)
+	part("FieldSoil", Vector3.new(14, 0.5, 6), cf * CFrame.new(0, 0.25, 0), STONE, "px_dirt")
+	for i = -2, 2 do
+		local lx = i * 3
+		part(
+			"Vine",
+			Vector3.new(1.2, 0.3, 4),
+			cf * CFrame.new(lx, 0.6, 0),
+			LEAF,
+			Enum.Material.Grass
+		).CanCollide =
+			false
+		part(
+			"VineLeaf",
+			Vector3.new(1.8, 0.2, 1.4),
+			cf
+				* CFrame.new(lx + rng:NextNumber(-0.6, 0.6), 0.75, rng:NextNumber(-1.5, 1.5))
+				* CFrame.Angles(0, rng:NextNumber(0, 3), 0),
+			LEAF2,
+			Enum.Material.Grass
+		).CanCollide =
+			false
+		if rng:NextNumber() < 0.7 then
 			part(
-				"VineLeaf",
-				Vector3.new(1.8, 0.2, 1.4),
-				CFrame.new(x + rng:NextNumber(-0.6, 0.6), 0.75, z + rng:NextNumber(-1.5, 1.5))
-					* CFrame.Angles(0, rng:NextNumber(0, 3), 0),
-				LEAF2,
-				Enum.Material.Grass
-			).CanCollide =
-				false
-			if rng:NextNumber() < 0.7 then
-				part(
-					"Melon",
-					Vector3.new(2, 2, 2),
-					CFrame.new(
-						x + rng:NextNumber(-0.4, 0.4),
+				"Melon",
+				Vector3.new(2, 2, 2),
+				cf
+					* CFrame.new(
+						lx + rng:NextNumber(-0.4, 0.4),
 						1.5,
-						z + (if rng:NextNumber() < 0.5 then -2.2 else 2.2)
-					) * CFrame.Angles(0, rng:NextNumber(0, 3), 0),
-					Color3.new(1, 1, 1),
-					"px_melon"
-				)
-			end
-		end
-		for _, dz in ipairs({ -3.6, 3.6 }) do
-			part(
-				"FieldFence",
-				Vector3.new(15, 0.3, 0.3),
-				CFrame.new(bx, 1.3, z + dz),
-				DARK_WOOD,
-				Enum.Material.Wood
-			).CanCollide =
-				false
+						if rng:NextNumber() < 0.5 then -2.2 else 2.2
+					)
+					* CFrame.Angles(0, rng:NextNumber(0, 3), 0),
+				Color3.new(1, 1, 1),
+				"px_melon"
+			)
 		end
 	end
-	for _, z in ipairs({ 84, 108, 132, 156 }) do
-		tree(bx + side * 14, z, rng:NextNumber(0.8, 1.1))
+	for _, dz in ipairs({ -3.6, 3.6 }) do
+		part(
+			"FieldFence",
+			Vector3.new(15, 0.3, 0.3),
+			cf * CFrame.new(0, 1.3, dz),
+			DARK_WOOD,
+			Enum.Material.Wood
+		).CanCollide =
+			false
 	end
-	for i = 1, 3 do
-		local hb = part(
-			"HayBale",
-			Vector3.new(3, 2.2, 2.2),
-			CFrame.new(bx - side * 12, 1.1 + (i == 3 and 2.2 or 0), 160 + (i % 2) * 3.3),
-			Color3.fromRGB(220, 190, 90),
-			Enum.Material.Fabric
-		)
-		part("HayBand", Vector3.new(3.1, 0.3, 2.3), hb.CFrame, DARK_WOOD, Enum.Material.Fabric)
-	end
+end
+-- west side of the small mine: four patches in a column + orchard
+for row = 0, 3 do
+	patch(-58, 92 + row * 16, true)
+end
+for _, z in ipairs({ 84, 108, 132, 156 }) do
+	tree(-74, z, rng:NextNumber(0.8, 1.1))
+end
+-- south side (between the mine rim and the wall): three patches in a row + orchard
+for _, x in ipairs({ -22, 0, 22 }) do
+	patch(x, 176, true)
+end
+for _, x in ipairs({ -40, 40 }) do
+	tree(x, 178, rng:NextNumber(0.8, 1.1))
+end
+for i = 1, 3 do
+	local hb = part(
+		"HayBale",
+		Vector3.new(3, 2.2, 2.2),
+		CFrame.new(-46, 1.1 + (i == 3 and 2.2 or 0), 160 + (i % 2) * 3.3),
+		Color3.fromRGB(220, 190, 90),
+		Enum.Material.Fabric
+	)
+	part("HayBand", Vector3.new(3.1, 0.3, 2.3), hb.CFrame, DARK_WOOD, Enum.Material.Fabric)
+end
+do
+	local sx, sz = 44, 180
 	part(
 		"Scarecrow",
 		Vector3.new(0.5, 7, 0.5),
-		CFrame.new(bx, 3.5, 176),
+		CFrame.new(sx, 3.5, sz),
 		DARK_WOOD,
 		Enum.Material.Wood
 	)
 	part(
 		"ScarecrowArms",
 		Vector3.new(5, 0.4, 0.4),
-		CFrame.new(bx, 5.5, 176),
+		CFrame.new(sx, 5.5, sz),
 		DARK_WOOD,
 		Enum.Material.Wood
 	)
 	part(
 		"ScarecrowBody",
 		Vector3.new(1.8, 2.4, 1),
-		CFrame.new(bx, 5, 176),
+		CFrame.new(sx, 5, sz),
 		Color3.fromRGB(120, 70, 40),
 		Enum.Material.Fabric
 	)
 	part(
 		"ScarecrowHead",
 		Vector3.new(1.2, 1.2, 1.2),
-		CFrame.new(bx, 7.2, 176),
+		CFrame.new(sx, 7.2, sz),
 		Color3.fromRGB(230, 200, 100),
 		Enum.Material.Fabric
 	)
 	part(
 		"ScarecrowHat",
 		Vector3.new(2, 0.3, 2),
-		CFrame.new(bx, 7.9, 176),
+		CFrame.new(sx, 7.9, sz),
 		Color3.fromRGB(200, 170, 80),
 		Enum.Material.Fabric
 	)
-	crate(bx - side * 8, 0, 176, 2.5, "px_melon")
-	crate(bx - side * 8, 2.5, 176, 2, "px_melon")
-	barrel(bx - side * 12, 176)
+	crate(-50, 0, 180, 2.5, "px_melon")
+	crate(-50, 2.5, 180, 2, "px_melon")
+	barrel(-54, 182)
 end
 -- Pond reeds and lily pads (pond cut by build-prison at (-92, 168), 32 × 20)
 for i = 1, 14 do

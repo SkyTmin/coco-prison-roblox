@@ -25,6 +25,7 @@ export type Profile = {
 	blocksTotal: number, -- cumulative blocks with multipliers (never spent)
 	counters: { [string]: number }, -- upgrade counters by display name ("Земля", "Крысы", …)
 	inventory: { [number]: ItemStack }, -- slots 1..36 (1..9 = hotbar)
+	caseContents: { [string]: { [number]: ItemStack } }, -- per case kind, sparse slots 1..27; schema stays v3
 	armor: { [string]: ItemStack }, -- helmet / chestplate / leggings / boots
 	selectedSlot: number,
 	professions: Professions,
