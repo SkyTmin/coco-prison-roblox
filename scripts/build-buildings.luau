@@ -1445,8 +1445,7 @@ do
 		{ Vector3.new(24, 3, 0.3), CFrame.new(-137, 2.1, -90.8) }, -- S left of the door
 		{ Vector3.new(24, 3, 0.3), CFrame.new(-103, 2.1, -90.8) }, -- S right of the door
 		{ Vector3.new(0.3, 3, 38), CFrame.new(-149.2, 2.1, -110) }, -- W
-		{ Vector3.new(0.3, 3, 25), CFrame.new(-90.8, 2.1, -116.5) }, -- E below the door
-		{ Vector3.new(0.3, 3, 6), CFrame.new(-90.8, 2.1, -94) }, -- E above the door
+		{ Vector3.new(0.3, 3, 32), CFrame.new(-90.8, 2.1, -113) }, -- E below the door (door z -96..-92)
 	}) do
 		part("WallTiles", seg[1], seg[2], Color3.fromRGB(80, 140, 170), Enum.Material.Marble, m)
 	end
