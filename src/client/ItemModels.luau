@@ -16,7 +16,7 @@ local store = Instance.new("Folder")
 store.Name = "ItemModelCache"
 store.Parent = ReplicatedStorage
 
-export type Voxels = { w: number, h: number, p: { string }, r: { number } }
+export type Voxels = { w: number, h: number, p: { string }, r: { number }, mirror: boolean? }
 
 local function hexColor(hex: string): Color3
 	local r = tonumber(string.sub(hex, 1, 2), 16) or 0
@@ -59,7 +59,7 @@ local function build(key: string, voxels: Voxels, pixel: number, depth: number):
 		p.Name = "Px"
 		p.Size = Vector3.new(depth, h * pixel, w * pixel)
 		-- centre of the rect in sprite space, origin at the sprite centre
-		local cx = (x + w / 2 - voxels.w / 2) * pixel
+		local cx = (x + w / 2 - voxels.w / 2) * pixel * (if voxels.mirror then -1 else 1)
 		local cy = (voxels.h / 2 - (y + h / 2)) * pixel
 		local offset = CFrame.new(0, cy, cx) -- image right = +Z (checked on the live character)
 		p.CFrame = root.CFrame * offset

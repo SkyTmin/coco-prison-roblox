@@ -1,0 +1,14 @@
+{
+  "_source": "Roblox Creator Store, free audio by ProSoundEffects (Pro Sound Effects library licensed by Roblox for use inside Roblox experiences), chosen 21.10.2026 as Minecraft-like block sounds. Per material: hit = while digging (every 0.25 s), break = block destroyed.",
+  "materials": {
+    "dirt": { "hit": "rbxassetid://9114084427", "break": "rbxassetid://9114083746", "_names": "Dirt Digging With Pick 15 / Dirt Dig Dirt Throws From Shovel 12" },
+    "stone": { "hit": "rbxassetid://9119049891", "break": "rbxassetid://9119043400", "_names": "Shale Break Low End Crackling Rock 3 / Shale Break 3" },
+    "wood": { "hit": "rbxassetid://9120809592", "break": "rbxassetid://9120808574", "_names": "Wood Chopping Exterior Single Hits 27 / 12" },
+    "sand": { "hit": "rbxassetid://9118770616", "break": "rbxassetid://9114083746", "_names": "Sand Silt 1 / Dirt throws 12" },
+    "gravel": { "hit": "rbxassetid://9114084245", "break": "rbxassetid://9118770616", "_names": "Dirt Digging With Pick 11 / Sand Silt 1" }
+  },
+  "blockMaterial": {
+    "dirt": "dirt", "grass": "dirt", "sand": "sand", "gravel": "gravel", "oak_log": "wood", "melon": "wood", "planks": "wood",
+    "stone": "stone", "cobblestone": "stone", "coal_ore": "stone", "iron_ore": "stone", "gold_ore": "stone", "_default": "stone"
+  }
+}

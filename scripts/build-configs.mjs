@@ -83,6 +83,7 @@ for (const loc of pricesWiki.locations) {
 			warnSeconds: dec.warnSeconds ?? def.warnSeconds,
 			shares,
 		},
+		mines: Object.fromEntries(Object.entries(decisions.mines).filter(([k, v]) => k.startsWith(loc.id + "_") && v.shares).map(([k, v]) => [k, { shares: v.shares, source: v._source || "[решение]" }])), // per-mine overrides (e.g. prison_small)
 		sellList: loc.blocks.map((b) => b.id),
 		sharesSource: wikiShares ? "[меню]" : "[решение]",
 	});
@@ -175,6 +176,10 @@ write("trainer.json", { source: "первые требования [меню]; �
 write("keys.json", { source: "[решение]; цены ключей у обменника [меню]", starExchange: { ancient_key: 10, improved_ancient_key: 60, dispeller: 15 }, ...decisions.keys });
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
 write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival });
+write("effects.json", { source: "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков", cracks: read("assets/cracks/ids.json"), sounds: read("assets/sounds/ids.json") });
+write("achievements.json", { source: "[меню] ступени; [владелец] цепочки по инструменту", ...decisions.achievements });
+write("artifacts.json", { source: "[меню, клиент]; шансы [решение]", ...decisions.artifacts });
+write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("armor.json", { source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)", ...read("assets/armor/ids.json") });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
 write("icons.json", { source: "assets/icons/ids.json — Codex image gen + Studio upload; lookup: <id>_<material>, then <id>, then block texture", ...read("assets/icons/ids.json") });

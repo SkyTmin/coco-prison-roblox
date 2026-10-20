@@ -1,0 +1,19 @@
+{
+  "source": "[меню] NPC-MENU-RECOVERY",
+  "_source": "[меню] NPC-MENU-RECOVERY: тренер, продавец еды, продавец предметов, обменник звёзд (древний ключ 10, улучшенный 60, развеиватель 15), обменник осколков (4 лунных стали → Лунное лезвие, 4 огненных осколка → Вулканический камень)",
+  "starExchange": {
+    "ancient_key": 10,
+    "improved_ancient_key": 60,
+    "dispeller": 15
+  },
+  "shardExchange": {
+    "moon_blade": {
+      "input": "moon_steel",
+      "count": 4
+    },
+    "volcanic_stone": {
+      "input": "fire_shard",
+      "count": 4
+    }
+  }
+}

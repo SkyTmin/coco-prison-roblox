@@ -412,6 +412,13 @@
         "doubleChests": 8
       },
       "_note": "[владелец] 4 спавна с хранилищем и мини-шахтой, арена босса в центре, крысы по базе"
+    },
+    "prison_small": {
+      "shares": {
+        "melon": 0.35,
+        "oak_log": 0.65
+      },
+      "_source": "[владелец] 21.10: в малой шахте нет гравия, песка и земли — только арбузы и деревья (дуб); вики состав малой шахты не содержит — [решение] 65 % дуба, 35 % арбуза"
     }
   },
   "pvpFromLevel": 9,
@@ -671,7 +678,73 @@
         100
       ]
     },
-    "_ordinaryCaseNote": "[меню] 15 предметов в окне кейса; веса — оценка по 17 открытиям владельца; кейс выдаёт 2–4 предмета за открытие"
+    "_ordinaryCaseNote": "[меню] 15 предметов в окне кейса; веса — оценка по 17 открытиям владельца; кейс выдаёт 2–4 предмета за открытие",
+    "sources": {
+      "_source": "[вики] CASES-ARTIFACTS: обычный ключ — редко при копании; древний — 10 звёзд у обменника; улучшенный древний — 60 звёзд; ключ с кличками — только магазин; ключ артефактов — только сборка 9 фрагментов",
+      "ordinary_key": [
+        "dig"
+      ],
+      "ancient_key": [
+        "star_exchange:10"
+      ],
+      "improved_ancient_key": [
+        "star_exchange:60"
+      ],
+      "nickname_key": [
+        "shop"
+      ],
+      "artifact_key": [
+        "artifact_mosaic"
+      ]
+    },
+    "caseKeys": {
+      "ordinaryCase": "ordinary_key",
+      "ancientCase": [
+        "ancient_key",
+        "improved_ancient_key"
+      ],
+      "artifactCase": "artifact_key",
+      "nicknameCase": "nickname_key"
+    },
+    "artifactCase": {
+      "_source": "[меню] в окне кейса артефактов видны: ключи от обычного кейса, древние звёзды, мешки денег, ящики (наборы), ключ с кличками, порошок/книга; шансы не показаны — веса [решение]",
+      "rewards": [
+        {
+          "id": "ordinary_key",
+          "weight": 30,
+          "count": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": "ancient_star",
+          "weight": 25,
+          "count": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": "money",
+          "weight": 25,
+          "min": 20,
+          "max": 120
+        },
+        {
+          "id": "ancient_key",
+          "weight": 10
+        },
+        {
+          "id": "nickname_key",
+          "weight": 5
+        },
+        {
+          "id": "ancient_powder",
+          "weight": 5
+        }
+      ]
+    }
   },
   "books": {
     "limits": {
@@ -816,14 +889,18 @@
     "_source": "[владелец] 21.10.2026: здоровье сердечками и голод как в Minecraft, еда восстанавливает голод; смерть в PvP-зоне — броня и инструменты остаются, остальное выпадает дропом на землю; Эндер-сундук — личное сохраняемое хранилище. Числа — [решение] по ванильным значениям Minecraft",
     "hunger": {
       "max": 20,
-      "drainPerMinuteIdle": 0.5,
-      "drainPerBlockDug": 0.1,
-      "drainPerSprintSecond": 0.1,
+      "drainPerMinuteIdle": 0,
+      "drainPerBlockDug": 0.025,
+      "drainPerWalkSecond": 0.01,
+      "drainPerSprintSecond": 0.05,
+      "drainPerJump": 0.05,
+      "drainPerHealthRegen": 0.6,
       "regenHealthAbove": 18,
       "regenHealthPerSecond": 1,
       "starveBelow": 0,
       "starveDamagePerSecond": 0.5,
-      "starveMinHealth": 1
+      "starveMinHealth": 1,
+      "_source": "[владелец] 21.10: голод по Minecraft, от действий. [решение] ванильное истощение пересчитано в очки голода: ~40 блоков или ~100 с ходьбы или ~20 прыжков = 1 очко; регенерация 1 HP стоит 0.6 очка"
     },
     "food": {
       "apple": 4,
@@ -846,6 +923,83 @@
       "perPlayer": true,
       "persistent": true,
       "keepOnDeath": true
+    }
+  },
+  "achievements": {
+    "_source": "[меню] пять карточек «Копатель» с 12 ступенями, 64 на 2-й и 2050 на 7–8-й ступени (×1.7); [владелец] 21.10: объединить в 4 цепочки по инструменту, первая награда 5 $, остальные меньше, авто-выдача, прогресс сохранить",
+    "tiers": 12,
+    "thresholdBase": 64,
+    "thresholdGrowth": 1.7,
+    "rewardFirst": 5,
+    "rewardGrowth": 1.3,
+    "chains": {
+      "pickaxe": {
+        "counter": "pickaxe_blocks",
+        "_what": "блоки, добытые киркой (камень, руды)"
+      },
+      "shovel": {
+        "counter": "shovel_blocks",
+        "_what": "блоки, добытые лопатой (земля, песок, гравий)"
+      },
+      "axe": {
+        "counter": "axe_blocks",
+        "_what": "блоки, добытые топором (дерево, арбуз)"
+      },
+      "sword": {
+        "counter": "sword_kills",
+        "_what": "убийства мечом: мобы, боссы, игроки"
+      }
+    },
+    "legacy": "старые ключи digger_<block> переносятся: прогресс блоков суммируется в цепочку по инструменту блока, выданные ступени не выдаются повторно"
+  },
+  "artifacts": {
+    "_source": "[меню, клиент] три редкости по 9 фрагментов (I–IX), 9 дубликатов = 1 недостающий фрагмент, награда за 9 — ключ от кейса артефактов; картинки: Качалка, Огород (обычные), Подручный (редкий), Векна (эпический); фрагменты падают с шахт, боссов, мобов, ключей; шанс [решение]",
+    "fragmentsPerArtifact": 9,
+    "duplicatesPerMissingFragment": 9,
+    "tiers": {
+      "common": {
+        "name": "Обычный",
+        "pictures": [
+          "Качалка",
+          "Огород"
+        ],
+        "dropChancePerBlock": 0.0004
+      },
+      "rare": {
+        "name": "Редкий",
+        "pictures": [
+          "Подручный"
+        ],
+        "dropChancePerBlock": 0.0001
+      },
+      "epic": {
+        "name": "Эпический",
+        "pictures": [
+          "Векна"
+        ],
+        "dropChancePerBlock": 0.00002
+      }
+    },
+    "fromCaseChance": {
+      "ordinaryCase": 0.06
+    }
+  },
+  "market": {
+    "_source": "[меню] NPC-MENU-RECOVERY: тренер, продавец еды, продавец предметов, обменник звёзд (древний ключ 10, улучшенный 60, развеиватель 15), обменник осколков (4 лунных стали → Лунное лезвие, 4 огненных осколка → Вулканический камень)",
+    "starExchange": {
+      "ancient_key": 10,
+      "improved_ancient_key": 60,
+      "dispeller": 15
+    },
+    "shardExchange": {
+      "moon_blade": {
+        "input": "moon_steel",
+        "count": 4
+      },
+      "volcanic_stone": {
+        "input": "fire_shard",
+        "count": 4
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "source": "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)",
-  "_source": "assets/icons/items/*.png → scripts/sprite-to-voxels.ps1 (16×16) → 6-colour k-means palette → greedy rectangles. Format: p = palette (hex), r = flat [x,y,w,h,paletteIndex,...] from the top-left; tools and shears: exact pixels of VoxeLibre textures (CC BY-SA 4.0, see assets/thirdparty/voxelibre/ATTRIBUTION.md)",
+  "_source": "assets/icons/items/*.png → scripts/sprite-to-voxels.ps1 (16×16) → 6-colour k-means palette → greedy rectangles. Format: p = palette (hex), r = flat [x,y,w,h,paletteIndex,...] from the top-left; tools and shears: exact pixels of VoxeLibre textures (CC BY-SA 4.0, see assets/thirdparty/voxelibre/ATTRIBUTION.md); mirror=true flips the sprite horizontally in the hand (axe blade must face away from the player)",
   "items": {
     "pickaxe_wood": {
       "w": 16,
@@ -1201,7 +1201,8 @@
         1,
         1,
         9
-      ]
+      ],
+      "mirror": true
     },
     "ancient_star": {
       "w": 16,
@@ -1942,7 +1943,8 @@
         1,
         1,
         4
-      ]
+      ],
+      "mirror": true
     },
     "arrow": {
       "w": 16,
@@ -3292,7 +3294,8 @@
         1,
         1,
         14
-      ]
+      ],
+      "mirror": true
     },
     "chestplate_iron": {
       "w": 16,
@@ -8160,7 +8163,8 @@
         1,
         1,
         5
-      ]
+      ],
+      "mirror": true
     },
     "shovel_stone": {
       "w": 16,

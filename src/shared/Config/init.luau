@@ -27,6 +27,10 @@ Config.previews = load("previews")
 Config.icons = load("icons")
 Config.itemVoxels = load("itemvoxels")
 Config.armor = load("armor")
+Config.effects = load("effects")
+Config.achievementsCfg = load("achievements")
+Config.artifacts = load("artifacts")
+Config.market = load("market")
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

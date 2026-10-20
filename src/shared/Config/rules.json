@@ -50,14 +50,18 @@
     "_source": "[владелец] 21.10.2026: здоровье сердечками и голод как в Minecraft, еда восстанавливает голод; смерть в PvP-зоне — броня и инструменты остаются, остальное выпадает дропом на землю; Эндер-сундук — личное сохраняемое хранилище. Числа — [решение] по ванильным значениям Minecraft",
     "hunger": {
       "max": 20,
-      "drainPerMinuteIdle": 0.5,
-      "drainPerBlockDug": 0.1,
-      "drainPerSprintSecond": 0.1,
+      "drainPerMinuteIdle": 0,
+      "drainPerBlockDug": 0.025,
+      "drainPerWalkSecond": 0.01,
+      "drainPerSprintSecond": 0.05,
+      "drainPerJump": 0.05,
+      "drainPerHealthRegen": 0.6,
       "regenHealthAbove": 18,
       "regenHealthPerSecond": 1,
       "starveBelow": 0,
       "starveDamagePerSecond": 0.5,
-      "starveMinHealth": 1
+      "starveMinHealth": 1,
+      "_source": "[владелец] 21.10: голод по Minecraft, от действий. [решение] ванильное истощение пересчитано в очки голода: ~40 блоков или ~100 с ходьбы или ~20 прыжков = 1 очко; регенерация 1 HP стоит 0.6 очка"
     },
     "food": {
       "apple": 4,

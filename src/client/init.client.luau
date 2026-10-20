@@ -22,8 +22,10 @@ local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
+local BlockBreak = require(script.BlockBreak)
 HeldItem.Start()
 ArmorVisual.Start()
+BlockBreak.Start()
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale
@@ -1791,6 +1793,7 @@ end
 
 local function stopDig()
 	HeldItem.SetDigging(false)
+	BlockBreak.Clear()
 	digging = false
 	digTarget = nil
 	tapTarget = nil
@@ -1832,8 +1835,10 @@ RunService.RenderStepped:Connect(function()
 			local k = math.clamp((os.clock() - digStarted) / digNeeded, 0, 1)
 			progress.Visible = true
 			progressFill.Size = UDim2.fromScale(k, 1)
+			BlockBreak.Update(digTarget, k)
 			if k >= 1 then
 				Remotes.event("DigFinish"):FireServer(digTarget)
+				BlockBreak.Break(digTarget)
 				stopDig()
 			end
 		end

@@ -86,5 +86,71 @@
       100
     ]
   },
-  "_ordinaryCaseNote": "[меню] 15 предметов в окне кейса; веса — оценка по 17 открытиям владельца; кейс выдаёт 2–4 предмета за открытие"
+  "_ordinaryCaseNote": "[меню] 15 предметов в окне кейса; веса — оценка по 17 открытиям владельца; кейс выдаёт 2–4 предмета за открытие",
+  "sources": {
+    "_source": "[вики] CASES-ARTIFACTS: обычный ключ — редко при копании; древний — 10 звёзд у обменника; улучшенный древний — 60 звёзд; ключ с кличками — только магазин; ключ артефактов — только сборка 9 фрагментов",
+    "ordinary_key": [
+      "dig"
+    ],
+    "ancient_key": [
+      "star_exchange:10"
+    ],
+    "improved_ancient_key": [
+      "star_exchange:60"
+    ],
+    "nickname_key": [
+      "shop"
+    ],
+    "artifact_key": [
+      "artifact_mosaic"
+    ]
+  },
+  "caseKeys": {
+    "ordinaryCase": "ordinary_key",
+    "ancientCase": [
+      "ancient_key",
+      "improved_ancient_key"
+    ],
+    "artifactCase": "artifact_key",
+    "nicknameCase": "nickname_key"
+  },
+  "artifactCase": {
+    "_source": "[меню] в окне кейса артефактов видны: ключи от обычного кейса, древние звёзды, мешки денег, ящики (наборы), ключ с кличками, порошок/книга; шансы не показаны — веса [решение]",
+    "rewards": [
+      {
+        "id": "ordinary_key",
+        "weight": 30,
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "id": "ancient_star",
+        "weight": 25,
+        "count": [
+          1,
+          3
+        ]
+      },
+      {
+        "id": "money",
+        "weight": 25,
+        "min": 20,
+        "max": 120
+      },
+      {
+        "id": "ancient_key",
+        "weight": 10
+      },
+      {
+        "id": "nickname_key",
+        "weight": 5
+      },
+      {
+        "id": "ancient_powder",
+        "weight": 5
+      }
+    ]
+  }
 }

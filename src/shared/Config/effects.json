@@ -1,0 +1,63 @@
+{
+  "source": "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков",
+  "cracks": {
+    "_source": "assets/cracks/crack_0..9.png — procedural crack stages generated 21.10.2026 (ours), uploaded via upload_image",
+    "stages": [
+      "rbxassetid://120089675507687",
+      "rbxassetid://94846251928385",
+      "rbxassetid://103838394713724",
+      "rbxassetid://78696596009605",
+      "rbxassetid://95685097804402",
+      "rbxassetid://80485962704244",
+      "rbxassetid://92558256453350",
+      "rbxassetid://110179806163947",
+      "rbxassetid://95415122973727",
+      "rbxassetid://140335400561915"
+    ]
+  },
+  "sounds": {
+    "_source": "Roblox Creator Store, free audio by ProSoundEffects (Pro Sound Effects library licensed by Roblox for use inside Roblox experiences), chosen 21.10.2026 as Minecraft-like block sounds. Per material: hit = while digging (every 0.25 s), break = block destroyed.",
+    "materials": {
+      "dirt": {
+        "hit": "rbxassetid://9114084427",
+        "break": "rbxassetid://9114083746",
+        "_names": "Dirt Digging With Pick 15 / Dirt Dig Dirt Throws From Shovel 12"
+      },
+      "stone": {
+        "hit": "rbxassetid://9119049891",
+        "break": "rbxassetid://9119043400",
+        "_names": "Shale Break Low End Crackling Rock 3 / Shale Break 3"
+      },
+      "wood": {
+        "hit": "rbxassetid://9120809592",
+        "break": "rbxassetid://9120808574",
+        "_names": "Wood Chopping Exterior Single Hits 27 / 12"
+      },
+      "sand": {
+        "hit": "rbxassetid://9118770616",
+        "break": "rbxassetid://9114083746",
+        "_names": "Sand Silt 1 / Dirt throws 12"
+      },
+      "gravel": {
+        "hit": "rbxassetid://9114084245",
+        "break": "rbxassetid://9118770616",
+        "_names": "Dirt Digging With Pick 11 / Sand Silt 1"
+      }
+    },
+    "blockMaterial": {
+      "dirt": "dirt",
+      "grass": "dirt",
+      "sand": "sand",
+      "gravel": "gravel",
+      "oak_log": "wood",
+      "melon": "wood",
+      "planks": "wood",
+      "stone": "stone",
+      "cobblestone": "stone",
+      "coal_ore": "stone",
+      "iron_ore": "stone",
+      "gold_ore": "stone",
+      "_default": "stone"
+    }
+  }
+}
