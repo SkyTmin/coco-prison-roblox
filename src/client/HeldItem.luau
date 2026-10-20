@@ -104,6 +104,15 @@ local function render(rig: Rig)
 			model.Name = "HeldItemVisual"
 			visual, container = model.PrimaryPart :: BasePart, model
 			if Config.isEnchanted(id, if level > 0 then level else nil) then
+				local glow = Instance.new("Highlight")
+				glow.Name = "EnchantGlow"
+				glow.FillColor = Color3.fromRGB(190, 110, 255)
+				glow.FillTransparency = 0.6
+				glow.OutlineColor = Color3.fromRGB(230, 180, 255)
+				glow.OutlineTransparency = 0.5
+				glow.DepthMode = Enum.HighlightDepthMode.Occluded
+				glow.Adornee = model
+				glow.Parent = model
 				for _, px in ipairs(model:GetChildren()) do
 					if px:IsA("BasePart") and px.Name == "Px" then
 						enchantedParts[px] = px.Color
@@ -219,6 +228,15 @@ function HeldItem.Start()
 	CollectionService:GetInstanceRemovedSignal("HeldMannequin"):Connect(clear)
 	RunService.Heartbeat:Connect(function()
 		local k = 0.2 + 0.25 * (0.5 + 0.5 * math.sin(os.clock() * 4))
+		local fill = 0.55 + 0.25 * math.sin(os.clock() * 3)
+		for _, rig in pairs(rigs) do
+			local visual = rig.visual
+			local glow = visual and visual:FindFirstChild("EnchantGlow")
+			if glow and glow:IsA("Highlight") then
+				glow.FillTransparency = fill
+				glow.OutlineTransparency = 0.3 + 0.4 * (0.5 + 0.5 * math.sin(os.clock() * 5))
+			end
+		end
 		for px, base in pairs(enchantedParts) do
 			if px.Parent then
 				px.Color = base:Lerp(GLINT, k)

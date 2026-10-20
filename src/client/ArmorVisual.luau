@@ -183,6 +183,7 @@ local function render(rig: Rig)
 	local visual = Instance.new("Model")
 	visual.Name = "ArmorVisual"
 	local rendered: { [string]: boolean } = {}
+	local anyGlint = false
 	for entry in string.gmatch(attribute, "[^,]+") do
 		local id, rawLevel = string.match(entry, "^([^:]+):(%d+)$")
 		local level = tonumber(rawLevel)
@@ -193,12 +194,24 @@ local function render(rig: Rig)
 		rendered[id] = true
 		local material = Config.materialForLevel(level)
 		local glint = enchanted(id, level)
+		anyGlint = anyGlint or glint
 		for _, box in ipairs(boxes) do
 			local limb = rig.character:FindFirstChild(box.limb)
 			if limb and limb:IsA("BasePart") then
 				buildBox(visual, limb, id, material, box, glint)
 			end
 		end
+	end
+	if anyGlint then
+		local glow = Instance.new("Highlight")
+		glow.Name = "EnchantGlow"
+		glow.FillColor = Color3.fromRGB(190, 110, 255)
+		glow.FillTransparency = 0.75
+		glow.OutlineColor = Color3.fromRGB(230, 180, 255)
+		glow.OutlineTransparency = 0.6
+		glow.DepthMode = Enum.HighlightDepthMode.Occluded
+		glow.Adornee = visual
+		glow.Parent = visual
 	end
 	visual.Parent = rig.character
 	rig.visual = visual
@@ -288,6 +301,13 @@ function ArmorVisual.Start()
 	-- enchant glint shimmer: Decals have no UV offset, so pulse the purple overlay's transparency
 	RunService.Heartbeat:Connect(function()
 		local pulse = 0.45 + 0.25 * math.sin(os.clock() * 4)
+		for _, rig in pairs(rigs) do
+			local visual = rig.visual
+			local glow = visual and visual:FindFirstChild("EnchantGlow")
+			if glow and glow:IsA("Highlight") then
+				glow.FillTransparency = 0.65 + 0.2 * math.sin(os.clock() * 3)
+			end
+		end
 		for decal in pairs(glintDecals) do
 			if decal.Parent then
 				decal.Transparency = pulse
