@@ -164,30 +164,54 @@ function Config.isEnchanted(itemId: string, level: number?): boolean
 	return Config.enchantForLevel(itemId, level) > 0
 end
 
--- Vanilla break time in seconds (0.05 minimum). Returns nil when the tool cannot harvest the block.
+-- Break time in seconds, exactly Minecraft Java Edition (minecraft.wiki/w/Breaking) [ваниль]:
+--   speed = 1 by hand; with the matching tool type: toolSpeed[material] (wood 2, stone 4, iron 6,
+--   diamond 8) + (efficiency² + 1) when enchanted; damage per tick = speed / hardness / 30 when the
+--   tool can harvest the block (or the block needs no tool), / 100 otherwise; the block breaks after
+--   ceil(1 / damage) ticks of 0.05 s, instantly when damage ≥ 1. Haste is applied by DigService.
+-- [владелец 20.10] digging by hand / with the wrong tool is always allowed and the block still drops;
+-- it just takes the vanilla "wrong tool" time (pickaxe blocks: /100, e.g. stone by hand 7.5 s).
+local TICK = 0.05
 function Config.breakTime(block: Block, toolId: string?, toolLevel: number): number?
 	if block.itemOnly then
 		return nil
 	end
-	-- [ваниль] with the proper tool: hardness * 1.5 / (toolSpeed + enchant² + 1).
-	-- [владелец 20.10] digging by hand (or with the wrong tool) is always allowed but slow:
-	-- hardness * 1.5 for blocks that need no tool (dirt, sand, logs…), hardness * 5 for pickaxe
-	-- blocks (vanilla "wrong tool" time); the block still drops ([решение]).
-	local proper = toolId == block.tool and toolLevel >= 1
-	if proper then
-		local material = Config.materialForLevel(toolLevel)
-		proper = Config.tierIndex(material) >= block.minTier
+	local hardness = block.hardness
+	if hardness <= 0 then
+		return TICK
 	end
-	local mult = 1
-	if block.tool ~= "any" and proper then
-		local material = Config.materialForLevel(toolLevel)
-		local enchant = Config.enchantForLevel(toolId :: string, toolLevel)
-		mult = Config.vanilla.toolSpeed[material]
-			+ (if enchant > 0 then enchant * enchant + 1 else 0)
-	elseif block.tool == "pickaxe" then
-		return math.max(0.05, block.hardness * 5)
+	local speed = Config.vanilla.toolSpeed.hand
+	local canHarvest = true
+	if block.tool ~= "any" then
+		if toolId == block.tool and toolLevel >= 1 then
+			local material = Config.materialForLevel(toolLevel)
+			speed = Config.vanilla.toolSpeed[material]
+			local enchant = Config.enchantForLevel(toolId :: string, toolLevel)
+			if enchant > 0 then
+				speed += enchant * enchant + 1
+			end
+			-- the tool type speeds up digging even when its tier is too low to harvest (iron ore with
+			-- a wooden pickaxe), harvesting then falls to the /100 rule like in Minecraft
+			canHarvest = Config.tierIndex(material) >= block.minTier
+		else
+			-- shovel/axe blocks (dirt, sand, logs, melons) can be taken by hand; pickaxe blocks cannot
+			canHarvest = block.tool ~= "pickaxe"
+		end
 	end
-	return math.max(0.05, block.hardness * 1.5 / mult)
+	local damage = speed / hardness / (if canHarvest then 30 else 100)
+	if damage >= 1 then
+		return TICK -- instant break [ваниль]
+	end
+	return math.ceil(1 / damage - 1e-9) * TICK
+end
+
+-- Minecraft pauses 5 ticks after a block breaks before the next one can start [ваниль]
+function Config.hitDelay(): number
+	local digging = Config.rules.digging
+	local ticks = if digging and typeof(digging.hitDelayTicks) == "number"
+		then digging.hitDelayTicks
+		else 5
+	return ticks * TICK
 end
 
 return Config

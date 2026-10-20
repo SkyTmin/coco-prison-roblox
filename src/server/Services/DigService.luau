@@ -47,6 +47,7 @@ type Combo = { count: number, lastAt: number }
 local DigService = {}
 local digs: { [Player]: Dig } = {}
 local combos: { [Player]: Combo } = {}
+local lastBreakAt: { [Player]: number } = {} -- Minecraft's 5-tick pause after a break [ваниль]
 local random = Random.new()
 local nextToken = 0
 
@@ -185,6 +186,7 @@ local function complete(player: Player, token: number)
 	end
 	local brokenCFrame, brokenSize, brokenColor = part.CFrame, part.Size, part.Color
 	local blockId = MineService.breakBlock(mine, i)
+	lastBreakAt[player] = os.clock()
 	if not blockId then
 		Remotes.event("DigRejected"):FireClient(player, part)
 		return
@@ -268,6 +270,9 @@ local function onDigStart(player: Player, part: any, hit: any)
 		return
 	end
 	local toolId, toolLevel = InventoryService.heldTool(profile)
+	-- rapid taps cannot skip the pause: the timer simply includes what is left of it
+	local pause =
+		math.max(0, Config.hitDelay() - (os.clock() - (lastBreakAt[player] or -math.huge)))
 	nextToken += 1
 	local token = nextToken
 	digs[player] = {
@@ -280,8 +285,8 @@ local function onDigStart(player: Player, part: any, hit: any)
 		toolId = toolId,
 		toolLevel = toolLevel,
 	}
-	Remotes.event("DigAccepted"):FireClient(player, part, needed)
-	task.delay(needed, complete, player, token)
+	Remotes.event("DigAccepted"):FireClient(player, part, needed, pause)
+	task.delay(needed + pause, complete, player, token)
 end
 
 local function onDigCancel(player: Player)
@@ -299,6 +304,7 @@ function DigService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		digs[player] = nil
 		combos[player] = nil
+		lastBreakAt[player] = nil
 	end)
 	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client
 	local elapsed = 0

@@ -1666,6 +1666,7 @@ local digNeeded = 0
 local digPredicted = false -- the client already played the break and hid the block
 local tapTarget: Aim? = nil -- touch: the block under the finger when the hold began
 local pending: { [BasePart]: number } = {} -- blocks hidden locally, waiting for the server to remove them
+local nextDigAt = 0 -- Minecraft's 5-tick pause after a break [ваниль]
 
 local function expectedTime(part: BasePart): number?
 	if not profile then
@@ -1737,11 +1738,15 @@ local function startDig(aim: Aim)
 	Remotes.event("DigStart"):FireServer(aim.part, aim.hit)
 end
 
-Remotes.event("DigAccepted").OnClientEvent:Connect(function(part: BasePart, needed: number)
-	if digging and digTarget == part then
-		digNeeded = needed -- the server's number is the truth; progress keeps its local start
-	end
-end)
+Remotes.event("DigAccepted").OnClientEvent
+	:Connect(function(part: BasePart, needed: number, pause: number?)
+		if digging and digTarget == part then
+			digNeeded = needed -- the server's number is the truth; progress keeps its local start
+			if pause and pause > 0 then
+				digStarted = math.max(digStarted, os.clock() + pause - (os.clock() - digStarted))
+			end
+		end
+	end)
 Remotes.event("DigRejected").OnClientEvent:Connect(function(part: BasePart)
 	restoreLocally(part)
 	if digTarget == part then
@@ -1789,13 +1794,13 @@ RunService.RenderStepped:Connect(function()
 			if not digTarget.Parent then
 				-- the server removed it: move on to whatever is under the cursor now
 				stopDig(false)
-				if holding and aim and not pending[aim.part] then
+				if holding and aim and not pending[aim.part] and now >= nextDigAt then
 					startDig(aim)
 				end
 			end
 		elseif not aim or aim.part ~= digTarget then
 			stopDig(true)
-			if holding and aim and not pending[aim.part] then
+			if holding and aim and not pending[aim.part] and now >= nextDigAt then
 				startDig(aim)
 			end
 		else
@@ -1808,9 +1813,10 @@ RunService.RenderStepped:Connect(function()
 				hideLocally(digTarget)
 				digPredicted = true
 				progress.Visible = false
+				nextDigAt = now + Config.hitDelay()
 			end
 		end
-	elseif holding and aim and not pending[aim.part] then
+	elseif holding and aim and not pending[aim.part] and now >= nextDigAt then
 		startDig(aim)
 	end
 	HeldItem.SetDigging(digging and not digPredicted)
