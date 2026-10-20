@@ -50,6 +50,7 @@ function walkTree(node, pathParts) {
 	for (const [key, value] of Object.entries(node)) {
 		if (key.startsWith("$")) continue;
 		if (value.$path) {
+			if (value.$path.endsWith(".project.json")) continue; // nested project (MaterialService): edit-time only
 			walkDir(join(root, value.$path), [...pathParts, key]);
 		} else if (typeof value === "object") {
 			walkTree(value, [...pathParts, key]);

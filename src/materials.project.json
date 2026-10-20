@@ -1,0 +1,134 @@
+{
+  "name": "materials",
+  "tree": {
+    "$className": "MaterialService",
+    "px_dirt": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://120467403268934",
+        "StudsPerTile": 4
+      }
+    },
+    "px_sand": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://87188573562363",
+        "StudsPerTile": 4
+      }
+    },
+    "px_gravel": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://77890280599391",
+        "StudsPerTile": 4
+      }
+    },
+    "px_oak_log": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://104108597901323",
+        "StudsPerTile": 4
+      }
+    },
+    "px_oak_log_top": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://80953281607678",
+        "StudsPerTile": 4
+      }
+    },
+    "px_melon": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://135500516194515",
+        "StudsPerTile": 4
+      }
+    },
+    "px_cobblestone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://136749436423818",
+        "StudsPerTile": 4
+      }
+    },
+    "px_stone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://86301739343505",
+        "StudsPerTile": 4
+      }
+    },
+    "px_coal_ore": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://72510378842791",
+        "StudsPerTile": 4
+      }
+    },
+    "px_iron_ore": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://114736204050300",
+        "StudsPerTile": 4
+      }
+    },
+    "px_prison_wall": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://133440216572646",
+        "StudsPerTile": 4
+      }
+    },
+    "px_concrete_floor": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://71434716170906",
+        "StudsPerTile": 4
+      }
+    },
+    "px_grass_top": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://113859839776090",
+        "StudsPerTile": 4
+      }
+    },
+    "px_planks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://110913940729167",
+        "StudsPerTile": 4
+      }
+    },
+    "px_water": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://104193719964849",
+        "StudsPerTile": 4
+      }
+    },
+    "px_red_brick": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://114326295218433",
+        "StudsPerTile": 4
+      }
+    }
+  }
+}

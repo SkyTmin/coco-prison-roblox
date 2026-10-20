@@ -176,4 +176,14 @@ write("keys.json", { source: "[решение]; цены ключей у обм�
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
 write("rules.json", { source: "[решение]", death: decisions.death, combo: decisions.combo, money: decisions.money });
 write("textures.json", { source: "assets/textures/ids.json — Codex image gen + Studio upload", ...read("assets/textures/ids.json") });
+// Rojo nested project for MaterialService: one MaterialVariant per texture (edit-time instances).
+{
+	const ids = read("assets/textures/ids.json");
+	const tree = { "$className": "MaterialService" };
+	for (const [id, assetId] of Object.entries(ids.textures)) {
+		tree["px_" + id] = { "$className": "MaterialVariant", "$properties": { BaseMaterial: "Plastic", ColorMap: assetId, StudsPerTile: ids.studsPerTile || 4 } };
+	}
+	writeFileSync(join(root, "src", "materials.project.json"), JSON.stringify({ name: "materials", tree }, null, 2) + "\n");
+	console.log("wrote src/materials.project.json");
+}
 write("professions.json", { source: "[меню] Работы/Прокачки; формула опыта [решение]", ...decisions.professions, boosters: decisions.boosters });
