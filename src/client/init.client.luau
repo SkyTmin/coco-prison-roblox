@@ -1,7 +1,7 @@
 --!strict
 -- Client: digging input (hold on PC / touch button / gamepad), target highlight with progress,
 -- HUD (right stats panel, hotkeys), hotbar, inventory [E], shop/sell/food windows (prompts),
--- upgrade [J], level [U], jobs [O]. Everything is confirmed by the server via ProfileUpdated/Toast.
+-- upgrade [J], level [U], jobs [O], achievements [L], case results (server event).
 
 local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
@@ -63,16 +63,18 @@ end
 local hints = Ui.label(
 	gui,
 	T("keys_hint"),
-	UDim2.fromOffset(720, 18),
-	UDim2.new(1, -730, 1, -120),
+	UDim2.new(1, -20, 0, 36),
+	UDim2.new(0, 10, 1, -138),
 	13,
 	Ui.colors.muted
 )
 hints.TextXAlignment = Enum.TextXAlignment.Right
+hints.TextWrapped = true
 
-local toast = Ui.panel(gui, UDim2.fromOffset(360, 34), UDim2.new(1, -370, 0, 12))
+local toast = Ui.panel(gui, UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12))
 local toastText =
 	Ui.label(toast, "", UDim2.new(1, -12, 1, 0), UDim2.fromOffset(6, 0), 14, Ui.colors.header)
+toastText.TextWrapped = true
 toast.Visible = false
 local toastToken = 0
 local function showToast(text: string)
@@ -143,11 +145,13 @@ end
 
 -- ---------------------------------------------------------------- windows
 local openWindow: Frame? = nil
+local currentWindowKind: string? = nil
 local function closeWindow()
 	if openWindow then
 		openWindow:Destroy()
 		openWindow = nil
 	end
+	currentWindowKind = nil
 end
 
 -- Inventory [E]: 27 slots + hotbar row + armor; click-to-move.
@@ -546,6 +550,115 @@ local function buildJobs(): Frame
 	return win
 end
 
+-- [решение] Same owner-specified thresholds and rewards as AchievementService.
+local function buildAchievements(): Frame
+	local win, content = Ui.window(gui, T("achievements"), UDim2.fromOffset(772, 486), closeWindow)
+	local p = profile
+	if not p then
+		return win
+	end
+	for i, blockId in ipairs({ "dirt", "sand", "gravel", "coal_ore", "oak_log" }) do
+		local id = "digger_" .. blockId
+		local claimed = math.clamp(p.achievements[id] or 0, 0, 12)
+		local tier = math.min(claimed + 1, 12)
+		local threshold = math.floor(64 * 1.7 ^ (tier - 1) + 0.5)
+		local counter = Config.blocks[blockId].upgradeCounter
+		local progress = p.counters[counter] or 0
+		local claimable = claimed < 12 and progress >= threshold
+		local card = Ui.panel(
+			content,
+			UDim2.fromOffset(244, 210),
+			UDim2.fromOffset(4 + ((i - 1) % 3) * 252, 4 + math.floor((i - 1) / 3) * 218)
+		)
+		local title = Ui.label(
+			card,
+			T(id),
+			UDim2.new(1, -12, 0, 36),
+			UDim2.fromOffset(6, 4),
+			14,
+			Ui.colors.header
+		)
+		title.TextWrapped = true
+		local stars = Ui.label(
+			card,
+			'<font color="#FFAA28">'
+				.. string.rep("★", claimed)
+				.. '</font><font color="#96969E">'
+				.. string.rep("☆", 12 - claimed)
+				.. "</font>",
+			UDim2.new(1, -12, 0, 24),
+			UDim2.fromOffset(6, 42),
+			18
+		)
+		stars.RichText = true
+		local track = Ui.panel(card, UDim2.new(1, -12, 0, 24), UDim2.fromOffset(6, 74))
+		local fill = Instance.new("Frame")
+		fill.Size = UDim2.fromScale(math.clamp(progress / threshold, 0, 1), 1)
+		fill.BackgroundColor3 = Ui.colors.buttonGreen
+		fill.BorderSizePixel = 0
+		fill.Parent = track
+		local value = Ui.label(
+			track,
+			string.format("%s / %s", Strings.big(progress), Strings.big(threshold)),
+			UDim2.fromScale(1, 1),
+			UDim2.fromOffset(0, 0),
+			13
+		)
+		value.TextXAlignment = Enum.TextXAlignment.Center
+		value.ZIndex = fill.ZIndex + 1
+		local reward = if claimed == 12
+			then T("achievement_complete")
+			else T("reward") .. ": " .. tostring(tier * 10) .. " $"
+		if claimed < 12 and tier % 4 == 0 then
+			reward ..= " + " .. T("item_booster_money") .. " ×1"
+		end
+		local rewardLabel = Ui.label(
+			card,
+			reward,
+			UDim2.new(1, -12, 0, 64),
+			UDim2.fromOffset(6, 102),
+			12,
+			Ui.colors.money
+		)
+		rewardLabel.TextWrapped = true
+		local button = Ui.button(
+			card,
+			T("claim"),
+			UDim2.new(1, -12, 0, 30),
+			UDim2.new(0, 6, 1, -36),
+			if claimable then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+		)
+		button.Interactable = claimable
+		button.AutoButtonColor = claimable
+		button.Activated:Connect(function()
+			if claimable then
+				Remotes.event("ClaimAchievement"):FireServer(id, tier)
+			end
+		end)
+	end
+	return win
+end
+
+type CaseDrop = { id: string, count: number }
+local caseDrops: { CaseDrop } = {}
+local function buildCase(): Frame
+	local win, content = Ui.window(gui, T("ordinary_case"), UDim2.fromOffset(420, 160), closeWindow)
+	for i, drop in ipairs(caseDrops) do
+		local slot, name, count = Ui.slot(content, 94)
+		slot.Position = UDim2.fromOffset(4 + (i - 1) * 102, 4)
+		if drop.id == "money" then
+			name.Text = T("coins")
+			name.TextColor3 = Ui.colors.money
+			count.Text = Strings.money(drop.count) .. " $"
+		else
+			local level = if Config.tools[drop.id] then 1 else nil
+			name.Text = Strings.itemName(drop.id, level, locale)
+			count.Text = "×" .. tostring(drop.count)
+		end
+	end
+	return win
+end
+
 local windowBuilders: { [string]: () -> Frame } = {
 	inventory = buildInventory,
 	sell = buildSell,
@@ -558,9 +671,14 @@ local windowBuilders: { [string]: () -> Frame } = {
 	upgrade = buildUpgrade,
 	level = buildLevel,
 	jobs = buildJobs,
+	achievements = buildAchievements,
+	case = buildCase,
 }
-local currentWindowKind: string? = nil
 local function open(kind: string)
+	local builder = windowBuilders[kind]
+	if not builder then
+		return
+	end
 	if currentWindowKind == kind then
 		closeWindow()
 		currentWindowKind = nil
@@ -568,7 +686,7 @@ local function open(kind: string)
 	end
 	closeWindow()
 	currentWindowKind = kind
-	openWindow = windowBuilders[kind]()
+	openWindow = builder()
 end
 local function refreshWindow()
 	if currentWindowKind and openWindow then
@@ -600,8 +718,12 @@ Remotes.event("ProfileUpdated").OnClientEvent:Connect(render)
 Remotes.event("Toast").OnClientEvent:Connect(showToast)
 Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string)
 	closeWindow()
-	currentWindowKind = kind
-	openWindow = windowBuilders[kind]()
+	open(kind)
+end)
+Remotes.event("CaseOpened").OnClientEvent:Connect(function(drops: { CaseDrop })
+	caseDrops = drops
+	closeWindow()
+	open("case")
 end)
 Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
 	combo.Text =
@@ -818,6 +940,11 @@ ContextActionService:SetPosition("Dig", UDim2.fromScale(0.72, 0.55))
 
 -- ---------------------------------------------------------------- keys
 UserInputService.InputBegan:Connect(function(input, processed)
+	-- Roblox can mark Escape as processed when it opens its own menu.
+	if input.KeyCode == Enum.KeyCode.Escape then
+		closeWindow()
+		return
+	end
 	if processed then
 		return
 	end
@@ -830,11 +957,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("level")
 	elseif k == Enum.KeyCode.O then
 		open("jobs")
+	elseif k == Enum.KeyCode.L then
+		open("achievements")
 	elseif k == Enum.KeyCode.F and profile then
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
-	elseif k == Enum.KeyCode.Escape then
-		closeWindow()
-		currentWindowKind = nil
 	elseif k.Value >= Enum.KeyCode.One.Value and k.Value <= Enum.KeyCode.Nine.Value then
 		selectSlot(k.Value - Enum.KeyCode.One.Value + 1)
 	end

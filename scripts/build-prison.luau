@@ -223,6 +223,11 @@ npc("Buyer", "SellPoint", CFrame.new(-22, 3.5, 12), "Скупщик блоков
 npc("ItemShop", "ItemShop", CFrame.new(22, 3.5, 12), "Продавец предметов")
 npc("FoodShop", "FoodShop", CFrame.new(22, 3.5, -12), "Продавец еды")
 
+local ordinaryCase =
+	part("OrdinaryCase", Vector3.new(5, 5, 4), CFrame.new(-22, 3, -12), WOOD, Enum.Material.Wood)
+CollectionService:AddTag(ordinaryCase, "OrdinaryCase")
+sign(ordinaryCase, "Обычный кейс")
+
 -- Buildings (blockout with signs; decoration pass comes later)
 local function building(
 	name: string,

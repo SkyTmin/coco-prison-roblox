@@ -37,7 +37,22 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 - Research questions → one subagent per topic with a precise brief and a file to write; keep the conclusion, not the transcript.
 - Screenshots from the owner: crop/tile before viewing, view each once, write findings immediately.
 - Codex (`codex` MCP) costs the owner's ChatGPT quota: use for image assets and second opinions only, with a written spec.
-- Roblox Studio MCP (`Roblox_Studio`): `list_roblox_studios` first; `execute_luau` builds/inspects; keep code in `src/` via Rojo, never paste logic into the place.
+- Roblox Studio MCP (`Roblox_Studio`): `list_roblox_studios` first; `execute_luau` builds/inspects; keep code in `src/`, never paste logic into the place.
+
+## Studio loop without the Rojo plugin (agent sessions)
+
+1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
+2. After editing code: `node scripts/make-studio-sync.mjs > sync.luau`, run it with `execute_luau`
+   (Edit mode) — it sets every script's Source by path (28 scripts, ~1 s). `rojo serve` + HttpService
+   from Studio hangs; do not use it.
+3. Map: run `scripts/build-prison.luau` (Edit). Textures: `scripts/build-textures.luau` (Edit) creates
+   MaterialVariants — runtime scripts cannot. Both are idempotent.
+4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
+   Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
+   window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
+5. `require()` inside `execute_luau` gets a separate module instance: read profiles through the client
+   `ProfileUpdated` event, not through `ProfileService.Get`.
+6. If `list_roblox_studios` returns `[]`, restart Studio with the place file and wait ~1 min.
 
 ## Tooling
 

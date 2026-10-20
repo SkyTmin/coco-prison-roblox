@@ -20,6 +20,8 @@ for _, name in ipairs({
 	"EquipArmor",
 	"UseConsumable",
 	"OpenCase",
+	"ClaimAchievement",
+	"CaseOpened",
 	"ProfileUpdated",
 	"Toast",
 	"MineReset",
@@ -36,6 +38,8 @@ local MineService = require(script.Services.MineService)
 local DigService = require(script.Services.DigService)
 local EconomyService = require(script.Services.EconomyService)
 local NeedsService = require(script.Services.NeedsService)
+local AchievementService = require(script.Services.AchievementService)
+local CaseService = require(script.Services.CaseService)
 
 ProfileService.Start()
 ProfessionService.Start()
@@ -44,6 +48,8 @@ MineService.Start()
 DigService.Start()
 EconomyService.Start()
 NeedsService.Start()
+AchievementService.Start()
+CaseService.Start()
 
 -- Hearts by level on spawn
 game:GetService("Players").PlayerAdded:Connect(function(player)
