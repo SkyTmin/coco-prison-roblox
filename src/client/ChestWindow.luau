@@ -1,4 +1,9 @@
 --!strict
+-- Case / chest window in the look of the original: the vanilla Minecraft 3-row chest GUI
+-- (reference: owner's screenshots of the "Кейс с предметами" chest — light grey bevelled panel,
+-- dark-grey titles "Кейс с предметами" / "Инвентарь", 9×3 chest grid, 9×3 inventory, hotbar row).
+-- Below the vanilla area a row of Minecraft-style buttons: open with a key, take all, key choice.
+-- Drag/drop and shift/double-tap quick moves come from DragDrop; the server validates every move.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -12,6 +17,15 @@ type Address = DragDrop.Address
 type SlotView = { address: Address, name: TextLabel, count: TextLabel, icon: ImageLabel }
 local ChestWindow = {}
 
+local MC = Ui.MC
+local TITLES = {
+	ordinaryCase = "case_contents_title", -- [меню] "Кейс с предметами"
+	ancientCase = "ancient_case",
+	artifactCase = "artifact_case",
+	nicknameCase = "nickname_case",
+	enderChest = "ender_chest",
+}
+
 function ChestWindow.build(
 	parent: Instance,
 	id: string,
@@ -20,36 +34,38 @@ function ChestWindow.build(
 	onClose: () -> (),
 	createWindow: (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 ): (Frame, () -> ())
-	local function t(key: string): string
-		return Strings.t(key, locale)
+	local function t(key: string, ...: any): string
+		return Strings.t(key, locale, ...)
 	end
 	local isEnder = id == "enderChest"
-	local win, content = createWindow(
+	-- vanilla chest GUI is 176×168 GUI px; our button row adds 30
+	local width, height = 176 * MC, (168 + 36) * MC
+	local win, raw = createWindow(
 		parent,
-		t(
-			if isEnder
-				then "ender_chest"
-				elseif id == "ancientCase" then "ancient_case"
-				elseif id == "artifactCase" then "artifact_case"
-				else "ordinary_case"
-		),
-		UDim2.fromOffset(452, if id == "ancientCase" then 528 else 478),
+		t(TITLES[id] or "ordinary_case"),
+		UDim2.fromOffset(width, height),
 		onClose
 	)
+	local content = Ui.toMc(win, raw)
+	Ui.mcText(
+		content,
+		t(TITLES[id] or "ordinary_case"),
+		UDim2.fromOffset(150 * MC, 10 * MC),
+		UDim2.fromOffset(8 * MC, 5 * MC)
+	)
+	Ui.mcText(
+		content,
+		t("inventory"),
+		UDim2.fromOffset(150 * MC, 10 * MC),
+		UDim2.fromOffset(8 * MC, 72 * MC)
+	)
+
 	local views: { SlotView } = {}
 	local configuredKeys = Config.keys.caseKeys[id]
 	local accepted: { string } = if typeof(configuredKeys) == "string"
 		then { configuredKeys }
 		else configuredKeys or {}
 	local selectedKey = accepted[1]
-	for _, child in ipairs(win:GetChildren()) do
-		if child:IsA("Frame") and child ~= content then
-			local title = child:FindFirstChildOfClass("TextLabel")
-			if title then
-				title.TextColor3 = Ui.colors.header
-			end
-		end
-	end
 	local function stackAt(address: Address): Types.ItemStack?
 		local profile = getProfile()
 		if not profile then
@@ -78,47 +94,50 @@ function ChestWindow.build(
 	local function grid(container: "case" | "inv", first: number, rows: number, y: number)
 		for row = 0, rows - 1 do
 			for column = 0, 8 do
-				local frame, name, count, icon = Ui.slot(content, 44)
-				frame.Position = UDim2.fromOffset(4 + column * 48, y + row * 48)
+				local frame, name, count, icon = Ui.mcSlot(content)
+				frame.Position = UDim2.fromOffset((8 + column * 18) * MC, (y + row * 18) * MC)
 				local address: Address = { container = container, index = first + row * 9 + column }
 				table.insert(views, { address = address, name = name, count = count, icon = icon })
 				drag.Bind(frame, address)
 			end
 		end
 	end
-	grid("case", 1, 3, 0)
-	Ui.label(
+	grid("case", 1, 3, 17) -- [ваниль] chest rows at y = 17
+	grid("inv", 10, 3, 84) -- [ваниль] inventory at y = 84
+	grid("inv", 1, 1, 142) -- [ваниль] hotbar at y = 142
+
+	local rowY = 168 * MC
+	local open = Ui.mcButton(
 		content,
-		t("inventory"),
-		UDim2.fromOffset(430, 20),
-		UDim2.fromOffset(4, 148),
-		14,
-		Ui.colors.header
+		t("case_open"),
+		UDim2.fromOffset(54 * MC, 20 * MC),
+		UDim2.fromOffset(8 * MC, rowY)
 	)
-	grid("inv", 10, 3, 172)
-	grid("inv", 1, 1, 324)
-	local open =
-		Ui.button(content, t("case_open"), UDim2.fromOffset(142, 30), UDim2.fromOffset(4, 380))
 	open.Visible = not isEnder
-	local take = Ui.button(
+	local take = Ui.mcButton(
 		content,
 		t("case_take_all"),
-		UDim2.fromOffset(142, 30),
-		UDim2.fromOffset(152, 380),
-		Ui.colors.buttonGreen
+		UDim2.fromOffset(54 * MC, 20 * MC),
+		UDim2.fromOffset(if isEnder then 8 * MC else 64 * MC, rowY)
 	)
-	if isEnder then
-		take.Position = UDim2.fromOffset(4, 380)
+	local keyButton: TextButton? = nil
+	if #accepted > 1 then
+		keyButton = Ui.mcButton(
+			content,
+			"",
+			UDim2.fromOffset(48 * MC, 20 * MC),
+			UDim2.fromOffset(120 * MC, rowY)
+		)
 	end
-	local hint = Ui.label(
+	local hint = Ui.mcText(
 		content,
 		"",
-		UDim2.fromOffset(136, 38),
-		UDim2.fromOffset(300, 376),
-		12,
-		Ui.colors.muted
+		UDim2.fromOffset(160 * MC, 10 * MC),
+		UDim2.fromOffset(8 * MC, 189 * MC),
+		7 * MC
 	)
-	hint.TextWrapped = true
+	hint.TextXAlignment = Enum.TextXAlignment.Left
+
 	open.Activated:Connect(function()
 		if open.Active then
 			Remotes.event("CaseOpen"):FireServer(id, selectedKey)
@@ -147,15 +166,17 @@ function ChestWindow.build(
 			end
 		end
 	end)
-	local keyButton: TextButton? = nil
-	if id == "ancientCase" then
-		keyButton = Ui.button(
-			content,
-			"",
-			UDim2.fromOffset(432, 44),
-			UDim2.fromOffset(4, 424),
-			Ui.colors.buttonGrey
-		)
+	local function keyCount(key: string?): number
+		local profile = getProfile()
+		local n = 0
+		if profile and key then
+			for _, stack in pairs(profile.inventory) do
+				if stack.id == key then
+					n += stack.count
+				end
+			end
+		end
+		return n
 	end
 	local function refresh()
 		for _, view in ipairs(views) do
@@ -163,45 +184,47 @@ function ChestWindow.build(
 			local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
 			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
-			view.name.Visible = icon == nil
+			view.name.Visible = icon == nil and stack ~= nil
 			view.count.Text = if stack and stack.coins
-				then Strings.money(stack.coins) .. " $"
+				then Strings.money(stack.coins) .. "$"
 				elseif stack and stack.count > 1 then tostring(stack.count)
 				else ""
+			local glint = view.icon:FindFirstChild("Glint")
+			if glint and glint:IsA("ImageLabel") then
+				local enchanted = stack ~= nil
+					and icon ~= nil
+					and Config.isEnchanted(stack.id, stack.level)
+				glint.Image, glint.Visible = icon or "", enchanted
+			end
 		end
 		if isEnder then
 			return
 		end
 		local config = Config.keys[id]
 		local rewards = if typeof(config) == "table" then config.rewards or config else {}
-		local available = id == "ancientCase" or (typeof(rewards) == "table" and #rewards > 0)
-		local owned: { [string]: boolean } = {}
-		local profile = getProfile()
-		if profile then
-			for _, stack in pairs(profile.inventory) do
-				if table.find(accepted, stack.id) and stack.count > 0 then
-					owned[stack.id] = true
-				end
-			end
-		end
-		if not owned[selectedKey] then
+		local available = id == "ancientCase"
+			or id == "nicknameCase"
+			or (typeof(rewards) == "table" and #rewards > 0)
+		if keyCount(selectedKey) == 0 then
 			for _, key in ipairs(accepted) do
-				if owned[key] then
+				if keyCount(key) > 0 then
 					selectedKey = key
 					break
 				end
 			end
 		end
-		local hasKey = owned[selectedKey] == true
+		local have = keyCount(selectedKey)
 		if keyButton then
 			keyButton.Text = Strings.itemName(selectedKey, nil, locale)
 		end
-		open.Active, open.AutoButtonColor = available and hasKey, available and hasKey
-		open.BackgroundColor3 = if open.Active then Ui.colors.buttonBlue else Ui.colors.buttonGrey
+		Ui.setMcButtonActive(open, available and have > 0)
 		hint.Text = if not available
 			then t("case_locked")
-			elseif not hasKey then t("case_no_key")
-			else ""
+			elseif have == 0 then t(
+				"case_need_key",
+				Strings.itemName(selectedKey or "ordinary_key", nil, locale)
+			)
+			else t("case_key_hint", Strings.itemName(selectedKey, nil, locale), have)
 	end
 	if keyButton then
 		keyButton.Activated:Connect(function()

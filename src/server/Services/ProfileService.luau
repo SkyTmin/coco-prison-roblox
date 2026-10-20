@@ -49,6 +49,8 @@ function ProfileService.defaultProfile(): Profile
 		hunger = Config.rules.survival.hunger.max,
 		achievements = {},
 		stats = {},
+		nicknames = {},
+		trainer = { strength = 0, agility = 0, needs = 0 },
 		location = "prison",
 		operationIds = {},
 	}
@@ -113,6 +115,12 @@ local function migrate(data: any): Profile
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
+	if typeof(profile.nicknames) ~= "table" then
+		profile.nicknames = {}
+	end
+	if typeof(profile.trainer) ~= "table" then
+		profile.trainer = { strength = 0, agility = 0, needs = 0 }
+	end
 	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
 	local rawArtifacts = profile.artifacts
 	profile.artifacts = {}
@@ -285,6 +293,47 @@ function ProfileService.Replicate(player: Player)
 end
 
 function ProfileService.Start()
+	-- Studio-only test hook (ServerStorage.ProfileDebug): execute_luau runs in its own VM, so it cannot
+	-- reach this module's sessions; the BindableFunction exposes get / give / coins / set for QA.
+	if game:GetService("RunService"):IsStudio() then
+		local InventoryService = require(script.Parent.InventoryService) :: any
+		local debugApi = Instance.new("BindableFunction")
+		debugApi.Name = "ProfileDebug"
+		debugApi.OnInvoke = function(op: string, userId: number, a: any, b: any, c: any): any
+			local player = Players:GetPlayerByUserId(userId)
+			if not player then
+				return nil
+			end
+			if op == "get" then
+				return ProfileService.Get(player)
+			elseif op == "give" then
+				local overflow = 0
+				local inside = ""
+				ProfileService.Mutate(player, function(profile)
+					overflow = InventoryService.add(profile, a, b or 1, c)
+					for slot = 1, 36 do
+						local stack = profile.inventory[slot]
+						if stack then
+							inside ..= slot .. "=" .. stack.id .. "x" .. stack.count .. ","
+						end
+					end
+				end)
+				return { overflow = overflow, inside = inside }
+			elseif op == "coins" then
+				ProfileService.Mutate(player, function(profile)
+					profile.coins += a
+				end)
+				return true
+			elseif op == "set" then
+				ProfileService.Mutate(player, function(profile)
+					(profile :: any)[a] = b
+				end)
+				return true
+			end
+			return nil
+		end
+		debugApi.Parent = game:GetService("ServerStorage")
+	end
 	Remotes.event("SetLocale").OnServerEvent:Connect(function(player: Player, locale: any)
 		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then
 			return

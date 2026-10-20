@@ -23,6 +23,9 @@ local ChestWindow = require(script.ChestWindow)
 local AchievementsWindow = require(script.AchievementsWindow)
 local ExchangeWindow = require(script.ExchangeWindow)
 local ArtifactWindow = require(script.ArtifactWindow)
+local SellWindow = require(script.SellWindow)
+local ShopWindow = require(script.ShopWindow)
+local TrainerWindow = require(script.TrainerWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
@@ -505,30 +508,56 @@ local function closeWindow()
 	currentWindowKind = nil
 end
 
--- Inventory [E]: shared drag/drop gestures; profile updates repaint slots in place.
+-- Inventory [E] in the look of the original: the vanilla Minecraft survival inventory GUI
+-- (176×166 GUI px at scale 2): four armour slots, the player preview, the decorative 2×2 "Создание"
+-- grid, the 9×3 inventory and the hotbar. Armour is equipped by dragging a piece onto its slot (or a
+-- double tap / shift-click), taken off by dragging it back; profile updates repaint slots in place.
 local function buildInventory(): Frame
-	local win, content = createWindow(
-		gui,
-		T("inventory"),
-		UDim2.fromOffset(9 * (SLOT + 4) + 160, 5 * (SLOT + 4) + 70),
-		closeWindow
-	)
+	local MC = Ui.MC
+	local win, raw =
+		createWindow(gui, T("inventory"), UDim2.fromOffset(176 * MC, 166 * MC), closeWindow)
+	local content = Ui.toMc(win, raw)
 	local views: { { index: number, name: TextLabel, count: TextLabel, image: ImageLabel } } = {}
 	local armorViews: { { part: string, name: TextLabel, count: TextLabel, image: ImageLabel } } =
 		{}
+	local ARMOR_PARTS = { "helmet", "chestplate", "leggings", "boots" }
 	local function renderArmor(part: string, name: TextLabel, count: TextLabel, image: ImageLabel)
 		local armor = if profile then profile.armor[part] else nil
 		renderSlot(name, count, image, armor or { id = part, level = 1, count = 1 })
-		image.ImageColor3 = if armor then Color3.new(1, 1, 1) else Color3.fromRGB(145, 145, 145)
-		image.ImageTransparency = if armor then 0 else 0.6
-		name.TextColor3 = if armor then Ui.colors.text else Ui.colors.muted
+		name.Visible = false
+		image.ImageColor3 = if armor then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
+		image.ImageTransparency = if armor then 0 else 0.55
 	end
 	local function stackAt(address: DragDrop.Address): Types.ItemStack?
-		return if profile then profile.inventory[address.index] else nil
+		if not profile then
+			return nil
+		end
+		if address.container == "armor" then
+			return profile.armor[ARMOR_PARTS[address.index]]
+		end
+		return profile.inventory[address.index]
 	end
 	local drag = DragDrop.new(win, stackAt, function(from, to)
-		Remotes.event("InventoryMove"):FireServer(from.index, to.index)
+		if from.container == "inv" and to.container == "armor" then
+			local stack = stackAt(from)
+			if stack and stack.id == ARMOR_PARTS[to.index] then
+				Remotes.event("EquipArmor"):FireServer(from.index)
+			end
+		elseif from.container == "armor" and to.container == "inv" then
+			Remotes.event("UnequipArmor"):FireServer(ARMOR_PARTS[from.index], to.index)
+		elseif from.container == "inv" and to.container == "inv" then
+			Remotes.event("InventoryMove"):FireServer(from.index, to.index)
+		end
 	end, function(from)
+		if from.container == "armor" then
+			Remotes.event("UnequipArmor"):FireServer(ARMOR_PARTS[from.index])
+			return
+		end
+		local stack = stackAt(from)
+		if stack and table.find(ARMOR_PARTS, stack.id) then
+			Remotes.event("EquipArmor"):FireServer(from.index)
+			return
+		end
 		local first, last = if from.index <= 9 then 10 else 1, if from.index <= 9 then 36 else 9
 		for index = first, last do
 			if not stackAt({ container = "inv", index = index }) then
@@ -538,42 +567,97 @@ local function buildInventory(): Frame
 		end
 	end)
 	local function slotAt(index: number, x: number, y: number)
-		local f, name, count, image = Ui.slot(content, SLOT)
-		f.Position = UDim2.fromOffset(x, y)
+		local f, name, count, image = Ui.mcSlot(content)
+		f.Position = UDim2.fromOffset(x * MC, y * MC)
 		renderSlot(name, count, image, if profile then profile.inventory[index] else nil)
 		table.insert(views, { index = index, name = name, count = count, image = image })
 		drag.Bind(f, { container = "inv", index = index })
 	end
-	for r = 0, 2 do
-		for c = 0, 8 do
-			slotAt(10 + r * 9 + c, c * (SLOT + 4), r * (SLOT + 4))
-		end
-	end
-	for c = 0, 8 do
-		slotAt(c + 1, c * (SLOT + 4), 3 * (SLOT + 4) + 10)
-	end
-	local y = 0
-	for _, part in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
-		local f, name, count, image = Ui.slot(content, SLOT)
-		f.Position = UDim2.fromOffset(9 * (SLOT + 4) + 12, y)
+	-- [ваниль] armour column at (8, 8), inventory at (8, 84), hotbar at (8, 142)
+	for i, part in ipairs(ARMOR_PARTS) do
+		local f, name, count, image = Ui.mcSlot(content)
+		f.Position = UDim2.fromOffset(8 * MC, (8 + (i - 1) * 18) * MC)
 		renderArmor(part, name, count, image)
 		table.insert(armorViews, { part = part, name = name, count = count, image = image })
-		y += SLOT + 4
+		drag.Bind(f, { container = "armor", index = i })
 	end
-	local equip = Ui.button(
-		content,
-		"⤒",
-		UDim2.fromOffset(SLOT, 24),
-		UDim2.fromOffset(9 * (SLOT + 4) + 12, y + 4),
-		Ui.colors.buttonGrey
-	)
-	equip.Activated:Connect(function()
-		local picked = drag.Selected()
-		if picked then
-			Remotes.event("EquipArmor"):FireServer(picked.index)
-			drag.Clear()
+	for r = 0, 2 do
+		for col = 0, 8 do
+			slotAt(10 + r * 9 + col, 8 + col * 18, 84 + r * 18)
 		end
-	end)
+	end
+	for col = 0, 8 do
+		slotAt(col + 1, 8 + col * 18, 142)
+	end
+	-- player preview [ваниль] (26, 8) 49×70
+	local preview = Instance.new("ViewportFrame")
+	preview.Size = UDim2.fromOffset(49 * MC, 70 * MC)
+	preview.Position = UDim2.fromOffset(26 * MC, 8 * MC)
+	preview.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	preview.BorderSizePixel = 0
+	preview.Ambient = Color3.fromRGB(200, 200, 200)
+	preview.LightColor = Color3.fromRGB(255, 255, 255)
+	preview.Parent = content
+	Ui.bevel(preview, MC, Ui.colors.mcSlotDark, Ui.colors.mcLight)
+	local previewCamera = Instance.new("Camera")
+	previewCamera.Parent = preview
+	preview.CurrentCamera = previewCamera
+	local world = Instance.new("WorldModel")
+	world.Parent = preview
+	local function renderPreview()
+		world:ClearAllChildren()
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not character or not root or not root:IsA("BasePart") then
+			return
+		end
+		character.Archivable = true
+		local clone = character:Clone()
+		character.Archivable = false
+		for _, d in ipairs(clone:GetDescendants()) do
+			if
+				d:IsA("Script")
+				or d:IsA("LocalScript")
+				or d:IsA("Sound")
+				or d:IsA("BillboardGui")
+			then
+				d:Destroy()
+			end
+		end
+		local cloneRoot = clone:FindFirstChild("HumanoidRootPart") :: BasePart
+		clone:PivotTo(CFrame.new(0, 0, 0))
+		clone.Parent = world
+		previewCamera.CFrame = CFrame.lookAt(
+			cloneRoot.Position + Vector3.new(0, 0.3, -8.5),
+			cloneRoot.Position + Vector3.new(0, 0.3, 0)
+		)
+		previewCamera.FieldOfView = 36
+	end
+	renderPreview()
+	-- decorative crafting area of the vanilla GUI [ваниль] (97, 8) label, 2×2 grid at (98, 18), result at (154, 28)
+	Ui.mcText(
+		content,
+		T("crafting"),
+		UDim2.fromOffset(60 * MC, 10 * MC),
+		UDim2.fromOffset(97 * MC, 7 * MC)
+	)
+	for i = 0, 3 do
+		local f = Ui.mcSlot(content)
+		f.Position = UDim2.fromOffset((98 + (i % 2) * 18) * MC, (18 + math.floor(i / 2) * 18) * MC)
+	end
+	local arrow = Ui.mcText(
+		content,
+		"➜",
+		UDim2.fromOffset(18 * MC, 18 * MC),
+		UDim2.fromOffset(133 * MC, 28 * MC),
+		11 * MC
+	)
+	arrow.TextXAlignment = Enum.TextXAlignment.Center
+	arrow.TextColor3 = Ui.colors.mcSlot
+	local result = Ui.mcSlot(content, 26 * MC)
+	result.Position = UDim2.fromOffset(150 * MC, 24 * MC)
+	local shield = Ui.mcSlot(content)
+	shield.Position = UDim2.fromOffset(77 * MC, 62 * MC)
 	refreshInventory = function()
 		for _, view in ipairs(views) do
 			renderSlot(
@@ -586,119 +670,7 @@ local function buildInventory(): Frame
 		for _, view in ipairs(armorViews) do
 			renderArmor(view.part, view.name, view.count, view.image)
 		end
-	end
-	return win
-end
-
--- Sell window: list of blocks in bag with prices, "sell all".
-local function buildSell(): Frame
-	local win, content =
-		createWindow(gui, T("sell_prompt"), UDim2.fromOffset(360, 320), closeWindow)
-	local y = 0
-	local totals: { [string]: number } = {}
-	if profile then
-		for _, stack in pairs(profile.inventory) do
-			if Config.block(stack.id) then
-				totals[stack.id] = (totals[stack.id] or 0) + stack.count
-			end
-		end
-	end
-	local mult = if profile
-		then 1 + profile.professions.upgrades.money * Config.professions.upgrades.money
-		else 1
-	local sum = 0
-	for id, n in pairs(totals) do
-		local block = Config.block(id) :: Config.Block
-		local value = math.floor(block.basePrice * Config.moneyScale * mult * n + 0.5)
-		sum += value
-		Ui.label(
-			content,
-			string.format("%s ×%d", block.name, n),
-			UDim2.new(0.6, 0, 0, 20),
-			UDim2.fromOffset(4, y),
-			14
-		)
-		Ui.label(
-			content,
-			Strings.money(value) .. " $",
-			UDim2.new(0.4, -8, 0, 20),
-			UDim2.new(0.6, 0, 0, y),
-			14,
-			Ui.colors.money
-		)
-		y += 20
-	end
-	Ui.label(
-		content,
-		string.format("×%.2f", mult),
-		UDim2.new(1, 0, 0, 20),
-		UDim2.new(0, 4, 1, -56),
-		13,
-		Ui.colors.muted
-	)
-	local btn = Ui.button(
-		content,
-		T("sell_all") .. "  " .. Strings.money(sum) .. " $",
-		UDim2.new(1, -8, 0, 30),
-		UDim2.new(0, 4, 1, -32),
-		Ui.colors.buttonGreen
-	)
-	btn.Activated:Connect(function()
-		Remotes.event("Sell"):FireServer()
-		closeWindow()
-	end)
-	return win
-end
-
-local function buildShop(kind: string): Frame
-	type ShopItem = { id: string, price: number }
-	local items: { ShopItem } = if kind == "food"
-		then {
-			{ id = "apple", price = 0.03 },
-			{ id = "bread", price = 0.25 },
-			{ id = "cooked_chicken", price = 0.5 },
-		}
-		else {
-			{ id = "axe", price = 4 },
-			{ id = "pickaxe", price = 22.5 },
-			{ id = "shears", price = 4000 },
-			{ id = "shovel", price = 4 },
-		}
-	local win, content = createWindow(
-		gui,
-		T(if kind == "food" then "food_prompt" else "shop_prompt"),
-		UDim2.fromOffset(#items * 120 + 40, 180),
-		closeWindow
-	)
-	for i, item in ipairs(items) do
-		local card =
-			Ui.panel(content, UDim2.fromOffset(110, 120), UDim2.fromOffset((i - 1) * 120 + 4, 4))
-		local name = Ui.label(
-			card,
-			Strings.itemName(item.id, 1, locale),
-			UDim2.new(1, -8, 0, 40),
-			UDim2.fromOffset(4, 4),
-			13
-		)
-		name.TextWrapped = true
-		Ui.label(
-			card,
-			Strings.money(item.price * Config.moneyScale) .. " $",
-			UDim2.new(1, -8, 0, 20),
-			UDim2.fromOffset(4, 60),
-			14,
-			Ui.colors.money
-		)
-		local btn = Ui.button(
-			card,
-			T("buy"),
-			UDim2.new(1, -8, 0, 26),
-			UDim2.new(0, 4, 1, -30),
-			Ui.colors.buttonGreen
-		)
-		btn.Activated:Connect(function()
-			Remotes.event("BuyItem"):FireServer(item.id)
-		end)
+		renderPreview()
 	end
 	return win
 end
@@ -1446,12 +1418,27 @@ end
 
 local windowBuilders: { [string]: () -> Frame } = {
 	inventory = buildInventory,
-	sell = buildSell,
+	sell = function()
+		local win, refresh = SellWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	shop = function()
-		return buildShop("shop")
+		local win, refresh =
+			ShopWindow.build(gui, "shop", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
 	end,
 	food = function()
-		return buildShop("food")
+		local win, refresh =
+			ShopWindow.build(gui, "food", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
+	trainer = function()
+		local win, refresh = TrainerWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
 	end,
 	upgrade = buildUpgrade,
 	level = buildLevel,

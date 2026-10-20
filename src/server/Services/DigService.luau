@@ -153,10 +153,15 @@ local function onDigFinish(player: Player, part: any)
 	if toolNow ~= dig.toolId or levelNow ~= dig.toolLevel then
 		return -- tool changed mid-dig: start over
 	end
+	local brokenCFrame, brokenSize, brokenColor =
+		(part :: BasePart).CFrame, (part :: BasePart).Size, (part :: BasePart).Color
 	local blockId = MineService.breakBlock(mine, i)
 	if not blockId then
 		return
 	end
+	-- other clients play the break sound/particles for blocks they did not dig themselves
+	Remotes.event("BlockBroken")
+		:FireAllClients(player.UserId, brokenCFrame, brokenSize, brokenColor, blockId)
 	local block = Config.block(blockId) :: Config.Block
 	local dropId = block.dropsAs or blockId
 
@@ -224,6 +229,7 @@ local function onDigFinish(player: Player, part: any)
 end
 
 function DigService.Start()
+	Remotes.event("BlockBroken") -- created up front so clients can listen before the first break
 	Remotes.event("DigStart").OnServerEvent:Connect(onDigStart)
 	Remotes.event("DigFinish").OnServerEvent:Connect(onDigFinish)
 	Players.PlayerRemoving:Connect(function(player)

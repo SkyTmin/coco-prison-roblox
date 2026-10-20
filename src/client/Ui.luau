@@ -1,7 +1,10 @@
 --!strict
--- UI kit in the style of the original: dark translucent panels with a thin grey border, pixel-style
--- monospace font, orange headers, green money, blue/green buttons, red close square.
--- (Reference: wiki/in-game-wiki/JOBS-CASES-SPAWN.md, "Стиль интерфейса".)
+-- UI kit in the style of the original (reference screenshots, wiki/in-game-wiki/JOBS-CASES-SPAWN.md
+-- "Стиль интерфейса"): two looks live side by side, exactly like in the original game:
+--   * "dark" — the server's custom menus: dark translucent panels with a thin grey border, pixel font,
+--     orange headers, green money, blue/green buttons, red close square (shops, buyer, trainer, artifacts);
+--   * "mc"   — vanilla Minecraft container GUIs (chests/cases, inventory): light grey bevelled panel,
+--     bevelled slots, dark grey text. One Minecraft pixel = Ui.MC px.
 
 local Ui = {}
 
@@ -10,6 +13,7 @@ Ui.colors = {
 	panel = Color3.fromRGB(18, 18, 22),
 	panelTransparency = 0.15,
 	border = Color3.fromRGB(70, 70, 78),
+	inset = Color3.fromRGB(12, 12, 15),
 	text = Color3.fromRGB(225, 225, 225),
 	muted = Color3.fromRGB(150, 150, 158),
 	header = Color3.fromRGB(255, 170, 40),
@@ -21,7 +25,30 @@ Ui.colors = {
 	close = Color3.fromRGB(200, 50, 50),
 	slot = Color3.fromRGB(30, 30, 36),
 	slotSelected = Color3.fromRGB(255, 200, 80),
+	-- name colours of the original (Minecraft chat colours) [меню]
+	yellow = Color3.fromRGB(255, 255, 85),
+	gray = Color3.fromRGB(170, 170, 170),
+	white = Color3.fromRGB(255, 255, 255),
+	orange = Color3.fromRGB(255, 170, 0),
+	green = Color3.fromRGB(85, 255, 85),
+	red = Color3.fromRGB(255, 85, 85),
+	magenta = Color3.fromRGB(255, 85, 255),
+	cyan = Color3.fromRGB(85, 255, 255),
+	blue = Color3.fromRGB(85, 85, 255),
+	purple = Color3.fromRGB(170, 85, 255),
+	-- vanilla Minecraft GUI palette
+	mcPanel = Color3.fromRGB(198, 198, 198),
+	mcLight = Color3.fromRGB(255, 255, 255),
+	mcDark = Color3.fromRGB(85, 85, 85),
+	mcSlot = Color3.fromRGB(139, 139, 139),
+	mcSlotDark = Color3.fromRGB(55, 55, 55),
+	mcText = Color3.fromRGB(64, 64, 64),
+	mcButton = Color3.fromRGB(120, 120, 120),
+	mcButtonLight = Color3.fromRGB(175, 175, 175),
+	mcButtonDark = Color3.fromRGB(70, 70, 70),
 }
+Ui.MC = 2 -- screen px per Minecraft GUI px (the original runs its GUI at scale 2)
+Ui.MC_SLOT = 18 * Ui.MC
 
 local function corner(parent: Instance, radius: number)
 	local c = Instance.new("UICorner")
@@ -29,11 +56,12 @@ local function corner(parent: Instance, radius: number)
 	c.Parent = parent
 end
 
-local function stroke(parent: Instance, color: Color3, thickness: number)
+local function stroke(parent: Instance, color: Color3, thickness: number): UIStroke
 	local s = Instance.new("UIStroke")
 	s.Color = color
 	s.Thickness = thickness
 	s.Parent = parent
+	return s
 end
 
 function Ui.panel(parent: Instance, size: UDim2, position: UDim2): Frame
@@ -46,6 +74,14 @@ function Ui.panel(parent: Instance, size: UDim2, position: UDim2): Frame
 	corner(f, 4)
 	stroke(f, Ui.colors.border, 1)
 	f.Parent = parent
+	return f
+end
+
+-- Dark inset box (price lines, requirement boxes of the original).
+function Ui.inset(parent: Instance, size: UDim2, position: UDim2): Frame
+	local f = Ui.panel(parent, size, position)
+	f.BackgroundColor3 = Ui.colors.inset
+	f.BackgroundTransparency = 0.1
 	return f
 end
 
@@ -71,6 +107,24 @@ function Ui.label(
 	return l
 end
 
+-- Label with rich text, e.g. "Цена <font color=\"#888\">»</font> <font color=\"#5ADC5A\">0.03$</font>".
+function Ui.rich(
+	parent: Instance,
+	text: string,
+	size: UDim2,
+	position: UDim2,
+	textSize: number?
+): TextLabel
+	local l = Ui.label(parent, "", size, position, textSize)
+	l.RichText = true
+	l.Text = text
+	return l
+end
+
+function Ui.hex(color: Color3): string
+	return "#" .. color:ToHex()
+end
+
 function Ui.button(
 	parent: Instance,
 	text: string,
@@ -89,6 +143,9 @@ function Ui.button(
 	b.Text = text
 	b.AutoButtonColor = true
 	corner(b, 3)
+	-- the original's buttons have a lighter 1px edge
+	local s = stroke(b, Color3.new(1, 1, 1), 1)
+	s.Transparency = 0.75
 	b.Parent = parent
 	return b
 end
@@ -98,11 +155,14 @@ function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> 
 	local win = Ui.panel(parent, size, UDim2.new(0.5, -size.X.Offset / 2, 0.5, -size.Y.Offset / 2))
 	win.Name = "Window_" .. title
 	local titleBar = Ui.panel(win, UDim2.new(1, -44, 0, 28), UDim2.fromOffset(6, 6))
+	titleBar.Name = "TitleBar"
 	Ui.label(titleBar, title, UDim2.new(1, -12, 1, 0), UDim2.fromOffset(8, 0), 16, Ui.colors.text)
 	local close =
 		Ui.button(win, "✕", UDim2.fromOffset(28, 28), UDim2.new(1, -34, 0, 6), Ui.colors.close)
+	close.Name = "Close"
 	close.Activated:Connect(onClose)
 	local content = Instance.new("Frame")
+	content.Name = "Content"
 	content.Size = UDim2.new(1, -12, 1, -46)
 	content.Position = UDim2.fromOffset(6, 40)
 	content.BackgroundTransparency = 1
@@ -110,18 +170,46 @@ function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> 
 	return win, content
 end
 
-function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, ImageLabel)
-	local f = Instance.new("Frame")
-	f.Size = UDim2.fromOffset(size, size)
-	f.BackgroundColor3 = Ui.colors.slot
-	f.BorderSizePixel = 0
-	corner(f, 3)
-	stroke(f, Ui.colors.border, 1)
-	f.Parent = parent
+-- Window of the original "shop" kind: orange title text in the strip.
+function Ui.titleColor(win: Frame, color: Color3)
+	local bar = win:FindFirstChild("TitleBar")
+	local label = if bar then bar:FindFirstChildOfClass("TextLabel") else nil
+	if label then
+		label.TextColor3 = color
+	end
+end
+
+local function slotLabels(
+	f: Frame,
+	image: ImageLabel,
+	textSize: number,
+	shadow: boolean
+): (TextLabel, TextLabel)
+	local name =
+		Ui.label(f, "", UDim2.new(1, -4, 1, -14), UDim2.fromOffset(2, 2), 11, Ui.colors.text)
+	name.TextXAlignment = Enum.TextXAlignment.Center
+	name.TextYAlignment = Enum.TextYAlignment.Center
+	name.TextWrapped = true
+	local count = Ui.label(
+		f,
+		"",
+		UDim2.new(1, -4, 0, textSize + 2),
+		UDim2.new(0, 2, 1, -textSize - 4),
+		textSize,
+		Ui.colors.white
+	)
+	count.TextXAlignment = Enum.TextXAlignment.Right
+	count.TextStrokeTransparency = if shadow then 0 else 0.4
+	count.TextStrokeColor3 = Color3.fromRGB(63, 63, 63)
+	count.ZIndex = image.ZIndex + 2
+	return name, count
+end
+
+local function slotImage(f: Frame, scale: number): ImageLabel
 	local image = Instance.new("ImageLabel")
 	image.Name = "Icon"
 	image.AnchorPoint = Vector2.new(0.5, 0.5)
-	image.Size = UDim2.fromScale(0.76, 0.76)
+	image.Size = UDim2.fromScale(scale, scale)
 	image.Position = UDim2.fromScale(0.5, 0.5)
 	image.ScaleType = Enum.ScaleType.Fit
 	image.ResampleMode = Enum.ResamplerMode.Pixelated
@@ -139,17 +227,146 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	image.BackgroundTransparency = 1
 	image.Visible = false
 	image.Parent = f
-	local name =
-		Ui.label(f, "", UDim2.new(1, -4, 1, -14), UDim2.fromOffset(2, 2), 11, Ui.colors.text)
-	name.TextXAlignment = Enum.TextXAlignment.Center
-	name.TextYAlignment = Enum.TextYAlignment.Center
-	name.TextWrapped = true
-	local count =
-		Ui.label(f, "", UDim2.new(1, -4, 0, 12), UDim2.new(0, 2, 1, -14), 11, Ui.colors.text)
-	count.TextXAlignment = Enum.TextXAlignment.Right
-	count.TextStrokeTransparency = 0
-	count.ZIndex = image.ZIndex + 1
+	return image
+end
+
+function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, ImageLabel)
+	local f = Instance.new("Frame")
+	f.Size = UDim2.fromOffset(size, size)
+	f.BackgroundColor3 = Ui.colors.slot
+	f.BorderSizePixel = 0
+	corner(f, 3)
+	stroke(f, Ui.colors.border, 1)
+	f.Parent = parent
+	local image = slotImage(f, 0.76)
+	local name, count = slotLabels(f, image, 11, false)
 	return f, name, count, image
+end
+
+-- ---------------------------------------------------------------- vanilla Minecraft GUI look
+local function bevel(parent: Instance, thickness: number, light: Color3, dark: Color3)
+	local function edge(name: string, size: UDim2, position: UDim2, color: Color3)
+		local e = Instance.new("Frame")
+		e.Name = name
+		e.Size = size
+		e.Position = position
+		e.BackgroundColor3 = color
+		e.BorderSizePixel = 0
+		e.ZIndex = parent:IsA("GuiObject") and parent.ZIndex or 1
+		e.Parent = parent
+	end
+	edge("Top", UDim2.new(1, 0, 0, thickness), UDim2.new(), light)
+	edge("Left", UDim2.new(0, thickness, 1, 0), UDim2.new(), light)
+	edge("Bottom", UDim2.new(1, 0, 0, thickness), UDim2.new(0, 0, 1, -thickness), dark)
+	edge("Right", UDim2.new(0, thickness, 1, 0), UDim2.new(1, -thickness, 0, 0), dark)
+end
+
+Ui.bevel = bevel
+
+-- Turns a dark window from Ui.window into a vanilla Minecraft container panel (keeps the close
+-- button and the viewport scaling of the caller); returns the content frame covering the panel.
+function Ui.toMc(win: Frame, content: Frame): Frame
+	win.BackgroundColor3 = Ui.colors.mcPanel
+	win.BackgroundTransparency = 0
+	local s = win:FindFirstChildOfClass("UIStroke")
+	if s then
+		s.Color = Color3.fromRGB(30, 30, 30)
+	end
+	local c = win:FindFirstChildOfClass("UICorner")
+	if c then
+		c.CornerRadius = UDim.new(0, Ui.MC)
+	end
+	local bar = win:FindFirstChild("TitleBar")
+	if bar then
+		bar.Visible = false
+	end
+	local close = win:FindFirstChild("Close")
+	if close and close:IsA("GuiObject") then
+		close.Size = UDim2.fromOffset(11 * Ui.MC, 11 * Ui.MC)
+		close.Position = UDim2.new(1, -14 * Ui.MC, 0, 3 * Ui.MC)
+		close.ZIndex = 5
+	end
+	bevel(win, Ui.MC * 2, Ui.colors.mcLight, Ui.colors.mcDark)
+	content.Position = UDim2.new()
+	content.Size = UDim2.fromScale(1, 1)
+	return content
+end
+
+-- Light grey container panel with the 3D edge of Minecraft GUIs.
+function Ui.mcPanel(parent: Instance, size: UDim2, position: UDim2): Frame
+	local f = Instance.new("Frame")
+	f.Size = size
+	f.Position = position
+	f.BackgroundColor3 = Ui.colors.mcPanel
+	f.BorderSizePixel = 0
+	corner(f, Ui.MC)
+	stroke(f, Color3.fromRGB(30, 30, 30), 1)
+	f.Parent = parent
+	bevel(f, Ui.MC * 2, Ui.colors.mcLight, Ui.colors.mcDark)
+	return f
+end
+
+-- Minecraft inventory slot (18×18 GUI px): dark top-left, white bottom-right.
+function Ui.mcSlot(parent: Instance, size: number?): (Frame, TextLabel, TextLabel, ImageLabel)
+	local px = size or Ui.MC_SLOT
+	local f = Instance.new("Frame")
+	f.Size = UDim2.fromOffset(px, px)
+	f.BackgroundColor3 = Ui.colors.mcSlot
+	f.BorderSizePixel = 0
+	f.Parent = parent
+	bevel(f, Ui.MC, Ui.colors.mcSlotDark, Ui.colors.mcLight)
+	-- selection highlight for drag/drop (DragDrop recolours the UIStroke)
+	local s = stroke(f, Ui.colors.border, 1)
+	s.Transparency = 1
+	f:SetAttribute("StrokeHidden", true)
+	local image = slotImage(f, 16 / 18)
+	local name, count = slotLabels(f, image, 14, true)
+	name.TextColor3 = Ui.colors.mcText
+	return f, name, count, image
+end
+
+function Ui.mcText(
+	parent: Instance,
+	text: string,
+	size: UDim2,
+	position: UDim2,
+	textSize: number?
+): TextLabel
+	return Ui.label(parent, text, size, position, textSize or 8 * Ui.MC, Ui.colors.mcText)
+end
+
+-- Minecraft button: grey bevelled, white text with shadow, blue-ish tint on hover.
+function Ui.mcButton(parent: Instance, text: string, size: UDim2, position: UDim2): TextButton
+	local b = Instance.new("TextButton")
+	b.Size = size
+	b.Position = position
+	b.BackgroundColor3 = Ui.colors.mcButton
+	b.BorderSizePixel = 0
+	b.AutoButtonColor = false
+	b.Font = Ui.font
+	b.TextSize = 8 * Ui.MC
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.TextStrokeTransparency = 0
+	b.TextStrokeColor3 = Color3.fromRGB(63, 63, 63)
+	b.Text = text
+	stroke(b, Color3.fromRGB(0, 0, 0), 1)
+	b.Parent = parent
+	bevel(b, Ui.MC, Ui.colors.mcButtonLight, Ui.colors.mcButtonDark)
+	b.MouseEnter:Connect(function()
+		if b.Active then
+			b.BackgroundColor3 = Color3.fromRGB(126, 136, 191)
+		end
+	end)
+	b.MouseLeave:Connect(function()
+		b.BackgroundColor3 = if b.Active then Ui.colors.mcButton else Ui.colors.mcDark
+	end)
+	return b
+end
+
+function Ui.setMcButtonActive(b: TextButton, active: boolean)
+	b.Active = active
+	b.BackgroundColor3 = if active then Ui.colors.mcButton else Ui.colors.mcDark
+	b.TextColor3 = if active then Color3.new(1, 1, 1) else Ui.colors.gray
 end
 
 return Ui

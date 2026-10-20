@@ -155,6 +155,33 @@ function InventoryService.equipArmor(profile: Profile, slot: number): boolean
 	return true
 end
 
+-- Takes a worn piece off into an inventory slot (a given empty slot, else the first free one).
+function InventoryService.unequipArmor(profile: Profile, part: string, slot: number?): boolean
+	local worn = profile.armor[part]
+	if not worn then
+		return false
+	end
+	local target = if slot
+			and InventoryService.isSlot(slot)
+			and not profile.inventory[slot]
+		then slot
+		else nil
+	if not target then
+		for index = 1, 36 do
+			if not profile.inventory[index] then
+				target = index
+				break
+			end
+		end
+	end
+	if not target then
+		return false
+	end
+	profile.inventory[target] = worn
+	profile.armor[part] = nil
+	return true
+end
+
 -- Sells every block stack; returns money units earned.
 function InventoryService.sellAll(profile: Profile, multiplier: number): number
 	local total = 0

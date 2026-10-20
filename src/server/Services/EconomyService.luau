@@ -22,6 +22,7 @@ local PROMPTS = {
 	FoodShop = "food",
 	StarExchange = "stars",
 	ShardExchange = "shards",
+	TrainerNpc = "trainer",
 }
 
 local EconomyService = {}
@@ -55,10 +56,17 @@ local function nearNpc(player: Player, tag: string): boolean
 	return false
 end
 
-local function exchange(player: Player, kind: any, id: any)
+local function exchange(player: Player, kind: any, id: any, rawCount: any)
 	if typeof(kind) ~= "string" or typeof(id) ~= "string" then
 		return
 	end
+	-- −/+ in the exchanger window: 1..64 exchanges at once [меню]
+	local count = if typeof(rawCount) == "number"
+			and rawCount == rawCount
+			and rawCount >= 1
+			and rawCount <= 64
+		then math.floor(rawCount)
+		else 1
 	local input: string
 	local cost: number
 	local tag: string
@@ -82,17 +90,17 @@ local function exchange(player: Player, kind: any, id: any)
 	end
 	local result = ""
 	ProfileService.Mutate(player, function(p)
-		if InventoryService.count(p, input) < cost then
+		if InventoryService.count(p, input) < cost * count then
 			result = "exchange_need_items"
 			return
 		end
-		if not InventoryService.canAdd(p, id, 1) then
+		if not InventoryService.canAdd(p, id, count) then
 			result = "bag_full"
 			return
 		end
 		-- No yields: inputs and output change atomically, using only the server offer.
-		InventoryService.remove(p, input, cost)
-		InventoryService.add(p, id, 1)
+		InventoryService.remove(p, input, cost * count)
+		InventoryService.add(p, id, count)
 		result = "exchanged"
 	end)
 	if result ~= "" then
@@ -283,6 +291,17 @@ function EconomyService.Start()
 			-- Mutate also replicates the equipped Armor attribute to the character.
 			ProfileService.Mutate(player, function(p)
 				InventoryService.equipArmor(p, slot)
+			end)
+		end
+	end)
+	Remotes.event("UnequipArmor").OnServerEvent:Connect(function(player, part, slot)
+		if typeof(part) == "string" then
+			ProfileService.Mutate(player, function(p)
+				InventoryService.unequipArmor(
+					p,
+					part,
+					if typeof(slot) == "number" then slot else nil
+				)
 			end)
 		end
 	end)

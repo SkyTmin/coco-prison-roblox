@@ -383,6 +383,15 @@ chest("ArtifactCase", "ArtifactCase", Vector3.new(36, 0, 14), centre, {
 	caseId = "artifactCase",
 	pedestal = "px_stone",
 })
+chest("NicknameCase", "NicknameCase", Vector3.new(-36, 0, -14), centre, {
+	wood = Color3.fromRGB(120, 60, 110),
+	band = Color3.fromRGB(220, 180, 70),
+	lock = Color3.fromRGB(255, 160, 220),
+	glow = Color3.fromRGB(255, 120, 220),
+	label = "Кейс с кличками",
+	caseId = "nicknameCase",
+	pedestal = "px_stone",
+})
 chest("EnderChest", "EnderChest", Vector3.new(-36, 0, 14), centre, {
 	wood = Color3.fromRGB(28, 22, 40),
 	band = Color3.fromRGB(20, 60, 50),

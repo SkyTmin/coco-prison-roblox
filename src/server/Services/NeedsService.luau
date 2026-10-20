@@ -207,7 +207,11 @@ local function updatePlayers()
 			state.nextDecay += ticks * DECAY_SECONDS
 			ProfileService.Mutate(player, function(p)
 				for _, need in ipairs(NEEDS) do
-					local decay = 100 / (Config.needs[need].minutesToZero * 6)
+					-- Trainer "needs" levels slow the drain (Config.trainer.needs.perLevel per level) [решение]
+					local trained = if p.trainer then (p.trainer.needs or 0) else 0
+					local decay = 100
+						/ (Config.needs[need].minutesToZero * 6)
+						* math.max(0.1, 1 - trained * Config.trainer.needs.perLevel)
 					local value = math.clamp(p.needs[need] - decay * ticks, 0, 100)
 					-- Floating-point residue must not postpone a zero effect by another tick.
 					p.needs[need] = if value < 1e-9 then 0 else value

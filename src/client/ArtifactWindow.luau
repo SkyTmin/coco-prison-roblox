@@ -1,4 +1,10 @@
 --!strict
+-- "Артефакты" window of the original (owner's screenshots 066–068): title "✱ АРТЕФАКТЫ", a wide blue
+-- "Сбор" tab (+ "Альбом"), left column with the "✱ РЕДКОСТЬ" list (icon, coloured name, n / 9 in
+-- green, blue progress bar, "Собрано: N"; the selected rarity card is blue) and the "⌚ НАХОДКИ" panel
+-- ("Здесь появятся находки" until something is assembled); on the right the picture panel
+-- "◆ Огород  9 / 9" with the 3×3 mosaic (roman numerals on missing fragments) and the green
+-- "Создать артефакт" button (grey until all nine fragments are there).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -10,11 +16,15 @@ local Ui = require(script.Parent.Ui)
 local TIERS = { "common", "rare", "epic" }
 local ROMAN = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX" }
 local COLORS = {
-	common = Color3.fromRGB(92, 155, 105),
-	rare = Color3.fromRGB(64, 129, 210),
-	epic = Color3.fromRGB(164, 88, 201),
+	common = Color3.fromRGB(190, 190, 255),
+	rare = Ui.colors.header,
+	epic = Ui.colors.purple,
 }
 local ArtifactWindow = {}
+
+local W, H = 900, 580
+local LEFT = 300
+local TILE = 150
 
 function ArtifactWindow.build(
 	parent: Instance,
@@ -26,190 +36,294 @@ function ArtifactWindow.build(
 	local function t(key: string, ...: any): string
 		return Strings.t(key, locale, ...)
 	end
-	-- At 812×375 the existing viewport clamp keeps scale = 1, including 44px targets.
-	local win, content = createWindow(parent, t("artifacts"), UDim2.fromOffset(780, 350), onClose)
-	content.Position, content.Size = UDim2.fromOffset(6, 56), UDim2.new(1, -12, 1, -62)
-	for _, child in ipairs(win:GetChildren()) do
-		if child:IsA("TextButton") then
-			child.Size, child.Position = UDim2.fromOffset(44, 44), UDim2.new(1, -50, 0, 6)
-		elseif child:IsA("Frame") and child ~= content then
-			child.Size = UDim2.new(1, -62, 0, 44)
-		end
-	end
+	local win, content = createWindow(
+		parent,
+		"✱ " .. string.upper(t("artifacts")),
+		UDim2.fromOffset(W, H),
+		onClose
+	)
 	local tier = "common"
 	local album = false
-	local collection = Instance.new("Frame")
-	collection.Size, collection.BackgroundTransparency = UDim2.fromScale(1, 1), 1
-	collection.Parent = content
-	local albumFrame = Instance.new("Frame")
-	albumFrame.Size, albumFrame.BackgroundTransparency = UDim2.fromScale(1, 1), 1
-	albumFrame.Parent = content
 	local tabs: { TextButton } = {}
-	local rarityButtons: { [string]: TextButton } = {}
+	for index, key in ipairs({ "artifact_collection", "artifact_album" }) do
+		local button = Ui.button(
+			content,
+			t(key),
+			UDim2.new(if index == 1 then 0.72 else 0.28, if index == 1 then -4 else -8, 0, 36),
+			UDim2.new(if index == 1 then 0 else 0.72, if index == 1 then 0 else 4, 0, 0)
+		)
+		tabs[index] = button
+		button.Activated:Connect(function()
+			album = index == 2
+		end)
+	end
+	local body = Instance.new("Frame")
+	body.Size, body.Position, body.BackgroundTransparency =
+		UDim2.new(1, 0, 1, -44), UDim2.fromOffset(0, 44), 1
+	body.Parent = content
+
+	-- left: rarity list
+	local rarityPanel = Ui.panel(body, UDim2.fromOffset(LEFT, 262), UDim2.fromOffset(0, 0))
+	Ui.label(
+		rarityPanel,
+		"✱ " .. t("artifact_rarity"),
+		UDim2.new(1, -16, 0, 26),
+		UDim2.fromOffset(10, 4),
+		15,
+		Ui.colors.muted
+	)
+	type Card = { frame: Frame, count: TextLabel, bar: Frame, collected: TextLabel }
+	local cards: { [string]: Card } = {}
+	for index, rarity in ipairs(TIERS) do
+		local card = Ui.panel(
+			rarityPanel,
+			UDim2.new(1, -20, 0, 70),
+			UDim2.fromOffset(10, 32 + (index - 1) * 76)
+		)
+		card.Name = "Card_" .. rarity
+		local icon = Ui.panel(card, UDim2.fromOffset(52, 52), UDim2.fromOffset(8, 9))
+		local image = Instance.new("ImageLabel")
+		image.Size, image.BackgroundTransparency = UDim2.fromScale(1, 1), 1
+		image.ScaleType = Enum.ScaleType.Crop
+		image.Image = Config.artifacts.tiers[rarity].image or ""
+		image.Parent = icon
+		local numeral = Ui.label(
+			icon,
+			string.upper(string.sub(t("artifact_tier_" .. rarity), 1, 1)),
+			UDim2.fromScale(1, 1),
+			UDim2.new(),
+			22,
+			COLORS[rarity]
+		)
+		numeral.TextXAlignment = Enum.TextXAlignment.Center
+		numeral.Visible = image.Image == ""
+		Ui.label(
+			card,
+			t("artifact_tier_" .. rarity),
+			UDim2.fromOffset(140, 22),
+			UDim2.fromOffset(70, 8),
+			15,
+			COLORS[rarity]
+		)
+		local count = Ui.label(
+			card,
+			"",
+			UDim2.fromOffset(80, 22),
+			UDim2.new(1, -90, 0, 8),
+			15,
+			Ui.colors.money
+		)
+		count.TextXAlignment = Enum.TextXAlignment.Right
+		local track = Ui.inset(card, UDim2.new(1, -82, 0, 10), UDim2.fromOffset(70, 34))
+		local bar = Instance.new("Frame")
+		bar.Size = UDim2.fromScale(0, 1)
+		bar.BackgroundColor3 = Ui.colors.buttonBlue
+		bar.BorderSizePixel = 0
+		bar.Parent = track
+		local collected = Ui.label(
+			card,
+			"",
+			UDim2.new(1, -82, 0, 18),
+			UDim2.fromOffset(70, 46),
+			13,
+			Ui.colors.muted
+		)
+		local hit = Instance.new("TextButton")
+		hit.Size, hit.BackgroundTransparency, hit.Text = UDim2.fromScale(1, 1), 1, ""
+		hit.Parent = card
+		hit.Activated:Connect(function()
+			tier = rarity
+			album = false
+		end)
+		cards[rarity] = { frame = card, count = count, bar = bar, collected = collected }
+	end
+	-- left: finds
+	local findsPanel = Ui.panel(body, UDim2.new(0, LEFT, 1, -272), UDim2.fromOffset(0, 270))
+	Ui.label(
+		findsPanel,
+		"⌚ " .. t("artifact_finds"),
+		UDim2.new(1, -16, 0, 26),
+		UDim2.fromOffset(10, 4),
+		15,
+		Ui.colors.muted
+	)
+	local findsEmpty = Ui.label(
+		findsPanel,
+		t("artifact_finds_empty"),
+		UDim2.new(1, -20, 1, -40),
+		UDim2.fromOffset(10, 32),
+		14,
+		Ui.colors.muted
+	)
+	findsEmpty.TextXAlignment = Enum.TextXAlignment.Center
+	findsEmpty.TextWrapped = true
+	local findLabels: { TextLabel } = {}
+	for index, rarity in ipairs(TIERS) do
+		local l = Ui.label(
+			findsPanel,
+			"",
+			UDim2.new(1, -20, 0, 22),
+			UDim2.fromOffset(10, 32 + (index - 1) * 26),
+			14,
+			COLORS[rarity]
+		)
+		findLabels[index] = l
+	end
+
+	-- right: picture + mosaic
+	local right = Ui.panel(body, UDim2.new(1, -LEFT - 8, 1, -54), UDim2.fromOffset(LEFT + 8, 0))
+	local pictureName =
+		Ui.label(right, "", UDim2.new(1, -120, 0, 28), UDim2.fromOffset(10, 4), 15, Ui.colors.text)
+	local pictureCount = Ui.label(
+		right,
+		"",
+		UDim2.fromOffset(100, 28),
+		UDim2.new(1, -110, 0, 4),
+		15,
+		Ui.colors.money
+	)
+	pictureCount.TextXAlignment = Enum.TextXAlignment.Right
+	local mosaic = Ui.inset(
+		right,
+		UDim2.fromOffset(3 * TILE + 16, 3 * TILE + 16),
+		UDim2.new(0.5, -(3 * TILE + 16) / 2, 0, 36)
+	)
 	local tiles: { Frame } = {}
 	local images: { ImageLabel } = {}
 	local numerals: { TextLabel } = {}
-	local finds: { TextLabel } = {}
-	local picture = Ui.label(
-		collection,
-		"",
-		UDim2.fromOffset(194, 28),
-		UDim2.fromOffset(6, 48),
-		16,
-		Ui.colors.header
-	)
-	Ui.label(
-		collection,
-		t("artifact_finds"),
-		UDim2.fromOffset(238, 24),
-		UDim2.fromOffset(202, 78),
-		15,
-		Ui.colors.header
-	)
 	for index = 1, 9 do
 		local column, row = (index - 1) % 3, math.floor((index - 1) / 3)
 		local tile = Ui.panel(
-			collection,
-			UDim2.fromOffset(56, 56),
-			UDim2.fromOffset(6 + column * 60, 82 + row * 60)
+			mosaic,
+			UDim2.fromOffset(TILE, TILE),
+			UDim2.fromOffset(8 + column * TILE, 8 + row * TILE)
 		)
 		tile.ClipsDescendants = true
 		local image = Instance.new("ImageLabel")
 		image.BackgroundTransparency = 1
-		image.Size = UDim2.fromOffset(168, 168)
-		image.Position = UDim2.fromOffset(-column * 56, -row * 56)
+		image.Size = UDim2.fromOffset(3 * TILE, 3 * TILE)
+		image.Position = UDim2.fromOffset(-column * TILE, -row * TILE)
 		image.Parent = tile
-		local numeral = Ui.label(tile, ROMAN[index], UDim2.fromScale(1, 1), UDim2.new(), 22)
+		local numeral =
+			Ui.label(tile, ROMAN[index], UDim2.fromScale(1, 1), UDim2.new(), 28, Ui.colors.muted)
 		numeral.TextXAlignment = Enum.TextXAlignment.Center
-		numeral.TextStrokeTransparency = 0.4
 		numeral.ZIndex = image.ZIndex + 1
 		tiles[index], images[index], numerals[index] = tile, image, numeral
-		finds[index] = Ui.label(
-			collection,
-			"",
-			UDim2.fromOffset(238, 18),
-			UDim2.fromOffset(202, 104 + (index - 1) * 18),
-			12
-		)
 	end
-	local duplicates =
-		Ui.label(collection, "", UDim2.fromOffset(306, 76), UDim2.fromOffset(450, 78), 14)
-	duplicates.TextWrapped = true
 	local assemble = Ui.button(
-		collection,
+		body,
 		t("artifact_create"),
-		UDim2.fromOffset(306, 48),
-		UDim2.fromOffset(450, 164),
+		UDim2.new(1, -LEFT - 8, 0, 44),
+		UDim2.new(0, LEFT + 8, 1, -46),
 		Ui.colors.buttonGreen
 	)
-	local tooltip = Ui.label(
-		collection,
-		"",
-		UDim2.fromOffset(306, 64),
-		UDim2.fromOffset(450, 218),
-		13,
-		Ui.colors.muted
-	)
-	tooltip.TextWrapped = true
+	assemble.TextSize = 17
 	assemble.Activated:Connect(function()
-		if assemble.Active then
+		if assemble.Interactable then
 			Remotes.event("ArtifactAssemble"):FireServer(tier)
 		end
 	end)
-	local completedLabels: { [string]: TextLabel } = {}
+	-- album: assembled artifacts per rarity
+	local albumFrame = Ui.panel(body, UDim2.new(1, -LEFT - 8, 1, -8), UDim2.fromOffset(LEFT + 8, 0))
+	local albumLabels: { [string]: TextLabel } = {}
 	for index, rarity in ipairs(TIERS) do
 		local card = Ui.panel(
 			albumFrame,
-			UDim2.fromOffset(244, 224),
-			UDim2.fromOffset(4 + (index - 1) * 256, 54)
+			UDim2.new(1, -20, 0, 70),
+			UDim2.fromOffset(10, 10 + (index - 1) * 78)
 		)
 		Ui.label(
 			card,
 			t("artifact_tier_" .. rarity),
-			UDim2.new(1, -16, 0, 44),
-			UDim2.fromOffset(8, 12),
-			19,
+			UDim2.new(0.5, 0, 0, 30),
+			UDim2.fromOffset(12, 8),
+			16,
 			COLORS[rarity]
 		)
-		local count = Ui.label(card, "", UDim2.new(1, -16, 0, 100), UDim2.fromOffset(8, 72), 18)
-		count.TextWrapped = true
-		completedLabels[rarity] = count
+		albumLabels[rarity] = Ui.label(
+			card,
+			"",
+			UDim2.new(1, -24, 0, 24),
+			UDim2.fromOffset(12, 38),
+			14,
+			Ui.colors.muted
+		)
 	end
+
 	local function refresh(p: Types.Profile?)
 		profile = p
-		collection.Visible, albumFrame.Visible = not album, album
+		right.Visible, assemble.Visible, albumFrame.Visible = not album, not album, album
 		for index, button in ipairs(tabs) do
 			button.BackgroundColor3 = if album == (index == 2)
 				then Ui.colors.buttonBlue
 				else Ui.colors.buttonGrey
 		end
-		for rarity, button in pairs(rarityButtons) do
-			button.Visible = not album
-			button.BackgroundColor3 = if rarity == tier
-				then COLORS[rarity]
-				else Ui.colors.buttonGrey
+		local anyFind = false
+		for index, rarity in ipairs(TIERS) do
+			local state = if p and p.artifacts then p.artifacts[rarity] else nil
+			local owned = 0
+			for i = 1, 9 do
+				if state and (state.fragments[i] or 0) > 0 then
+					owned += 1
+				end
+			end
+			local card = cards[rarity]
+			card.frame.BackgroundColor3 = if rarity == tier and not album
+				then Ui.colors.buttonBlue
+				else Ui.colors.panel
+			card.frame.BackgroundTransparency = if rarity == tier and not album
+				then 0.1
+				else Ui.colors.panelTransparency
+			card.count.Text = string.format("%d / 9", owned)
+			card.bar.Size = UDim2.fromScale(owned / 9, 1)
+			card.collected.Text = t("artifact_collected", if state then state.completed else 0)
+			local completed = if state then state.completed else 0
+			local definition = Config.artifacts.tiers[rarity]
+			findLabels[index].Text = if completed > 0
+				then string.format(
+					"%s ×%d",
+					Strings.artifactPictureName(definition.pictures[1], locale),
+					completed
+				)
+				else ""
+			anyFind = anyFind or completed > 0
+			albumLabels[rarity].Text = t("artifact_completed", completed)
 		end
+		findsEmpty.Visible = not anyFind
 		local state = if p and p.artifacts then p.artifacts[tier] else nil
 		local definition = Config.artifacts.tiers[tier]
-		picture.Text = Strings.artifactPictureName(definition.pictures[1], locale)
+		pictureName.Text = "◆ " .. Strings.artifactPictureName(definition.pictures[1], locale)
 		local complete = true
+		local ownedCount = 0
 		for index = 1, 9 do
-			local count = if state then (state.fragments[index] or 0) else 0
-			local owned = count > 0
+			local owned = state ~= nil and (state.fragments[index] or 0) > 0
 			complete = complete and owned
+			ownedCount += if owned then 1 else 0
 			tiles[index].BackgroundColor3 = if owned then COLORS[tier] else Ui.colors.slot
-			tiles[index].BackgroundTransparency = 0
+			tiles[index].BackgroundTransparency = if owned then 0.6 else 0.2
 			images[index].Image = definition.image or ""
 			images[index].Visible = owned
 				and typeof(definition.image) == "string"
 				and definition.image ~= ""
+			numerals[index].Visible = not images[index].Visible
 			numerals[index].TextColor3 = if owned then Ui.colors.text else Ui.colors.muted
-			finds[index].Text = t(
-				"artifact_fragment_name",
-				t("artifact_tier_" .. tier),
-				ROMAN[index]
-			) .. " ×" .. tostring(count)
-			finds[index].TextColor3 = if owned then Ui.colors.text else Ui.colors.muted
 		end
-		duplicates.Text = t(
-			"artifact_duplicates",
-			if state then state.duplicates else 0,
-			Config.artifacts.duplicatesPerMissingFragment
-		)
-		assemble.Active, assemble.AutoButtonColor = complete, complete
+		pictureCount.Text = string.format("%d / 9", ownedCount)
+		assemble.Interactable = complete
 		assemble.BackgroundColor3 = if complete then Ui.colors.buttonGreen else Ui.colors.buttonGrey
-		tooltip.Text = t(if complete then "artifact_ready_tooltip" else "artifact_need_fragments")
-		for _, rarity in ipairs(TIERS) do
-			local progress = if p and p.artifacts then p.artifacts[rarity] else nil
-			completedLabels[rarity].Text =
-				t("artifact_completed", if progress then progress.completed else 0)
+	end
+	for _, button in ipairs(tabs) do
+		button.Activated:Connect(function()
+			refresh(profile)
+		end)
+	end
+	for _, card in pairs(cards) do
+		local hit = card.frame:FindFirstChildOfClass("TextButton")
+		if hit then
+			hit.Activated:Connect(function()
+				refresh(profile)
+			end)
 		end
-	end
-	for index, key in ipairs({ "artifact_collection", "artifact_album" }) do
-		local button = Ui.button(
-			content,
-			t(key),
-			UDim2.fromOffset(110, 44),
-			UDim2.fromOffset((index - 1) * 116, 0)
-		)
-		tabs[index] = button
-		button.Activated:Connect(function()
-			album = index == 2
-			refresh(profile)
-		end)
-	end
-	for index, rarity in ipairs(TIERS) do
-		local button = Ui.button(
-			content,
-			t("artifact_tier_" .. rarity),
-			UDim2.fromOffset(172, 44),
-			UDim2.fromOffset(240 + (index - 1) * 176, 0)
-		)
-		rarityButtons[rarity] = button
-		button.Activated:Connect(function()
-			tier = rarity
-			refresh(profile)
-		end)
 	end
 	refresh(profile)
 	return win, refresh

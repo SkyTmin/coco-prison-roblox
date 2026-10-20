@@ -1,0 +1,174 @@
+{
+  "_source": "scripts/build-sounds.mjs — VoxeLibre mcl_sounds (see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt)",
+  "gap": 0.1,
+  "files": {
+    "stone_hit": {
+      "file": "assets/sounds/build/stone_hit.ogg",
+      "duration": 0.793,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.28,
+          "source": "default_hard_footstep.1.ogg"
+        },
+        {
+          "start": 0.38,
+          "length": 0.28,
+          "source": "default_hard_footstep.2.ogg"
+        },
+        {
+          "start": 0.761,
+          "length": 0.28,
+          "source": "default_hard_footstep.3.ogg"
+        }
+      ]
+    },
+    "stone_break": {
+      "file": "assets/sounds/build/stone_break.ogg",
+      "duration": 0.489,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.28,
+          "source": "default_dig_cracky.1.ogg"
+        },
+        {
+          "start": 0.38,
+          "length": 0.28,
+          "source": "default_dig_cracky.2.ogg"
+        },
+        {
+          "start": 0.76,
+          "length": 0.28,
+          "source": "default_dig_cracky.3.ogg"
+        }
+      ]
+    },
+    "gravel_hit": {
+      "file": "assets/sounds/build/gravel_hit.ogg",
+      "duration": 1.842,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.27,
+          "source": "default_gravel_footstep.1.ogg"
+        },
+        {
+          "start": 0.37,
+          "length": 0.515,
+          "source": "default_gravel_footstep.2.ogg"
+        },
+        {
+          "start": 0.985,
+          "length": 0.3,
+          "source": "default_gravel_footstep.3.ogg"
+        },
+        {
+          "start": 1.385,
+          "length": 0.36,
+          "source": "default_gravel_footstep.4.ogg"
+        }
+      ]
+    },
+    "gravel_break": {
+      "file": "assets/sounds/build/gravel_break.ogg",
+      "duration": 1.141,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.28,
+          "source": "default_gravel_dug.1.ogg"
+        },
+        {
+          "start": 0.38,
+          "length": 0.28,
+          "source": "default_gravel_dug.2.ogg"
+        },
+        {
+          "start": 0.761,
+          "length": 0.28,
+          "source": "default_gravel_dug.3.ogg"
+        }
+      ]
+    },
+    "grass": {
+      "file": "assets/sounds/build/grass.ogg",
+      "duration": 0.773,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.76,
+          "source": "default_grass_footstep.1.ogg"
+        },
+        {
+          "start": 0.86,
+          "length": 0.76,
+          "source": "default_grass_footstep.2.ogg"
+        },
+        {
+          "start": 1.72,
+          "length": 0.76,
+          "source": "default_grass_footstep.3.ogg"
+        }
+      ]
+    },
+    "sand": {
+      "file": "assets/sounds/build/sand.ogg",
+      "duration": 1.153,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.28,
+          "source": "default_sand_footstep.1.ogg"
+        },
+        {
+          "start": 0.38,
+          "length": 0.28,
+          "source": "default_sand_footstep.2.ogg"
+        },
+        {
+          "start": 0.761,
+          "length": 0.28,
+          "source": "default_sand_footstep.3.ogg"
+        }
+      ]
+    },
+    "wood_hit": {
+      "file": "assets/sounds/build/wood_hit.ogg",
+      "duration": 0.473,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.16,
+          "source": "default_wood_footstep.1.ogg"
+        },
+        {
+          "start": 0.26,
+          "length": 0.161,
+          "source": "default_wood_footstep.2.ogg"
+        }
+      ]
+    },
+    "wood_break": {
+      "file": "assets/sounds/build/wood_break.ogg",
+      "duration": 0.599,
+      "segments": [
+        {
+          "start": 0,
+          "length": 0.28,
+          "source": "default_dig_choppy.1.ogg"
+        },
+        {
+          "start": 0.38,
+          "length": 0.28,
+          "source": "default_dig_choppy.2.ogg"
+        },
+        {
+          "start": 0.76,
+          "length": 0.28,
+          "source": "default_dig_choppy.3.ogg"
+        }
+      ]
+    }
+  }
+}

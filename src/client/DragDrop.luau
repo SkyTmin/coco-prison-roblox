@@ -8,7 +8,7 @@ local Types = require(ReplicatedStorage.Shared.Types)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Ui = require(script.Parent.Ui)
 
-export type Address = { container: "case" | "inv", index: number }
+export type Address = { container: "case" | "inv" | "armor", index: number }
 type Binding = { frame: Frame, address: Address }
 
 local DragDrop = {}
@@ -47,9 +47,13 @@ function DragDrop.new(
 		for _, binding in ipairs(bindings) do
 			local stroke = binding.frame:FindFirstChildOfClass("UIStroke")
 			if stroke then
-				stroke.Color = if same(picked, binding.address)
-					then Ui.colors.slotSelected
-					else Ui.colors.border
+				local selected = same(picked, binding.address)
+				stroke.Color = if selected then Ui.colors.slotSelected else Ui.colors.border
+				-- Minecraft-style slots keep their bevel and show the stroke only while selected
+				if binding.frame:GetAttribute("StrokeHidden") then
+					stroke.Transparency = if selected then 0 else 1
+					stroke.Thickness = 2
+				end
 			end
 		end
 	end

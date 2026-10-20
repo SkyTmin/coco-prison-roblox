@@ -32,8 +32,9 @@ local CASES: { [string]: { tag: string, text: string } } = {
 	ordinaryCase = { tag = "OrdinaryCase", text = "ordinary_case" },
 	ancientCase = { tag = "AncientCase", text = "ancient_case" },
 	artifactCase = { tag = "ArtifactCase", text = "artifact_case" },
+	nicknameCase = { tag = "NicknameCase", text = "nickname_case" },
 }
-local TAGS = { "OrdinaryCase", "AncientCase", "ArtifactCase", "EnderChest" }
+local TAGS = { "OrdinaryCase", "AncientCase", "ArtifactCase", "NicknameCase", "EnderChest" }
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
@@ -147,10 +148,55 @@ local function roll(rewards: { Reward }): Reward
 	return rewards[#rewards]
 end
 
+local function toast(player: Player, key: string, ...: any)
+	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
+end
+
+-- Keys a case accepts (Config.keys.caseKeys: one id or a list).
+local function acceptedKeys(id: string): { string }
+	local configured = Config.keys.caseKeys[id]
+	return if typeof(configured) == "string"
+		then { configured }
+		elseif typeof(configured) == "table" then configured
+		else {}
+end
+
+local function hasAnyKey(profile: Types.Profile, keys: { string }): boolean
+	for _, key in ipairs(keys) do
+		if InventoryService.count(profile, key) > 0 then
+			return true
+		end
+	end
+	return false
+end
+
+local function applyNickname(player: Player)
+	local profile = ProfileService.Get(player)
+	local character = player.Character
+	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
+	if humanoid and profile and typeof(profile.nickname) == "string" and profile.nickname ~= "" then
+		humanoid.DisplayName = "[" .. profile.nickname .. "] " .. player.DisplayName
+	end
+end
+
 local function openChest(player: Player, part: BasePart)
 	local id = caseId(part)
-	if not id or not near(player, part) or not ProfileService.Get(player) then
+	local profile = ProfileService.Get(player)
+	if not id or not near(player, part) or not profile then
 		return
+	end
+	if id ~= "enderChest" then
+		-- Without a key the chest stays shut unless rewards from an earlier opening are still inside.
+		local keys = acceptedKeys(id)
+		local contents = profile.caseContents[id]
+		if not hasAnyKey(profile, keys) and (contents == nil or next(contents) == nil) then
+			toast(
+				player,
+				"case_need_key",
+				Strings.itemName(keys[1] or "ordinary_key", nil, Strings.localeOf(player))
+			)
+			return
+		end
 	end
 	sessions[player] =
 		{ id = id, part = part, rolledAt = -math.huge, tokens = 80, tokenAt = os.clock() }
@@ -160,10 +206,6 @@ local function openChest(player: Player, part: BasePart)
 		end
 	end)
 	Remotes.event("CaseOpened"):FireClient(player, id)
-end
-
-local function toast(player: Player, key: string, ...: any)
-	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
 local function weightedKey(weights: { [string]: number }): string
@@ -206,14 +248,61 @@ local function openCase(player: Player, id: any, requestedKey: any)
 		return
 	end
 	session.rolledAt = os.clock()
-	local configuredKeys = Config.keys.caseKeys[session.id]
-	local accepted: { string } = if typeof(configuredKeys) == "string"
-		then { configuredKeys }
-		else configuredKeys
+	local accepted = acceptedKeys(session.id)
 	if
 		requestedKey ~= nil
 		and (typeof(requestedKey) ~= "string" or not table.find(accepted, requestedKey))
 	then
+		-- a key of another case: refused, and the toast names the key this case wants
+		toast(player, "case_need_key", Strings.itemName(accepted[1] or "ordinary_key", nil, Strings.localeOf(player)))
+		return
+	end
+	if session.id == "nicknameCase" then
+		-- [вики] the nickname case grants a unique nickname; "all nicknames already owned" is a separate error.
+		-- The nickname list itself is ours (scripts/design-decisions.json → keys.nicknameCase) [решение].
+		local names = Config.keys.nicknameCase and Config.keys.nicknameCase.nicknames
+		local granted: string? = nil
+		local failure: string? = nil
+		ProfileService.Mutate(player, function(p)
+			local key: string? = nil
+			for _, candidate in ipairs(accepted) do
+				if
+					(requestedKey == nil or requestedKey == candidate)
+					and InventoryService.count(p, candidate) > 0
+				then
+					key = candidate
+					break
+				end
+			end
+			if not key then
+				failure = "case_no_key"
+				return
+			end
+			local owned = p.nicknames or {}
+			local pool: { string } = {}
+			for _, name in ipairs(if typeof(names) == "table" then names else {}) do
+				if not table.find(owned, name) then
+					table.insert(pool, name)
+				end
+			end
+			if #pool == 0 then
+				failure = "nickname_all_owned" -- the key is not spent
+				return
+			end
+			local pick = pool[random:NextInteger(1, #pool)]
+			table.insert(owned, pick)
+			p.nicknames = owned
+			p.nickname = pick
+			InventoryService.remove(p, key, 1)
+			granted = pick
+		end)
+		if failure then
+			toast(player, failure)
+		elseif granted then
+			toast(player, "nickname_received", granted)
+			applyNickname(player)
+		end
+		Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 		return
 	end
 	local rewards = rewardsFor(session.id)
@@ -415,6 +504,8 @@ local function bind(part: Instance)
 	prompt.ActionText = Strings.t(containerTitle(id))
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = RANGE
+	prompt.RequiresLineOfSight = false -- usable from any side of the chest model
+	prompt.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
 	prompt.Parent = part
 	bindings[part] = {
 		prompt = prompt,
@@ -448,6 +539,23 @@ function CaseService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		sessions[player] = nil
 	end)
+	local function watchNickname(player: Player)
+		player.CharacterAdded:Connect(function()
+			task.spawn(function()
+				for _ = 1, 30 do
+					if ProfileService.Get(player) then
+						applyNickname(player)
+						return
+					end
+					task.wait(1)
+				end
+			end)
+		end)
+	end
+	Players.PlayerAdded:Connect(watchNickname)
+	for _, player in ipairs(Players:GetPlayers()) do
+		watchNickname(player)
+	end
 	local elapsed = 0
 	RunService.Heartbeat:Connect(function(dt)
 		elapsed += dt

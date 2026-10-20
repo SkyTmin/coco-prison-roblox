@@ -46,6 +46,9 @@ export type Profile = {
 	hunger: number, -- 0..20
 	achievements: { [string]: number }, -- digger_dirt = claimed tier
 	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
+	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
+	nickname: string?, -- shown as a prefix of the display name
+	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	location: string,
 	operationIds: { [string]: boolean },
 }

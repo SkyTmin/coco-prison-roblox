@@ -6,6 +6,152 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+
+	-- cases / keys (сессия 8)
+	nickname_case = {
+		ru = "Кейс с кличками",
+		en = "Nickname case",
+		es = "Caja de apodos",
+		fr = "Caisse des surnoms",
+	},
+	case_need_key = {
+		ru = "Для открытия требуется %s",
+		en = "%s is required to open this",
+		es = "Se necesita %s para abrir",
+		fr = "%s est requis pour ouvrir",
+	},
+	nickname_received = {
+		ru = "Вы получили кличку «%s»",
+		en = 'You received the nickname "%s"',
+		es = "Recibiste el apodo «%s»",
+		fr = "Vous avez reçu le surnom « %s »",
+	},
+	nickname_all_owned = {
+		ru = "Все клички уже есть",
+		en = "You already own every nickname",
+		es = "Ya tienes todos los apodos",
+		fr = "Vous avez déjà tous les surnoms",
+	},
+	case_contents_title = {
+		ru = "Кейс с предметами",
+		en = "Case with items",
+		es = "Caja con objetos",
+		fr = "Caisse d'objets",
+	},
+	case_key_hint = {
+		ru = "Ключ: %s ×%d",
+		en = "Key: %s ×%d",
+		es = "Llave: %s ×%d",
+		fr = "Clé : %s ×%d",
+	},
+	-- shops / buyer [меню]
+	price = { ru = "Цена", en = "Price", es = "Precio", fr = "Prix" },
+	cost = { ru = "Стоимость", en = "Cost", es = "Coste", fr = "Coût" },
+	per_block = { ru = "за 1 блок", en = "per block", es = "por bloque", fr = "par bloc" },
+	in_inventory = {
+		ru = "В инвентаре: %d",
+		en = "In inventory: %d",
+		es = "En inventario: %d",
+		fr = "Dans l'inventaire : %d",
+	},
+	in_inventory_none = {
+		ru = "В инвентаре нет",
+		en = "None in inventory",
+		es = "Ninguno en inventario",
+		fr = "Aucun dans l'inventaire",
+	},
+	prices_multiplier = {
+		ru = "Цены с вашим множителем",
+		en = "Prices with your multiplier",
+		es = "Precios con tu multiplicador",
+		fr = "Prix avec votre multiplicateur",
+	},
+	opens_at_level = {
+		ru = "Откроется с %d уровня",
+		en = "Opens at level %d",
+		es = "Se abre en el nivel %d",
+		fr = "S'ouvre au niveau %d",
+	},
+	from_level = {
+		ru = "С %d уровня",
+		en = "From level %d",
+		es = "Desde el nivel %d",
+		fr = "Dès le niveau %d",
+	},
+	sell_title = {
+		ru = "Скупщик блоков",
+		en = "Block buyer",
+		es = "Comprador de bloques",
+		fr = "Acheteur de blocs",
+	},
+	-- trainer [меню]
+	trainer = { ru = "Тренер", en = "Trainer", es = "Entrenador", fr = "Entraîneur" },
+	trainer_prompt = { ru = "Тренер", en = "Trainer", es = "Entrenador", fr = "Entraîneur" },
+	trainer_strength = { ru = "Сила", en = "Strength", es = "Fuerza", fr = "Force" },
+	trainer_agility = { ru = "Ловкость", en = "Agility", es = "Agilidad", fr = "Agilité" },
+	trainer_needs = { ru = "Нужды", en = "Needs", es = "Necesidades", fr = "Besoins" },
+	trainer_strength_desc = {
+		ru = "Увеличивает силу удара",
+		en = "Increases hit strength",
+		es = "Aumenta la fuerza del golpe",
+		fr = "Augmente la force des coups",
+	},
+	trainer_agility_desc = {
+		ru = "Позволяет увернуться от удара",
+		en = "Lets you dodge a hit",
+		es = "Permite esquivar un golpe",
+		fr = "Permet d'esquiver un coup",
+	},
+	trainer_needs_desc = {
+		ru = "Снижает потребность справлять нужду",
+		en = "Reduces the need to relieve yourself",
+		es = "Reduce la necesidad de hacer tus necesidades",
+		fr = "Réduit le besoin de se soulager",
+	},
+	level_short = { ru = "Ур.", en = "Lv.", es = "Nv.", fr = "Niv." },
+	requirements = {
+		ru = "Требования",
+		en = "Requirements",
+		es = "Requisitos",
+		fr = "Conditions",
+	},
+	requirements_not_met = {
+		ru = "Требования не выполнены",
+		en = "Requirements not met",
+		es = "Requisitos no cumplidos",
+		fr = "Conditions non remplies",
+	},
+	train = { ru = "Прокачать", en = "Train", es = "Mejorar", fr = "Entraîner" },
+	trained = {
+		ru = "%s: уровень %d",
+		en = "%s: level %d",
+		es = "%s: nivel %d",
+		fr = "%s : niveau %d",
+	},
+	req_zombies = { ru = "Зомби", en = "Zombies", es = "Zombis", fr = "Zombies" },
+	req_kills = { ru = "Убийства", en = "Kills", es = "Muertes", fr = "Éliminations" },
+	req_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
+	req_bats = {
+		ru = "Летучие мыши",
+		en = "Bats",
+		es = "Murciélagos",
+		fr = "Chauves-souris",
+	},
+	-- inventory / artifacts [меню]
+	crafting = { ru = "Создание", en = "Crafting", es = "Creación", fr = "Fabrication" },
+	artifact_rarity = { ru = "РЕДКОСТЬ", en = "RARITY", es = "RAREZA", fr = "RARETÉ" },
+	artifact_finds_empty = {
+		ru = "Здесь появятся находки",
+		en = "Your finds will appear here",
+		es = "Tus hallazgos aparecerán aquí",
+		fr = "Vos trouvailles apparaîtront ici",
+	},
+	artifact_collected = {
+		ru = "Собрано: %d",
+		en = "Collected: %d",
+		es = "Reunidos: %d",
+		fr = "Collectés : %d",
+	},
 	artifacts = { ru = "Артефакты", en = "Artifacts", es = "Artefactos", fr = "Artefacts" },
 	artifacts_hotkey = {
 		ru = "Артефакты [I]",

@@ -10,6 +10,8 @@
 --                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
 -- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
+--                          BlockBroken(userId, cframe, size, color, blockId) — for other players' effects
+-- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

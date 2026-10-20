@@ -16,47 +16,275 @@
     ]
   },
   "sounds": {
-    "_source": "Roblox Creator Store, free audio by ProSoundEffects (Pro Sound Effects library licensed by Roblox for use inside Roblox experiences), chosen 21.10.2026 as Minecraft-like block sounds. Per material: hit = while digging (every 0.25 s), break = block destroyed.",
-    "materials": {
-      "dirt": {
-        "hit": "rbxassetid://9114084427",
-        "break": "rbxassetid://9114083746",
-        "_names": "Dirt Digging With Pick 15 / Dirt Dig Dirt Throws From Shovel 12"
+    "_source": "Block sounds. files[*].id are Roblox audio assets uploaded with scripts/upload-audio.mjs from assets/sounds/build/*.ogg (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0, see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt). Every file holds several variants separated by 0.1 s; segments = [start, length] in seconds, the client plays one at random with Sound.TimePosition. Until the owner uploads them (id = \"\"), fallback points at a Roblox-licensed ProSoundEffects clip trimmed to a short segment. Semantics follow Minecraft [ваниль]: hit = step sound while digging every 0.2 s at pitch 0.5 / volume 0.25, break = dig sound at pitch 0.8 / volume 1.",
+    "files": {
+      "stone_hit": {
+        "id": "",
+        "duration": 0.793,
+        "segments": [
+          [
+            0,
+            0.28
+          ],
+          [
+            0.38,
+            0.28
+          ],
+          [
+            0.761,
+            0.28
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9119049891",
+          "segments": [
+            [
+              0,
+              0.22
+            ]
+          ]
+        }
       },
-      "stone": {
-        "hit": "rbxassetid://9119049891",
-        "break": "rbxassetid://9119043400",
-        "_names": "Shale Break Low End Crackling Rock 3 / Shale Break 3"
+      "stone_break": {
+        "id": "",
+        "duration": 0.489,
+        "segments": [
+          [
+            0,
+            0.28
+          ],
+          [
+            0.38,
+            0.28
+          ],
+          [
+            0.761,
+            0.28
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9119043400",
+          "segments": [
+            [
+              0,
+              0.7
+            ]
+          ]
+        }
       },
-      "wood": {
-        "hit": "rbxassetid://9120809592",
-        "break": "rbxassetid://9120808574",
-        "_names": "Wood Chopping Exterior Single Hits 27 / 12"
+      "gravel_hit": {
+        "id": "",
+        "duration": 1.84,
+        "segments": [
+          [
+            0,
+            0.27
+          ],
+          [
+            0.37,
+            0.51
+          ],
+          [
+            0.98,
+            0.3
+          ],
+          [
+            1.38,
+            0.36
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9114084245",
+          "segments": [
+            [
+              0,
+              0.22
+            ]
+          ]
+        }
+      },
+      "gravel_break": {
+        "id": "",
+        "duration": 1.14,
+        "segments": [
+          [
+            0,
+            0.28
+          ],
+          [
+            0.38,
+            0.28
+          ],
+          [
+            0.761,
+            0.28
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9114083746",
+          "segments": [
+            [
+              0,
+              0.6
+            ]
+          ]
+        }
+      },
+      "grass": {
+        "id": "",
+        "duration": 0.77,
+        "segments": [
+          [
+            0,
+            0.76
+          ],
+          [
+            0.86,
+            0.76
+          ],
+          [
+            1.72,
+            0.76
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9114084427",
+          "segments": [
+            [
+              0,
+              0.3
+            ]
+          ]
+        }
       },
       "sand": {
-        "hit": "rbxassetid://9118770616",
-        "break": "rbxassetid://9114083746",
-        "_names": "Sand Silt 1 / Dirt throws 12"
+        "id": "",
+        "duration": 1.15,
+        "segments": [
+          [
+            0,
+            0.28
+          ],
+          [
+            0.38,
+            0.28
+          ],
+          [
+            0.761,
+            0.28
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9118770616",
+          "segments": [
+            [
+              0,
+              0.3
+            ]
+          ]
+        }
+      },
+      "wood_hit": {
+        "id": "",
+        "duration": 0.47,
+        "segments": [
+          [
+            0,
+            0.16
+          ],
+          [
+            0.26,
+            0.16
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9120809592",
+          "segments": [
+            [
+              0,
+              0.25
+            ]
+          ]
+        }
+      },
+      "wood_break": {
+        "id": "",
+        "duration": 0.6,
+        "segments": [
+          [
+            0,
+            0.28
+          ],
+          [
+            0.38,
+            0.28
+          ],
+          [
+            0.761,
+            0.28
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9120808574",
+          "segments": [
+            [
+              0,
+              0.7
+            ]
+          ]
+        }
+      }
+    },
+    "materials": {
+      "stone": {
+        "hit": "stone_hit",
+        "break": "stone_break"
       },
       "gravel": {
-        "hit": "rbxassetid://9114084245",
-        "break": "rbxassetid://9118770616",
-        "_names": "Dirt Digging With Pick 11 / Sand Silt 1"
+        "hit": "gravel_hit",
+        "break": "gravel_break"
+      },
+      "dirt": {
+        "hit": "gravel_hit",
+        "break": "gravel_break"
+      },
+      "grass": {
+        "hit": "grass",
+        "break": "grass"
+      },
+      "sand": {
+        "hit": "sand",
+        "break": "sand"
+      },
+      "wood": {
+        "hit": "wood_hit",
+        "break": "wood_break"
       }
     },
     "blockMaterial": {
+      "_source": "[ваниль] Minecraft sound types: dirt → GRAVEL, grass → GRASS, sand/red sand/soul sand → SAND, logs/planks/melon/pumpkin → WOOD, stone/ores/concrete/bricks → STONE",
       "dirt": "dirt",
-      "grass": "dirt",
+      "grass": "grass",
       "sand": "sand",
+      "red_sand": "sand",
+      "soul_sand": "sand",
       "gravel": "gravel",
       "oak_log": "wood",
+      "cherry_log": "wood",
       "melon": "wood",
+      "pumpkin": "wood",
+      "jack_o_lantern": "wood",
       "planks": "wood",
-      "stone": "stone",
-      "cobblestone": "stone",
-      "coal_ore": "stone",
-      "iron_ore": "stone",
-      "gold_ore": "stone",
+      "wisteria_leaves": "grass",
+      "dark_oak_leaves": "grass",
+      "white_wool": "grass",
+      "yellow_wool": "grass",
+      "red_wool": "grass",
+      "lime_wool": "grass",
+      "pink_wool": "grass",
+      "green_wool": "grass",
+      "cobweb": "grass",
+      "snow": "grass",
       "_default": "stone"
     }
   }

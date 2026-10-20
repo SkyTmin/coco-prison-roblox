@@ -1,0 +1,279 @@
+// Our own 16×16 pixel-art icons (keys, exchanger goods, trainer badges) in the Pixel Perfection style,
+// upscaled ×8 nearest-neighbour to assets/icons/items/<id>.png, then uploaded with the Studio MCP
+// (upload_image) and recorded in assets/icons/ids.json. Palette letters per sprite; "." = transparent.
+// Usage: node scripts/draw-icons.mjs   (needs the sharp module: cd scratchpad/imgtools && npm i sharp)
+import fs from "node:fs";
+import path from "node:path";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+const sharpPath = process.env.SHARP_PATH || path.join(process.env.LOCALAPPDATA || "", "Temp/claude/C--Users-user-Desktop--------claud/5519c892-7982-41f2-b081-ec30cc78a89a/scratchpad/imgtools/node_modules/sharp");
+const sharp = require(fs.existsSync(sharpPath) ? sharpPath : "sharp");
+const out = path.join(root, "assets/icons/items");
+
+// Key silhouette shared by all keys (bow top-left, blade to bottom-right), like the original's angled keys.
+const KEY = [
+  "................",
+  "......OOOO......",
+  "....OOhhhhOO....",
+  "...OhhOOOOhhO...",
+  "...OhO....OhO...",
+  "...OhO....OhO...",
+  "...OhhOOOOhhO...",
+  "....OOhhhhOO....",
+  "......OhhO......",
+  "......OhhO......",
+  "......OhhOO.....",
+  "......OhhhhO....",
+  "......OhhOO.....",
+  "......OhhhhO....",
+  "......OOOOO.....",
+  "................",
+];
+const keyPalette = (hi, body, outline) => ({ O: outline, h: body, H: hi });
+const SPRITES = {
+  improved_ancient_key: { rows: KEY, palette: keyPalette("#ffe28a", "#e2b53f", "#5a3b0a"), gem: "#b04cff" },
+  nickname_key: { rows: KEY, palette: keyPalette("#ffd0f0", "#ff5fc8", "#5c1245") },
+  artifact_key: { rows: KEY, palette: keyPalette("#d8fbff", "#4fd8ef", "#0d4a5a") },
+  dispeller: {
+    rows: [
+      "................",
+      "..........p.....",
+      ".........ppp....",
+      "..........p.....",
+      "................",
+      "...............p",
+      "....OOOO.....pp.",
+      "...OppppO...p...",
+      "..OppppppOOO....",
+      ".OppppppppppO...",
+      ".OppppppppppO...",
+      "..OppppppppO....",
+      "...OOppppOO.....",
+      ".....OOOO.......",
+      "....OppppO......",
+      "....OOOOOO......",
+    ],
+    palette: { O: "#3a1452", p: "#b45cff" },
+  },
+  ancient_powder: {
+    rows: [
+      "................",
+      "................",
+      "................",
+      ".......p........",
+      "......ppp.......",
+      "....p.ppp..p....",
+      "...pppPPPpppp...",
+      "..ppPPPPPPPppp..",
+      ".pppPPPPPPPPppp.",
+      ".ppPPPPPPPPPPpp.",
+      "OppPPPPPPPPPPppO",
+      "OpppPPPPPPPPpppO",
+      ".OppppppppppppO.",
+      "..OOOOOOOOOOOO..",
+      "................",
+      "................",
+    ],
+    palette: { O: "#2d1040", p: "#9a3fe0", P: "#d08cff" },
+  },
+  money_bag: {
+    rows: [
+      "................",
+      "......OOOO......",
+      ".....OggggO.....",
+      "......OggO......",
+      ".....OOggOO.....",
+      "....OggggggO....",
+      "...OggggggggO...",
+      "..OggGgggggggO..",
+      "..OgGGGggggggO..",
+      "..OgGggGgggggO..",
+      "..OggggGggggO...",
+      "..OggGGGggggO...",
+      "...OggggggggO...",
+      "....OggggggO....",
+      ".....OOOOOO.....",
+      "................",
+    ],
+    palette: { O: "#1e4d22", g: "#3fae45", G: "#c9f26b" },
+  },
+  moon_steel: {
+    rows: [
+      "................",
+      "..............O.",
+      ".............OsO",
+      "............OssO",
+      "...........OssO.",
+      "..........OssO..",
+      ".........OssO...",
+      "........OssO....",
+      ".......OssO.....",
+      "......OssO......",
+      ".....OssO.......",
+      "....OssO........",
+      "...OOsO.........",
+      "..OddO..........",
+      ".OddO...........",
+      ".OOO............",
+    ],
+    palette: { O: "#1f2330", s: "#c6cde0", d: "#5a4630" },
+  },
+  fire_shard: {
+    rows: [
+      "................",
+      ".......O........",
+      "......OfO.......",
+      ".....OffO.......",
+      "....OfFfO.......",
+      "....OfFffO......",
+      "...OffFFfO......",
+      "...OfFFFffO.....",
+      "..OffFFFffO.....",
+      "..OfFFFFfffO....",
+      "..OffFFffffO....",
+      "...OfffffffO....",
+      "...OOffffOO.....",
+      ".....OOOO.......",
+      "................",
+      "................",
+    ],
+    palette: { O: "#5a1a05", f: "#ff6a1a", F: "#ffd23a" },
+  },
+  moon_blade: {
+    rows: [
+      "................",
+      "...........OOO..",
+      "..........OsssO.",
+      ".........OssssO.",
+      "........OsssOO..",
+      ".......OsssO....",
+      "......OsssO.....",
+      ".....OsssO......",
+      "....OsssO.......",
+      "...OsssO........",
+      "..OOssO.........",
+      ".OddOO..........",
+      "OddO............",
+      "OOO.............",
+      "................",
+      "................",
+    ],
+    palette: { O: "#1a2a3a", s: "#9fd8ff", d: "#4a3a2a" },
+  },
+  volcanic_stone: {
+    rows: [
+      "................",
+      "................",
+      ".....OOOO.......",
+      "....OrrrrO......",
+      "...OrRRrrrO.....",
+      "..OrrRRrrrrO....",
+      "..OrrrrRRrrO....",
+      ".OrrRrrrRrrrO...",
+      ".OrrrrrrrrrrO...",
+      ".OrRRrrrRRrrO...",
+      "..OrrrrrrrrO....",
+      "..OrrRRrrrrO....",
+      "...OrrrrrrO.....",
+      "....OOOOOO......",
+      "................",
+      "................",
+    ],
+    palette: { O: "#1a0a0a", r: "#4a2a2a", R: "#ff7a2a" },
+  },
+  // trainer badges (round blue medallions like the original's cards)
+  trainer_strength: { rows: null, badge: { fill: "#2f7fd6", glyph: "arm" } },
+  trainer_agility: { rows: null, badge: { fill: "#2f7fd6", glyph: "feather" } },
+  trainer_needs: { rows: null, badge: { fill: "#2f7fd6", glyph: "bed" } },
+};
+
+const BADGE = {
+  arm: [
+    "................",
+    "....OOOOOOOO....",
+    "..OObbbbbbbbOO..",
+    ".ObbbbbbbbbbbbO.",
+    ".ObbbbaaabbbbbO.",
+    "ObbbbaAAaabbbbbO",
+    "ObbbaAAAAaabbbbO",
+    "ObbbaAAAAaaabbbO",
+    "ObbbbaaAAaaaabbO",
+    "ObbbbbbaaaaaabbO",
+    "ObbbbbaaaaaabbbO",
+    ".ObbbaaaaaabbbO.",
+    ".ObbbbbbbbbbbbO.",
+    "..OObbbbbbbbOO..",
+    "....OOOOOOOO....",
+    "................",
+  ],
+  feather: [
+    "................",
+    "....OOOOOOOO....",
+    "..OObbbbbbbbOO..",
+    ".ObbbbbbbbffffO.",
+    ".ObbbbbbbfffffO.",
+    "ObbbbbbbffffffbO",
+    "ObbbbbbfffffbbbO",
+    "ObbbbbffffffbbbO",
+    "ObbbbffffffbbbbO",
+    "ObbbfffffbbbbbbO",
+    "ObbbfffbbbbbbbbO",
+    ".ObffbbbbbbbbbO.",
+    ".ObfbbbbbbbbbbO.",
+    "..OObbbbbbbbOO..",
+    "....OOOOOOOO....",
+    "................",
+  ],
+  bed: [
+    "................",
+    "....OOOOOOOO....",
+    "..OObbbbbbbbOO..",
+    ".ObbbbbbbbbbbbO.",
+    ".ObbbbbbbbbbbbO.",
+    "ObbbwwwbbbbbbbbO",
+    "ObbbwwwrrrrrrbbO",
+    "ObbbrrrrrrrrrbbO",
+    "ObbbrrrrrrrrrbbO",
+    "ObbbddddddddddbO",
+    "Obbbdbbbbbbbbdb O".replace(" ", ""),
+    ".ObbdbbbbbbbbdO.",
+    ".ObbbbbbbbbbbbO.",
+    "..OObbbbbbbbOO..",
+    "....OOOOOOOO....",
+    "................",
+  ],
+};
+const badgePalette = { O: "#17345c", b: "#2f7fd6", a: "#f2b48c", A: "#e07a5a", f: "#f4f4f4", w: "#f4f4f4", r: "#d03a3a", d: "#6b3d1e" };
+
+function hex(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+
+async function render(id, rows, palette, extras) {
+  const buf = Buffer.alloc(16 * 16 * 4, 0);
+  rows.forEach((row, y) => {
+    for (let x = 0; x < 16; x++) {
+      const ch = row[x];
+      let color = palette[ch];
+      if (!color) continue;
+      // light edge: lighter shade on the top-left pixels of the body for a bit of volume
+      let [r, g, b] = hex(color);
+      if (ch === "h" || ch === "p" || ch === "g" || ch === "s") {
+        const above = rows[y - 1] && rows[y - 1][x];
+        if (above === "." || above === undefined) { r = Math.min(255, r + 40); g = Math.min(255, g + 40); b = Math.min(255, b + 40); }
+      }
+      if (extras && extras.gem && ch === "h" && y >= 3 && y <= 6 && x >= 5 && x <= 10 && (x + y) % 2 === 0) { [r, g, b] = hex(extras.gem); }
+      const i = (y * 16 + x) * 4;
+      buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = 255;
+    }
+  });
+  await sharp(buf, { raw: { width: 16, height: 16, channels: 4 } }).resize(128, 128, { kernel: "nearest" }).png().toFile(path.join(out, id + ".png"));
+}
+
+for (const [id, spec] of Object.entries(SPRITES)) {
+  if (spec.badge) {
+    await render(id, BADGE[spec.badge.glyph], badgePalette);
+  } else {
+    await render(id, spec.rows, spec.palette, spec);
+  }
+  console.log("drew", id);
+}
