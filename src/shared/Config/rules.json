@@ -1,5 +1,5 @@
 {
-  "source": "[решение]",
+  "source": "[решение]; телепорт и UI — [владелец]",
   "death": {
     "cashLossFraction": 0.05,
     "pvpDropsBlocks": true,
@@ -18,5 +18,22 @@
     "priceMultiplierPerLevel": 0,
     "upgradeMultiplierPerPoint": 0.01,
     "_note": "[меню] множитель цен = 1 + 0.01 × уровень Прокачки «Бустер денег»; очки за уровни профессий"
+  },
+  "teleport": {
+    "_source": "[владелец] 20.10.2026: телепорт после 5 с ожидания, движение прерывает; после урона от игрока или босса 10 с телепорт запрещён",
+    "channelSeconds": 5,
+    "cancelMoveStuds": 1.5,
+    "combatLockSeconds": 10
+  },
+  "ui": {
+    "_source": "[владелец] 20.10.2026: интерфейс на русском и английском; предметы с иконками",
+    "defaultLocale": "ru",
+    "locales": [
+      "ru",
+      "en",
+      "es",
+      "fr"
+    ],
+    "itemIcons": true
   }
 }

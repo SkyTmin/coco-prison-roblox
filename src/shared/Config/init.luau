@@ -24,14 +24,15 @@ Config.rules = load("rules")
 Config.trainer = load("trainer")
 Config.textures = load("textures")
 Config.previews = load("previews")
+Config.icons = load("icons")
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number
 Config.blocks = Config.blocksFile.blocks
 Config.tools = Config.toolsFile.tools
 Config.vanilla = Config.toolsFile.vanilla
-Config.defaultLocale = "ru"
-Config.locales = { "ru", "en", "es", "fr" }
+Config.defaultLocale = Config.rules.ui.defaultLocale :: string
+Config.locales = Config.rules.ui.locales :: { string }
 
 export type Block = {
 	id: string,
@@ -119,6 +120,18 @@ local MATERIALS = { "wood", "stone", "iron", "diamond" }
 function Config.materialForLevel(level: number): string
 	return MATERIALS[math.clamp(math.floor((level - 1) / 4) + 1, 1, 4)]
 end
+
+function Config.iconFor(itemId: string, level: number?): string?
+	local icons = Config.icons.icons
+	if level and Config.tools[itemId] then
+		local materialIcon = icons[itemId .. "_" .. Config.materialForLevel(level)]
+		if materialIcon then
+			return materialIcon
+		end
+	end
+	return icons[itemId] or Config.textures.textures[itemId]
+end
+
 function Config.tierIndex(material: string): number
 	return (table.find(MATERIALS, material) or 1) - 1
 end
