@@ -54,6 +54,12 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Restore* tags), `scripts/build-npcs.luau` (R15 NPC rigs tagged on HumanoidRootPart, chest model for
    OrdinaryCase), `scripts/decorate-prison.luau` (outdoor props). Keep-out rectangles for the random
    props live at the top of decorate-prison; update them when a building footprint changes.
+   `scripts/build-showcase.luau` builds the owner's showcase north of the wall (mannequins with every
+   armor set and tool, icon wall); mannequins render through the `ArmorMannequin` / `HeldMannequin` tags.
+   Asset pipeline: `scripts/prepare-voxelibre.ps1` (icons ×8 nearest-neighbour, armor faces from the
+   Minecraft layer layout) → upload via `upload_image` → ids in `assets/icons/ids.json`,
+   `assets/armor/ids.json` → `node scripts/build-configs.mjs`; `scripts/tools-to-voxels.ps1` + node
+   greedy-rectangle merge → `assets/icons/voxels.json` (3D extruded item sprites, `ItemModels.luau`).
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).

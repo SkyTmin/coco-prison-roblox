@@ -49,6 +49,7 @@ local STRINGS: { [string]: Entry } = {
 	spot_bedroom = { ru = "Спальня", en = "Bedroom", es = "Dormitorio", fr = "Dortoir" },
 	spot_bath = { ru = "Баня", en = "Bath", es = "Baños", fr = "Bains" },
 	spot_trainer = { ru = "Тренер", en = "Trainer", es = "Entrenador", fr = "Entraîneur" },
+	spot_showcase = { ru = "Витрина", en = "Showcase", es = "Vitrina", fr = "Vitrine" },
 	camera_first_person = {
 		ru = "От первого лица",
 		en = "First person",

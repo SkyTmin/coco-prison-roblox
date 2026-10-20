@@ -27,6 +27,7 @@ local SPOTS: { [string]: boolean } = {
 	bedroom = true,
 	bath = true,
 	trainer = true,
+	showcase = true, -- витрина (scripts/build-showcase.luau)
 }
 type Channel = {
 	character: Model,

@@ -1023,6 +1023,7 @@ local SPOTS = {
 	{ id = "bedroom", icon = "☾" },
 	{ id = "bath", icon = "♨" },
 	{ id = "trainer", icon = "⚔" },
+	{ id = "showcase", icon = "★" }, -- витрина брони и инструментов (scripts/build-showcase.luau)
 }
 local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	prison = true,
