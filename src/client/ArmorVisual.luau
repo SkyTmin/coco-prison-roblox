@@ -135,21 +135,26 @@ end
 local function renderLimb(parent: Model, limb: BasePart, id: string, style: Style)
 	local size = limb.Size + Vector3.new(PADDING, PADDING, PADDING)
 	if id == "helmet" then
+		-- Minecraft-style open-face helmet: a box 1.3× the head, raised so it covers the hair line,
+		-- closed on top/back/sides, with a brow band across the forehead and a neck guard.
 		local width = limb.Size.X * 1.3
+		local height = limb.Size.Y + 0.55
+		local depth = limb.Size.Z + PADDING
+		local lift = 0.2 -- the box sits a little higher than the head centre
 		plate(
 			parent,
 			limb,
 			"HelmetTop",
-			Vector3.new(width, size.Z, THICKNESS),
-			CFrame.new(0, (size.Y - THICKNESS) / 2, 0) * CFrame.Angles(math.pi / 2, 0, 0),
+			Vector3.new(width, depth, THICKNESS),
+			CFrame.new(0, lift + (height - THICKNESS) / 2, 0) * CFrame.Angles(math.pi / 2, 0, 0),
 			style
 		)
 		plate(
 			parent,
 			limb,
 			"HelmetBack",
-			Vector3.new(width, size.Y, THICKNESS),
-			CFrame.new(0, 0, (size.Z - THICKNESS) / 2) * CFrame.Angles(0, math.pi, 0),
+			Vector3.new(width, height, THICKNESS),
+			CFrame.new(0, lift, (depth - THICKNESS) / 2) * CFrame.Angles(0, math.pi, 0),
 			style
 		)
 		for _, sign in ipairs({ -1, 1 }) do
@@ -157,18 +162,29 @@ local function renderLimb(parent: Model, limb: BasePart, id: string, style: Styl
 				parent,
 				limb,
 				"HelmetSide",
-				Vector3.new(size.Z, size.Y, THICKNESS),
-				CFrame.new(sign * (width - THICKNESS) / 2, 0, 0)
+				Vector3.new(depth, height, THICKNESS),
+				CFrame.new(sign * (width - THICKNESS) / 2, lift, 0)
 					* CFrame.Angles(0, -sign * math.pi / 2, 0),
 				style
 			)
 		end
+		-- brow band (upper third of the face stays covered, eyes open)
 		plate(
 			parent,
 			limb,
-			"HelmetBrim",
-			Vector3.new(width + 0.1, 0.25, THICKNESS),
-			CFrame.new(0, (size.Y - THICKNESS) / 2, -size.Z / 2) * CFrame.Angles(math.pi / 2, 0, 0),
+			"HelmetBrow",
+			Vector3.new(width, height * 0.36, THICKNESS),
+			CFrame.new(0, lift + height / 2 - height * 0.18, -(depth - THICKNESS) / 2),
+			style
+		)
+		-- neck guard below the back plate
+		plate(
+			parent,
+			limb,
+			"HelmetNeck",
+			Vector3.new(width, 0.3, THICKNESS),
+			CFrame.new(0, lift - height / 2 - 0.1, (depth - THICKNESS) / 2 + 0.05)
+				* CFrame.Angles(0, math.pi, 0),
 			style
 		)
 	elseif id == "chestplate" and string.find(limb.Name, "Arm") then
@@ -215,6 +231,20 @@ local function renderLimb(parent: Model, limb: BasePart, id: string, style: Styl
 	end
 end
 
+-- Hair pokes through a helmet; Minecraft hides it under the helmet texture, we hide the accessory.
+local function setHairHidden(character: Model, hidden: boolean)
+	for _, accessory in ipairs(character:GetChildren()) do
+		if accessory:IsA("Accessory") then
+			local isHair = accessory.AccessoryType == Enum.AccessoryType.Hair
+				or string.find(string.lower(accessory.Name), "hair") ~= nil
+			local handle = accessory:FindFirstChild("Handle")
+			if isHair and handle and handle:IsA("BasePart") then
+				handle.LocalTransparencyModifier = if hidden then 1 else 0
+			end
+		end
+	end
+end
+
 local function render(rig: Rig)
 	if rig.visual then
 		rig.visual:Destroy()
@@ -222,6 +252,7 @@ local function render(rig: Rig)
 	end
 	local attribute = rig.character:GetAttribute("Armor")
 	if typeof(attribute) ~= "string" or attribute == "" then
+		setHairHidden(rig.character, false)
 		return
 	end
 	local visual = Instance.new("Model")
@@ -245,6 +276,7 @@ local function render(rig: Rig)
 	end
 	visual.Parent = rig.character
 	rig.visual = visual
+	setHairHidden(rig.character, rendered.helmet == true)
 end
 
 local function clear(player: Player)
@@ -272,8 +304,12 @@ local function characterAdded(player: Player, character: Model)
 		end)
 	)
 	local function limbChanged(child: Instance)
-		if child:IsA("BasePart") and limbNames[child.Name] then
-			render(rig)
+		if (child:IsA("BasePart") and limbNames[child.Name]) or child:IsA("Accessory") then
+			task.defer(function()
+				if rig.character.Parent then
+					render(rig)
+				end
+			end)
 		end
 	end
 	table.insert(rig.connections, character.ChildAdded:Connect(limbChanged))
