@@ -116,6 +116,22 @@ end
 -- mannequin: animated R15 rig; returns the model
 local walkScript = [[
 local humanoid = script.Parent:WaitForChild("Humanoid")
+-- anchored root: keep the humanoid in Running so the pose never collapses into FallingDown
+for _, state in ipairs({
+	Enum.HumanoidStateType.FallingDown,
+	Enum.HumanoidStateType.Ragdoll,
+	Enum.HumanoidStateType.Freefall,
+	Enum.HumanoidStateType.Jumping,
+	Enum.HumanoidStateType.Climbing,
+	Enum.HumanoidStateType.Swimming,
+	Enum.HumanoidStateType.Seated,
+	Enum.HumanoidStateType.PlatformStanding,
+	Enum.HumanoidStateType.GettingUp,
+	Enum.HumanoidStateType.Flying,
+}) do
+	humanoid:SetStateEnabled(state, false)
+end
+humanoid:ChangeState(Enum.HumanoidStateType.Running)
 local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
 local anim = Instance.new("Animation")
 anim.AnimationId = script:GetAttribute("AnimationId")
@@ -283,7 +299,7 @@ for n, key in ipairs(keys) do
 	)
 	tile.CFrame = CFrame.new(CX - 75 + col * 10, 3.5 + row * 7 + 2, CZ - 39.2)
 	local gui = Instance.new("SurfaceGui")
-	gui.Face = Enum.NormalId.Front
+	gui.Face = Enum.NormalId.Back -- tiles stand in front of the wall; their +Z face looks at the viewer
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = 32
 	gui.Parent = tile
