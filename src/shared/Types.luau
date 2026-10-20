@@ -6,6 +6,15 @@ export type ItemStack = {
 	count: number,
 	level: number?, -- for tools/weapons/armor
 	books: { { id: string, level: number } }?, -- ancient enchantments on the item
+	rarity: string?, -- rolled ancient book rarity
+	applyChance: number?, -- ancient book application percentage
+	coins: number?, -- unclaimed case money bag, in 1/moneyScale
+}
+
+export type ArtifactTier = {
+	fragments: { [number]: number },
+	duplicates: number,
+	completed: number,
 }
 
 export type Needs = { hygiene: number, sleep: number, toilet: number }
@@ -27,6 +36,7 @@ export type Profile = {
 	inventory: { [number]: ItemStack }, -- slots 1..36 (1..9 = hotbar)
 	caseContents: { [string]: { [number]: ItemStack } }, -- per case kind, sparse slots 1..27; schema stays v3
 	enderChest: { [number]: ItemStack }, -- personal sparse slots 1..27; schema stays v3
+	artifacts: { [string]: ArtifactTier }, -- common / rare / epic; schema stays v3
 	armor: { [string]: ItemStack }, -- helmet / chestplate / leggings / boots
 	selectedSlot: number,
 	professions: Professions,

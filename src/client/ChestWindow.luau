@@ -30,12 +30,18 @@ function ChestWindow.build(
 			if isEnder
 				then "ender_chest"
 				elseif id == "ancientCase" then "ancient_case"
+				elseif id == "artifactCase" then "artifact_case"
 				else "ordinary_case"
 		),
-		UDim2.fromOffset(452, 478),
+		UDim2.fromOffset(452, if id == "ancientCase" then 528 else 478),
 		onClose
 	)
 	local views: { SlotView } = {}
+	local configuredKeys = Config.keys.caseKeys[id]
+	local accepted: { string } = if typeof(configuredKeys) == "string"
+		then { configuredKeys }
+		else configuredKeys or {}
+	local selectedKey = accepted[1]
 	for _, child in ipairs(win:GetChildren()) do
 		if child:IsA("Frame") and child ~= content then
 			local title = child:FindFirstChildOfClass("TextLabel")
@@ -115,7 +121,7 @@ function ChestWindow.build(
 	hint.TextWrapped = true
 	open.Activated:Connect(function()
 		if open.Active then
-			Remotes.event("CaseOpen"):FireServer(id)
+			Remotes.event("CaseOpen"):FireServer(id, selectedKey)
 		end
 	end)
 	take.Activated:Connect(function()
@@ -141,6 +147,16 @@ function ChestWindow.build(
 			end
 		end
 	end)
+	local keyButton: TextButton? = nil
+	if id == "ancientCase" then
+		keyButton = Ui.button(
+			content,
+			"",
+			UDim2.fromOffset(432, 44),
+			UDim2.fromOffset(4, 424),
+			Ui.colors.buttonGrey
+		)
+	end
 	local function refresh()
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
@@ -148,24 +164,37 @@ function ChestWindow.build(
 			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
 			view.name.Visible = icon == nil
-			view.count.Text = if stack and stack.count > 1 then tostring(stack.count) else ""
+			view.count.Text = if stack and stack.coins
+				then Strings.money(stack.coins) .. " $"
+				elseif stack and stack.count > 1 then tostring(stack.count)
+				else ""
 		end
 		if isEnder then
 			return
 		end
 		local config = Config.keys[id]
 		local rewards = if typeof(config) == "table" then config.rewards or config else {}
-		local available = typeof(rewards) == "table" and #rewards > 0
-		local key = if id == "ancientCase" then "ancient_key" else "ordinary_key"
-		local hasKey = false
+		local available = id == "ancientCase" or (typeof(rewards) == "table" and #rewards > 0)
+		local owned: { [string]: boolean } = {}
 		local profile = getProfile()
 		if profile then
 			for _, stack in pairs(profile.inventory) do
-				if stack.id == key and stack.count > 0 then
-					hasKey = true
+				if table.find(accepted, stack.id) and stack.count > 0 then
+					owned[stack.id] = true
+				end
+			end
+		end
+		if not owned[selectedKey] then
+			for _, key in ipairs(accepted) do
+				if owned[key] then
+					selectedKey = key
 					break
 				end
 			end
+		end
+		local hasKey = owned[selectedKey] == true
+		if keyButton then
+			keyButton.Text = Strings.itemName(selectedKey, nil, locale)
 		end
 		open.Active, open.AutoButtonColor = available and hasKey, available and hasKey
 		open.BackgroundColor3 = if open.Active then Ui.colors.buttonBlue else Ui.colors.buttonGrey
@@ -173,6 +202,12 @@ function ChestWindow.build(
 			then t("case_locked")
 			elseif not hasKey then t("case_no_key")
 			else ""
+	end
+	if keyButton then
+		keyButton.Activated:Connect(function()
+			selectedKey = accepted[(table.find(accepted, selectedKey) or 1) % #accepted + 1]
+			refresh()
+		end)
 	end
 	refresh()
 	return win, refresh

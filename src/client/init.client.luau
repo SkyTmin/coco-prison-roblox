@@ -22,6 +22,7 @@ local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
 local AchievementsWindow = require(script.AchievementsWindow)
 local ExchangeWindow = require(script.ExchangeWindow)
+local ArtifactWindow = require(script.ArtifactWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
@@ -1461,6 +1462,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	artifacts = function()
+		local win, refresh = ArtifactWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	stars = function()
 		local win, refresh =
 			ExchangeWindow.build(gui, "stars", profile, locale, closeWindow, createWindow)
@@ -1513,6 +1519,17 @@ local function refreshWindow(force: boolean?)
 		openWindow = windowBuilders[kind]()
 	end
 end
+local artifactButton = Ui.button(
+	gui,
+	T("artifacts_hotkey"),
+	UDim2.fromOffset(190, 44),
+	UDim2.fromOffset(8, 64),
+	Ui.colors.buttonGrey
+)
+localizedButtons[artifactButton] = "artifacts_hotkey"
+artifactButton.Activated:Connect(function()
+	open("artifacts")
+end)
 
 -- ---------------------------------------------------------------- profile rendering
 local function render(p: Types.Profile)
@@ -1839,11 +1856,19 @@ touchMenus.Position = UDim2.fromOffset(8, 120)
 touchMenus.BackgroundTransparency = 1
 touchMenus.BorderSizePixel = 0
 touchMenus.ScrollBarThickness = 2
-touchMenus.CanvasSize = UDim2.fromOffset(0, 7 * 52 - 8)
+touchMenus.CanvasSize = UDim2.fromOffset(0, 8 * 52 - 8)
 touchMenus.Parent = gui
-local menuKeys =
-	{ "locations", "inventory", "jobs", "upgrade", "level", "achievements", "language_code" }
-local menuGlyphs = { "M", "E", "O", "J", "U", "L", "" }
+local menuKeys = {
+	"locations",
+	"inventory",
+	"jobs",
+	"upgrade",
+	"level",
+	"achievements",
+	"artifacts",
+	"language_code",
+}
+local menuGlyphs = { "M", "E", "O", "J", "U", "L", "◆", "" }
 for i, kind in ipairs(menuKeys) do
 	local button = Ui.button(
 		touchMenus,
@@ -1949,6 +1974,7 @@ local function updateLayout()
 	touchMenus.Visible, touchActions.Visible = mobile, mobile
 	touchMenus.Size = UDim2.fromOffset(52, math.clamp(viewport.Y - 260, 52, 356))
 	hints.Visible, languageButton.Visible = not mobile, not mobile
+	artifactButton.Visible = not mobile
 	statsScale.Scale, needsScale.Scale = if mobile then 0.65 else 1, if mobile then 0.65 else 1
 	stats.Position = if mobile then UDim2.new(1, -132, 0, 64) else UDim2.new(1, -200, 0.42, 0)
 	needsPanel.Position = if mobile
@@ -2034,6 +2060,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("jobs")
 	elseif k == Enum.KeyCode.L then
 		open("achievements")
+	elseif k == Enum.KeyCode.I then
+		open("artifacts")
 	elseif k == Enum.KeyCode.M then
 		open("locations")
 	elseif k == Enum.KeyCode.V then

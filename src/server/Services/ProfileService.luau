@@ -34,6 +34,7 @@ function ProfileService.defaultProfile(): Profile
 		inventory = { [1] = { id = "shovel", count = 1, level = 1, books = {} } }, -- starting shovel [владелец]
 		caseContents = {},
 		enderChest = {},
+		artifacts = {},
 		armor = {},
 		selectedSlot = 1,
 		professions = {
@@ -99,7 +100,7 @@ local function migrate(data: any): Profile
 		end
 		profile.caseContents = {}
 		if typeof(data.caseContents) == "table" then
-			for _, id in ipairs({ "ordinaryCase", "ancientCase" }) do
+			for _, id in ipairs({ "ordinaryCase", "ancientCase", "artifactCase" }) do
 				local contents = decodeInventory(data.caseContents[id])
 				for slot in pairs(contents) do
 					if slot < 1 or slot > 27 or slot ~= math.floor(slot) then
@@ -112,6 +113,31 @@ local function migrate(data: any): Profile
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
+	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
+	local rawArtifacts = profile.artifacts
+	profile.artifacts = {}
+	local function count(value: any): number
+		return if typeof(value) == "number"
+				and value == value
+				and value < math.huge
+			then math.max(0, math.floor(value))
+			else 0
+	end
+	for _, tier in ipairs({ "common", "rare", "epic" }) do
+		local raw = if typeof(rawArtifacts) == "table" then rawArtifacts[tier] else nil
+		local state: Types.ArtifactTier = { fragments = {}, duplicates = 0, completed = 0 }
+		if typeof(raw) == "table" then
+			state.duplicates, state.completed = count(raw.duplicates), count(raw.completed)
+			if typeof(raw.fragments) == "table" then
+				for index = 1, 9 do
+					state.fragments[index] = count(
+						(raw.fragments :: any)[index] or (raw.fragments :: any)[tostring(index)]
+					)
+				end
+			end
+		end
+		profile.artifacts[tier] = state
+	end
 	-- v3 remains compatible. Seed absent chain counters once, without paying legacy progress.
 	local seeds: { [string]: number } = { pickaxe = 0, shovel = 0, axe = 0, sword = 0 }
 	local seen: { [string]: boolean } = {}
@@ -191,6 +217,18 @@ local function save(player: Player, session: Session)
 	snapshot.inventory = encodeInventory(session.profile.inventory)
 	snapshot.enderChest = encodeInventory(session.profile.enderChest)
 	snapshot.caseContents = {}
+	snapshot.artifacts = {}
+	for tier, state in pairs(session.profile.artifacts) do
+		local fragments: { [string]: number } = {}
+		for index, amount in pairs(state.fragments) do
+			fragments[tostring(index)] = amount
+		end
+		snapshot.artifacts[tier] = {
+			fragments = fragments,
+			duplicates = state.duplicates,
+			completed = state.completed,
+		}
+	end
 	for id, contents in pairs(session.profile.caseContents) do
 		snapshot.caseContents[id] = encodeInventory(contents)
 	end

@@ -4,7 +4,8 @@
 -- Client → server events:  DigStart(part), DigFinish(part), Sell(), BuyItem(id), UpgradeItem(id),
 --                           LevelUp(), InventoryMove(from, to), SelectSlot(n), SpendPoint(kind),
 --                           ClaimProfessionPoints(job), UseConsumable(slot),
---                           CaseOpen(caseId), CaseClose(caseId),
+--                           CaseOpen(caseId, keyId?), CaseClose(caseId),
+--                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
 --                           CaseMove(caseId, {container = "case"|"inv", index}, destination)
 --                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
 -- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)

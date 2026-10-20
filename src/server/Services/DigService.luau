@@ -18,6 +18,7 @@ local MineService = require(script.Parent.MineService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local HungerService = require(script.Parent.HungerService)
 local AchievementService = require(script.Parent.AchievementService)
+local ArtifactService = require(script.Parent.ArtifactService)
 
 local MAX_DISTANCE = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks from the eye
 local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
@@ -176,6 +177,8 @@ local function onDigFinish(player: Player, part: any)
 	)
 
 	local keyFound = false
+	local artifactNotices: { ArtifactService.Notice } = {}
+	local keyFull = false
 	local overflow = 0
 	ProfileService.Mutate(player, function(p)
 		overflow = InventoryService.add(p, dropId, 1)
@@ -193,17 +196,24 @@ local function onDigFinish(player: Player, part: any)
 		local chance = Config.keys.ordinaryKeyChancePerBlock
 		p.counters["_keyPity"] = (p.counters["_keyPity"] or 0) + 1
 		if math.random() < chance or p.counters["_keyPity"] >= Config.keys.ordinaryKeyPity then
-			p.counters["_keyPity"] = 0
-			InventoryService.add(p, "ordinary_key", 1)
-			keyFound = true
+			if InventoryService.canAdd(p, "ordinary_key", 1) then
+				p.counters["_keyPity"] = 0
+				InventoryService.add(p, "ordinary_key", 1)
+				keyFound = true
+			else
+				p.counters["_keyPity"] = Config.keys.ordinaryKeyPity
+				keyFull = true
+			end
 		end
+		artifactNotices = ArtifactService.RollDig(p)
 	end)
 	HungerService.OnBlockDug(player)
 	local chain = if block.tool == "any" then (toolNow or "shovel") else block.tool
 	if chain == "pickaxe" or chain == "shovel" or chain == "axe" then
 		AchievementService.AddProgress(player, chain, 1)
 	end
-	if overflow > 0 then
+	ArtifactService.Notify(player, artifactNotices)
+	if overflow > 0 or keyFull then
 		toast(player, "bag_full")
 	end
 	if keyFound then

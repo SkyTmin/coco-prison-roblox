@@ -6,6 +6,111 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+	artifacts = { ru = "Артефакты", en = "Artifacts", es = "Artefactos", fr = "Artefacts" },
+	artifacts_hotkey = {
+		ru = "Артефакты [I]",
+		en = "Artifacts [I]",
+		es = "Artefactos [I]",
+		fr = "Artefacts [I]",
+	},
+	artifact_collection = { ru = "Сбор", en = "Collection", es = "Colección", fr = "Collecte" },
+	artifact_album = { ru = "Альбом", en = "Album", es = "Álbum", fr = "Album" },
+	artifact_tier_common = { ru = "Обычный", en = "Common", es = "Común", fr = "Commun" },
+	artifact_tier_rare = { ru = "Редкий", en = "Rare", es = "Raro", fr = "Rare" },
+	artifact_tier_epic = { ru = "Эпический", en = "Epic", es = "Épico", fr = "Épique" },
+	artifact_picture_gym = {
+		ru = "Качалка",
+		en = "Gym",
+		es = "Gimnasio",
+		fr = "Salle de sport",
+	},
+	artifact_picture_garden = { ru = "Огород", en = "Garden", es = "Huerto", fr = "Potager" },
+	artifact_picture_henchman = {
+		ru = "Подручный",
+		en = "Henchman",
+		es = "Secuaz",
+		fr = "Homme de main",
+	},
+	artifact_picture_vecna = { ru = "Векна", en = "Vecna", es = "Vecna", fr = "Vecna" },
+	artifact_fragment_name = {
+		ru = "%s фрагмент %s",
+		en = "%s fragment %s",
+		es = "Fragmento %s %s",
+		fr = "Fragment %s %s",
+	},
+	artifact_finds = { ru = "Находки", en = "Finds", es = "Hallazgos", fr = "Trouvailles" },
+	artifact_duplicates = {
+		ru = "дубликаты: %d/%d → следующий недостающий фрагмент",
+		en = "Duplicates: %d/%d → next missing fragment",
+		es = "Duplicados: %d/%d → siguiente fragmento que falta",
+		fr = "Doublons : %d/%d → prochain fragment manquant",
+	},
+	artifact_create = {
+		ru = "Создать артефакт",
+		en = "Assemble artifact",
+		es = "Crear artefacto",
+		fr = "Assembler l’artefact",
+	},
+	artifact_ready_tooltip = {
+		ru = "Все девять фрагментов на месте — вы получите ключ от кейса артефактов",
+		en = "All nine fragments are present — you will receive an artifact case key",
+		es = "Tienes los nueve fragmentos: recibirás una llave de la caja de artefactos",
+		fr = "Les neuf fragments sont réunis : vous recevrez une clé de caisse d’artefacts",
+	},
+	artifact_need_fragments = {
+		ru = "Соберите все девять фрагментов",
+		en = "Collect all nine fragments",
+		es = "Reúne los nueve fragmentos",
+		fr = "Réunissez les neuf fragments",
+	},
+	artifact_completed = {
+		ru = "Собрано артефактов: %d",
+		en = "Artifacts assembled: %d",
+		es = "Artefactos creados: %d",
+		fr = "Artefacts assemblés : %d",
+	},
+	artifact_fragment_found = {
+		ru = "Найден фрагмент артефакта: %s, %s",
+		en = "Artifact fragment found: %s, %s",
+		es = "Fragmento de artefacto encontrado: %s, %s",
+		fr = "Fragment d’artefact trouvé : %s, %s",
+	},
+	artifact_fragment_from_duplicates = {
+		ru = "Фрагмент за дубликаты: %s, %s",
+		en = "Fragment from duplicates: %s, %s",
+		es = "Fragmento por duplicados: %s, %s",
+		fr = "Fragment obtenu avec les doublons : %s, %s",
+	},
+	artifact_assembled = {
+		ru = "Артефакт собран (%s)! Получен ключ от кейса артефактов",
+		en = "Artifact assembled (%s)! Artifact case key received",
+		es = "¡Artefacto creado (%s)! Recibiste una llave de la caja de artefactos",
+		fr = "Artefact assemblé (%s) ! Clé de caisse d’artefacts reçue",
+	},
+	artifact_case = {
+		ru = "Кейс артефактов",
+		en = "Artifact case",
+		es = "Caja de artefactos",
+		fr = "Caisse d’artefacts",
+	},
+	item_artifact_key = {
+		ru = "Ключ от кейса артефактов",
+		en = "Artifact case key",
+		es = "Llave de la caja de artefactos",
+		fr = "Clé de caisse d’artefacts",
+	},
+	item_ancient_book = {
+		ru = "Древняя книга",
+		en = "Ancient book",
+		es = "Libro antiguo",
+		fr = "Livre antique",
+	},
+	item_money_bag = {
+		ru = "Мешок денег",
+		en = "Money bag",
+		es = "Bolsa de dinero",
+		fr = "Sac d’argent",
+	},
 	kd_label = { ru = "У/С", en = "K/D", es = "B/M", fr = "É/M" },
 	exchange = { ru = "Обменять", en = "Exchange", es = "Canjear", fr = "Échanger" },
 	exchange_stars = {
@@ -81,7 +186,7 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Poudre ancienne",
 	},
 	item_nickname_key = {
-		ru = "Ключ смены ника",
+		ru = "Ключ от кейса с кличками",
 		en = "Nickname key",
 		es = "Llave de apodo",
 		fr = "Clé de pseudonyme",
@@ -725,6 +830,18 @@ local STRINGS: { [string]: Entry } = {
 
 local Strings = {}
 
+local PICTURES = {
+	["Качалка"] = "artifact_picture_gym",
+	["Огород"] = "artifact_picture_garden",
+	["Подручный"] = "artifact_picture_henchman",
+	["Векна"] = "artifact_picture_vecna",
+}
+
+function Strings.artifactPictureName(name: string, locale: string?): string
+	local key = PICTURES[name]
+	return if key then Strings.t(key, locale) else name
+end
+
 function Strings.localeOf(player: Player?): string
 	if player then
 		local locale = player:GetAttribute("Locale")
@@ -777,6 +894,9 @@ function Strings.itemName(id: string, level: number?, locale: string?): string
 	end
 	local key = "item_" .. id
 	local base = Strings.t(key, loc)
+	if id == "ancient_book" and level then
+		return base .. " " .. tostring(level)
+	end
 	if Config.tools[id] and level then
 		return Strings.t("mat_" .. Config.materialForLevel(level), loc) .. " " .. string.lower(base)
 	end

@@ -10,6 +10,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local ArtifactService = require(script.Parent.ArtifactService)
 local Types = require(Shared.Types)
 
 type Reward = {
@@ -27,11 +28,12 @@ type Binding = {
 }
 type Session = { id: string, part: BasePart, rolledAt: number, tokens: number, tokenAt: number }
 type Address = { container: "case" | "inv", index: number }
-local CASES: { [string]: { key: string, text: string } } = {
-	ordinaryCase = { key = "ordinary_key", text = "ordinary_case" },
-	ancientCase = { key = "ancient_key", text = "ancient_case" },
+local CASES: { [string]: { tag: string, text: string } } = {
+	ordinaryCase = { tag = "OrdinaryCase", text = "ordinary_case" },
+	ancientCase = { tag = "AncientCase", text = "ancient_case" },
+	artifactCase = { tag = "ArtifactCase", text = "artifact_case" },
 }
-local TAGS = { "OrdinaryCase", "AncientCase", "EnderChest" }
+local TAGS = { "OrdinaryCase", "AncientCase", "ArtifactCase", "EnderChest" }
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
@@ -52,17 +54,19 @@ local function caseId(part: Instance): string?
 	if CollectionService:HasTag(part, "EnderChest") then
 		return "enderChest"
 	end
-	if
-		not CollectionService:HasTag(part, "OrdinaryCase")
-		and not CollectionService:HasTag(part, "AncientCase")
-	then
-		return nil
-	end
 	local attribute = part:GetAttribute("CaseId")
 	if attribute ~= nil then
-		return if typeof(attribute) == "string" and CASES[attribute] then attribute else nil
+		local definition = if typeof(attribute) == "string" then CASES[attribute] else nil
+		return if definition and CollectionService:HasTag(part, definition.tag)
+			then attribute :: string
+			else nil
 	end
-	return if CollectionService:HasTag(part, "AncientCase") then "ancientCase" else "ordinaryCase"
+	for id, definition in pairs(CASES) do
+		if CollectionService:HasTag(part, definition.tag) then
+			return id
+		end
+	end
+	return nil
 end
 
 local function near(player: Player, part: BasePart): boolean
@@ -162,22 +166,76 @@ local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
-local function openCase(player: Player, id: any)
+local function weightedKey(weights: { [string]: number }): string
+	local choices: { Reward } = {}
+	for key, weight in pairs(weights) do
+		table.insert(choices, { id = key, weight = weight })
+	end
+	table.sort(choices, function(a, b)
+		return a.id < b.id
+	end)
+	return roll(choices).id
+end
+
+local function ancientBook(improved: boolean): Types.ItemStack
+	local rules = Config.keys.ancientCase
+	local effects: { string } = {}
+	for id in pairs(Config.books.effects) do
+		table.insert(effects, id)
+	end
+	table.sort(effects)
+	local effect = effects[random:NextInteger(1, #effects)]
+	local maxLevel = #Config.books.effects[effect]
+	local level = if improved
+		then maxLevel
+		else math.min(maxLevel, tonumber(weightedKey(rules.level)) :: number)
+	local chance = if improved then rules.improvedApplyChance else rules.applyChance
+	return {
+		id = "ancient_book",
+		count = 1,
+		level = level,
+		books = { { id = effect, level = level } },
+		rarity = weightedKey(rules.rarity),
+		applyChance = random:NextInteger(chance[1], chance[2]),
+	}
+end
+
+local function openCase(player: Player, id: any, requestedKey: any)
 	local session = validate(player, id)
 	if not session or session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
 		return
 	end
 	session.rolledAt = os.clock()
+	local configuredKeys = Config.keys.caseKeys[session.id]
+	local accepted: { string } = if typeof(configuredKeys) == "string"
+		then { configuredKeys }
+		else configuredKeys
+	if
+		requestedKey ~= nil
+		and (typeof(requestedKey) ~= "string" or not table.find(accepted, requestedKey))
+	then
+		return
+	end
 	local rewards = rewardsFor(session.id)
-	if not rewards then
+	if not rewards and session.id ~= "ancientCase" then
 		toast(player, "case_locked")
 		return
 	end
 	local money = 0
 	local failure: string? = nil
+	local artifactNotices: { ArtifactService.Notice } = {}
 	ProfileService.Mutate(player, function(p)
-		local key = CASES[session.id].key
-		if InventoryService.count(p, key) < 1 then
+		local key: string? = nil
+		for _, candidate in ipairs(accepted) do
+			if
+				(requestedKey == nil or requestedKey == candidate)
+				and InventoryService.count(p, candidate) > 0
+			then
+				key = candidate
+				break
+			end
+		end
+		if not key then
 			failure = "case_no_key"
 			return
 		end
@@ -185,14 +243,27 @@ local function openCase(player: Player, id: any)
 		-- No existing chest stack or key is changed until the entire roll fits.
 		local staged = table.clone(p)
 		staged.inventory = {}
-		for _ = 1, random:NextInteger(2, 4) do
-			local reward = roll(rewards)
+		if session.id == "ancientCase" then
+			staged.inventory[1] = ancientBook(key == "improved_ancient_key")
+		end
+		local rolls = if session.id == "ancientCase"
+			then 0
+			elseif session.id == "ordinaryCase" then random:NextInteger(2, 4)
+			else 1
+		for _ = 1, rolls do
+			local reward = roll(rewards :: { Reward })
 			local item, count, level = reward.id, 1, nil :: number?
 			if item == "money" then
-				money += random:NextInteger(
+				local amount = random:NextInteger(
 					math.floor((reward.min :: number) * Config.moneyScale + 0.5),
 					math.floor((reward.max :: number) * Config.moneyScale + 0.5)
 				)
+				if session.id == "artifactCase" then
+					-- Artifact rewards, including money, remain in the persistent grid until claimed.
+					staged.inventory[1] = { id = "money_bag", count = 1, coins = amount }
+				else
+					money += amount
+				end
 			else
 				if reward.count then
 					count = random:NextInteger(reward.count[1], reward.count[2])
@@ -254,12 +325,19 @@ local function openCase(player: Player, id: any)
 		InventoryService.remove(p, key, 1)
 		p.caseContents[session.id] = contents
 		p.coins += money
+		if
+			session.id == "ordinaryCase"
+			and random:NextNumber() < Config.artifacts.fromCaseChance.ordinaryCase
+		then
+			artifactNotices = ArtifactService.GrantFragment(p, "common")
+		end
 	end)
 	if failure then
 		toast(player, failure)
 	elseif money > 0 then
 		toast(player, "case_money", Strings.money(money))
 	end
+	ArtifactService.Notify(player, artifactNotices)
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
 
@@ -281,11 +359,28 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any)
 		return
 	end
 	session.tokens -= 1
+	local claimedMoney = 0
 	ProfileService.Mutate(player, function(p)
 		local contents = contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
 		if not source[from.index] then
+			return
+		end
+		local stack = source[from.index]
+		if from.container == "case" and to.container == "inv" and stack.id == "money_bag" then
+			local amount = stack.coins
+			if
+				typeof(amount) == "number"
+				and amount > 0
+				and amount < math.huge
+				and amount == math.floor(amount)
+			then
+				-- Remove the claim before crediting; replaying this move sees an empty slot.
+				source[from.index] = nil
+				p.coins += amount
+				claimedMoney = amount
+			end
 			return
 		end
 		-- Reuse inventory merge/swap and stack limits for both containers.
@@ -294,6 +389,9 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any)
 		InventoryService.move(staged, 1, 2)
 		source[from.index], target[to.index] = staged.inventory[1], staged.inventory[2]
 	end)
+	if claimedMoney > 0 then
+		toast(player, "case_money", Strings.money(claimedMoney))
+	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
 
@@ -343,7 +441,7 @@ function CaseService.Start()
 	Remotes.event("CaseOpen").OnServerEvent:Connect(openCase)
 	Remotes.event("CaseMove").OnServerEvent:Connect(move)
 	Remotes.event("CaseClose").OnServerEvent:Connect(function(player: Player, id: any)
-		if typeof(id) == "string" and sessions[player] and sessions[player].id == id then
+		if validate(player, id) then
 			close(player)
 		end
 	end)

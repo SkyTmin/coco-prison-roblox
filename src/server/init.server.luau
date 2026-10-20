@@ -26,6 +26,7 @@ for _, name in ipairs({
 	"CaseOpen",
 	"CaseMove",
 	"CaseClose",
+	"ArtifactAssemble",
 	"ProfileUpdated",
 	"Toast",
 	"MineReset",
@@ -47,6 +48,7 @@ local EconomyService = require(script.Services.EconomyService)
 local NeedsService = require(script.Services.NeedsService)
 local AchievementService = require(script.Services.AchievementService)
 local CaseService = require(script.Services.CaseService)
+local ArtifactService = require(script.Services.ArtifactService)
 local LocationService = require(script.Services.LocationService)
 local CombatService = require(script.Services.CombatService)
 local HungerService = require(script.Services.HungerService)
@@ -63,6 +65,7 @@ EconomyService.Start()
 NeedsService.Start()
 AchievementService.Start()
 CaseService.Start()
+ArtifactService.Start()
 CombatService.Start()
 LocationService.Start()
 

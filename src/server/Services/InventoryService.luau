@@ -18,7 +18,7 @@ local InventoryService = {}
 InventoryService.SLOTS = SLOTS
 
 function InventoryService.isStackable(id: string): boolean
-	return Config.tools[id] == nil
+	return Config.tools[id] == nil and id ~= "ancient_book" and id ~= "money_bag"
 end
 
 -- Adds `count` of item; returns the amount that did not fit.

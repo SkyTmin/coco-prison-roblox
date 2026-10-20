@@ -127,6 +127,7 @@ function Config.materialForLevel(level: number): string
 	return MATERIALS[math.clamp(math.floor((level - 1) / 4) + 1, 1, 4)]
 end
 
+local ICON_FALLBACKS = { artifact_key = "ancient_key" }
 function Config.iconFor(itemId: string, level: number?): string?
 	local icons = Config.icons.icons
 	if level and Config.tools[itemId] then
@@ -135,7 +136,7 @@ function Config.iconFor(itemId: string, level: number?): string?
 			return materialIcon
 		end
 	end
-	return icons[itemId] or Config.textures.textures[itemId]
+	return icons[itemId] or icons[ICON_FALLBACKS[itemId]] or Config.textures.textures[itemId]
 end
 
 function Config.tierIndex(material: string): number
