@@ -2126,4 +2126,39 @@ for i = 1, 9 do
 	end)
 end
 
+-- Studio-only QA hook: execute_luau cannot press our hotkeys, so tests drive the client through this.
+if RunService:IsStudio() then
+	local hook = Instance.new("BindableFunction")
+	hook.Name = "ClientDebug"
+	hook.OnInvoke = function(action: string, arg: any): any
+		if action == "toggleCamera" then
+			toggleFirstPerson()
+			return firstPerson
+		elseif action == "open" then
+			open(arg)
+			return currentWindowKind
+		elseif action == "close" then
+			closeWindow()
+			return true
+		elseif action == "aim" then
+			local aim = aimAt(if typeof(arg) == "Vector2" then arg else nil)
+			return if aim then { part = aim.part, hit = aim.hit } else nil
+		elseif action == "holdDig" then
+			holding = arg == true
+			if not holding then
+				stopDig(true)
+			end
+			return holding
+		elseif action == "state" then
+			return {
+				digging = digging,
+				target = digTarget,
+				predicted = digPredicted,
+				firstPerson = firstPerson,
+			}
+		end
+		return nil
+	end
+	hook.Parent = player.PlayerGui
+end
 print(string.format("[coco-prison] client ready (%s)", locale))

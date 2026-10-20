@@ -60,15 +60,34 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Minecraft layer layout) → upload via `upload_image` → ids in `assets/icons/ids.json`,
    `assets/armor/ids.json` → `node scripts/build-configs.mjs`; `scripts/tools-to-voxels.ps1` + node
    greedy-rectangle merge → `assets/icons/voxels.json` (3D extruded item sprites, `ItemModels.luau`).
-   Block breaking (`src/client/BlockBreak.luau`): crack stages `assets/cracks/ids.json`, sounds
-   `assets/sounds/ids.json` (Roblox library, ProSoundEffects) → `Config/effects.json`. Per-mine
+   Block breaking (`src/client/BlockBreak.luau`): crack stages `assets/cracks/ids.json`; sounds like
+   Minecraft (hit = step sound every 0.2 s at pitch 0.5, break = dig sound at 0.8; a 2-voice pool per
+   material, no piling up): `scripts/build-sounds.mjs` concatenates the VoxeLibre mcl_sounds variants
+   into `assets/sounds/build/*.ogg` + `manifest.json`; the OWNER uploads them with
+   `scripts/upload-audio.mjs` (Open Cloud API key) → ids in `assets/sounds/ids.json` → `build-configs`.
+   Until then `files[*].fallback` (trimmed Roblox-library clips) plays. Own pixel icons (keys, trainer
+   badges, touch menu) come from `scripts/draw-icons.mjs` → `upload_image`.
+   Digging is server-authoritative (`DigService`): DigStart(part, hitPoint) starts a server timer,
+   DigAccepted(needed) syncs the client bar, the client hides the block when its bar ends and the server
+   removes it right after; DigCancel on release; reach = 4.5 blocks eye → hit point, LoS to the hit
+   point. Mines keep four 4-wide ladder shafts free forever (`MineService.ladderShaft`).
+   Map fixes applied in place after a build: `scripts/fix-map-ladders-zfight.luau`.
+   Cases: `CaseService` refuses to open without the matching key (toast names the key), prompts work
+   from any side (no line of sight), nickname case grants names from `keys.nicknameCase.nicknames`. Per-mine
    composition: `scripts/design-decisions.json` → `mines.<locationId>_<mineId>.shares` →
    `locations.json` → `mines` → MineService.
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
-5. `require()` inside `execute_luau` gets a separate module instance: read profiles through the client
-   `ProfileUpdated` event, not through `ProfileService.Get`.
+5. `require()` inside `execute_luau` gets a separate module instance. QA hooks (Studio only):
+   `ServerStorage.ProfileDebug` BindableFunction (`get` userId → profile copy, `give` userId id count
+   level, `coins` userId delta, `set` userId field value) and `PlayerGui.ClientDebug` on the client
+   (`toggleCamera`, `open` kind, `close`, `aim`, `holdDig` bool, `state`). Prompts can be triggered
+   from the client with `prompt:InputHoldBegin()/InputHoldEnd()`. Injected keyboard input does NOT
+   reach our hotkeys; `screen_capture` and window layout break while the Studio viewport is 1×1
+   (window minimized/hidden) — check `camera.ViewportSize` first.
+   The published place (placeId 92594200898716) needs "Enable Studio Access to API Services" in Game
+   Settings → Security before DataStore works in Studio (ProfileService then loads real profiles).
 6. If `list_roblox_studios` returns `[]`, restart Studio with the place file and wait ~1 min. Never
    start a second `mcp.bat` (probe scripts etc.): only one proxy holds the Studio connection, and the
    second one steals it. Studio follows the Windows system proxy (Happ VPN, 127.0.0.1:10809); when
