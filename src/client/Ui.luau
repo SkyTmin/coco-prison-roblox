@@ -124,6 +124,7 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	image.Size = UDim2.fromScale(0.76, 0.76)
 	image.Position = UDim2.fromScale(0.5, 0.5)
 	image.ScaleType = Enum.ScaleType.Fit
+	image.ResampleMode = Enum.ResamplerMode.Pixelated
 	image.BackgroundTransparency = 1
 	image.Visible = false
 	image.Parent = f

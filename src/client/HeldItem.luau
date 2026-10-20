@@ -62,7 +62,7 @@ local function render(rig: Rig)
 	local block = Config.block(id)
 	local cube = block ~= nil and not block.itemOnly
 	local tool = Config.tools[id] ~= nil
-	local spriteSize = if tool then 1.8 else 1.4
+	local spriteSize = if tool then 1.45 else 1.2
 	local visual: BasePart
 	local container: Instance
 	if cube then

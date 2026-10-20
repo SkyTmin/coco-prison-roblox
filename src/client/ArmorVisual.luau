@@ -1,234 +1,137 @@
 --!strict
--- Cosmetic armor follows each R15 limb; the server owns the Armor attribute.
+-- Armor rendered the Minecraft way: a textured box slightly larger than each limb, welded to it, with
+-- the faces of the Minecraft armor layer (Pixel Perfection via VoxeLibre, CC BY-SA 4.0 — see
+-- assets/thirdparty/voxelibre/ATTRIBUTION.md) as Decals. Faces come from Config.armor (generated from
+-- assets/armor/ids.json). Enchanted pieces (level with an enchant > 0) get a purple glint overlay.
+-- The server owns the `Armor` attribute ("helmet:<level>,chestplate:<level>,...").
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 
-type Style = { color: Color3, material: Enum.Material, reflectance: number }
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Model? }
 
 local ArmorVisual = {}
 local rigs: { [Player]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local started = false
-local PADDING = 0.25
-local THICKNESS = 0.125
-local TRIM = 0.1
-local STYLES: { [string]: Style } = {
-	wood = { color = Color3.fromRGB(120, 80, 50), material = Enum.Material.Fabric, reflectance = 0 },
-	stone = {
-		color = Color3.fromRGB(120, 120, 125),
-		material = Enum.Material.Slate,
-		reflectance = 0,
+local glintDecals: { [Decal]: boolean } = {}
+
+-- Minecraft armor model is 1/16 block larger than the skin box on each side; R15 limbs are ~1 stud
+-- wide, so +0.3 studs total keeps the same proportion and hides the body underneath.
+local PAD = 0.3
+
+-- piece → boxes: { limb name, texture limb key, vertical slice {y0, y1} of the limb (0 = top), pad }
+type Box = { limb: string, key: string, y0: number, y1: number, pad: number? }
+local BOXES: { [string]: { Box } } = {
+	helmet = { { limb = "Head", key = "head", y0 = 0, y1 = 1, pad = 0.4 } },
+	chestplate = {
+		{ limb = "UpperTorso", key = "torso", y0 = 0, y1 = 1 },
+		{ limb = "LowerTorso", key = "torso", y0 = 0, y1 = 1 },
+		{ limb = "LeftUpperArm", key = "upperarm", y0 = 0, y1 = 1 },
+		{ limb = "RightUpperArm", key = "upperarm", y0 = 0, y1 = 1 },
+		{ limb = "LeftLowerArm", key = "lowerarm", y0 = 0, y1 = 1 },
+		{ limb = "RightLowerArm", key = "lowerarm", y0 = 0, y1 = 1 },
 	},
-	iron = {
-		color = Color3.fromRGB(210, 210, 215),
-		material = Enum.Material.Metal,
-		reflectance = 0,
+	leggings = {
+		{ limb = "LowerTorso", key = "torso", y0 = 0, y1 = 1, pad = 0.36 },
+		{ limb = "LeftUpperLeg", key = "upperleg", y0 = 0, y1 = 1 },
+		{ limb = "RightUpperLeg", key = "upperleg", y0 = 0, y1 = 1 },
+		{ limb = "LeftLowerLeg", key = "lowerleg", y0 = 0, y1 = 0.65 },
+		{ limb = "RightLowerLeg", key = "lowerleg", y0 = 0, y1 = 0.65 },
 	},
-	diamond = {
-		color = Color3.fromRGB(90, 220, 220),
-		material = Enum.Material.SmoothPlastic,
-		reflectance = 0.2,
+	boots = {
+		{ limb = "LeftFoot", key = "foot", y0 = 0, y1 = 1, pad = 0.36 },
+		{ limb = "RightFoot", key = "foot", y0 = 0, y1 = 1, pad = 0.36 },
+		{ limb = "LeftLowerLeg", key = "foot", y0 = 0.6, y1 = 1, pad = 0.36 },
+		{ limb = "RightLowerLeg", key = "foot", y0 = 0.6, y1 = 1, pad = 0.36 },
 	},
 }
-local LIMBS: { [string]: { string } } = {
-	helmet = { "Head" },
-	chestplate = { "UpperTorso", "LowerTorso", "LeftUpperArm", "RightUpperArm" },
-	leggings = { "LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg" },
-	boots = { "LeftFoot", "RightFoot" },
+-- texture face → Roblox face. Crops: front = the limb's -Z side; Minecraft "left" is the model's left.
+local FACES: { [string]: Enum.NormalId } = {
+	front = Enum.NormalId.Front,
+	back = Enum.NormalId.Back,
+	left = Enum.NormalId.Right,
+	right = Enum.NormalId.Left,
+	top = Enum.NormalId.Top,
+	bottom = Enum.NormalId.Bottom,
 }
 local limbNames: { [string]: boolean } = {}
-for _, names in pairs(LIMBS) do
-	for _, name in ipairs(names) do
-		limbNames[name] = true
+for _, boxes in pairs(BOXES) do
+	for _, box in ipairs(boxes) do
+		limbNames[box.limb] = true
 	end
 end
 
-local function part(
+local function faceTexture(piece: string, material: string, key: string, face: string): string?
+	local faces = Config.armor and Config.armor.faces
+	if not faces then
+		return nil
+	end
+	return faces[piece .. "_" .. material .. "_" .. key .. "_" .. face]
+end
+
+local function enchanted(id: string, level: number): boolean
+	local ok, value = pcall(Config.enchantForLevel, id, level)
+	return ok and type(value) == "number" and value > 0
+end
+
+local function buildBox(
 	parent: Model,
 	limb: BasePart,
-	name: string,
-	size: Vector3,
-	offset: CFrame,
-	style: Style,
-	trim: boolean
+	piece: string,
+	material: string,
+	box: Box,
+	glint: boolean
 )
-	local visual = Instance.new("Part")
-	visual.Name = name
-	visual.Size = size
-	visual.Color = if trim then style.color:Lerp(Color3.new(0, 0, 0), 0.3) else style.color
-	visual.Material = style.material
-	visual.Reflectance = style.reflectance
-	visual.Transparency = 0
-	visual.Massless = true
-	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
-	visual.CastShadow = true
-	visual.TopSurface, visual.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
-	visual.CFrame = limb.CFrame * offset
-	local weld = Instance.new("Weld")
-	weld.Name = "ArmorWeld"
-	weld.Part0, weld.Part1 = limb, visual
-	weld.C0 = offset
-	weld.Parent = visual
-	visual.Parent = parent
-end
-
--- Plates face local -Z. Four darker strips frame the exposed face without decals.
-local function plate(
-	parent: Model,
-	limb: BasePart,
-	name: string,
-	size: Vector3,
-	offset: CFrame,
-	style: Style
-)
-	part(parent, limb, name, size, offset, style, false)
-	local z = -size.Z / 2 - 0.005
-	for _, sign in ipairs({ -1, 1 }) do
-		part(
-			parent,
-			limb,
-			name .. "Trim",
-			Vector3.new(size.X, TRIM, 0.02),
-			offset * CFrame.new(0, sign * (size.Y - TRIM) / 2, z),
-			style,
-			true
-		)
-		part(
-			parent,
-			limb,
-			name .. "Trim",
-			Vector3.new(TRIM, size.Y, 0.02),
-			offset * CFrame.new(sign * (size.X - TRIM) / 2, 0, z),
-			style,
-			true
-		)
-	end
-end
-
-local function sleeve(parent: Model, limb: BasePart, style: Style, size: Vector3, offset: CFrame)
-	for _, sign in ipairs({ -1, 1 }) do
-		plate(
-			parent,
-			limb,
-			"FrontBack",
-			Vector3.new(size.X, size.Y, THICKNESS),
-			offset
-				* CFrame.new(0, 0, sign * (size.Z - THICKNESS) / 2)
-				* CFrame.Angles(0, if sign == 1 then math.pi else 0, 0),
-			style
-		)
-		plate(
-			parent,
-			limb,
-			"Side",
-			Vector3.new(size.Z, size.Y, THICKNESS),
-			offset
-				* CFrame.new(sign * (size.X - THICKNESS) / 2, 0, 0)
-				* CFrame.Angles(0, -sign * math.pi / 2, 0),
-			style
-		)
-	end
-end
-
-local function renderLimb(parent: Model, limb: BasePart, id: string, style: Style)
-	local size = limb.Size + Vector3.new(PADDING, PADDING, PADDING)
-	if id == "helmet" then
-		-- Minecraft-style open-face helmet: a box 1.3× the head, raised so it covers the hair line,
-		-- closed on top/back/sides, with a brow band across the forehead and a neck guard.
-		local width = limb.Size.X * 1.3
-		local height = limb.Size.Y + 0.55
-		local depth = limb.Size.Z + PADDING
-		local lift = 0.2 -- the box sits a little higher than the head centre
-		plate(
-			parent,
-			limb,
-			"HelmetTop",
-			Vector3.new(width, depth, THICKNESS),
-			CFrame.new(0, lift + (height - THICKNESS) / 2, 0) * CFrame.Angles(math.pi / 2, 0, 0),
-			style
-		)
-		plate(
-			parent,
-			limb,
-			"HelmetBack",
-			Vector3.new(width, height, THICKNESS),
-			CFrame.new(0, lift, (depth - THICKNESS) / 2) * CFrame.Angles(0, math.pi, 0),
-			style
-		)
-		for _, sign in ipairs({ -1, 1 }) do
-			plate(
-				parent,
-				limb,
-				"HelmetSide",
-				Vector3.new(depth, height, THICKNESS),
-				CFrame.new(sign * (width - THICKNESS) / 2, lift, 0)
-					* CFrame.Angles(0, -sign * math.pi / 2, 0),
-				style
-			)
-		end
-		-- brow band (upper third of the face stays covered, eyes open)
-		plate(
-			parent,
-			limb,
-			"HelmetBrow",
-			Vector3.new(width, height * 0.36, THICKNESS),
-			CFrame.new(0, lift + height / 2 - height * 0.18, -(depth - THICKNESS) / 2),
-			style
-		)
-		-- neck guard below the back plate
-		plate(
-			parent,
-			limb,
-			"HelmetNeck",
-			Vector3.new(width, 0.3, THICKNESS),
-			CFrame.new(0, lift - height / 2 - 0.1, (depth - THICKNESS) / 2 + 0.05)
-				* CFrame.Angles(0, math.pi, 0),
-			style
-		)
-	elseif id == "chestplate" and string.find(limb.Name, "Arm") then
-		-- Upper-arm pads never attach to the hand or alter the held-item grip.
-		local pad = Vector3.new(size.X, limb.Size.Y * 0.4 + PADDING, size.Z)
-		local offset = CFrame.new(0, (limb.Size.Y - pad.Y) / 2 + PADDING / 2, 0)
-		sleeve(parent, limb, style, pad, offset)
-		plate(
-			parent,
-			limb,
-			"ShoulderTop",
-			Vector3.new(pad.X, pad.Z, THICKNESS),
-			offset * CFrame.new(0, (pad.Y - THICKNESS) / 2, 0) * CFrame.Angles(math.pi / 2, 0, 0),
-			style
-		)
-	elseif id == "chestplate" then
-		for _, sign in ipairs({ -1, 1 }) do
-			plate(
-				parent,
-				limb,
-				"TorsoPlate",
-				Vector3.new(size.X, size.Y, THICKNESS),
-				CFrame.new(0, 0, sign * (size.Z - THICKNESS) / 2)
-					* CFrame.Angles(0, if sign == 1 then math.pi else 0, 0),
-				style
-			)
-		end
-	else
-		sleeve(parent, limb, style, size, CFrame.identity)
-		if id == "boots" then
-			-- Close the sleeves into foot-sized boxes, leaving ankle motion independent.
-			for _, sign in ipairs({ -1, 1 }) do
-				plate(
-					parent,
-					limb,
-					"BootCap",
-					Vector3.new(size.X, size.Z, THICKNESS),
-					CFrame.new(0, sign * (size.Y - THICKNESS) / 2, 0)
-						* CFrame.Angles(sign * math.pi / 2, 0, 0),
-					style
-				)
+	local pad = box.pad or PAD
+	local fullY = limb.Size.Y + pad
+	local height = fullY * (box.y1 - box.y0)
+	local centreY = fullY / 2 - fullY * (box.y0 + box.y1) / 2 -- limb-space Y of the slice centre
+	local part = Instance.new("Part")
+	part.Name = piece .. "_" .. box.limb
+	part.Size = Vector3.new(limb.Size.X + pad, height, limb.Size.Z + pad)
+	part.Transparency = 1 -- faces are drawn by the decals; the part itself is invisible
+	part.Massless = true
+	part.CanCollide, part.CanTouch, part.CanQuery = false, false, false
+	part.CastShadow = true
+	part.TopSurface, part.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+	local offset = CFrame.new(0, centreY, 0)
+	part.CFrame = limb.CFrame * offset
+	local any = false
+	for face, normal in pairs(FACES) do
+		local texture = faceTexture(piece, material, box.key, face)
+		if texture then
+			local decal = Instance.new("Decal")
+			decal.Name = face
+			decal.Face = normal
+			decal.Texture = texture
+			decal.Parent = part
+			any = true
+			if glint then
+				local g = Instance.new("Decal")
+				g.Name = "Glint"
+				g.Face = normal
+				g.Texture = Config.armor.glint or ""
+				g.Transparency = 0.55
+				g.Color3 = Color3.fromRGB(200, 120, 255)
+				g.ZIndex = 2
+				g.Parent = part
+				glintDecals[g] = true
 			end
 		end
 	end
+	if not any then
+		part:Destroy()
+		return
+	end
+	local weld = Instance.new("Weld")
+	weld.Name = "ArmorWeld"
+	weld.Part0, weld.Part1 = limb, part
+	weld.C0 = offset
+	weld.Parent = part
+	part.Parent = parent
 end
 
 -- Hair pokes through a helmet; Minecraft hides it under the helmet texture, we hide the accessory.
@@ -245,8 +148,17 @@ local function setHairHidden(character: Model, hidden: boolean)
 	end
 end
 
+local function forgetGlints(model: Model)
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("Decal") then
+			glintDecals[d] = nil
+		end
+	end
+end
+
 local function render(rig: Rig)
 	if rig.visual then
+		forgetGlints(rig.visual)
 		rig.visual:Destroy()
 		rig.visual = nil
 	end
@@ -261,16 +173,17 @@ local function render(rig: Rig)
 	for entry in string.gmatch(attribute, "[^,]+") do
 		local id, rawLevel = string.match(entry, "^([^:]+):(%d+)$")
 		local level = tonumber(rawLevel)
-		local names = if id then LIMBS[id] else nil
-		if not id or not names or not level or level < 1 or rendered[id] then
+		local boxes = if id then BOXES[id] else nil
+		if not id or not boxes or not level or level < 1 or rendered[id] then
 			continue
 		end
 		rendered[id] = true
-		local style = STYLES[Config.materialForLevel(level)] or STYLES.wood
-		for _, name in ipairs(names) do
-			local limb = rig.character:FindFirstChild(name)
+		local material = Config.materialForLevel(level)
+		local glint = enchanted(id, level)
+		for _, box in ipairs(boxes) do
+			local limb = rig.character:FindFirstChild(box.limb)
 			if limb and limb:IsA("BasePart") then
-				renderLimb(visual, limb, id, style)
+				buildBox(visual, limb, id, material, box, glint)
 			end
 		end
 	end
@@ -288,6 +201,7 @@ local function clear(player: Player)
 		connection:Disconnect()
 	end
 	if rig.visual then
+		forgetGlints(rig.visual)
 		rig.visual:Destroy()
 	end
 	rigs[player] = nil
@@ -303,7 +217,7 @@ local function characterAdded(player: Player, character: Model)
 			render(rig)
 		end)
 	)
-	local function limbChanged(child: Instance)
+	local function childChanged(child: Instance)
 		if (child:IsA("BasePart") and limbNames[child.Name]) or child:IsA("Accessory") then
 			task.defer(function()
 				if rig.character.Parent then
@@ -312,8 +226,8 @@ local function characterAdded(player: Player, character: Model)
 			end)
 		end
 	end
-	table.insert(rig.connections, character.ChildAdded:Connect(limbChanged))
-	table.insert(rig.connections, character.ChildRemoved:Connect(limbChanged))
+	table.insert(rig.connections, character.ChildAdded:Connect(childChanged))
+	table.insert(rig.connections, character.ChildRemoved:Connect(childChanged))
 	render(rig)
 end
 
@@ -347,6 +261,17 @@ function ArmorVisual.Start()
 	for _, player in ipairs(Players:GetPlayers()) do
 		watch(player)
 	end
+	-- enchant glint shimmer: Decals have no UV offset, so pulse the purple overlay's transparency
+	RunService.Heartbeat:Connect(function()
+		local pulse = 0.45 + 0.25 * math.sin(os.clock() * 4)
+		for decal in pairs(glintDecals) do
+			if decal.Parent then
+				decal.Transparency = pulse
+			else
+				glintDecals[decal] = nil
+			end
+		end
+	end)
 end
 
 return ArmorVisual
