@@ -25,6 +25,7 @@ Config.trainer = load("trainer")
 Config.textures = load("textures")
 Config.previews = load("previews")
 Config.icons = load("icons")
+Config.itemVoxels = load("itemvoxels")
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

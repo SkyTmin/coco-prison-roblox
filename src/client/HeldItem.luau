@@ -6,8 +6,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
+local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
 
-type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Part? }
+type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Instance? }
 local HeldItem = {}
 local rigs: { [Player]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
@@ -60,43 +61,57 @@ local function render(rig: Rig)
 	local icon = Config.iconFor(id, if level > 0 then level else nil)
 	local block = Config.block(id)
 	local cube = block ~= nil and not block.itemOnly
-	local visual = Instance.new("Part")
-	visual.Name = "HeldItemVisual"
-	visual.Size = if cube then Vector3.new(1.2, 1.2, 1.2) else Vector3.new(0.1, 2.2, 2.2)
+	local tool = Config.tools[id] ~= nil
+	local spriteSize = if tool then 1.8 else 1.4
+	local visual: BasePart
+	local container: Instance
+	if cube then
+		local p = Instance.new("Part")
+		p.Name = "HeldItemVisual"
+		p.Size = Vector3.new(1.2, 1.2, 1.2)
+		p.Material = Enum.Material.Plastic
+		if MaterialService:FindFirstChild("px_" .. id) then
+			p.MaterialVariant = "px_" .. id
+		else
+			local texture = Config.textures.textures[id]
+			if texture then
+				for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
+					local decal = Instance.new("Decal")
+					decal.Face, decal.Texture, decal.Parent = face, texture, p
+				end
+			end
+		end
+		visual, container = p, p
+	else
+		local model = ItemModels.get(id, if level > 0 then level else nil, spriteSize)
+		if not model then
+			-- no sprite data: fall back to a flat icon plane
+			local p = Instance.new("Part")
+			p.Name = "HeldItemVisual"
+			p.Size = Vector3.new(0.1, spriteSize, spriteSize)
+			p.Transparency = 1
+			if icon then
+				for _, face in ipairs({ Enum.NormalId.Left, Enum.NormalId.Right }) do
+					local decal = Instance.new("Decal")
+					decal.Face, decal.Texture, decal.Parent = face, icon, p
+				end
+			end
+			visual, container = p, p
+		else
+			model.Name = "HeldItemVisual"
+			visual, container = model.PrimaryPart :: BasePart, model
+		end
+	end
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
 	visual.Massless = true
 	visual.CastShadow = false
-	visual.Material = Enum.Material.Plastic
-	visual.Transparency = if cube then 0 else 1
-	if cube and MaterialService:FindFirstChild("px_" .. id) then
-		visual.MaterialVariant = "px_" .. id
-	elseif cube then
-		local texture = Config.textures.textures[id]
-		if texture then
-			for _, face in ipairs(Enum.NormalId:GetEnumItems()) do
-				local decal = Instance.new("Decal")
-				decal.Face, decal.Texture, decal.Parent = face, texture, visual
-			end
-		end
-	elseif icon then
-		-- The thin dimension is X, so Left/Right are the two broad image faces.
-		for _, face in ipairs({ Enum.NormalId.Left, Enum.NormalId.Right }) do
-			local decal = Instance.new("Decal")
-			decal.Face, decal.Texture, decal.Parent = face, icon, visual
-		end
-	end
-	-- Hand space (R15 RightHand): -Z forward, +Y up the arm, +X away from the body. Tuned visually
-	-- on the live character (21.10): the sprite's lower corner (handle end) sits in the palm, the head
-	-- points forward and up like Minecraft's third-person item; blocks sit in the palm as a small cube.
-	local tool = Config.tools[id] ~= nil
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
 	if cube then
 		motor.C0 = CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
 	else
-		local size = if tool then 1.8 else 1.4
-		visual.Size = Vector3.new(0.1, size, size)
+		local size = spriteSize
 		-- Tuned on the live character (21.10): handle end in the palm, head forward and a little up.
 		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
 			* CFrame.Angles(math.rad(-50), 0, 0)
@@ -104,8 +119,8 @@ local function render(rig: Rig)
 	end
 	visual.CFrame = hand.CFrame * motor.C0
 	motor.Parent = visual
-	visual.Parent = rig.character
-	rig.visual = visual
+	container.Parent = rig.character
+	rig.visual = container
 end
 
 local function clear(player: Player)
