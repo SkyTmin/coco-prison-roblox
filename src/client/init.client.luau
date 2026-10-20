@@ -190,9 +190,19 @@ local function renderSlot(
 	local n, c = stackLabel(stack)
 	local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
 	name.Text, count.Text = n, c
-	name.Visible = icon == nil
 	image.Image = icon or ""
 	image.Visible = icon ~= nil
+	-- Keep the name until the image has actually loaded (fresh uploads can take a while).
+	name.Visible = icon == nil or not image.IsLoaded
+	if icon and not image.IsLoaded then
+		local conn: RBXScriptConnection
+		conn = image:GetPropertyChangedSignal("IsLoaded"):Connect(function()
+			if image.IsLoaded then
+				name.Visible = false
+				conn:Disconnect()
+			end
+		end)
+	end
 end
 
 local function renderHotbar()
