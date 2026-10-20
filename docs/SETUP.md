@@ -28,7 +28,7 @@
 Get-ChildItem "$env:LOCALAPPDATA\Roblox\Versions" -Directory | Select-Object Name
 ```
 
-**VPN.** Studio ходит в сеть через системный прокси Windows (Happ → `127.0.0.1:10809`). Если VPN деградирует, в логе `%LOCALAPPDATA%Robloxlogs*_Studio_*_last.log` идут `SslConnectFail` к `ecsv2.roblox.com`, `apis.roblox.com`, и Studio сама закрывается через ~75 с после запуска. Проверка (через прокси должно быть не `000`):
+**VPN.** Studio ходит в сеть через системный прокси Windows (Happ → `127.0.0.1:10809`). Если VPN деградирует, в логе `%LOCALAPPDATA%Robloxlogs*_Studio_*_last.log` идут `SslConnectFail` к `ecsv2.roblox.com`, `apis.roblox.com`, (20.10.2026 так было, пока окно Studio закрывали вручную — само падение Studio из-за этого не доказано). Проверка (через прокси должно быть не `000`):
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}
