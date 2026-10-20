@@ -1,5 +1,12 @@
 {
   "source": "assets/previews/ids.json — Codex image gen + Studio upload; пусто = процедурная диорама",
-  "_source": "assets/previews/preview-*.png — Codex image gen (gpt-6-luna → image_gen), 20.10.2026. Upload each via Studio MCP upload_image and fill in rbxassetid; empty = client draws a procedural diorama.",
-  "previews": {}
+  "_source": "assets/previews/preview-*.png — Codex image gen (gpt-6-luna → image_gen), 20.10.2026; uploaded via Studio MCP upload_image 20.10.2026",
+  "previews": {
+    "prison": "rbxassetid://121878160343691",
+    "quarry": "rbxassetid://138333354305312",
+    "mountain_foot": "rbxassetid://130187719088793",
+    "underworld": "rbxassetid://97169540584042",
+    "pyramid": "rbxassetid://125858466739474",
+    "basement": "rbxassetid://119510467959258"
+  }
 }
