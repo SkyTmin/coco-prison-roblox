@@ -1,25 +1,49 @@
 # coco-prison-roblox
 
-Тюремная RPG для Roblox по мотивам Prison Classic на Cristalix: разные работы, быт, бой, фракции, боссы, ключи и сундуки. Спецификация первой главы — [wiki/PROTOTYPE-SPEC.md](wiki/PROTOTYPE-SPEC.md), каталог механик — [wiki/MECHANICS-CATALOG.md](wiki/MECHANICS-CATALOG.md), всё исследование — [wiki/README.md](wiki/README.md).
+Тюремная RPG для Roblox, воссоздающая режим **Prison Classic** с Minecraft-сервера Cristalix: спавн-тюрьма → шахты по уровням → телепорт → боссы у шахт, инвентарь и броня как в Minecraft, книги-зачарования, кейсы, нужды, фракции и банды.
 
-## Состояние
+Владелец проекта: SkyTmin. Разработку ведут ИИ-агенты (Claude Code, Codex); этот репозиторий — единственный источник правды, чтобы любой агент мог продолжить с любого места.
 
-Создано 20 октября 2026 года. Сделан каркас шага 1 из порядка реализации (§15 спецификации): профиль игрока, три инструмента, узлы работы (дерево, земля, глина, камень, уголь, железо), продажа, проверка условий уровня. Карта двора — заглушка из цветных блоков (`scripts/build-yard.luau`). Боёвка, быт, фракции, босс, ключи-предметы и сундук ещё не начаты.
+## Состояние на 20 октября 2026
+
+**Этап A (дизайн и данные) почти закрыт, код игры — каркас.** Собрано и подтверждено из игры: таблица 50 уровней, прайс и состав всех 25 шахт, 115 улучшений предметов, 19 боссов с наградами, 31 книга, кейсы, профессии и прокачки, древо навыков, нужды, карта спавна. Открытые пробелы перечислены в [docs/PROGRESS.md](docs/PROGRESS.md). Код в `src/` — рабочий скелет (профиль, узлы копания, продажа, уровни); карта и интерфейс ещё не строились.
+
+## С чего читать
+
+| Шаг | Файл | Зачем |
+| --- | --- | --- |
+| 1 | [CLAUDE.md](CLAUDE.md) | Правила работы в репозитории, где что лежит, как экономить контекст |
+| 2 | [docs/PROGRESS.md](docs/PROGRESS.md) | Что сделано, что открыто, что делать дальше |
+| 3 | [docs/GAME-DESIGN.md](docs/GAME-DESIGN.md) | Все игровые системы с цифрами и пометкой источника каждой цифры |
+| 4 | [docs/PLAN.md](docs/PLAN.md) | Этапы разработки A → F и критерии приёмки |
+| 5 | [docs/INDEX.md](docs/INDEX.md) | Карта всех исследовательских файлов с одной строкой на файл |
+| 6 | [docs/SETUP.md](docs/SETUP.md) | Установка Studio, Rojo, MCP, Codex, Blender; рабочий цикл |
 
 ## Структура
 
-| Путь | Что это |
-| --- | --- |
-| `default.project.json` | Проект Rojo: `src/shared` → ReplicatedStorage.Shared, `src/server` → ServerScriptService.Server, `src/client` → StarterPlayerScripts.Client |
-| `src/shared/Config/rpg-systems.json` | Баланс первой главы (копия `wiki/rpg-systems-config.json`); Rojo отдаёт его как ModuleScript |
-| `src/shared/` | `Config` (типизированный доступ к JSON), `Strings` (ru/en/es/fr), `Remotes`, `Types` (профиль v2) |
-| `src/server/Services/` | `ProfileService` (профили и DataStore), `WorkService` (проверка и выдача добычи), `EconomyService` (продажа, уровни) |
-| `src/client/` | Действие «Копать» для мыши, тач-кнопки и геймпада, подсветка цели, HUD |
-| `scripts/build-yard.luau` | Строит двор-заглушку в открытом place |
-| `docs/SETUP.md` | Установка Studio, MCP, Rokit/Rojo, VS Code, Blender; рабочий цикл |
-| `wiki/` | Исследование Cristalix Prison: восстановленные данные, аудиты, спецификации, скриншоты-доказательства |
-| `CLAUDE.md` | Правила для агентов, работающих в этой папке |
+```
+src/            Luau: shared (конфиги, строки, типы), server (сервисы), client (ввод, HUD)
+src/shared/Config/*.json   генерируются: node scripts/build-configs.mjs — руками не править
+scripts/        генератор конфигов, симуляция экономики, скрипт двора-заглушки, design-decisions.json
+docs/           дизайн-документ, план, прогресс, индекс, установка
+wiki/           исследование Cristalix: in-game-wiki (подтверждённые данные из игры, JSON),
+                client-audit (снимки меню, локализация клиента), web-research (поиск по сети)
+assets/         концепты (Codex image gen)
+```
 
 ## Быстрый старт
 
-См. [docs/SETUP.md](docs/SETUP.md). Коротко: `rokit install` → `rojo serve` → в Studio Rojo Connect → Command Bar с `scripts/build-yard.luau` → Play.
+```powershell
+rokit install
+node scripts/build-configs.mjs
+rojo serve
+```
+
+В Studio: Plugins → Rojo → Connect; `scripts/build-yard.luau` в Command Bar строит двор-заглушку. Подробно — [docs/SETUP.md](docs/SETUP.md).
+
+## Принципы
+
+- Цифры берутся из игры (скриншоты владельца, игровая вики `/wiki`), а не придумываются. Каждое число в документах помечено: `[вики]`, `[меню]`, `[клиент]`, `[сеть]`, `[ваниль]`, `[владелец]` или `[решение]`.
+- Сервер владеет всеми результатами; клиент шлёт только намерения.
+- Текстуры и названия свои: копировать ассеты Minecraft нельзя.
+- Интерфейс и превью локаций — в стиле оригинала (см. `wiki/in-game-wiki/JOBS-CASES-SPAWN.md`, раздел «Стиль интерфейса»).
