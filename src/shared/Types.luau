@@ -1,30 +1,38 @@
 --!strict
--- Shared type definitions. Profile schema v2 follows PROTOTYPE-SPEC.md §14.
+-- Profile schema v3 (docs/GAME-DESIGN.md, docs/PLAN.md stage 1).
 
-export type Needs = {
-	hygiene: number,
-	rest: number,
-	bladderComfort: number,
+export type ItemStack = {
+	id: string, -- item id: block id ("dirt"), tool id ("pickaxe"), consumable ("apple"), key ("ordinary_key")
+	count: number,
+	level: number?, -- for tools/weapons/armor
+	books: { { id: string, level: number } }?, -- ancient enchantments on the item
+}
+
+export type Needs = { hygiene: number, sleep: number, toilet: number }
+
+export type Professions = {
+	xp: { [string]: number }, -- mason / surveyor / blademaster
+	level: { [string]: number },
+	points: number, -- unspent upgrade points
+	upgrades: { blocks: number, money: number, mobs: number },
 }
 
 export type Profile = {
 	schemaVersion: number,
 	level: number,
-	coins: number, -- integer, in hundredths of a coin (Config.moneyScale)
-	inventory: { [string]: number }, -- resource id -> count
-	tools: { [string]: number }, -- tool id -> tier, 0 = not owned
-	weapon: number,
-	armor: number,
-	jobXp: { [string]: number },
-	workCount: number, -- accepted work targets, never decreases
-	mobKills: { [string]: number },
+	coins: number, -- integer, in 1/moneyScale
+	blocksTotal: number, -- cumulative blocks with multipliers (never spent)
+	counters: { [string]: number }, -- upgrade counters by display name ("Земля", "Крысы", …)
+	inventory: { [number]: ItemStack }, -- slots 1..36 (1..9 = hotbar)
+	armor: { [string]: ItemStack }, -- helmet / chestplate / leggings / boots
+	selectedSlot: number,
+	professions: Professions,
 	keys: { [string]: number },
-	workKeyCounter: number,
-	faction: string?,
+	passes: { [string]: boolean }, -- basement = true
 	needs: Needs,
-	quests: { [string]: string }, -- quest id -> state
-	cellStorage: { [string]: number },
-	learnedEffects: { [string]: boolean },
+	achievements: { [string]: number }, -- digger_dirt = claimed tier
+	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
+	location: string,
 	operationIds: { [string]: boolean },
 }
 

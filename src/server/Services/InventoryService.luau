@@ -1,0 +1,145 @@
+--!strict
+-- Minecraft-style inventory: 36 slots (1..9 hotbar), stacks of 64 for blocks/consumables,
+-- unstackable tools. Armor in 4 named slots. All operations run on the server.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
+local Types = require(Shared.Types)
+
+type Profile = Types.Profile
+type ItemStack = Types.ItemStack
+
+local SLOTS = 36
+local STACK = 64
+local ARMOR_SLOTS = { helmet = true, chestplate = true, leggings = true, boots = true }
+
+local InventoryService = {}
+InventoryService.SLOTS = SLOTS
+
+function InventoryService.isStackable(id: string): boolean
+	return Config.tools[id] == nil
+end
+
+-- Adds `count` of item; returns the amount that did not fit.
+function InventoryService.add(profile: Profile, id: string, count: number, level: number?): number
+	local remaining = count
+	if InventoryService.isStackable(id) then
+		for slot = 1, SLOTS do
+			local stack = profile.inventory[slot]
+			if stack and stack.id == id and stack.count < STACK then
+				local take = math.min(STACK - stack.count, remaining)
+				stack.count += take
+				remaining -= take
+				if remaining == 0 then
+					return 0
+				end
+			end
+		end
+	end
+	for slot = 1, SLOTS do
+		if remaining == 0 then
+			break
+		end
+		if not profile.inventory[slot] then
+			local take = if InventoryService.isStackable(id) then math.min(STACK, remaining) else 1
+			profile.inventory[slot] = { id = id, count = take, level = level, books = if level then {} else nil }
+			remaining -= take
+		end
+	end
+	return remaining
+end
+
+function InventoryService.count(profile: Profile, id: string): number
+	local total = 0
+	for _, stack in pairs(profile.inventory) do
+		if stack.id == id then
+			total += stack.count
+		end
+	end
+	return total
+end
+
+-- Removes up to `count`; returns how many were removed.
+function InventoryService.remove(profile: Profile, id: string, count: number): number
+	local left = count
+	for slot = SLOTS, 1, -1 do
+		local stack = profile.inventory[slot]
+		if stack and stack.id == id then
+			local take = math.min(stack.count, left)
+			stack.count -= take
+			left -= take
+			if stack.count == 0 then
+				profile.inventory[slot] = nil
+			end
+			if left == 0 then
+				break
+			end
+		end
+	end
+	return count - left
+end
+
+function InventoryService.move(profile: Profile, from: number, to: number): boolean
+	if from == to or from < 1 or to < 1 or from > SLOTS or to > SLOTS then
+		return false
+	end
+	local a, b = profile.inventory[from], profile.inventory[to]
+	if a and b and a.id == b.id and InventoryService.isStackable(a.id) then
+		local take = math.min(STACK - b.count, a.count)
+		b.count += take
+		a.count -= take
+		if a.count == 0 then
+			profile.inventory[from] = nil
+		end
+		return true
+	end
+	profile.inventory[from], profile.inventory[to] = b, a
+	return true
+end
+
+-- Tool currently in hand: the stack in the selected hotbar slot if it is a tool.
+function InventoryService.heldTool(profile: Profile): (string?, number)
+	local stack = profile.inventory[profile.selectedSlot]
+	if stack and Config.tools[stack.id] then
+		return stack.id, stack.level or 1
+	end
+	return nil, 0
+end
+
+-- Best tool of a kind anywhere in the inventory (used by the upgrade menu).
+function InventoryService.findTool(profile: Profile, id: string): (number?, ItemStack?)
+	local bestSlot, best: ItemStack? = nil, nil
+	for slot, stack in pairs(profile.inventory) do
+		if stack.id == id and (not best or (stack.level or 1) > (best.level or 1)) then
+			bestSlot, best = slot, stack
+		end
+	end
+	return bestSlot, best
+end
+
+function InventoryService.equipArmor(profile: Profile, slot: number): boolean
+	local stack = profile.inventory[slot]
+	if not stack or not ARMOR_SLOTS[stack.id] then
+		return false
+	end
+	local current = profile.armor[stack.id]
+	profile.armor[stack.id] = stack
+	profile.inventory[slot] = current
+	return true
+end
+
+-- Sells every block stack; returns money units earned.
+function InventoryService.sellAll(profile: Profile, multiplier: number): number
+	local total = 0
+	for slot, stack in pairs(profile.inventory) do
+		local block = Config.block(stack.id)
+		if block then
+			total += math.floor(block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5)
+			profile.inventory[slot] = nil
+		end
+	end
+	return total
+end
+
+return InventoryService

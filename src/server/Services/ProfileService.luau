@@ -1,11 +1,7 @@
 --!strict
--- Player profiles: one in-memory profile per player, saved to DataStore on leave,
--- on server close and every AUTOSAVE_SECONDS. Key: User_{UserId}, schema v2.
---
--- Safety rules (PROTOTYPE-SPEC.md §14, ROBLOX-TECH-NOTES.md):
---  * a failed load never produces a profile that can overwrite real data (loadFailed => no saves);
---  * all mutations go through Mutate() on the server, the client only receives copies;
---  * TODO before public test: session locking, save queue per key, bounded retries with jitter.
+-- Player profiles (schema v3). In-memory per player, saved on leave / close / every AUTOSAVE_SECONDS.
+-- Rules: failed load => session never saved; all mutations via Mutate(); client gets copies only.
+-- TODO before public test: session locking, per-key save queue, bounded retries with jitter.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -19,34 +15,36 @@ local Remotes = require(Shared.Remotes)
 type Profile = Types.Profile
 type Session = { profile: Profile, loadFailed: boolean, dirty: boolean, saving: boolean }
 
-local STORE_NAME = "PlayerProfiles_v2"
-local SCHEMA_VERSION = 2
+local STORE_NAME = "PlayerProfiles_v3"
+local SCHEMA_VERSION = 3
 local AUTOSAVE_SECONDS = 120
 
 local ProfileService = {}
-
 local sessions: { [Player]: Session } = {}
 local store: DataStore? = nil
 
-local function defaultProfile(): Profile
+function ProfileService.defaultProfile(): Profile
 	return {
 		schemaVersion = SCHEMA_VERSION,
 		level = 1,
 		coins = 0,
-		inventory = {},
-		tools = { axe = 1, shovel = 0, pickaxe = 0 }, -- axe is the starting tool (spec §3)
-		weapon = 1,
-		armor = 1,
-		jobXp = {},
-		workCount = 0,
-		mobKills = {},
+		blocksTotal = 0,
+		counters = {},
+		inventory = { [1] = { id = "shovel", count = 1, level = 1, books = {} } }, -- starting shovel [владелец]
+		armor = {},
+		selectedSlot = 1,
+		professions = {
+			xp = { mason = 0, surveyor = 0, blademaster = 0 },
+			level = { mason = 0, surveyor = 0, blademaster = 0 },
+			points = 0,
+			upgrades = { blocks = 0, money = 0, mobs = 0 },
+		},
 		keys = {},
-		workKeyCounter = 0,
-		faction = nil,
-		needs = { hygiene = 100, rest = 100, bladderComfort = 100 },
-		quests = {},
-		cellStorage = {},
-		learnedEffects = {},
+		passes = {},
+		needs = { hygiene = 100, sleep = 100, toilet = 100 },
+		achievements = {},
+		stats = {},
+		location = "prison",
 		operationIds = {},
 	}
 end
@@ -55,14 +53,14 @@ local function keyFor(player: Player): string
 	return "User_" .. tostring(player.UserId)
 end
 
--- Fills missing fields with defaults; older schemas are upgraded field by field.
 local function migrate(data: any): Profile
-	local profile = defaultProfile()
-	if typeof(data) == "table" then
+	local profile = ProfileService.defaultProfile()
+	if typeof(data) == "table" and data.schemaVersion == SCHEMA_VERSION then
 		for field, value in pairs(data) do
 			(profile :: any)[field] = value
 		end
 	end
+	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
 	return profile
 end
@@ -74,20 +72,9 @@ local function load(player: Player)
 			return (store :: DataStore):GetAsync(keyFor(player))
 		end)
 	end
-	local session: Session = {
-		profile = migrate(if ok then result else nil),
-		loadFailed = not ok,
-		dirty = false,
-		saving = false,
-	}
+	local session: Session = { profile = migrate(if ok then result else nil), loadFailed = not ok, dirty = false, saving = false }
 	if not ok then
-		warn(
-			string.format(
-				"[ProfileService] load failed for %s (%s); this session will NOT be saved",
-				player.Name,
-				tostring(result)
-			)
-		)
+		warn(string.format("[ProfileService] load failed for %s (%s); session will NOT be saved", player.Name, tostring(result)))
 	end
 	sessions[player] = session
 	ProfileService.Replicate(player)
@@ -117,7 +104,6 @@ function ProfileService.Get(player: Player): Profile?
 	return if session then session.profile else nil
 end
 
--- Applies a server-side change and replicates the result to the owner.
 function ProfileService.Mutate(player: Player, mutator: (Profile) -> ())
 	local session = sessions[player]
 	if not session then
@@ -142,18 +128,13 @@ function ProfileService.Start()
 	if ok then
 		store = result
 	else
-		warn(
-			"[ProfileService] DataStore unavailable ("
-				.. tostring(result)
-				.. "); running without saves"
-		)
+		warn("[ProfileService] DataStore unavailable (" .. tostring(result) .. "); running without saves")
 	end
 
 	Players.PlayerAdded:Connect(load)
 	for _, player in ipairs(Players:GetPlayers()) do
 		task.spawn(load, player)
 	end
-
 	Players.PlayerRemoving:Connect(function(player)
 		local session = sessions[player]
 		if session then
@@ -161,7 +142,6 @@ function ProfileService.Start()
 			sessions[player] = nil
 		end
 	end)
-
 	game:BindToClose(function()
 		if RunService:IsStudio() and not store then
 			return
@@ -170,7 +150,6 @@ function ProfileService.Start()
 			save(player, session)
 		end
 	end)
-
 	task.spawn(function()
 		while true do
 			task.wait(AUTOSAVE_SECONDS)
