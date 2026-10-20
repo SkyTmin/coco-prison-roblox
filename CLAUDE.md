@@ -42,12 +42,18 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 ## Studio loop without the Rojo plugin (agent sessions)
 
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
-2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync.luau`, then pass
-   the file's text as `code` to `execute_luau` (Edit mode) — it sets each script's Source by path. The
-   optional comma list limits it to the changed files (a full sync is ~226 KB; keep it partial).
-   `rojo serve` + HttpService from Studio hangs; do not use it.
-3. Map: run `scripts/build-prison.luau`, then `scripts/decorate-prison.luau` (Edit). Textures:
-   `scripts/build-textures.luau` (Edit) creates MaterialVariants — runtime scripts cannot. All idempotent.
+2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync-part.luau`
+   (the comma list limits it to changed files). Keep `node scripts/serve-repo.mjs` running (serves the
+   repo on 127.0.0.1:8766), then run `scripts/studio-loader.luau` via `execute_luau` (Edit) with FILE =
+   the file to run — Studio fetches and runs it itself (HttpService in `task.spawn`; a GetAsync on the
+   execute_luau thread hangs). Read `ServerStorage.SyncResult` ~2 s later. The loader also runs any
+   build script, so no script text ever goes through the MCP call.
+3. Map, in this order (all idempotent, Edit mode, via the loader): `scripts/build-textures.luau`
+   (MaterialVariants px_*), `scripts/build-prison.luau` (ground, walls, paths, plaza, pits),
+   `scripts/build-buildings.luau` (Рынок/Столовая/Спальня/Баня/Задания/Тренер with interiors and the
+   Restore* tags), `scripts/build-npcs.luau` (R15 NPC rigs tagged on HumanoidRootPart, chest model for
+   OrdinaryCase), `scripts/decorate-prison.luau` (outdoor props). Keep-out rectangles for the random
+   props live at the top of decorate-prison; update them when a building footprint changes.
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
