@@ -72,9 +72,20 @@ local function load(player: Player)
 			return (store :: DataStore):GetAsync(keyFor(player))
 		end)
 	end
-	local session: Session = { profile = migrate(if ok then result else nil), loadFailed = not ok, dirty = false, saving = false }
+	local session: Session = {
+		profile = migrate(if ok then result else nil),
+		loadFailed = not ok,
+		dirty = false,
+		saving = false,
+	}
 	if not ok then
-		warn(string.format("[ProfileService] load failed for %s (%s); session will NOT be saved", player.Name, tostring(result)))
+		warn(
+			string.format(
+				"[ProfileService] load failed for %s (%s); session will NOT be saved",
+				player.Name,
+				tostring(result)
+			)
+		)
 	end
 	sessions[player] = session
 	ProfileService.Replicate(player)
@@ -128,7 +139,11 @@ function ProfileService.Start()
 	if ok then
 		store = result
 	else
-		warn("[ProfileService] DataStore unavailable (" .. tostring(result) .. "); running without saves")
+		warn(
+			"[ProfileService] DataStore unavailable ("
+				.. tostring(result)
+				.. "); running without saves"
+		)
 	end
 
 	Players.PlayerAdded:Connect(load)

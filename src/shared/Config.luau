@@ -43,7 +43,13 @@ export type Block = {
 	upgradeCounter: string?,
 }
 
-export type LevelRule = { level: number, money: number, blocks: number, hearts: number, skillPoints: number }
+export type LevelRule = {
+	level: number,
+	money: number,
+	blocks: number,
+	hearts: number,
+	skillPoints: number,
+}
 
 export type Upgrade = {
 	from: number,
@@ -61,7 +67,12 @@ export type Location = {
 	unlockLevel: number,
 	requiresPass: boolean,
 	pvp: boolean,
-	mine: { size: { number }, resetSeconds: number, warnSeconds: number, shares: { [string]: number } },
+	mine: {
+		size: { number },
+		resetSeconds: number,
+		warnSeconds: number,
+		shares: { [string]: number },
+	},
 	sellList: { string },
 }
 
@@ -140,7 +151,8 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number): num
 			return nil
 		end
 		local enchant = Config.enchantForLevel(toolId :: string, toolLevel)
-		mult = Config.vanilla.toolSpeed[material] + (if enchant > 0 then enchant * enchant + 1 else 0)
+		mult = Config.vanilla.toolSpeed[material]
+			+ (if enchant > 0 then enchant * enchant + 1 else 0)
 	end
 	return math.max(0.05, block.hardness * 1.5 / mult)
 end

@@ -43,7 +43,8 @@ function InventoryService.add(profile: Profile, id: string, count: number, level
 		end
 		if not profile.inventory[slot] then
 			local take = if InventoryService.isStackable(id) then math.min(STACK, remaining) else 1
-			profile.inventory[slot] = { id = id, count = take, level = level, books = if level then {} else nil }
+			profile.inventory[slot] =
+				{ id = id, count = take, level = level, books = if level then {} else nil }
 			remaining -= take
 		end
 	end
@@ -135,7 +136,9 @@ function InventoryService.sellAll(profile: Profile, multiplier: number): number
 	for slot, stack in pairs(profile.inventory) do
 		local block = Config.block(stack.id)
 		if block then
-			total += math.floor(block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5)
+			total += math.floor(
+				block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5
+			)
 			profile.inventory[slot] = nil
 		end
 	end

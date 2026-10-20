@@ -1,7 +1,7 @@
 --!strict
--- Selling and level-ups. Both are computed on the server from the live profile;
--- the client never sends amounts (PROTOTYPE-SPEC.md §4, §14).
--- Sell points: any BasePart tagged "SellPoint" (a ProximityPrompt is created if missing).
+-- Selling, shops, item upgrades and level-ups. Everything is computed from the live profile.
+-- NPC markup: BaseParts tagged "SellPoint", "ItemShop", "FoodShop" get a ProximityPrompt; the client
+-- opens the matching window when triggered (server fires OpenMenu).
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,8 +11,12 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local InventoryService = require(script.Parent.InventoryService)
+local ProfessionService = require(script.Parent.ProfessionService)
 
-local SELL_TAG = "SellPoint"
+local SHOP_PRICES: { [string]: number } = { shovel = 4, axe = 4, pickaxe = 22.5, shears = 4000 } -- [меню]
+local FOOD_PRICES: { [string]: number } = { apple = 0.03, bread = 0.25, cooked_chicken = 0.5 } -- [меню]
+local PROMPTS = { SellPoint = "sell", ItemShop = "shop", FoodShop = "food" }
 
 local EconomyService = {}
 
@@ -20,25 +24,19 @@ local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
+local function units(dollars: number): number
+	return math.floor(dollars * Config.moneyScale + 0.5)
+end
+
 local function sell(player: Player)
-	if not ProfileService.Get(player) then
+	local profile = ProfileService.Get(player)
+	if not profile then
 		return
 	end
 	local total = 0
 	ProfileService.Mutate(player, function(p)
-		for id, count in pairs(p.inventory) do
-			local resource = Config.resource(id)
-			if resource and count > 0 then
-				total += count * resource.coinPrice * Config.moneyScale
-				p.inventory[id] = nil
-			end
-		end
-		if total > 0 then
-			p.coins += total
-			if p.quests.first_sale ~= "done" then
-				p.quests.first_sale = "done"
-			end
-		end
+		total = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
+		p.coins += total
 	end)
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
@@ -47,20 +45,84 @@ local function sell(player: Player)
 	end
 end
 
-local function bindSellPoint(part: Instance)
-	if not part:IsA("BasePart") then
+local function buy(player: Player, id: any)
+	if typeof(id) ~= "string" then
 		return
 	end
-	local prompt = part:FindFirstChildOfClass("ProximityPrompt")
-	if not prompt then
-		prompt = Instance.new("ProximityPrompt")
-		prompt.ActionText = Strings.t("sell_prompt")
-		prompt.HoldDuration = 0.5
-		prompt.MaxActivationDistance = 8
-		prompt.Parent = part
+	local price = SHOP_PRICES[id] or FOOD_PRICES[id]
+	if not price then
+		return
 	end
-	-- ProximityPrompt.Triggered fires on the server with the triggering player.
-	(prompt :: ProximityPrompt).Triggered:Connect(sell)
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return
+	end
+	if profile.coins < units(price) then
+		toast(player, "not_enough_money")
+		return
+	end
+	local overflow = 0
+	ProfileService.Mutate(player, function(p)
+		p.coins -= units(price)
+		overflow = InventoryService.add(p, id, 1, if Config.tools[id] then 1 else nil)
+		if overflow > 0 then
+			p.coins += units(price) -- refund when it does not fit
+		end
+	end)
+	if overflow > 0 then
+		toast(player, "bag_full")
+	else
+		toast(player, "bought", Strings.itemName(id, 1, Strings.localeOf(player)))
+	end
+end
+
+local function upgrade(player: Player, id: any)
+	if typeof(id) ~= "string" or not Config.tools[id] then
+		return
+	end
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return
+	end
+	local slot, stack = InventoryService.findTool(profile, id)
+	if not slot or not stack then
+		local armor = profile.armor[id]
+		if armor then
+			stack = armor
+		else
+			return
+		end
+	end
+	local up = Config.upgrade(id, stack.level or 1)
+	if not up then
+		toast(player, "upgrade_max")
+		return
+	end
+	local missing = {}
+	if profile.coins < units(up.cost) then
+		table.insert(missing, Strings.money(units(up.cost)) .. " $")
+	end
+	for counter, needed in pairs(up.requirements) do
+		local have = if counter == "Оружейник" then 0 else (profile.counters[counter] or 0)
+		if needed and have < needed then
+			table.insert(
+				missing,
+				string.format("%s %s/%s", counter, Strings.big(have), Strings.big(needed))
+			)
+		end
+	end
+	if #missing > 0 then
+		toast(player, "upgrade_need", table.concat(missing, ", "))
+		return
+	end
+	ProfileService.Mutate(player, function(p)
+		p.coins -= units(up.cost)
+		local target = if slot then p.inventory[slot] else p.armor[id]
+		if target then
+			target.level = up.to
+		end
+	end)
+	toast(player, "upgraded", Strings.itemName(id, up.to, Strings.localeOf(player)), up.to)
 end
 
 local function levelUp(player: Player)
@@ -68,53 +130,96 @@ local function levelUp(player: Player)
 	if not profile then
 		return
 	end
-	local locale = Strings.localeOf(player)
-	local nextLevel = profile.level + 1
-	local rule = Config.levelRule(nextLevel)
-	if not rule or nextLevel > Config.raw.chapter.maxLevel then
+	local rule = Config.levelRule(profile.level + 1)
+	if not rule then
 		toast(player, "level_max")
 		return
 	end
-	if profile.workCount < rule.totalWork then
-		toast(player, "level_need_work", profile.workCount, rule.totalWork)
+	if profile.blocksTotal < rule.blocks then
+		toast(
+			player,
+			"level_need_blocks",
+			Strings.big(profile.blocksTotal),
+			Strings.big(rule.blocks)
+		)
 		return
 	end
-	local cost = rule.coinCost * Config.moneyScale
-	if profile.coins < cost then
-		toast(player, "level_need_coins", tostring(rule.coinCost))
+	if profile.coins < units(rule.money) then
+		toast(player, "level_need_money", Strings.money(profile.coins), Strings.big(rule.money))
 		return
 	end
-	if rule.quest and profile.quests[rule.quest] ~= "done" then
-		toast(player, "level_need_quest", Strings.t("quest_" .. rule.quest, locale))
-		return
-	end
-	if rule.mobKills then
-		for mob, needed in pairs(rule.mobKills) do
-			local have = profile.mobKills[mob] or 0
-			if have < needed then
-				toast(player, "level_need_kills", Strings.t("mob_" .. mob, locale), have, needed)
-				return
-			end
-		end
-	end
-
 	ProfileService.Mutate(player, function(p)
-		p.coins -= cost
-		p.level = nextLevel
-		-- Level 3 opens the quarry: the pickaxe is granted with it (spec §3).
-		if nextLevel >= 3 and (p.tools.pickaxe or 0) < 1 then
-			p.tools.pickaxe = 1
-		end
+		p.coins -= units(rule.money)
+		p.level = rule.level
 	end)
-	toast(player, "level_reached", nextLevel)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid.MaxHealth = rule.hearts * 2
+		humanoid.Health = humanoid.MaxHealth
+	end
+	toast(player, "level_reached", rule.level)
+end
+
+local function bindPrompt(part: Instance, kind: string)
+	if not part:IsA("BasePart") then
+		return
+	end
+	local prompt = part:FindFirstChildOfClass("ProximityPrompt") or Instance.new("ProximityPrompt")
+	prompt.ActionText = Strings.t(
+		if kind == "sell"
+			then "sell_prompt"
+			elseif kind == "shop" then "shop_prompt"
+			else "food_prompt"
+	)
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 8
+	prompt.Parent = part
+	prompt.Triggered:Connect(function(player)
+		Remotes.event("OpenMenu"):FireClient(player, kind)
+	end)
 end
 
 function EconomyService.Start()
-	for _, part in ipairs(CollectionService:GetTagged(SELL_TAG)) do
-		bindSellPoint(part)
+	for tag, kind in pairs(PROMPTS) do
+		for _, part in ipairs(CollectionService:GetTagged(tag)) do
+			bindPrompt(part, kind)
+		end
+		CollectionService:GetInstanceAddedSignal(tag):Connect(function(part)
+			bindPrompt(part, kind)
+		end)
 	end
-	CollectionService:GetInstanceAddedSignal(SELL_TAG):Connect(bindSellPoint)
+	Remotes.event("Sell").OnServerEvent:Connect(sell)
+	Remotes.event("BuyItem").OnServerEvent:Connect(buy)
+	Remotes.event("UpgradeItem").OnServerEvent:Connect(upgrade)
 	Remotes.event("LevelUp").OnServerEvent:Connect(levelUp)
+	Remotes.event("InventoryMove").OnServerEvent:Connect(function(player, from, to)
+		if typeof(from) == "number" and typeof(to) == "number" then
+			ProfileService.Mutate(player, function(p)
+				InventoryService.move(p, from, to)
+			end)
+		end
+	end)
+	Remotes.event("SelectSlot").OnServerEvent:Connect(function(player, n)
+		if typeof(n) == "number" and n >= 1 and n <= 9 and n == math.floor(n) then
+			ProfileService.Mutate(player, function(p)
+				p.selectedSlot = n
+			end)
+		end
+	end)
+	Remotes.event("EquipArmor").OnServerEvent:Connect(function(player, slot)
+		if typeof(slot) == "number" then
+			ProfileService.Mutate(player, function(p)
+				InventoryService.equipArmor(p, slot)
+			end)
+		end
+	end)
+	Remotes.event("ClaimPoints").OnServerEvent:Connect(function(player)
+		-- Points are granted on level-up already; the button exists for parity with the original UI.
+		ProfileService.Replicate(player)
+	end)
 end
 
+EconomyService.SHOP_PRICES = SHOP_PRICES
+EconomyService.FOOD_PRICES = FOOD_PRICES
 return EconomyService
