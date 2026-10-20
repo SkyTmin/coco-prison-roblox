@@ -11,7 +11,7 @@
     "golden_apple": "rbxassetid://136132273272949",
     "chestplate_iron": "rbxassetid://78072525767618",
     "leggings_wood": "rbxassetid://112358280356796",
-    "shovel_wood": "rbxassetid://82350366712316",
+    "shovel_wood": "rbxassetid://124201732381557",
     "chestplate_diamond": "rbxassetid://109540569174813",
     "apple": "rbxassetid://120942107455296",
     "axe_iron": "rbxassetid://132033215299780",
@@ -42,6 +42,15 @@
     "cooked_chicken": "rbxassetid://102610844466165",
     "axe_wood": "rbxassetid://103434968526793",
     "key_ordinary": "rbxassetid://75579410187432",
-    "ordinaryCase": "rbxassetid://97757396066287"
-  }
+    "ordinaryCase": "rbxassetid://97757396066287",
+    "shears": "rbxassetid://120052232546354",
+    "bow": "rbxassetid://96769503822335",
+    "arrow": "rbxassetid://105946646329563",
+    "money": "rbxassetid://98688666877272",
+    "ancient_star": "rbxassetid://99617654204073",
+    "ancient_key": "rbxassetid://101987130582906",
+    "oblivion_scroll": "rbxassetid://135671510712139",
+    "basement_pass": "rbxassetid://93622354590349"
+  },
+  "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557"
 }

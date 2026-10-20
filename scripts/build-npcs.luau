@@ -47,7 +47,7 @@ end
 
 local function sign(target, text, offset)
 	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.fromOffset(220, 40)
+	gui.Size = UDim2.fromOffset(88, 16)
 	gui.StudsOffset = Vector3.new(0, offset or 4, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = 120
@@ -174,7 +174,7 @@ end
 npc({
 	name = "Buyer",
 	tag = "SellPoint",
-	cf = facing(-22, 12, 0, 0),
+	cf = facing(14, -36, 0, -36),
 	label = "Скупщик блоков",
 	skin = SKIN[2],
 	shirt = Color3.fromRGB(60, 90, 60),
@@ -183,9 +183,20 @@ npc({
 	apron = Color3.fromRGB(110, 80, 40),
 })
 npc({
+	name = "Buyer2",
+	tag = "SellPoint",
+	cf = facing(14, 68, 0, 68),
+	label = "Скупщик блоков",
+	skin = SKIN[3],
+	shirt = Color3.fromRGB(60, 90, 60),
+	pants = Color3.fromRGB(50, 45, 40),
+	hat = "cap",
+	apron = Color3.fromRGB(110, 80, 40),
+})
+npc({
 	name = "ItemShop",
 	tag = "ItemShop",
-	cf = facing(22, 12, 0, 0),
+	cf = facing(120, -121, 120, -90),
 	label = "Продавец предметов",
 	skin = SKIN[1],
 	shirt = Color3.fromRGB(120, 70, 40),
@@ -195,7 +206,7 @@ npc({
 npc({
 	name = "FoodShop",
 	tag = "FoodShop",
-	cf = facing(22, -12, 0, 0),
+	cf = facing(104, -104, 104, -90),
 	label = "Продавец еды",
 	skin = SKIN[4],
 	shirt = Color3.fromRGB(240, 240, 240),
@@ -206,7 +217,7 @@ npc({
 npc({
 	name = "Trainer",
 	tag = "TrainerNpc",
-	cf = facing(72, 128, 0, 0),
+	cf = facing(78, 132, 70, 132),
 	label = "Тренер",
 	skin = SKIN[3],
 	shirt = Color3.fromRGB(200, 60, 50),
@@ -216,7 +227,7 @@ npc({
 npc({
 	name = "QuestGiver",
 	tag = "QuestNpc",
-	cf = facing(6, -40, 0, 0),
+	cf = facing(-52, -58, 0, 0),
 	label = "Задания",
 	skin = SKIN[1],
 	shirt = Color3.fromRGB(70, 80, 120),
@@ -234,88 +245,122 @@ npc({
 	hat = "cap",
 })
 
--- Ordinary case as a chest: base is the tagged part, lid + bands + lock are decoration.
-local chest = Instance.new("Model")
-chest.Name = "OrdinaryCase"
-chest.Parent = folder
-local base = part(
-	"Base",
-	Vector3.new(5, 3, 4),
-	CFrame.new(-22, 1.5, -12),
-	Color3.fromRGB(150, 110, 70),
-	Enum.Material.Plastic,
-	chest
-)
-base.CanCollide = true
-base.MaterialVariant = "px_planks"
-local lid = part(
-	"Lid",
-	Vector3.new(5.2, 1.4, 4.2),
-	CFrame.new(-22, 3.7, -12),
-	Color3.fromRGB(150, 110, 70),
-	Enum.Material.Plastic,
-	chest
-)
-lid.MaterialVariant = "px_planks"
-lid.CanCollide = true
-for _, dx in ipairs({ -1.8, 1.8 }) do
-	part(
-		"Band",
-		Vector3.new(0.5, 3.1, 4.1),
-		CFrame.new(-22 + dx, 1.5, -12),
-		Color3.fromRGB(60, 60, 66),
-		Enum.Material.Metal,
-		chest
+-- Chests built in a local frame: -Z (the lock side) faces the target (the fountain).
+-- style: wood = Color3 for the body, band = Color3 for the bands, glow = Color3 for the slit light.
+local function chest(name, tag, pos, target, style)
+	local model = Instance.new("Model")
+	model.Name = name
+	model.Parent = folder
+	local cf = CFrame.lookAt(Vector3.new(pos.X, 0, pos.Z), Vector3.new(target.X, 0, target.Z))
+	local function at(dx, dy, dz)
+		return cf * CFrame.new(dx, dy, dz)
+	end
+	local pedestal = part(
+		"Pedestal",
+		Vector3.new(7, 0.6, 6),
+		at(0, 0.3, 0),
+		Color3.fromRGB(96, 96, 100),
+		Enum.Material.Plastic,
+		model
 	)
-	part(
-		"LidBand",
-		Vector3.new(0.5, 1.5, 4.3),
-		CFrame.new(-22 + dx, 3.7, -12),
-		Color3.fromRGB(60, 60, 66),
-		Enum.Material.Metal,
-		chest
+	pedestal.MaterialVariant = style.pedestal or "px_cobblestone"
+	pedestal.CanCollide = true
+	local base =
+		part("Base", Vector3.new(5, 3, 4), at(0, 2.1, 0), style.wood, Enum.Material.Plastic, model)
+	base.CanCollide = true
+	if style.variant then
+		base.MaterialVariant = style.variant
+	else
+		base.Material = Enum.Material.WoodPlanks
+	end
+	local lid = part(
+		"Lid",
+		Vector3.new(5.2, 1.4, 4.2),
+		at(0, 4.3, 0),
+		style.wood,
+		Enum.Material.Plastic,
+		model
 	)
+	lid.CanCollide = true
+	if style.variant then
+		lid.MaterialVariant = style.variant
+	else
+		lid.Material = Enum.Material.WoodPlanks
+	end
+	for _, dx in ipairs({ -1.8, 1.8 }) do
+		part(
+			"Band",
+			Vector3.new(0.5, 3.1, 4.1),
+			at(dx, 2.1, 0),
+			style.band,
+			Enum.Material.Metal,
+			model
+		)
+		part(
+			"LidBand",
+			Vector3.new(0.5, 1.5, 4.3),
+			at(dx, 4.3, 0),
+			style.band,
+			Enum.Material.Metal,
+			model
+		)
+	end
+	part("Lock", Vector3.new(1, 1.2, 0.4), at(0, 3.6, -2.1), style.lock, Enum.Material.Metal, model)
+	part(
+		"Keyhole",
+		Vector3.new(0.3, 0.5, 0.2),
+		at(0, 3.55, -2.3),
+		Color3.fromRGB(30, 30, 30),
+		Enum.Material.Metal,
+		model
+	)
+	local glow = part(
+		"Glow",
+		Vector3.new(4.6, 0.2, 3.6),
+		at(0, 3.65, 0),
+		style.glow,
+		Enum.Material.Neon,
+		model
+	)
+	glow.Transparency = 0.3
+	local light = Instance.new("PointLight")
+	light.Color = style.glow
+	light.Range = 10
+	light.Parent = glow
+	model.PrimaryPart = base
+	CollectionService:AddTag(base, tag)
+	if style.caseId then
+		base:SetAttribute("CaseId", style.caseId)
+	end
+	sign(base, style.label, 5)
+	return model
 end
-part(
-	"Lock",
-	Vector3.new(1, 1.2, 0.4),
-	CFrame.new(-22, 3, -14.1),
-	Color3.fromRGB(230, 190, 70),
-	Enum.Material.Metal,
-	chest
-)
-part(
-	"Keyhole",
-	Vector3.new(0.3, 0.5, 0.2),
-	CFrame.new(-22, 2.95, -14.3),
-	Color3.fromRGB(30, 30, 30),
-	Enum.Material.Metal,
-	chest
-)
-local glow = part(
-	"Glow",
-	Vector3.new(4.6, 0.2, 3.6),
-	CFrame.new(-22, 3.05, -12),
-	Color3.fromRGB(255, 210, 90),
-	Enum.Material.Neon,
-	chest
-)
-glow.Transparency = 0.3
-local light = Instance.new("PointLight")
-light.Color = Color3.fromRGB(255, 200, 90)
-light.Range = 10
-light.Parent = glow
-chest.PrimaryPart = base
-CollectionService:AddTag(base, "OrdinaryCase")
-sign(base, "Обычный кейс", 5)
-part(
-	"Pedestal",
-	Vector3.new(7, 0.6, 6),
-	CFrame.new(-22, 0.3, -12),
-	Color3.fromRGB(96, 96, 100),
-	Enum.Material.Plastic,
-	chest
-).MaterialVariant =
-	"px_cobblestone"
+local centre = Vector3.new(0, 0, 0)
+chest("OrdinaryCase", "OrdinaryCase", Vector3.new(-26, 0, -34), centre, {
+	wood = Color3.fromRGB(150, 110, 70),
+	variant = "px_planks",
+	band = Color3.fromRGB(60, 60, 66),
+	lock = Color3.fromRGB(230, 190, 70),
+	glow = Color3.fromRGB(255, 210, 90),
+	label = "Обычный кейс",
+	caseId = "ordinaryCase",
+})
+chest("AncientCase", "AncientCase", Vector3.new(26, 0, -34), centre, {
+	wood = Color3.fromRGB(70, 50, 40),
+	band = Color3.fromRGB(220, 180, 70),
+	lock = Color3.fromRGB(240, 210, 90),
+	glow = Color3.fromRGB(140, 90, 255),
+	label = "Древний кейс",
+	caseId = "ancientCase",
+	pedestal = "px_stone",
+})
+chest("EnderChest", "EnderChest", Vector3.new(-36, 0, 14), centre, {
+	wood = Color3.fromRGB(28, 22, 40),
+	band = Color3.fromRGB(20, 60, 50),
+	lock = Color3.fromRGB(60, 220, 160),
+	glow = Color3.fromRGB(60, 230, 170),
+	label = "Эндер-сундук",
+	pedestal = "px_stone",
+})
 
 return "[build-npcs] " .. #folder:GetChildren() .. " models"

@@ -35,5 +35,48 @@
       "fr"
     ],
     "itemIcons": true
+  },
+  "digging": {
+    "_source": "[владелец] 21.10.2026: копать можно руками (медленно) и инструментами (быстро), как в Minecraft; [решение]: без нужного инструмента время ×5 для кирочных блоков, ×1.5 для остальных, блок всё равно выпадает",
+    "handAllowed": true,
+    "wrongToolMultiplier": 5,
+    "noToolNeededMultiplier": 1.5,
+    "dropWithoutTool": true
+  },
+  "survival": {
+    "_source": "[владелец] 21.10.2026: здоровье сердечками и голод как в Minecraft, еда восстанавливает голод; смерть в PvP-зоне — броня и инструменты остаются, остальное выпадает дропом на землю; Эндер-сундук — личное сохраняемое хранилище. Числа — [решение] по ванильным значениям Minecraft",
+    "hunger": {
+      "max": 20,
+      "drainPerMinuteIdle": 0.5,
+      "drainPerBlockDug": 0.1,
+      "drainPerSprintSecond": 0.1,
+      "regenHealthAbove": 18,
+      "regenHealthPerSecond": 1,
+      "starveBelow": 0,
+      "starveDamagePerSecond": 0.5,
+      "starveMinHealth": 1
+    },
+    "food": {
+      "apple": 4,
+      "bread": 5,
+      "cooked_chicken": 6,
+      "golden_apple": 4,
+      "melon": 2
+    },
+    "death": {
+      "dropInPvpOnly": true,
+      "keep": [
+        "armor",
+        "tools"
+      ],
+      "dropDespawnSeconds": 300,
+      "pickupRadius": 4
+    },
+    "enderChest": {
+      "slots": 27,
+      "perPlayer": true,
+      "persistent": true,
+      "keepOnDeath": true
+    }
   }
 }

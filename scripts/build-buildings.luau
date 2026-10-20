@@ -17,7 +17,6 @@ for _, name in ipairs({
 	"Market",
 	"Bedroom",
 	"Canteen",
-	"Quests",
 	"Trainer",
 	"Toilet",
 }) do
@@ -74,7 +73,7 @@ local function light(parent, color, range, brightness)
 end
 local function sign(target, text, offset)
 	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.fromOffset(240, 44)
+	gui.Size = UDim2.fromOffset(96, 18)
 	gui.StudsOffset = Vector3.new(0, offset or 3, 0)
 	gui.AlwaysOnTop = true
 	gui.MaxDistance = 200
@@ -127,15 +126,54 @@ local function shell(spec)
 	m.Parent = buildings
 	local cx, cz, w, d, h = spec.cx, spec.cz, spec.w, spec.d, spec.h
 	local T = 1.5 -- wall thickness
-	local floor = part(
-		"Floor",
-		Vector3.new(w, 0.6, d),
-		CFrame.new(cx, 0.3, cz),
-		STONE,
-		spec.floor or "px_planks",
-		m
-	)
-	floor.CanCollide = true
+	local function floorSlab(x0, x1, z0, z1)
+		if x1 - x0 < 0.5 or z1 - z0 < 0.5 then
+			return
+		end
+		local f = part(
+			"Floor",
+			Vector3.new(x1 - x0, 0.6, z1 - z0),
+			CFrame.new((x0 + x1) / 2, 0.3, (z0 + z1) / 2),
+			spec.floorColor or STONE,
+			spec.floor or "px_planks",
+			m
+		)
+		f.CanCollide = true
+	end
+	local holes = spec.floorHoles or {}
+	if #holes == 0 then
+		floorSlab(cx - w / 2, cx + w / 2, cz - d / 2, cz + d / 2)
+	else
+		local xs = { cx - w / 2, cx + w / 2 }
+		for _, h in ipairs(holes) do
+			table.insert(xs, h.x0)
+			table.insert(xs, h.x1)
+		end
+		table.sort(xs)
+		for i = 1, #xs - 1 do
+			local x0, x1 = xs[i], xs[i + 1]
+			local cuts = { cz - d / 2, cz + d / 2 }
+			for _, h in ipairs(holes) do
+				if h.x0 <= x0 and h.x1 >= x1 then
+					table.insert(cuts, h.z0)
+					table.insert(cuts, h.z1)
+				end
+			end
+			table.sort(cuts)
+			for j = 1, #cuts - 1 do
+				local z0, z1 = cuts[j], cuts[j + 1]
+				local inside = false
+				for _, h in ipairs(holes) do
+					if h.x0 <= x0 and h.x1 >= x1 and h.z0 <= z0 and h.z1 >= z1 then
+						inside = true
+					end
+				end
+				if not inside then
+					floorSlab(x0, x1, z0, z1)
+				end
+			end
+		end
+	end
 	-- Walls per side, split around door openings.
 	local sides = {
 		N = { len = w, axisX = true, fixed = cz - d / 2 },
@@ -1425,21 +1463,20 @@ do
 			{ side = "N", at = -15, width = 5, height = 3, y = 9 },
 			{ side = "N", at = 15, width = 5, height = 3, y = 9 },
 		},
-		floor = "px_concrete_floor",
+		floor = Enum.Material.Marble,
+		floorColor = TILE,
 		wall = "px_prison_wall",
 		roof = "flat",
 		chimney = { -24, -14 },
 		lampColor = Color3.fromRGB(200, 230, 255),
+		-- pools are sunken basins with terrain water (cut out of the ground by build-prison)
+		floorHoles = {
+			{ x0 = -144, x1 = -128, z0 = -122, z1 = -110 },
+			{ x0 = -124, x1 = -108, z0 = -122, z1 = -110 },
+			{ x0 = -102, x1 = -94, z0 = -122, z1 = -114 },
+		},
 	})
 	-- Tiled floor band and a tiled wall skirt
-	part(
-		"Tiles",
-		Vector3.new(58, 0.2, 38),
-		CFrame.new(-120, 0.7, -110),
-		TILE,
-		Enum.Material.Marble,
-		m
-	)
 	for _, seg in ipairs({
 		{ Vector3.new(58, 3, 0.3), CFrame.new(-120, 2.1, -129.2) }, -- N
 		{ Vector3.new(24, 3, 0.3), CFrame.new(-137, 2.1, -90.8) }, -- S left of the door
@@ -1449,47 +1486,38 @@ do
 	}) do
 		part("WallTiles", seg[1], seg[2], Color3.fromRGB(80, 140, 170), Enum.Material.Marble, m)
 	end
-	-- Three pools (hot, warm, cold): rim, water (RestoreHygiene), steam.
-	local pools = {
-		{ -138, -114, 16, 14, Color3.fromRGB(90, 160, 220), true },
-		{ -116, -114, 16, 14, Color3.fromRGB(70, 130, 200), true },
-		{ -96, -118, 10, 10, Color3.fromRGB(120, 200, 230), false },
-	}
-	for _, p in ipairs(pools) do
-		local x, z, w, d, color, hot = p[1], p[2], p[3], p[4], p[5], p[6]
-		part(
-			"PoolRim",
-			Vector3.new(w + 2, 1.6, d + 2),
-			CFrame.new(x, 0.8, z),
-			STONE,
-			"px_cobblestone",
-			m
-		).CanCollide =
-			true
-		part(
-			"PoolInner",
-			Vector3.new(w, 1.7, d),
-			CFrame.new(x, 0.85, z),
-			Color3.fromRGB(60, 110, 140),
-			Enum.Material.Marble,
-			m
-		)
-		local water = part(
+	-- Three sunken pools (hot, warm, cold): water surface at y 0 (terrain), low rims, steps, steam.
+	for _, p in ipairs({
+		{ -136, -116, 16, 12, true },
+		{ -116, -116, 16, 12, true },
+		{ -98, -118, 8, 8, false },
+	}) do
+		local x, z, w, d, hot = p[1], p[2], p[3], p[4], p[5]
+		for _, seg in ipairs({
+			{ Vector3.new(w + 2.4, 1, 1.2), CFrame.new(x, 1.1, z - d / 2 - 0.6) },
+			{ Vector3.new(w + 2.4, 1, 1.2), CFrame.new(x, 1.1, z + d / 2 + 0.6) },
+			{ Vector3.new(1.2, 1, d + 2.4), CFrame.new(x - w / 2 - 0.6, 1.1, z) },
+			{ Vector3.new(1.2, 1, d + 2.4), CFrame.new(x + w / 2 + 0.6, 1.1, z) },
+		}) do
+			part("PoolRim", seg[1], seg[2], STONE, "px_cobblestone", m).CanCollide = true
+		end
+		local zone = part(
 			"BathWater",
-			Vector3.new(w - 0.4, 0.9, d - 0.4),
-			CFrame.new(x, 1.3, z),
-			color,
+			Vector3.new(w, 1, d),
+			CFrame.new(x, -0.5, z),
+			WATER,
 			Enum.Material.Glass,
 			m
 		)
-		water.Transparency = 0.35
-		water.CanCollide = false
-		CollectionService:AddTag(water, "RestoreHygiene")
+		zone.Transparency = 1
+		zone.CanCollide = false
+		zone.CanQuery = false
+		CollectionService:AddTag(zone, "RestoreHygiene")
 		if hot then
 			local steam = part(
 				"Steam",
 				Vector3.new(w - 2, 0.2, d - 2),
-				CFrame.new(x, 1.9, z),
+				CFrame.new(x, 0.6, z),
 				WHITE,
 				Enum.Material.SmoothPlastic,
 				m
@@ -1498,11 +1526,10 @@ do
 			steam.CanCollide = false
 			particles(steam, WHITE, 10, 2.5, 1, 3, 0.75)
 		end
-		-- steps into the pool
 		part(
 			"PoolStep",
-			Vector3.new(4, 0.8, 1.6),
-			CFrame.new(x, 0.4, z + d / 2 + 1.8),
+			Vector3.new(w - 1, 1.2, 2),
+			CFrame.new(x, -3.4, z + d / 2 - 1),
 			STONE,
 			"px_cobblestone",
 			m
@@ -1786,107 +1813,6 @@ do
 		Enum.Material.Metal,
 		m
 	)
-end
-
--- ================================================================== ЗАДАНИЯ (quest office)
-do
-	local m = shell({
-		name = "Quests",
-		label = "Задания",
-		cx = 0,
-		cz = -54,
-		w = 28,
-		d = 18,
-		h = 10,
-		doors = { { side = "S", at = -6, width = 5, height = 7 } },
-		windows = {
-			{ side = "S", at = 6, width = 6, height = 3.5, y = 6 },
-			{ side = "W", at = 0, width = 6, height = 3.5, y = 6 },
-			{ side = "E", at = 0, width = 6, height = 3.5, y = 6 },
-		},
-		floor = "px_planks",
-		wall = "px_red_brick",
-		roof = "gable",
-		chimney = { 10, -5 },
-	})
-	table_(m, 0, 3, -58, 10, 4)
-	chair(m, CFrame.new(0, 0, -61) * CFrame.Angles(0, math.pi, 0))
-	for i = 1, 3 do
-		part(
-			"Paper",
-			Vector3.new(1.2, 0.05, 1.6),
-			CFrame.new(-3 + i * 1.8, 3.3, -58 + rng:NextNumber(-0.8, 0.8))
-				* CFrame.Angles(0, rng:NextNumber(-0.3, 0.3), 0),
-			WHITE,
-			Enum.Material.SmoothPlastic,
-			m
-		)
-	end
-	part(
-		"Inkpot",
-		Vector3.new(0.5, 0.6, 0.5),
-		CFrame.new(4, 3.55, -59),
-		DARK,
-		Enum.Material.Glass,
-		m
-	)
-	part(
-		"Lantern",
-		Vector3.new(0.8, 1.1, 0.8),
-		CFrame.new(-4, 3.8, -59),
-		LAMP,
-		Enum.Material.Neon,
-		m
-	)
-	local board = part(
-		"QuestBoard",
-		Vector3.new(10, 6, 0.4),
-		CFrame.new(0, 6, -62.3),
-		DARK_WOOD,
-		"px_planks",
-		m
-	)
-	for i = 1, 6 do
-		part(
-			"Note",
-			Vector3.new(2, 2.4, 0.1),
-			CFrame.new(-3.6 + ((i - 1) % 3) * 3.6, 7.4 - math.floor((i - 1) / 3) * 2.8, -62),
-			({ WHITE, Color3.fromRGB(250, 240, 180), Color3.fromRGB(230, 200, 200) })[rng:NextInteger(
-				1,
-				3
-			)],
-			Enum.Material.SmoothPlastic,
-			m
-		)
-		part(
-			"Pin",
-			Vector3.new(0.25, 0.25, 0.2),
-			CFrame.new(-3.6 + ((i - 1) % 3) * 3.6, 8.4 - math.floor((i - 1) / 3) * 2.8, -61.9),
-			CLOTH,
-			Enum.Material.SmoothPlastic,
-			m
-		)
-	end
-	boardText(board, Enum.NormalId.Front, "ЗАДАНИЯ")
-	shelf(m, -11.5, -54, 10, math.pi / 2, 3, {
-		{
-			mat = Enum.Material.SmoothPlastic,
-			color = Color3.fromRGB(150, 50, 50),
-			size = Vector3.new(0.5, 1.4, 1),
-		},
-		{
-			mat = Enum.Material.SmoothPlastic,
-			color = Color3.fromRGB(50, 80, 140),
-			size = Vector3.new(0.5, 1.6, 1),
-		},
-		{
-			mat = Enum.Material.SmoothPlastic,
-			color = Color3.fromRGB(60, 120, 60),
-			size = Vector3.new(0.5, 1.2, 1),
-		},
-	})
-	rug(m, 0, -52, 10, 6, Color3.fromRGB(70, 90, 140))
-	wallLamp(m, CFrame.new(12.4, 7, -50) * CFrame.Angles(0, -math.pi / 2, 0))
 end
 
 -- ================================================================== ТРЕНЕР (training yard)
