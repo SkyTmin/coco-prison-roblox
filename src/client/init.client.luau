@@ -67,15 +67,16 @@ for i, need in ipairs(needNames) do
 	needBars[need], needValues[need] = fill, value
 end
 
+-- Bottom-left, at most 60 % of the width so it never runs under the right-hand panels.
 local hints = Ui.label(
 	gui,
 	T("keys_hint"),
-	UDim2.new(1, -20, 0, 36),
+	UDim2.new(0.6, 0, 0, 36),
 	UDim2.new(0, 10, 1, -138),
 	13,
 	Ui.colors.muted
 )
-hints.TextXAlignment = Enum.TextXAlignment.Right
+hints.TextXAlignment = Enum.TextXAlignment.Left
 hints.TextWrapped = true
 
 local languageButton = Ui.button(

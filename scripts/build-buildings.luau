@@ -752,7 +752,7 @@ do
 		h = 14,
 		doors = {
 			{ side = "S", at = 0, width = 7, height = 8 },
-			{ side = "W", at = 0, width = 5, height = 7 },
+			{ side = "W", at = 14, width = 5, height = 7 },
 		},
 		windows = {
 			{ side = "S", at = -18, width = 7, height = 4 },
@@ -956,9 +956,9 @@ do
 		lampColor = Color3.fromRGB(255, 230, 180),
 	})
 	-- Dining hall: 3 rows × 3 long tables with benches and plates.
-	for col = -1, 1 do
+	for col = -1, 1, 2 do
 		for row = 0, 2 do
-			local x = 140 + col * 12
+			local x = 142 + col * 8
 			local z = -14 + row * 20
 			local cf = table_(m, x, 3, z, 5, 14)
 			bench(m, cf * CFrame.new(-3.6, 0, 0) * CFrame.Angles(0, math.pi / 2, 0), 12)
@@ -1115,7 +1115,7 @@ do
 	end
 	-- Outdoor terrace by the west door: three round tables with chairs under umbrellas.
 	for i = -1, 1 do
-		local x, z = 112, 10 + i * 12
+		local x, z = 104, 10 + i * 14
 		part(
 			"TerraceTable",
 			Vector3.new(0.4, 2.8, 0.4),
@@ -1417,7 +1417,7 @@ do
 		h = 13,
 		doors = {
 			{ side = "S", at = 0, width = 6, height = 8 },
-			{ side = "E", at = 10, width = 4, height = 7 },
+			{ side = "E", at = 16, width = 4, height = 7 },
 		},
 		windows = {
 			{ side = "S", at = -20, width = 5, height = 3, y = 9 },
@@ -1440,13 +1440,15 @@ do
 		Enum.Material.Marble,
 		m
 	)
-	for _, s in ipairs({
-		{ Vector3.new(58, 3, 0.3), CFrame.new(-120, 2.1, -129.2) },
-		{ Vector3.new(58, 3, 0.3), CFrame.new(-120, 2.1, -90.8) },
-		{ Vector3.new(0.3, 3, 38), CFrame.new(-149.2, 2.1, -110) },
-		{ Vector3.new(0.3, 3, 38), CFrame.new(-90.8, 2.1, -110) },
+	for _, seg in ipairs({
+		{ Vector3.new(58, 3, 0.3), CFrame.new(-120, 2.1, -129.2) }, -- N
+		{ Vector3.new(24, 3, 0.3), CFrame.new(-137, 2.1, -90.8) }, -- S left of the door
+		{ Vector3.new(24, 3, 0.3), CFrame.new(-103, 2.1, -90.8) }, -- S right of the door
+		{ Vector3.new(0.3, 3, 38), CFrame.new(-149.2, 2.1, -110) }, -- W
+		{ Vector3.new(0.3, 3, 25), CFrame.new(-90.8, 2.1, -116.5) }, -- E below the door
+		{ Vector3.new(0.3, 3, 6), CFrame.new(-90.8, 2.1, -94) }, -- E above the door
 	}) do
-		part("WallTiles", s[1], s[2], Color3.fromRGB(80, 140, 170), Enum.Material.Marble, m)
+		part("WallTiles", seg[1], seg[2], Color3.fromRGB(80, 140, 170), Enum.Material.Marble, m)
 	end
 	-- Three pools (hot, warm, cold): rim, water (RestoreHygiene), steam.
 	local pools = {
