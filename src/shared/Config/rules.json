@@ -41,7 +41,10 @@
     "handAllowed": true,
     "wrongToolMultiplier": 5,
     "noToolNeededMultiplier": 1.5,
-    "dropWithoutTool": true
+    "dropWithoutTool": true,
+    "reachBlocks": 4.5,
+    "reachStuds": 18,
+    "_reach": "[ваниль] дальность 4,5 блока = 18 стадов от глаз до центра блока (+полблока)"
   },
   "survival": {
     "_source": "[владелец] 21.10.2026: здоровье сердечками и голод как в Minecraft, еда восстанавливает голод; смерть в PvP-зоне — броня и инструменты остаются, остальное выпадает дропом на землю; Эндер-сундук — личное сохраняемое хранилище. Числа — [решение] по ванильным значениям Minecraft",

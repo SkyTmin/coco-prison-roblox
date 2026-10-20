@@ -18,7 +18,7 @@ local MineService = require(script.Parent.MineService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local HungerService = require(script.Parent.HungerService)
 
-local MAX_DISTANCE = 10 -- studs from root to block centre (block is 4 wide)
+local MAX_DISTANCE = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks from the eye
 local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
 
 type Dig = {

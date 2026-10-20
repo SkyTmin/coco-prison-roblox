@@ -85,16 +85,22 @@ local function render(rig: Rig)
 			decal.Face, decal.Texture, decal.Parent = face, icon, visual
 		end
 	end
-	local grip = hand:FindFirstChild("RightGripAttachment")
-	local attachment = if grip and grip:IsA("Attachment")
-		then grip.CFrame
-		else CFrame.new(0, -0.6, 0)
+	-- Hand space (R15 RightHand): -Z forward, +Y up the arm, +X away from the body. Tuned visually
+	-- on a test rig (21.10): the sprite's lower corner (handle end) sits in the palm, the head points
+	-- forward and up like Minecraft's third-person item; blocks sit in the palm as a small cube.
+	local tool = Config.tools[id] ~= nil
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
-	motor.C0 = attachment
-		* CFrame.new(0, -0.15, -0.6)
-		* CFrame.Angles(math.rad(-45), math.rad(45), 0)
+	if cube then
+		motor.C0 = CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
+	else
+		local size = if tool then 1.8 else 1.4
+		visual.Size = Vector3.new(0.1, size, size)
+		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
+			* CFrame.Angles(math.rad(-60), 0, 0)
+			* CFrame.new(0, size * 0.45, -size * 0.45)
+	end
 	visual.CFrame = hand.CFrame * motor.C0
 	motor.Parent = visual
 	visual.Parent = rig.character

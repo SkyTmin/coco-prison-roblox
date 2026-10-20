@@ -1690,7 +1690,7 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progress
 progress.Visible = false
 
-local MAX_TARGET = 14
+local MAX_TARGET = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
 local function targetUnderCursor(point: Vector2?): BasePart?
 	local character = player.Character
 	local currentCamera = workspace.CurrentCamera
