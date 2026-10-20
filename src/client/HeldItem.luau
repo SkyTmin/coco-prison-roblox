@@ -112,9 +112,11 @@ local function render(rig: Rig)
 		motor.C0 = CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
 	else
 		local size = spriteSize
-		-- Tuned on the live character (21.10): handle end in the palm, head forward and a little up.
+		-- Tuned on the live character (21.10): sprite model has image-right = +Z, so yaw it 180° to
+		-- point the head forward (hand −Z); handle end (bottom-left of the icon) sits in the palm.
 		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
-			* CFrame.Angles(math.rad(-50), 0, 0)
+			* CFrame.Angles(math.rad(-20), 0, 0)
+			* CFrame.Angles(0, math.pi, 0)
 			* CFrame.new(0, size * 0.45, size * 0.45)
 	end
 	visual.CFrame = hand.CFrame * motor.C0
