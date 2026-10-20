@@ -10,7 +10,7 @@
 
 **Наши решения (△, в `scripts/design-decisions.json`):** размеры и таймеры шахт, HP/урон боссов, скорости нужд, ступени тренера, веса кейсов, сила книг по уровням, смерть, комбо.
 
-**Код (этап 1, ветка `stage-1`):** работает в Studio — шахта 32×12×32 из блоков с подтверждённым составом и текстурами (MaterialVariant), копание по ванильному времени с серверной проверкой (LoS, инструмент, полное время), инвентарь 9×4 + хотбар, скупщик/продавцы/улучшения/уровни/профессии, нужды с шкалами и зонами, случайные события. Первый скриншот: `assets/screenshots/2026-10-20-stage1-mine-first-run.jpg`. Place: `place/coco-prison.rbxl` (локальный, не опубликован — DataStore недоступен).
+**Код (этап 1, ветка `stage-1`):** добавлено 20.10 (сессия 3) и **не проверено в Studio**: меню «Локации» (M) с тремя вкладками, карточками, превью и телепортом, `LocationService`, щит «Телепортатор» и точка прибытия на карте; `scripts/decorate-prison.luau` (башни, фонари, деревья, лавки, рынок, спальня, баня); превью шести локаций в `assets/previews/` (ещё не загружены в Roblox — `assets/previews/ids.json` пуст). Проверенное ранее работает в Studio — шахта 32×12×32 из блоков с подтверждённым составом и текстурами (MaterialVariant), копание по ванильному времени с серверной проверкой (LoS, инструмент, полное время), инвентарь 9×4 + хотбар, скупщик/продавцы/улучшения/уровни/профессии, нужды с шкалами и зонами, случайные события. Первый скриншот: `assets/screenshots/2026-10-20-stage1-mine-first-run.jpg`. Place: `place/coco-prison.rbxl` (локальный, не опубликован — DataStore недоступен).
 
 ## Решения владельца (20.10)
 
@@ -27,9 +27,17 @@
 
 ## Следующий шаг
 
+1. В Studio (когда владелец на месте): `node scripts/make-studio-sync.mjs init.client,Strings,init.server,LocationService > sync.luau` → `execute_luau` (Edit), затем `scripts/build-prison.luau` и `scripts/decorate-prison.luau`; Play → M, щит, телепорт, отказы сервера; скриншоты в `assets/screenshots/`.
+2. Загрузить `assets/previews/*.png` через `upload_image`, вписать id в `assets/previews/ids.json`, `node scripts/build-configs.mjs`.
+3. Проверка на телефоне (эмуляция в Studio), публикация place для DataStore, приёмка этапа 1 владельцем.
+
+Прежний план 1.1–1.3 выполнен.
+
 Этап 1, подэтап 1.1: переписать `src/` под конфиги (профиль v3, инвентарь), затем 1.2 шахта. Порядок: Config.luau → Types → ProfileService → InventoryService → MineService (сетка, таймер, рендер граней) → DigService (ванильное время) → клиент (ввод, подсветка, HUD). Карта строится скриптом `scripts/build-prison.luau` по схеме Телепортатора.
 
 ## Журнал
+
+- **2026-10-20, сессия 3 (Claude + Codex, владелец отсутствует).** Codex сделал меню «Локации» + `LocationService` + щит (5 файлов, lint/build чисто). Написан `scripts/decorate-prison.luau`. Codex сгенерировал шесть превью локаций. В `make-studio-sync.mjs` добавлен фильтр файлов, в клиенте — показ превью-картинок при наличии id. **Проверить в Studio не удалось:** Studio трижды запускалась и закрывалась — в логе `close event received on MainWindow` и `User clicked No on the save place dialog`, то есть окно закрывал человек за ПК; параллельно через Happ-прокси не отвечали `ecsv2.roblox.com`/`apis.roblox.com` (см. `docs/SETUP.md` §2). Запуски прекращены до возвращения владельца. Урок: второй `mcp.bat` (скрипт-зонд) крадёт соединение Studio у Claude Code — не запускать.
 
 - **2026-10-20, сессия 2 (Claude + Codex).** План v1.0, этап A принят. Ветка `stage-1`: переписан `src/` под конфиги; Codex сделал рецензию (15 замечаний, 13 исправлены) и NeedsService; текстуры блоков сгенерированы Codex и загружены через Studio MCP. Рабочий цикл без плагина Rojo: `node scripts/make-studio-sync.mjs > sync.luau` → execute_luau в Edit; `scripts/build-prison.luau` строит карту; `scripts/build-textures.luau` создаёт MaterialVariant. Проверено в Play: копание, продажа, уровни, нужды.
 

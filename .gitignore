@@ -20,3 +20,4 @@ DevPackages/
 Thumbs.db
 __pycache__/
 .claude/worktrees/
+sync*.luau
