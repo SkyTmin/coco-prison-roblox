@@ -40,11 +40,13 @@ function ArtifactService.GrantFragment(profile: Types.Profile, tier: string): { 
 	local state = stateFor(profile, tier)
 	local index = random:NextInteger(1, Config.artifacts.fragmentsPerArtifact)
 	local held = state.fragments[index] or 0
-	state.fragments[index] = held + 1
 	local notices: { Notice } = {}
 	if held == 0 then
+		state.fragments[index] = 1
 		table.insert(notices, { key = "artifact_fragment_found", tier = tier, index = index })
 	else
+		-- [меню] «каждые 9 дубликатов дают фрагмент, которого у вас ещё нет»: a spare copy only feeds
+		-- the duplicates counter; the tile itself stays "owned once" so assembly consumes exactly 9.
 		state.duplicates += 1
 	end
 	-- Retain the counter when the mosaic is full; spend it once a missing tile exists.
