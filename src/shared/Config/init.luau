@@ -151,6 +151,14 @@ function Config.enchantForLevel(itemId: string, level: number): number
 	return 0
 end
 
+-- True when the item is a tool/armor piece whose level carries an enchantment (glint in UI/world).
+function Config.isEnchanted(itemId: string, level: number?): boolean
+	if not level or not Config.tools[itemId] then
+		return false
+	end
+	return Config.enchantForLevel(itemId, level) > 0
+end
+
 -- Vanilla break time in seconds (0.05 minimum). Returns nil when the tool cannot harvest the block.
 function Config.breakTime(block: Block, toolId: string?, toolLevel: number): number?
 	if block.itemOnly then

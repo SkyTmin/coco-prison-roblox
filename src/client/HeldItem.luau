@@ -1,5 +1,6 @@
 --!strict
 -- All clients render the server-owned HeldItem attribute; no physical Tools or gameplay state.
+local CollectionService = game:GetService("CollectionService")
 local MaterialService = game:GetService("MaterialService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,12 +11,14 @@ local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
 
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Instance? }
 local HeldItem = {}
-local rigs: { [Player]: Rig } = {}
+local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local swing = Instance.new("NumberValue")
 local swingTween: Tween? = nil
 local started = false
 local posed: { [Motor6D]: CFrame } = {}
+local enchantedParts: { [BasePart]: Color3 } = {} -- part → base colour, pulsed toward purple
+local GLINT = Color3.fromRGB(170, 90, 255)
 local visibleArms: { [BasePart]: boolean } = {}
 
 function HeldItem.SetDigging(active: boolean)
@@ -100,6 +103,13 @@ local function render(rig: Rig)
 		else
 			model.Name = "HeldItemVisual"
 			visual, container = model.PrimaryPart :: BasePart, model
+			if Config.isEnchanted(id, if level > 0 then level else nil) then
+				for _, px in ipairs(model:GetChildren()) do
+					if px:IsA("BasePart") and px.Name == "Px" then
+						enchantedParts[px] = px.Color
+					end
+				end
+			end
 		end
 	end
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
@@ -125,7 +135,7 @@ local function render(rig: Rig)
 	rig.visual = container
 end
 
-local function clear(player: Player)
+local function clear(player: Instance)
 	local rig = rigs[player]
 	if not rig then
 		return
@@ -139,7 +149,7 @@ local function clear(player: Player)
 	rigs[player] = nil
 end
 
-local function characterAdded(player: Player, character: Model)
+local function characterAdded(player: Instance, character: Model)
 	clear(player)
 	local rig: Rig = { character = character, connections = {}, visual = nil }
 	rigs[player] = rig
@@ -197,6 +207,26 @@ function HeldItem.Start()
 	for _, player in ipairs(Players:GetPlayers()) do
 		watch(player)
 	end
+	local function mannequin(model: Instance)
+		if model:IsA("Model") then
+			characterAdded(model, model)
+		end
+	end
+	for _, model in ipairs(CollectionService:GetTagged("HeldMannequin")) do
+		mannequin(model)
+	end
+	CollectionService:GetInstanceAddedSignal("HeldMannequin"):Connect(mannequin)
+	CollectionService:GetInstanceRemovedSignal("HeldMannequin"):Connect(clear)
+	RunService.Heartbeat:Connect(function()
+		local k = 0.2 + 0.25 * (0.5 + 0.5 * math.sin(os.clock() * 4))
+		for px, base in pairs(enchantedParts) do
+			if px.Parent then
+				px.Color = base:Lerp(GLINT, k)
+			else
+				enchantedParts[px] = nil
+			end
+		end
+	end)
 	RunService:BindToRenderStep("HeldItemPose", Enum.RenderPriority.Camera.Value + 2, function()
 		-- Restore our offsets before applying this frame's pose; never accumulate rotations.
 		for motor, base in pairs(posed) do

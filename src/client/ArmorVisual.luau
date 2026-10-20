@@ -5,6 +5,7 @@
 -- assets/armor/ids.json). Enchanted pieces (level with an enchant > 0) get a purple glint overlay.
 -- The server owns the `Armor` attribute ("helmet:<level>,chestplate:<level>,...").
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -13,22 +14,22 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Model? }
 
 local ArmorVisual = {}
-local rigs: { [Player]: Rig } = {}
+local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local started = false
 local glintDecals: { [Decal]: boolean } = {}
 
 -- Minecraft armor model is 1/16 block larger than the skin box on each side; R15 limbs are ~1 stud
 -- wide, so +0.3 studs total keeps the same proportion and hides the body underneath.
-local PAD = 0.3
+local PAD = 0.42
 
 -- piece → boxes: { limb name, texture limb key, vertical slice {y0, y1} of the limb (0 = top), pad }
 type Box = { limb: string, key: string, y0: number, y1: number, pad: number? }
 local BOXES: { [string]: { Box } } = {
 	helmet = { { limb = "Head", key = "head", y0 = 0, y1 = 1, pad = 0.4 } },
 	chestplate = {
-		{ limb = "UpperTorso", key = "torso", y0 = 0, y1 = 1 },
-		{ limb = "LowerTorso", key = "torso", y0 = 0, y1 = 1 },
+		{ limb = "UpperTorso", key = "torsoupper", y0 = 0, y1 = 1, pad = 0.5 },
+		{ limb = "LowerTorso", key = "torsolower", y0 = 0, y1 = 1, pad = 0.5 },
 		{ limb = "LeftUpperArm", key = "upperarm", y0 = 0, y1 = 1 },
 		{ limb = "RightUpperArm", key = "upperarm", y0 = 0, y1 = 1 },
 		{ limb = "LeftLowerArm", key = "lowerarm", y0 = 0, y1 = 1 },
@@ -134,15 +135,27 @@ local function buildBox(
 	part.Parent = parent
 end
 
--- Hair pokes through a helmet; Minecraft hides it under the helmet texture, we hide the accessory.
-local function setHairHidden(character: Model, hidden: boolean)
+-- Minecraft draws armor over the skin and hides nothing else, but Roblox avatars wear bulky layered
+-- clothing (jackets, pants) and hair that poke through the armor boxes. Hide those accessories while
+-- the matching piece is worn: hair under a helmet, upper-body clothing under a chestplate, lower-body
+-- clothing under leggings/boots.
+local UPPER_CLOTHING =
+	{ Jacket = true, Sweater = true, Shirt = true, TShirt = true, DressSkirt = true }
+local LOWER_CLOTHING =
+	{ Pants = true, Shorts = true, LeftShoe = true, RightShoe = true, DressSkirt = true }
+local function setAccessoriesHidden(character: Model, rendered: { [string]: boolean })
 	for _, accessory in ipairs(character:GetChildren()) do
 		if accessory:IsA("Accessory") then
-			local isHair = accessory.AccessoryType == Enum.AccessoryType.Hair
+			local kind = accessory.AccessoryType.Name
+			local isHair = kind == "Hair"
 				or string.find(string.lower(accessory.Name), "hair") ~= nil
-			local handle = accessory:FindFirstChild("Handle")
-			if isHair and handle and handle:IsA("BasePart") then
-				handle.LocalTransparencyModifier = if hidden then 1 else 0
+			local hidden = (isHair and rendered.helmet)
+				or (UPPER_CLOTHING[kind] and rendered.chestplate)
+				or (LOWER_CLOTHING[kind] and (rendered.leggings or rendered.boots))
+			for _, d in ipairs(accessory:GetDescendants()) do
+				if d:IsA("BasePart") then
+					d.LocalTransparencyModifier = if hidden then 1 else 0
+				end
 			end
 		end
 	end
@@ -164,7 +177,7 @@ local function render(rig: Rig)
 	end
 	local attribute = rig.character:GetAttribute("Armor")
 	if typeof(attribute) ~= "string" or attribute == "" then
-		setHairHidden(rig.character, false)
+		setAccessoriesHidden(rig.character, {})
 		return
 	end
 	local visual = Instance.new("Model")
@@ -189,10 +202,10 @@ local function render(rig: Rig)
 	end
 	visual.Parent = rig.character
 	rig.visual = visual
-	setHairHidden(rig.character, rendered.helmet == true)
+	setAccessoriesHidden(rig.character, rendered)
 end
 
-local function clear(player: Player)
+local function clear(player: Instance)
 	local rig = rigs[player]
 	if not rig then
 		return
@@ -207,7 +220,7 @@ local function clear(player: Player)
 	rigs[player] = nil
 end
 
-local function characterAdded(player: Player, character: Model)
+local function characterAdded(player: Instance, character: Model)
 	clear(player)
 	local rig: Rig = { character = character, connections = {}, visual = nil }
 	rigs[player] = rig
@@ -261,6 +274,17 @@ function ArmorVisual.Start()
 	for _, player in ipairs(Players:GetPlayers()) do
 		watch(player)
 	end
+	-- showcase mannequins (scripts/build-showcase.luau): the model itself is the key
+	local function mannequin(model: Instance)
+		if model:IsA("Model") then
+			characterAdded(model, model)
+		end
+	end
+	for _, model in ipairs(CollectionService:GetTagged("ArmorMannequin")) do
+		mannequin(model)
+	end
+	CollectionService:GetInstanceAddedSignal("ArmorMannequin"):Connect(mannequin)
+	CollectionService:GetInstanceRemovedSignal("ArmorMannequin"):Connect(clear)
 	-- enchant glint shimmer: Decals have no UV offset, so pulse the purple overlay's transparency
 	RunService.Heartbeat:Connect(function()
 		local pulse = 0.45 + 0.25 * math.sin(os.clock() * 4)

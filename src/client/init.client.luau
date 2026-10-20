@@ -411,6 +411,18 @@ local function stackLabel(stack: Types.ItemStack?): (string, string)
 	return name, if stack.count > 1 then tostring(stack.count) else ""
 end
 
+local glintLabels: { [ImageLabel]: boolean } = {}
+RunService.Heartbeat:Connect(function()
+	local pulse = 0.4 + 0.3 * math.sin(os.clock() * 4)
+	for label in pairs(glintLabels) do
+		if label.Parent then
+			label.ImageTransparency = pulse
+		else
+			glintLabels[label] = nil
+		end
+	end
+end)
+
 local function renderSlot(
 	name: TextLabel,
 	count: TextLabel,
@@ -422,6 +434,14 @@ local function renderSlot(
 	name.Text, count.Text = n, c
 	image.Image = icon or ""
 	image.Visible = icon ~= nil
+	-- Minecraft-style enchant glint: purple copy of the icon pulsing over it
+	local glint = image:FindFirstChild("Glint")
+	if glint and glint:IsA("ImageLabel") then
+		local enchanted = stack ~= nil and icon ~= nil and Config.isEnchanted(stack.id, stack.level)
+		glint.Image = icon or ""
+		glint.Visible = enchanted
+		glintLabels[glint] = if enchanted then true else nil
+	end
 	-- Keep the name until the image has actually loaded (fresh uploads can take a while).
 	name.Visible = icon == nil or not image.IsLoaded
 	if icon and not image.IsLoaded then

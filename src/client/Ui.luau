@@ -125,6 +125,17 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	image.Position = UDim2.fromScale(0.5, 0.5)
 	image.ScaleType = Enum.ScaleType.Fit
 	image.ResampleMode = Enum.ResamplerMode.Pixelated
+	local glint = Instance.new("ImageLabel")
+	glint.Name = "Glint"
+	glint.Size = UDim2.fromScale(1, 1)
+	glint.ScaleType = Enum.ScaleType.Fit
+	glint.ResampleMode = Enum.ResamplerMode.Pixelated
+	glint.BackgroundTransparency = 1
+	glint.ImageColor3 = Color3.fromRGB(190, 110, 255)
+	glint.ImageTransparency = 0.55
+	glint.Visible = false
+	glint.ZIndex = image.ZIndex + 1
+	glint.Parent = image
 	image.BackgroundTransparency = 1
 	image.Visible = false
 	image.Parent = f

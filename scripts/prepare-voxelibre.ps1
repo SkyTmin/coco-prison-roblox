@@ -84,7 +84,8 @@ foreach ($m in $armorMat.Keys) {
   Faces $helm "helmet_${mk}_head" 32 0 8 8 8 0 8
   $helm.Dispose()
   $chest = Load "mcl_armor_chestplate_$m.png"
-  Faces $chest "chestplate_${mk}_torso" 16 16 8 12 4 0 12
+  Faces $chest "chestplate_${mk}_torsoupper" 16 16 8 12 4 0 8
+  Faces $chest "chestplate_${mk}_torsolower" 16 16 8 12 4 8 12
   Faces $chest "chestplate_${mk}_upperarm" 40 16 4 12 4 0 6
   Faces $chest "chestplate_${mk}_lowerarm" 40 16 4 12 4 6 12
   $chest.Dispose()
