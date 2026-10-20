@@ -1,0 +1,1314 @@
+{
+  "source": "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
+  "vanilla": {
+    "swordDamage": {
+      "wood": 4,
+      "stone": 5,
+      "iron": 6,
+      "diamond": 7
+    },
+    "sharpnessBonus": [
+      0,
+      1,
+      1.5,
+      2,
+      2.5,
+      3
+    ],
+    "toolSpeed": {
+      "hand": 1,
+      "wood": 2,
+      "stone": 4,
+      "iron": 6,
+      "diamond": 8
+    },
+    "efficiencyBonus": "level^2 + 1 added to toolSpeed",
+    "armorPoints": {
+      "wood": [
+        1,
+        3,
+        2,
+        1
+      ],
+      "stone": [
+        2,
+        5,
+        4,
+        1
+      ],
+      "iron": [
+        2,
+        6,
+        5,
+        2
+      ],
+      "diamond": [
+        3,
+        8,
+        6,
+        3
+      ]
+    },
+    "armorToughness": {
+      "wood": 0,
+      "stone": 0,
+      "iron": 0,
+      "diamond": 2
+    },
+    "protectionPerLevelPerPiece": 0.04,
+    "maxEpf": 20
+  },
+  "tools": {
+    "pickaxe": {
+      "buyPrice": 22.5,
+      "enchant": "efficiency",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 25,
+          "requirements": {
+            "Камень": 145,
+            "Каменный уголь": 5
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 37,
+          "requirements": {
+            "Камень": 285,
+            "Каменный уголь": 15
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 47,
+          "requirements": {
+            "Камень": 520,
+            "Каменный уголь": 75
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 90,
+          "requirements": {
+            "Камень": 1050,
+            "Каменный уголь": 150
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 180,
+          "requirements": {
+            "Камень": 1500,
+            "Каменный уголь": 250,
+            "Железная руда": 10
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 270,
+          "requirements": {
+            "Камень": 2000,
+            "Каменный уголь": 350,
+            "Железная руда": 25
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 540,
+          "requirements": {
+            "Камень": 3250,
+            "Каменный уголь": 500,
+            "Железная руда": 60
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 830,
+          "requirements": {
+            "Камень": 7800,
+            "Железная руда": 165
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 1330,
+          "requirements": {
+            "Камень": 10700,
+            "Железная руда": 335,
+            "Золотая руда": 165
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 3000,
+          "requirements": {
+            "Камень": 15800,
+            "Железная руда": 680,
+            "Золотая руда": 375
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 6000,
+          "requirements": {
+            "Камень": 23200,
+            "Железная руда": 1010,
+            "Золотая руда": 560
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 7500,
+          "requirements": {
+            "Камень": 33800,
+            "Золотая руда": 1120
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 9000,
+          "requirements": {
+            "Камень": 49700,
+            "Золотая руда": 1800
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 11200,
+          "requirements": {
+            "Камень": 67200,
+            "Золотая руда": 2700
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 15,
+          "to": 16,
+          "cost": 14900,
+          "requirements": {
+            "Камень": 93100,
+            "Золотая руда": 4750
+          },
+          "enchantAfter": 3,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "shovel": {
+      "buyPrice": 0,
+      "enchant": "efficiency",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 5,
+          "requirements": {
+            "Гравий": 20,
+            "Песок": 15,
+            "Земля": 15
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 10,
+          "requirements": {
+            "Гравий": 30,
+            "Песок": 36,
+            "Земля": 30
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 20,
+          "requirements": {
+            "Гравий": 60,
+            "Песок": 65,
+            "Земля": 75
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 40,
+          "requirements": {
+            "Гравий": 295,
+            "Песок": 240,
+            "Земля": 265
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 80,
+          "requirements": {
+            "Гравий": 530,
+            "Песок": 590,
+            "Земля": 480
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 110,
+          "requirements": {
+            "Гравий": 1070,
+            "Песок": 960,
+            "Земля": 1170
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 175,
+          "requirements": {
+            "Гравий": 1670,
+            "Песок": 1830,
+            "Земля": 1500
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 405,
+          "requirements": {
+            "Гравий": 2400,
+            "Песок": 2150,
+            "Земля": 2600
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 1330,
+          "requirements": {
+            "Гравий": 4650,
+            "Песок": 4200,
+            "Земля": 3800
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 1880,
+          "requirements": {
+            "Гравий": 4950,
+            "Песок": 5500,
+            "Земля": 6050
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 2600,
+          "requirements": {
+            "Гравий": 5350,
+            "Песок": 6600,
+            "Земля": 5950
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 3050,
+          "requirements": {
+            "Гравий": 8000,
+            "Песок": 7200,
+            "Земля": 8800
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 6700,
+          "requirements": {
+            "Гравий": 10600,
+            "Песок": 8650,
+            "Земля": 9600
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 7550,
+          "requirements": {
+            "Гравий": 10100,
+            "Песок": 12300,
+            "Земля": 11200
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 15,
+          "to": 16,
+          "cost": 9250,
+          "requirements": {
+            "Гравий": 11100,
+            "Песок": 12300,
+            "Земля": 13500
+          },
+          "enchantAfter": 3,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "sword": {
+      "buyPrice": null,
+      "enchant": "sharpness",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 10,
+          "requirements": {
+            "Крысы": 5
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 20,
+          "requirements": {
+            "Крысы": 15
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 40,
+          "requirements": {
+            "Крысы": 45
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 80,
+          "requirements": {
+            "Крысы": 90
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 110,
+          "requirements": {
+            "Крысы": 180
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 140,
+          "requirements": {
+            "Крысы": 360
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 200,
+          "requirements": {
+            "Крысы": 750
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 520,
+          "requirements": {
+            "Крысы": 1500
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 860,
+          "requirements": {
+            "Крысы": 2800
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 1530,
+          "requirements": {
+            "Крысы": 4900
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 2100,
+          "requirements": {
+            "Крысы": 6000
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 5600,
+          "requirements": {
+            "Крысы": 9000
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 7600,
+          "requirements": {
+            "Крысы": 10900,
+            "Оружейник": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 13900,
+          "requirements": {
+            "Крысы": 13800,
+            "Оружейник": 5
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "helmet": {
+      "buyPrice": null,
+      "enchant": "protection",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 20,
+          "requirements": {
+            "Крысы": 5
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 34,
+          "requirements": {
+            "Крысы": 10
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 60,
+          "requirements": {
+            "Крысы": 20
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 150,
+          "requirements": {
+            "Крысы": 35
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 225,
+          "requirements": {
+            "Крысы": 60
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 325,
+          "requirements": {
+            "Крысы": 100
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 550,
+          "requirements": {
+            "Крысы": 175
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 970,
+          "requirements": {
+            "Крысы": 335
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 1840,
+          "requirements": {
+            "Крысы": 820
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 2600,
+          "requirements": {
+            "Крысы": 1240
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 3700,
+          "requirements": {
+            "Крысы": 1800
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 5550,
+          "requirements": {
+            "Крысы": 2800
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 6900,
+          "requirements": {
+            "Оружейник": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 11500,
+          "requirements": {
+            "Оружейник": 5
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "chestplate": {
+      "buyPrice": null,
+      "enchant": "protection",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 25,
+          "requirements": {
+            "Крысы": 4
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 40,
+          "requirements": {
+            "Крысы": 8
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 60,
+          "requirements": {
+            "Крысы": 14
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 150,
+          "requirements": {
+            "Крысы": 35
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 225,
+          "requirements": {
+            "Крысы": 60
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 325,
+          "requirements": {
+            "Крысы": 110
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 550,
+          "requirements": {
+            "Крысы": 240
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 1650,
+          "requirements": {
+            "Крысы": 600
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 2250,
+          "requirements": {
+            "Крысы": 1050
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 3200,
+          "requirements": {
+            "Крысы": 1950
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 4950,
+          "requirements": {
+            "Крысы": 3000
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 5850,
+          "requirements": {
+            "Крысы": 4900
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 7400,
+          "requirements": {
+            "Оружейник": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 14800,
+          "requirements": {
+            "Оружейник": 5
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "leggings": {
+      "buyPrice": null,
+      "enchant": "protection",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 25,
+          "requirements": {
+            "Крысы": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 37,
+          "requirements": {
+            "Крысы": 7
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 75,
+          "requirements": {
+            "Крысы": 15
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 150,
+          "requirements": {
+            "Крысы": 27
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 300,
+          "requirements": {
+            "Крысы": 45
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 450,
+          "requirements": {
+            "Крысы": 75
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 830,
+          "requirements": {
+            "Крысы": 160
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 1880,
+          "requirements": {
+            "Крысы": 405
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 3000,
+          "requirements": {
+            "Крысы": 720
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 3100,
+          "requirements": {
+            "Крысы": 1420
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 4500,
+          "requirements": {
+            "Крысы": 2550
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 5250,
+          "requirements": {
+            "Крысы": 3800
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 6000,
+          "requirements": {
+            "Оружейник": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 13400,
+          "requirements": {
+            "Оружейник": 5
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "boots": {
+      "buyPrice": null,
+      "enchant": "protection",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 20,
+          "requirements": {
+            "Крысы": 5
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 34,
+          "requirements": {
+            "Крысы": 10
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 60,
+          "requirements": {
+            "Крысы": 20
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 150,
+          "requirements": {
+            "Крысы": 30
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 225,
+          "requirements": {
+            "Крысы": 45
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 325,
+          "requirements": {
+            "Крысы": 80
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 550,
+          "requirements": {
+            "Крысы": 160
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 970,
+          "requirements": {
+            "Крысы": 335
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 1840,
+          "requirements": {
+            "Крысы": 980
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 2600,
+          "requirements": {
+            "Крысы": 1350
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 3700,
+          "requirements": {
+            "Крысы": 1950
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 5550,
+          "requirements": {
+            "Крысы": 2850
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 6900,
+          "requirements": {
+            "Оружейник": 3
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 11900,
+          "requirements": {
+            "Оружейник": 5
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        }
+      ]
+    },
+    "axe": {
+      "buyPrice": 4,
+      "enchant": "efficiency",
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 2,
+          "requirements": {
+            "Дерево": 25
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 5,
+          "requirements": {
+            "Дерево": 50
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 10,
+          "requirements": {
+            "Дерево": 100
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 20,
+          "requirements": {
+            "Дерево": 200
+          },
+          "enchantAfter": 0,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 40,
+          "requirements": {
+            "Дерево": 400
+          },
+          "enchantAfter": 1,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "cost": 80,
+          "requirements": {
+            "Дерево": 800
+          },
+          "enchantAfter": 2,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "cost": 160,
+          "requirements": {
+            "Дерево": 1100
+          },
+          "enchantAfter": 3,
+          "materialAfter": "stone"
+        },
+        {
+          "from": 8,
+          "to": 9,
+          "cost": 240,
+          "requirements": {
+            "Дерево": 1900
+          },
+          "enchantAfter": 0,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 9,
+          "to": 10,
+          "cost": 480,
+          "requirements": {
+            "Дерево": 2500
+          },
+          "enchantAfter": 1,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 10,
+          "to": 11,
+          "cost": 1070,
+          "requirements": {
+            "Дерево": 4200
+          },
+          "enchantAfter": 2,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "cost": 2900,
+          "requirements": {
+            "Дерево": 6750
+          },
+          "enchantAfter": 3,
+          "materialAfter": "iron"
+        },
+        {
+          "from": 12,
+          "to": 13,
+          "cost": 3750,
+          "requirements": {
+            "Дерево": 11200
+          },
+          "enchantAfter": 0,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 13,
+          "to": 14,
+          "cost": 7500,
+          "requirements": {
+            "Дерево": 14200
+          },
+          "enchantAfter": 1,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 14,
+          "to": 15,
+          "cost": 9000,
+          "requirements": {
+            "Дерево": 18800
+          },
+          "enchantAfter": 2,
+          "materialAfter": "diamond"
+        },
+        {
+          "from": 15,
+          "to": 16,
+          "cost": 13400,
+          "requirements": {
+            "Дерево": 22300
+          },
+          "enchantAfter": 3,
+          "materialAfter": "diamond"
+        }
+      ]
+    }
+  }
+}

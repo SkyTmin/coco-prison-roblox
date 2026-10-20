@@ -1,0 +1,41 @@
+{
+  "source": "эффекты и зоны снятия [вики]; таймеры и штрафы [решение]",
+  "hygiene": {
+    "name": "Грязь",
+    "minutesToZero": 90,
+    "effectAtZero": "nausea",
+    "digSlowdownAtZero": 0.1,
+    "restoreZone": "bath_water",
+    "consumable": "soap"
+  },
+  "sleep": {
+    "name": "Сон",
+    "minutesToZero": 120,
+    "effectAtZero": "insomnia",
+    "digBlockedAtZero": true,
+    "restoreZone": "bed",
+    "consumable": "sleeping_bag"
+  },
+  "toilet": {
+    "name": "Туалет",
+    "minutesToZero": 60,
+    "effectAtZero": "slowness",
+    "moveSlowdownAtZero": 0.15,
+    "restoreZone": "toilet_lever",
+    "consumable": "toilet_paper"
+  },
+  "warnThreshold": 25,
+  "restoreInstant": true,
+  "persistAfterDeath": true,
+  "consumablePrices": {
+    "soap": 15,
+    "toilet_paper": 10,
+    "sleeping_bag": 25
+  },
+  "randomEvent": {
+    "everySeconds": 1200,
+    "effect": "haste",
+    "level": 1,
+    "durationSeconds": 300
+  }
+}

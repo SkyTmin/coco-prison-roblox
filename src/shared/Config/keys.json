@@ -1,0 +1,68 @@
+{
+  "source": "[решение]; цены ключей у обменника [меню]",
+  "starExchange": {
+    "ancient_key": 10,
+    "improved_ancient_key": 60,
+    "dispeller": 15
+  },
+  "ordinaryKeyChancePerBlock": 0.0005,
+  "ordinaryKeyPity": 5000,
+  "luckyBonusPerLevel": 0.2,
+  "ordinaryCase": [
+    {
+      "id": "money",
+      "weight": 25,
+      "min": 10,
+      "max": 50
+    },
+    {
+      "id": "blocks",
+      "weight": 20,
+      "count": 32
+    },
+    {
+      "id": "food",
+      "weight": 15
+    },
+    {
+      "id": "hygiene",
+      "weight": 15
+    },
+    {
+      "id": "ancient_star",
+      "weight": 15
+    },
+    {
+      "id": "basement_pass",
+      "weight": 3
+    },
+    {
+      "id": "ancient_powder",
+      "weight": 3
+    },
+    {
+      "id": "rare_wooden_pickaxe",
+      "weight": 2
+    }
+  ],
+  "ancientCase": {
+    "rarity": {
+      "common": 70,
+      "rare": 25,
+      "legendary": 5
+    },
+    "level": {
+      "1": 60,
+      "2": 30,
+      "3": 10
+    },
+    "applyChance": [
+      10,
+      100
+    ],
+    "improvedApplyChance": [
+      40,
+      100
+    ]
+  }
+}

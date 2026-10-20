@@ -1,0 +1,707 @@
+{
+  "source": "wiki/in-game-wiki/block-prices.json [меню]; размеры/доли/таймеры [решение]",
+  "locations": [
+    {
+      "id": "prison",
+      "kind": "mine",
+      "name": "Тюрьма",
+      "unlockLevel": 1,
+      "requiresPass": false,
+      "pvp": false,
+      "mine": {
+        "size": [
+          32,
+          12,
+          32
+        ],
+        "resetSeconds": 300,
+        "warnSeconds": 15,
+        "shares": {
+          "dirt": 0.6,
+          "sand": 0.2,
+          "gravel": 0.12,
+          "oak_log": 0.05,
+          "melon": 0.03
+        }
+      },
+      "sellList": [
+        "sand",
+        "gravel",
+        "dirt",
+        "oak_log",
+        "melon"
+      ]
+    },
+    {
+      "id": "quarry",
+      "kind": "mine",
+      "name": "Каменоломня",
+      "unlockLevel": 3,
+      "requiresPass": false,
+      "pvp": false,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "stone": 0.7,
+          "coal_ore": 0.18,
+          "iron_ore": 0.09,
+          "coal_block": 0.03
+        }
+      },
+      "sellList": [
+        "cobblestone",
+        "stone",
+        "coal",
+        "coal_ore",
+        "iron_ore",
+        "coal_block"
+      ]
+    },
+    {
+      "id": "mountain_foot",
+      "kind": "mine",
+      "name": "Подножье горы",
+      "unlockLevel": 5,
+      "requiresPass": false,
+      "pvp": false,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "red_sand": 0.7,
+          "iron_ore": 0.2,
+          "gold_ore": 0.1
+        }
+      },
+      "sellList": [
+        "red_sand",
+        "iron_ore",
+        "gold_ore"
+      ]
+    },
+    {
+      "id": "underworld",
+      "kind": "mine",
+      "name": "Преисподняя",
+      "unlockLevel": 7,
+      "requiresPass": false,
+      "pvp": false,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "netherite": 0.55,
+          "soul_sand": 0.2,
+          "quartz_ore": 0.25
+        }
+      },
+      "sellList": [
+        "netherite",
+        "soul_sand",
+        "quartz",
+        "quartz_ore"
+      ]
+    },
+    {
+      "id": "pyramid",
+      "kind": "mine",
+      "name": "Пирамида",
+      "unlockLevel": 9,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "sandstone": 0.5,
+          "red_sandstone": 0.5
+        }
+      },
+      "sellList": [
+        "sandstone",
+        "red_sandstone"
+      ]
+    },
+    {
+      "id": "royal_garden",
+      "kind": "mine",
+      "name": "Королевский сад",
+      "unlockLevel": 11,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "wisteria_leaves": 0.5,
+          "cherry_log": 0.5
+        }
+      },
+      "sellList": [
+        "wisteria_leaves",
+        "cherry_log"
+      ]
+    },
+    {
+      "id": "sunken_lighthouse",
+      "kind": "mine",
+      "name": "Затопленный маяк",
+      "unlockLevel": 13,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "cyan_concrete": 0.3333333333333333,
+          "prismarine": 0.3333333333333333,
+          "prismarine_bricks": 0.3333333333333333
+        }
+      },
+      "sellList": [
+        "cyan_concrete",
+        "prismarine",
+        "prismarine_bricks"
+      ]
+    },
+    {
+      "id": "end_castle",
+      "kind": "mine",
+      "name": "Пустотная крепость",
+      "unlockLevel": 15,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "end_stone_bricks": 0.5,
+          "purpur": 0.5
+        }
+      },
+      "sellList": [
+        "end_stone_bricks",
+        "purpur"
+      ]
+    },
+    {
+      "id": "spider_lair",
+      "kind": "mine",
+      "name": "Паучье логово",
+      "unlockLevel": 17,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "white_wool": 0.5,
+          "cobweb": 0.5
+        }
+      },
+      "sellList": [
+        "white_wool",
+        "cobweb"
+      ]
+    },
+    {
+      "id": "snowy_hand",
+      "kind": "mine",
+      "name": "Снежная длань",
+      "unlockLevel": 19,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "ice": 0.5,
+          "packed_ice": 0.5
+        }
+      },
+      "sellList": [
+        "ice",
+        "packed_ice"
+      ]
+    },
+    {
+      "id": "market",
+      "kind": "mine",
+      "name": "Рынок",
+      "unlockLevel": 21,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "yellow_wool": 0.3333333333333333,
+          "red_wool": 0.3333333333333333,
+          "lime_wool": 0.3333333333333333
+        }
+      },
+      "sellList": [
+        "yellow_wool",
+        "red_wool",
+        "lime_wool"
+      ]
+    },
+    {
+      "id": "leprechaun_valley",
+      "kind": "mine",
+      "name": "Лепреконовая долина",
+      "unlockLevel": 23,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "orange_concrete": 0.2,
+          "yellow_concrete": 0.2,
+          "lime_concrete": 0.2,
+          "purple_concrete": 0.2,
+          "red_concrete": 0.2
+        }
+      },
+      "sellList": [
+        "orange_concrete",
+        "yellow_concrete",
+        "lime_concrete",
+        "purple_concrete",
+        "red_concrete"
+      ]
+    },
+    {
+      "id": "castle",
+      "kind": "mine",
+      "name": "Замок",
+      "unlockLevel": 25,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "quartz_block": 0.5,
+          "chiseled_quartz": 0.5
+        }
+      },
+      "sellList": [
+        "quartz_block",
+        "chiseled_quartz"
+      ]
+    },
+    {
+      "id": "inside_out",
+      "kind": "mine",
+      "name": "Изнанка",
+      "unlockLevel": 27,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "dark_oak_leaves": 1
+        }
+      },
+      "sellList": [
+        "dark_oak_leaves"
+      ]
+    },
+    {
+      "id": "kyoto",
+      "kind": "mine",
+      "name": "Киото",
+      "unlockLevel": 29,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "pink_wool": 0.5,
+          "sea_lantern": 0.5
+        }
+      },
+      "sellList": [
+        "pink_wool",
+        "sea_lantern"
+      ]
+    },
+    {
+      "id": "farm",
+      "kind": "mine",
+      "name": "Ферма",
+      "unlockLevel": 31,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "pumpkin": 0.3333333333333333,
+          "melon": 0.3333333333333333,
+          "green_wool": 0.3333333333333333
+        }
+      },
+      "sellList": [
+        "pumpkin",
+        "melon",
+        "green_wool"
+      ]
+    },
+    {
+      "id": "barn",
+      "kind": "mine",
+      "name": "Амбар",
+      "unlockLevel": 33,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "jack_o_lantern": 1
+        }
+      },
+      "sellList": [
+        "jack_o_lantern"
+      ]
+    },
+    {
+      "id": "edge_gate",
+      "kind": "mine",
+      "name": "Врата края",
+      "unlockLevel": 35,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "magenta_concrete": 0.5,
+          "black_glass": 0.5
+        }
+      },
+      "sellList": [
+        "magenta_concrete",
+        "black_glass"
+      ]
+    },
+    {
+      "id": "tree",
+      "kind": "mine",
+      "name": "Древо",
+      "unlockLevel": 37,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "white_concrete": 1
+        }
+      },
+      "sellList": [
+        "white_concrete"
+      ]
+    },
+    {
+      "id": "church",
+      "kind": "mine",
+      "name": "Церковь",
+      "unlockLevel": 39,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "clay": 1
+        }
+      },
+      "sellList": [
+        "clay"
+      ]
+    },
+    {
+      "id": "purgatory",
+      "kind": "mine",
+      "name": "Чистилище",
+      "unlockLevel": 41,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "chiseled_sandstone": 1
+        }
+      },
+      "sellList": [
+        "chiseled_sandstone"
+      ]
+    },
+    {
+      "id": "eden",
+      "kind": "mine",
+      "name": "Эдем",
+      "unlockLevel": 43,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "brown_mushroom_block": 1
+        }
+      },
+      "sellList": [
+        "brown_mushroom_block"
+      ]
+    },
+    {
+      "id": "cherubim",
+      "kind": "mine",
+      "name": "Херувимы",
+      "unlockLevel": 45,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "snow": 1
+        }
+      },
+      "sellList": [
+        "snow"
+      ]
+    },
+    {
+      "id": "gate",
+      "kind": "mine",
+      "name": "Врата",
+      "unlockLevel": 47,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "smooth_sandstone": 1
+        }
+      },
+      "sellList": [
+        "smooth_sandstone"
+      ]
+    },
+    {
+      "id": "paradise",
+      "kind": "mine",
+      "name": "Рай",
+      "unlockLevel": 49,
+      "requiresPass": false,
+      "pvp": true,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "red_mushroom_block": 1
+        }
+      },
+      "sellList": [
+        "red_mushroom_block"
+      ]
+    },
+    {
+      "id": "basement",
+      "kind": "mine",
+      "name": "Подвал",
+      "unlockLevel": 5,
+      "requiresPass": true,
+      "pvp": true,
+      "mine": {
+        "size": [
+          24,
+          10,
+          24
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "dirt": 0.3,
+          "sand": 0.3,
+          "gravel": 0.3,
+          "lapis_block": 0.04,
+          "iron_block": 0.03,
+          "gold_block": 0.02,
+          "diamond_block": 0.01
+        }
+      },
+      "sellList": [
+        "sand",
+        "gravel",
+        "dirt",
+        "lapis_block",
+        "iron_block",
+        "gold_block",
+        "diamond_block"
+      ]
+    },
+    {
+      "id": "fraction_base",
+      "kind": "social",
+      "name": "База фракций",
+      "unlockLevel": 5,
+      "requiresPass": false,
+      "pvp": false,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {
+          "cobblestone": 0.2,
+          "stone": 0.2,
+          "coal": 0.2,
+          "coal_ore": 0.2,
+          "iron_ore": 0.2
+        }
+      },
+      "sellList": [
+        "cobblestone",
+        "stone",
+        "coal",
+        "coal_ore",
+        "iron_ore"
+      ]
+    }
+  ]
+}

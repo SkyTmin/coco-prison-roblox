@@ -1,0 +1,28 @@
+{
+  "source": "первые требования [меню]; остальное [решение]",
+  "strength": {
+    "perLevel": 0.02,
+    "maxLevel": 20,
+    "first": {
+      "zombies": 30,
+      "kills": 15,
+      "money": 500
+    }
+  },
+  "agility": {
+    "perLevel": 0.01,
+    "maxLevel": 20,
+    "first": {
+      "money": 50,
+      "bats": 5
+    }
+  },
+  "needs": {
+    "perLevel": 0.02,
+    "maxLevel": 20,
+    "first": {
+      "money": 450
+    }
+  },
+  "costGrowth": 1.25
+}

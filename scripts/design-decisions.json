@@ -1,0 +1,683 @@
+{
+  "_comment": "Наши решения для конфигов (GAME-DESIGN.md, пометка [решение]). Подтверждённые данные берутся из wiki/in-game-wiki и wiki/client-audit, этот файл — только то, чего в игре не снято. Правится вручную, затем `node scripts/build-configs.mjs`.",
+  "money": {
+    "scale": 10000,
+    "displayDecimals": 3,
+    "priceMultiplierPerLevel": 0.01
+  },
+  "hearts": {
+    "base": 10,
+    "perLevel": 0.5
+  },
+  "skillPoints": {
+    "firstLevel": 5,
+    "perLevel": 1
+  },
+  "blocks": {
+    "sand": {
+      "hardness": 0.5,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "gravel": {
+      "hardness": 0.6,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "dirt": {
+      "hardness": 0.5,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "oak_log": {
+      "hardness": 2,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "melon": {
+      "hardness": 1,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "cobblestone": {
+      "hardness": 2,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "stone": {
+      "hardness": 1.5,
+      "tool": "pickaxe",
+      "minTier": 0,
+      "dropsAs": "cobblestone"
+    },
+    "coal": {
+      "hardness": 0,
+      "tool": "none",
+      "minTier": 0,
+      "itemOnly": true
+    },
+    "coal_ore": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 0,
+      "dropsAs": "coal"
+    },
+    "iron_ore": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 1
+    },
+    "coal_block": {
+      "hardness": 5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "red_sand": {
+      "hardness": 0.5,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "gold_ore": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 2
+    },
+    "netherite": {
+      "hardness": 0.4,
+      "tool": "pickaxe",
+      "minTier": 0,
+      "note": "по иконке и цене — незерак"
+    },
+    "soul_sand": {
+      "hardness": 0.5,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "quartz": {
+      "hardness": 0,
+      "tool": "none",
+      "minTier": 0,
+      "itemOnly": true
+    },
+    "quartz_ore": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 0,
+      "dropsAs": "quartz"
+    },
+    "sandstone": {
+      "hardness": 0.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "red_sandstone": {
+      "hardness": 0.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "wisteria_leaves": {
+      "hardness": 0.2,
+      "tool": "shears",
+      "minTier": 0
+    },
+    "cherry_log": {
+      "hardness": 2,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "cyan_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "prismarine": {
+      "hardness": 1.5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "prismarine_bricks": {
+      "hardness": 1.5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "end_stone_bricks": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "purpur": {
+      "hardness": 1.5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "white_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "cobweb": {
+      "hardness": 4,
+      "tool": "sword",
+      "minTier": 0
+    },
+    "ice": {
+      "hardness": 0.5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "packed_ice": {
+      "hardness": 0.5,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "yellow_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "red_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "lime_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "orange_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "yellow_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "lime_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "purple_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "red_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "quartz_block": {
+      "hardness": 0.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "chiseled_quartz": {
+      "hardness": 0.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "dark_oak_leaves": {
+      "hardness": 0.2,
+      "tool": "shears",
+      "minTier": 0
+    },
+    "pink_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "sea_lantern": {
+      "hardness": 0.3,
+      "tool": "any",
+      "minTier": 0
+    },
+    "pumpkin": {
+      "hardness": 1,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "green_wool": {
+      "hardness": 0.8,
+      "tool": "any",
+      "minTier": 0
+    },
+    "jack_o_lantern": {
+      "hardness": 1,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "magenta_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "black_glass": {
+      "hardness": 0.3,
+      "tool": "any",
+      "minTier": 0
+    },
+    "white_concrete": {
+      "hardness": 1.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "clay": {
+      "hardness": 0.6,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "chiseled_sandstone": {
+      "hardness": 0.8,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "brown_mushroom_block": {
+      "hardness": 0.2,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "snow": {
+      "hardness": 0.2,
+      "tool": "shovel",
+      "minTier": 0
+    },
+    "smooth_sandstone": {
+      "hardness": 2,
+      "tool": "pickaxe",
+      "minTier": 0
+    },
+    "red_mushroom_block": {
+      "hardness": 0.2,
+      "tool": "axe",
+      "minTier": 0
+    },
+    "lapis_block": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 1
+    },
+    "iron_block": {
+      "hardness": 5,
+      "tool": "pickaxe",
+      "minTier": 1
+    },
+    "gold_block": {
+      "hardness": 3,
+      "tool": "pickaxe",
+      "minTier": 2
+    },
+    "diamond_block": {
+      "hardness": 5,
+      "tool": "pickaxe",
+      "minTier": 2
+    }
+  },
+  "mines": {
+    "_default": {
+      "size": [
+        40,
+        16,
+        40
+      ],
+      "resetSeconds": 480,
+      "warnSeconds": 15
+    },
+    "prison": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "resetSeconds": 300,
+      "shares": {
+        "dirt": 0.6,
+        "sand": 0.2,
+        "gravel": 0.12,
+        "oak_log": 0.05,
+        "melon": 0.03
+      }
+    },
+    "quarry": {
+      "shares": {
+        "stone": 0.7,
+        "coal_ore": 0.18,
+        "iron_ore": 0.09,
+        "coal_block": 0.03
+      }
+    },
+    "mountain_foot": {
+      "shares": {
+        "red_sand": 0.7,
+        "iron_ore": 0.2,
+        "gold_ore": 0.1
+      }
+    },
+    "underworld": {
+      "shares": {
+        "netherite": 0.55,
+        "soul_sand": 0.2,
+        "quartz_ore": 0.25
+      }
+    },
+    "pyramid": {
+      "shares": {
+        "sandstone": 0.5,
+        "red_sandstone": 0.5
+      },
+      "pvp": true
+    },
+    "basement": {
+      "size": [
+        24,
+        10,
+        24
+      ],
+      "requiresPass": true,
+      "pvp": true,
+      "shares": {
+        "dirt": 0.3,
+        "sand": 0.3,
+        "gravel": 0.3,
+        "lapis_block": 0.04,
+        "iron_block": 0.03,
+        "gold_block": 0.02,
+        "diamond_block": 0.01
+      }
+    },
+    "fraction_base": {
+      "kind": "social",
+      "note": "База фракций: не шахта, продаются блоки Каменоломни с точек захвата"
+    }
+  },
+  "pvpFromLevel": 9,
+  "toolShop": {
+    "shovel": 0,
+    "axe": 4,
+    "pickaxe": 22.5,
+    "shears": 4000
+  },
+  "mobs": {
+    "rat": {
+      "name": "Крыса",
+      "hp": 12,
+      "damage": 2,
+      "money": 0.5,
+      "statKey": "rats",
+      "locations": [
+        "prison",
+        "basement"
+      ]
+    },
+    "zombie": {
+      "name": "Зомби",
+      "hp": 20,
+      "damage": 3,
+      "money": 1.5,
+      "statKey": "zombies",
+      "drop": "rotten_flesh",
+      "locations": [
+        "basement",
+        "quarry"
+      ]
+    },
+    "bat": {
+      "name": "Летучая мышь",
+      "hp": 6,
+      "damage": 1,
+      "money": 0.3,
+      "statKey": "bats",
+      "locations": [
+        "basement",
+        "underworld"
+      ]
+    }
+  },
+  "bosses": {
+    "basalt_guardian": {
+      "hp": 600,
+      "damage": 4,
+      "respawnSeconds": 1200
+    },
+    "minotaur": {
+      "hp": 1000,
+      "damage": 5,
+      "respawnSeconds": 1500
+    },
+    "piglin": {
+      "hp": 1500,
+      "damage": 6,
+      "respawnSeconds": 1800
+    },
+    "skeleton": {
+      "hp": 2500,
+      "damage": 7,
+      "respawnSeconds": 2400
+    },
+    "rat_boss": {
+      "name": "Босс-крыса",
+      "location": "basement",
+      "hp": 1200,
+      "damage": 6,
+      "respawnSeconds": 1200,
+      "money": [
+        0,
+        600
+      ],
+      "ancientStars": [
+        0,
+        1
+      ]
+    }
+  },
+  "bossRewards": {
+    "lastHitBonus": 0.2,
+    "minDamageShare": 0.05,
+    "starsTopN": 3
+  },
+  "needs": {
+    "hygiene": {
+      "name": "Грязь",
+      "minutesToZero": 90,
+      "effectAtZero": "nausea",
+      "digSlowdownAtZero": 0.1,
+      "restoreZone": "bath_water",
+      "consumable": "soap"
+    },
+    "sleep": {
+      "name": "Сон",
+      "minutesToZero": 120,
+      "effectAtZero": "insomnia",
+      "digBlockedAtZero": true,
+      "restoreZone": "bed",
+      "consumable": "sleeping_bag"
+    },
+    "toilet": {
+      "name": "Туалет",
+      "minutesToZero": 60,
+      "effectAtZero": "slowness",
+      "moveSlowdownAtZero": 0.15,
+      "restoreZone": "toilet_lever",
+      "consumable": "toilet_paper"
+    },
+    "warnThreshold": 25,
+    "restoreInstant": true,
+    "persistAfterDeath": true,
+    "consumablePrices": {
+      "soap": 15,
+      "toilet_paper": 10,
+      "sleeping_bag": 25
+    },
+    "randomEvent": {
+      "everySeconds": 1200,
+      "effect": "haste",
+      "level": 1,
+      "durationSeconds": 300
+    }
+  },
+  "trainer": {
+    "strength": {
+      "perLevel": 0.02,
+      "maxLevel": 20,
+      "first": {
+        "zombies": 30,
+        "kills": 15,
+        "money": 500
+      }
+    },
+    "agility": {
+      "perLevel": 0.01,
+      "maxLevel": 20,
+      "first": {
+        "money": 50,
+        "bats": 5
+      }
+    },
+    "needs": {
+      "perLevel": 0.02,
+      "maxLevel": 20,
+      "first": {
+        "money": 450
+      }
+    },
+    "costGrowth": 1.25
+  },
+  "keys": {
+    "ordinaryKeyChancePerBlock": 0.0005,
+    "ordinaryKeyPity": 5000,
+    "luckyBonusPerLevel": 0.2,
+    "ordinaryCase": [
+      {
+        "id": "money",
+        "weight": 25,
+        "min": 10,
+        "max": 50
+      },
+      {
+        "id": "blocks",
+        "weight": 20,
+        "count": 32
+      },
+      {
+        "id": "food",
+        "weight": 15
+      },
+      {
+        "id": "hygiene",
+        "weight": 15
+      },
+      {
+        "id": "ancient_star",
+        "weight": 15
+      },
+      {
+        "id": "basement_pass",
+        "weight": 3
+      },
+      {
+        "id": "ancient_powder",
+        "weight": 3
+      },
+      {
+        "id": "rare_wooden_pickaxe",
+        "weight": 2
+      }
+    ],
+    "ancientCase": {
+      "rarity": {
+        "common": 70,
+        "rare": 25,
+        "legendary": 5
+      },
+      "level": {
+        "1": 60,
+        "2": 30,
+        "3": 10
+      },
+      "applyChance": [
+        10,
+        100
+      ],
+      "improvedApplyChance": [
+        40,
+        100
+      ]
+    }
+  },
+  "books": {
+    "limits": {
+      "sword": 4,
+      "bow": 2,
+      "armor": 2,
+      "tool": 2
+    },
+    "powderPerUse": 0.02,
+    "donatePowder": 0.1,
+    "forge": {
+      "starsPerLevel": 10,
+      "successChance": 0.6
+    },
+    "effects": {
+      "trader": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "archaeologist": [
+        0.03,
+        0.06,
+        0.09
+      ],
+      "hammer": [
+        0.02,
+        0.04,
+        0.06
+      ],
+      "toxic": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "berserk": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "tank": [
+        1,
+        2,
+        3
+      ],
+      "springs": [
+        1,
+        2,
+        3
+      ],
+      "vampirism": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "enlightened": [
+        0.05,
+        0.1,
+        0.15
+      ]
+    }
+  },
+  "death": {
+    "cashLossFraction": 0.05,
+    "pvpDropsBlocks": true,
+    "spawnProtectionSeconds": 5,
+    "killerCashShare": 0.1
+  },
+  "combo": {
+    "blocksPerStep": 1000,
+    "stepBonus": 0.1,
+    "maxMultiplier": 2,
+    "breakAfterIdleSeconds": 10
+  }
+}

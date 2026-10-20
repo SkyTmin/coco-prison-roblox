@@ -1,0 +1,62 @@
+{
+  "source": "лимиты [вики]; остальное [решение]",
+  "limits": {
+    "sword": 4,
+    "bow": 2,
+    "armor": 2,
+    "tool": 2
+  },
+  "powderPerUse": 0.02,
+  "donatePowder": 0.1,
+  "forge": {
+    "starsPerLevel": 10,
+    "successChance": 0.6
+  },
+  "effects": {
+    "trader": [
+      0.05,
+      0.1,
+      0.15
+    ],
+    "archaeologist": [
+      0.03,
+      0.06,
+      0.09
+    ],
+    "hammer": [
+      0.02,
+      0.04,
+      0.06
+    ],
+    "toxic": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "berserk": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "tank": [
+      1,
+      2,
+      3
+    ],
+    "springs": [
+      1,
+      2,
+      3
+    ],
+    "vampirism": [
+      0.05,
+      0.1,
+      0.15
+    ],
+    "enlightened": [
+      0.05,
+      0.1,
+      0.15
+    ]
+  }
+}

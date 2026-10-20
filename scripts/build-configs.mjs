@@ -1,0 +1,171 @@
+// Generates src/shared/Config/*.json from confirmed wiki data + scripts/design-decisions.json.
+// Usage: node scripts/build-configs.mjs
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const read = (p) => JSON.parse(readFileSync(join(root, p), "utf8"));
+const outDir = join(root, "src", "shared", "Config");
+mkdirSync(outDir, { recursive: true });
+const write = (name, data) => {
+	writeFileSync(join(outDir, name), JSON.stringify(data, null, 2) + "\n");
+	console.log("wrote", name);
+};
+
+const decisions = read("scripts/design-decisions.json");
+const levelsWiki = read("wiki/in-game-wiki/levels.json");
+const pricesWiki = read("wiki/in-game-wiki/block-prices.json");
+const pickaxeWiki = read("wiki/client-audit/content-analysis/pickaxe-upgrades-recovery.json");
+const otherWiki = read("wiki/client-audit/content-analysis/other-upgrades-recovery.json");
+const armorWiki = read("wiki/client-audit/content-analysis/armor-and-axe-recovery.json");
+const bossWiki = read("wiki/client-audit/content-analysis/boss-menu-recovery.json");
+
+// ---------------------------------------------------------------- levels
+const levels = levelsWiki.levels.map((l) => ({
+	level: l.level,
+	money: l.money,
+	blocks: l.blocks,
+	hearts: decisions.hearts.base + decisions.hearts.perLevel * (l.level - 1),
+	skillPoints: l.level >= decisions.skillPoints.firstLevel ? decisions.skillPoints.perLevel : 0,
+}));
+write("levels.json", {
+	source: "wiki/in-game-wiki/levels.json [вики]; сердца и очки навыков — [решение]",
+	maxLevel: levelsWiki.rules.maxLevel,
+	blocksSpent: false,
+	moneySpent: true,
+	levels,
+});
+
+// ---------------------------------------------------------------- blocks + locations
+const counterByBlock = {
+	sand: "Песок", gravel: "Гравий", dirt: "Земля", oak_log: "Дерево", melon: "Арбуз",
+	stone: "Камень", cobblestone: "Камень", coal_ore: "Каменный уголь", coal: "Каменный уголь",
+	iron_ore: "Железная руда", gold_ore: "Золотая руда",
+};
+const blocks = {};
+const locations = [];
+for (const loc of pricesWiki.locations) {
+	const dec = decisions.mines[loc.id] || {};
+	const def = decisions.mines._default;
+	const shares = dec.shares || Object.fromEntries(loc.blocks.map((b) => [b.id, 1 / loc.blocks.length]));
+	for (const b of loc.blocks) {
+		const phys = decisions.blocks[b.id];
+		if (!phys) throw new Error(`no physics for block ${b.id}`);
+		blocks[b.id] ??= {
+			id: b.id,
+			name: b.name,
+			basePrice: b.base,
+			hardness: phys.hardness,
+			tool: phys.tool,
+			minTier: phys.minTier,
+			dropsAs: phys.dropsAs ?? null,
+			itemOnly: phys.itemOnly ?? false,
+			upgradeCounter: counterByBlock[b.id] ?? null,
+		};
+	}
+	locations.push({
+		id: loc.id,
+		kind: dec.kind ?? "mine",
+		name: loc.name,
+		unlockLevel: loc.level,
+		requiresPass: loc.requiresPass ?? false,
+		pvp: dec.pvp ?? (loc.level >= decisions.pvpFromLevel && loc.id !== "fraction_base"),
+		mine: {
+			size: dec.size ?? def.size,
+			resetSeconds: dec.resetSeconds ?? def.resetSeconds,
+			warnSeconds: dec.warnSeconds ?? def.warnSeconds,
+			shares,
+		},
+		sellList: loc.blocks.map((b) => b.id),
+	});
+}
+write("blocks.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; твёрдость [ваниль]", money: decisions.money, blocks });
+write("locations.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; размеры/доли/таймеры [решение]", locations });
+
+// ---------------------------------------------------------------- tools and gear
+const val = (r) => r.exactValue ?? r.approximateValue ?? null;
+function tiers(level) {
+	return ["wood", "stone", "iron", "diamond"][Math.min(3, Math.floor((level - 1) / 4))];
+}
+function fromTransitions(list, mapReq) {
+	return list.map((t) => ({
+		from: t.fromLevel,
+		to: t.toLevel,
+		cost: t.cost.exactValue,
+		requirements: mapReq(t),
+		enchantAfter: (t.efficiencyChange ?? t.enchantmentChange)?.after ?? 0,
+		materialAfter: tiers(t.toLevel),
+	}));
+}
+const reqMap = (t) => Object.fromEntries(Object.entries(t.requirements).map(([k, v]) => [k, val(v)]));
+const tools = {
+	pickaxe: { buyPrice: decisions.toolShop.pickaxe, enchant: "efficiency", upgrades: fromTransitions(pickaxeWiki.transitions, reqMap) },
+	shovel: { buyPrice: decisions.toolShop.shovel, enchant: "efficiency", upgrades: fromTransitions(otherWiki.shovel.transitions, reqMap) },
+	sword: { buyPrice: null, enchant: "sharpness", upgrades: fromTransitions(otherWiki.sword.transitions, reqMap) },
+};
+const armorReq = (t) => {
+	const r = {};
+	if (t.counterThreshold && t.requiredCounter) r[t.requiredCounter] = t.counterThreshold.exactValue ?? t.counterThreshold.approximateValue;
+	if (t.armorerLevel) r["Оружейник"] = t.armorerLevel;
+	return r;
+};
+for (const [id, item] of Object.entries(armorWiki.items)) {
+	tools[id] = {
+		buyPrice: id === "axe" ? decisions.toolShop.axe : null,
+		enchant: id === "axe" ? "efficiency" : "protection",
+		upgrades: item.transitions.map((t) => ({
+			from: t.fromLevel,
+			to: t.toLevel,
+			cost: t.moneyCost,
+			requirements: armorReq(t),
+			enchantAfter: t.enchantmentChangeShown?.after ?? 0,
+			materialAfter: tiers(t.toLevel),
+		})),
+	};
+}
+// Sword upgrades beyond 12 need Оружейник from the sword table (field "Оружейник" is inside requirements already as a counter name).
+write("tools.json", {
+	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
+	vanilla: {
+		swordDamage: { wood: 4, stone: 5, iron: 6, diamond: 7 },
+		sharpnessBonus: [0, 1.0, 1.5, 2.0, 2.5, 3.0],
+		toolSpeed: { hand: 1, wood: 2, stone: 4, iron: 6, diamond: 8 },
+		efficiencyBonus: "level^2 + 1 added to toolSpeed",
+		armorPoints: { wood: [1, 3, 2, 1], stone: [2, 5, 4, 1], iron: [2, 6, 5, 2], diamond: [3, 8, 6, 3] },
+		armorToughness: { wood: 0, stone: 0, iron: 0, diamond: 2 },
+		protectionPerLevelPerPiece: 0.04,
+		maxEpf: 20,
+	},
+	tools,
+});
+
+// ---------------------------------------------------------------- bosses
+const bosses = bossWiki.entries.map((e) => {
+	const id = e.localizationMatch?.id ?? e.name;
+	const dec = decisions.bosses[id] || {};
+	return {
+		id,
+		name: e.name,
+		location: e.location,
+		unlockLevel: e.locationUnlockLevel,
+		money: e.possibleRewards?.money ? [e.possibleRewards.money.min, e.possibleRewards.money.max] : null,
+		ancientStars: e.possibleRewards?.ancientStars ? [e.possibleRewards.ancientStars.min, e.possibleRewards.ancientStars.max] : null,
+		powderChance: e.possibleRewards?.ancientPowder ?? null,
+		shard: e.possibleRewards?.shard ?? null,
+		hp: dec.hp ?? null,
+		damage: dec.damage ?? null,
+		respawnSeconds: dec.respawnSeconds ?? null,
+	};
+});
+const rb = decisions.bosses.rat_boss;
+bosses.push({ id: "rat_boss", name: rb.name, location: "Подвал", unlockLevel: 5, money: rb.money, ancientStars: rb.ancientStars, powderChance: null, shard: null, hp: rb.hp, damage: rb.damage, respawnSeconds: rb.respawnSeconds });
+write("bosses.json", { source: "boss-menu-recovery.json [меню]; hp/damage/respawn [решение]", rewards: decisions.bossRewards, bosses });
+
+// ---------------------------------------------------------------- pure decisions
+write("mobs.json", { source: "[решение]", mobs: decisions.mobs });
+write("needs.json", { source: "эффекты и зоны снятия [вики]; таймеры и штрафы [решение]", ...decisions.needs });
+write("trainer.json", { source: "первые требования [меню]; остальное [решение]", ...decisions.trainer });
+write("keys.json", { source: "[решение]; цены ключей у обменника [меню]", starExchange: { ancient_key: 10, improved_ancient_key: 60, dispeller: 15 }, ...decisions.keys });
+write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
+write("rules.json", { source: "[решение]", death: decisions.death, combo: decisions.combo, money: decisions.money });

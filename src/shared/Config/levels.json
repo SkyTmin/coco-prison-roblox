@@ -1,0 +1,351 @@
+{
+  "source": "wiki/in-game-wiki/levels.json [вики]; сердца и очки навыков — [решение]",
+  "maxLevel": 50,
+  "blocksSpent": false,
+  "moneySpent": true,
+  "levels": [
+    {
+      "level": 2,
+      "money": 5,
+      "blocks": 470,
+      "hearts": 10.5,
+      "skillPoints": 0
+    },
+    {
+      "level": 3,
+      "money": 7,
+      "blocks": 1120,
+      "hearts": 11,
+      "skillPoints": 0
+    },
+    {
+      "level": 4,
+      "money": 20,
+      "blocks": 2420,
+      "hearts": 11.5,
+      "skillPoints": 0
+    },
+    {
+      "level": 5,
+      "money": 51,
+      "blocks": 4720,
+      "hearts": 12,
+      "skillPoints": 1
+    },
+    {
+      "level": 6,
+      "money": 100,
+      "blocks": 8620,
+      "hearts": 12.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 7,
+      "money": 190,
+      "blocks": 14600,
+      "hearts": 13,
+      "skillPoints": 1
+    },
+    {
+      "level": 8,
+      "money": 260,
+      "blocks": 23100,
+      "hearts": 13.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 9,
+      "money": 440,
+      "blocks": 34100,
+      "hearts": 14,
+      "skillPoints": 1
+    },
+    {
+      "level": 10,
+      "money": 480,
+      "blocks": 48100,
+      "hearts": 14.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 11,
+      "money": 700,
+      "blocks": 64100,
+      "hearts": 15,
+      "skillPoints": 1
+    },
+    {
+      "level": 12,
+      "money": 950,
+      "blocks": 82100,
+      "hearts": 15.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 13,
+      "money": 1800,
+      "blocks": 102000,
+      "hearts": 16,
+      "skillPoints": 1
+    },
+    {
+      "level": 14,
+      "money": 3400,
+      "blocks": 123000,
+      "hearts": 16.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 15,
+      "money": 5500,
+      "blocks": 144000,
+      "hearts": 17,
+      "skillPoints": 1
+    },
+    {
+      "level": 16,
+      "money": 10000,
+      "blocks": 166000,
+      "hearts": 17.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 17,
+      "money": 10500,
+      "blocks": 189000,
+      "hearts": 18,
+      "skillPoints": 1
+    },
+    {
+      "level": 18,
+      "money": 13000,
+      "blocks": 214000,
+      "hearts": 18.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 19,
+      "money": 15000,
+      "blocks": 242000,
+      "hearts": 19,
+      "skillPoints": 1
+    },
+    {
+      "level": 20,
+      "money": 18000,
+      "blocks": 276000,
+      "hearts": 19.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 21,
+      "money": 23000,
+      "blocks": 319000,
+      "hearts": 20,
+      "skillPoints": 1
+    },
+    {
+      "level": 22,
+      "money": 32000,
+      "blocks": 374000,
+      "hearts": 20.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 23,
+      "money": 44000,
+      "blocks": 454000,
+      "hearts": 21,
+      "skillPoints": 1
+    },
+    {
+      "level": 24,
+      "money": 65000,
+      "blocks": 564000,
+      "hearts": 21.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 25,
+      "money": 70000,
+      "blocks": 734000,
+      "hearts": 22,
+      "skillPoints": 1
+    },
+    {
+      "level": 26,
+      "money": 90000,
+      "blocks": 934000,
+      "hearts": 22.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 27,
+      "money": 110000,
+      "blocks": 1140000,
+      "hearts": 23,
+      "skillPoints": 1
+    },
+    {
+      "level": 28,
+      "money": 140000,
+      "blocks": 1360000,
+      "hearts": 23.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 29,
+      "money": 150000,
+      "blocks": 1590000,
+      "hearts": 24,
+      "skillPoints": 1
+    },
+    {
+      "level": 30,
+      "money": 160000,
+      "blocks": 1830000,
+      "hearts": 24.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 31,
+      "money": 170000,
+      "blocks": 2080000,
+      "hearts": 25,
+      "skillPoints": 1
+    },
+    {
+      "level": 32,
+      "money": 210000,
+      "blocks": 2350000,
+      "hearts": 25.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 33,
+      "money": 260000,
+      "blocks": 2630000,
+      "hearts": 26,
+      "skillPoints": 1
+    },
+    {
+      "level": 34,
+      "money": 320000,
+      "blocks": 2930000,
+      "hearts": 26.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 35,
+      "money": 370000,
+      "blocks": 3240000,
+      "hearts": 27,
+      "skillPoints": 1
+    },
+    {
+      "level": 36,
+      "money": 410000,
+      "blocks": 3570000,
+      "hearts": 27.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 37,
+      "money": 430000,
+      "blocks": 3920000,
+      "hearts": 28,
+      "skillPoints": 1
+    },
+    {
+      "level": 38,
+      "money": 470000,
+      "blocks": 4280000,
+      "hearts": 28.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 39,
+      "money": 500000,
+      "blocks": 4660000,
+      "hearts": 29,
+      "skillPoints": 1
+    },
+    {
+      "level": 40,
+      "money": 550000,
+      "blocks": 5060000,
+      "hearts": 29.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 41,
+      "money": 600000,
+      "blocks": 5490000,
+      "hearts": 30,
+      "skillPoints": 1
+    },
+    {
+      "level": 42,
+      "money": 650000,
+      "blocks": 5940000,
+      "hearts": 30.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 43,
+      "money": 700000,
+      "blocks": 6410000,
+      "hearts": 31,
+      "skillPoints": 1
+    },
+    {
+      "level": 44,
+      "money": 750000,
+      "blocks": 6910000,
+      "hearts": 31.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 45,
+      "money": 800000,
+      "blocks": 7410000,
+      "hearts": 32,
+      "skillPoints": 1
+    },
+    {
+      "level": 46,
+      "money": 850000,
+      "blocks": 7960000,
+      "hearts": 32.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 47,
+      "money": 900000,
+      "blocks": 8560000,
+      "hearts": 33,
+      "skillPoints": 1
+    },
+    {
+      "level": 48,
+      "money": 1000000,
+      "blocks": 9160000,
+      "hearts": 33.5,
+      "skillPoints": 1
+    },
+    {
+      "level": 49,
+      "money": 1100000,
+      "blocks": 9810000,
+      "hearts": 34,
+      "skillPoints": 1
+    },
+    {
+      "level": 50,
+      "money": 1200000,
+      "blocks": 10500000,
+      "hearts": 34.5,
+      "skillPoints": 1
+    }
+  ]
+}

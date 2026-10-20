@@ -15,8 +15,13 @@ Minecraft server. Design source of truth: `wiki/PROTOTYPE-SPEC.md` (chapter 1, v
 
 - `default.project.json` — Rojo tree. Workspace is NOT synced: the map lives in the place
   file, built by `scripts/build-yard.luau` (re-runnable, replaces `Workspace.Yard`).
-- `src/shared/Config/rpg-systems.json` — balance; mirror of `wiki/rpg-systems-config.json`.
-  Change both together. Rojo exposes it as `ReplicatedStorage.Shared.Config["rpg-systems"]`.
+- `src/shared/Config/*.json` — **generated**, never edit by hand. Run
+  `node scripts/build-configs.mjs`: it reads confirmed data from `wiki/in-game-wiki/*.json` and
+  `wiki/client-audit/content-analysis/*-recovery.json` plus our decisions in
+  `scripts/design-decisions.json`, and writes levels/blocks/locations/tools/bosses/mobs/needs/
+  trainer/keys/books/rules. Design rationale and source tags live in `docs/GAME-DESIGN.md`.
+  `node scripts/simulate-economy.mjs [maxLevel]` estimates minutes-to-level from those configs.
+  `rpg-systems.json` is the old chapter-1 spec config, kept only until the Luau code is rewritten.
 - `src/shared/` — `Config.luau` (typed accessors), `Strings.luau` (t(key, locale, …), four
   locales ru/en/es/fr, ru default), `Remotes.luau`, `Types.luau` (Profile v2).
 - `src/server/Services/` — `ProfileService` (in-memory profiles, DataStore

@@ -1,0 +1,39 @@
+{
+  "source": "[решение]",
+  "mobs": {
+    "rat": {
+      "name": "Крыса",
+      "hp": 12,
+      "damage": 2,
+      "money": 0.5,
+      "statKey": "rats",
+      "locations": [
+        "prison",
+        "basement"
+      ]
+    },
+    "zombie": {
+      "name": "Зомби",
+      "hp": 20,
+      "damage": 3,
+      "money": 1.5,
+      "statKey": "zombies",
+      "drop": "rotten_flesh",
+      "locations": [
+        "basement",
+        "quarry"
+      ]
+    },
+    "bat": {
+      "name": "Летучая мышь",
+      "hp": 6,
+      "damage": 1,
+      "money": 0.3,
+      "statKey": "bats",
+      "locations": [
+        "basement",
+        "underworld"
+      ]
+    }
+  }
+}
