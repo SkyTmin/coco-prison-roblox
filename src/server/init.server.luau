@@ -4,6 +4,31 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+-- Create every remote up front so clients never block on WaitForChild.
+for _, name in ipairs({
+	"DigStart",
+	"DigFinish",
+	"Sell",
+	"BuyItem",
+	"UpgradeItem",
+	"LevelUp",
+	"InventoryMove",
+	"SelectSlot",
+	"SpendPoint",
+	"ClaimPoints",
+	"EquipArmor",
+	"UseConsumable",
+	"OpenCase",
+	"ProfileUpdated",
+	"Toast",
+	"MineReset",
+	"Combo",
+	"OpenMenu",
+}) do
+	Remotes.event(name)
+end
+
 local ProfileService = require(script.Services.ProfileService)
 local ProfessionService = require(script.Services.ProfessionService)
 local MineService = require(script.Services.MineService)

@@ -51,6 +51,24 @@ function InventoryService.add(profile: Profile, id: string, count: number, level
 	return remaining
 end
 
+-- True when `count` of the item fits without dropping anything.
+function InventoryService.canAdd(profile: Profile, id: string, count: number): boolean
+	local room = 0
+	local stackable = InventoryService.isStackable(id)
+	for slot = 1, SLOTS do
+		local stack = profile.inventory[slot]
+		if not stack then
+			room += if stackable then STACK else 1
+		elseif stackable and stack.id == id then
+			room += STACK - stack.count
+		end
+		if room >= count then
+			return true
+		end
+	end
+	return false
+end
+
 function InventoryService.count(profile: Profile, id: string): number
 	local total = 0
 	for _, stack in pairs(profile.inventory) do
@@ -81,8 +99,12 @@ function InventoryService.remove(profile: Profile, id: string, count: number): n
 	return count - left
 end
 
+function InventoryService.isSlot(n: any): boolean
+	return typeof(n) == "number" and n == n and n == math.floor(n) and n >= 1 and n <= SLOTS
+end
+
 function InventoryService.move(profile: Profile, from: number, to: number): boolean
-	if from == to or from < 1 or to < 1 or from > SLOTS or to > SLOTS then
+	if from == to or not InventoryService.isSlot(from) or not InventoryService.isSlot(to) then
 		return false
 	end
 	local a, b = profile.inventory[from], profile.inventory[to]
@@ -120,6 +142,9 @@ function InventoryService.findTool(profile: Profile, id: string): (number?, Item
 end
 
 function InventoryService.equipArmor(profile: Profile, slot: number): boolean
+	if not InventoryService.isSlot(slot) then
+		return false
+	end
 	local stack = profile.inventory[slot]
 	if not stack or not ARMOR_SLOTS[stack.id] then
 		return false

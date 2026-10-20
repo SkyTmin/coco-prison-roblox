@@ -49,8 +49,11 @@ local function coords(mine: Mine, i: number): (number, number, number)
 end
 
 local function cellAt(mine: Mine, x: number, y: number, z: number): string?
-	if x < 1 or y < 1 or z < 1 or x > mine.size[1] or y > mine.size[2] or z > mine.size[3] then
-		return "wall" -- outside the grid counts as solid (unbreakable surroundings)
+	if y < 1 then
+		return nil -- above the mine is air: the top layer is always exposed
+	end
+	if x < 1 or z < 1 or x > mine.size[1] or y > mine.size[2] or z > mine.size[3] then
+		return "wall" -- sides and floor count as solid (unbreakable surroundings)
 	end
 	return mine.cells[index(mine, x, y, z)]
 end
@@ -124,8 +127,14 @@ end
 local function rebuild(mine: Mine)
 	mine.rebuilding = true
 	mine.generation += 1
-	for part in pairs(mine.parts) do
+	local n = 0
+	for _, part in pairs(mine.parts) do
 		blockLookup[part] = nil
+		part:Destroy()
+		n += 1
+		if n % CHUNK == 0 then
+			task.wait()
+		end
 	end
 	mine.folder:ClearAllChildren()
 	table.clear(mine.parts)
@@ -134,6 +143,9 @@ local function rebuild(mine: Mine)
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
 	for i = 1, total do
 		mine.cells[i] = pickBlock(mine.location.mine.shares, rng)
+		if i % 4096 == 0 then
+			task.wait()
+		end
 	end
 	local created = 0
 	for i = 1, total do
@@ -265,6 +277,8 @@ local function register(anchor: Instance)
 	mines[mineId] = mine
 	anchor.Transparency = 1
 	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.CanTouch = false
 	task.spawn(rebuild, mine)
 end
 

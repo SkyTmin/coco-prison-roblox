@@ -28,9 +28,25 @@ local function units(dollars: number): number
 	return math.floor(dollars * Config.moneyScale + 0.5)
 end
 
+-- Server-side proximity to an NPC of the given tag (menus are opened by prompt, but the remote
+-- itself must also be used next to the NPC).
+local NPC_RANGE = 14
+local function nearNpc(player: Player, tag: string): boolean
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root or not root:IsA("BasePart") then
+		return false
+	end
+	for _, npc in ipairs(CollectionService:GetTagged(tag)) do
+		if npc:IsA("BasePart") and (npc.Position - root.Position).Magnitude <= NPC_RANGE then
+			return true
+		end
+	end
+	return false
+end
+
 local function sell(player: Player)
 	local profile = ProfileService.Get(player)
-	if not profile then
+	if not profile or not nearNpc(player, "SellPoint") then
 		return
 	end
 	local total = 0
@@ -54,7 +70,7 @@ local function buy(player: Player, id: any)
 		return
 	end
 	local profile = ProfileService.Get(player)
-	if not profile then
+	if not profile or not nearNpc(player, if SHOP_PRICES[id] then "ItemShop" else "FoodShop") then
 		return
 	end
 	if profile.coins < units(price) then
@@ -194,7 +210,7 @@ function EconomyService.Start()
 	Remotes.event("UpgradeItem").OnServerEvent:Connect(upgrade)
 	Remotes.event("LevelUp").OnServerEvent:Connect(levelUp)
 	Remotes.event("InventoryMove").OnServerEvent:Connect(function(player, from, to)
-		if typeof(from) == "number" and typeof(to) == "number" then
+		if InventoryService.isSlot(from) and InventoryService.isSlot(to) then
 			ProfileService.Mutate(player, function(p)
 				InventoryService.move(p, from, to)
 			end)
@@ -208,7 +224,7 @@ function EconomyService.Start()
 		end
 	end)
 	Remotes.event("EquipArmor").OnServerEvent:Connect(function(player, slot)
-		if typeof(slot) == "number" then
+		if InventoryService.isSlot(slot) then
 			ProfileService.Mutate(player, function(p)
 				InventoryService.equipArmor(p, slot)
 			end)

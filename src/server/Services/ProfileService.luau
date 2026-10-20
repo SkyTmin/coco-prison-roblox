@@ -53,12 +53,36 @@ local function keyFor(player: Player): string
 	return "User_" .. tostring(player.UserId)
 end
 
+-- DataStore turns sparse numeric keys into strings: inventory slots are stored as string keys
+-- and restored to numbers on load.
+local function encodeInventory(inv: { [number]: Types.ItemStack }): { [string]: Types.ItemStack }
+	local out = {}
+	for slot, stack in pairs(inv) do
+		out[tostring(slot)] = stack
+	end
+	return out
+end
+
+local function decodeInventory(inv: any): { [number]: Types.ItemStack }
+	local out = {}
+	if typeof(inv) == "table" then
+		for slot, stack in pairs(inv) do
+			local n = tonumber(slot)
+			if n then
+				out[n] = stack
+			end
+		end
+	end
+	return out
+end
+
 local function migrate(data: any): Profile
 	local profile = ProfileService.defaultProfile()
 	if typeof(data) == "table" and data.schemaVersion == SCHEMA_VERSION then
 		for field, value in pairs(data) do
 			(profile :: any)[field] = value
 		end
+		profile.inventory = decodeInventory(data.inventory)
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
@@ -96,7 +120,8 @@ local function save(player: Player, session: Session)
 		return
 	end
 	session.saving = true
-	local snapshot = session.profile
+	local snapshot = table.clone(session.profile) :: any
+	snapshot.inventory = encodeInventory(session.profile.inventory)
 	local ok, err = pcall(function()
 		(store :: DataStore):UpdateAsync(keyFor(player), function()
 			return snapshot
@@ -153,8 +178,11 @@ function ProfileService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		local session = sessions[player]
 		if session then
-			save(player, session)
 			sessions[player] = nil
+			while session.saving do
+				task.wait(0.1) -- let an autosave in flight finish, then write the final state
+			end
+			save(player, session)
 		end
 	end)
 	game:BindToClose(function()

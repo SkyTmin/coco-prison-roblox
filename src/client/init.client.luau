@@ -674,15 +674,15 @@ RunService.RenderStepped:Connect(function()
 			progressFill.Size = UDim2.fromScale(k, 1)
 			if k >= 1 then
 				Remotes.event("DigFinish"):FireServer(digTarget)
-				local t = digTarget
 				stopDig()
-				-- keep digging the next block under the cursor while the button is held
-				task.delay(0.05, function()
-					if holding and targetUnderCursor() ~= t then
-						digging = true
-					end
-				end)
 			end
+		end
+	elseif holding and target then
+		-- button still held: start on whatever block is under the cursor now
+		local needed = expectedTime(target)
+		if needed then
+			digging, digTarget, digStarted, digNeeded = true, target, os.clock(), needed
+			Remotes.event("DigStart"):FireServer(target)
 		end
 	end
 end)

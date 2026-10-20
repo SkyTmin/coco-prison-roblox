@@ -11,15 +11,23 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
 local ProfessionService = require(script.Parent.ProfessionService)
 
 local MAX_DISTANCE = 10 -- studs from root to block centre (block is 4 wide)
-local TOLERANCE = 0.85 -- accept finish at 85 % of the server-side break time (latency)
+local TOLERANCE = 0.97 -- accept finish at 97 % of the server-side break time (latency only)
 
-type Dig = { part: BasePart, generation: number, startedAt: number, needed: number }
+type Dig = {
+	part: BasePart,
+	generation: number,
+	startedAt: number,
+	needed: number,
+	toolId: string?,
+	toolLevel: number,
+}
 type Combo = { count: number, lastAt: number }
 
 local DigService = {}
@@ -30,12 +38,22 @@ local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
+-- Distance and line of sight from the character to the target block (no digging through walls).
 local function inRange(player: Player, part: BasePart): boolean
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	return root ~= nil
-		and root:IsA("BasePart")
-		and (root.Position - part.Position).Magnitude <= MAX_DISTANCE + MineService.BLOCK
+	if not root or not root:IsA("BasePart") then
+		return false
+	end
+	local eye = root.Position + Vector3.new(0, 1.5, 0)
+	if (part.Position - eye).Magnitude > MAX_DISTANCE + MineService.BLOCK then
+		return false
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { character }
+	local hit = workspace:Raycast(eye, part.Position - eye, params)
+	return hit ~= nil and hit.Instance == part
 end
 
 -- Validates and returns the server-side break time, or nil (with a toast) when digging is not allowed.
@@ -77,6 +95,10 @@ local function check(player: Player, part: any): (number?, MineService.Mine?, nu
 	if profile.needs.sleep <= 0 then
 		return nil, nil, nil -- insomnia: cannot dig [вики]
 	end
+	if not InventoryService.canAdd(profile, block.dropsAs or block.id, 1) then
+		toast(player, "bag_full")
+		return nil, nil, nil
+	end
 	local slowdown = 0
 	if profile.needs.hygiene <= 0 then
 		slowdown += Config.needs.hygiene.digSlowdownAtZero
@@ -90,8 +112,20 @@ local function onDigStart(player: Player, part: any)
 		digs[player] = nil
 		return
 	end
-	digs[player] =
-		{ part = part, generation = mine.generation, startedAt = os.clock(), needed = needed }
+	digs[player] = {
+		part = part,
+		generation = mine.generation,
+		startedAt = os.clock(),
+		needed = needed,
+		toolId = nil,
+		toolLevel = 0,
+	}
+	local profile = ProfileService.Get(player)
+	if profile then
+		local toolId, toolLevel = InventoryService.heldTool(profile)
+		digs[player].toolId = toolId
+		digs[player].toolLevel = toolLevel
+	end
 end
 
 local function onDigFinish(player: Player, part: any)
@@ -106,6 +140,11 @@ local function onDigFinish(player: Player, part: any)
 	local needed, mine, i = check(player, part)
 	if not needed or not mine or not i or mine.generation ~= dig.generation then
 		return
+	end
+	local profileNow = ProfileService.Get(player) :: Types.Profile
+	local toolNow, levelNow = InventoryService.heldTool(profileNow)
+	if toolNow ~= dig.toolId or levelNow ~= dig.toolLevel then
+		return -- tool changed mid-dig: start over
 	end
 	local blockId = MineService.breakBlock(mine, i)
 	if not blockId then
