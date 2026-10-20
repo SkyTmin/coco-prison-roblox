@@ -42,17 +42,22 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 ## Studio loop without the Rojo plugin (agent sessions)
 
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
-2. After editing code: `node scripts/make-studio-sync.mjs > sync.luau`, run it with `execute_luau`
-   (Edit mode) — it sets every script's Source by path (28 scripts, ~1 s). `rojo serve` + HttpService
-   from Studio hangs; do not use it.
-3. Map: run `scripts/build-prison.luau` (Edit). Textures: `scripts/build-textures.luau` (Edit) creates
-   MaterialVariants — runtime scripts cannot. Both are idempotent.
+2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync.luau`, then pass
+   the file's text as `code` to `execute_luau` (Edit mode) — it sets each script's Source by path. The
+   optional comma list limits it to the changed files (a full sync is ~226 KB; keep it partial).
+   `rojo serve` + HttpService from Studio hangs; do not use it.
+3. Map: run `scripts/build-prison.luau`, then `scripts/decorate-prison.luau` (Edit). Textures:
+   `scripts/build-textures.luau` (Edit) creates MaterialVariants — runtime scripts cannot. All idempotent.
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
 5. `require()` inside `execute_luau` gets a separate module instance: read profiles through the client
    `ProfileUpdated` event, not through `ProfileService.Get`.
-6. If `list_roblox_studios` returns `[]`, restart Studio with the place file and wait ~1 min.
+6. If `list_roblox_studios` returns `[]`, restart Studio with the place file and wait ~1 min. Never
+   start a second `mcp.bat` (probe scripts etc.): only one proxy holds the Studio connection, and the
+   second one steals it. Studio follows the Windows system proxy (Happ VPN, 127.0.0.1:10809); when
+   `ecsv2.roblox.com` / `apis.roblox.com` fail through it, Studio quits ~75 s after launch — see
+   `docs/SETUP.md` §2, do not change the proxy yourself, wait for the VPN or ask the owner.
 
 ## Tooling
 

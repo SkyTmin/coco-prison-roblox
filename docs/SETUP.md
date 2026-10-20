@@ -28,6 +28,15 @@
 Get-ChildItem "$env:LOCALAPPDATA\Roblox\Versions" -Directory | Select-Object Name
 ```
 
+**VPN.** Studio ходит в сеть через системный прокси Windows (Happ → `127.0.0.1:10809`). Если VPN деградирует, в логе `%LOCALAPPDATA%Robloxlogs*_Studio_*_last.log` идут `SslConnectFail` к `ecsv2.roblox.com`, `apis.roblox.com`, и Studio сама закрывается через ~75 с после запуска. Проверка (через прокси должно быть не `000`):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}
+" -m 10 -x http://127.0.0.1:10809 https://ecsv2.roblox.com/
+```
+
+Лечится переподключением VPN в Happ (делает владелец); агент прокси не трогает.
+
 ## 3. MCP-сервер Studio для Claude Code
 
 С февраля 2026 года MCP-сервер встроен в Studio (отдельный `studio-rust-mcp-server` в архиве и не нужен).
