@@ -21,7 +21,9 @@ local Ui = require(script.Ui)
 local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
 local HeldItem = require(script.HeldItem)
+local ArmorVisual = require(script.ArmorVisual)
 HeldItem.Start()
+ArmorVisual.Start()
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale

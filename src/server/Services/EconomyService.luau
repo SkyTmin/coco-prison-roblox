@@ -225,6 +225,7 @@ function EconomyService.Start()
 	end)
 	Remotes.event("EquipArmor").OnServerEvent:Connect(function(player, slot)
 		if InventoryService.isSlot(slot) then
+			-- Mutate also replicates the equipped Armor attribute to the character.
 			ProfileService.Mutate(player, function(p)
 				InventoryService.equipArmor(p, slot)
 			end)

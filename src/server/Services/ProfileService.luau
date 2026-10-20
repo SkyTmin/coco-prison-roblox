@@ -201,6 +201,14 @@ function ProfileService.Replicate(player: Player)
 				"HeldItem",
 				if stack then stack.id .. ":" .. tostring(stack.level or 0) else ""
 			)
+			local armor: { string } = {}
+			for _, id in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
+				local piece = session.profile.armor[id]
+				if piece then
+					table.insert(armor, id .. ":" .. tostring(piece.level or 1))
+				end
+			end
+			character:SetAttribute("Armor", table.concat(armor, ","))
 		end
 		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
 		Remotes.event("ProfileUpdated"):FireClient(player, session.profile)
