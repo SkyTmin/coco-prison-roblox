@@ -947,16 +947,18 @@ local selectedLocations: { [string]: string } = {}
 local locationScroll: { [string]: number } = {}
 local lastLocationClick: string? = nil
 local lastLocationClickAt = -math.huge
-local SPOTS = {
+-- spots inside a location (LocationSpawn + Spot); `at` = the locations that have it (nil = all)
+local SPOTS: { { id: string, icon: string, at: { string }? } } = {
 	{ id = "spawn", icon = "⌂" },
-	{ id = "mine", icon = "⛏" },
-	{ id = "small_mine", icon = "⛏" },
-	{ id = "market", icon = "$" },
-	{ id = "canteen", icon = "🍎" },
-	{ id = "bedroom", icon = "☾" },
-	{ id = "bath", icon = "♨" },
-	{ id = "trainer", icon = "⚔" },
-	{ id = "showcase", icon = "★" }, -- витрина брони и инструментов (scripts/build-showcase.luau)
+	{ id = "mine", icon = "⛏", at = { "prison", "quarry" } },
+	{ id = "small_mine", icon = "⛏", at = { "prison" } },
+	{ id = "market", icon = "$", at = { "prison" } },
+	{ id = "canteen", icon = "🍎", at = { "prison" } },
+	{ id = "bedroom", icon = "☾", at = { "prison" } },
+	{ id = "bath", icon = "♨", at = { "prison" } },
+	{ id = "trainer", icon = "⚔", at = { "prison" } },
+	{ id = "showcase", icon = "★", at = { "prison" } }, -- витрина брони и инструментов (scripts/build-showcase.luau)
+	{ id = "boss", icon = "☠", at = { "quarry" } }, -- арена босса (scripts/build-quarry.luau)
 }
 local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	prison = true,
@@ -1311,6 +1313,9 @@ local function buildLocations(): Frame
 			selected = nil
 			detail:ClearAllChildren()
 			for i, spot in ipairs(SPOTS) do
+				if spot.at and not (profile and table.find(spot.at, profile.location)) then
+					continue
+				end
 				local card = Ui.panel(grid, UDim2.new(1, -8, 0, 72), UDim2.new())
 				card.Name = "Spot_" .. spot.id
 				card.LayoutOrder = i
@@ -1725,19 +1730,19 @@ local LADDER_SLIDE = 1 -- full "away" push while idle = climbing down at the cli
 local LADDER_FALL = -12 -- studs/s: 3 blocks/s like a Minecraft ladder [ваниль]
 local LADDER_REACH = 4.5 -- studs from the ladder (the shaft is one block deep)
 -- nearest ladder truss piece whose column (full height, one block deep) contains the position
+local LADDER_ROOTS = { "Prison", "Quarry" } -- map folders holding mine ladders and MineAnchor_ parts
 local function ladderAt(position: Vector3): BasePart?
-	local prison = workspace:FindFirstChild("Prison")
-	if not prison then
-		return nil
-	end
 	local best, bestD = nil, LADDER_REACH
-	for _, p in ipairs(prison:GetChildren()) do
-		if p.Name == "Ladder" and p:IsA("BasePart") then
-			local d = p.Position - position
-			if math.abs(d.Y) <= p.Size.Y / 2 + 1 then
-				local flat = Vector3.new(d.X, 0, d.Z).Magnitude - 1
-				if flat < bestD then
-					best, bestD = p, flat
+	for _, rootName in ipairs(LADDER_ROOTS) do
+		local mapRoot = workspace:FindFirstChild(rootName)
+		for _, p in ipairs(if mapRoot then mapRoot:GetChildren() else {}) do
+			if p.Name == "Ladder" and p:IsA("BasePart") then
+				local d = p.Position - position
+				if math.abs(d.Y) <= p.Size.Y / 2 + 1 then
+					local flat = Vector3.new(d.X, 0, d.Z).Magnitude - 1
+					if flat < bestD then
+						best, bestD = p, flat
+					end
 				end
 			end
 		end
@@ -1746,10 +1751,10 @@ local function ladderAt(position: Vector3): BasePart?
 end
 -- facing axis of a ladder piece: the pit wall is on the far side of the truss from the shaft
 local function awayFromWall(ladder: BasePart): Vector3
-	local prison = workspace:FindFirstChild("Prison")
+	local mapRoot = ladder.Parent -- the location folder (Prison, Quarry) holding this ladder
 	-- the wall side is the one farther from the mine's centre: push toward the pit centre
 	local centre = Vector3.new(0, 0, 0)
-	for _, p in ipairs(prison and prison:GetChildren() or {}) do
+	for _, p in ipairs(mapRoot and mapRoot:GetChildren() or {}) do
 		if p.Name:match("^MineAnchor_") and (p.Position - ladder.Position).Magnitude < 120 then
 			centre = p.Position
 			break

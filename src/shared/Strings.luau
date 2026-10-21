@@ -404,6 +404,12 @@ local STRINGS: { [string]: Entry } = {
 	locations_spots = { ru = "Спавн", en = "Spots", es = "Puntos", fr = "Points" },
 	spot_spawn = { ru = "Спавн", en = "Spawn", es = "Inicio", fr = "Départ" },
 	spot_mine = { ru = "Шахта", en = "Mine", es = "Mina", fr = "Mine" },
+	spot_boss = {
+		ru = "Арена босса",
+		en = "Boss arena",
+		es = "Arena del jefe",
+		fr = "Arène du boss",
+	},
 	spot_small_mine = {
 		ru = "Малая шахта",
 		en = "Small mine",
