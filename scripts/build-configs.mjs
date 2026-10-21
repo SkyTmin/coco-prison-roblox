@@ -190,7 +190,14 @@ write("books.json", { source: "лимиты [вики]; остальное [ре
 write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival });
 write("effects.json", { source: "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков", cracks: read("assets/cracks/ids.json"), sounds: read("assets/sounds/ids.json") });
 write("achievements.json", { source: "[меню] ступени; [владелец] цепочки по инструменту", ...decisions.achievements });
-write("artifacts.json", { source: "[меню, клиент]; шансы [решение]", ...decisions.artifacts });
+// Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`
+// (all its pictures) and `image` (the first picture, shown in the rarity card and the mosaic).
+const artifactImages = read("assets/artifacts/ids.json").images;
+const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tiers).map(([tier, def]) => {
+	const images = Object.fromEntries(def.pictures.filter((p) => artifactImages[p]).map((p) => [p, artifactImages[p]]));
+	return [tier, { ...def, images, image: images[def.pictures[0]] ?? "" }];
+}));
+write("artifacts.json", { source: "[меню, клиент]; шансы [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("armor.json", { source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)", ...read("assets/armor/ids.json") });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });

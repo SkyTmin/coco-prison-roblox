@@ -423,6 +423,13 @@ local STRINGS: { [string]: Entry } = {
 	},
 	touch_dig = { ru = "Копать", en = "Dig", es = "Cavar", fr = "Creuser" },
 	touch_use = { ru = "Использовать", en = "Use", es = "Usar", fr = "Utiliser" },
+	touch_menu_upgrade = {
+		ru = "Улучшить",
+		en = "Upgrade",
+		es = "Mejorar",
+		fr = "Améliorer",
+	},
+	touch_menu_level = { ru = "Уровень", en = "Level up", es = "Nivel", fr = "Niveau" },
 	locations_sky = {
 		ru = "Небесные шахты",
 		en = "Sky mines",

@@ -66,7 +66,10 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    into `assets/sounds/build/*.ogg` + `manifest.json`; the OWNER uploads them with
    `scripts/upload-audio.mjs` (Open Cloud API key) → ids in `assets/sounds/ids.json` → `build-configs`.
    Until then `files[*].fallback` (trimmed Roblox-library clips) plays. Own pixel icons (keys, trainer
-   badges, touch menu) come from `scripts/draw-icons.mjs` → `upload_image`.
+   badges, touch menu) come from `scripts/draw-icons.mjs` → `upload_image`. Artifact pictures:
+   `assets/artifacts/artifact-*.png` → `upload_image` (serve PNGs over a local http server; serve-repo
+   only serves .luau/.json) → `assets/artifacts/ids.json` (picture name → id) → `build-configs`.
+   Windows: `fitWindow` keeps every window below Roblox's top bar (`GuiService:GetGuiInset()`).
    Digging is server-authoritative (`DigService`): DigStart(part, hitPoint) starts a server timer,
    DigAccepted(needed) syncs the client bar, the client hides the block when its bar ends and the server
    removes it right after; DigCancel on release; reach = 4.5 blocks eye → hit point, LoS to the hit

@@ -1,5 +1,5 @@
 --!strict
--- Fall damage as in Minecraft [ваниль]: a fall of N blocks deals N − 3 damage (half-hearts), none in
+-- Fall damage as in Minecraft [ваниль]: ceil(N − 3) damage (half-hearts) for a fall of N blocks, none in
 -- water or while on a ladder. Humanoid.FloorMaterial replicates to the server (Air while airborne),
 -- so the apex is the highest point seen while in the air and the landing is the first grounded
 -- frame. Fall deaths are not player/mob/boss deaths (stats untouched).
@@ -9,8 +9,12 @@ local RunService = game:GetService("RunService")
 
 local BLOCK = 4
 local SAFE_BLOCKS = 3
+-- the first grounded frame sees the root slightly above its resting height; without this slack a
+-- 10-block fall measured 9.9 blocks
+local LANDING_SLACK = 0.1
 
-type Track = { apex: number? }
+type Track = { apex: number?, history: { number } } -- history: last positions (replication lag)
+local HISTORY = 8
 local tracks: { [Player]: Track } = {}
 local FallService = {}
 
@@ -26,7 +30,7 @@ local function step()
 		local y = root.Position.Y
 		local track = tracks[player]
 		if not track then
-			track = { apex = nil }
+			track = { apex = nil, history = {} }
 			tracks[player] = track
 		end
 		local state = humanoid:GetState()
@@ -36,14 +40,25 @@ local function step()
 		if safe then
 			track.apex = nil -- ladders and water cancel the fall
 		elseif humanoid.FloorMaterial == Enum.Material.Air then
-			track.apex = math.max(track.apex or y, y)
+			-- FloorMaterial can lag behind the replicated position: the apex also looks at recent frames
+			local apex = track.apex or y
+			if not track.apex then
+				for _, h in ipairs(track.history) do
+					apex = math.max(apex, h)
+				end
+			end
+			track.apex = math.max(apex, y)
 		elseif track.apex then
-			local damage = math.floor((track.apex - y) / BLOCK - SAFE_BLOCKS)
+			local damage = math.ceil((track.apex - y) / BLOCK - SAFE_BLOCKS - LANDING_SLACK)
 			track.apex = nil
 			if damage >= 1 then
 				humanoid:SetAttribute("LastHitBy", nil)
 				humanoid:TakeDamage(damage)
 			end
+		end
+		table.insert(track.history, y)
+		if #track.history > HISTORY then
+			table.remove(track.history, 1)
 		end
 	end
 end

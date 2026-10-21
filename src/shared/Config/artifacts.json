@@ -1,5 +1,5 @@
 {
-  "source": "[меню, клиент]; шансы [решение]",
+  "source": "[меню, клиент]; шансы [решение]; картинки — assets/artifacts/ids.json",
   "_source": "[меню, клиент] три редкости по 9 фрагментов (I–IX), 9 дубликатов = 1 недостающий фрагмент, награда за 9 — ключ от кейса артефактов; картинки: Качалка, Огород (обычные), Подручный (редкий), Векна (эпический); фрагменты падают с шахт, боссов, мобов, ключей; шанс [решение]",
   "fragmentsPerArtifact": 9,
   "duplicatesPerMissingFragment": 9,
@@ -10,21 +10,34 @@
         "Качалка",
         "Огород"
       ],
-      "dropChancePerBlock": 0.0004
+      "dropChancePerBlock": 0.0004,
+      "images": {
+        "Качалка": "rbxassetid://79069284938429",
+        "Огород": "rbxassetid://112194212540322"
+      },
+      "image": "rbxassetid://79069284938429"
     },
     "rare": {
       "name": "Редкий",
       "pictures": [
         "Подручный"
       ],
-      "dropChancePerBlock": 0.0001
+      "dropChancePerBlock": 0.0001,
+      "images": {
+        "Подручный": "rbxassetid://123145028713725"
+      },
+      "image": "rbxassetid://123145028713725"
     },
     "epic": {
       "name": "Эпический",
       "pictures": [
         "Векна"
       ],
-      "dropChancePerBlock": 0.00002
+      "dropChancePerBlock": 0.00002,
+      "images": {
+        "Векна": "rbxassetid://117862159051902"
+      },
+      "image": "rbxassetid://117862159051902"
     }
   },
   "fromCaseChance": {

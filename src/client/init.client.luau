@@ -5,6 +5,7 @@
 
 local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
+local GuiService = game:GetService("GuiService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -41,6 +42,7 @@ local function isMobile(): boolean
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 end
 local localizedButtons: { [TextButton]: string } = {}
+local localizedLabels: { [TextLabel]: string } = {} -- captions under touch icons
 local T = function(key: string, ...: any)
 	return Strings.t(key, locale, ...)
 end
@@ -394,13 +396,19 @@ local function fitWindow(win: Frame, layout: WindowLayout)
 		return
 	end
 	local viewport = currentCamera.ViewportSize
+	-- the HUD ignores the GUI inset, so keep windows below Roblox's top bar (58 px on phones),
+	-- otherwise its menu/chat buttons cover the window's tabs and title
+	local inset = GuiService:GetGuiInset().Y
 	local width = layout.size.X.Offset + layout.size.X.Scale * viewport.X
 	local height = layout.size.Y.Offset + layout.size.Y.Scale * viewport.Y
 	layout.scale.Scale =
-		math.clamp(math.min((viewport.X - 20) / width, (viewport.Y - 20) / height), 0.1, 1)
-	if layout.scale.Scale < 1 then
+		math.clamp(math.min((viewport.X - 20) / width, (viewport.Y - inset - 12) / height), 0.1, 1)
+	local top = layout.position.Y.Scale * viewport.Y
+		+ layout.position.Y.Offset
+		- layout.anchor.Y * height * layout.scale.Scale
+	if layout.scale.Scale < 1 or top < inset then
 		win.AnchorPoint = Vector2.new(0.5, 0.5)
-		win.Position = UDim2.fromScale(0.5, 0.5)
+		win.Position = UDim2.new(0.5, 0, 0.5, (inset - 4) / 2)
 	else
 		win.AnchorPoint, win.Position = layout.anchor, layout.position
 	end
@@ -1513,6 +1521,9 @@ local function render(p: Types.Profile)
 	for button, key in pairs(localizedButtons) do
 		button.Text = T(key)
 	end
+	for label, key in pairs(localizedLabels) do
+		label.Text = T(key)
+	end
 	hints.Text = T("keys_hint")
 	renderTeleportCountdown()
 	renderCombo()
@@ -2137,7 +2148,11 @@ local function touchIconButton(
 end
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
-	local captionKey = if kind == "level" then "level_up" else kind
+	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
+	local captionKey = if kind == "level"
+		then "touch_menu_level"
+		elseif kind == "upgrade" then "touch_menu_upgrade"
+		else kind
 	local button = touchIconButton(
 		touchMenus,
 		icon,
@@ -2157,6 +2172,10 @@ for i, kind in ipairs(menuKeys) do
 	if kind == "language_code" then
 		localizedButtons[button] = kind
 	end
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = captionKey
+	end
 end
 local touchActions = Instance.new("Frame")
 touchActions.Name = "TouchActions"
@@ -2171,6 +2190,10 @@ end
 -- "Съесть" appears above the jump button whenever food is in the selected slot (hold-to-eat stays too)
 local eatButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("eat"), 60, T("eat"))
 eatButton.Name = "TouchEat"
+local eatCaption = eatButton:FindFirstChild("Caption")
+if eatCaption and eatCaption:IsA("TextLabel") then
+	localizedLabels[eatCaption] = "eat"
+end
 eatButton.Position = UDim2.new(1, -180, 1, -200)
 eatButton.Visible = false
 eatButton.Activated:Connect(useConsumable)
