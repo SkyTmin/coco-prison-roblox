@@ -1860,36 +1860,46 @@ ContextActionService:BindAction(
 	Enum.KeyCode.ButtonR2
 )
 
--- Touch, like Minecraft Bedrock "tap to interact": put a finger on a block and hold it to break it;
--- moving the finger turns the camera instead (Roblox's touch camera) and the dig stops. Movement
--- and jumping stay with Roblox's thumbstick and jump button.
+-- Touch, Minecraft Bedrock "split controls" style [владелец 21.10]: the crosshair is always on; a
+-- finger held on the RIGHT half of the screen breaks the block under the crosshair (and keeps
+-- breaking the next ones while held — the same loop as the PC mouse button), while moving that
+-- finger still turns the camera (Roblox's touch camera). With food in hand and nothing to dig, the
+-- hold eats it. The left half stays with Roblox's thumbstick and jump button.
 local activeTouch: InputObject? = nil
-local touchOrigin = Vector2.zero
-local TOUCH_SLOP = 14 -- px of finger travel before a hold becomes a camera drag
+local touchHeldSince = 0
+local touchAte = false
+local EAT_HOLD = 0.6 -- s, like Bedrock's hold-to-use
+local function isFood(): boolean
+	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+	local food = Config.rules.survival and Config.rules.survival.food
+	return stack ~= nil and food ~= nil and typeof(food[stack.id]) == "number"
+end
 local function cancelDigInput()
 	activeTouch = nil
 	tapTarget = nil
 	holding = false
 	stopDig(true)
 end
+local function touchOnRightHalf(input: InputObject): boolean
+	local currentCamera = workspace.CurrentCamera
+	return currentCamera ~= nil and input.Position.X >= currentCamera.ViewportSize.X / 2
+end
 UserInputService.TouchStarted:Connect(function(input: InputObject, processed: boolean)
-	if processed or not isMobile() or currentWindowKind or activeTouch then
+	if
+		processed
+		or not isMobile()
+		or currentWindowKind
+		or activeTouch
+		or not touchOnRightHalf(input)
+	then
 		return
 	end
-	local point = Vector2.new(input.Position.X, input.Position.Y)
-	local aim = aimAt(point)
+	activeTouch, touchHeldSince, touchAte = input, os.clock(), false
+	holding = true
+	local aim = aimAt()
 	if aim and not pending[aim.part] then
-		activeTouch, touchOrigin, tapTarget = input, point, aim
 		stopDig(true)
 		startDig(aim)
-	end
-end)
-UserInputService.TouchMoved:Connect(function(input: InputObject)
-	if input == activeTouch then
-		local point = Vector2.new(input.Position.X, input.Position.Y)
-		if (point - touchOrigin).Magnitude > TOUCH_SLOP then
-			cancelDigInput()
-		end
 	end
 end)
 UserInputService.TouchEnded:Connect(function(input: InputObject)
@@ -1897,15 +1907,28 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 		cancelDigInput()
 	end
 end)
+RunService.Heartbeat:Connect(function()
+	-- hold with food and nothing under the crosshair → eat once per hold
+	if
+		activeTouch
+		and not digging
+		and not touchAte
+		and isFood()
+		and os.clock() - touchHeldSince >= EAT_HOLD
+	then
+		touchAte = true
+		Remotes.event("UseConsumable"):FireServer(profile and profile.selectedSlot or 1)
+	end
+end)
 UserInputService.WindowFocusReleased:Connect(cancelDigInput)
 player.CharacterRemoving:Connect(cancelDigInput)
 
--- Touch HUD in the spirit of Minecraft Bedrock: icon buttons only (no letters). Left column: menus;
--- right side above the jump button: eat and camera; "•••" next to the hotbar opens the inventory.
+-- Touch HUD: icon buttons only (no letters). Menus in a 2-column grid at the top-left so every
+-- button fits a phone in landscape; "•••" next to the hotbar opens the inventory.
 local touchMenus = Instance.new("Frame")
 touchMenus.Name = "TouchMenus"
-touchMenus.Position = UDim2.fromOffset(8, 120)
-touchMenus.Size = UDim2.fromOffset(52, 7 * 52)
+touchMenus.Position = UDim2.fromOffset(8, 64)
+touchMenus.Size = UDim2.fromOffset(2 * 50, 4 * 50)
 touchMenus.BackgroundTransparency = 1
 touchMenus.Parent = gui
 local menuKeys =
@@ -1944,7 +1967,7 @@ for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
 	local button =
 		touchIconButton(touchMenus, icon, if kind == "language_code" then T(kind) else "", 44)
-	button.Position = UDim2.fromOffset(0, (i - 1) * 52)
+	button.Position = UDim2.fromOffset(((i - 1) % 2) * 50, math.floor((i - 1) / 2) * 50)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
@@ -1967,10 +1990,6 @@ local function useConsumable()
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end
-local useButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("touch_use"), 56)
-useButton.Name = "TouchUse"
-useButton.Position = UDim2.new(1, -176, 1, -196)
-useButton.Activated:Connect(useConsumable)
 local inventoryButton = touchIconButton(touchActions, nil, "•••", 40)
 inventoryButton.Name = "TouchInventory"
 inventoryButton.TextSize = 20
