@@ -182,6 +182,36 @@ local function sendCombo(player: Player, combo: Combo)
 		:FireClient(player, comboMultiplier(combo), combo.count % Config.rules.combo.blocksPerStep)
 end
 
+-- Other players' break particles/sounds: only to those within FX_RANGE (they could not hear it
+-- further away), batched into one unreliable event per frame per player — with many players digging
+-- this was FireAllClients for every block.
+local FX_RANGE = 48 -- studs, BlockBreak.OTHERS_RANGE
+local FX_PER_FRAME = 12 -- entries per batch: stays under the 1000-byte unreliable payload
+local fxQueue: { [Player]: { any } } = {}
+local function queueBreakFx(
+	breaker: Player,
+	position: Vector3,
+	size: Vector3,
+	color: Color3,
+	id: string
+)
+	for _, other in ipairs(Players:GetPlayers()) do
+		local root = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if
+			other ~= breaker
+			and root
+			and root:IsA("BasePart")
+			and (root.Position - position).Magnitude <= FX_RANGE
+		then
+			local queue = fxQueue[other] or {}
+			fxQueue[other] = queue
+			if #queue < FX_PER_FRAME then
+				table.insert(queue, { position, size, color, id })
+			end
+		end
+	end
+end
+
 local function complete(player: Player, token: number)
 	local dig = digs[player]
 	if not dig or dig.token ~= token then
@@ -208,9 +238,7 @@ local function complete(player: Player, token: number)
 		Remotes.event("DigRejected"):FireClient(player, part)
 		return
 	end
-	-- other clients play the break sound/particles for blocks they did not dig themselves
-	Remotes.event("BlockBroken")
-		:FireAllClients(player.UserId, brokenCFrame, brokenSize, brokenColor, blockId)
+	queueBreakFx(player, brokenCFrame.Position, brokenSize, brokenColor, blockId)
 	local block = Config.block(blockId) :: Config.Block
 	local dropId = block.dropsAs or blockId
 	local dropCount = 1
@@ -276,7 +304,30 @@ local function complete(player: Player, token: number)
 	sendCombo(player, combo)
 end
 
+-- Token bucket per player [docs/research/server-scaling.md]: instant mining is 20 blocks a second, a
+-- little more is allowed for retries; a flooding (or cheating) client is refused, not processed.
+local DIG_RATE, DIG_BURST = 25, 10
+local digTokens: { [Player]: { tokens: number, at: number } } = {}
+local function takeDigToken(player: Player): boolean
+	local now = os.clock()
+	local bucket = digTokens[player] or { tokens = DIG_BURST, at = now }
+	digTokens[player] = bucket
+	bucket.tokens = math.min(DIG_BURST, bucket.tokens + (now - bucket.at) * DIG_RATE)
+	bucket.at = now
+	if bucket.tokens < 1 then
+		return false
+	end
+	bucket.tokens -= 1
+	return true
+end
+
 local function onDigStart(player: Player, part: any, hit: any)
+	if not takeDigToken(player) then
+		if typeof(part) == "Instance" then
+			Remotes.event("DigRejected"):FireClient(player, part)
+		end
+		return
+	end
 	-- The client's timer starts when it sends DigStart, ours when it arrives, so with no pause
 	-- (instant mining) the next DigStart races our timer of the previous block: finish that block
 	-- first if its time is up (one tick of grace for jitter) instead of dropping it.
@@ -322,7 +373,15 @@ local function onDigCancel(player: Player)
 end
 
 function DigService.Start()
-	Remotes.event("BlockBroken") -- created up front so clients can listen before the first break
+	local fxRemote = Remotes.unreliable("BlockBrokenFx") -- created up front so clients can listen
+	RunService.Heartbeat:Connect(function()
+		for other, queue in pairs(fxQueue) do
+			if other.Parent then
+				fxRemote:FireClient(other, queue)
+			end
+		end
+		table.clear(fxQueue)
+	end)
 	Remotes.event("DigAccepted")
 	Remotes.event("DigRejected")
 	Remotes.event("DigStart").OnServerEvent:Connect(onDigStart)
@@ -334,6 +393,8 @@ function DigService.Start()
 		combos[player] = nil
 		lastBreakAt[player] = nil
 		lastPause[player] = nil
+		digTokens[player] = nil
+		fxQueue[player] = nil
 		insomniaToastAt[player] = nil
 	end)
 	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client

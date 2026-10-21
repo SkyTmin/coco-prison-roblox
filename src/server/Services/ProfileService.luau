@@ -108,18 +108,8 @@ local function migrate(data: any): Profile
 				profile.enderChest[slot] = nil
 			end
 		end
+		-- cases are emptied when they close [владелец 21.10]: nothing survives a rejoin either
 		profile.caseContents = {}
-		if typeof(data.caseContents) == "table" then
-			for _, id in ipairs({ "ordinaryCase", "ancientCase", "artifactCase" }) do
-				local contents = decodeInventory(data.caseContents[id])
-				for slot in pairs(contents) do
-					if slot < 1 or slot > 27 or slot ~= math.floor(slot) then
-						contents[slot] = nil
-					end
-				end
-				profile.caseContents[id] = contents
-			end
-		end
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
@@ -303,6 +293,76 @@ function ProfileService.Replicate(player: Player)
 	end
 end
 
+-- Deltas: the client gets the whole profile once (ProfileUpdated), then only what changed since the
+-- last send (ProfilePatch) — a changed top-level value, or the changed entries of a top-level table
+-- (one inventory slot, one counter). Roblox: "replicate only what changed" (docs/research/server-scaling.md).
+local sentCopies: { [Player]: { [string]: any } } = {}
+
+local function deepEqual(a: any, b: any): boolean
+	if a == b then
+		return true
+	end
+	if typeof(a) ~= "table" or typeof(b) ~= "table" then
+		return false
+	end
+	for key, value in pairs(a) do
+		if not deepEqual(value, b[key]) then
+			return false
+		end
+	end
+	for key in pairs(b) do
+		if a[key] == nil then
+			return false
+		end
+	end
+	return true
+end
+
+local function deepCopy(value: any): any
+	if typeof(value) ~= "table" then
+		return value
+	end
+	local out = {}
+	for key, item in pairs(value) do
+		out[key] = deepCopy(item)
+	end
+	return out
+end
+
+-- ops: { k = field, c = entry key?, v = Wire-encoded value?, d = true when removed }
+local function diff(sent: { [string]: any }, profile: { [string]: any }): { any }
+	local ops = {}
+	for key, value in pairs(profile) do
+		local old = sent[key]
+		if not deepEqual(old, value) then
+			if typeof(value) == "table" and typeof(old) == "table" then
+				for child, item in pairs(value) do
+					if not deepEqual(old[child], item) then
+						table.insert(ops, { k = key, c = child, v = Wire.encode(item) })
+						old[child] = deepCopy(item)
+					end
+				end
+				for child in pairs(old) do
+					if value[child] == nil then
+						table.insert(ops, { k = key, c = child, d = true })
+						old[child] = nil
+					end
+				end
+			else
+				table.insert(ops, { k = key, v = Wire.encode(value) })
+				sent[key] = deepCopy(value)
+			end
+		end
+	end
+	for key in pairs(sent) do
+		if profile[key] == nil then
+			table.insert(ops, { k = key, d = true })
+			sent[key] = nil
+		end
+	end
+	return ops
+end
+
 local function flushReplication()
 	local now = os.clock()
 	for player in pairs(replicateDue) do
@@ -312,7 +372,16 @@ local function flushReplication()
 		elseif now - (replicatedAt[player] or -math.huge) >= REPLICATE_SECONDS then
 			replicateDue[player] = nil
 			replicatedAt[player] = now
-			Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
+			local sent = sentCopies[player]
+			if not sent then
+				sentCopies[player] = deepCopy(session.profile)
+				Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
+			else
+				local ops = diff(sent, session.profile :: any)
+				if #ops > 0 then
+					Remotes.event("ProfilePatch"):FireClient(player, ops)
+				end
+			end
 		end
 	end
 end
@@ -463,6 +532,7 @@ function ProfileService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		replicateDue[player] = nil
 		replicatedAt[player] = nil
+		sentCopies[player] = nil
 		rememberPosition(player)
 		restored[player] = nil
 		local session = sessions[player]

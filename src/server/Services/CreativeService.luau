@@ -4,6 +4,7 @@
 -- The player attribute `CreativeAllowed` shows the window button; `Creative` = the mode is on
 -- (DigService, HungerService and NeedsService read it). Client → server: Creative(op, a, b).
 
+local LogService = game:GetService("LogService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -154,6 +155,32 @@ function CreativeService.Start()
 	end
 	catalog.ancient_book = nil -- books come with their effect (give "ancient_book", effectId)
 	Remotes.event("Creative").OnServerEvent:Connect(onRequest)
+	-- the server's warnings and errors go to the creative window of allowed players: the owner reads
+	-- them on a phone where the chat (and /console) is not available [владелец 21.10]
+	local logRemote = Remotes.event("ServerLog")
+	local sentThisSecond, second = 0, 0
+	LogService.MessageOut:Connect(function(message: string, kind: Enum.MessageType)
+		if kind ~= Enum.MessageType.MessageWarning and kind ~= Enum.MessageType.MessageError then
+			return
+		end
+		local now = math.floor(os.clock())
+		if now ~= second then
+			second, sentThisSecond = now, 0
+		end
+		sentThisSecond += 1
+		if sentThisSecond > 10 then
+			return -- an error in a loop must not flood the network
+		end
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player:GetAttribute("CreativeAllowed") then
+				logRemote:FireClient(
+					player,
+					string.sub(message, 1, 300),
+					kind == Enum.MessageType.MessageError
+				)
+			end
+		end
+	end)
 	local function added(player: Player)
 		if allowed(player) then
 			player:SetAttribute("CreativeAllowed", true)

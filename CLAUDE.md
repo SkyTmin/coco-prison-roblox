@@ -85,7 +85,10 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
    server warns `[ItemInfo] missing translations` in Studio when something is missing.
    Ground items: `ItemDropService` (thrown items via DropItem, death loot, ClearLag sweep every 5 min, cap 400);
-   the profile reaches the client at most 10×/s (`ProfileService` REPLICATE_SECONDS) — never send it per action.
+   the profile reaches the client once whole (ProfileUpdated), then as deltas (ProfilePatch) at most 10×/s — never
+   send it per action. Cosmetic broadcasts go to nearby players only, batched, via `Remotes.unreliable`.
+   Cases are temporary: contents vanish when the case closes (`CaseService.emptyCase`); the ender chest keeps them.
+   Server warnings/errors reach CreativeAllowed players (`ServerLog` → creative window) — the owner has no chat.
    Creative test mode: `CreativeService` (player attributes `CreativeAllowed` / `Creative`; Studio, place creator,
    `creative.admins`) + `src/client/CreativeWindow.luau` (menu button, key K); Dig/Hunger/Needs read `Creative`.
    Avatars are rigged with AnimationConstraints (no Motor6D C0): pose joints via `Transform` in PreSimulation.

@@ -1641,6 +1641,30 @@ end
 Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any)
 	render(Wire.decode(encoded))
 end)
+-- then only the changes (ProfileService diff): a changed field, or changed entries of a table field;
+-- changed tables are copied so the previous profile stays as it was
+Remotes.event("ProfilePatch").OnClientEvent:Connect(function(ops: any)
+	if not profile or typeof(ops) ~= "table" then
+		return
+	end
+	local nextProfile = table.clone(profile :: any)
+	local copied: { [string]: boolean } = {}
+	for _, op in ipairs(ops) do
+		local value = if op.d then nil else Wire.decode(op.v)
+		if op.c == nil then
+			nextProfile[op.k] = value
+		else
+			local field = nextProfile[op.k]
+			if not copied[op.k] then
+				field = if typeof(field) == "table" then table.clone(field) else {}
+				nextProfile[op.k] = field
+				copied[op.k] = true
+			end
+			field[op.c] = value
+		end
+	end
+	render(nextProfile)
+end)
 Remotes.event("Toast").OnClientEvent:Connect(showToast)
 Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string, tab: string?)
 	if kind == "locations" and tab == "spots" then
@@ -2348,6 +2372,7 @@ for i, kind in ipairs(menuKeys) do
 end
 -- the 8th grid cell: creative test mode, only for players CreativeService allows
 do
+	CreativeWindow.Listen()
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
 	button.Position = UDim2.fromOffset((#menuKeys % 4) * 60, math.floor(#menuKeys / 4) * 60)

@@ -9,7 +9,7 @@
 -- Every audio file holds several variants (Config.effects.sounds.files[*].segments); one is picked at
 -- random and played with TimePosition, then stopped after its length.
 -- The server still owns the dig (DigService); this module only reacts to the local dig state and to
--- "BlockBroken" broadcasts for blocks other players destroy nearby.
+-- "BlockBrokenFx" batches for blocks other players destroy nearby.
 
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -301,24 +301,28 @@ function BlockBreak.Start()
 			end)
 		end)
 	end
-	-- blocks broken by others: (position, size, color, blockId), only when the breaker is not us
-	Remotes.event("BlockBroken").OnClientEvent:Connect(
-		function(byUserId: number, cframe: CFrame, size: Vector3, color: Color3, blockId: string?)
-			local player = Players.LocalPlayer
-			if byUserId == player.UserId then
-				return
-			end
-			local character = player.Character
-			local root = character and character:FindFirstChild("HumanoidRootPart")
+	-- blocks broken by others nearby: one unreliable batch per frame { {position, size, color, id} }
+	-- (the server already left out our own breaks and anything beyond its range)
+	Remotes.unreliable("BlockBrokenFx").OnClientEvent:Connect(function(batch: any)
+		if typeof(batch) ~= "table" then
+			return
+		end
+		local character = Players.LocalPlayer.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		for _, entry in ipairs(batch) do
+			local position, size, color, blockId = entry[1], entry[2], entry[3], entry[4]
 			if
-				root
+				typeof(position) == "Vector3"
+				and typeof(size) == "Vector3"
+				and typeof(color) == "Color3"
+				and root
 				and root:IsA("BasePart")
-				and (root.Position - cframe.Position).Magnitude <= OTHERS_RANGE
+				and (root.Position - position).Magnitude <= OTHERS_RANGE
 			then
-				breakEffects(cframe, size, color, blockId)
+				breakEffects(CFrame.new(position), size, color, blockId)
 			end
 		end
-	)
+	end)
 end
 
 return BlockBreak

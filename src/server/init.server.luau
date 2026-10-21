@@ -28,6 +28,7 @@ for _, name in ipairs({
 	"CaseClose",
 	"ArtifactAssemble",
 	"ProfileUpdated",
+	"ProfilePatch",
 	"Toast",
 	"MineReset",
 	"Combo",
@@ -37,6 +38,7 @@ for _, name in ipairs({
 	"SetLocale",
 	"Creative",
 	"DropItem",
+	"ServerLog",
 }) do
 	Remotes.event(name)
 end

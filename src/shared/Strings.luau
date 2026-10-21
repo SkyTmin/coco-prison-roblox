@@ -471,6 +471,18 @@ local STRINGS: { [string]: Entry } = {
 		es = "Nivel de herramientas: %s",
 		fr = "Niveau des outils : %s",
 	},
+	creative_log = {
+		ru = "Лог сервера",
+		en = "Server log",
+		es = "Registro del servidor",
+		fr = "Journal du serveur",
+	},
+	creative_log_empty = {
+		ru = "Ошибок и предупреждений нет",
+		en = "No errors or warnings",
+		es = "Sin errores ni advertencias",
+		fr = "Aucune erreur ni avertissement",
+	},
 	creative_blocks = { ru = "Блоки", en = "Blocks", es = "Bloques", fr = "Blocs" },
 	creative_tools = {
 		ru = "Инструменты и броня",

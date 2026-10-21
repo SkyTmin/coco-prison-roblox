@@ -83,10 +83,21 @@ local function near(player: Player, part: BasePart): boolean
 		and (root.Position - part.Position).Magnitude <= RANGE
 end
 
+-- [владелец 21.10] a case is not storage: whatever is left inside (rewards not taken, items put in)
+-- is gone once it closes; the ender chest keeps its contents
+local function emptyCase(player: Player, id: string)
+	if id ~= "enderChest" and ProfileService.Get(player) then
+		ProfileService.Mutate(player, function(p)
+			p.caseContents[id] = {}
+		end)
+	end
+end
+
 local function close(player: Player)
 	local session = sessions[player]
 	if session then
 		sessions[player] = nil
+		emptyCase(player, session.id)
 		Remotes.event("CaseUpdated"):FireClient(player, session.id, false)
 		local part = (session :: any).part
 		if typeof(part) == "Instance" and part:IsA("BasePart") then
@@ -195,10 +206,9 @@ local function openChest(player: Player, part: BasePart)
 		return
 	end
 	if id ~= "enderChest" then
-		-- Without a key the chest stays shut unless rewards from an earlier opening are still inside.
+		-- without a key the case stays shut (nothing is ever left inside: see emptyCase)
 		local keys = acceptedKeys(id)
-		local contents = profile.caseContents[id]
-		if not hasAnyKey(profile, keys) and (contents == nil or next(contents) == nil) then
+		if not hasAnyKey(profile, keys) then
 			toast(
 				player,
 				"case_need_key",
@@ -206,6 +216,10 @@ local function openChest(player: Player, part: BasePart)
 			)
 			return
 		end
+	end
+	local previous = sessions[player]
+	if previous then
+		emptyCase(player, previous.id) -- another case opened over this one: the old one closes
 	end
 	sessions[player] =
 		{ id = id, part = part, rolledAt = -math.huge, tokens = 80, tokenAt = os.clock() }

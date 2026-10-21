@@ -18,6 +18,23 @@ type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local CreativeWindow = {}
 local CELL = 48
 local toolLevel = 1 -- kept between openings
+local LOG_LINES = 30
+local logLines: { { text: string, error: boolean, at: string } } = {} -- server warnings, newest last
+local logChanged = Instance.new("BindableEvent")
+
+-- Collects the server's warnings/errors (CreativeService relays them to allowed players only).
+function CreativeWindow.Listen()
+	Remotes.event("ServerLog").OnClientEvent:Connect(function(message: string, isError: boolean)
+		table.insert(
+			logLines,
+			{ text = message, error = isError, at = os.date("%H:%M:%S") :: string }
+		)
+		while #logLines > LOG_LINES do
+			table.remove(logLines, 1)
+		end
+		logChanged:Fire()
+	end)
+end
 
 function CreativeWindow.build(
 	parent: Instance,
@@ -122,7 +139,47 @@ function CreativeWindow.build(
 	layout.Parent = list
 
 	local toolIcons: { { image: ImageLabel, id: string } } = {}
-	local order = 0
+	local order = 1
+	-- server log on top: warnings yellow, errors red, newest first
+	local logHeader = Ui.label(
+		list,
+		t("creative_log"),
+		UDim2.new(1, -12, 0, 20),
+		UDim2.new(),
+		15,
+		Ui.colors.header
+	)
+	logHeader.LayoutOrder = order
+	order += 1
+	local logLabel = Ui.label(list, "", UDim2.new(1, -12, 0, 0), UDim2.new(), 12, Ui.colors.text)
+	logLabel.LayoutOrder = order
+	logLabel.AutomaticSize = Enum.AutomaticSize.Y
+	logLabel.TextWrapped = true
+	logLabel.RichText = true
+	logLabel.TextYAlignment = Enum.TextYAlignment.Top
+	local function escape(text: string): string
+		return (text:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"))
+	end
+	local function drawLog()
+		local lines = {}
+		for i = #logLines, 1, -1 do
+			local line = logLines[i]
+			table.insert(
+				lines,
+				string.format(
+					'<font color="%s">%s %s</font>',
+					Ui.hex(if line.error then Ui.colors.red else Ui.colors.yellow),
+					line.at,
+					escape(line.text)
+				)
+			)
+		end
+		logLabel.Text = if #lines > 0
+			then table.concat(lines, string.char(10))
+			else t("creative_log_empty")
+	end
+	drawLog()
+	local logWatch = logChanged.Event:Connect(drawLog)
 	local function section(titleKey: string): Frame
 		order += 1
 		local header =
@@ -249,6 +306,7 @@ function CreativeWindow.build(
 	local watch = player:GetAttributeChangedSignal("Creative"):Connect(refresh)
 	win.Destroying:Connect(function()
 		watch:Disconnect()
+		logWatch:Disconnect()
 		ItemTooltip.hide()
 	end)
 	refresh(nil)

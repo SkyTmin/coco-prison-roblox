@@ -8,14 +8,16 @@
 --                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
 --                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?)
 --                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
--- Server → client events:  ProfileUpdated(profile), Toast(text), MineReset(mineId, state), Combo(mult, n)
+-- Server → client events:  ProfileUpdated(profile) once, then ProfilePatch(ops) with the changes only, Toast(text), MineReset(mineId, state), Combo(mult, n)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
---                          BlockBroken(userId, cframe, size, color, blockId) — for other players' effects
+--                          BlockBrokenFx({ {position, size, color, blockId} }) — unreliable, one batch per
+--                          frame, only to players within FX_RANGE of the block (DigService)
 --                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
 -- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection)
 -- Server → client:        Sfx(name, anchorPart?, volume?, pitch?) — play an atlas sound locally (Sfx.luau)
 -- Client → server:        Creative(op, a?, b?) — test mode (CreativeService): toggle / give id level|bookId /
 --                          coins / level / refill / clear; only for players with the CreativeAllowed attribute
+-- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
 
@@ -56,6 +58,12 @@ end
 
 function Remotes.event(name: string): RemoteEvent
 	return get("RemoteEvent", name) :: RemoteEvent
+end
+
+-- Cosmetic traffic (others' break particles/sounds): may be dropped, never queues behind gameplay,
+-- payload ≤ 1000 bytes [docs/research/server-scaling.md]
+function Remotes.unreliable(name: string): UnreliableRemoteEvent
+	return get("UnreliableRemoteEvent", name) :: UnreliableRemoteEvent
 end
 
 function Remotes.func(name: string): RemoteFunction
