@@ -267,7 +267,23 @@ end
 
 local function openCase(player: Player, id: any, requestedKey: any)
 	local session = validate(player, id)
-	if not session or session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
+	if not session then
+		-- [владелец 21.10: «пусто после открытия»] the window is up but this server has no session for
+		-- it (walked away, reopened elsewhere): say so and close it instead of silently doing nothing
+		if typeof(id) == "string" and CASES[id] then
+			warn(
+				string.format(
+					"[CaseService] %s pressed Open on %s without a session",
+					player.Name,
+					id
+				)
+			)
+			Remotes.event("CaseUpdated"):FireClient(player, id, false)
+			toast(player, "case_reopen")
+		end
+		return
+	end
+	if session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
 		return
 	end
 	session.rolledAt = os.clock()
@@ -340,7 +356,7 @@ local function openCase(player: Player, id: any, requestedKey: any)
 	local money = 0
 	local failure: string? = nil
 	local artifactNotices: { ArtifactService.Notice } = {}
-	ProfileService.Mutate(player, function(p)
+	local ok, err = pcall(ProfileService.Mutate, player, function(p)
 		local key: string? = nil
 		for _, candidate in ipairs(accepted) do
 			if
@@ -448,6 +464,18 @@ local function openCase(player: Player, id: any, requestedKey: any)
 			artifactNotices = ArtifactService.GrantFragment(p, "common")
 		end
 	end)
+	if not ok then
+		warn(
+			string.format(
+				"[CaseService] opening %s failed for %s: %s",
+				session.id,
+				player.Name,
+				tostring(err)
+			)
+		)
+		toast(player, "case_error")
+		return
+	end
 	if failure then
 		toast(player, failure)
 	elseif money > 0 then

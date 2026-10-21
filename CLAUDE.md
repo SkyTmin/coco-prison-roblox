@@ -84,6 +84,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    selected or long-pressed slot). A new item needs `item_<id>` (+ optional `desc_<id>`) in Strings in
    all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
    server warns `[ItemInfo] missing translations` in Studio when something is missing.
+   Ground items: `ItemDropService` (thrown items via DropItem, death loot, ClearLag sweep every 5 min, cap 400);
+   the profile reaches the client at most 10×/s (`ProfileService` REPLICATE_SECONDS) — never send it per action.
    Creative test mode: `CreativeService` (player attributes `CreativeAllowed` / `Creative`; Studio, place creator,
    `creative.admins`) + `src/client/CreativeWindow.luau` (menu button, key K); Dig/Hunger/Needs read `Creative`.
    Avatars are rigged with AnimationConstraints (no Motor6D C0): pose joints via `Transform` in PreSimulation.

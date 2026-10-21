@@ -15,6 +15,7 @@
 --   double tap          quick move to the other container
 -- Item info (Minecraft tooltip, ItemTooltip): mouse — while hovering a slot with nothing on the cursor;
 -- touch — for the selected stack and while a slot is long-pressed (also during the split bar).
+-- Both: drag a stack out of the window and let go → it is thrown on the ground (throw, when given).
 -- A move is sent as move(from, to, count?) — count nil means "the whole stack".
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -45,7 +46,8 @@ function DragDrop.new(
 	owner: Frame,
 	getStack: (Address) -> Types.ItemStack?,
 	move: (Address, Address, number?) -> (),
-	quick: (Address) -> ()
+	quick: (Address) -> (),
+	throw: ((Address, number?) -> ())?
 )
 	local bindings: { Binding } = {}
 	local connections: { RBXScriptConnection } = {}
@@ -353,8 +355,16 @@ function DragDrop.new(
 			-- drag and drop
 			if held then
 				if isTouch or #dragPath <= 1 then
+					local pos, size = owner.AbsolutePosition, owner.AbsoluteSize
+					local outside = point.X < pos.X
+						or point.Y < pos.Y
+						or point.X > pos.X + size.X
+						or point.Y > pos.Y + size.Y
 					if target then
 						place(target)
+					elseif throw and outside and held.from.container == "inv" then
+						throw(held.from, held.count) -- Minecraft: dropped outside the window
+						setHeld(nil)
 					elseif from and held and same(held.from, from) and not isTouch then
 						setHeld(nil)
 					end

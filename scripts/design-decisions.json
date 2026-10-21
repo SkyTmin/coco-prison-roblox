@@ -1106,6 +1106,16 @@
       "perPlayer": true,
       "persistent": true,
       "keepOnDeath": true
+    },
+    "drops": {
+      "_owner": "[владелец 21.10] предметы можно выкидывать, кроме инструментов и брони; каждые 5 минут лежащие на земле предметы удаляются",
+      "clearEverySeconds": 300,
+      "warnBeforeSeconds": 30,
+      "pickupDelaySeconds": 2,
+      "_pickupDelay": "[ваниль] выброшенный предмет можно подобрать через 40 тиков (2 с)",
+      "maxOnServer": 400,
+      "maxPerSecond": 8,
+      "_limits": "[решение] не больше 400 предметов на сервер (старые исчезают) и 8 выбросов в секунду на игрока — при большом онлайне"
     }
   },
   "achievements": {

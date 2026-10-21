@@ -29,7 +29,10 @@ local AchievementService = require(script.Parent.AchievementService)
 local ArtifactService = require(script.Parent.ArtifactService)
 
 local REACH = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
-local REACH_SLACK = 1.0 -- studs of tolerance for latency / animation (the client checks the real reach)
+-- The client digs at 4.5 blocks; the server accepts up to 6 like the vanilla server [ваниль]: it sees the
+-- player where they were a ping ago (still standing on a block the client already broke), and a strict
+-- check rejected the blocks dug ahead, which then popped back [владелец 21.10]
+local REACH_SLACK = 6.0
 local EYE_HEIGHT = 1.5 -- studs above the root when there is no Head
 
 type Dig = {
@@ -88,7 +91,12 @@ local function inRange(player: Player, part: BasePart, hit: Vector3): boolean
 		return false
 	end
 	local delta = hit - eye
-	if delta.Magnitude > REACH + REACH_SLACK then
+	-- a moving (falling) player is further along on their own screen than here: allow the distance
+	-- they cover in a round trip (capped), on top of the vanilla slack
+	local root = character.PrimaryPart
+	local speed = if root then root.AssemblyLinearVelocity.Magnitude else 0
+	local lag = math.min(0.5, player:GetNetworkPing() * 2 + 0.1)
+	if delta.Magnitude > REACH + REACH_SLACK + math.min(speed, 80) * lag then
 		return false
 	end
 	local params = RaycastParams.new()
@@ -279,6 +287,9 @@ local function onDigStart(player: Player, part: any, hit: any)
 	digs[player] = nil
 	local needed, mine = check(player, part, hit)
 	if not needed or not mine then
+		if typeof(part) == "Instance" then
+			Remotes.event("DigRejected"):FireClient(player, part) -- show it again now, not after a timeout
+		end
 		return
 	end
 	local profile = ProfileService.Get(player)

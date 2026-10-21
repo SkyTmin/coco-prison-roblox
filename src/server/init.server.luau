@@ -36,6 +36,7 @@ for _, name in ipairs({
 	"TeleportChannel",
 	"SetLocale",
 	"Creative",
+	"DropItem",
 }) do
 	Remotes.event(name)
 end
@@ -59,6 +60,7 @@ local FallService = require(script.Services.FallService)
 local LightingService = require(script.Services.LightingService)
 local HurtService = require(script.Services.HurtService)
 local CreativeService = require(script.Services.CreativeService)
+local ItemDropService = require(script.Services.ItemDropService)
 
 HungerService.Start()
 DeathService.Start()
@@ -79,6 +81,7 @@ FallService.Start()
 LightingService.Start()
 HurtService.Start()
 CreativeService.Start()
+ItemDropService.Start()
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn

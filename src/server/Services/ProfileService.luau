@@ -25,6 +25,12 @@ local ProfileService = {}
 local sessions: { [Player]: Session } = {}
 local onLoaded: ((Player) -> ())? = nil -- set in Start: puts the character back at the logout spot
 local store: DataStore? = nil
+-- The whole profile goes to the client at most every REPLICATE_SECONDS: one dug block mutates it
+-- 2–3 times (inventory, hunger, achievements), and sending each copy at 20 blocks a second flooded
+-- the connection — dig confirmations then came seconds late and the client put the blocks back.
+local REPLICATE_SECONDS = 0.1
+local replicateDue: { [Player]: boolean } = {}
+local replicatedAt: { [Player]: number } = {}
 
 function ProfileService.defaultProfile(): Profile
 	return {
@@ -293,11 +299,26 @@ function ProfileService.Replicate(player: Player)
 			character:SetAttribute("Armor", table.concat(armor, ","))
 		end
 		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
-		Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
+		replicateDue[player] = true
+	end
+end
+
+local function flushReplication()
+	local now = os.clock()
+	for player in pairs(replicateDue) do
+		local session = sessions[player]
+		if not session or player.Parent == nil then
+			replicateDue[player] = nil
+		elseif now - (replicatedAt[player] or -math.huge) >= REPLICATE_SECONDS then
+			replicateDue[player] = nil
+			replicatedAt[player] = now
+			Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
+		end
 	end
 end
 
 function ProfileService.Start()
+	RunService.Heartbeat:Connect(flushReplication)
 	-- Studio-only test hook (ServerStorage.ProfileDebug): execute_luau runs in its own VM, so it cannot
 	-- reach this module's sessions; the BindableFunction exposes get / give / coins / set for QA.
 	if game:GetService("RunService"):IsStudio() then
@@ -440,6 +461,8 @@ function ProfileService.Start()
 		added(player)
 	end
 	Players.PlayerRemoving:Connect(function(player)
+		replicateDue[player] = nil
+		replicatedAt[player] = nil
 		rememberPosition(player)
 		restored[player] = nil
 		local session = sessions[player]

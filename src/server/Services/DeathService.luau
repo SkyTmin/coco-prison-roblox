@@ -2,21 +2,19 @@
 -- Deaths drop backpack contents (blocks, keys, mob loot…) on the ground; armor, tools and personal
 -- containers (ender chest) stay in the profile [владелец 21.10].
 local CollectionService = game:GetService("CollectionService")
-local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Types = require(Shared.Types)
-local Sfx = require(Shared.Sfx)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local AchievementService = require(script.Parent.AchievementService)
+local ItemDropService = require(script.Parent.ItemDropService)
 
 local KEPT_TOOLS = { pickaxe = true, shovel = true, axe = true, sword = true, shears = true }
 local ARMOR = { helmet = true, chestplate = true, leggings = true, boots = true }
 local rules = Config.rules.survival.death
-local random = Random.new()
 local DeathService = {}
 local started = false
 
@@ -37,81 +35,6 @@ local function inPvp(character: Model, profile: Types.Profile): boolean
 		end
 	end
 	return false
-end
-
-local function spawnDrop(stack: Types.ItemStack, position: Vector3, owner: Player)
-	local drop = Instance.new("Part")
-	drop.Name = "ItemDrop"
-	drop.Size = Vector3.new(1.2, 1.2, 1.2)
-	drop.Position = position + Vector3.new(random:NextNumber(-1, 1), 1.5, random:NextNumber(-1, 1))
-	drop.Color = Color3.fromRGB(150, 125, 90)
-	drop.Anchored = false
-	drop:SetAttribute("ItemId", stack.id)
-	drop:SetAttribute("Level", stack.level or 0)
-	drop:SetAttribute("Count", stack.count)
-	drop:SetAttribute("OwnerUserId", owner.UserId)
-	local icon = Config.iconFor(stack.id, stack.level)
-	if icon then
-		local billboard = Instance.new("BillboardGui")
-		billboard.Size = UDim2.fromOffset(36, 36)
-		billboard.StudsOffsetWorldSpace = Vector3.new(0, 1, 0)
-		billboard.Adornee = drop
-		billboard.Parent = drop
-		local image = Instance.new("ImageLabel")
-		image.AnchorPoint = Vector2.new(0.5, 0.5)
-		image.Position = UDim2.fromScale(0.5, 0.5)
-		image.Size = UDim2.fromScale(1, 1)
-		image.BackgroundTransparency = 1
-		image.ScaleType = Enum.ScaleType.Fit
-		image.Image = icon
-		image.Parent = billboard
-	end
-	local busy = false
-	drop.Touched:Connect(function(hit: BasePart)
-		if busy or not drop:IsDescendantOf(workspace) then
-			return
-		end
-		local character = hit:FindFirstAncestorOfClass("Model")
-		local player = if character then Players:GetPlayerFromCharacter(character) else nil
-		local root = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		local profile = if player then ProfileService.Get(player) else nil
-		if
-			not player
-			or not root
-			or not root:IsA("BasePart")
-			or not humanoid
-			or humanoid.Health <= 0
-			or not profile
-		then
-			return
-		end
-		if (root.Position - drop.Position).Magnitude > rules.pickupRadius then
-			return
-		end
-		if not InventoryService.canAdd(profile, stack.id, stack.count) then
-			return
-		end
-		busy = true
-		local pickedUp = false
-		ProfileService.Mutate(player, function(p)
-			if InventoryService.canAdd(p, stack.id, stack.count) then
-				pickedUp = InventoryService.add(p, stack.id, stack.count, stack.level) == 0
-			end
-		end)
-		if pickedUp then
-			Sfx.toPlayer(player, "pickup", 0.5, 1.4 + math.random() * 0.4)
-			drop:Destroy()
-		else
-			busy = false
-		end
-	end)
-	CollectionService:AddTag(drop, "ItemDrop")
-	drop.Parent = workspace
-	-- Server ownership prevents a nearby client moving a drop to claim it remotely.
-	drop:SetNetworkOwner(nil)
-	drop.AssemblyLinearVelocity = Vector3.new(random:NextNumber(-3, 3), 8, random:NextNumber(-3, 3))
-	Debris:AddItem(drop, rules.dropDespawnSeconds)
 end
 
 local function died(player: Player, character: Model)
@@ -165,7 +88,7 @@ local function died(player: Player, character: Model)
 		end
 	end)
 	for _, stack in ipairs(drops) do
-		spawnDrop(stack, position, player)
+		ItemDropService.SpawnLoot(stack, position)
 	end
 end
 

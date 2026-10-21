@@ -960,6 +960,37 @@ local STRINGS: { [string]: Entry } = {
 		es = "Tomar todo",
 		fr = "Tout prendre",
 	},
+	-- thrown items (ItemDropService) [владелец 21.10]
+	drop_not_tools = {
+		ru = "Инструменты и броню выбросить нельзя",
+		en = "Tools and armor cannot be thrown away",
+		es = "No puedes tirar herramientas ni armadura",
+		fr = "Impossible de jeter les outils et l'armure",
+	},
+	drops_clear_soon = {
+		ru = "Через %d с предметы на земле будут удалены",
+		en = "Items on the ground will be removed in %d s",
+		es = "Los objetos del suelo se eliminarán en %d s",
+		fr = "Les objets au sol seront supprimés dans %d s",
+	},
+	drops_cleared = {
+		ru = "Предметы на земле удалены: %d",
+		en = "Items on the ground removed: %d",
+		es = "Objetos del suelo eliminados: %d",
+		fr = "Objets au sol supprimés : %d",
+	},
+	case_reopen = {
+		ru = "Сундук закрылся — подойди к нему и открой снова",
+		en = "The chest closed — walk up to it and open it again",
+		es = "El cofre se cerró: acércate y ábrelo de nuevo",
+		fr = "Le coffre s'est fermé : approche-toi et rouvre-le",
+	},
+	case_error = {
+		ru = "Не удалось открыть сундук, ключ не потрачен",
+		en = "Could not open the chest, the key was not used",
+		es = "No se pudo abrir el cofre, la llave no se gastó",
+		fr = "Impossible d'ouvrir le coffre, la clé n'a pas été utilisée",
+	},
 	case_full = {
 		ru = "Освободите место в кейсе",
 		en = "Make room in the chest",

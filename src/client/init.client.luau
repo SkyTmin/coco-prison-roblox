@@ -677,6 +677,8 @@ local function buildInventory(): Frame
 				break
 			end
 		end
+	end, function(from, count)
+		Remotes.event("DropItem"):FireServer(from.index, count)
 	end)
 	local function slotAt(index: number, x: number, y: number)
 		local f, name, count, image = Ui.mcSlot(content)
@@ -2374,6 +2376,13 @@ local function useConsumable()
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end
+-- Throw the held item like Minecraft: Q one item, Ctrl+Q the whole stack; on a phone hold a hotbar
+-- slot. Tools and armor stay (the server refuses them with a toast) [владелец 21.10]
+local function throwSelected(wholeStack: boolean)
+	if profile and not currentWindowKind then
+		Remotes.event("DropItem"):FireServer(profile.selectedSlot, if wholeStack then nil else 1)
+	end
+end
 -- "Съесть" appears above the jump button whenever food is in the selected slot (hold-to-eat stays too);
 -- with soap / toilet paper / a sleeping bag it becomes "Использовать" with that item's icon [владелец 21.10]
 local eatButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("eat"), 60, T("eat"))
@@ -2546,6 +2555,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		toggleFirstPerson()
 	elseif k == Enum.KeyCode.F then
 		useConsumable()
+	elseif k == Enum.KeyCode.Q then
+		throwSelected(
+			UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
+				or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)
+		)
 	elseif k.Value >= Enum.KeyCode.One.Value and k.Value <= Enum.KeyCode.Nine.Value then
 		selectSlot(k.Value - Enum.KeyCode.One.Value + 1)
 	end
@@ -2557,6 +2571,7 @@ UserInputService.InputChanged:Connect(function(input, processed)
 	local n = profile.selectedSlot - math.sign(input.Position.Z)
 	selectSlot((n - 1) % 9 + 1)
 end)
+local THROW_HOLD = 0.6 -- s a finger rests on a hotbar slot before its stack is thrown
 for i = 1, 9 do
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.fromScale(1, 1)
@@ -2565,6 +2580,25 @@ for i = 1, 9 do
 	btn.Parent = hotbarSlots[i]
 	btn.Activated:Connect(function()
 		selectSlot(i)
+	end)
+	-- phone: hold a hotbar slot to throw that stack (Bedrock)
+	btn.InputBegan:Connect(function(input)
+		if input.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+		local start = input.Position
+		task.delay(THROW_HOLD, function()
+			if
+				input.UserInputState ~= Enum.UserInputState.End
+				and input.UserInputState ~= Enum.UserInputState.Cancel
+				and (input.Position - start).Magnitude < 20 -- a finger sliding along the bar throws nothing
+			then
+				selectSlot(i)
+				if profile and not currentWindowKind then
+					Remotes.event("DropItem"):FireServer(i, nil)
+				end
+			end
+		end)
 	end)
 end
 

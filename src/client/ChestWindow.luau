@@ -91,7 +91,9 @@ function ChestWindow.build(
 			end
 		end
 	end
-	local drag = DragDrop.new(win, stackAt, move, quick)
+	local drag = DragDrop.new(win, stackAt, move, quick, function(from: Address, count: number?)
+		Remotes.event("DropItem"):FireServer(from.index, count) -- only bag slots are thrown
+	end)
 	local function grid(container: "case" | "inv", first: number, rows: number, y: number)
 		for row = 0, rows - 1 do
 			for column = 0, 8 do
