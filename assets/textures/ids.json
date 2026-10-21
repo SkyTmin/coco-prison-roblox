@@ -17,6 +17,8 @@
     "grass_top": "rbxassetid://113859839776090",
     "planks": "rbxassetid://110913940729167",
     "water": "rbxassetid://104193719964849",
-    "red_brick": "rbxassetid://114326295218433"
-  }
+    "red_brick": "rbxassetid://114326295218433",
+    "ladder": "rbxassetid://124917633758655"
+  },
+  "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026"
 }

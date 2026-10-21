@@ -62,24 +62,7 @@ local function coords(mine: Mine, i: number): (number, number, number)
 	return x, y, z
 end
 
-local function cellAt(mine: Mine, x: number, y: number, z: number): string?
-	if y < 1 then
-		return nil -- above the mine is air: the top layer is always exposed
-	end
-	if x < 1 or z < 1 or x > mine.size[1] or y > mine.size[2] or z > mine.size[3] then
-		return "wall" -- sides and floor count as solid (unbreakable surroundings)
-	end
-	return mine.cells[index(mine, x, y, z)]
-end
-
-local function exposed(mine: Mine, x: number, y: number, z: number): boolean
-	return cellAt(mine, x + 1, y, z) == nil
-		or cellAt(mine, x - 1, y, z) == nil
-		or cellAt(mine, x, y + 1, z) == nil
-		or cellAt(mine, x, y - 1, z) == nil
-		or cellAt(mine, x, y, z + 1) == nil
-		or cellAt(mine, x, y, z - 1) == nil
-end
+-- (cells are all rendered now; exposure tests were removed with the exposed-only rendering)
 
 local COLORS: { [string]: Color3 } = {
 	dirt = Color3.fromRGB(121, 85, 58),
@@ -154,7 +137,8 @@ local function rebuild(mine: Mine)
 	mine.folder:ClearAllChildren()
 	table.clear(mine.parts)
 	table.clear(mine.cells)
-	local rng = Random.new()
+	-- fresh seed every reset so the layout is reshuffled [владелец]
+	local rng = Random.new(os.time() + mine.generation * 7919 + math.floor(os.clock() * 1000))
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
 	for i = 1, total do
 		local x, _, z = coords(mine, i)
@@ -165,8 +149,9 @@ local function rebuild(mine: Mine)
 	end
 	local created = 0
 	for i = 1, total do
-		local x, y, z = coords(mine, i)
-		if mine.cells[i] and exposed(mine, x, y, z) then
+		-- every cell gets a Part [владелец 21.10]: with Parts only on exposed cells a player could slip
+		-- into a freshly opened hole before its neighbours appeared and fall through the solid interior
+		if mine.cells[i] then
 			makePart(mine, i)
 			created += 1
 			if created % CHUNK == 0 then

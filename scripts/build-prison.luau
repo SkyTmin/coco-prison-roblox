@@ -8,6 +8,7 @@
 -- Water is Terrain water (swimmable); basins are cut out of the ground slabs like the mine pits.
 
 local CollectionService = game:GetService("CollectionService")
+local textures = require(game:GetService("ReplicatedStorage").Shared.Config.textures)
 
 for _, name in ipairs({ "Prison", "Baseplate", "Yard" }) do
 	local old = workspace:FindFirstChild(name)
@@ -628,24 +629,43 @@ for _, m in ipairs(pits) do
 	anchor.CanTouch = false
 	CollectionService:AddTag(anchor, "MineAnchor")
 	sign(anchor, m.label, 10)
-	-- [владелец] four ladders, 4 blocks (16 studs) wide, centred on every wall, from the floor to the
-	-- rim; MineService keeps the 4-wide shaft in front of each ladder free of blocks forever.
+	-- [владелец] four Minecraft-style ladders, 4 blocks (16 studs) wide, centred on every wall, floor
+	-- to rim: a transparent plate carrying the ladder texture (one sprite per block) on the wall side of
+	-- the shaft, plus an invisible TrussPart behind it that the humanoid actually climbs. MineService
+	-- keeps the 4-wide shaft in front of each ladder free of blocks forever.
 	local LADDER_W = 4 * B
+	local ladderTexture = textures and textures.textures and textures.textures.ladder
 	for _, side in ipairs({
-		{ cx, cz - d / 2 + 1, true },
-		{ cx, cz + d / 2 - 1, true },
-		{ cx - w / 2 + 1, cz, false },
-		{ cx + w / 2 - 1, cz, false },
+		{ cx, cz - d / 2, Vector3.new(0, 0, 1) },
+		{ cx, cz + d / 2, Vector3.new(0, 0, -1) },
+		{ cx - w / 2, cz, Vector3.new(1, 0, 0) },
+		{ cx + w / 2, cz, Vector3.new(-1, 0, 0) },
 	}) do
+		local inward = side[3] -- from the wall into the pit
+		local along = Vector3.new(math.abs(inward.Z), 0, math.abs(inward.X)) -- ladder width direction
 		local truss = Instance.new("TrussPart")
 		truss.Name = "Ladder"
-		truss.Size = if side[3]
-			then Vector3.new(LADDER_W, h + 2, 2)
-			else Vector3.new(2, h + 2, LADDER_W)
-		truss.CFrame = CFrame.new(side[1], -h / 2 + 1, side[2])
+		truss.Size = Vector3.new(LADDER_W * along.X + 2 * math.abs(inward.X), h + 2, LADDER_W * along.Z + 2 * math.abs(inward.Z))
+		truss.CFrame = CFrame.new(Vector3.new(side[1], -h / 2 + 1, side[2]) + inward * 1)
 		truss.Anchored = true
-		truss.Color = STONE
+		truss.Transparency = 1
 		truss.Parent = root
+		local plate = Instance.new("Part")
+		plate.Name = "LadderFace"
+		plate.Size = Vector3.new(LADDER_W * along.X + 0.2 * math.abs(inward.X), h, LADDER_W * along.Z + 0.2 * math.abs(inward.Z))
+		plate.CFrame = CFrame.new(Vector3.new(side[1], -h / 2, side[2]) + inward * 2.1)
+		plate.Anchored = true
+		plate.CanCollide = false
+		plate.CanQuery = false
+		plate.Transparency = 1
+		plate.Parent = root
+		if ladderTexture then
+			local tex = Instance.new("Texture")
+			tex.Texture = ladderTexture
+			tex.Face = if inward.Z > 0 then Enum.NormalId.Back elseif inward.Z < 0 then Enum.NormalId.Front elseif inward.X > 0 then Enum.NormalId.Right else Enum.NormalId.Left
+			tex.StudsPerTileU, tex.StudsPerTileV = B, B
+			tex.Parent = plate
+		end
 	end
 end
 

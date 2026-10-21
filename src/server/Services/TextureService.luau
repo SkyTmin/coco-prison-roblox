@@ -29,7 +29,39 @@ function TextureService.apply(part: BasePart, textureId: string, fallback: Color
 	end
 end
 
+-- The MaterialVariants live in the place file; when Studio reloads the published place without
+-- them (owner reconnects / does not save) the server recreates them from Config.textures.
+local function ensureVariants()
+	local cfg = Config.textures
+	if not cfg then
+		return
+	end
+	for id, assetId in pairs(cfg.textures) do
+		local name = PREFIX .. id
+		if not MaterialService:FindFirstChild(name) then
+			local ok, err = pcall(function()
+				local variant = Instance.new("MaterialVariant")
+				variant.Name = name
+				variant.BaseMaterial = Enum.Material.Plastic
+				variant.ColorMap = assetId
+				variant.StudsPerTile = cfg.studsPerTile or 4
+				variant.Parent = MaterialService
+			end)
+			if not ok then
+				warn(
+					"[TextureService] cannot create MaterialVariant "
+						.. name
+						.. " at runtime: "
+						.. tostring(err)
+				)
+				return
+			end
+		end
+	end
+end
+
 function TextureService.Start()
+	ensureVariants()
 	for _, child in ipairs(MaterialService:GetChildren()) do
 		if child:IsA("MaterialVariant") then
 			available[child.Name] = true

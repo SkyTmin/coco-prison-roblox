@@ -154,6 +154,7 @@ end
 function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> ()): (Frame, Frame)
 	local win = Ui.panel(parent, size, UDim2.new(0.5, -size.X.Offset / 2, 0.5, -size.Y.Offset / 2))
 	win.Name = "Window_" .. title
+	win.Active = true -- touches on the window never reach the camera / thumbstick
 	local titleBar = Ui.panel(win, UDim2.new(1, -44, 0, 28), UDim2.fromOffset(6, 6))
 	titleBar.Name = "TitleBar"
 	Ui.label(titleBar, title, UDim2.new(1, -12, 1, 0), UDim2.fromOffset(8, 0), 16, Ui.colors.text)

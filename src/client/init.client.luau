@@ -521,6 +521,7 @@ local function closeWindow()
 		openWindow = nil
 	end
 	currentWindowKind = nil
+	UserInputService.ModalEnabled = false
 end
 
 -- Inventory [E] in the look of the original: the vanilla Minecraft survival inventory GUI
@@ -1426,6 +1427,8 @@ local function open(kind: string)
 	closeWindow()
 	currentWindowKind = kind
 	openWindow = builder()
+	-- Roblox hides its touch controls and stops touch camera panning while a menu is open
+	UserInputService.ModalEnabled = true
 end
 local function refreshWindow(force: boolean?)
 	if not force and refreshMenu then
@@ -1586,6 +1589,49 @@ player.CharacterRemoving:Connect(function()
 	watchNausea(nil)
 end)
 watchNausea(player.Character)
+
+-- ---------------------------------------------------------------- ladders [ваниль]
+-- On a Minecraft ladder you climb at ≈ 2.35 blocks/s and slide down at ≈ 3 blocks/s when idle.
+-- Roblox climbing (truss) holds still, so when the humanoid is climbing with no input we push it
+-- down the ladder slowly.
+local LADDER_SLIDE = Vector3.new(0, -12, 0) -- 3 blocks/s
+local ladderSlide: LinearVelocity? = nil
+local function updateLadder(humanoid: Humanoid)
+	local climbing = humanoid:GetState() == Enum.HumanoidStateType.Climbing
+	local idle = humanoid.MoveDirection.Magnitude < 0.05
+	local root = humanoid.RootPart
+	if climbing and idle and root then
+		if not ladderSlide then
+			local attachment = root:FindFirstChild("RootAttachment")
+				or root:FindFirstChildOfClass("Attachment")
+			if attachment then
+				local lv = Instance.new("LinearVelocity")
+				lv.Name = "LadderSlide"
+				lv.Attachment0 = attachment
+				lv.RelativeTo = Enum.ActuatorRelativeTo.World
+				lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
+				lv.LineDirection = Vector3.new(0, 1, 0)
+				lv.LineVelocity = LADDER_SLIDE.Y
+				lv.MaxForce = 5000
+				lv.Parent = root
+				ladderSlide = lv
+			end
+		end
+	elseif ladderSlide then
+		ladderSlide:Destroy()
+		ladderSlide = nil
+	end
+end
+RunService.Heartbeat:Connect(function()
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		updateLadder(humanoid)
+	elseif ladderSlide then
+		ladderSlide:Destroy()
+		ladderSlide = nil
+	end
+end)
 
 -- ---------------------------------------------------------------- digging
 local highlight = Instance.new("Highlight")
