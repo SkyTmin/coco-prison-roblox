@@ -116,14 +116,23 @@ slab("Ground", -HALF, HALF, hole.z1, HALF)
 slab("Ground", -HALF, hole.x0, hole.z0, hole.z1)
 slab("Ground", hole.x1, HALF, hole.z0, hole.z1)
 
-textured(part("PitFloor", Vector3.new(w + 4 * B, B, d + 4 * B), at(MX, -h - B / 2, MZ), DARK), "px_stone")
+-- [владелец 22.10: «границы шахты из камня, а копаем камень — границы не видно»] the pit walls, floor and
+-- rim are dark like Minecraft's bedrock (cobblestone texture tinted almost black), so the edge of the
+-- mine never looks like one more block to dig
+local BEDROCK = Color3.fromRGB(62, 58, 66)
+local function bedrock(p)
+	textured(p, "px_cobblestone")
+	p.Color = BEDROCK
+	return p
+end
+bedrock(part("PitFloor", Vector3.new(w + 4 * B, B, d + 4 * B), at(MX, -h - B / 2, MZ), DARK))
 for _, wall in ipairs({
 	{ "PitWallN", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ - d / 2 - B) },
 	{ "PitWallS", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ + d / 2 + B) },
 	{ "PitWallW", Vector3.new(2 * B, h, d), at(MX - w / 2 - B, -h / 2, MZ) },
 	{ "PitWallE", Vector3.new(2 * B, h, d), at(MX + w / 2 + B, -h / 2, MZ) },
 }) do
-	textured(part(wall[1], wall[2], wall[3], STONE), "px_stone")
+	bedrock(part(wall[1], wall[2], wall[3], STONE))
 end
 -- cobblestone rim around the opening; a gate in the south rail towards the plaza
 local rimY = 0.5
@@ -133,7 +142,7 @@ for _, r in ipairs({
 	{ Vector3.new(2 * B, 1, d), at(MX - w / 2 - B, rimY - 0.5, MZ) },
 	{ Vector3.new(2 * B, 1, d), at(MX + w / 2 + B, rimY - 0.5, MZ) },
 }) do
-	textured(part("PitRim", r[1], r[2], STONE), "px_cobblestone")
+	bedrock(part("PitRim", r[1], r[2], STONE))
 end
 local function rail(size, cf)
 	textured(part("PitRail", size, cf, WOOD), "px_planks")
@@ -221,8 +230,8 @@ indoor.Transparency = 1
 indoor.CanCollide = false
 indoor.CanQuery = false
 indoor.CanTouch = false
-indoor:SetAttribute("Ambient", Color3.fromRGB(165, 160, 150))
-indoor:SetAttribute("Exposure", 0.35)
+indoor:SetAttribute("Ambient", Color3.fromRGB(150, 145, 138))
+indoor:SetAttribute("Exposure", 0.2) -- 0.35 washed the stone out
 CollectionService:AddTag(indoor, "IndoorLighting")
 -- cave floor: cut stone around the pit hole (just above the grass so it wins the z-fight)
 local function floor(x0, x1, z0, z1)
@@ -235,12 +244,12 @@ floor(CX0, CX1, hole.z1, CZ1)
 floor(CX0, hole.x0, hole.z0, hole.z1)
 floor(hole.x1, CX1, hole.z0, hole.z1)
 -- the vault: a stepped stone DOME over the whole cave [владелец 22.10: «крыша как сфера, а не коробка»].
--- Ceiling height follows an ellipsoid (64 studs in the middle, falling to the walls); every 8 × 8 column
+-- Ceiling height follows an ellipsoid (48 studs in the middle, falling to the walls; 64 felt empty); every 8 × 8 column
 -- is one block reaching up to its neighbours' height, so the steps never leave a gap to the sky. Columns
 -- where the vault would be lower than 12 studs (the corners, the edge) are solid rock down to the floor.
 local DCX, DCZ = (CX0 + CX1) / 2, (CZ0 + CZ1) / 2
 local DRX, DRZ = (CX1 - CX0) / 2 * 1.25, (CZ1 - CZ0) / 2 * 1.25
-local DOME_H = 64
+local DOME_H = 48
 local function ceilingAt(x, z)
 	local k = 1 - ((x - DCX) / DRX) ^ 2 - ((z - DCZ) / DRZ) ^ 2
 	return math.floor(DOME_H * math.sqrt(math.max(0, k)) / 4) * 4
@@ -452,16 +461,7 @@ end
 local function planks(size, cf)
 	return textured(part("Planks", size, cf, WOOD, nil, props), "px_planks")
 end
--- scaffolding towers in the pit corners, down the walls
-for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-	local x, z = MX + c[1] * (w / 2 - 6), MZ + c[2] * (d / 2 - 6)
-	for _, o in ipairs({ { -3, -3 }, { 3, -3 }, { -3, 3 }, { 3, 3 } }) do
-		log(Vector3.new(1, h + 6, 1), at(x + o[1], (-h + 6) / 2, z + o[2]))
-	end
-	for level = 0, 3 do
-		planks(Vector3.new(8, 0.6, 8), at(x, -h + 8 + level * 16, z))
-	end
-end
+-- (the scaffolding towers in the pit corners are gone [владелец 22.10]: they stood inside the mine blocks)
 -- wooden roof props (mine supports) along the cave walls
 for t = 0.1, 0.9, 0.2 do
 	for _, side in ipairs({ { CX0 + 3, nil }, { CX1 - 3, nil } }) do
@@ -697,6 +697,137 @@ local arenaSign = part("ArenaSign", Vector3.new(1, 1, 1), at(AX, 8, GATE_Z + 6),
 arenaSign.Transparency = 1
 arenaSign.CanCollide = false
 sign(arenaSign, "Арена босса", 0, Color3.fromRGB(255, 80, 60))
+
+-- ---------------------------------------------------------------- rock formations [владелец 22.10: «много пустого пространства»]
+-- The cave floor around the pit, the arrival area and the arena was a bare flat field under a high vault.
+-- Natural rock now fills every free spot: stalagmites, boulder heaps, a few columns up to the vault, crystal
+-- clusters; a miners' camp in the empty south-east. Paths, the pit rim, the arena and the props stay clear.
+local formations = Instance.new("Folder")
+formations.Name = "Formations"
+formations.Parent = root
+local function stoneVariant()
+	local roll = rng:NextNumber()
+	return if roll < 0.6 then "px_stone" elseif roll < 0.82 then "px_cobblestone" elseif roll < 0.9 then "px_gravel" elseif roll < 0.96 then "px_coal_ore" else "px_iron_ore"
+end
+local function rock(size, x, y, z)
+	return textured(part("Rock", size, at(x, y, z), STONE, nil, formations), stoneVariant())
+end
+local CAMP_X, CAMP_Z = 124, 70
+local function reserved(x, z)
+	return (x > hole.x0 - 10 and x < hole.x1 + 10 and z > hole.z0 - 10 and z < hole.z1 + 10) -- the pit and its supports
+		or (x > -34 and x < 34 and z > PZ - 30) -- arrival area and spawn
+		or (x > -12 and x < 12 and z > hole.z1 and z < PZ) -- road to the pit
+		or (x > 12 and x < 40 and z > PZ - 22 and z < PZ + 14) -- the buyer, barrels and crates
+		or (x > POOL_X - POOL_W / 2 - 6 and x < POOL_X + POOL_W / 2 + 6 and z > POOL_Z - POOL_D / 2 - 6 and z < POOL_Z + POOL_D / 2 + 6)
+		or (x > -106 and x < -24 and z > railZ - 6 and z < railZ + 6) -- the rail line
+		or (z > PZ - 9 and z < PZ + 9 and x > 24 and x < AX + 9) -- road east
+		or (x > AX - 9 and x < AX + 9 and z > GATE_Z - 2 and z < PZ) -- road to the arena gate
+		or (x - AX) ^ 2 + (z - AZ) ^ 2 < (AR + 10) ^ 2 -- the arena
+		or (x - CAMP_X) ^ 2 + (z - CAMP_Z) ^ 2 < 16 ^ 2 -- the miners' camp
+		or (x - (CX1 - 14)) ^ 2 + (z - (CZ1 - 14)) ^ 2 < 14 ^ 2 -- the ore piles
+		or (x - (CX0 + 12)) ^ 2 + (z - (CZ0 + 12)) ^ 2 < 12 ^ 2
+		or (x - (CX1 - 12)) ^ 2 + (z - (CZ0 + 12)) ^ 2 < 12 ^ 2
+		or (x - (CX0 + 12)) ^ 2 + (z - (CZ1 - 22)) ^ 2 < 12 ^ 2
+		or x < CX0 + 8 or x > CX1 - 8 or z < CZ0 + 8 or z > CZ1 - 8 -- torches and props along the walls
+end
+local FLOOR_Y = 0.4
+local function stalagmite(x, z, roof)
+	local y = FLOOR_Y
+	if rng:NextNumber() < 0.6 then
+		rock(Vector3.new(8, 4, 8), x, y + 2, z)
+		y += 4
+	end
+	local blocks = math.min(rng:NextInteger(1, 3), math.floor((roof - y - 8) / 4))
+	for _ = 1, blocks do
+		rock(Vector3.new(4, 4, 4), x, y + 2, z)
+		y += 4
+	end
+	rock(Vector3.new(2, 3, 2), x, y + 1.5, z)
+end
+local function boulders(x, z)
+	local spots = { { 0, 0 }, { 4, 0 }, { -4, 0 }, { 0, 4 }, { 0, -4 }, { 4, 4 }, { -4, -4 }, { 4, -4 } }
+	local used = {}
+	for k = 1, rng:NextInteger(3, 6) do
+		local o = spots[k]
+		rock(Vector3.new(4, 4, 4), x + o[1], FLOOR_Y + 2, z + o[2])
+		table.insert(used, o)
+	end
+	for _ = 1, rng:NextInteger(0, 2) do
+		local o = used[rng:NextInteger(1, #used)]
+		rock(Vector3.new(4, 4, 4), x + o[1], FLOOR_Y + 6, z + o[2])
+	end
+end
+local function column(x, z, roof)
+	-- a pillar of rock holding up the vault, flared at the floor and at the top
+	rock(Vector3.new(8, roof + 4, 8), x, (roof + 4) / 2, z)
+	rock(Vector3.new(12, 4, 12), x, FLOOR_Y + 2, z)
+	rock(Vector3.new(12, 4, 12), x, roof - 2, z)
+	rock(Vector3.new(4, 4, 4), x + 6, FLOOR_Y + 2, z + 2)
+end
+local STEP = 14
+for gx = CX0 + 8, CX1 - 8, STEP do
+	for gz = CZ0 + 8, CZ1 - 8, STEP do
+		local x = math.floor((gx + rng:NextNumber(-4, 4)) / 4) * 4 + 2
+		local z = math.floor((gz + rng:NextNumber(-4, 4)) / 4) * 4 + 2
+		local roof = ceilingAt(x, z)
+		-- every corner of the formation footprint must be free (a 12-stud square)
+		local free = roof >= 20
+		for _, o in ipairs({ { -6, -6 }, { 6, -6 }, { -6, 6 }, { 6, 6 }, { 0, 0 } }) do
+			if reserved(x + o[1], z + o[2]) then
+				free = false
+			end
+		end
+		if free and rng:NextNumber() < 0.6 then
+			local roll = rng:NextNumber()
+			if roll < 0.42 then
+				stalagmite(x, z, roof)
+			elseif roll < 0.78 then
+				boulders(x, z)
+			elseif roll < 0.9 then
+				crystal(x, z)
+				boulders(x + 6, z + 2)
+			else
+				column(x, z, roof)
+			end
+		end
+	end
+end
+-- the miners' camp: a tent, a campfire with log benches, a tool rack and a chest of ore
+local camp = Instance.new("Folder")
+camp.Name = "MinersCamp"
+camp.Parent = root
+local CANVAS = Color3.fromRGB(196, 176, 130)
+for _, side in ipairs({ -1, 1 }) do
+	local slope = part("TentCanvas", Vector3.new(0.4, 8.5, 12), at(CAMP_X - 8 + side * 2.9, 3.4, CAMP_Z - 4) * CFrame.Angles(0, 0, side * math.rad(42)), CANVAS, Enum.Material.Fabric, camp)
+	slope.CanCollide = true
+end
+textured(part("TentPole", Vector3.new(0.6, 6.6, 0.6), at(CAMP_X - 8, 3.7, CAMP_Z - 10.2), WOOD, nil, camp), "px_oak_log")
+textured(part("TentPole", Vector3.new(0.6, 6.6, 0.6), at(CAMP_X - 8, 3.7, CAMP_Z + 2.2), WOOD, nil, camp), "px_oak_log")
+part("Bedroll", Vector3.new(3, 0.4, 7), at(CAMP_X - 8, 0.6, CAMP_Z - 4), Color3.fromRGB(150, 50, 45), Enum.Material.Fabric, camp)
+local fireBase = textured(part("Campfire", Vector3.new(3, 0.8, 3), at(CAMP_X + 4, 0.8, CAMP_Z + 2), WOOD, nil, camp), "px_oak_log")
+local embers = part("Embers", Vector3.new(2, 0.3, 2), at(CAMP_X + 4, 1.35, CAMP_Z + 2), Color3.fromRGB(255, 120, 40), Enum.Material.Neon, camp)
+embers.CanCollide = false
+local flames = Instance.new("Fire")
+flames.Size = 3
+flames.Heat = 5
+flames.Parent = embers
+local campLight = Instance.new("PointLight")
+campLight.Range = 24
+campLight.Brightness = 1.5
+campLight.Color = Color3.fromRGB(255, 160, 80)
+campLight.Parent = embers
+_ = fireBase
+for _, o in ipairs({ { 0, 6, 0 }, { 6, 0, math.pi / 2 }, { 0, -4.5, 0 } }) do
+	local bench = part("Bench", Vector3.new(5, 1.4, 1.4), at(CAMP_X + 4 + o[1], 1.1, CAMP_Z + 2 + o[2]) * CFrame.Angles(0, o[3], 0), WOOD, nil, camp)
+	textured(bench, "px_oak_log")
+end
+textured(part("OreChest", Vector3.new(3, 2.4, 2), at(CAMP_X - 2, 1.6, CAMP_Z - 10), WOOD, nil, camp), "px_planks")
+textured(part("OreChestLoad", Vector3.new(2.6, 0.6, 1.6), at(CAMP_X - 2, 3.1, CAMP_Z - 10), STONE, nil, camp), "px_coal_ore")
+textured(part("ToolRack", Vector3.new(5, 0.6, 0.6), at(CAMP_X + 8, 4, CAMP_Z - 9), WOOD, nil, camp), "px_planks")
+for k = -1, 1 do
+	part("RackPick", Vector3.new(0.3, 3.5, 0.3), at(CAMP_X + 8 + k * 1.5, 2.4, CAMP_Z - 8.8), Color3.fromRGB(110, 75, 40), Enum.Material.Wood, camp)
+	part("RackPickHead", Vector3.new(2, 0.4, 0.4), at(CAMP_X + 8 + k * 1.5, 4.3, CAMP_Z - 8.6), IRON, Enum.Material.Metal, camp)
+end
 
 local count = 0
 for _, x in ipairs(root:GetDescendants()) do

@@ -13,10 +13,16 @@ local HeldItem = require(script.Parent.HeldItem)
 
 local FirstPersonHand = {}
 
-local ARM_SIZE = Vector3.new(0.32, 0.32, 1.15) -- the arm points forward along −Z
-local SPRITE_SCALE = 0.32 -- held items are drawn smaller this close to the camera
+-- [владелец 22.10: «анимации от 1 лица такое себе»] sized and placed like Minecraft Java's view (FOV 70):
+-- the item is big, its handle leaves the screen at the bottom right and the head points to the upper
+-- left; it was a small stick near the centre of the screen. Tuned on screenshots in Studio.
+local ARM_SIZE = Vector3.new(0.45, 0.45, 1.6) -- the arm points forward along −Z
+local SPRITE_SCALE = 0.6 -- held items are drawn smaller this close to the camera
+local GRIP_SCALE = SPRITE_SCALE / 0.32 -- the cube grip below was tuned at scale 0.32
 -- the hand's rest position in camera space: right, down, forward
-local REST = CFrame.new(0.5, -0.5, -0.95) * CFrame.Angles(math.rad(8), math.rad(-12), math.rad(-6))
+local REST = CFrame.new(1.15, -0.72, -1.0) * CFrame.Angles(math.rad(8), math.rad(-12), math.rad(-6))
+-- Minecraft places the hand 0.72 in front of the eye; its swing offsets scale to our depth
+local SWING_SCALE = 1.0 / 0.72
 
 local started = false
 
@@ -122,6 +128,7 @@ function FirstPersonHand.Start()
 			-- forward. Wind-up before the blow, like the third-person keyframes.
 			local kind, progress = HeldItem.SwingState()
 			local swingOffset = CFrame.identity
+			local swingShift = CFrame.identity -- moves the whole hand in camera space
 			if progress then
 				local windup = math.clamp(progress / 0.4, 0, 1)
 				local blow = math.clamp((progress - 0.4) / 0.25, 0, 1)
@@ -153,17 +160,33 @@ function FirstPersonHand.Start()
 						0
 					)
 				else
-					local s = HeldItem.SwingAmount()
-					swingOffset = CFrame.new(-0.3 * s, -0.2 * s, -0.18 * s)
-						* CFrame.Angles(math.rad(-80) * s, math.rad(40) * s, math.rad(28) * s)
+					-- pickaxe, shovel, axe, blocks, the bare hand [владелец 22.10: «анимации кирки от 1 лица
+					-- такое себе»]: Minecraft Java's first-person swing curve (the math of its item-in-hand
+					-- renderer, progress linear over the 0.3 s swing). The hand darts in towards the centre
+					-- and up on a fast-in √p curve, the item chops forward 80° and tilts, then settles back
+					-- slower; the old sine went out and back evenly and looked floaty.
+					local p = progress
+					local sq = math.sqrt(p)
+					local f = math.sin(p * p * math.pi)
+					local f1 = math.sin(sq * math.pi)
+					swingShift = CFrame.new(
+						-0.4 * f1 * SWING_SCALE,
+						0.2 * math.sin(sq * math.pi * 2) * SWING_SCALE,
+						-0.2 * math.sin(p * math.pi) * SWING_SCALE
+					)
+					swingOffset = CFrame.Angles(0, math.rad(45 - 20 * f), 0)
+						* CFrame.Angles(0, 0, math.rad(-20 * f1))
+						* CFrame.Angles(math.rad(-80 * f1), 0, 0)
+						* CFrame.Angles(0, math.rad(-45), 0)
 				end
 			end
-			local handFrame = camera.CFrame * REST * bobOffset * swingOffset
+			local handFrame = camera.CFrame * swingShift * REST * bobOffset * swingOffset
 			-- the arm comes from below the screen edge towards the hand point
 			arm.CFrame = handFrame * CFrame.new(0, -0.05, ARM_SIZE.Z / 2 - 0.05)
 			if item and itemPart then
 				local grip = if itemIsCube
-					then CFrame.new(-0.05, 0.18, -0.12) * CFrame.Angles(0, math.rad(35), 0)
+					then CFrame.new(-0.05 * GRIP_SCALE, 0.18 * GRIP_SCALE, -0.12 * GRIP_SCALE)
+						* CFrame.Angles(0, math.rad(35), 0)
 					else CFrame.new(-0.02, 0.05, -0.05)
 						* CFrame.Angles( -- yaw −75°: icon top right → upper left
 							math.rad(-10),
