@@ -29,6 +29,7 @@ local CreativeWindow = require(script.CreativeWindow)
 local BossHud = require(script.BossHud)
 local BossAnimator = require(script.BossAnimator)
 local CharacterAnimator = require(script.CharacterAnimator)
+local Combat = require(ReplicatedStorage.Shared.Combat)
 CharacterAnimator.Start() -- keyframed swings on every character (ours and the relayed ones)
 local TrainerWindow = require(script.TrainerWindow)
 local UpgradeWindow = require(script.UpgradeWindow)
@@ -2086,13 +2087,25 @@ RunService.RenderStepped:Connect(function()
 	HeldItem.SetDigging(digging or (holding and digPredicted) or (holding and aim ~= nil))
 end)
 
--- Melee swing along the look direction (Minecraft: click / tap with nothing to dig)
+-- Melee attack along the look direction (click / tap with nothing to dig), Better Combat-style
+-- [владелец 22.10]: attacks come at the weapon's pace (vanilla attack speed), each plays the next animation
+-- of the weapon's combo (sword: cut right, cut left, stab); the server hits along the arc (Combat).
+local attackState: Combat.ComboState = { lastAt = -math.huge, index = 0 }
 local function attack()
 	local currentCamera = workspace.CurrentCamera
 	if not currentCamera or currentWindowKind then
 		return
 	end
-	HeldItem.Swing()
+	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
+	local kind = Combat.kind(toolId)
+	local duration = Combat.duration(kind, stack and stack.level)
+	local now = os.clock()
+	if now - attackState.lastAt < duration * 0.85 then
+		return -- still in the previous attack
+	end
+	local _, blow = Combat.next(attackState, kind, duration, now)
+	HeldItem.Attack(blow.animation, duration)
 	Remotes.event("Attack"):FireServer(currentCamera.CFrame.LookVector)
 end
 

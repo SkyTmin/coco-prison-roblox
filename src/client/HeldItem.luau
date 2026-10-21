@@ -20,21 +20,19 @@ local GLINT = Color3.fromRGB(170, 90, 255)
 -- The swing [владелец 22.10: «замах от первого и третьего лица, видно другим»]. It runs in whole cycles of
 -- SWING_SECONDS: a cycle that has started always finishes (instant mining used to restart it every few
 -- frames, so the arm never moved). Each cycle drives the first-person hand (SwingAmount) and plays our
--- keyframed swing on the character (CharacterAnimator: a chop for tools, a slash for swords), which the
--- server relays so every player sees it. While an item is held the character keeps the R15 "toolnone"
--- pose (arm raised holding it), as Roblox does for a Tool.
+-- keyframed animation on the character (CharacterAnimator), which the server relays so every player sees
+-- it. Digging repeats the overhead blow; a melee attack (Attack) plays the combo animation of the weapon
+-- over its attack length. The hold pose (arm relaxed, item in front) is CharacterAnimator's too.
 local SWING_SECONDS = 0.3
-local HOLD_ANIMATION = "rbxassetid://507768375" -- R15 Animate "toolnone" (Roblox-owned)
 local swingActive = false -- digging: keep swinging
 local swingPhase = -1 -- 0..1 inside a cycle, -1 = resting
-local holdTrack: AnimationTrack? = nil
+local swingKind = "slam" -- the animation of the current cycle
+local swingLength = SWING_SECONDS
 
 local function startCycle()
 	swingPhase = 0
-	local character = Players.LocalPlayer.Character
-	local held = character and character:GetAttribute("HeldItem")
-	local sword = typeof(held) == "string" and string.sub(held, 1, 6) == "sword:"
-	CharacterAnimator.PlayLocal(if sword then "slash" else "chop")
+	swingKind, swingLength = "slam", SWING_SECONDS
+	CharacterAnimator.PlayLocal("slam", SWING_SECONDS)
 end
 
 function HeldItem.SetDigging(active: boolean)
@@ -49,11 +47,22 @@ function HeldItem.SwingAmount(): number
 	return if swingPhase < 0 then 0 else math.sin(math.pi * swingPhase)
 end
 
--- One attack swing like Minecraft's arm swing
+-- the current swing for the first-person hand: animation kind and progress 0..1 (nil when resting)
+function HeldItem.SwingState(): (string, number?)
+	return swingKind, if swingPhase < 0 then nil else swingPhase
+end
+
+-- One plain swing (no weapon combo), e.g. a tap that hit nothing to dig
 function HeldItem.Swing()
 	if swingPhase < 0 then
 		startCycle()
 	end
+end
+
+-- A melee attack of the combo (Combat): its animation over the weapon's attack length
+function HeldItem.Attack(kind: string, duration: number)
+	swingPhase, swingKind, swingLength = 0, kind, duration
+	CharacterAnimator.PlayLocal(kind, duration)
 end
 
 local function rightHand(character: Model): BasePart?
@@ -131,6 +140,29 @@ function HeldItem.MakeVisual(
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
 	visual.Massless = true
 	visual.CastShadow = false
+	if tool and not cube then
+		-- the weapon trail of a blow (CharacterAnimator turns it on): from the grip to the head of the item
+		local a0 = Instance.new("Attachment")
+		a0.Name = "TrailBase"
+		a0.Position = Vector3.new(0, -spriteSize * 0.15, -spriteSize * 0.15)
+		a0.Parent = visual
+		local a1 = Instance.new("Attachment")
+		a1.Name = "TrailTip"
+		a1.Position = Vector3.new(0, spriteSize * 0.45, spriteSize * 0.45)
+		a1.Parent = visual
+		local trail = Instance.new("Trail")
+		trail.Attachment0, trail.Attachment1 = a0, a1
+		trail.Lifetime = 0.16
+		trail.MinLength = 0.05
+		trail.FaceCamera = true
+		trail.LightEmission = 0.6
+		trail.Color =
+			ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 210, 255))
+		trail.Transparency = NumberSequence.new(0.35, 1)
+		trail.WidthScale = NumberSequence.new(1, 0.3)
+		trail.Enabled = false
+		trail.Parent = visual
+	end
 	return container, visual, cube
 end
 
@@ -161,8 +193,10 @@ local function render(rig: Rig)
 		local size = spriteSize
 		-- Tuned on the live character (21.10): sprite model has image-right = +Z, so yaw it 180° to
 		-- point the head forward (hand −Z); handle end (bottom-left of the icon) sits in the palm.
+		-- [владелец 22.10, reference: Steve] with the arm relaxed the item points forward and a little
+		-- down, not up: pitch −62° (was −20°, the tip stood 45° up)
 		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
-			* CFrame.Angles(math.rad(-20), 0, 0)
+			* CFrame.Angles(math.rad(-62), 0, 0)
 			* CFrame.Angles(0, math.pi, 0)
 			* CFrame.new(0, size * 0.45, size * 0.45)
 	end
@@ -273,50 +307,16 @@ function HeldItem.Start()
 			end
 		end
 	end)
-	-- the swing cycle and the animation tracks of our own character
-	local function loadTracks(character: Model)
-		holdTrack = nil
-		local humanoid = character:WaitForChild("Humanoid", 10)
-		local animator = humanoid and humanoid:WaitForChild("Animator", 10)
-		if not animator or not animator:IsA("Animator") then
-			return
-		end
-		local hold = Instance.new("Animation")
-		hold.AnimationId = HOLD_ANIMATION
-		local okHold, s2 = pcall(function()
-			return (animator :: Animator):LoadAnimation(hold)
-		end)
-		if okHold then
-			s2.Priority = Enum.AnimationPriority.Action -- over walking (Movement), arm only
-			s2.Looped = true
-			holdTrack = s2
-		end
-	end
-	local localPlayer = Players.LocalPlayer
-	localPlayer.CharacterAdded:Connect(function(character)
-		task.spawn(loadTracks, character)
-	end)
-	if localPlayer.Character then
-		task.spawn(loadTracks, localPlayer.Character)
-	end
+	-- the swing cycle
 	RunService.Heartbeat:Connect(function(dt)
 		if swingPhase >= 0 then
-			swingPhase += dt / SWING_SECONDS
+			swingPhase += dt / swingLength
 			if swingPhase >= 1 then
 				if swingActive then
 					startCycle()
 				else
 					swingPhase = -1
 				end
-			end
-		end
-		local character = localPlayer.Character
-		local holding = character ~= nil and (character:GetAttribute("HeldItem") or "") ~= ""
-		if holdTrack then
-			if holding and not holdTrack.IsPlaying then
-				holdTrack:Play(0.2)
-			elseif not holding and holdTrack.IsPlaying then
-				holdTrack:Stop(0.2)
 			end
 		end
 	end)

@@ -149,6 +149,13 @@ function Config.enchantForLevel(itemId: string, level: number): number
 	if level <= 1 then
 		return 0
 	end
+	-- [владелец 22.10] pickaxe / axe: Efficiency keeps growing with the level (design-decisions digging)
+	local curve = Config.rules.digging
+		and Config.rules.digging.efficiencyByLevel
+		and Config.rules.digging.efficiencyByLevel[itemId]
+	if typeof(curve) == "table" and curve[level] then
+		return curve[level]
+	end
 	for _, up in ipairs(Config.tools[itemId].upgrades) do
 		if up.to == level then
 			return up.enchantAfter

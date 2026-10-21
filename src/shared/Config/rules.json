@@ -110,7 +110,46 @@
     "_reach": "[ваниль] дальность 4,5 блока = 18 стадов от глаз до точки попадания на грани блока (как в Minecraft), не до центра",
     "hitDelayTicks": 6,
     "_hitDelay": "[ваниль, minecraft.wiki/w/Breaking] после разрушения блока 6 тиков (0,3 с) паузы до начала следующего; блок, сломанный мгновенно (за 1 тик), — без паузы (мгновенное копание, 20 блоков/с). [владелец 21.10]: «как в Minecraft». Спешка: скорость ×(1 + 0,2·уровень)",
-    "_formula": "[ваниль] minecraft.wiki/w/Breaking: damage/tick = speed / hardness / 30 (или /100 без подходящего инструмента), ticks = ceil(1/damage), 0,05 с/тик, мгновенно при damage ≥ 1; Эффективность: +уровень²+1 к скорости"
+    "_formula": "[ваниль] minecraft.wiki/w/Breaking: damage/tick = speed / hardness / 30 (или /100 без подходящего инструмента), ticks = ceil(1/damage), 0,05 с/тик, мгновенно при damage ≥ 1; Эффективность: +уровень²+1 к скорости",
+    "efficiencyByLevel": {
+      "pickaxe": [
+        0,
+        1,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        8,
+        8,
+        9
+      ],
+      "axe": [
+        0,
+        1,
+        2,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        8,
+        8,
+        9
+      ]
+    },
+    "_efficiencyByLevel": "[владелец 22.10] «алмазная кирка максимальная копает медленно — сделай как лопату»: у кирки и топора Эффективность растёт с уровнем и не сбрасывается при смене материала (было по меню оригинала: I–III и обнуление). Кирка 16 (алмаз, Эфф. IX): камень, булыжник, руда — мгновенно; топор 14: брёвна мгновенно. Лопата — по меню (она и так мгновенная на максимуме). Формула копания — ванильная, твёрдость блоков — ванильная (проверено, 57/57)"
   },
   "survival": {
     "_source": "[владелец] 21.10.2026: здоровье сердечками и голод как в Minecraft, еда восстанавливает голод; смерть в PvP-зоне — броня и инструменты остаются, остальное выпадает дропом на землю; Эндер-сундук — личное сохраняемое хранилище. Числа — [решение] по ванильным значениям Minecraft",
@@ -171,5 +210,94 @@
     ],
     "breakSeconds": 0.05,
     "stackCount": 64
+  },
+  "combat": {
+    "_source": "[ваниль] дальность удара 3 блока, скорость атаки и урон оружия — tools.json vanilla; [Better Combat, открытые параметры weapon_attributes] угол дуги, момент удара (upswing — доля анимации до удара), бонус дальности, комбо меча из трёх ударов; файлы анимаций Better Combat не используются (All Rights Reserved), анимации свои — src/shared/SwingAnimations.luau [владелец 22.10]",
+    "reachBlocks": 3,
+    "blockStuds": 4,
+    "comboResetSeconds": 0.9,
+    "weapons": {
+      "sword": {
+        "rangeBonus": 0,
+        "attacks": [
+          {
+            "animation": "slash_right",
+            "hitbox": "horizontal",
+            "angle": 120,
+            "upswing": 0.5,
+            "damage": 1
+          },
+          {
+            "animation": "slash_left",
+            "hitbox": "horizontal",
+            "angle": 120,
+            "upswing": 0.5,
+            "damage": 1
+          },
+          {
+            "animation": "stab",
+            "hitbox": "forward",
+            "angle": 0,
+            "upswing": 0.5,
+            "damage": 1
+          }
+        ]
+      },
+      "axe": {
+        "rangeBonus": -0.25,
+        "attacks": [
+          {
+            "animation": "slash_right",
+            "hitbox": "horizontal",
+            "angle": 90,
+            "upswing": 0.3,
+            "damage": 1
+          },
+          {
+            "animation": "slash_left",
+            "hitbox": "horizontal",
+            "angle": 90,
+            "upswing": 0.3,
+            "damage": 1
+          }
+        ]
+      },
+      "pickaxe": {
+        "rangeBonus": -0.5,
+        "attacks": [
+          {
+            "animation": "slam",
+            "hitbox": "vertical",
+            "angle": 90,
+            "upswing": 0.5,
+            "damage": 1
+          }
+        ]
+      },
+      "shovel": {
+        "rangeBonus": -0.5,
+        "attacks": [
+          {
+            "animation": "slam",
+            "hitbox": "vertical",
+            "angle": 90,
+            "upswing": 0.5,
+            "damage": 1
+          }
+        ]
+      },
+      "hand": {
+        "rangeBonus": 0,
+        "attacks": [
+          {
+            "animation": "punch",
+            "hitbox": "forward",
+            "angle": 0,
+            "upswing": 0.5,
+            "damage": 1
+          }
+        ]
+      }
+    }
   }
 }

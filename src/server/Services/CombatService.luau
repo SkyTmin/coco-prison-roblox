@@ -11,9 +11,7 @@ local Remotes = require(Shared.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
-
-local MELEE_REACH = 12 -- [ваниль] 3 blocks
-local lastAttack: { [Player]: number } = {}
+local Combat = require(Shared.Combat)
 
 local CombatService = {}
 local lastCombat: { [Player]: number } = {}
@@ -98,8 +96,77 @@ local function weapon(profile): (number, number)
 	return damage, speed
 end
 
--- Tap / click with no block under the crosshair: a melee swing along the look direction.
--- Cooldown scaling like Java: damage × (0.2 + 0.8 × t²), t = time since the last swing × attack speed.
+-- Better Combat-style melee [владелец 22.10]: the attack hits along an arc in front of the player, measured
+-- to the target's bounding box (not a thin ray to its exact mesh — the boss was hard to hit), after the
+-- weapon's upswing (the moment the animation reaches the blow). Reach = 3 blocks + the weapon bonus
+-- [ваниль, Better Combat]. Every target inside the arc is hit; the combo picks the attack of the set.
+local combos: { [Player]: Combat.ComboState } = {}
+
+local function targetBox(model: Model): (CFrame, Vector3)
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local root = model:FindFirstChild("HumanoidRootPart")
+	if humanoid and root and root:IsA("BasePart") and Players:GetPlayerFromCharacter(model) then
+		-- a player: the standard character box around the root (accessories would inflate the bounds)
+		return root.CFrame * CFrame.new(0, -0.5, 0), Vector3.new(4, 5.5, 2)
+	end
+	return model:GetBoundingBox()
+end
+
+local function closestPoint(cf: CFrame, size: Vector3, point: Vector3): Vector3
+	local p = cf:PointToObjectSpace(point)
+	local half = size / 2
+	return cf:PointToWorldSpace(
+		Vector3.new(
+			math.clamp(p.X, -half.X, half.X),
+			math.clamp(p.Y, -half.Y, half.Y),
+			math.clamp(p.Z, -half.Z, half.Z)
+		)
+	)
+end
+
+local function insideArc(
+	attack: Combat.Attack,
+	eye: Vector3,
+	look: Vector3,
+	cf: CFrame,
+	size: Vector3,
+	range: number
+): boolean
+	local near = closestPoint(cf, size, eye)
+	local offset = near - eye
+	if offset.Magnitude > range then
+		return false
+	end
+	if offset.Magnitude < 2.5 then
+		return true -- standing in it
+	end
+	local centre = cf.Position - eye
+	local function angleBetween(a: Vector3, b: Vector3): number
+		if a.Magnitude < 1e-3 or b.Magnitude < 1e-3 then
+			return 0
+		end
+		return math.deg(math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1)))
+	end
+	local flatLook = look * Vector3.new(1, 0, 1)
+	if attack.hitbox == "horizontal" then
+		-- a wide horizontal sweep: the yaw towards the nearest point within half the arc, any height in reach
+		return angleBetween(flatLook, offset * Vector3.new(1, 0, 1)) <= attack.angle / 2
+			or angleBetween(flatLook, centre * Vector3.new(1, 0, 1)) <= attack.angle / 2
+	elseif attack.hitbox == "vertical" then
+		-- an overhead blow: a narrow yaw, but anything from above to the ground in front
+		return angleBetween(flatLook, centre * Vector3.new(1, 0, 1)) <= 30
+			and angleBetween(look, centre) <= attack.angle / 2 + 30
+	end
+	-- forward box (stab, punch): the box must come within 2 studs of the look line
+	local along = offset:Dot(look)
+	if along < -1 then
+		return false
+	end
+	local onLine = eye + look * math.max(0, centre:Dot(look))
+	local lateral = (closestPoint(cf, size, onLine) - onLine).Magnitude
+	return lateral <= 2
+end
+
 local function onAttack(player: Player, direction: any)
 	if
 		typeof(direction) ~= "Vector3"
@@ -115,44 +182,64 @@ local function onAttack(player: Player, direction: any)
 	if not profile or not character or not humanoid or humanoid.Health <= 0 then
 		return
 	end
-	local baseDamage, speed = weapon(profile)
+	local toolId, level = InventoryService.heldTool(profile)
+	local kind = Combat.kind(toolId)
+	local duration = Combat.duration(kind, level)
 	local now = os.clock()
-	local t = math.clamp((now - (lastAttack[player] or -math.huge)) * speed, 0, 1)
-	lastAttack[player] = now
-	local damage = baseDamage * (0.2 + 0.8 * t * t)
-	local head = character:FindFirstChild("Head")
-	local eye = if head and head:IsA("BasePart")
-		then head.Position
-		else character:GetPivot().Position + Vector3.new(0, 1.5, 0)
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character }
-	local hit = workspace:Raycast(eye, direction.Unit * MELEE_REACH, params)
-	if not hit then
-		return
+	local state = combos[player] or { lastAt = -math.huge, index = 0 }
+	combos[player] = state
+	if now - state.lastAt < duration * 0.8 then
+		return -- still swinging: attacks come at the weapon's pace
 	end
-	local model = hit.Instance:FindFirstAncestorOfClass("Model")
-	local target = model and model:FindFirstChildOfClass("Humanoid")
-	if not model or not target or target.Health <= 0 then
-		return
-	end
-	local victim = Players:GetPlayerFromCharacter(model)
-	if victim then
-		-- PvP only where the location allows it (both players there) [вики]
-		local mine = Config.location(profile.location)
-		local theirs = ProfileService.Get(victim)
-		local other = theirs and Config.location(theirs.location)
-		if not (mine and mine.pvp and other and other.pvp) then
+	local _, attack = Combat.next(state, kind, duration, now)
+	local baseDamage = weapon(profile)
+	local look = direction.Unit
+	task.delay(duration * attack.upswing, function()
+		local head = character:FindFirstChild("Head")
+		if not character.Parent or humanoid.Health <= 0 or not head or not head:IsA("BasePart") then
 			return
 		end
-		CombatService.ApplyDamage(target, damage, "player", player)
-		HurtService.Knockback(model, direction)
-	elseif CollectionService:HasTag(model, "Mob") or CollectionService:HasTag(model, "Boss") then
-		target:SetAttribute("LastHitBy", player.UserId)
-		target:SetAttribute("LastHitAt", now)
-		target:TakeDamage(damage)
-		HurtService.Knockback(model, direction)
-	end
+		local eye = head.Position
+		local range = Combat.range(kind)
+		local candidates: { Model } = {}
+		for _, other in ipairs(Players:GetPlayers()) do
+			if other ~= player and other.Character then
+				table.insert(candidates, other.Character)
+			end
+		end
+		for _, tag in ipairs({ "Mob", "Boss" }) do
+			for _, model in ipairs(CollectionService:GetTagged(tag)) do
+				if model:IsA("Model") then
+					table.insert(candidates, model)
+				end
+			end
+		end
+		for _, model in ipairs(candidates) do
+			local target = model:FindFirstChildOfClass("Humanoid")
+			if target and target.Health > 0 then
+				local cf, size = targetBox(model)
+				if insideArc(attack, eye, look, cf, size, range) then
+					local damage = baseDamage * attack.damage
+					local victim = Players:GetPlayerFromCharacter(model)
+					if victim then
+						-- PvP only where the location allows it (both players there) [вики]
+						local mine = Config.location(profile.location)
+						local theirs = ProfileService.Get(victim)
+						local other = theirs and Config.location(theirs.location)
+						if mine and mine.pvp and other and other.pvp then
+							CombatService.ApplyDamage(target, damage, "player", player)
+							HurtService.Knockback(model, look)
+						end
+					else
+						target:SetAttribute("LastHitBy", player.UserId)
+						target:SetAttribute("LastHitAt", os.clock())
+						target:TakeDamage(damage)
+						HurtService.Knockback(model, look)
+					end
+				end
+			end
+		end
+	end)
 end
 
 function CombatService.Start()
@@ -165,10 +252,13 @@ function CombatService.Start()
 	-- character (CharacterAnimator); unreliable — a lost swing only skips an animation
 	local swingFx = Remotes.unreliable("SwingFx")
 	local lastSwing: { [Player]: number } = {}
-	Remotes.event("Swing").OnServerEvent:Connect(function(player: Player, kind: any)
-		if kind ~= "chop" and kind ~= "slash" then
+	local SWING_KINDS =
+		{ slam = true, slash_right = true, slash_left = true, stab = true, punch = true }
+	Remotes.event("Swing").OnServerEvent:Connect(function(player: Player, kind: any, duration: any)
+		if typeof(kind) ~= "string" or not SWING_KINDS[kind] then
 			return
 		end
+		duration = math.clamp(tonumber(duration) or 0.4, 0.1, 2)
 		local now = os.clock()
 		if now - (lastSwing[player] or -math.huge) < 0.1 then
 			return
@@ -186,7 +276,7 @@ function CombatService.Start()
 				and otherRoot:IsA("BasePart")
 				and (otherRoot.Position - root.Position).Magnitude < 150
 			then
-				swingFx:FireClient(other, player.UserId, kind)
+				swingFx:FireClient(other, player.UserId, kind, duration)
 			end
 		end
 	end)
@@ -195,7 +285,7 @@ function CombatService.Start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		lastCombat[player] = nil
-		lastAttack[player] = nil
+		combos[player] = nil
 	end)
 end
 

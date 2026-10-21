@@ -117,10 +117,47 @@ function FirstPersonHand.Start()
 			bob += dt * (if speed > 0.1 then 9 else 0)
 			local bobOffset =
 				CFrame.new(math.sin(bob) * 0.03 * speed, -math.abs(math.cos(bob)) * 0.03 * speed, 0)
-			local s = HeldItem.SwingAmount()
-			-- a big, clear Minecraft swing: the hand dives to the centre and down, turning the item over
-			local swingOffset = CFrame.new(-0.3 * s, -0.2 * s, -0.18 * s)
-				* CFrame.Angles(math.rad(-80) * s, math.rad(40) * s, math.rad(28) * s)
+			-- the swing in view follows the attack kind [владелец 22.10]: the overhead blow dives to the centre
+			-- and down; the cuts sweep across the screen (right→left, then back); the stab and the punch thrust
+			-- forward. Wind-up before the blow, like the third-person keyframes.
+			local kind, progress = HeldItem.SwingState()
+			local swingOffset = CFrame.identity
+			if progress then
+				local windup = math.clamp(progress / 0.4, 0, 1)
+				local blow = math.clamp((progress - 0.4) / 0.25, 0, 1)
+				local back = math.clamp((progress - 0.65) / 0.35, 0, 1)
+				local w = math.sin(windup * math.pi / 2) * (1 - back)
+				local b = (blow * blow * (3 - 2 * blow)) * (1 - back)
+				if kind == "slash_right" then
+					swingOffset = CFrame.new(0.25 * w - 0.6 * b, 0.08 * w, -0.1 * b)
+						* CFrame.Angles(
+							math.rad(10) * w,
+							math.rad(-50) * w + math.rad(95) * b,
+							math.rad(-20) * w + math.rad(40) * b
+						)
+				elseif kind == "slash_left" then
+					swingOffset = CFrame.new(-0.45 * w + 0.7 * b, 0.05 * w, -0.1 * b)
+						* CFrame.Angles(
+							math.rad(10) * w,
+							math.rad(60) * w - math.rad(100) * b,
+							math.rad(30) * w - math.rad(45) * b
+						)
+				elseif kind == "stab" or kind == "punch" then
+					swingOffset = CFrame.new(
+						-0.05 * w - 0.12 * b,
+						-0.04 * w + 0.04 * b,
+						0.25 * w - 0.6 * b
+					) * CFrame.Angles(
+						math.rad(-15) * w + math.rad(15) * b,
+						math.rad(10) * w,
+						0
+					)
+				else
+					local s = HeldItem.SwingAmount()
+					swingOffset = CFrame.new(-0.3 * s, -0.2 * s, -0.18 * s)
+						* CFrame.Angles(math.rad(-80) * s, math.rad(40) * s, math.rad(28) * s)
+				end
+			end
 			local handFrame = camera.CFrame * REST * bobOffset * swingOffset
 			-- the arm comes from below the screen edge towards the hand point
 			arm.CFrame = handFrame * CFrame.new(0, -0.05, ARM_SIZE.Z / 2 - 0.05)
