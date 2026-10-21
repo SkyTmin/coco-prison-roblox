@@ -76,6 +76,7 @@ TrainerService.Start()
 FallService.Start()
 LightingService.Start()
 HurtService.Start()
+require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn
 game:GetService("Players").PlayerAdded:Connect(function(player)

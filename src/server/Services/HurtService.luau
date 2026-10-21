@@ -9,8 +9,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local Sfx = require(Shared.Sfx)
 
 local HurtService = {}
 
@@ -19,22 +19,6 @@ local KNOCKBACK_SPEED = 26 -- studs/s horizontal (0.4 block/tick Ã— 20 ticks/s Ã
 local KNOCKBACK_LIFT = 14
 local watched: { [Humanoid]: boolean } = {}
 local started = false
-
-local function hurtSoundId(): string?
-	local sounds = Config.effects.sounds
-	local entry = sounds and sounds.files and sounds.files.player_hurt
-	if not entry then
-		return nil
-	end
-	if typeof(entry.id) == "string" and entry.id ~= "" then
-		return entry.id
-	end
-	return if entry.fallback
-			and typeof(entry.fallback.id) == "string"
-			and entry.fallback.id ~= ""
-		then entry.fallback.id
-		else nil
-end
 
 local function flash(model: Model)
 	local existing = model:FindFirstChild("HurtFlash")
@@ -57,26 +41,10 @@ local function flash(model: Model)
 end
 
 local function playHurt(model: Model)
-	local id = hurtSoundId()
 	local root = model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart
-	if not id or not root then
-		return
+	if root and root:IsA("BasePart") then
+		Sfx.broadcast("player_hurt", root, 0.7, 0.9 + math.random() * 0.2) -- vanilla varies the pitch a little
 	end
-	local sound = Instance.new("Sound")
-	sound.SoundId = id
-	sound.Volume = 0.6
-	sound.PlaybackSpeed = 0.9 + math.random() * 0.2 -- vanilla varies the pitch a little
-	sound.RollOffMaxDistance = 48
-	sound.Parent = root
-	sound:Play()
-	sound.Ended:Once(function()
-		sound:Destroy()
-	end)
-	task.delay(3, function()
-		if sound.Parent then
-			sound:Destroy()
-		end
-	end)
 end
 
 local function watch(humanoid: Humanoid)

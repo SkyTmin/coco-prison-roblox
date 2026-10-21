@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
@@ -129,6 +130,7 @@ local function sell(player: Player)
 	end)
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
+		Sfx.toPlayer(player, "xp", 0.5)
 	else
 		toast(player, "nothing_to_sell")
 	end
@@ -217,6 +219,7 @@ local function upgrade(player: Player, target: any)
 			item.level = up.to
 		end
 	end)
+	Sfx.toPlayer(player, "enchant", 0.6)
 	toast(player, "upgraded", Strings.itemName(id, up.to, Strings.localeOf(player)), up.to)
 end
 
@@ -254,6 +257,7 @@ local function levelUp(player: Player)
 		humanoid.Health = humanoid.MaxHealth
 	end
 	toast(player, "level_reached", rule.level)
+	Sfx.toPlayer(player, "level_up", 0.7)
 end
 
 local function bindPrompt(part: Instance, kind: string, tag: string)
@@ -308,9 +312,21 @@ function EconomyService.Start()
 	Remotes.event("EquipArmor").OnServerEvent:Connect(function(player, slot)
 		if InventoryService.isSlot(slot) then
 			-- Mutate also replicates the equipped Armor attribute to the character.
+			local profile = ProfileService.Get(player)
+			local stack = profile and profile.inventory[slot]
 			ProfileService.Mutate(player, function(p)
 				InventoryService.equipArmor(p, slot)
 			end)
+			if stack and stack.level then
+				-- armor tiers: leather / chainmail / iron / diamond (Minecraft equip sounds)
+				local material = Config.materialForLevel(stack.level)
+				Sfx.toPlayer(player, ({
+					wood = "armor_equip_leather",
+					stone = "armor_equip_chain",
+					iron = "armor_equip_iron",
+					diamond = "armor_equip_diamond",
+				})[material] or "armor_equip", 0.6)
+			end
 		end
 	end)
 	Remotes.event("UnequipArmor").OnServerEvent:Connect(function(player, part, slot)

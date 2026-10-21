@@ -6,6 +6,7 @@
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Sfx = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared").Sfx)
 
 local BLOCK = 4
 local SAFE_BLOCKS = 3
@@ -54,6 +55,7 @@ local function step()
 			if damage >= 1 then
 				humanoid:SetAttribute("LastHitBy", nil)
 				humanoid:TakeDamage(damage)
+				Sfx.broadcast("player_fall", root :: BasePart, 0.8)
 			end
 		end
 		table.insert(track.history, y)

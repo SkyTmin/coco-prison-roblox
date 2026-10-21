@@ -60,6 +60,11 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Minecraft layer layout) → upload via `upload_image` → ids in `assets/icons/ids.json`,
    `assets/armor/ids.json` → `node scripts/build-configs.mjs`; `scripts/tools-to-voxels.ps1` + node
    greedy-rectangle merge → `assets/icons/voxels.json` (3D extruded item sprites, `ItemModels.luau`).
+   Sounds: ALL from one VoxeLibre atlas [владелец 21.10]: `scripts/build-sounds.mjs` → `assets/sounds/build/atlas.ogg`
+   + segments in `assets/sounds/ids.json` (`files[name]`, `materials[type].hit/break/step`, `blockMaterial`); the OWNER
+   uploads it once (`scripts/upload-audio.mjs`, Open Cloud key; unverified accounts get 10 audio uploads a month) →
+   `atlasId` → `build-configs`. Play with `src/shared/Sfx.luau` (server: `Sfx.broadcast` / `Sfx.toPlayer` → client plays
+   the segment); footsteps `src/client/Footsteps.luau`; attribution `assets/thirdparty/voxelibre/ATTRIBUTION.md`.
    Block breaking (`src/client/BlockBreak.luau`): crack stages `assets/cracks/ids.json`; sounds like
    Minecraft (hit = step sound every 0.2 s at pitch 0.5, break = dig sound at 0.8; a 2-voice pool per
    material, no piling up): `scripts/build-sounds.mjs` concatenates the VoxeLibre mcl_sounds variants

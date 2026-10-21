@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
@@ -87,6 +88,14 @@ local function close(player: Player)
 	if session then
 		sessions[player] = nil
 		Remotes.event("CaseUpdated"):FireClient(player, session.id, false)
+		local part = (session :: any).part
+		if typeof(part) == "Instance" and part:IsA("BasePart") then
+			Sfx.broadcast(
+				if session.id == "enderChest" then "ender_close" else "chest_close",
+				part,
+				0.6
+			)
+		end
 	end
 end
 
@@ -206,6 +215,9 @@ local function openChest(player: Player, part: BasePart)
 		end
 	end)
 	Remotes.event("CaseOpened"):FireClient(player, id)
+	if part and part:IsA("BasePart") then
+		Sfx.broadcast(if id == "enderChest" then "ender_open" else "chest_open", part, 0.6)
+	end
 end
 
 local function weightedKey(weights: { [string]: number }): string

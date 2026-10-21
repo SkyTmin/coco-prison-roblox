@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Types = require(Shared.Types)
+local Sfx = require(Shared.Sfx)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local AchievementService = require(script.Parent.AchievementService)
@@ -98,6 +99,7 @@ local function spawnDrop(stack: Types.ItemStack, position: Vector3, owner: Playe
 			end
 		end)
 		if pickedUp then
+			Sfx.toPlayer(player, "pickup", 0.5, 1.4 + math.random() * 0.4)
 			drop:Destroy()
 		else
 			busy = false

@@ -9,6 +9,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
 local Remotes = require(Shared.Remotes)
+local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
@@ -240,6 +241,15 @@ local function useConsumable(player: Player, slot: any)
 		end
 	end)
 	if consumed then
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			-- eating bites like Minecraft; soap splashes, a sleeping bag / paper rustles
+			Sfx.broadcast(
+				if food then "eat" elseif matchingNeed == "hygiene" then "water_step" else "wool",
+				root,
+				0.7
+			)
+		end
 		if matchingNeed then
 			restored(player, matchingNeed)
 		elseif food then

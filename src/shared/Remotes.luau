@@ -13,6 +13,7 @@
 --                          BlockBroken(userId, cframe, size, color, blockId) — for other players' effects
 --                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
 -- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection)
+-- Server → client:        Sfx(name, anchorPart?, volume?, pitch?) — play an atlas sound locally (Sfx.luau)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

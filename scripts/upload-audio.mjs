@@ -1,5 +1,5 @@
-// Uploads the built block sounds (assets/sounds/build/*.ogg, see scripts/build-sounds.mjs) to Roblox through
-// the Open Cloud Assets API and writes the asset ids into assets/sounds/ids.json → files[name].id.
+// Uploads the sound atlas (assets/sounds/build/atlas.ogg, see scripts/build-sounds.mjs) to Roblox through the
+// Open Cloud Assets API and writes its id into assets/sounds/ids.json → atlasId and every files[name].id.
 // The owner runs this (it needs their API key); Claude/Codex never see the key.
 //
 //   1. https://create.roblox.com/dashboard/credentials → "Create API key": add the "Assets" API system with
@@ -8,7 +8,7 @@
 //      (or $env:ROBLOX_GROUP_ID for a group-owned experience), then  node scripts/upload-audio.mjs
 //   3. node scripts/build-configs.mjs  → sync to Studio (the game reads Config.effects.sounds.files).
 //
-// Audio uploads: free, but unverified accounts are limited to 10 per month (this needs 8). Roblox moderates
+// Audio uploads: free, but unverified accounts are limited to 10 per month — the atlas needs ONE. Roblox moderates
 // audio; a file stays unavailable until it is approved (usually minutes).
 import fs from "node:fs";
 import path from "node:path";
@@ -21,7 +21,6 @@ if (!key || (!userId && !groupId)) {
   console.error("Set ROBLOX_API_KEY and ROBLOX_USER_ID (or ROBLOX_GROUP_ID) in the environment first.");
   process.exit(1);
 }
-const only = process.argv.slice(2); // optional: names to (re)upload
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "assets/sounds/manifest.json"), "utf8"));
 const idsPath = path.join(root, "assets/sounds/ids.json");
 const ids = JSON.parse(fs.readFileSync(idsPath, "utf8"));
@@ -31,8 +30,8 @@ async function upload(name, file) {
   const form = new FormData();
   form.append("request", JSON.stringify({
     assetType: "Audio",
-    displayName: `coco-prison block ${name}`,
-    description: "Block dig/break sound (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0 — see repo README)",
+    displayName: `coco-prison sounds ${name}`,
+    description: "Game sounds atlas (VoxeLibre sounds, CC BY-SA 3.0/4.0, CC BY 3.0, CC0 — see repo ATTRIBUTION)",
     creationContext: { creator: groupId ? { groupId } : { userId } },
   }));
   form.append("fileContent", new Blob([fs.readFileSync(file)], { type: "audio/ogg" }), path.basename(file));
@@ -52,12 +51,16 @@ async function upload(name, file) {
   throw new Error(`${name}: operation did not finish`);
 }
 
-for (const [name, entry] of Object.entries(manifest.files)) {
-  if (only.length && !only.includes(name)) continue;
-  if (!only.length && ids.files[name] && ids.files[name].id) { console.log(name, "already uploaded:", ids.files[name].id); continue; }
-  const assetId = await upload(name, path.join(root, entry.file));
-  ids.files[name] = { id: `rbxassetid://${assetId}`, duration: entry.duration, segments: entry.segments.map((s) => [s.start, s.length]) };
-  fs.writeFileSync(idsPath, JSON.stringify(ids, null, 2) + "\n");
-  console.log(name, "→", assetId);
+// One upload: the atlas with every sound (scripts/build-sounds.mjs); each sound keeps its segments.
+if (ids.atlasId && !process.argv.includes("--force")) {
+  console.log("atlas already uploaded:", ids.atlasId, "(pass --force to upload a rebuilt atlas)");
+} else {
+  const assetId = await upload("atlas", path.join(root, manifest.atlas.file));
+  ids.atlasId = `rbxassetid://${assetId}`;
+  console.log("atlas →", assetId);
 }
-console.log("done; now: node scripts/build-configs.mjs");
+for (const entry of Object.values(ids.files)) entry.id = ids.atlasId;
+// one line per sound entry, as scripts/build-sounds.mjs writes it
+const compact = JSON.stringify(ids, null, 2).replace(/"(\w+)": \{\n\s+"id"[\s\S]*?\n {4}\}/g, (m) => m.replace(/\s*\n\s*/g, " "));
+fs.writeFileSync(idsPath, compact + "\n");
+console.log("done; now: node scripts/build-configs.mjs and sync to Studio");
