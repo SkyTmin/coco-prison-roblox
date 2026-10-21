@@ -28,7 +28,6 @@ local SPOTS: { [string]: boolean } = {
 	bath = true,
 	trainer = true,
 	showcase = true, -- витрина (scripts/build-showcase.luau)
-	boss = true, -- арена босса каменоломни (scripts/build-quarry.luau)
 }
 type Channel = {
 	character: Model,
@@ -102,6 +101,10 @@ local function teleport(player: Player, locationId: any, spot: any)
 	local profile = ProfileService.Get(player)
 	if not profile then
 		toast(player, "teleport_not_ready")
+		return
+	end
+	-- [владелец 22.10] spots (and moving between them) exist only at the spawn
+	if spot ~= nil and locationId ~= "prison" then
 		return
 	end
 	local withinCurrent = spot ~= nil and profile.location == locationId

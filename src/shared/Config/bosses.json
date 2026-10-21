@@ -140,7 +140,7 @@
       "nameEn": "Basalt Guardian",
       "fight": {
         "meleeDamage": 0.2,
-        "meleeRange": 8,
+        "meleeRange": 6,
         "meleeCooldown": 2.5,
         "walkSpeed": 9,
         "leashSeconds": 30,
@@ -171,7 +171,9 @@
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
-        }
+        },
+        "template": "basalt_guardian",
+        "scale": 0.55
       },
       "money": [
         0,

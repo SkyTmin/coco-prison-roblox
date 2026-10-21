@@ -16,6 +16,7 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -78,6 +79,7 @@ type Boss = {
 	nextAbilityAt: number,
 	lastTargetAt: number,
 	walkPhase: number,
+	stuckFor: number,
 	nextAbility: number,
 	stunnedUntil: number, -- after ramming a pillar or the wall: open to ×stunDamageMultiplier damage
 }
@@ -170,7 +172,192 @@ local function seam(model: Model, parent: BasePart, size: Vector3, offset: CFram
 	weld.Parent = s
 end
 
+-- ---------------------------------------------------------------- the model from a template
+-- ServerStorage.BossTemplates.<template> holds a static mesh golem split into Head / Torso / LeftArm /
+-- RightArm / LeftLeg / RightLeg (child models or parts; "_geom" suffixes and spaces are ignored).
+-- It is scaled, each limb is welded to an invisible bone at its joint (shoulder, hip, neck) and the
+-- bones hang on Motor6Ds named like the procedural rig, so BossAnimator turns the limbs at the joints.
+local LIMBS = { "head", "torso", "leftarm", "rightarm", "leftleg", "rightleg" }
+local function limbKey(name: string): string
+	return (string.gsub(string.gsub(string.lower(name), "[%s_]", ""), "geom$", ""))
+end
+
+local function rigFromTemplate(boss: Boss, template: Model): Model?
+	local model = template:Clone()
+	local scale = tonumber((boss.fight :: any).scale) or 1
+	if scale ~= 1 then
+		model:ScaleTo(model:GetScale() * scale)
+	end
+	local groups: { [string]: { BasePart } } = {}
+	for _, child in ipairs(model:GetChildren()) do
+		local key = limbKey(child.Name)
+		if table.find(LIMBS, key) then
+			groups[key] = groups[key] or {}
+			if child:IsA("BasePart") then
+				table.insert(groups[key], child)
+			end
+			for _, d in ipairs(child:GetDescendants()) do
+				if d:IsA("BasePart") then
+					table.insert(groups[key], d)
+				end
+			end
+		end
+	end
+	for _, key in ipairs(LIMBS) do
+		if not groups[key] or #groups[key] == 0 then
+			warn("[BossService] template " .. template.Name .. " has no " .. key)
+			model:Destroy()
+			return nil
+		end
+	end
+	local function box(key: string): (Vector3, Vector3)
+		local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+		for _, part in ipairs(groups[key]) do
+			local half = part.Size / 2
+			for _, sx in ipairs({ -1, 1 }) do
+				for _, sy in ipairs({ -1, 1 }) do
+					for _, sz in ipairs({ -1, 1 }) do
+						local corner = part.CFrame:PointToWorldSpace(half * Vector3.new(sx, sy, sz))
+						lo, hi = lo:Min(corner), hi:Max(corner)
+					end
+				end
+			end
+		end
+		return (lo + hi) / 2, hi - lo
+	end
+	-- stand it on the spawn: feet on the floor, torso over the spawn point
+	local lowest = math.huge
+	for _, key in ipairs({ "leftleg", "rightleg" }) do
+		local c, sz = box(key)
+		lowest = math.min(lowest, c.Y - sz.Y / 2)
+	end
+	local torsoC = box("torso")
+	local ground = boss.spawn.Position.Y + boss.spawn.Size.Y / 2
+	model:PivotTo(
+		model:GetPivot()
+			+ Vector3.new(
+				boss.spawn.Position.X - torsoC.X,
+				ground - lowest,
+				boss.spawn.Position.Z - torsoC.Z
+			)
+	)
+	local torsoS
+	torsoC, torsoS = box("torso")
+	local function bone(name: string, at: Vector3): BasePart
+		local b = Instance.new("Part")
+		b.Name = name
+		b.Size = Vector3.one * 0.4
+		b.Transparency = 1
+		b.CanCollide = false
+		b.CanQuery = false
+		b.CanTouch = false
+		b.Massless = true
+		b.CFrame = CFrame.new(at)
+		b.Parent = model
+		return b
+	end
+	local function joint(key: string, where: string): Vector3
+		local c, sz = box(key)
+		if where == "top" then
+			return Vector3.new(c.X, c.Y + sz.Y / 2 - sz.Y * 0.12, c.Z) -- the shoulder / hip, a bit inside the top
+		end
+		return Vector3.new(c.X, c.Y - sz.Y / 2, c.Z) -- the neck, at the bottom of the head
+	end
+	local root = Instance.new("Part")
+	root.Name = "HumanoidRootPart"
+	root.Size = Vector3.new(torsoS.X * 0.7, torsoS.Y * 0.8, torsoS.Z * 0.7)
+	root.CFrame = CFrame.new(torsoC)
+	root.Transparency = 1
+	root.CanCollide = true
+	root.Parent = model
+	local bones: { [string]: BasePart } = {
+		torso = bone("Torso", torsoC),
+		head = bone("Head", joint("head", "bottom")),
+		leftarm = bone("LeftArm", joint("leftarm", "top")),
+		rightarm = bone("RightArm", joint("rightarm", "top")),
+		leftleg = bone("LeftLeg", joint("leftleg", "top")),
+		rightleg = bone("RightLeg", joint("rightleg", "top")),
+	}
+	local welded: { [BasePart]: boolean } = { [root] = true }
+	for _, b in pairs(bones) do
+		welded[b] = true
+	end
+	for key, parts in pairs(groups) do
+		for _, part in ipairs(parts) do
+			part.Anchored = false
+			part.CanCollide = false
+			part.CanTouch = false
+			part.Massless = true
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0, weld.Part1 = bones[key], part
+			weld.Parent = part
+			welded[part] = true
+		end
+	end
+	for _, d in ipairs(model:GetDescendants()) do -- anything outside the six groups rides on the torso
+		if d:IsA("BasePart") and not welded[d] then
+			d.Anchored = false
+			d.CanCollide = false
+			d.Massless = true
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0, weld.Part1 = bones.torso, d
+			weld.Parent = d
+		end
+	end
+	local function motor6(name: string, part0: BasePart, part1: BasePart)
+		local m = Instance.new("Motor6D")
+		m.Name = name
+		m.Part0, m.Part1 = part0, part1
+		m.C0 = part0.CFrame:ToObjectSpace(part1.CFrame)
+		m.C1 = CFrame.new()
+		m.Parent = part0
+		m:SetAttribute("BaseC0", m.C0)
+		boss.motors[name] = m
+	end
+	motor6("Torso", root, bones.torso)
+	motor6("Neck", bones.torso, bones.head)
+	motor6("LeftShoulder", bones.torso, bones.leftarm)
+	motor6("RightShoulder", bones.torso, bones.rightarm)
+	motor6("LeftHip", bones.torso, bones.leftleg)
+	motor6("RightHip", bones.torso, bones.rightleg)
+	local glow = Instance.new("PointLight") -- lava glow from the chest
+	glow.Range = 16
+	glow.Brightness = 1.4
+	glow.Color = LAVA
+	glow.Parent = bones.torso
+	local humanoid = Instance.new("Humanoid")
+	humanoid.RigType = Enum.HumanoidRigType.R6
+	humanoid.HipHeight = math.max(0.5, (torsoC.Y - root.Size.Y / 2) - ground)
+	humanoid.MaxHealth = boss.card.hp
+	humanoid.Health = boss.card.hp
+	humanoid.WalkSpeed = boss.fight.walkSpeed
+	humanoid.UseJumpPower = true
+	humanoid.JumpPower = 55 -- clears a 4-stud block when it gets stuck on one
+	humanoid.BreakJointsOnDeath = false
+	humanoid.RequiresNeck = false
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+	humanoid.Parent = model
+	model.Name = "Boss_" .. boss.id
+	model:SetAttribute("BossId", boss.id)
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	model.PrimaryPart = root
+	CollectionService:AddTag(model, "Boss")
+	model.Parent = workspace
+	root:SetNetworkOwner(nil)
+	return model
+end
+
 local function buildModel(boss: Boss): Model
+	local templates = ServerStorage:FindFirstChild("BossTemplates")
+	local template = templates and templates:FindFirstChild((boss.fight :: any).template or boss.id)
+	if template and template:IsA("Model") then
+		local rigged = rigFromTemplate(boss, template)
+		if rigged then
+			return rigged
+		end
+	end
+	-- fallback: the procedural block golem (no template in the place)
 	local model = Instance.new("Model")
 	model.Name = "Boss_" .. boss.id
 	model:SetAttribute("BossId", boss.id)
@@ -286,37 +473,33 @@ local function setInvulnerable(boss: Boss, seconds: number)
 		field.Name = "CastShield"
 		field.Visible = false
 		field.Parent = model
-		local glow = Instance.new("Highlight")
-		glow.Name = "CastGlow"
-		glow.FillColor = LAVA
-		glow.FillTransparency = 0.7
-		glow.OutlineColor = Color3.fromRGB(255, 200, 80)
-		glow.Parent = model
+		-- no Highlight: it also outlined the invisible root box; BossAnimator pulses the lava instead
+		model:SetAttribute("Shielded", true)
 	end
 	task.delay(seconds, function()
 		if
 			(os.clock() >= boss.busyUntil - 0.01 or os.clock() < boss.stunnedUntil)
 			and boss.model == model
 		then
-			for _, name in ipairs({ "CastShield", "CastGlow" }) do
-				local x = model:FindFirstChild(name)
-				if x then
-					x:Destroy()
-				end
+			local x = model:FindFirstChild("CastShield")
+			if x then
+				x:Destroy()
 			end
+			model:SetAttribute("Shielded", false)
 			publish(boss)
 		end
 	end)
 	publish(boss)
 end
 
-local function pose(boss: Boss, name: string, rotation: CFrame, seconds: number)
-	local m = boss.motors[name]
-	if m then
-		local base = m:GetAttribute("BaseC0") :: CFrame
-		TweenService
-			:Create(m, TweenInfo.new(seconds, Enum.EasingStyle.Quad), { C0 = base * rotation })
-			:Play()
+-- What the golem is doing, for the clients' animator (BossAnimator): Action + when it started (server
+-- time) + how long it lasts. The clients pose the joints locally every frame — smooth, no traffic.
+local function act(boss: Boss, action: string, seconds: number)
+	local model = boss.model
+	if model then
+		model:SetAttribute("Action", action)
+		model:SetAttribute("ActionAt", workspace:GetServerTimeNow())
+		model:SetAttribute("ActionLen", seconds)
 	end
 end
 
@@ -373,7 +556,8 @@ local function lavaBlade(boss: Boss, target: Vector3)
 	local dir = if flat.Magnitude > 0.1 then flat.Unit else root.CFrame.LookVector
 	root.CFrame = CFrame.lookAt(root.Position, root.Position + dir)
 	setInvulnerable(boss, cfg.telegraph + cfg.length / cfg.speed + 0.3)
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(160), 0, 0), cfg.telegraph * 0.8)
+	act(boss, "blade", cfg.telegraph + cfg.length / cfg.speed + 0.3)
+	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	local strip = telegraphPart(
 		Vector3.new(cfg.width, 0.2, cfg.length),
 		CFrame.lookAt(from + dir * (cfg.length / 2), from + dir * cfg.length),
@@ -381,7 +565,6 @@ local function lavaBlade(boss: Boss, target: Vector3)
 	)
 	task.wait(cfg.telegraph)
 	strip:Destroy()
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(-30), 0, 0), 0.15)
 	local wave = Instance.new("Part")
 	wave.Name = "LavaBlade"
 	wave.Anchored = true
@@ -420,7 +603,6 @@ local function lavaBlade(boss: Boss, target: Vector3)
 		RunService.Heartbeat:Wait()
 	end
 	wave:Destroy()
-	pose(boss, "RightShoulder", CFrame.new(), 0.4)
 end
 
 -- «Шипы из земли»: red circles appear under the players (three each in phase 2), then basalt spikes burst
@@ -444,9 +626,9 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 		return
 	end
 	setInvulnerable(boss, cfg.telegraph + 0.6)
+	act(boss, "spikes", cfg.telegraph + 0.6)
+	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	-- both fists slam the ground
-	pose(boss, "LeftShoulder", CFrame.Angles(math.rad(150), 0, 0), cfg.telegraph * 0.7)
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(150), 0, 0), cfg.telegraph * 0.7)
 	local marks = {}
 	for _, at in ipairs(spots) do
 		table.insert(
@@ -458,8 +640,6 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 	for _, m in ipairs(marks) do
 		m:Destroy()
 	end
-	pose(boss, "LeftShoulder", CFrame.Angles(math.rad(-20), 0, 0), 0.12)
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(-20), 0, 0), 0.12)
 	Sfx.broadcast("player_fall", root, 0.9, 0.6)
 	local spikes = {}
 	for _, at in ipairs(spots) do
@@ -503,8 +683,6 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 		end
 	end
 	task.wait(0.4)
-	pose(boss, "LeftShoulder", CFrame.new(), 0.4)
-	pose(boss, "RightShoulder", CFrame.new(), 0.4)
 	task.delay(1.2, function()
 		for _, spike in ipairs(spikes) do
 			TweenService:Create(spike, TweenInfo.new(0.4), { Transparency = 1 }):Play()
@@ -544,8 +722,8 @@ local function charge(boss: Boss, target: Vector3)
 	end
 	root.CFrame = CFrame.lookAt(root.Position, root.Position + dir)
 	setInvulnerable(boss, cfg.telegraph + distance / cfg.speed)
-	pose(boss, "LeftShoulder", CFrame.Angles(math.rad(-40), 0, 0), cfg.telegraph * 0.6)
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(-40), 0, 0), cfg.telegraph * 0.6)
+	act(boss, "charge", cfg.telegraph + distance / cfg.speed)
+	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	local strip = telegraphPart(
 		Vector3.new(cfg.width, 0.2, math.max(distance, 1)),
 		CFrame.lookAt(from + dir * (distance / 2), from + dir * distance),
@@ -574,15 +752,13 @@ local function charge(boss: Boss, target: Vector3)
 		RunService.Heartbeat:Wait()
 	end
 	root.Anchored = false
-	pose(boss, "LeftShoulder", CFrame.new(), 0.3)
-	pose(boss, "RightShoulder", CFrame.new(), 0.3)
 	if obstacle and boss.root == root then
 		local seconds = if obstacle == "pillar" then cfg.stunPillar else cfg.stunWall
 		boss.stunnedUntil = os.clock() + seconds
 		boss.busyUntil = math.max(boss.busyUntil, boss.stunnedUntil)
+		act(boss, "stunned", seconds)
 		Sfx.broadcast("player_fall", root, 1, 0.5)
 		-- dizzy: a spinning ring of sparks over the head, the golem slumps forward
-		pose(boss, "Neck", CFrame.Angles(math.rad(25), 0, 0), 0.2)
 		local model = boss.model
 		local head = model and model:FindFirstChild("Head")
 		if head then
@@ -598,17 +774,15 @@ local function charge(boss: Boss, target: Vector3)
 			sparks.Parent = head
 			task.delay(seconds, function()
 				sparks:Destroy()
-				pose(boss, "Neck", CFrame.new(), 0.3)
 			end)
 		end
 		-- the shield of the charge is gone at once: the stun is the window to hit it
 		if model then
-			for _, name in ipairs({ "CastShield", "CastGlow" }) do
-				local x = model:FindFirstChild(name)
-				if x then
-					x:Destroy()
-				end
+			local x = model:FindFirstChild("CastShield")
+			if x then
+				x:Destroy()
 			end
+			model:SetAttribute("Shielded", false)
 		end
 		publish(boss)
 		task.delay(seconds, publish, boss)
@@ -618,9 +792,8 @@ end
 local function melee(boss: Boss, f: { player: Player, root: BasePart, humanoid: Humanoid })
 	local root = boss.root :: BasePart
 	boss.busyUntil = math.max(boss.busyUntil, os.clock() + 0.8) -- busy, but hittable: only abilities shield it
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(120), 0, 0), 0.35)
+	act(boss, "melee", 0.9)
 	task.wait(0.4)
-	pose(boss, "RightShoulder", CFrame.Angles(math.rad(-10), 0, 0), 0.1)
 	if
 		f.humanoid.Health > 0
 		and (f.root.Position - root.Position).Magnitude <= boss.fight.meleeRange + 2
@@ -628,7 +801,6 @@ local function melee(boss: Boss, f: { player: Player, root: BasePart, humanoid: 
 		hurt(boss, f, boss.fight.meleeDamage, root.Position)
 	end
 	task.wait(0.3)
-	pose(boss, "RightShoulder", CFrame.new(), 0.3)
 end
 
 -- ---------------------------------------------------------------- life cycle
@@ -750,6 +922,8 @@ function spawnBoss(boss: Boss)
 		died(boss)
 	end)
 	boss.state:SetAttribute("RespawnAt", 0)
+	setInvulnerable(boss, 1.8)
+	act(boss, "roar", 1.8)
 	publish(boss)
 	for _, player in ipairs(Players:GetPlayers()) do
 		toast(player, "boss_spawned", bossName(boss, player))
@@ -817,25 +991,17 @@ local function think(boss: Boss)
 			goal = boss.spawn.Position + flat.Unit * (boss.arenaRadius - 4)
 		end
 		humanoid:MoveTo(goal)
-	end
-end
-
--- walking: legs and arms swing while the golem moves (server motors replicate to everyone)
-local function animate(boss: Boss, dt: number)
-	local root = boss.root
-	if not root or os.clock() < boss.busyUntil then
-		return
-	end
-	local speed = (root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)).Magnitude
-	if speed > 1 then
-		boss.walkPhase += dt * 6
-	end
-	local s = math.sin(boss.walkPhase) * math.min(1, speed / 6)
-	for name, sign in pairs({ LeftHip = 1, RightHip = -1, LeftShoulder = -0.6, RightShoulder = 0.6 }) do
-		local m = boss.motors[name]
-		if m then
-			m.C0 = (m:GetAttribute("BaseC0") :: CFrame)
-				* CFrame.Angles(math.rad(35) * s * sign, 0, 0)
+		-- a block in the way: if it barely moves while chasing, it jumps over (a golem stepping up)
+		local speed = (root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)).Magnitude
+		if speed < 1.5 and distance > boss.fight.meleeRange + 2 then
+			boss.stuckFor += 0.15
+			if boss.stuckFor > 0.45 then
+				boss.stuckFor = 0
+				humanoid.Jump = true
+				act(boss, "jump", 0.8)
+			end
+		else
+			boss.stuckFor = 0
 		end
 	end
 end
@@ -889,6 +1055,7 @@ local function register(spawnPart: Instance)
 		nextAbilityAt = 0,
 		lastTargetAt = 0,
 		walkPhase = 0,
+		stuckFor = 0,
 		nextAbility = 0,
 		stunnedUntil = 0,
 	}
@@ -909,9 +1076,6 @@ function BossService.Start()
 	CollectionService:GetInstanceAddedSignal("BossSpawn"):Connect(register)
 	local thinkAt = 0
 	RunService.Heartbeat:Connect(function(dt)
-		for _, boss in pairs(bosses) do
-			animate(boss, dt)
-		end
 		thinkAt += dt
 		if thinkAt >= 0.15 then
 			thinkAt = 0

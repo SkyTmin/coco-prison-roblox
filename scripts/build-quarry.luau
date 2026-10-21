@@ -366,7 +366,6 @@ for ix = -3, 3 do
 end
 textured(part("RoadPit", Vector3.new(16, 0.4, PZ - 24 - hole.z1), at(MX, 0.5, (PZ - 24 + hole.z1) / 2), STONE), "px_gravel")
 spot("spawn", 0, PZ + 8, 0, MZ)
-spot("mine", 0, hole.z1 + 8, 0, MZ)
 for _, xz in ipairs({ { -26, PZ - 22 }, { 26, PZ - 22 }, { -26, PZ + 22 }, { 26, PZ + 22 } }) do
 	lamp(xz[1], xz[2])
 end
@@ -670,7 +669,6 @@ local arenaSign = part("ArenaSign", Vector3.new(1, 1, 1), at(AX, 8, GATE_Z + 6),
 arenaSign.Transparency = 1
 arenaSign.CanCollide = false
 sign(arenaSign, "Арена босса", 0, Color3.fromRGB(255, 80, 60))
-spot("boss", AX, GATE_Z + 14, AX, AZ)
 
 local count = 0
 for _, x in ipairs(root:GetDescendants()) do

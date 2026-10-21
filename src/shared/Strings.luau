@@ -404,6 +404,12 @@ local STRINGS: { [string]: Entry } = {
 	locations_spots = { ru = "Спавн", en = "Spots", es = "Puntos", fr = "Points" },
 	spot_spawn = { ru = "Спавн", en = "Spawn", es = "Inicio", fr = "Départ" },
 	spot_mine = { ru = "Шахта", en = "Mine", es = "Mina", fr = "Mine" },
+	spots_only_spawn = {
+		ru = "Точки для быстрого перемещения есть только на Спавне",
+		en = "Quick-travel spots exist only at the Spawn",
+		es = "Los puntos de viaje rápido solo están en el Inicio",
+		fr = "Les points de voyage rapide n'existent qu'au Départ",
+	},
 	spot_boss = {
 		ru = "Арена босса",
 		en = "Boss arena",

@@ -27,6 +27,7 @@ local SellWindow = require(script.SellWindow)
 local ShopWindow = require(script.ShopWindow)
 local CreativeWindow = require(script.CreativeWindow)
 local BossHud = require(script.BossHud)
+local BossAnimator = require(script.BossAnimator)
 local TrainerWindow = require(script.TrainerWindow)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
@@ -948,10 +949,11 @@ local selectedLocations: { [string]: string } = {}
 local locationScroll: { [string]: number } = {}
 local lastLocationClick: string? = nil
 local lastLocationClickAt = -math.huge
--- spots inside a location (LocationSpawn + Spot); `at` = the locations that have it (nil = all)
+-- spots inside a location (LocationSpawn + Spot); `at` = the locations that have it (nil = all).
+-- [владелец 22.10] spots and teleporting between them exist only at the spawn (prison)
 local SPOTS: { { id: string, icon: string, at: { string }? } } = {
-	{ id = "spawn", icon = "⌂" },
-	{ id = "mine", icon = "⛏", at = { "prison", "quarry" } },
+	{ id = "spawn", icon = "⌂", at = { "prison" } },
+	{ id = "mine", icon = "⛏", at = { "prison" } },
 	{ id = "small_mine", icon = "⛏", at = { "prison" } },
 	{ id = "market", icon = "$", at = { "prison" } },
 	{ id = "canteen", icon = "🍎", at = { "prison" } },
@@ -959,7 +961,6 @@ local SPOTS: { { id: string, icon: string, at: { string }? } } = {
 	{ id = "bath", icon = "♨", at = { "prison" } },
 	{ id = "trainer", icon = "⚔", at = { "prison" } },
 	{ id = "showcase", icon = "★", at = { "prison" } }, -- витрина брони и инструментов (scripts/build-showcase.luau)
-	{ id = "boss", icon = "☠", at = { "quarry" } }, -- арена босса (scripts/build-quarry.luau)
 }
 local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	prison = true,
@@ -1316,10 +1317,12 @@ local function buildLocations(): Frame
 		if spots then
 			selected = nil
 			detail:ClearAllChildren()
+			local shownSpots = 0
 			for i, spot in ipairs(SPOTS) do
 				if spot.at and not (profile and table.find(spot.at, profile.location)) then
 					continue
 				end
+				shownSpots += 1
 				local card = Ui.panel(grid, UDim2.new(1, -8, 0, 72), UDim2.new())
 				card.Name = "Spot_" .. spot.id
 				card.LayoutOrder = i
@@ -1347,6 +1350,17 @@ local function buildLocations(): Frame
 						closeWindow()
 					end
 				end)
+			end
+			if shownSpots == 0 then
+				Ui.label(
+					grid,
+					T("spots_only_spawn"),
+					UDim2.new(1, -8, 0, 40),
+					UDim2.new(),
+					16,
+					Ui.colors.muted
+				).TextWrapped =
+					true
 			end
 			grid.CanvasPosition = Vector2.new(0, scrollY)
 			drawingTab = false
@@ -2066,7 +2080,8 @@ RunService.RenderStepped:Connect(function()
 	elseif holding and aim and not pending[aim.part] and now >= nextDigAt then
 		startDig(aim)
 	end
-	HeldItem.SetDigging(digging and not digPredicted)
+	-- keep swinging while the dig input is held on blocks (instant mining flips digging every few frames)
+	HeldItem.SetDigging(digging or (holding and digPredicted) or (holding and aim ~= nil))
 end)
 
 -- Melee swing along the look direction (Minecraft: click / tap with nothing to dig)
@@ -2387,6 +2402,7 @@ end
 do
 	CreativeWindow.Listen()
 	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
+	BossAnimator.Start() -- smooth boss joints from its Action attributes
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
 	button.Position = UDim2.fromOffset((#menuKeys % 4) * 60, math.floor(#menuKeys / 4) * 60)

@@ -5,7 +5,6 @@ local MaterialService = game:GetService("MaterialService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
 
@@ -13,57 +12,48 @@ type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Ins
 local HeldItem = {}
 local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
-local swing = Instance.new("NumberValue")
-local swingTween: Tween? = nil
 local started = false
-local posed: { [Motor6D]: CFrame } = {} -- motor → its unposed C0
 local enchantedParts: { [BasePart]: Color3 } = {} -- part → base colour, pulsed toward purple
 local GLINT = Color3.fromRGB(170, 90, 255)
 
+-- The swing [владелец 22.10: «замах от первого и третьего лица, видно другим»]. It runs in whole cycles of
+-- SWING_SECONDS: a cycle that has started always finishes (instant mining used to restart it every few
+-- frames, so the arm never moved). Each cycle drives the first-person hand (SwingAmount) and plays the
+-- Roblox R15 tool-slash animation on the character — played on our own character it replicates, so every
+-- player sees the swing from the outside. While an item is held the character keeps the R15 "toolnone"
+-- pose (arm raised holding it), as Roblox does for a Tool.
+local SWING_SECONDS = 0.3
+local SLASH_ANIMATION = "rbxassetid://522635514" -- R15 Animate "toolslash" (Roblox-owned, 0.5 s)
+local HOLD_ANIMATION = "rbxassetid://507768375" -- R15 Animate "toolnone" (Roblox-owned)
+local swingActive = false -- digging: keep swinging
+local swingPhase = -1 -- 0..1 inside a cycle, -1 = resting
+local slashTrack: AnimationTrack? = nil
+local holdTrack: AnimationTrack? = nil
+
+local function startCycle()
+	swingPhase = 0
+	if slashTrack then
+		slashTrack:Play(0.05, 1, 0.5 / SWING_SECONDS) -- the 0.5 s slash squeezed into one cycle
+	end
+end
+
 function HeldItem.SetDigging(active: boolean)
-	if active == (swingTween ~= nil) then
-		return
-	end
-	if swingTween then
-		swingTween:Cancel()
-		swingTween = nil
-	end
-	swing.Value = 0
-	if active then
-		local tween = TweenService:Create(
-			swing,
-			TweenInfo.new(0.125, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-			{ Value = 1 }
-		)
-		swingTween = tween
-		tween:Play()
+	swingActive = active
+	if active and swingPhase < 0 then
+		startCycle()
 	end
 end
 
--- One attack swing like Minecraft's arm swing (about 6 ticks there); ignored while digging.
--- 0..1 while the arm swings (digging loop or a single hit); FirstPersonHand animates with it
+-- 0..1 while the arm swings; FirstPersonHand animates with it
 function HeldItem.SwingAmount(): number
-	return swing.Value
+	return if swingPhase < 0 then 0 else math.sin(math.pi * swingPhase)
 end
 
+-- One attack swing like Minecraft's arm swing
 function HeldItem.Swing()
-	if swingTween then
-		return
+	if swingPhase < 0 then
+		startCycle()
 	end
-	swing.Value = 0
-	local tween = TweenService:Create(
-		swing,
-		TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, true),
-		{ Value = 1 }
-	)
-	swingTween = tween
-	tween.Completed:Once(function()
-		if swingTween == tween then
-			swingTween = nil
-			swing.Value = 0
-		end
-	end)
-	tween:Play()
 end
 
 local function rightHand(character: Model): BasePart?
@@ -283,56 +273,59 @@ function HeldItem.Start()
 			end
 		end
 	end)
-	-- Current Roblox avatars are rigged with AnimationConstraints (no C0): the swing goes into the
-	-- shoulder's Transform after the Animator wrote this frame's pose and before physics moves the arm.
-	-- If the Animator did not rewrite it (no track on the joint), start from our own base again.
-	local lastSet: CFrame? = nil
-	local lastBase = CFrame.identity
-	RunService.PreSimulation:Connect(function()
-		local character = Players.LocalPlayer.Character
-		local upperArm = character and character:FindFirstChild("RightUpperArm")
-		local joint = upperArm and upperArm:FindFirstChild("RightShoulder")
-		if not joint or not joint:IsA("AnimationConstraint") then
-			lastSet = nil
+	-- the swing cycle and the animation tracks of our own character
+	local function loadTracks(character: Model)
+		slashTrack, holdTrack = nil, nil
+		local humanoid = character:WaitForChild("Humanoid", 10)
+		local animator = humanoid and humanoid:WaitForChild("Animator", 10)
+		if not animator or not animator:IsA("Animator") then
 			return
 		end
-		local current = joint.Transform
-		if lastSet and current == lastSet then
-			current = lastBase
+		local slash = Instance.new("Animation")
+		slash.AnimationId = SLASH_ANIMATION
+		local hold = Instance.new("Animation")
+		hold.AnimationId = HOLD_ANIMATION
+		local okSlash, s1 = pcall(function()
+			return (animator :: Animator):LoadAnimation(slash)
+		end)
+		local okHold, s2 = pcall(function()
+			return (animator :: Animator):LoadAnimation(hold)
+		end)
+		if okSlash then
+			s1.Priority = Enum.AnimationPriority.Action2 -- over walking and the hold pose
+			slashTrack = s1
 		end
-		local s = swing.Value
-		if s > 0 then
-			local turned = current * CFrame.Angles(math.rad(80) * s, 0, math.rad(-20) * s)
-			lastBase, lastSet = current, turned
-			joint.Transform = turned
-		elseif lastSet then
-			joint.Transform = current
-			lastSet = nil
+		if okHold then
+			s2.Priority = Enum.AnimationPriority.Action -- over walking (Movement), arm only
+			s2.Looped = true
+			holdTrack = s2
 		end
+	end
+	local localPlayer = Players.LocalPlayer
+	localPlayer.CharacterAdded:Connect(function(character)
+		task.spawn(loadTracks, character)
 	end)
-	RunService:BindToRenderStep("HeldItemPose", Enum.RenderPriority.Last.Value, function()
-		-- Restore our offsets before applying this frame's pose; never accumulate rotations.
-		for motor, base in pairs(posed) do
-			if motor.Parent then
-				motor.C0 = base
+	if localPlayer.Character then
+		task.spawn(loadTracks, localPlayer.Character)
+	end
+	RunService.Heartbeat:Connect(function(dt)
+		if swingPhase >= 0 then
+			swingPhase += dt / SWING_SECONDS
+			if swingPhase >= 1 then
+				if swingActive then
+					startCycle()
+				else
+					swingPhase = -1
+				end
 			end
 		end
-		table.clear(posed)
-		-- first person is drawn by FirstPersonHand (a Minecraft-style hand at the camera)
-		local character = Players.LocalPlayer.Character
-		if not character then
-			return
-		end
-		-- the whole arm swings forward from the shoulder like Minecraft's (the wrist alone was barely visible)
-		local upperArm = character:FindFirstChild("RightUpperArm") or rightHand(character)
-		local s = swing.Value
-		if s > 0 and upperArm then
-			local turn = CFrame.Angles(math.rad(80) * s, 0, math.rad(-20) * s)
-			for _, descendant in ipairs(character:GetDescendants()) do
-				if descendant:IsA("Motor6D") and descendant.Part1 == upperArm then
-					posed[descendant] = descendant.C0
-					descendant.C0 *= turn
-				end
+		local character = localPlayer.Character
+		local holding = character ~= nil and (character:GetAttribute("HeldItem") or "") ~= ""
+		if holdTrack then
+			if holding and not holdTrack.IsPlaying then
+				holdTrack:Play(0.2)
+			elseif not holding and holdTrack.IsPlaying then
+				holdTrack:Stop(0.2)
 			end
 		end
 	end)

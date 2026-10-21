@@ -118,8 +118,9 @@ function FirstPersonHand.Start()
 			local bobOffset =
 				CFrame.new(math.sin(bob) * 0.03 * speed, -math.abs(math.cos(bob)) * 0.03 * speed, 0)
 			local s = HeldItem.SwingAmount()
-			local swingOffset = CFrame.new(-0.12 * s, -0.08 * s, -0.12 * s)
-				* CFrame.Angles(math.rad(-55) * s, math.rad(25) * s, math.rad(15) * s)
+			-- a big, clear Minecraft swing: the hand dives to the centre and down, turning the item over
+			local swingOffset = CFrame.new(-0.3 * s, -0.2 * s, -0.18 * s)
+				* CFrame.Angles(math.rad(-80) * s, math.rad(40) * s, math.rad(28) * s)
 			local handFrame = camera.CFrame * REST * bobOffset * swingOffset
 			-- the arm comes from below the screen edge towards the hand point
 			arm.CFrame = handFrame * CFrame.new(0, -0.05, ARM_SIZE.Z / 2 - 0.05)
