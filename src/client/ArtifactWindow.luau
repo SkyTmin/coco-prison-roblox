@@ -24,7 +24,7 @@ local ArtifactWindow = {}
 
 local W, H = 900, 580
 local LEFT = 300
-local TILE = 150
+local TILE = 110 -- 3×3 tiles must fit the right panel (window 580 high)
 
 function ArtifactWindow.build(
 	parent: Instance,
@@ -89,7 +89,7 @@ function ArtifactWindow.build(
 		image.Parent = icon
 		local numeral = Ui.label(
 			icon,
-			string.upper(string.sub(t("artifact_tier_" .. rarity), 1, 1)),
+			string.upper(utf8.char(utf8.codepoint(t("artifact_tier_" .. rarity), 1))),
 			UDim2.fromScale(1, 1),
 			UDim2.new(),
 			22,
