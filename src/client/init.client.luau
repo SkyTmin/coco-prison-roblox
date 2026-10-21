@@ -2106,7 +2106,16 @@ local function attack()
 	end
 	local _, blow = Combat.next(attackState, kind, duration, now)
 	HeldItem.Attack(blow.animation, duration)
-	Remotes.event("Attack"):FireServer(currentCamera.CFrame.LookVector)
+	-- falling after a jump = a critical hit (×1.5) on the server, like Minecraft
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local falling = humanoid ~= nil
+		and root ~= nil
+		and root:IsA("BasePart")
+		and humanoid.FloorMaterial == Enum.Material.Air
+		and root.AssemblyLinearVelocity.Y < -1
+	Remotes.event("Attack"):FireServer(currentCamera.CFrame.LookVector, falling)
 end
 
 -- PC / gamepad: hold the mouse button (R2) on a block

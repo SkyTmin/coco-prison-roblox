@@ -53,6 +53,9 @@ function CombatService.ApplyDamage(
 		else nil
 	if victim then
 		CombatService.MarkHit(victim, source, attacker)
+		-- worn armor and Protection soften blows from players, mobs and bosses [ваниль]
+		local profile = ProfileService.Get(victim)
+		amount = Combat.armorReduce(amount, profile and profile.armor)
 	else
 		humanoid:SetAttribute(
 			"LastHitBy",
@@ -86,7 +89,7 @@ local function weapon(profile): (number, number)
 	local speed = 4
 	if toolId == "sword" then
 		damage = vanilla.swordDamage[material]
-			+ (vanilla.sharpnessBonus[Config.enchantForLevel("sword", level) + 1] or 0)
+			+ Config.sharpnessBonus(Config.enchantForLevel("sword", level))
 		speed = vanilla.attackSpeed.sword
 	elseif vanilla.toolDamage and vanilla.toolDamage[toolId] then
 		damage = vanilla.toolDamage[toolId][material]
@@ -167,7 +170,32 @@ local function insideArc(
 	return lateral <= 2
 end
 
-local function onAttack(player: Player, direction: any)
+-- Minecraft crit particles: a burst of little stars at the target
+local function critBurst(at: Vector3)
+	local p = Instance.new("Part")
+	p.Name = "CritBurst"
+	p.Anchored = true
+	p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
+	p.Transparency = 1
+	p.Size = Vector3.one
+	p.Position = at + Vector3.new(0, 1, 0)
+	local stars = Instance.new("ParticleEmitter")
+	stars.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	stars.Color = ColorSequence.new(Color3.fromRGB(255, 245, 210), Color3.fromRGB(190, 170, 120))
+	stars.Size = NumberSequence.new(0.6, 0.1)
+	stars.Lifetime = NumberRange.new(0.35, 0.6)
+	stars.Speed = NumberRange.new(10, 18)
+	stars.SpreadAngle = Vector2.new(180, 180)
+	stars.Drag = 6
+	stars.LightEmission = 0.8
+	stars.Enabled = false
+	stars.Parent = p
+	p.Parent = workspace
+	stars:Emit(18)
+	game:GetService("Debris"):AddItem(p, 1)
+end
+
+local function onAttack(player: Player, direction: any, falling: any)
 	if
 		typeof(direction) ~= "Vector3"
 		or direction ~= direction
@@ -193,6 +221,16 @@ local function onAttack(player: Player, direction: any)
 	end
 	local _, attack = Combat.next(state, kind, duration, now)
 	local baseDamage = weapon(profile)
+	-- critical hit like Minecraft: struck while falling after a jump (not on a ladder, not in water). The
+	-- client knows its own fall exactly (here the velocity arrives late); the server checks it is airborne.
+	local stateNow = humanoid:GetState()
+	local crit = falling == true
+		and humanoid.FloorMaterial == Enum.Material.Air
+		and stateNow ~= Enum.HumanoidStateType.Climbing
+		and stateNow ~= Enum.HumanoidStateType.Swimming
+	if crit then
+		baseDamage *= Config.rules.combat.crit.multiplier
+	end
 	local look = direction.Unit
 	task.delay(duration * attack.upswing, function()
 		local head = character:FindFirstChild("Head")
@@ -220,6 +258,9 @@ local function onAttack(player: Player, direction: any)
 				local cf, size = targetBox(model)
 				if insideArc(attack, eye, look, cf, size, range) then
 					local damage = baseDamage * attack.damage
+					if crit then
+						critBurst(cf.Position)
+					end
 					local victim = Players:GetPlayerFromCharacter(model)
 					if victim then
 						-- PvP only where the location allows it (both players there) [вики]

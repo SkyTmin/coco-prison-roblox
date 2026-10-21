@@ -46,6 +46,31 @@ function Combat.range(kind: string): number
 	return (rules.reachBlocks + Combat.weapon(kind).rangeBonus) * rules.blockStuds
 end
 
+-- Damage after the victim's armor, Java formulas [ваниль, владелец 22.10]: armor points and toughness of
+-- the worn pieces, then Protection (4 % per level of every piece, at most 20 levels = 80 %).
+local ARMOR_SLOTS = { helmet = 1, chestplate = 2, leggings = 3, boots = 4 }
+function Combat.armorReduce(damage: number, armor: { [string]: any }?): number
+	if not armor then
+		return damage
+	end
+	local vanilla = Config.vanilla
+	local points, toughness, protection = 0, 0, 0
+	for part, slot in pairs(ARMOR_SLOTS) do
+		local piece = armor[part]
+		if piece then
+			local level = piece.level or 1
+			local material = Config.materialForLevel(level)
+			points += (vanilla.armorPoints[material] and vanilla.armorPoints[material][slot]) or 0
+			toughness += vanilla.armorToughness[material] or 0
+			protection += Config.enchantForLevel(part, level)
+		end
+	end
+	local effective = math.min(20, math.max(points / 5, points - damage / (2 + toughness / 4)))
+	local afterArmor = damage * (1 - effective / 25)
+	local epf = math.min(vanilla.maxEpf or 20, protection)
+	return afterArmor * (1 - epf * (vanilla.protectionPerLevelPerPiece or 0.04))
+end
+
 -- the next attack of the combo; mutates state
 function Combat.next(
 	state: ComboState,

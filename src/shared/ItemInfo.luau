@@ -166,7 +166,7 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			add(t("tip_main_hand"), GRAY)
 			local damage, speed
 			if id == "sword" then
-				damage = vanilla.swordDamage[material] + (vanilla.sharpnessBonus[enchant + 1] or 0)
+				damage = vanilla.swordDamage[material] + Config.sharpnessBonus(enchant)
 				speed = vanilla.attackSpeed.sword
 			elseif vanilla.toolDamage[id] then
 				damage = vanilla.toolDamage[id][material]

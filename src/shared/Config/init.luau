@@ -149,10 +149,17 @@ function Config.enchantForLevel(itemId: string, level: number): number
 	if level <= 1 then
 		return 0
 	end
-	-- [владелец 22.10] pickaxe / axe: Efficiency keeps growing with the level (design-decisions digging)
-	local curve = Config.rules.digging
+	-- [владелец 22.10] pickaxe / axe Efficiency and sword Sharpness keep growing with the level
+	local curve = (
+		Config.rules.digging
 		and Config.rules.digging.efficiencyByLevel
 		and Config.rules.digging.efficiencyByLevel[itemId]
+	)
+		or (
+			Config.rules.combat
+			and Config.rules.combat.sharpnessByLevel
+			and Config.rules.combat.sharpnessByLevel[itemId]
+		)
 	if typeof(curve) == "table" and curve[level] then
 		return curve[level]
 	end
@@ -162,6 +169,11 @@ function Config.enchantForLevel(itemId: string, level: number): number
 		end
 	end
 	return 0
+end
+
+-- Extra sword damage of a Sharpness level, Java formula 0.5 × level + 0.5 [ваниль]
+function Config.sharpnessBonus(level: number): number
+	return if level > 0 then 0.5 * level + 0.5 else 0
 end
 
 -- True when the item is a tool/armor piece whose level carries an enchantment (glint in UI/world).

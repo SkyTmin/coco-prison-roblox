@@ -13,7 +13,7 @@
 --                          BlockBrokenFx({ {position, size, color, blockId} }) — unreliable, one batch per
 --                          frame, only to players within FX_RANGE of the block (DigService)
 --                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
--- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection)
+-- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection, falling)
 -- Server → client:        Sfx(name, anchorPart?, volume?, pitch?) — play an atlas sound locally (Sfx.luau)
 -- Client → server:        Creative(op, a?, b?) — test mode (CreativeService): toggle / give id level|bookId /
 --                          coins / level / refill / clear; only for players with the CreativeAllowed attribute
