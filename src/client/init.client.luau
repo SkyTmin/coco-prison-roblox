@@ -1594,42 +1594,45 @@ watchNausea(player.Character)
 -- On a Minecraft ladder you climb at ≈ 2.35 blocks/s and slide down at ≈ 3 blocks/s when idle.
 -- Roblox climbing (truss) holds still, so when the humanoid is climbing with no input we push it
 -- down the ladder slowly.
-local LADDER_SLIDE = Vector3.new(0, -12, 0) -- 3 blocks/s
-local ladderSlide: LinearVelocity? = nil
-local function updateLadder(humanoid: Humanoid)
-	local climbing = humanoid:GetState() == Enum.HumanoidStateType.Climbing
-	local idle = humanoid.MoveDirection.Magnitude < 0.05
-	local root = humanoid.RootPart
-	if climbing and idle and root then
-		if not ladderSlide then
-			local attachment = root:FindFirstChild("RootAttachment")
-				or root:FindFirstChildOfClass("Attachment")
-			if attachment then
-				local lv = Instance.new("LinearVelocity")
-				lv.Name = "LadderSlide"
-				lv.Attachment0 = attachment
-				lv.RelativeTo = Enum.ActuatorRelativeTo.World
-				lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-				lv.LineDirection = Vector3.new(0, 1, 0)
-				lv.LineVelocity = LADDER_SLIDE.Y
-				lv.MaxForce = 5000
-				lv.Parent = root
-				ladderSlide = lv
+local LADDER_SLIDE = 0.75 -- fraction of walk speed pushed "away" from the ladder = climbing down ≈ 3 blocks/s
+local function nearestLadder(position: Vector3): BasePart?
+	local best, bestD = nil, 6
+	local prison = workspace:FindFirstChild("Prison")
+	if not prison then
+		return nil
+	end
+	for _, p in ipairs(prison:GetChildren()) do
+		if p.Name == "Ladder" and p:IsA("BasePart") then
+			local flat = (p.Position - position) * Vector3.new(1, 0, 1)
+			local d = math.max(0, flat.Magnitude - math.max(p.Size.X, p.Size.Z) / 2)
+			if d < bestD then
+				best, bestD = p, d
 			end
 		end
-	elseif ladderSlide then
-		ladderSlide:Destroy()
-		ladderSlide = nil
 	end
+	return best
 end
-RunService.Heartbeat:Connect(function()
+-- Runs after the Roblox control script each frame: with no input while climbing, push the humanoid
+-- away from the ladder, which the climb controller turns into a slow descent.
+RunService:BindToRenderStep("LadderSlide", Enum.RenderPriority.Last.Value, function()
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if humanoid then
-		updateLadder(humanoid)
-	elseif ladderSlide then
-		ladderSlide:Destroy()
-		ladderSlide = nil
+	local root = humanoid and humanoid.RootPart
+	if not humanoid or not root or humanoid:GetState() ~= Enum.HumanoidStateType.Climbing then
+		return
+	end
+	if humanoid.MoveDirection.Magnitude > 0.05 then
+		return
+	end
+	local ladder = nearestLadder(root.Position)
+	if ladder then
+		-- the truss is wide: its thin axis is the facing direction
+		local away = if ladder.Size.X < ladder.Size.Z
+			then Vector3.new(math.sign(root.Position.X - ladder.Position.X), 0, 0)
+			else Vector3.new(0, 0, math.sign(root.Position.Z - ladder.Position.Z))
+		if away.Magnitude > 0 then
+			humanoid:Move(away.Unit * LADDER_SLIDE, false)
+		end
 	end
 end)
 

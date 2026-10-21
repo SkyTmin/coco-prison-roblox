@@ -36,15 +36,23 @@ for _, anchor in ipairs(game:GetService("CollectionService"):GetTagged("MineAnch
 			local along = Vector3.new(math.abs(inward.Z), 0, math.abs(inward.X))
 			local truss = Instance.new("TrussPart")
 			truss.Name = "Ladder"
-			truss.Size = Vector3.new(LADDER_W * along.X + 2 * math.abs(inward.X), h + 2, LADDER_W * along.Z + 2 * math.abs(inward.Z))
+			truss.Size = Vector3.new(
+				LADDER_W * along.X + 2 * math.abs(inward.X),
+				h + 2,
+				LADDER_W * along.Z + 2 * math.abs(inward.Z)
+			)
 			truss.CFrame = CFrame.new(Vector3.new(side[1], -h / 2 + 1, side[2]) + inward * 1)
 			truss.Anchored = true
 			truss.Transparency = 1
 			truss.Parent = root
 			local plate = Instance.new("Part")
 			plate.Name = "LadderFace"
-			plate.Size = Vector3.new(LADDER_W * along.X + 0.2 * math.abs(inward.X), h, LADDER_W * along.Z + 0.2 * math.abs(inward.Z))
-			plate.CFrame = CFrame.new(Vector3.new(side[1], -h / 2, side[2]) + inward * 2.1)
+			plate.Size = Vector3.new(
+				LADDER_W * along.X + 0.2 * math.abs(inward.X),
+				h,
+				LADDER_W * along.Z + 0.2 * math.abs(inward.Z)
+			)
+			plate.CFrame = CFrame.new(Vector3.new(side[1], -h / 2, side[2]) + inward * 0.15) -- flush against the pit wall, like a Minecraft ladder on its block [владелец]
 			plate.Anchored = true
 			plate.CanCollide = false
 			plate.CanQuery = false
@@ -53,7 +61,11 @@ for _, anchor in ipairs(game:GetService("CollectionService"):GetTagged("MineAnch
 			if ladderTexture then
 				local tex = Instance.new("Texture")
 				tex.Texture = ladderTexture
-				tex.Face = if inward.Z > 0 then Enum.NormalId.Back elseif inward.Z < 0 then Enum.NormalId.Front elseif inward.X > 0 then Enum.NormalId.Right else Enum.NormalId.Left
+				tex.Face = if inward.Z > 0
+					then Enum.NormalId.Back
+					elseif inward.Z < 0 then Enum.NormalId.Front
+					elseif inward.X > 0 then Enum.NormalId.Right
+					else Enum.NormalId.Left
 				tex.StudsPerTileU, tex.StudsPerTileV = B, B
 				tex.Parent = plate
 			end
@@ -66,10 +78,20 @@ table.insert(report, "ladders " .. ladders)
 -- fountain rims: shorten the W/E pieces (those with Size.Z > Size.X)
 local rims = 0
 for _, p in ipairs(root:GetChildren()) do
-	if p:IsA("BasePart") and p.Name == "FountainRim" and p.Size.Z > p.Size.X and p.Size.Z > 29.5 then
+	if
+		p:IsA("BasePart")
+		and p.Name == "FountainRim"
+		and p.Size.Z > p.Size.X
+		and p.Size.Z > 29.5
+	then
 		p.Size = Vector3.new(p.Size.X, p.Size.Y, 29)
 		rims += 1
-	elseif p:IsA("BasePart") and p.Name == "FountainTier2" and p.Size.Z > p.Size.X and p.Size.Z > 13.7 then
+	elseif
+		p:IsA("BasePart")
+		and p.Name == "FountainTier2"
+		and p.Size.Z > p.Size.X
+		and p.Size.Z > 13.7
+	then
 		p.Size = Vector3.new(p.Size.X, p.Size.Y, 13.6)
 		rims += 1
 	end
