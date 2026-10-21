@@ -132,7 +132,7 @@ function SellWindow.build(
 				then listed.dropsAs
 				else listedId
 			local block = Config.block(blockId)
-			if not block or shown[blockId] then
+			if not block or shown[blockId] or block.sellable == false then
 				continue -- stone and cobblestone both drop cobblestone: one row per sold item
 			end
 			shown[blockId] = true
@@ -187,7 +187,8 @@ function SellWindow.build(
 		local sum = 0
 		if p then
 			for _, stack in pairs(p.inventory) do
-				if Config.block(stack.id) then
+				local b = Config.block(stack.id)
+				if b and b.sellable ~= false then
 					totals[stack.id] = (totals[stack.id] or 0) + stack.count
 				end
 			end

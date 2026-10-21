@@ -1699,9 +1699,10 @@ end
 
 -- Prediction: the block disappears for this client the moment its timer ends; the server removes it
 -- a few ms later. If the server rejects (or nothing arrives in 2 s) the block comes back as it was.
+-- Only the look changes: collision stays until the server really removes the part, otherwise the
+-- player could sink into the cell and fall through the unrendered solid cells below.
 local function hideLocally(part: BasePart)
 	part.LocalTransparencyModifier = 1
-	part.CanCollide = false
 	part.CanQuery = false
 	pending[part] = os.clock()
 end
@@ -1710,7 +1711,6 @@ local function restoreLocally(part: BasePart)
 		pending[part] = nil
 		if part.Parent then
 			part.LocalTransparencyModifier = 0
-			part.CanCollide = true
 			part.CanQuery = true
 		end
 	end

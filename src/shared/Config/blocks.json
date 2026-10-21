@@ -17,6 +17,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Песок"
     },
@@ -29,6 +30,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Гравий"
     },
@@ -41,6 +43,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Земля"
     },
@@ -53,6 +56,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Дерево"
     },
@@ -68,6 +72,7 @@
         3,
         7
       ],
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Арбуз"
     },
@@ -80,6 +85,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Камень"
     },
@@ -92,6 +98,7 @@
       "minTier": 0,
       "dropsAs": "cobblestone",
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Камень"
     },
@@ -104,6 +111,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": true,
       "upgradeCounter": "Каменный уголь"
     },
@@ -116,6 +124,7 @@
       "minTier": 0,
       "dropsAs": "coal",
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Каменный уголь"
     },
@@ -128,6 +137,7 @@
       "minTier": 1,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Железная руда"
     },
@@ -140,6 +150,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -152,6 +163,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -164,6 +176,7 @@
       "minTier": 2,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": "Золотая руда"
     },
@@ -176,6 +189,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -188,6 +202,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -200,6 +215,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": true,
       "upgradeCounter": null
     },
@@ -212,6 +228,7 @@
       "minTier": 0,
       "dropsAs": "quartz",
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -224,6 +241,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -236,6 +254,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -248,6 +267,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -260,6 +280,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -272,6 +293,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -284,6 +306,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -296,6 +319,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -308,6 +332,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -320,6 +345,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -332,6 +358,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -344,6 +371,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -356,6 +384,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -368,6 +397,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -380,6 +410,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -392,6 +423,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -404,6 +436,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -416,6 +449,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -428,6 +462,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -440,6 +475,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -452,6 +488,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -464,6 +501,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -476,6 +514,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -488,6 +527,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -500,6 +540,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -512,6 +553,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -524,6 +566,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -536,6 +579,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -548,6 +592,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -560,6 +605,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -572,6 +618,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -584,6 +631,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -596,6 +644,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -608,6 +657,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -620,6 +670,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -632,6 +683,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -644,6 +696,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -656,6 +709,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -668,6 +722,7 @@
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -680,6 +735,7 @@
       "minTier": 1,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -692,6 +748,7 @@
       "minTier": 1,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -704,6 +761,7 @@
       "minTier": 2,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
@@ -716,18 +774,20 @@
       "minTier": 2,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": true,
       "itemOnly": false,
       "upgradeCounter": null
     },
     "melon_slice": {
       "id": "melon_slice",
       "name": "Ломтик арбуза",
-      "basePrice": 0.28,
+      "basePrice": 0,
       "hardness": 0,
       "tool": "any",
       "minTier": 0,
       "dropsAs": null,
       "dropCount": null,
+      "sellable": false,
       "itemOnly": true,
       "upgradeCounter": null
     }

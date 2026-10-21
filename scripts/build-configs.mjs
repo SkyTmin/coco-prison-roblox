@@ -67,6 +67,7 @@ for (const loc of pricesWiki.locations) {
 			minTier: phys.minTier,
 			dropsAs: phys.dropsAs ?? null,
 			dropCount: phys.dropCount ?? null,
+			sellable: phys.sellable ?? true,
 			itemOnly: phys.itemOnly ?? false,
 			upgradeCounter: counterByBlock[b.id] ?? null,
 		};
@@ -92,7 +93,7 @@ for (const loc of pricesWiki.locations) {
 // Item-only entries (drops that are not blocks, e.g. melon slices): name/price from design decisions.
 for (const [id, phys] of Object.entries(decisions.blocks)) {
 	if (phys.itemOnly && !blocks[id]) {
-		blocks[id] = { id, name: phys.name, basePrice: phys.basePrice, hardness: 0, tool: "any", minTier: 0, dropsAs: null, dropCount: null, itemOnly: true, upgradeCounter: null };
+		blocks[id] = { id, name: phys.name, basePrice: phys.basePrice, hardness: 0, tool: "any", minTier: 0, dropsAs: null, dropCount: null, sellable: phys.sellable ?? true, itemOnly: true, upgradeCounter: null };
 	}
 }
 write("blocks.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; твёрдость [ваниль]", money: decisions.money, blocks });

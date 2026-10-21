@@ -49,6 +49,7 @@ export type Block = {
 	minTier: number,
 	dropsAs: string?,
 	itemOnly: boolean,
+	sellable: boolean?, -- false: the buyer does not take it (melon slices are food only) [владелец]
 	upgradeCounter: string?,
 }
 

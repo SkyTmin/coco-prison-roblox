@@ -219,7 +219,7 @@ function InventoryService.sellAll(profile: Profile, multiplier: number): number
 	local total = 0
 	for slot, stack in pairs(profile.inventory) do
 		local block = Config.block(stack.id)
-		if block then
+		if block and block.sellable ~= false then
 			total += math.floor(
 				block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5
 			)

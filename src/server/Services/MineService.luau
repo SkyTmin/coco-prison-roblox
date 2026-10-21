@@ -303,6 +303,41 @@ local function register(anchor: Instance)
 	task.spawn(rebuild, mine)
 end
 
+-- A player whose root is inside a solid cell (rendered or not) is lifted onto the mine top. Solid
+-- cells deeper than the exposed layer have no Parts, so anything that slips past the surface would
+-- otherwise fall to the pit floor "through" the blocks.
+local function rescue(mine: Mine)
+	if mine.rebuilding then
+		return
+	end
+	for _, player in ipairs(Players:GetPlayers()) do
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			local local_ = root.Position - mine.origin
+			local x = math.floor(local_.X / BLOCK + 0.5) + 1
+			local y = math.floor(-local_.Y / BLOCK + 0.5) + 1
+			local z = math.floor(local_.Z / BLOCK + 0.5) + 1
+			-- below the grid (between the lowest layer and the pit floor) counts as stuck too
+			local below = y > mine.size[2] and local_.Y > -(mine.size[2] + 1) * BLOCK - 2
+			local inside = x >= 1 and x <= mine.size[1] and z >= 1 and z <= mine.size[3]
+			if
+				inside
+				and (
+					below
+					or (y >= 1 and y <= mine.size[2] and mine.cells[index(mine, x, y, z)] ~= nil)
+				)
+			then
+				-- still fine while standing on a rendered block: only the root centre deep inside counts
+				local depthInCell = (y - 1) * BLOCK + local_.Y + BLOCK / 2 -- 0 at the cell top, BLOCK at its bottom
+				if below or depthInCell > 1.5 then
+					root.CFrame =
+						CFrame.new(root.Position.X, mine.origin.Y + BLOCK * 1.5, root.Position.Z)
+				end
+			end
+		end
+	end
+end
+
 function MineService.Start()
 	for _, anchor in ipairs(CollectionService:GetTagged(ANCHOR_TAG)) do
 		register(anchor)
@@ -313,6 +348,9 @@ function MineService.Start()
 		local warned: { [string]: boolean } = {}
 		while true do
 			task.wait(1)
+			for _, mine in pairs(mines) do
+				rescue(mine)
+			end
 			local now = os.clock()
 			for id, mine in pairs(mines) do
 				if mine.rebuilding or mine.resetAt == 0 then

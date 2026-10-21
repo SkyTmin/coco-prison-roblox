@@ -134,7 +134,8 @@
       "bread": 5,
       "cooked_chicken": 6,
       "golden_apple": 4,
-      "melon": 2
+      "melon_slice": 2,
+      "_melon": "[ваниль] ломтик арбуза +2 голода; [владелец 21.10] арбуз не продаётся, его только едят"
     },
     "death": {
       "dropInPvpOnly": true,
