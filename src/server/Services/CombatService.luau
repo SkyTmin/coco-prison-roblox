@@ -161,6 +161,38 @@ function CombatService.Start()
 	end
 	started = true
 	Remotes.event("Attack").OnServerEvent:Connect(onAttack)
+	-- swing animations: a player's client says it swings (chop / slash), the others nearby play it on that
+	-- character (CharacterAnimator); unreliable — a lost swing only skips an animation
+	local swingFx = Remotes.unreliable("SwingFx")
+	local lastSwing: { [Player]: number } = {}
+	Remotes.event("Swing").OnServerEvent:Connect(function(player: Player, kind: any)
+		if kind ~= "chop" and kind ~= "slash" then
+			return
+		end
+		local now = os.clock()
+		if now - (lastSwing[player] or -math.huge) < 0.1 then
+			return
+		end
+		lastSwing[player] = now
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if not root or not root:IsA("BasePart") then
+			return
+		end
+		for _, other in ipairs(Players:GetPlayers()) do
+			local otherRoot = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+			if
+				other ~= player
+				and otherRoot
+				and otherRoot:IsA("BasePart")
+				and (otherRoot.Position - root.Position).Magnitude < 150
+			then
+				swingFx:FireClient(other, player.UserId, kind)
+			end
+		end
+	end)
+	Players.PlayerRemoving:Connect(function(player)
+		lastSwing[player] = nil
+	end)
 	Players.PlayerRemoving:Connect(function(player)
 		lastCombat[player] = nil
 		lastAttack[player] = nil

@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
+local CharacterAnimator = require(script.Parent:WaitForChild("CharacterAnimator"))
 
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Instance? }
 local HeldItem = {}
@@ -18,23 +19,22 @@ local GLINT = Color3.fromRGB(170, 90, 255)
 
 -- The swing [владелец 22.10: «замах от первого и третьего лица, видно другим»]. It runs in whole cycles of
 -- SWING_SECONDS: a cycle that has started always finishes (instant mining used to restart it every few
--- frames, so the arm never moved). Each cycle drives the first-person hand (SwingAmount) and plays the
--- Roblox R15 tool-slash animation on the character — played on our own character it replicates, so every
--- player sees the swing from the outside. While an item is held the character keeps the R15 "toolnone"
+-- frames, so the arm never moved). Each cycle drives the first-person hand (SwingAmount) and plays our
+-- keyframed swing on the character (CharacterAnimator: a chop for tools, a slash for swords), which the
+-- server relays so every player sees it. While an item is held the character keeps the R15 "toolnone"
 -- pose (arm raised holding it), as Roblox does for a Tool.
 local SWING_SECONDS = 0.3
-local SLASH_ANIMATION = "rbxassetid://522635514" -- R15 Animate "toolslash" (Roblox-owned, 0.5 s)
 local HOLD_ANIMATION = "rbxassetid://507768375" -- R15 Animate "toolnone" (Roblox-owned)
 local swingActive = false -- digging: keep swinging
 local swingPhase = -1 -- 0..1 inside a cycle, -1 = resting
-local slashTrack: AnimationTrack? = nil
 local holdTrack: AnimationTrack? = nil
 
 local function startCycle()
 	swingPhase = 0
-	if slashTrack then
-		slashTrack:Play(0.05, 1, 0.5 / SWING_SECONDS) -- the 0.5 s slash squeezed into one cycle
-	end
+	local character = Players.LocalPlayer.Character
+	local held = character and character:GetAttribute("HeldItem")
+	local sword = typeof(held) == "string" and string.sub(held, 1, 6) == "sword:"
+	CharacterAnimator.PlayLocal(if sword then "slash" else "chop")
 end
 
 function HeldItem.SetDigging(active: boolean)
@@ -275,26 +275,17 @@ function HeldItem.Start()
 	end)
 	-- the swing cycle and the animation tracks of our own character
 	local function loadTracks(character: Model)
-		slashTrack, holdTrack = nil, nil
+		holdTrack = nil
 		local humanoid = character:WaitForChild("Humanoid", 10)
 		local animator = humanoid and humanoid:WaitForChild("Animator", 10)
 		if not animator or not animator:IsA("Animator") then
 			return
 		end
-		local slash = Instance.new("Animation")
-		slash.AnimationId = SLASH_ANIMATION
 		local hold = Instance.new("Animation")
 		hold.AnimationId = HOLD_ANIMATION
-		local okSlash, s1 = pcall(function()
-			return (animator :: Animator):LoadAnimation(slash)
-		end)
 		local okHold, s2 = pcall(function()
 			return (animator :: Animator):LoadAnimation(hold)
 		end)
-		if okSlash then
-			s1.Priority = Enum.AnimationPriority.Action2 -- over walking and the hold pose
-			slashTrack = s1
-		end
 		if okHold then
 			s2.Priority = Enum.AnimationPriority.Action -- over walking (Movement), arm only
 			s2.Looped = true

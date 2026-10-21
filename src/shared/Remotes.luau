@@ -17,6 +17,7 @@
 -- Server → client:        Sfx(name, anchorPart?, volume?, pitch?) — play an atlas sound locally (Sfx.luau)
 -- Client → server:        Creative(op, a?, b?) — test mode (CreativeService): toggle / give id level|bookId /
 --                          coins / level / refill / clear; only for players with the CreativeAllowed attribute
+-- Client → server:        Swing(kind) → others get SwingFx(userId, kind) (unreliable) — swing animations
 -- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)

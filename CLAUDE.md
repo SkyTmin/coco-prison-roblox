@@ -87,7 +87,9 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Каменоломня: `scripts/build-quarry.luau` (Edit, after build-textures; Workspace.Quarry at X = 700, all in one cave).
    Boss looks: ServerStorage.BossTemplates.<template> (mesh golem split into Head/Torso/LeftArm/RightArm/LeftLeg/
    RightLeg; lives only in the place file) is rigged in code; `src/client/BossAnimator.luau` poses it from the
-   Action attributes. Player swing = Roblox R15 toolslash/toolnone animations on the own character (replicated).
+   Action attributes. Player swing = our keyframes (`src/shared/SwingAnimations.luau`) played by
+   `src/client/CharacterAnimator.luau` on top of Roblox animations, relayed Swing → SwingFx; hold pose = R15 toolnone.
+   Better Combat animations are All Rights Reserved — never copy them without a verifiable permission link.
    Bosses: `BossService` (BossSpawn part + BossId; fight numbers in design-decisions bosses.<id>.fight) and
    `src/client/BossHud.luau` (top bar, respawn board) via ReplicatedStorage.Bosses; QA `BossDebug`.
    StreamingEnabled is on (`scripts/setup-streaming.luau`, Edit): never assume a far part exists on the client;

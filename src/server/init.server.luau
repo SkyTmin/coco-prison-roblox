@@ -39,6 +39,7 @@ for _, name in ipairs({
 	"Creative",
 	"DropItem",
 	"ServerLog",
+	"Swing",
 }) do
 	Remotes.event(name)
 end
