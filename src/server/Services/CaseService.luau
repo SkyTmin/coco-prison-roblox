@@ -199,19 +199,26 @@ local function applyNickname(player: Player)
 	end
 end
 
+local openCase: (player: Player, id: any, requestedKey: any) -> ()
+
+-- [владелец 22.10] a case opens with its key IN HAND: the key is spent at once and the window shows
+-- the reward; without the key in hand nothing opens (a hint says which key to take). The ender chest
+-- needs no key.
 local function openChest(player: Player, part: BasePart)
 	local id = caseId(part)
 	local profile = ProfileService.Get(player)
 	if not id or not near(player, part) or not profile then
 		return
 	end
+	local heldKey: string? = nil
 	if id ~= "enderChest" then
-		-- without a key the case stays shut (nothing is ever left inside: see emptyCase)
 		local keys = acceptedKeys(id)
-		if not hasAnyKey(profile, keys) then
+		local held = profile.inventory[profile.selectedSlot]
+		heldKey = if held and table.find(keys, held.id) then held.id else nil
+		if not heldKey then
 			toast(
 				player,
-				"case_need_key",
+				if hasAnyKey(profile, keys) then "case_hold_key" else "case_need_key",
 				Strings.itemName(keys[1] or "ordinary_key", nil, Strings.localeOf(player))
 			)
 			return
@@ -231,6 +238,9 @@ local function openChest(player: Player, part: BasePart)
 	Remotes.event("CaseOpened"):FireClient(player, id)
 	if part and part:IsA("BasePart") then
 		Sfx.broadcast(if id == "enderChest" then "ender_open" else "chest_open", part, 0.6)
+	end
+	if heldKey then
+		openCase(player, id, heldKey) -- spend the key in hand and roll right away
 	end
 end
 
@@ -279,7 +289,7 @@ local function ancientBook(improved: boolean): Types.ItemStack
 	}
 end
 
-local function openCase(player: Player, id: any, requestedKey: any)
+openCase = function(player: Player, id: any, requestedKey: any)
 	local session = validate(player, id)
 	if not session then
 		-- [владелец 21.10: «пусто после открытия»] the window is up but this server has no session for

@@ -43,6 +43,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "Caja de apodos",
 		fr = "Caisse des surnoms",
 	},
+	case_hold_key = {
+		ru = "Возьми в руку %s, чтобы открыть кейс",
+		en = "Hold %s in your hand to open the case",
+		es = "Sostén %s en la mano para abrir el cofre",
+		fr = "Tiens %s en main pour ouvrir le coffre",
+	},
 	case_need_key = {
 		ru = "Для открытия требуется %s",
 		en = "%s is required to open this",
