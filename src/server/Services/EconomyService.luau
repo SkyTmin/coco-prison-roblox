@@ -37,7 +37,7 @@ end
 
 -- Server-side proximity to an NPC of the given tag (menus are opened by prompt, but the remote
 -- itself must also be used next to the NPC).
-local NPC_RANGE = 14
+local NPC_RANGE = 16 -- prompt shows at 10, a couple of steps of slack while the window is open
 local function nearNpc(player: Player, tag: string): boolean
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -85,7 +85,11 @@ local function exchange(player: Player, kind: any, id: any, rawCount: any)
 	else
 		return
 	end
-	if not ProfileService.Get(player) or not nearNpc(player, tag) then
+	if not ProfileService.Get(player) then
+		return
+	end
+	if not nearNpc(player, tag) then
+		toast(player, "too_far")
 		return
 	end
 	local result = ""
@@ -110,7 +114,11 @@ end
 
 local function sell(player: Player)
 	local profile = ProfileService.Get(player)
-	if not profile or not nearNpc(player, "SellPoint") then
+	if not profile then
+		return
+	end
+	if not nearNpc(player, "SellPoint") then
+		toast(player, "too_far")
 		return
 	end
 	local total = 0
@@ -134,7 +142,11 @@ local function buy(player: Player, id: any)
 		return
 	end
 	local profile = ProfileService.Get(player)
-	if not profile or not nearNpc(player, if SHOP_PRICES[id] then "ItemShop" else "FoodShop") then
+	if not profile then
+		return
+	end
+	if not nearNpc(player, if SHOP_PRICES[id] then "ItemShop" else "FoodShop") then
+		toast(player, "too_far")
 		return
 	end
 	if profile.coins < units(price) then
@@ -249,7 +261,11 @@ local function bindPrompt(part: Instance, kind: string, tag: string)
 	prompt.ActionText =
 		Strings.t(if kind == "stars" or kind == "shards" then "exchange" else kind .. "_prompt")
 	prompt.HoldDuration = 0
-	prompt.MaxActivationDistance = 8
+	prompt.MaxActivationDistance = 10
+	-- The tag sits on the rig's HumanoidRootPart, which is inside the torso: with line of sight the
+	-- prompt was hidden by the NPC's own body and the buyer/shops could not be opened at all.
+	prompt.RequiresLineOfSight = false
+	prompt.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
 	prompt.Parent = part
 	prompt.Triggered:Connect(function(player)
 		if part:IsDescendantOf(workspace) and nearNpc(player, tag) then

@@ -61,7 +61,7 @@ local function nearTrainer(player: Player): boolean
 		if
 			npc:IsA("BasePart")
 			and npc:IsDescendantOf(workspace)
-			and (npc.Position - root.Position).Magnitude <= 14
+			and (npc.Position - root.Position).Magnitude <= 16
 		then
 			return true
 		end
@@ -74,7 +74,11 @@ local function upgrade(player: Player, stat: any)
 		return
 	end
 	local profile = ProfileService.Get(player)
-	if not profile or not nearTrainer(player) then
+	if not profile then
+		return
+	end
+	if not nearTrainer(player) then
+		toast(player, "too_far")
 		return
 	end
 	local result: string? = nil
