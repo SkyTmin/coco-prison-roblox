@@ -1594,44 +1594,76 @@ watchNausea(player.Character)
 -- On a Minecraft ladder you climb at ≈ 2.35 blocks/s and slide down at ≈ 3 blocks/s when idle.
 -- Roblox climbing (truss) holds still, so when the humanoid is climbing with no input we push it
 -- down the ladder slowly.
-local LADDER_SLIDE = 0.75 -- fraction of walk speed pushed "away" from the ladder = climbing down ≈ 3 blocks/s
-local function nearestLadder(position: Vector3): BasePart?
-	local best, bestD = nil, 6
+local LADDER_SLIDE = 1 -- full "away" push while idle = climbing down at the climb speed
+local LADDER_FALL = -12 -- studs/s: 3 blocks/s like a Minecraft ladder [ваниль]
+local LADDER_REACH = 4.5 -- studs from the ladder (the shaft is one block deep)
+-- nearest ladder truss piece whose column (full height, one block deep) contains the position
+local function ladderAt(position: Vector3): BasePart?
 	local prison = workspace:FindFirstChild("Prison")
 	if not prison then
 		return nil
 	end
+	local best, bestD = nil, LADDER_REACH
 	for _, p in ipairs(prison:GetChildren()) do
 		if p.Name == "Ladder" and p:IsA("BasePart") then
-			local flat = (p.Position - position) * Vector3.new(1, 0, 1)
-			local d = math.max(0, flat.Magnitude - math.max(p.Size.X, p.Size.Z) / 2)
-			if d < bestD then
-				best, bestD = p, d
+			local d = p.Position - position
+			if math.abs(d.Y) <= p.Size.Y / 2 + 1 then
+				local flat = Vector3.new(d.X, 0, d.Z).Magnitude - 1
+				if flat < bestD then
+					best, bestD = p, flat
+				end
 			end
 		end
 	end
 	return best
 end
--- Runs after the Roblox control script each frame: with no input while climbing, push the humanoid
--- away from the ladder, which the climb controller turns into a slow descent.
+-- facing axis of a ladder piece: the pit wall is on the far side of the truss from the shaft
+local function awayFromWall(ladder: BasePart): Vector3
+	local prison = workspace:FindFirstChild("Prison")
+	-- the wall side is the one farther from the mine's centre: push toward the pit centre
+	local centre = Vector3.new(0, 0, 0)
+	for _, p in ipairs(prison and prison:GetChildren() or {}) do
+		if p.Name:match("^MineAnchor_") and (p.Position - ladder.Position).Magnitude < 120 then
+			centre = p.Position
+			break
+		end
+	end
+	local d = (centre - ladder.Position) * Vector3.new(1, 0, 1)
+	if math.abs(d.X) > math.abs(d.Z) then
+		return Vector3.new(math.sign(d.X), 0, 0)
+	end
+	return Vector3.new(0, 0, math.sign(d.Z))
+end
+-- Runs after the Roblox control script each frame. Climbing with no input → slide down slowly
+-- (push away from the ladder; the climb controller turns it into a descent). Falling through the
+-- ladder column → the fall is capped at ladder speed, like being caught by a Minecraft ladder.
 RunService:BindToRenderStep("LadderSlide", Enum.RenderPriority.Last.Value, function()
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local root = humanoid and humanoid.RootPart
-	if not humanoid or not root or humanoid:GetState() ~= Enum.HumanoidStateType.Climbing then
+	local rootPart = humanoid and humanoid.RootPart
+	if not humanoid or not rootPart then
 		return
 	end
-	if humanoid.MoveDirection.Magnitude > 0.05 then
+	local state = humanoid:GetState()
+	local ladder = ladderAt(rootPart.Position)
+	if not ladder then
 		return
 	end
-	local ladder = nearestLadder(root.Position)
-	if ladder then
-		-- the truss is wide: its thin axis is the facing direction
-		local away = if ladder.Size.X < ladder.Size.Z
-			then Vector3.new(math.sign(root.Position.X - ladder.Position.X), 0, 0)
-			else Vector3.new(0, 0, math.sign(root.Position.Z - ladder.Position.Z))
-		if away.Magnitude > 0 then
-			humanoid:Move(away.Unit * LADDER_SLIDE, false)
+	local toCentre = awayFromWall(ladder)
+	if state == Enum.HumanoidStateType.Climbing then
+		if humanoid.MoveDirection.Magnitude <= 0.05 then
+			humanoid:Move(toCentre * LADDER_SLIDE, false)
+		end
+	elseif
+		state == Enum.HumanoidStateType.Freefall or state == Enum.HumanoidStateType.FallingDown
+	then
+		local v = rootPart.AssemblyLinearVelocity
+		if v.Y < LADDER_FALL then
+			rootPart.AssemblyLinearVelocity = Vector3.new(v.X, LADDER_FALL, v.Z)
+		end
+		-- lean onto the ladder so the climb controller grabs it
+		if humanoid.MoveDirection.Magnitude <= 0.05 then
+			humanoid:Move(-toCentre * 0.3, false)
 		end
 	end
 end)

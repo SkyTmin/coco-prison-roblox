@@ -34,17 +34,18 @@ for _, anchor in ipairs(game:GetService("CollectionService"):GetTagged("MineAnch
 		}) do
 			local inward = side[3]
 			local along = Vector3.new(math.abs(inward.Z), 0, math.abs(inward.X))
-			local truss = Instance.new("TrussPart")
-			truss.Name = "Ladder"
-			truss.Size = Vector3.new(
-				LADDER_W * along.X + 2 * math.abs(inward.X),
-				h + 2,
-				LADDER_W * along.Z + 2 * math.abs(inward.Z)
-			)
-			truss.CFrame = CFrame.new(Vector3.new(side[1], -h / 2 + 1, side[2]) + inward * 1)
-			truss.Anchored = true
-			truss.Transparency = 1
-			truss.Parent = root
+			-- Roblox climbs only 2×2 trusses: the 4-block ladder is eight of them side by side, invisible
+			for k = 0, LADDER_W / 2 - 1 do
+				local offset = along * (-LADDER_W / 2 + 1 + k * 2)
+				local truss = Instance.new("TrussPart")
+				truss.Name = "Ladder"
+				truss.Size = Vector3.new(2, h, 2) -- top flush with the ground, like a Minecraft ladder
+				truss.CFrame =
+					CFrame.new(Vector3.new(side[1], -h / 2, side[2]) + inward * 1 + offset)
+				truss.Anchored = true
+				truss.Transparency = 1
+				truss.Parent = root
+			end
 			local plate = Instance.new("Part")
 			plate.Name = "LadderFace"
 			plate.Size = Vector3.new(
