@@ -32,6 +32,28 @@ const KEY = [
 ];
 const keyPalette = (hi, body, outline) => ({ O: outline, h: body, H: hi });
 const SPRITES = {
+  // Каменный уголь — the lump dropped by coal ore [владелец 22.10]: a faceted black lump with grey glints
+  coal: {
+    rows: [
+      "................",
+      "................",
+      "......OOOO......",
+      "....OOdddhOO....",
+      "...OddddhhddO...",
+      "..OdddkkddhddO..",
+      "..OddkkkkdddhO..",
+      ".OdddkkkdddddO..",
+      ".OhddddkkkdddO..",
+      ".OdhddddkkddO...",
+      "..OddhdddddddO..",
+      "..OddddhhdddO...",
+      "...OOddddddO....",
+      ".....OOOOOO.....",
+      "................",
+      "................",
+    ],
+    palette: { O: "#0d0d10", d: "#2a2a30", k: "#18181c", h: "#6e6e78" },
+  },
   improved_ancient_key: { rows: KEY, palette: keyPalette("#ffe28a", "#e2b53f", "#5a3b0a"), gem: "#b04cff" },
   nickname_key: { rows: KEY, palette: keyPalette("#ffd0f0", "#ff5fc8", "#5c1245") },
   artifact_key: { rows: KEY, palette: keyPalette("#d8fbff", "#4fd8ef", "#0d4a5a") },

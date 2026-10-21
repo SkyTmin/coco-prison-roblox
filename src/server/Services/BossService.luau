@@ -10,9 +10,15 @@
 --   * the kill bank (money max of the boss card, 350 $ [меню]) is split by damage share, the last hit
 --     gets ×(1 + lastHitBonus); players below minDamageShare or no longer in the location get nothing
 --     [клиент: «кого нет на локации — ничего»];
---   * state for the HUD bar lives in ReplicatedStorage.Bosses.<id> attributes (works with streaming).
+--   * state for the HUD bar lives in ReplicatedStorage.Bosses.<id> attributes (works with streaming);
+--   * [владелец 22.10: «босс должен жить независимо от игроков»] a server shuts down when its last player
+--     leaves, so the boss's life (health, the respawn time, who dealt how much) is kept in MemoryStore
+--     (hash map BossState) every few seconds; a new server picks it up: the same wounded boss, or the
+--     respawn timer that is already running. One record per boss for the whole game: with several
+--     servers the last writer wins (fine while the game runs one server).
 
 local CollectionService = game:GetService("CollectionService")
+local MemoryStoreService = game:GetService("MemoryStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -82,7 +88,10 @@ type Boss = {
 	stuckFor: number,
 	nextAbility: number,
 	stunnedUntil: number, -- after ramming a pillar or the wall: open to ×stunDamageMultiplier damage
+	dirty: boolean, -- changed since the last MemoryStore save
 }
+-- what MemoryStore keeps per boss
+type Saved = { hp: number?, respawnAt: number?, damageBy: { [string]: number }? }
 
 local bosses: { [string]: Boss } = {}
 
@@ -459,6 +468,56 @@ local function publish(boss: Boss)
 		os.clock() < boss.busyUntil and os.clock() >= boss.stunnedUntil
 	)
 	boss.state:SetAttribute("Stunned", os.clock() < boss.stunnedUntil)
+	boss.dirty = true
+end
+
+-- ---------------------------------------------------------------- the boss outlives its server (MemoryStore)
+local SAVE_EVERY = 3
+local storeOk, store = pcall(function()
+	return MemoryStoreService:GetHashMap("BossState")
+end)
+
+local function snapshot(boss: Boss): Saved
+	local humanoid = boss.humanoid
+	local damageBy = {}
+	for userId, dealt in pairs(boss.damageBy) do
+		damageBy[tostring(userId)] = dealt
+	end
+	local respawnAt = boss.state:GetAttribute("RespawnAt")
+	return {
+		hp = if humanoid and humanoid.Health > 0 then humanoid.Health else nil,
+		respawnAt = if typeof(respawnAt) == "number" then respawnAt else 0,
+		damageBy = damageBy,
+	}
+end
+
+local function save(boss: Boss)
+	boss.dirty = false
+	if not storeOk then
+		return
+	end
+	local data = snapshot(boss)
+	-- kept a little longer than one respawn cycle; a record older than that means nothing
+	local ok, err = pcall(function()
+		store:SetAsync(boss.id, data, boss.card.respawnSeconds + 600)
+	end)
+	if not ok then
+		warn("[BossService] save failed", boss.id, err)
+	end
+end
+
+local function load(id: string): Saved?
+	if not storeOk then
+		return nil
+	end
+	local ok, data = pcall(function()
+		return store:GetAsync(id)
+	end)
+	if not ok then
+		warn("[BossService] load failed", id, data)
+		return nil
+	end
+	return if typeof(data) == "table" then data else nil
 end
 
 -- ---------------------------------------------------------------- casting helpers
@@ -804,7 +863,7 @@ local function melee(boss: Boss, f: { player: Player, root: BasePart, humanoid: 
 end
 
 -- ---------------------------------------------------------------- life cycle
-local spawnBoss: (boss: Boss) -> ()
+local spawnBoss: (boss: Boss, saved: Saved?) -> ()
 
 local function reward(boss: Boss, lastHit: number?)
 	local total = 0
@@ -887,7 +946,7 @@ local function died(boss: Boss)
 	end)
 end
 
-function spawnBoss(boss: Boss)
+function spawnBoss(boss: Boss, saved: Saved?)
 	if boss.model then
 		return
 	end
@@ -895,6 +954,16 @@ function spawnBoss(boss: Boss)
 	boss.motors = {}
 	local model = buildModel(boss)
 	local humanoid = model:FindFirstChildOfClass("Humanoid") :: Humanoid
+	-- a new server continues the fight of the old one: the wounds and everybody's share of the damage
+	if saved and saved.hp and saved.hp > 0 then
+		humanoid.Health = math.min(humanoid.MaxHealth, saved.hp)
+		for userId, dealt in pairs(saved.damageBy or {}) do
+			local n = tonumber(userId)
+			if n and typeof(dealt) == "number" then
+				boss.damageBy[n] = dealt
+			end
+		end
+	end
 	boss.model, boss.humanoid, boss.root = model, humanoid, model.PrimaryPart
 	boss.busyUntil, boss.nextMeleeAt, boss.stunnedUntil = 0, 0, 0
 	boss.nextAbilityAt = os.clock() + boss.fight.abilityCooldown
@@ -1058,11 +1127,24 @@ local function register(spawnPart: Instance)
 		stuckFor = 0,
 		nextAbility = 0,
 		stunnedUntil = 0,
+		dirty = false,
 	}
 	bosses[id] = boss
 	state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + card.fight.firstSpawnSeconds)
 	publish(boss)
-	task.delay(card.fight.firstSpawnSeconds, spawnBoss, boss)
+	boss.dirty = false -- nothing to save before the old record is read
+	task.spawn(function()
+		local saved = load(id)
+		local now = workspace:GetServerTimeNow()
+		if saved and typeof(saved.respawnAt) == "number" and saved.respawnAt > now then
+			-- killed on another server: its respawn timer keeps running here
+			state:SetAttribute("RespawnAt", saved.respawnAt)
+			publish(boss)
+			task.delay(saved.respawnAt - now, spawnBoss, boss)
+		else
+			task.delay(card.fight.firstSpawnSeconds, spawnBoss, boss, saved)
+		end
+	end)
 end
 
 function BossService.Start()
@@ -1082,6 +1164,21 @@ function BossService.Start()
 			for _, boss in pairs(bosses) do
 				think(boss)
 			end
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(SAVE_EVERY)
+			for _, boss in pairs(bosses) do
+				if boss.dirty then
+					task.spawn(save, boss)
+				end
+			end
+		end
+	end)
+	game:BindToClose(function()
+		for _, boss in pairs(bosses) do
+			save(boss)
 		end
 	end)
 	-- Studio-only QA hook: ServerStorage.BossDebug ("spawn" | "kill" | "state", bossId)

@@ -428,18 +428,7 @@ local STRINGS: { [string]: Entry } = {
 	spot_bath = { ru = "Баня", en = "Bath", es = "Baños", fr = "Bains" },
 	spot_trainer = { ru = "Тренер", en = "Trainer", es = "Entrenador", fr = "Entraîneur" },
 	spot_showcase = { ru = "Витрина", en = "Showcase", es = "Vitrina", fr = "Vitrine" },
-	camera_first_person = {
-		ru = "От первого лица",
-		en = "First person",
-		es = "Primera persona",
-		fr = "Première personne",
-	},
-	camera_third_person = {
-		ru = "От третьего лица",
-		en = "Third person",
-		es = "Tercera persona",
-		fr = "Troisième personne",
-	},
+	touch_camera = { ru = "Вид", en = "View", es = "Vista", fr = "Vue" },
 	touch_dig = { ru = "Копать", en = "Dig", es = "Cavar", fr = "Creuser" },
 	touch_use = { ru = "Использовать", en = "Use", es = "Usar", fr = "Utiliser" },
 	touch_menu = { ru = "Меню", en = "Menu", es = "Menú", fr = "Menu" },
@@ -1498,10 +1487,10 @@ local STRINGS: { [string]: Entry } = {
 	mat_iron = { ru = "Железн.", en = "Iron", es = "De hierro", fr = "En fer" },
 	mat_diamond = { ru = "Алмазн.", en = "Diamond", es = "De diamante", fr = "En diamant" },
 	keys_hint = {
-		ru = "Локации [M]  Работа [O]  Улучшить [J]  Уровень [U]  Инвентарь [E]  Использовать [F]  Достижения [L]",
-		en = "Locations [M]  Jobs [O]  Upgrade [J]  Level [U]  Inventory [E]  Use [F]  Achievements [L]",
-		es = "Ubicaciones [M]  Trabajos [O]  Mejorar [J]  Nivel [U]  Inventario [E]  Usar [F]  Logros [L]",
-		fr = "Lieux [M]  Métiers [O]  Améliorer [J]  Niveau [U]  Inventaire [E]  Utiliser [F]  Succès [L]",
+		ru = "Локации [M]  Работа [O]  Улучшить [J]  Уровень [U]  Инвентарь [E]  Использовать [F]  Достижения [L]  Вид [V]",
+		en = "Locations [M]  Jobs [O]  Upgrade [J]  Level [U]  Inventory [E]  Use [F]  Achievements [L]  View [V]",
+		es = "Ubicaciones [M]  Trabajos [O]  Mejorar [J]  Nivel [U]  Inventario [E]  Usar [F]  Logros [L]  Vista [V]",
+		fr = "Lieux [M]  Métiers [O]  Améliorer [J]  Niveau [U]  Inventaire [E]  Utiliser [F]  Succès [L]  Vue [V]",
 	},
 }
 

@@ -18,7 +18,10 @@
     "planks": "rbxassetid://110913940729167",
     "water": "rbxassetid://104193719964849",
     "red_brick": "rbxassetid://114326295218433",
-    "ladder": "rbxassetid://124917633758655"
+    "ladder": "rbxassetid://124917633758655",
+    "coal_block": "rbxassetid://124803961735254",
+    "gold_ore": "rbxassetid://119623485372429"
   },
-  "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026"
+  "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
+  "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026"
 }

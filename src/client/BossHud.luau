@@ -4,7 +4,6 @@
 -- board counts down to the next appearance while it is dead. Reads ReplicatedStorage.Bosses.<id>
 -- attributes (BossService), so it works whether or not the arena is streamed in.
 local CollectionService = game:GetService("CollectionService")
-local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -121,7 +120,9 @@ function BossHud.Start(gui: ScreenGui)
 			end
 		end
 		bar.Visible = shown ~= nil
-		bar.Position = UDim2.new(0.5, 0, 0, GuiService:GetGuiInset().Y + 6)
+		-- [владелец 22.10: «бар босса выше, к краю верха экрана»] at the very top, between the Roblox
+		-- buttons in the corners (the centre of the top bar is free)
+		bar.Position = UDim2.new(0.5, 0, 0, 4)
 		if shown then
 			local hp = tonumber(shown:GetAttribute("Health")) or 0
 			local max = math.max(1, tonumber(shown:GetAttribute("MaxHealth")) or 1)

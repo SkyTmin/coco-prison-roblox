@@ -137,6 +137,22 @@
         "ColorMap": "rbxassetid://124917633758655",
         "StudsPerTile": 4
       }
+    },
+    "px_coal_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://124803961735254",
+        "StudsPerTile": 4
+      }
+    },
+    "px_gold_ore": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://119623485372429",
+        "StudsPerTile": 4
+      }
     }
   }
 }

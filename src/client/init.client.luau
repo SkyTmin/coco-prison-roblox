@@ -1,5 +1,5 @@
 --!strict
--- Client: digging input (hold on PC / touch button / gamepad), target highlight with progress,
+-- Client: digging input (hold on PC / touch button / gamepad), target outline and crack stages,
 -- HUD (right stats panel, hotkeys), hotbar, inventory [E], shop/sell/food windows (prompts),
 -- upgrade [J], level [U], jobs [O], achievements [L], locations [M], case results (server event).
 
@@ -28,6 +28,7 @@ local ShopWindow = require(script.ShopWindow)
 local CreativeWindow = require(script.CreativeWindow)
 local BossHud = require(script.BossHud)
 local BossAnimator = require(script.BossAnimator)
+local IndoorLighting = require(script.IndoorLighting)
 local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
 CharacterAnimator.Start() -- keyframed swings on every character (ours and the relayed ones)
@@ -93,17 +94,9 @@ for _, size in ipairs({ Vector2.new(12, 2), Vector2.new(2, 12) }) do
 	line.BorderSizePixel = 0
 	line.Parent = crosshair
 end
-local cameraButton = Ui.button(
-	gui,
-	T("camera_first_person"),
-	UDim2.fromOffset(150, 28),
-	UDim2.new(1, -160, 0, 88),
-	Ui.colors.buttonGrey
-)
+-- [владелец 22.10: «кнопку 3 лица кинь в меню»] no camera button on the HUD: the view switches from the
+-- touch menu (Touch_camera) or with V / F5 like Minecraft
 local function renderCameraButton()
-	cameraButton.Text = if isMobile()
-		then ""
-		else T(if firstPerson then "camera_third_person" else "camera_first_person")
 	crosshair.Visible = firstPerson or isMobile()
 end
 local THIRD_PERSON_ZOOM = 12
@@ -128,7 +121,6 @@ local function toggleFirstPerson()
 	end
 	renderCameraButton()
 end
-cameraButton.Activated:Connect(toggleFirstPerson)
 
 -- ---------------------------------------------------------------- HUD: stats panel (right), hints, toast, combo
 local stats = Ui.panel(gui, UDim2.fromOffset(190, 114), UDim2.new(1, -200, 0.42, 0))
@@ -1822,18 +1814,16 @@ RunService:BindToRenderStep("LadderSlide", Enum.RenderPriority.Last.Value, funct
 end)
 
 -- ---------------------------------------------------------------- digging
-local highlight = Instance.new("Highlight")
-highlight.FillTransparency = 0.7
-highlight.OutlineColor = Color3.fromRGB(255, 220, 80)
-highlight.Enabled = false
+-- [владелец 22.10: «как в майне»] the targeted block gets Minecraft's thin dark wire outline, no fill and no
+-- glow; there is no progress bar: the crack stages on the block (BlockBreak) show how far it is dug
+local highlight = Instance.new("SelectionBox")
+highlight.Name = "BlockOutline"
+highlight.Color3 = Color3.new(0, 0, 0)
+highlight.LineThickness = 0.03
+highlight.Transparency = 0.45
+highlight.SurfaceTransparency = 1
+highlight.Visible = false
 highlight.Parent = gui
-local progress = Ui.panel(gui, UDim2.fromOffset(160, 10), UDim2.new(0.5, -80, 0.5, 40))
-local progressFill = Instance.new("Frame")
-progressFill.Size = UDim2.fromScale(0, 1)
-progressFill.BackgroundColor3 = Ui.colors.header
-progressFill.BorderSizePixel = 0
-progressFill.Parent = progress
-progress.Visible = false
 
 local MAX_TARGET = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
 type Aim = { part: BasePart, hit: Vector3 }
@@ -1968,7 +1958,6 @@ local function stopDig(tellServer: boolean)
 	digging = false
 	digTarget = nil
 	digPredicted = false
-	progress.Visible = false
 end
 
 local function startDig(aim: Aim)
@@ -2030,7 +2019,7 @@ RunService.RenderStepped:Connect(function()
 		holding = false
 		tapTarget = nil
 		stopDig(true)
-		highlight.Enabled = false
+		highlight.Visible = false
 		return
 	end
 	local aim: Aim? = nil
@@ -2051,7 +2040,7 @@ RunService.RenderStepped:Connect(function()
 		aim = aimAt()
 	end
 	highlight.Adornee = if aim then aim.part else nil
-	highlight.Enabled = aim ~= nil and not pending[aim.part]
+	highlight.Visible = aim ~= nil and not pending[aim.part]
 	if digging and digTarget then
 		if digPredicted then
 			-- [владелец 21.10, lag] do not wait for the server to remove the block: it gets our DigStarts
@@ -2069,14 +2058,11 @@ RunService.RenderStepped:Connect(function()
 			end
 		else
 			local k = math.clamp((now - digStarted) / digNeeded, 0, 1)
-			progress.Visible = true
-			progressFill.Size = UDim2.fromScale(k, 1)
 			BlockBreak.Update(digTarget, k)
 			if k >= 1 then
 				BlockBreak.Break(digTarget)
 				hideLocally(digTarget)
 				digPredicted = true
-				progress.Visible = false
 				nextDigAt = now + Config.hitDelayAfter(digNeeded)
 			end
 		end
@@ -2280,16 +2266,16 @@ player.CharacterRemoving:Connect(cancelDigInput)
 local touchMenus = Instance.new("Frame")
 touchMenus.Name = "TouchMenus"
 touchMenus.Position = UDim2.fromOffset(8, 64)
-touchMenus.Size = UDim2.fromOffset(5 * 60, 2 * 60)
+touchMenus.Size = UDim2.fromOffset(6 * 60, 2 * 60)
 touchMenus.BackgroundTransparency = 1
 touchMenus.Parent = gui
 -- [владелец 21.10] the menu buttons were hit by accident while playing: one "Menu" button stays on
--- screen and unfolds the grid to its right (2 rows × 4, clear of the joystick); choosing an item or
+-- screen and unfolds the grid to its right (2 rows × 5, clear of the joystick); choosing an item or
 -- touching the game world folds it back
 local touchMenuGrid = Instance.new("Frame")
 touchMenuGrid.Name = "Grid"
 touchMenuGrid.Position = UDim2.fromOffset(60, 0)
-touchMenuGrid.Size = UDim2.fromOffset(4 * 60, 2 * 60)
+touchMenuGrid.Size = UDim2.fromOffset(5 * 60, 2 * 60)
 touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
@@ -2404,7 +2390,7 @@ for i, kind in ipairs(menuKeys) do
 		56,
 		if kind == "language_code" then nil else T(captionKey)
 	)
-	button.Position = UDim2.fromOffset(((i - 1) % 4) * 60, math.floor((i - 1) / 4) * 60)
+	button.Position = UDim2.fromOffset(((i - 1) % 5) * 60, math.floor((i - 1) / 5) * 60)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
@@ -2422,14 +2408,31 @@ for i, kind in ipairs(menuKeys) do
 		localizedLabels[caption] = captionKey
 	end
 end
--- the 8th grid cell: creative test mode, only for players CreativeService allows
+-- the 8th grid cell: first / third person view (was a separate HUD button)
+do
+	local button =
+		touchIconButton(touchMenuGrid, Config.icons.icons["menu_camera"], "", 56, T("touch_camera"))
+	button.Position = UDim2.fromOffset((#menuKeys % 5) * 60, math.floor(#menuKeys / 5) * 60)
+	button.Name = "Touch_camera"
+	button.Activated:Connect(function()
+		setTouchMenuOpen(false)
+		toggleFirstPerson()
+	end)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "touch_camera"
+	end
+end
+-- the 9th grid cell: creative test mode, only for players CreativeService allows
 do
 	CreativeWindow.Listen()
 	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
 	BossAnimator.Start() -- smooth boss joints from its Action attributes
+	IndoorLighting.Start() -- brighter ambient light under the quarry cave roof
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
-	button.Position = UDim2.fromOffset((#menuKeys % 4) * 60, math.floor(#menuKeys / 4) * 60)
+	button.Position =
+		UDim2.fromOffset(((#menuKeys + 1) % 5) * 60, math.floor((#menuKeys + 1) / 5) * 60)
 	button.Name = "Touch_creative"
 	local function show()
 		button.Visible = player:GetAttribute("CreativeAllowed") == true
@@ -2504,32 +2507,6 @@ local function updateLayout()
 	-- effect icons sit left of the stats panel, top-aligned with it
 	effectsHud.Position = if mobile then UDim2.new(1, -136, 0, 64) else UDim2.new(1, -206, 0.42, 0)
 	effectsScale.Scale = if mobile then 0.75 else 1
-	cameraButton.Parent = if mobile then touchActions else gui
-	cameraButton.Size = if mobile then UDim2.fromOffset(64, 48) else UDim2.fromOffset(150, 28)
-	cameraButton.Position = if mobile
-		then UDim2.new(1, -168, 1, -120)
-		else UDim2.new(1, -160, 0, 88)
-	cameraButton.TextScaled, cameraButton.TextWrapped = mobile, mobile
-	local cameraIcon = cameraButton:FindFirstChild("Icon")
-	if mobile and not cameraIcon then
-		local image = Instance.new("ImageLabel")
-		image.Name = "Icon"
-		image.AnchorPoint = Vector2.new(0.5, 0.5)
-		image.Position = UDim2.fromScale(0.5, 0.5)
-		image.Size = UDim2.fromScale(0.7, 0.7)
-		image.BackgroundTransparency = 1
-		image.ScaleType = Enum.ScaleType.Fit
-		image.ResampleMode = Enum.ResamplerMode.Pixelated
-		image.Image = Config.icons.icons["menu_camera"] or ""
-		image.Parent = cameraButton
-	elseif cameraIcon then
-		cameraIcon.Visible = mobile
-	end
-	if mobile then
-		cameraButton.Size = UDim2.fromOffset(56, 56)
-		-- above the jump button: lower, it covered the right end of the food row on narrow phones
-		cameraButton.Position = UDim2.new(1, -78, 1, -205)
-	end
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8
 	hotbar.Size = UDim2.fromOffset(width, size + 12)
@@ -2630,7 +2607,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("locations")
 	elseif k == Enum.KeyCode.K and player:GetAttribute("CreativeAllowed") then
 		open("creative") -- test mode (CreativeService)
-	elseif k == Enum.KeyCode.V then
+	elseif k == Enum.KeyCode.V or k == Enum.KeyCode.F5 then
 		toggleFirstPerson()
 	elseif k == Enum.KeyCode.F then
 		useConsumable()

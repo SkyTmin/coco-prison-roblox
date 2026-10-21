@@ -208,6 +208,22 @@ local CZ0, CZ1 = MZ - d / 2 - 2 * B - 24, 152 -- cave interior, z (south part = 
 local cave = Instance.new("Folder")
 cave.Name = "Cave"
 cave.Parent = root
+-- [владелец 22.10: «в шахте плохое освещение, камня почти не видно»] the closed roof shuts out the sky,
+-- so inside only Lighting.Ambient lights the blocks. The client (IndoorLighting) brightens the ambient
+-- light and lifts the exposure while the player is inside this volume.
+-- (a Persistent model: with streaming the client always has it, however far its centre is)
+local indoorModel = Instance.new("Model")
+indoorModel.Name = "IndoorLighting"
+indoorModel.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
+indoorModel.Parent = cave
+local indoor = part("IndoorVolume", Vector3.new(CX1 - CX0, 200, CZ1 - CZ0), at((CX0 + CX1) / 2, 0, (CZ0 + CZ1) / 2), STONE, nil, indoorModel)
+indoor.Transparency = 1
+indoor.CanCollide = false
+indoor.CanQuery = false
+indoor.CanTouch = false
+indoor:SetAttribute("Ambient", Color3.fromRGB(165, 160, 150))
+indoor:SetAttribute("Exposure", 0.35)
+CollectionService:AddTag(indoor, "IndoorLighting")
 -- cave floor: cut stone around the pit hole (just above the grass so it wins the z-fight)
 local function floor(x0, x1, z0, z1)
 	if x1 - x0 > 0.5 and z1 - z0 > 0.5 then
@@ -335,6 +351,11 @@ for _, xz in ipairs({
 	{ 190, 116 },
 	{ 156, -90 },
 	{ 200, -20 },
+	-- over the four quarters of the pit, so its bottom is lit too
+	{ -40, -60 },
+	{ 40, -60 },
+	{ -40, 20 },
+	{ 40, 20 },
 }) do
 	lantern(MX + xz[1], xz[2], if xz[1] == 0 and xz[2] == -20 then 10 else 6)
 end
@@ -600,17 +621,24 @@ local SEGMENTS = 24
 local function isGate(a)
 	return math.sin(a) > 0.93 -- the +Z side, towards the road
 end
-for i = 0, SEGMENTS - 1 do
-	local a = (i + 0.5) / SEGMENTS * math.pi * 2
-	local tile = part("ArenaFloor", Vector3.new(2 * AR * math.tan(math.pi / SEGMENTS) + 0.5, 1, AR), CFrame.new(QX + AX, 0.5, QZ + AZ) * CFrame.Angles(0, -a + math.pi / 2, 0) * CFrame.new(0, 0, -AR / 2), STONE, nil, arena)
-	textured(tile, if i % 2 == 0 then "px_stone" else "px_cobblestone")
+-- [владелец 22.10: «что с текстурами под боссом»] the floor was 24 overlapping wedge tiles in two
+-- textures at the same height, which flickered (z-fighting) where they overlapped. Now two discs that
+-- never share a surface: a cobblestone ring (top 1.0) and a raised stone circle inside it (top 1.3).
+local function disc(name, radius, top, material)
+	local p = part(name, Vector3.new(1, 2 * radius, 2 * radius), at(AX, top - 0.5, AZ) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, arena)
+	p.Shape = Enum.PartType.Cylinder
+	textured(p, material)
+	return p
 end
-part("ArenaCentre", Vector3.new(16, 1.2, 16), at(AX, 0.6, AZ), Color3.fromRGB(52, 52, 58), Enum.Material.Basalt, arena)
--- lava cracks running out from the centre (flush with the floor, decoration only)
+local INNER = AR - 6
+disc("ArenaFloor", AR, 1, "px_cobblestone")
+disc("ArenaFloorInner", INNER, 1.3, "px_stone")
+part("ArenaCentre", Vector3.new(16, 1.2, 16), at(AX, 0.9, AZ), Color3.fromRGB(52, 52, 58), Enum.Material.Basalt, arena)
+-- lava cracks running out from the centre (on the inner circle, decoration only)
 for i = 0, 7 do
 	local a = i / 8 * math.pi * 2 + rng:NextNumber(-0.2, 0.2)
-	local len = rng:NextNumber(18, AR - 6)
-	local crack = part("LavaCrack", Vector3.new(0.8, 0.12, len), CFrame.new(QX + AX, 1.06, QZ + AZ) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -(8 + len / 2)), Color3.fromRGB(255, 100, 25), Enum.Material.Neon, arena)
+	local len = rng:NextNumber(12, INNER - 10)
+	local crack = part("LavaCrack", Vector3.new(0.8, 0.12, len), CFrame.new(QX + AX, 1.36, QZ + AZ) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -(8 + len / 2)), Color3.fromRGB(255, 100, 25), Enum.Material.Neon, arena)
 	crack.CanCollide = false
 	crack.CanQuery = false
 end
