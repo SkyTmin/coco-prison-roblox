@@ -51,6 +51,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "PrisonHud"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- windows (later children) draw above the HUD
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local firstPerson = false

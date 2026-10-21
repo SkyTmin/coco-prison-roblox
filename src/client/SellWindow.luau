@@ -122,6 +122,7 @@ function SellWindow.build(
 		line.BorderSizePixel = 0
 		line.Parent = list
 		y += GROUP + 2
+		local shown: { [string]: boolean } = {}
 		for _, listedId in ipairs(ids) do
 			local listed = Config.block(listedId)
 			-- the buyer takes what actually drops (melon → melon slices) [ваниль]
@@ -131,9 +132,10 @@ function SellWindow.build(
 				then listed.dropsAs
 				else listedId
 			local block = Config.block(blockId)
-			if not block then
-				continue
+			if not block or shown[blockId] then
+				continue -- stone and cobblestone both drop cobblestone: one row per sold item
 			end
+			shown[blockId] = true
 			local row = Ui.inset(list, UDim2.new(1, -24, 0, ROW - 4), UDim2.fromOffset(12, y))
 			local slot, _, _, icon = Ui.slot(row, 36)
 			slot.Position = UDim2.fromOffset(6, 5)
