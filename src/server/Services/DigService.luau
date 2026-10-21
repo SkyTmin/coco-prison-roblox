@@ -99,9 +99,15 @@ local function inRange(player: Player, part: BasePart, hit: Vector3): boolean
 	if delta.Magnitude > REACH + REACH_SLACK + math.min(speed, 80) * lag then
 		return false
 	end
+	-- line of sight against the static world only, not the mine's own blocks [docs/research/server-scaling.md]:
+	-- with ping the client has already hidden the block in front and digs the next one, while here
+	-- that front block still stands for a moment — the ray hit it, the dig was refused ("Слишком
+	-- далеко"), the block popped back and the first blocks of every row looked slow [владелец 22.10]
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character }
+	params.FilterDescendantsInstances = if part.Parent
+		then { character, part.Parent }
+		else { character }
 	-- stop a hair before the face: a clear path means nothing is in the way
 	local result = workspace:Raycast(eye, delta * 0.98, params)
 	return result == nil or result.Instance == part
