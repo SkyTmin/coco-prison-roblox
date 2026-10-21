@@ -81,6 +81,16 @@ local COLORS: { [string]: Color3 } = {
 	red_sandstone = Color3.fromRGB(190, 100, 50),
 }
 
+-- Block look and identity; used for new parts and for parts re-used by an in-place reset.
+local function stylePart(part: BasePart, id: string)
+	part.Name = id
+	part.Material = Enum.Material.SmoothPlastic
+	part.MaterialVariant = ""
+	part.Color = COLORS[id] or Color3.fromRGB(200, 200, 200)
+	TextureService.apply(part, id)
+	part:SetAttribute("Block", id)
+end
+
 local function makePart(mine: Mine, i: number)
 	if mine.parts[i] then
 		return
@@ -95,12 +105,9 @@ local function makePart(mine: Mine, i: number)
 	part.Size = Vector3.new(BLOCK, BLOCK, BLOCK)
 	part.Position = mine.origin + Vector3.new((x - 1) * BLOCK, -(y - 1) * BLOCK, (z - 1) * BLOCK)
 	part.Anchored = true
-	part.Material = Enum.Material.SmoothPlastic
-	part.Color = COLORS[id] or Color3.fromRGB(200, 200, 200)
-	TextureService.apply(part, id)
+	stylePart(part, id)
 	part.TopSurface = Enum.SurfaceType.Smooth
 	part.BottomSurface = Enum.SurfaceType.Smooth
-	part:SetAttribute("Block", id)
 	part:SetAttribute("Index", i)
 	part:SetAttribute("MineId", mine.id)
 	part:SetAttribute("Generation", mine.generation)
@@ -125,38 +132,45 @@ end
 local function rebuild(mine: Mine)
 	mine.rebuilding = true
 	mine.generation += 1
-	local n = 0
-	for _, part in pairs(mine.parts) do
-		blockLookup[part] = nil
-		part:Destroy()
-		n += 1
-		if n % CHUNK == 0 then
-			task.wait()
-		end
-	end
-	mine.folder:ClearAllChildren()
-	table.clear(mine.parts)
-	table.clear(mine.cells)
 	-- fresh seed every reset so the layout is reshuffled [владелец]
 	local rng = Random.new(os.time() + mine.generation * 7919 + math.floor(os.clock() * 1000))
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
+	local layout: { [number]: string } = {}
 	for i = 1, total do
 		local x, _, z = coords(mine, i)
-		mine.cells[i] = if ladderShaft(mine.size, x, z) then nil else pickBlock(mine.shares, rng)
+		local id = if ladderShaft(mine.size, x, z) then nil else pickBlock(mine.shares, rng)
+		if id then
+			layout[i] = id
+		end
 		if i % 4096 == 0 then
 			task.wait()
 		end
 	end
-	local created = 0
+	-- [владелец 21.10] reset IN PLACE: existing blocks change their type, dug cells get a block back,
+	-- nothing is removed first. Before, the whole mine was destroyed column by column and then rebuilt,
+	-- so players standing on it fell through. Every cell keeps a Part (no holes into the solid inside).
+	local touched = 0
 	for i = 1, total do
-		-- every cell gets a Part [владелец 21.10]: with Parts only on exposed cells a player could slip
-		-- into a freshly opened hole before its neighbours appeared and fall through the solid interior
-		if mine.cells[i] then
-			makePart(mine, i)
-			created += 1
-			if created % CHUNK == 0 then
-				task.wait()
+		local id = layout[i]
+		local part = mine.parts[i]
+		mine.cells[i] = id
+		if id then
+			if part then
+				if part.Name ~= id then
+					stylePart(part, id)
+				end
+				part:SetAttribute("Generation", mine.generation)
+			else
+				makePart(mine, i)
 			end
+		elseif part then
+			blockLookup[part] = nil
+			mine.parts[i] = nil
+			part:Destroy()
+		end
+		touched += 1
+		if touched % CHUNK == 0 then
+			task.wait()
 		end
 	end
 	mine.resetAt = os.clock() + mine.location.mine.resetSeconds
@@ -328,6 +342,21 @@ function MineService.Start()
 		register(anchor)
 	end
 	CollectionService:GetInstanceAddedSignal(ANCHOR_TAG):Connect(register)
+
+	-- Studio-only QA hook (ServerStorage.MineDebug): ("reset", mineId) makes that mine reset in 1 s
+	if game:GetService("RunService"):IsStudio() then
+		local debugApi = Instance.new("BindableFunction")
+		debugApi.Name = "MineDebug"
+		debugApi.OnInvoke = function(op: string, id: string): any
+			local mine = mines[id]
+			if op == "reset" and mine then
+				mine.resetAt = os.clock() + 1
+				return true
+			end
+			return false
+		end
+		debugApi.Parent = game:GetService("ServerStorage")
+	end
 
 	task.spawn(function()
 		local warned: { [string]: boolean } = {}

@@ -1,5 +1,6 @@
 --!strict
--- PvP deaths drop backpack contents only. Equipment and personal containers stay in the profile.
+-- Deaths drop backpack contents (blocks, keys, mob loot…) on the ground; armor, tools and personal
+-- containers (ender chest) stay in the profile [владелец 21.10].
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
@@ -142,7 +143,12 @@ local function died(player: Player, character: Model)
 			end
 		end
 	end
-	if not character:IsDescendantOf(workspace) or not inPvp(character, profile) then
+	-- [владелец 21.10] every death loses the loot (only PvP deaths did before); dropInPvpOnly keeps the
+	-- old rule switchable
+	if
+		not character:IsDescendantOf(workspace)
+		or (rules.dropInPvpOnly and not inPvp(character, profile))
+	then
 		return
 	end
 	local root = character:FindFirstChild("HumanoidRootPart")

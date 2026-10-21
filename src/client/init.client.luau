@@ -1900,6 +1900,19 @@ Remotes.event("DigAccepted").OnClientEvent
 			end
 		end
 	end)
+-- a mine reset re-uses its block parts: anything this client hid while digging there shows again
+task.spawn(function() -- the remote may appear only after the first mine build
+	Remotes.event("MineReset").OnClientEvent:Connect(function(mineId: any)
+		for part in pairs(pending) do
+			if part:GetAttribute("MineId") == mineId then
+				restoreLocally(part)
+				if digTarget == part then
+					stopDig(false)
+				end
+			end
+		end
+	end)
+end)
 Remotes.event("DigRejected").OnClientEvent:Connect(function(part: BasePart)
 	restoreLocally(part)
 	if digTarget == part then

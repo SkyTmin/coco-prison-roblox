@@ -24,10 +24,14 @@ local function nameColor(blockId: string): Color3
 	return (if typeof(key) == "string" then (Ui.colors :: any)[key] else nil) or Ui.colors.text
 end
 
+-- same as ProfessionService.moneyMultiplier: dig reward boost × «Бустер денег» points
 local function moneyMultiplier(profile: Types.Profile?): number
-	return if profile
-		then 1 + profile.professions.upgrades.money * Config.professions.upgrades.money
-		else 1
+	return (Config.money.digRewardMultiplier or 1)
+		* (
+			if profile
+				then 1 + profile.professions.upgrades.money * Config.professions.upgrades.money
+				else 1
+		)
 end
 
 function SellWindow.build(

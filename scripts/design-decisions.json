@@ -5,6 +5,8 @@
     "displayDecimals": 3,
     "priceMultiplierPerLevel": 0,
     "upgradeMultiplierPerPoint": 0.01,
+    "digRewardMultiplier": 2,
+    "_digReward": "[владелец 21.10] награды с копания ×2, чтобы в начале легче качаться: множитель денег за проданные блоки",
     "_note": "[меню] множитель цен = 1 + 0.01 × уровень Прокачки «Бустер денег»; очки за уровни профессий"
   },
   "hearts": {
@@ -612,8 +614,9 @@
     "costGrowth": 1.25
   },
   "keys": {
-    "ordinaryKeyChancePerBlock": 0.0005,
-    "ordinaryKeyPity": 5000,
+    "ordinaryKeyChancePerBlock": 0.001,
+    "ordinaryKeyPity": 2000,
+    "_ordinaryKey": "[владелец 21.10] выпадение ключей ×2 (0,05 → 0,1 % за блок, в среднем раз в 1000 блоков), гарантия не позже 2000 блоков (было 5000)",
     "luckyBonusPerLevel": 0.2,
     "ordinaryCase": [
       {
@@ -1091,7 +1094,8 @@
       "_melon": "[ваниль] ломтик арбуза +2 голода; [владелец 21.10] арбуз не продаётся, его только едят"
     },
     "death": {
-      "dropInPvpOnly": true,
+      "_owner": "[владелец 21.10] при любой смерти теряешь добытое (блоки, ключи, предметы с мобов…) — выпадает на землю; броня и инструменты остаются",
+      "dropInPvpOnly": false,
       "keep": [
         "armor",
         "tools"
