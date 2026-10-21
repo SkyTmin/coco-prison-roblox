@@ -445,6 +445,7 @@ function ProfileService.Start()
 			return
 		end
 		for player, session in pairs(sessions) do
+			rememberPosition(player) -- shutdown may skip PlayerRemoving: keep the exact logout spot
 			save(player, session)
 		end
 	end)

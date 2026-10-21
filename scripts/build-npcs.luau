@@ -45,7 +45,10 @@ local function part(name, size, cf, color, material, parent)
 	return p
 end
 
-local function sign(target, text, offset)
+-- [владелец] 21.10: ник скупщика блоков красный (остальные NPC — золотые)
+local BUYER_RED = Color3.fromRGB(255, 55, 55)
+
+local function sign(target, text, offset, color)
 	local gui = Instance.new("BillboardGui")
 	gui.Size = UDim2.fromOffset(88, 16)
 	gui.StudsOffset = Vector3.new(0, offset or 4, 0)
@@ -55,7 +58,7 @@ local function sign(target, text, offset)
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.fromScale(1, 1)
 	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(255, 190, 60)
+	label.TextColor3 = color or Color3.fromRGB(255, 190, 60)
 	label.TextStrokeTransparency = 0.2
 	label.TextScaled = true
 	label.Font = Enum.Font.Code
@@ -63,7 +66,7 @@ local function sign(target, text, offset)
 	label.Parent = gui
 end
 
--- spec: { name, tag, cf (facing direction included), label, skin, shirt, pants, hat = "cap"|"chef"|"band"|"helmet"|nil, apron = Color3? }
+-- spec: { name, tag, cf (facing direction included), label, labelColor = Color3?, skin, shirt, pants, hat = "cap"|"chef"|"band"|"helmet"|nil, apron = Color3? }
 local function npc(spec)
 	local desc = Instance.new("HumanoidDescription")
 	desc.HeadColor = spec.skin
@@ -90,7 +93,7 @@ local function npc(spec)
 	model:PivotTo(spec.cf)
 	local hrp = model:FindFirstChild("HumanoidRootPart")
 	CollectionService:AddTag(hrp, spec.tag)
-	sign(hrp, spec.label, 4.5)
+	sign(hrp, spec.label, 4.5, spec.labelColor)
 	local head = model:FindFirstChild("Head")
 	local headCf = head.CFrame
 	if spec.hat == "cap" then
@@ -176,6 +179,7 @@ npc({
 	tag = "SellPoint",
 	cf = facing(14, -36, 0, -36),
 	label = "Скупщик блоков",
+	labelColor = BUYER_RED,
 	skin = SKIN[2],
 	shirt = Color3.fromRGB(60, 90, 60),
 	pants = Color3.fromRGB(50, 45, 40),
@@ -187,6 +191,7 @@ npc({
 	tag = "SellPoint",
 	cf = facing(14, 68, 0, 68),
 	label = "Скупщик блоков",
+	labelColor = BUYER_RED,
 	skin = SKIN[3],
 	shirt = Color3.fromRGB(60, 90, 60),
 	pants = Color3.fromRGB(50, 45, 40),
