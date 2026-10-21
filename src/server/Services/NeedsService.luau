@@ -21,7 +21,6 @@ type State = {
 	previous: Types.Needs,
 	humanoid: Humanoid?,
 	movementMultiplier: number,
-	remindAt: { [string]: number }, -- next reminder per need at zero
 }
 type Event = { name: string, endsAt: number, endsAtServer: number }
 
@@ -133,20 +132,10 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	end
 end
 
--- [владелец 21.10] no need bars: when a need runs out (its effect appears) the player gets a message
--- saying where to go or what to use, repeated every REMIND_SECONDS while the effect lasts
-local REMIND_SECONDS = 180
+-- [владелец 21.10] no need bars: while a need is at zero the client keeps its hint on screen
+-- (need_effect_* under the effect icon), so the server only applies the effects
 local function sync(player: Player, state: State, needs: Types.Needs)
-	local now = os.clock()
 	for _, need in ipairs(NEEDS) do
-		if needs[need] <= 0 then
-			if state.previous[need] > 0 or now >= (state.remindAt[need] or 0) then
-				toast(player, "need_effect_" .. need)
-				state.remindAt[need] = now + REMIND_SECONDS
-			end
-		else
-			state.remindAt[need] = nil
-		end
 		state.previous[need] = needs[need]
 	end
 	applyEffects(player, state, needs)
@@ -280,7 +269,6 @@ local function updatePlayers()
 				previous = table.clone(profile.needs),
 				humanoid = nil,
 				movementMultiplier = 1,
-				remindAt = {},
 			}
 			states[player] = state
 		end

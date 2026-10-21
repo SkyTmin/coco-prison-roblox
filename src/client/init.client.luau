@@ -213,16 +213,6 @@ local function showToast(text: string)
 	end)
 end
 
-local combo =
-	Ui.label(gui, "", UDim2.fromOffset(200, 18), UDim2.new(0.5, 120, 1, -112), 13, Ui.colors.muted)
-local comboMultiplier: number? = nil
-local comboBlocks = 0
-local function renderCombo()
-	if comboMultiplier then
-		combo.Text = T("combo", comboMultiplier, comboBlocks, Config.rules.combo.blocksPerStep)
-	end
-end
-
 -- ---------------------------------------------------------------- hotbar
 local SLOT = 44
 local hotbar = Ui.panel(
@@ -245,18 +235,20 @@ end
 local survivalHud = Instance.new("Frame")
 survivalHud.Name = "SurvivalHud"
 survivalHud.BackgroundTransparency = 1
-survivalHud.AnchorPoint = Vector2.new(0.5, 1)
-survivalHud.Position = UDim2.new(0.5, 0, 0, -4)
-survivalHud.Size = UDim2.fromOffset(408, 24)
+-- [владелец 21.10] like Minecraft: hearts start at the hotbar's left edge, food ends at its right edge
+survivalHud.AnchorPoint = Vector2.new(0, 1)
+survivalHud.Position = UDim2.fromOffset(6, -4)
+survivalHud.Size = UDim2.new(1, -12, 0, 24)
 survivalHud.Parent = hotbar
 local survivalScale = Instance.new("UIScale")
 survivalScale.Parent = survivalHud
 type SurvivalMeter = { fills: { Frame }, tooltip: TextLabel }
-local function buildMeter(x: number, glyph: string, color: Color3): SurvivalMeter
+local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): SurvivalMeter
 	local group = Instance.new("Frame")
 	group.BackgroundTransparency = 1
 	group.Size = UDim2.fromOffset(190, 24)
-	group.Position = UDim2.fromOffset(x, 0)
+	group.AnchorPoint = Vector2.new(if rightAligned then 1 else 0, 0)
+	group.Position = UDim2.fromScale(if rightAligned then 1 else 0, 0)
 	group.Parent = survivalHud
 	local function drawIcon(parent: Frame, filled: boolean)
 		local tint = if filled then color else Ui.colors.border
@@ -314,7 +306,8 @@ local function buildMeter(x: number, glyph: string, color: Color3): SurvivalMete
 	for i = 1, 10 do
 		local cell = Instance.new("Frame")
 		cell.Size = UDim2.fromOffset(18, 24)
-		cell.Position = UDim2.fromOffset((i - 1) * 19, 0)
+		-- the food row fills from the right like Minecraft's: icon 1 is the rightmost
+		cell.Position = UDim2.fromOffset((if rightAligned then 10 - i else i - 1) * 19, 0)
 		cell.BackgroundTransparency = 1
 		cell.Parent = group
 		drawIcon(cell, false)
@@ -322,14 +315,38 @@ local function buildMeter(x: number, glyph: string, color: Color3): SurvivalMete
 		clip.Size = UDim2.fromScale(1, 1)
 		clip.BackgroundTransparency = 1
 		clip.ClipsDescendants = true
+		if rightAligned then
+			clip.AnchorPoint, clip.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
+		end
 		clip.Parent = cell
 		drawIcon(clip, true)
 		fills[i] = clip
 	end
 	return { fills = fills, tooltip = tooltip }
 end
-local hearts = buildMeter(0, "♥", Color3.fromRGB(235, 55, 55))
-local drumsticks = buildMeter(218, "🍗", Color3.fromRGB(225, 150, 65))
+local hearts = buildMeter(false, "♥", Color3.fromRGB(235, 55, 55))
+local drumsticks = buildMeter(true, "🍗", Color3.fromRGB(225, 150, 65))
+
+-- Above the meters, bottom to top (all inside the hotbar so they share its scale): combo, the held
+-- item's name, the hint of a harmful effect.
+local function hudLine(y: number, size: number, color: Color3): TextLabel
+	local label =
+		Ui.label(hotbar, "", UDim2.new(1, 160, 0, size + 4), UDim2.new(0.5, 0, 0, y), size, color)
+	label.AnchorPoint = Vector2.new(0.5, 1)
+	label.TextXAlignment = Enum.TextXAlignment.Center
+	label.TextStrokeTransparency = 0.4
+	return label
+end
+-- [владелец 21.10] combo above the hearts and food; resets after 30 s without digging (server)
+local combo = hudLine(-34, 14, Ui.colors.muted)
+local comboMultiplier: number? = nil
+local comboBlocks = 0
+local function renderCombo()
+	if comboMultiplier then
+		combo.Text = T("combo", comboMultiplier, comboBlocks, Config.rules.combo.blocksPerStep)
+		combo.TextColor3 = if comboMultiplier > 1 then Ui.colors.money else Ui.colors.muted
+	end
+end
 local trackedHumanoid: Humanoid? = nil
 local healthConnections: { RBXScriptConnection } = {}
 local function fillMeter(meter: SurvivalMeter, value: number)
@@ -486,12 +503,34 @@ local function renderHotbar()
 end
 
 -- Minecraft: the name of the newly selected item shows above the hotbar for 2 s, then fades
-local heldName =
-	Ui.label(gui, "", UDim2.fromOffset(420, 22), UDim2.new(0.5, -210, 1, -134), 17, Ui.colors.white)
-heldName.TextXAlignment = Enum.TextXAlignment.Center
-heldName.TextStrokeTransparency = 0.4
+local heldName = hudLine(-54, 17, Ui.colors.white)
 heldName.Visible = false
 local heldNameToken = 0
+
+-- [владелец 21.10] while a need's effect lasts, its hint (where to go / what to use) stays on screen
+local effectHint = hudLine(-80, 14, Color3.fromRGB(255, 225, 120))
+effectHint.TextWrapped = true
+effectHint.BackgroundColor3 = Ui.colors.panel
+effectHint.BackgroundTransparency = 0.35
+effectHint.Visible = false
+local NEED_EFFECTS = { { "Nausea", "hygiene" }, { "Insomnia", "sleep" }, { "Slowness", "toilet" } }
+task.spawn(function()
+	while true do
+		local character = player.Character
+		local lines = {}
+		for _, pair in ipairs(NEED_EFFECTS) do
+			local level = if character then character:GetAttribute(pair[1]) else nil
+			if typeof(level) == "number" and level > 0 then
+				table.insert(lines, T("need_effect_" .. pair[2]))
+			end
+		end
+		effectHint.Text = table.concat(lines, string.char(10))
+		effectHint.Visible = #lines > 0
+		-- one line per effect (AutomaticSize does not grow a bottom-anchored label): size it by the count
+		effectHint.Size = UDim2.new(1, 160, 0, math.max(1, #lines) * 20 + 4)
+		task.wait(0.5)
+	end
+end)
 local function showHeldName(stack: Types.ItemStack?)
 	heldNameToken += 1
 	local token = heldNameToken
@@ -1550,7 +1589,8 @@ local function render(p: Types.Profile)
 	renderCombo()
 	statLevel.Text = string.format("%s  %d", T("level"), p.level)
 	statLevel.TextColor3 = Ui.colors.level
-	statMoney.Text = string.format("%s  %s $", T("coins"), Strings.money(p.coins))
+	-- [владелец 21.10] the bar shows whole money (exact amounts stay in the sell window)
+	statMoney.Text = string.format("%s  %d $", T("coins"), math.floor(p.coins / Config.moneyScale))
 	statMoney.TextColor3 = Ui.colors.money
 	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
@@ -1723,6 +1763,9 @@ local function eyePosition(): Vector3?
 end
 
 -- The mine block under a screen point (or under the cursor / crosshair) within reach, with the hit point.
+-- blocks hidden locally, waiting for the server to remove them (declared before aimAt, which skips them)
+local pending: { [BasePart]: number } = {}
+
 local function aimAt(point: Vector2?): Aim?
 	local character = player.Character
 	local currentCamera = workspace.CurrentCamera
@@ -1747,7 +1790,13 @@ local function aimAt(point: Vector2?): Aim?
 	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { character }
+	-- hidden (predicted) blocks keep their collision, and CanQuery = false is ignored while CanCollide is
+	-- on, so they are excluded here: the crosshair finds the block behind and digging goes on
+	local ignore: { Instance } = { character }
+	for part in pairs(pending) do
+		table.insert(ignore, part)
+	end
+	params.FilterDescendantsInstances = ignore
 	local hit = workspace:Raycast(ray.Origin, ray.Direction * 200, params)
 	if not hit or not CollectionService:HasTag(hit.Instance, "MineBlock") then
 		return nil
@@ -1766,7 +1815,11 @@ local digStarted = 0
 local digNeeded = 0
 local digPredicted = false -- the client already played the break and hid the block
 local tapTarget: Aim? = nil -- touch: the block under the finger when the hold began
-local pending: { [BasePart]: number } = {} -- blocks hidden locally, waiting for the server to remove them
+local accepted: { [BasePart]: boolean } = {} -- the server started its timer for this block (DigAccepted)
+-- [владелец 21.10] with lag the server removes a block late: once it accepted the dig, wait longer
+-- before showing the block again (2 s made blocks vanish, come back and vanish again)
+local CONFIRM_TIMEOUT = 3
+local ACCEPTED_TIMEOUT = 8
 local nextDigAt = 0 -- Minecraft's 5-tick pause after a break [ваниль]
 
 local function expectedTime(part: BasePart): number?
@@ -1804,6 +1857,7 @@ local function hideLocally(part: BasePart)
 	pending[part] = os.clock()
 end
 local function restoreLocally(part: BasePart)
+	accepted[part] = nil
 	if pending[part] then
 		pending[part] = nil
 		if part.Parent then
@@ -1838,6 +1892,7 @@ end
 
 Remotes.event("DigAccepted").OnClientEvent
 	:Connect(function(part: BasePart, needed: number, pause: number?)
+		accepted[part] = true
 		if digging and digTarget == part then
 			digNeeded = needed -- the server's number is the truth; progress keeps its local start
 			if pause and pause > 0 then
@@ -1856,9 +1911,14 @@ RunService.RenderStepped:Connect(function()
 	local now = os.clock()
 	for part, at in pairs(pending) do
 		if not part.Parent then
-			pending[part] = nil
-		elseif now - at > 2 then
-			restoreLocally(part) -- the server never confirmed: show it again
+			pending[part], accepted[part] = nil, nil
+		elseif now - at > (if accepted[part] then ACCEPTED_TIMEOUT else CONFIRM_TIMEOUT) then
+			restoreLocally(part) -- the server never removed it: show it again
+			if digTarget == part then
+				-- leave the "waiting for removal" state, so a held finger / button digs on by itself
+				-- (before, digging froze here until the player tapped again)
+				stopDig(false)
+			end
 		end
 	end
 	if currentWindowKind then
@@ -1889,12 +1949,13 @@ RunService.RenderStepped:Connect(function()
 	highlight.Enabled = aim ~= nil and not pending[aim.part]
 	if digging and digTarget then
 		if digPredicted then
-			if not digTarget.Parent then
-				-- the server removed it: move on to whatever is under the cursor now
-				stopDig(false)
-				if holding and aim and not pending[aim.part] and now >= nextDigAt then
-					startDig(aim)
-				end
+			-- [владелец 21.10, lag] do not wait for the server to remove the block: it gets our DigStarts
+			-- in order and finishes this block before the next DigStart arrives, so dig on at once (the
+			-- hidden block is not queryable, the crosshair finds the one behind it). Waiting cost a full
+			-- round trip per block and looked like digging stopped.
+			stopDig(false)
+			if holding and aim and not pending[aim.part] and now >= nextDigAt then
+				startDig(aim)
 			end
 		elseif not aim or aim.part ~= digTarget then
 			stopDig(true)
@@ -1979,6 +2040,10 @@ local activeTouch: InputObject? = nil
 local touchHeldSince = 0
 local touchStart = Vector2.zero
 local touchAte = false
+local touchDragged = false -- the finger moved: it turns the camera and never digs or hits
+local touchAim: Aim? = nil -- the block under the crosshair when the finger landed
+local DIG_HOLD = 0.12 -- s the finger must rest before digging starts [владелец 21.10]
+local DRAG_SLOP = 14 -- px of movement that makes a touch a camera drag
 local EAT_HOLD = 0.6 -- s, like Bedrock's hold-to-use
 local function isFood(): boolean
 	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
@@ -2018,31 +2083,57 @@ UserInputService.TouchStarted:Connect(function(input: InputObject, processed: bo
 	then
 		return
 	end
-	activeTouch, touchHeldSince, touchAte = input, os.clock(), false
+	activeTouch, touchHeldSince, touchAte, touchDragged = input, os.clock(), false, false
 	touchStart = Vector2.new(input.Position.X, input.Position.Y)
+	-- [владелец 21.10] digging starts only when the finger rests DIG_HOLD on a block (Heartbeat below);
+	-- a finger that moves turns the camera only — no swings, no dig sounds while looking around
 	local aim = aimAt()
-	if aim and not pending[aim.part] then
-		-- a block under the crosshair when the finger lands: dig, and keep digging while held
-		holding = true
-		stopDig(true)
-		startDig(aim)
-	else
-		-- nothing to dig: this finger only turns the camera (never starts digging later) or eats
-		holding = false
+	touchAim = if aim and not pending[aim.part] then aim else nil
+	holding = false
+end)
+UserInputService.TouchMoved:Connect(function(input: InputObject)
+	if input ~= activeTouch or touchDragged then
+		return
+	end
+	if (Vector2.new(input.Position.X, input.Position.Y) - touchStart).Magnitude > DRAG_SLOP then
+		touchDragged = true
+		touchAim = nil
+		if holding then
+			holding = false
+			tapTarget = nil
+			stopDig(true)
+		end
 	end
 end)
 UserInputService.TouchEnded:Connect(function(input: InputObject)
 	if input == activeTouch then
 		local tapped = os.clock() - touchHeldSince < 0.3
 			and (Vector2.new(input.Position.X, input.Position.Y) - touchStart).Magnitude < 12
-		local wasDigging = holding
+		local wasDigging = holding or touchAim ~= nil
 		cancelDigInput()
-		if tapped and not wasDigging and not touchAte then
+		touchAim = nil
+		if tapped and not touchDragged and not wasDigging and not touchAte then
 			attack() -- a short tap on empty space = a swing, like Minecraft's attack tap
 		end
 	end
 end)
 RunService.Heartbeat:Connect(function()
+	-- a finger resting on a block starts digging and keeps digging the next blocks while held
+	if
+		activeTouch
+		and touchAim
+		and not touchDragged
+		and not holding
+		and os.clock() - touchHeldSince >= DIG_HOLD
+	then
+		local aim = touchAim
+		touchAim = nil
+		holding = true
+		stopDig(true)
+		if aim.part:IsDescendantOf(workspace) and not pending[aim.part] then
+			startDig(aim)
+		end
+	end
 	-- hold with food and nothing under the crosshair → eat once per hold
 	if
 		activeTouch
@@ -2288,7 +2379,7 @@ local function updateLayout()
 	hotbar.AnchorPoint = Vector2.new(0.5, 1)
 	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
 	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
-	survivalScale.Scale = if mobile then 0.85 else 1
+	survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
 	inventoryButton.Position = UDim2.new(0.5, width / 2 * hotbarScale.Scale + 6, 1, -8 - size - 4)
 	inventoryButton.AnchorPoint = Vector2.new(0, 0)
 	for i, slot in ipairs(hotbarSlots) do
@@ -2430,11 +2521,23 @@ if RunService:IsStudio() then
 			end
 			return holding
 		elseif action == "state" then
+			local aim = aimAt()
 			return {
 				digging = digging,
 				target = digTarget,
 				predicted = digPredicted,
 				firstPerson = firstPerson,
+				holding = holding,
+				aimPart = if aim then aim.part else nil,
+				expected = if aim then expectedTime(aim.part) else nil, -- nil = the client thinks it can't dig
+				sleep = if profile then profile.needs.sleep else nil,
+				pending = (function()
+					local n = 0
+					for _ in pairs(pending) do
+						n += 1
+					end
+					return n
+				end)(),
 			}
 		end
 		return nil

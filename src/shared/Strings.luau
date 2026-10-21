@@ -476,10 +476,10 @@ local STRINGS: { [string]: Entry } = {
 	},
 	language_code = { ru = "RU", en = "EN", es = "ES", fr = "FR" },
 	combo = {
-		ru = "Комбо ×%.1f   %d/%d",
-		en = "Combo ×%.1f   %d/%d",
-		es = "Combo ×%.1f   %d/%d",
-		fr = "Combo ×%.1f   %d/%d",
+		ru = "Комбо ×%.2f   %d/%d",
+		en = "Combo ×%.2f   %d/%d",
+		es = "Combo ×%.2f   %d/%d",
+		fr = "Combo ×%.2f   %d/%d",
 	},
 	teleporter_prompt = {
 		ru = "Телепортатор",
