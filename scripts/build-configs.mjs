@@ -197,7 +197,7 @@ const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tier
 	const images = Object.fromEntries(def.pictures.filter((p) => artifactImages[p]).map((p) => [p, artifactImages[p]]));
 	return [tier, { ...def, images, image: images[def.pictures[0]] ?? "" }];
 }));
-write("artifacts.json", { source: "[меню, клиент]; шансы [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
+write("artifacts.json", { source: "[меню, клиент]; шанс за блок [владелец], из кейса [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("armor.json", { source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)", ...read("assets/armor/ids.json") });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
