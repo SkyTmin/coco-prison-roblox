@@ -194,9 +194,9 @@ local function render(rig: Rig)
 		-- Tuned on the live character (21.10): sprite model has image-right = +Z, so yaw it 180° to
 		-- point the head forward (hand −Z); handle end (bottom-left of the icon) sits in the palm.
 		-- [владелец 22.10, reference: Steve] with the arm relaxed the item points forward and a little
-		-- down, not up: pitch −62° (was −20°, the tip stood 45° up)
+		-- down, not up: pitch −105° ≈ 25–30° below level (−20° stood 45° up, −90° gave 11° down)
 		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
-			* CFrame.Angles(math.rad(-62), 0, 0)
+			* CFrame.Angles(math.rad(-105), 0, 0)
 			* CFrame.Angles(0, math.pi, 0)
 			* CFrame.new(0, size * 0.45, size * 0.45)
 	end
