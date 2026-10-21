@@ -649,7 +649,7 @@ for _, m in ipairs(pits) do
 			local truss = Instance.new("TrussPart")
 			truss.Name = "Ladder"
 			truss.Size = Vector3.new(2, h, 2) -- top flush with the ground, like a Minecraft ladder
-			truss.CFrame = CFrame.new(Vector3.new(side[1], -h / 2, side[2]) + inward * 1 + offset)
+			truss.CFrame = CFrame.new(Vector3.new(side[1], -h / 2, side[2]) - inward * 0.6 + offset) -- 1.6 studs sunk into the wall: only 0.4 stud protrudes, nobody can stand on the top
 			truss.Anchored = true
 			truss.Transparency = 1
 			truss.Parent = root
