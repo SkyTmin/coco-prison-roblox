@@ -10,6 +10,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local HurtService = require(script.Parent.HurtService)
 
 local MELEE_REACH = 12 -- [ваниль] 3 blocks
 local lastAttack: { [Player]: number } = {}
@@ -145,10 +146,12 @@ local function onAttack(player: Player, direction: any)
 			return
 		end
 		CombatService.ApplyDamage(target, damage, "player", player)
+		HurtService.Knockback(model, direction)
 	elseif CollectionService:HasTag(model, "Mob") or CollectionService:HasTag(model, "Boss") then
 		target:SetAttribute("LastHitBy", player.UserId)
 		target:SetAttribute("LastHitAt", now)
 		target:TakeDamage(damage)
+		HurtService.Knockback(model, direction)
 	end
 end
 

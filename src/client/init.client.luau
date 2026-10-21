@@ -31,8 +31,12 @@ local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
+local FirstPersonHand = require(script.FirstPersonHand)
 local ItemInfo = require(Shared.ItemInfo)
+local Wire = require(Shared.Wire)
+local BlockColors = require(Shared.BlockColors)
 HeldItem.Start()
+FirstPersonHand.Start()
 ArmorVisual.Start()
 BlockBreak.Start()
 
@@ -126,31 +130,8 @@ local statBlocks = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffse
 local statRats = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 74), 14)
 local statKD = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 92), 14)
 
-local needsPanel = Ui.panel(gui, UDim2.fromOffset(190, 78), UDim2.new(1, -200, 0.42, 120))
-type Need = "hygiene" | "sleep" | "toilet"
-local needNames: { Need } = { "hygiene", "sleep", "toilet" }
-local needBars: { [string]: Frame } = {}
-local needValues: { [string]: TextLabel } = {}
-local needLabels: { [string]: TextLabel } = {}
-for i, need in ipairs(needNames) do
-	local y = 5 + (i - 1) * 24
-	needLabels[need] = Ui.label(
-		needsPanel,
-		T("need_" .. need),
-		UDim2.fromOffset(82, 20),
-		UDim2.fromOffset(6, y),
-		12
-	)
-	local track = Ui.panel(needsPanel, UDim2.fromOffset(90, 16), UDim2.fromOffset(94, y + 2))
-	local fill = Instance.new("Frame")
-	fill.Size = UDim2.fromScale(1, 1)
-	fill.BackgroundColor3 = Ui.colors.money
-	fill.BorderSizePixel = 0
-	fill.Parent = track
-	local value = Ui.label(track, "100", UDim2.fromScale(1, 1), UDim2.fromOffset(0, 0), 11)
-	value.TextXAlignment = Enum.TextXAlignment.Center
-	needBars[need], needValues[need] = fill, value
-end
+-- [владелец 21.10] no hygiene / sleep / toilet bars: NeedsService sends a message when a need runs out
+-- and the effect icon (EffectsHud) shows while it lasts
 
 -- Bottom-left, at most 60 % of the width so it never runs under the right-hand panels.
 local hints = Ui.label(
@@ -471,7 +452,11 @@ local function renderSlot(
 	local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
 	name.Text, count.Text = n, c
 	image.Image = icon or ""
-	image.Visible = icon ~= nil
+	-- [владелец 21.10] no text on items/blocks: without a picture the slot shows a tile of the block colour
+	local tile = if stack and not icon then BlockColors.of(stack.id) else nil
+	image.Visible = icon ~= nil or tile ~= nil
+	image.BackgroundColor3 = tile or Color3.new()
+	image.BackgroundTransparency = if tile then 0 else 1
 	-- Minecraft-style enchant glint: purple copy of the icon pulsing over it
 	local glint = image:FindFirstChild("Glint")
 	if glint and glint:IsA("ImageLabel") then
@@ -480,17 +465,7 @@ local function renderSlot(
 		glint.Visible = enchanted
 		glintLabels[glint] = if enchanted then true else nil
 	end
-	-- Keep the name until the image has actually loaded (fresh uploads can take a while).
-	name.Visible = icon == nil or not image.IsLoaded
-	if icon and not image.IsLoaded then
-		local conn: RBXScriptConnection
-		conn = image:GetPropertyChangedSignal("IsLoaded"):Connect(function()
-			if image.IsLoaded then
-				name.Visible = false
-				conn:Disconnect()
-			end
-		end)
-	end
+	name.Visible = false
 end
 
 local function renderHotbar()
@@ -1225,6 +1200,7 @@ local function buildLocations(): Frame
 	local function requestTeleport(location: Config.Location)
 		if locationAvailable(location) then
 			Remotes.event("Teleport"):FireServer(location.id)
+			closeWindow() -- [владелец 21.10] the menu closes; the countdown shows in the HUD
 		end
 	end
 	teleportButton.Activated:Connect(function()
@@ -1281,6 +1257,7 @@ local function buildLocations(): Frame
 				hit.Activated:Connect(function()
 					if profile then
 						Remotes.event("Teleport"):FireServer(profile.location, spot.id)
+						closeWindow()
 					end
 				end)
 			end
@@ -1576,18 +1553,14 @@ local function render(p: Types.Profile)
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
 	statKD.Text =
 		string.format("%s  %d / %d", T("kd_label"), p.stats.kills or 0, p.stats.deaths or 0)
-	for _, need in ipairs(needNames) do
-		needLabels[need].Text = T("need_" .. need)
-		local value = math.clamp(p.needs[need], 0, 100)
-		needBars[need].Size = UDim2.fromScale(value / 100, 1)
-		needBars[need].BackgroundColor3 = if value < 25 then Ui.colors.close else Ui.colors.money
-		needValues[need].Text = tostring(math.floor(value))
-	end
 	renderHotbar()
 	renderSurvival()
 	refreshWindow(rebuild)
 end
-Remotes.event("ProfileUpdated").OnClientEvent:Connect(render)
+-- the profile crosses the network Wire-encoded (sparse slot tables survive intact)
+Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any)
+	render(Wire.decode(encoded))
+end)
 Remotes.event("Toast").OnClientEvent:Connect(showToast)
 Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string, tab: string?)
 	if kind == "locations" and tab == "spots" then
@@ -2009,6 +1982,19 @@ local function isFood(): boolean
 	local food = Config.rules.survival and Config.rules.survival.food
 	return stack ~= nil and food ~= nil and typeof(food[stack.id]) == "number"
 end
+-- soap / toilet paper / sleeping bag in hand (they restore a need when used) [вики]
+local function isNeedConsumable(): boolean
+	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+	if not stack then
+		return false
+	end
+	for _, need in ipairs({ "hygiene", "sleep", "toilet" }) do
+		if Config.needs[need].consumable == stack.id then
+			return true
+		end
+	end
+	return false
+end
 local function cancelDigInput()
 	activeTouch = nil
 	tapTarget = nil
@@ -2226,7 +2212,8 @@ local function useConsumable()
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end
--- "Съесть" appears above the jump button whenever food is in the selected slot (hold-to-eat stays too)
+-- "Съесть" appears above the jump button whenever food is in the selected slot (hold-to-eat stays too);
+-- with soap / toilet paper / a sleeping bag it becomes "Использовать" with that item's icon [владелец 21.10]
 local eatButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("eat"), 60, T("eat"))
 eatButton.Name = "TouchEat"
 local eatCaption = eatButton:FindFirstChild("Caption")
@@ -2245,8 +2232,6 @@ end)
 
 local statsScale = Instance.new("UIScale")
 statsScale.Parent = stats
-local needsScale = Instance.new("UIScale")
-needsScale.Parent = needsPanel
 local hotbarScale = Instance.new("UIScale")
 hotbarScale.Parent = hotbar
 local effectsScale = Instance.new("UIScale")
@@ -2264,11 +2249,8 @@ local function updateLayout()
 	touchMenus.Visible, touchActions.Visible = mobile, mobile
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
-	statsScale.Scale, needsScale.Scale = if mobile then 0.65 else 1, if mobile then 0.65 else 1
+	statsScale.Scale = if mobile then 0.65 else 1
 	stats.Position = if mobile then UDim2.new(1, -132, 0, 64) else UDim2.new(1, -200, 0.42, 0)
-	needsPanel.Position = if mobile
-		then UDim2.new(1, -132, 0, 142)
-		else UDim2.new(1, -200, 0.42, 120)
 	-- effect icons sit left of the stats panel, top-aligned with it
 	effectsHud.Position = if mobile then UDim2.new(1, -136, 0, 64) else UDim2.new(1, -206, 0.42, 0)
 	effectsScale.Scale = if mobile then 0.75 else 1
@@ -2347,7 +2329,23 @@ watchViewport()
 RunService.RenderStepped:Connect(function()
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
-	eatButton.Visible = controlsVisible and isFood()
+	local food, needItem = isFood(), isNeedConsumable()
+	eatButton.Visible = controlsVisible and (food or needItem)
+	if eatButton.Visible then
+		local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+		local key = if food then "eat" else "touch_use"
+		local icon = if food
+			then Config.icons.icons["apple"]
+			else (stack and Config.iconFor(stack.id))
+		local image = eatButton:FindFirstChildOfClass("ImageLabel")
+		if image and icon and image.Image ~= icon then
+			image.Image = icon
+		end
+		if eatCaption and eatCaption:IsA("TextLabel") and localizedLabels[eatCaption] ~= key then
+			localizedLabels[eatCaption] = key
+			eatCaption.Text = T(key)
+		end
+	end
 	crosshair.Visible = (firstPerson or isMobile()) and currentWindowKind == nil
 	if currentWindowKind then
 		cancelDigInput()

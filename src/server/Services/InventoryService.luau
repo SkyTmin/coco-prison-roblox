@@ -43,8 +43,12 @@ function InventoryService.add(profile: Profile, id: string, count: number, level
 		end
 		if not profile.inventory[slot] then
 			local take = if InventoryService.isStackable(id) then math.min(STACK, remaining) else 1
-			profile.inventory[slot] =
-				{ id = id, count = take, level = level, books = if level then {} else nil }
+			profile.inventory[slot] = {
+				id = id,
+				count = take,
+				level = level,
+				books = if level then {} else nil,
+			}
 			remaining -= take
 		end
 	end

@@ -16,7 +16,7 @@
     ]
   },
   "sounds": {
-    "_source": "Block sounds. files[*].id are Roblox audio assets uploaded with scripts/upload-audio.mjs from assets/sounds/build/*.ogg (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0, see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt). Every file holds several variants separated by 0.1 s; segments = [start, length] in seconds, the client plays one at random with Sound.TimePosition. Until the owner uploads them (id = \"\"), fallback points at a Roblox-licensed ProSoundEffects clip trimmed to a short segment. Semantics follow Minecraft [ваниль]: hit = step sound while digging every 0.2 s at pitch 0.5 / volume 0.25, break = dig sound at pitch 0.8 / volume 1.",
+    "_source": "Block sounds. files[*].id are Roblox audio assets uploaded with scripts/upload-audio.mjs from assets/sounds/build/*.ogg (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0, see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt). player_hurt (HurtService, getting hurt like Minecraft): fallback ProSoundEffects \"Video Game Effects 21 (SFX)\", Getting Hit, 0.4 s. Every file holds several variants separated by 0.1 s; segments = [start, length] in seconds, the client plays one at random with Sound.TimePosition. Until the owner uploads them (id = \"\"), fallback points at a Roblox-licensed ProSoundEffects clip trimmed to a short segment. Semantics follow Minecraft [ваниль]: hit = step sound while digging every 0.2 s at pitch 0.5 / volume 0.25, break = dig sound at pitch 0.8 / volume 1.",
     "files": {
       "stone_hit": {
         "id": "",
@@ -230,6 +230,25 @@
             [
               0,
               0.7
+            ]
+          ]
+        }
+      },
+      "player_hurt": {
+        "id": "",
+        "duration": 0.4,
+        "segments": [
+          [
+            0,
+            0.4
+          ]
+        ],
+        "fallback": {
+          "id": "rbxassetid://9120417141",
+          "segments": [
+            [
+              0,
+              0.4
             ]
           ]
         }

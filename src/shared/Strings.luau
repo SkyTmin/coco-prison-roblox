@@ -578,23 +578,24 @@ local STRINGS: { [string]: Entry } = {
 	need_hygiene = { ru = "Гигиена", en = "Hygiene", es = "Higiene", fr = "Hygiène" },
 	need_sleep = { ru = "Сон", en = "Sleep", es = "Sueño", fr = "Sommeil" },
 	need_toilet = { ru = "Туалет", en = "Toilet", es = "Aseo", fr = "Toilettes" },
-	need_low_hygiene = {
-		ru = "Гигиена на исходе: Баня или мыло.",
-		en = "Hygiene is low: bath or soap.",
-		es = "Higiene baja: baños o jabón.",
-		fr = "Hygiène faible : bains ou savon.",
+	-- sent when a need runs out and its effect starts (no need bars any more) [владелец 21.10]
+	need_effect_hygiene = {
+		ru = "Тошнота: вы грязный. Помойтесь в Бане — в бассейне или под душем — или используйте мыло.",
+		en = "Nausea: you are dirty. Wash in the Bath house — pool or shower — or use soap.",
+		es = "Náuseas: estás sucio. Lávate en los baños — piscina o ducha — o usa jabón.",
+		fr = "Nausée : vous êtes sale. Lavez-vous aux bains — bassin ou douche — ou utilisez du savon.",
 	},
-	need_low_sleep = {
-		ru = "Вы устали: Спальня или спальный мешок.",
-		en = "Sleep is low: bedroom or sleeping bag.",
-		es = "Sueño bajo: dormitorio o saco de dormir.",
-		fr = "Sommeil faible : dortoir ou sac de couchage.",
+	need_effect_sleep = {
+		ru = "Бессонница: копать нельзя. Поспите на кровати в Спальне или используйте спальный мешок.",
+		en = "Insomnia: you can't dig. Sleep in a bed in the Dormitory or use a sleeping bag.",
+		es = "Insomnio: no puedes cavar. Duerme en una cama del dormitorio o usa un saco de dormir.",
+		fr = "Insomnie : impossible de creuser. Dormez dans un lit du dortoir ou utilisez un sac de couchage.",
 	},
-	need_low_toilet = {
-		ru = "Пора в Уборную или используйте бумагу.",
-		en = "Visit the toilet or use toilet paper.",
-		es = "Visita el aseo o usa papel higiénico.",
-		fr = "Allez aux toilettes ou utilisez du papier.",
+	need_effect_toilet = {
+		ru = "Замедление: пора в туалет. Зайдите в уборную в Бане или используйте туалетную бумагу.",
+		en = "Slowness: time for the toilet. Visit the toilets in the Bath house or use toilet paper.",
+		es = "Lentitud: hora del baño. Ve a los aseos de los baños o usa papel higiénico.",
+		fr = "Lenteur : il faut aller aux toilettes. Allez aux toilettes des bains ou utilisez du papier.",
 	},
 	restore_hygiene_prompt = { ru = "Баня", en = "Bath", es = "Baños", fr = "Bains" },
 	restore_sleep_prompt = {

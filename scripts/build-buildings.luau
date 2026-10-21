@@ -1334,7 +1334,10 @@ do
 		)
 	end
 	for i = 0, 4 do
-		bunk(-144 + i * 12, 96, 0)
+		-- [владелец 21.10] the middle bunk of the front row stood in the north doorway: keep the way in free
+		if i ~= 2 then
+			bunk(-144 + i * 12, 96, 0)
+		end
 		bunk(-144 + i * 12, 124, math.pi)
 	end
 	-- Wardrobe, stove and a reading corner on the east side
@@ -1566,13 +1569,10 @@ do
 		local drops = particles(head, Color3.fromRGB(190, 220, 255), 14, 0.25, 8, 1, 0.3)
 		drops.Acceleration = Vector3.new(0, -20, 0)
 		drops.EmissionDirection = Enum.NormalId.Bottom
-		part(
-			"Drain",
-			Vector3.new(1.6, 0.1, 1.6),
-			CFrame.new(x, 0.82, -125),
-			DARK,
-			Enum.Material.Metal,
-			m
+		-- [владелец 21.10] the showers wash too (the pools were the only RestoreHygiene zones)
+		CollectionService:AddTag(
+			part("Drain", Vector3.new(1.6, 0.1, 1.6), CFrame.new(x, 0.82, -125), DARK, Enum.Material.Metal, m),
+			"RestoreHygiene"
 		)
 		if i < 5 then
 			part(
@@ -1631,10 +1631,11 @@ do
 	-- Toilet stalls (RestoreToilet) in the east annex with doors
 	for i = 1, 3 do
 		local z = -124 + i * 7
+		-- [владелец 21.10] the 6-stud front walls left a 1-stud gap: now a pillar, the stall is open
 		part(
 			"StallWall",
-			Vector3.new(0.3, 7, 6),
-			CFrame.new(-96, 4.3, z - 3.5),
+			Vector3.new(0.3, 7, 1),
+			CFrame.new(-96, 4.3, z - 3),
 			TILE,
 			Enum.Material.Marble,
 			m
@@ -1651,7 +1652,7 @@ do
 		local door = part(
 			"StallDoor",
 			Vector3.new(0.3, 6, 4.2),
-			CFrame.new(-96.2, 3.8, z + 1) * CFrame.Angles(0, 0.6, 0),
+			CFrame.new(-97.9, 3.8, z - 0.6) * CFrame.Angles(0, math.pi / 2, 0), -- swung fully open
 			DARK_WOOD,
 			Enum.Material.Wood,
 			m
@@ -1694,8 +1695,8 @@ do
 	end
 	part(
 		"StallWall",
-		Vector3.new(0.3, 7, 6),
-		CFrame.new(-96, 4.3, -99.5),
+		Vector3.new(0.3, 7, 1),
+		CFrame.new(-96, 4.3, -97),
 		TILE,
 		Enum.Material.Marble,
 		m

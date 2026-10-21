@@ -492,7 +492,8 @@ sign(t3, "Спавн", 10)
 local spawn = Instance.new("SpawnLocation")
 spawn.Name = "Spawn"
 spawn.Size = Vector3.new(8, 1, 8)
-spawn.CFrame = CFrame.new(0, 0.8, 24)
+-- [владелец 21.10] players appear by the big mine (north edge of the plaza), facing it (−Z)
+spawn.CFrame = CFrame.new(0, 0.8, -40)
 spawn.Anchored = true
 spawn.Transparency = 1
 spawn.CanCollide = false

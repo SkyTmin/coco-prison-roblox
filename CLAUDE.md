@@ -94,7 +94,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
    window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
 5. `require()` inside `execute_luau` gets a separate module instance. QA hooks (Studio only):
-   `ServerStorage.ProfileDebug` BindableFunction (`get` userId → profile copy, `give` userId id count
+   `ServerStorage.ProfileDebug` BindableFunction (Wire-encoded tables: `Wire.decode` what `get` returns,
+   `Wire.encode` what you `set`; `get` userId → profile copy, `give` userId id count
    level, `coins` userId delta, `set` userId field value) and `PlayerGui.ClientDebug` on the client
    (`toggleCamera`, `open` kind, `close`, `aim`, `holdDig` bool, `state`). Prompts can be triggered
    from the client with `prompt:InputHoldBegin()/InputHoldEnd()`. Injected keyboard input does NOT

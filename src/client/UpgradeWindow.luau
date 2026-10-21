@@ -4,7 +4,9 @@
 -- and the blue "Улучшить" button; right panel — "⬆ Улучшения N" list ("Деревянная лопата 1 → 2",
 -- "Эффективность 0 → 1" / "Защита 0 → 1") and "✓ Требования n/m" with counters "Гравий 1.16K / 20 ✓";
 -- bottom bar "‹ Уровень 1 → 2 ›" pages through every future level (view only — buying is possible only
--- for the item's current level). A row of owned tools/armour on top selects the item.
+-- for the item's current level). A row of owned tools/armour on top selects the item — one button
+-- per item (two shovels are two entries, each with its own level), the held tool first; the
+-- requirement counters are the player's.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -52,7 +54,7 @@ function UpgradeWindow.build(
 	local itemsRow = Instance.new("Frame")
 	itemsRow.Size, itemsRow.BackgroundTransparency = UDim2.new(1, 0, 0, 52), 1
 	itemsRow.Parent = content
-	local selectedId: string? = nil
+	local selectedKey: string? = nil
 	local viewLevel = 1
 	local itemButtons: { [string]: { frame: Frame, icon: ImageLabel } } = {}
 	-- left card
@@ -121,22 +123,35 @@ function UpgradeWindow.build(
 	local pagerText = Ui.rich(pager, "", UDim2.new(1, -8, 1, 0), UDim2.fromOffset(4, 0), 14)
 	pagerText.TextXAlignment = Enum.TextXAlignment.Center
 
-	local function ownedLevel(id: string): number
-		if not profile then
-			return 1
+	-- Every owned tool / armor piece is its own entry [владелец 21.10]: two shovels are two items, each
+	-- with its own level. Keys: "inv:<slot>" or "armor:<part>".
+	type Entry = { key: string, stack: Types.ItemStack, target: number | string }
+	local function entries(p: Types.Profile?): { Entry }
+		local list: { Entry } = {}
+		if not p then
+			return list
 		end
-		if ARMOR[id] then
-			local piece = profile.armor[id]
+		for slot = 1, 36 do
+			local stack = p.inventory[slot]
+			if stack and Config.tools[stack.id] then
+				table.insert(list, { key = "inv:" .. slot, stack = stack, target = slot })
+			end
+		end
+		for _, part in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
+			local piece = p.armor[part]
 			if piece then
-				return piece.level or 1
+				table.insert(list, { key = "armor:" .. part, stack = piece, target = part })
 			end
 		end
-		for _, stack in pairs(profile.inventory) do
-			if stack.id == id then
-				return stack.level or 1
+		return list
+	end
+	local function entryFor(key: string?): Entry?
+		for _, entry in ipairs(entries(profile)) do
+			if entry.key == key then
+				return entry
 			end
 		end
-		return 1
+		return nil
 	end
 
 	local function refresh(p: Types.Profile?)
@@ -146,65 +161,59 @@ function UpgradeWindow.build(
 			Ui.hex(Ui.colors.money),
 			if p then Strings.money(p.coins) else "0"
 		)
-		-- owned items
-		local owned: { string } = {}
-		if p then
-			local seen: { [string]: boolean } = {}
-			for _, stack in pairs(p.inventory) do
-				if Config.tools[stack.id] and not seen[stack.id] then
-					seen[stack.id] = true
-					table.insert(owned, stack.id)
-				end
-			end
-			for id in pairs(p.armor) do
-				if not seen[id] then
-					seen[id] = true
-					table.insert(owned, id)
-				end
-			end
-		end
-		table.sort(owned)
-		for id, view in pairs(itemButtons) do
-			if not table.find(owned, id) then
-				view.frame:Destroy()
-				itemButtons[id] = nil
-			end
-		end
-		for index, id in ipairs(owned) do
-			local view = itemButtons[id]
+		-- owned items, one button each
+		local owned = entries(p)
+		local alive: { [string]: boolean } = {}
+		for index, entry in ipairs(owned) do
+			alive[entry.key] = true
+			local view = itemButtons[entry.key]
 			if not view then
 				local frame, _, _, icon = Ui.slot(itemsRow, 48)
 				local hit = Instance.new("TextButton")
 				hit.Size, hit.BackgroundTransparency, hit.Text = UDim2.fromScale(1, 1), 1, ""
 				hit.Parent = frame
+				local key = entry.key
 				hit.Activated:Connect(function()
-					selectedId = id
-					viewLevel = ownedLevel(id)
+					local chosen = entryFor(key)
+					selectedKey = key
+					viewLevel = if chosen then (chosen.stack.level or 1) else 1
 					refresh(profile)
 				end)
 				view = { frame = frame, icon = icon }
-				itemButtons[id] = view
+				itemButtons[entry.key] = view
 			end
 			view.frame.Position = UDim2.fromOffset((index - 1) * 52, 0)
-			view.icon.Image = Config.iconFor(id, ownedLevel(id)) or ""
+			view.icon.Image = Config.iconFor(entry.stack.id, entry.stack.level or 1) or ""
 			view.icon.Visible = view.icon.Image ~= ""
 			local stroke = view.frame:FindFirstChildOfClass("UIStroke")
 			if stroke then
-				stroke.Color = if id == selectedId then Ui.colors.slotSelected else Ui.colors.border
-				stroke.Thickness = if id == selectedId then 2 else 1
+				local selected = entry.key == selectedKey
+				stroke.Color = if selected then Ui.colors.slotSelected else Ui.colors.border
+				stroke.Thickness = if selected then 2 else 1
 			end
 		end
-		if not selectedId or not table.find(owned, selectedId) then
-			selectedId = owned[1]
-			viewLevel = if selectedId then ownedLevel(selectedId) else 1
+		for key, view in pairs(itemButtons) do
+			if not alive[key] then
+				view.frame:Destroy()
+				itemButtons[key] = nil
+			end
 		end
-		local id = selectedId
+		local chosen = entryFor(selectedKey)
+		if not chosen then
+			-- default: the tool in hand, else the first owned item
+			local heldKey = if p then "inv:" .. p.selectedSlot else nil
+			chosen = entryFor(heldKey) or owned[1]
+			selectedKey = if chosen then chosen.key else nil
+			viewLevel = if chosen then (chosen.stack.level or 1) else 1
+		end
+		local entry = chosen
 		left.Visible, right.Visible, pager.Visible, prev.Visible, nextB.Visible =
-			id ~= nil, id ~= nil, id ~= nil, id ~= nil, id ~= nil
-		if not id then
+			entry ~= nil, entry ~= nil, entry ~= nil, entry ~= nil, entry ~= nil
+		if not entry then
 			return
 		end
-		local current = ownedLevel(id)
+		local id = entry.stack.id
+		local current = entry.stack.level or 1
 		local top = maxLevel(id)
 		viewLevel = math.clamp(viewLevel, 1, top)
 		local up = Config.upgrade(id, viewLevel)
@@ -321,8 +330,9 @@ function UpgradeWindow.build(
 		refresh(profile)
 	end)
 	buy.Activated:Connect(function()
-		if buy.Interactable and selectedId then
-			Remotes.event("UpgradeItem"):FireServer(selectedId)
+		local entry = entryFor(selectedKey)
+		if buy.Interactable and entry then
+			Remotes.event("UpgradeItem"):FireServer(entry.target)
 		end
 	end)
 	refresh(profile)

@@ -10,6 +10,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfessionService = require(script.Parent.ProfessionService)
@@ -168,23 +169,25 @@ local function buy(player: Player, id: any)
 	end
 end
 
-local function upgrade(player: Player, id: any)
-	if typeof(id) ~= "string" or not Config.tools[id] then
-		return
-	end
+-- Upgrades one specific item [владелец 21.10]: `target` is an inventory slot (number) or an equipped
+-- armor part ("helmet"…). The counters belong to the player (blocks dug in total), so a new tool
+-- starts at level 1 and climbs level by level as long as the player meets each requirement.
+local function upgrade(player: Player, target: any)
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return
 	end
-	local slot, stack = InventoryService.findTool(profile, id)
-	if not slot or not stack then
-		local armor = profile.armor[id]
-		if armor then
-			stack = armor
-		else
-			return
-		end
+	local slot: number? = nil
+	local stack: Types.ItemStack? = nil
+	if InventoryService.isSlot(target) then
+		slot, stack = target, profile.inventory[target]
+	elseif typeof(target) == "string" and profile.armor[target] then
+		stack = profile.armor[target]
 	end
+	if not stack or not Config.tools[stack.id] then
+		return
+	end
+	local id = stack.id
 	local up = Config.upgrade(id, stack.level or 1)
 	if not up then
 		toast(player, "upgrade_max")
@@ -209,9 +212,9 @@ local function upgrade(player: Player, id: any)
 	end
 	ProfileService.Mutate(player, function(p)
 		p.coins -= units(up.cost)
-		local target = if slot then p.inventory[slot] else p.armor[id]
-		if target then
-			target.level = up.to
+		local item = if slot then p.inventory[slot] else p.armor[target]
+		if item and item.id == id then
+			item.level = up.to
 		end
 	end)
 	toast(player, "upgraded", Strings.itemName(id, up.to, Strings.localeOf(player)), up.to)

@@ -133,6 +133,15 @@ local function teleport(player: Player, locationId: any, spot: any)
 		toast(player, "teleport_not_ready")
 		return
 	end
+	if withinCurrent then
+		-- [владелец 21.10] spots inside the current location (Спавн, Шахта, Рынок…) are instant;
+		-- the 5 s channel stays for travelling between locations
+		character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
+		Remotes.event("TeleportChannel"):FireClient(player, nil)
+		return
+	end
 	local channel: Channel = {
 		character = character,
 		humanoid = humanoid,

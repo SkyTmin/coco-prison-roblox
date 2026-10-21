@@ -10,6 +10,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local BlockColors = require(Shared.BlockColors)
 local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
 
@@ -182,9 +183,12 @@ function ChestWindow.build(
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
 			local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
-			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil
+			local tile = if stack and not icon then BlockColors.of(stack.id) else nil
+			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil or tile ~= nil
+			view.icon.BackgroundColor3 = tile or Color3.new()
+			view.icon.BackgroundTransparency = if tile then 0 else 1
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
-			view.name.Visible = icon == nil and stack ~= nil
+			view.name.Visible = false -- no text on items (the tile or picture identifies them)
 			view.count.Text = if stack and stack.coins
 				then Strings.money(stack.coins) .. "$"
 				elseif stack and stack.count > 1 then tostring(stack.count)

@@ -1,5 +1,5 @@
 {
-  "_source": "Block sounds. files[*].id are Roblox audio assets uploaded with scripts/upload-audio.mjs from assets/sounds/build/*.ogg (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0, see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt). Every file holds several variants separated by 0.1 s; segments = [start, length] in seconds, the client plays one at random with Sound.TimePosition. Until the owner uploads them (id = \"\"), fallback points at a Roblox-licensed ProSoundEffects clip trimmed to a short segment. Semantics follow Minecraft [ваниль]: hit = step sound while digging every 0.2 s at pitch 0.5 / volume 0.25, break = dig sound at pitch 0.8 / volume 1.",
+  "_source": "Block sounds. files[*].id are Roblox audio assets uploaded with scripts/upload-audio.mjs from assets/sounds/build/*.ogg (VoxeLibre mcl_sounds, CC BY-SA 3.0 / CC BY 3.0 / CC0, see assets/thirdparty/voxelibre/sounds/README-mcl_sounds.txt). player_hurt (HurtService, getting hurt like Minecraft): fallback ProSoundEffects \"Video Game Effects 21 (SFX)\", Getting Hit, 0.4 s. Every file holds several variants separated by 0.1 s; segments = [start, length] in seconds, the client plays one at random with Sound.TimePosition. Until the owner uploads them (id = \"\"), fallback points at a Roblox-licensed ProSoundEffects clip trimmed to a short segment. Semantics follow Minecraft [ваниль]: hit = step sound while digging every 0.2 s at pitch 0.5 / volume 0.25, break = dig sound at pitch 0.8 / volume 1.",
   "files": {
     "stone_hit": { "id": "", "duration": 0.793, "segments": [[0, 0.28], [0.38, 0.28], [0.761, 0.28]], "fallback": { "id": "rbxassetid://9119049891", "segments": [[0, 0.22]] } },
     "stone_break": { "id": "", "duration": 0.489, "segments": [[0, 0.28], [0.38, 0.28], [0.761, 0.28]], "fallback": { "id": "rbxassetid://9119043400", "segments": [[0, 0.7]] } },
@@ -8,7 +8,8 @@
     "grass": { "id": "", "duration": 0.77, "segments": [[0, 0.76], [0.86, 0.76], [1.72, 0.76]], "fallback": { "id": "rbxassetid://9114084427", "segments": [[0, 0.3]] } },
     "sand": { "id": "", "duration": 1.15, "segments": [[0, 0.28], [0.38, 0.28], [0.761, 0.28]], "fallback": { "id": "rbxassetid://9118770616", "segments": [[0, 0.3]] } },
     "wood_hit": { "id": "", "duration": 0.47, "segments": [[0, 0.16], [0.26, 0.16]], "fallback": { "id": "rbxassetid://9120809592", "segments": [[0, 0.25]] } },
-    "wood_break": { "id": "", "duration": 0.6, "segments": [[0, 0.28], [0.38, 0.28], [0.761, 0.28]], "fallback": { "id": "rbxassetid://9120808574", "segments": [[0, 0.7]] } }
+    "wood_break": { "id": "", "duration": 0.6, "segments": [[0, 0.28], [0.38, 0.28], [0.761, 0.28]], "fallback": { "id": "rbxassetid://9120808574", "segments": [[0, 0.7]] } },
+    "player_hurt": { "id": "", "duration": 0.4, "segments": [[0, 0.4]], "fallback": { "id": "rbxassetid://9120417141", "segments": [[0, 0.4]] } }
   },
   "materials": {
     "stone": { "hit": "stone_hit", "break": "stone_break" },

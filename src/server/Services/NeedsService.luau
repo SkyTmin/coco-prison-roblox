@@ -20,6 +20,7 @@ type State = {
 	previous: Types.Needs,
 	humanoid: Humanoid?,
 	movementMultiplier: number,
+	remindAt: { [string]: number }, -- next reminder per need at zero
 }
 type Event = { name: string, endsAt: number, endsAtServer: number }
 
@@ -131,13 +132,19 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	end
 end
 
+-- [владелец 21.10] no need bars: when a need runs out (its effect appears) the player gets a message
+-- saying where to go or what to use, repeated every REMIND_SECONDS while the effect lasts
+local REMIND_SECONDS = 180
 local function sync(player: Player, state: State, needs: Types.Needs)
+	local now = os.clock()
 	for _, need in ipairs(NEEDS) do
-		if
-			state.previous[need] >= Config.needs.warnThreshold
-			and needs[need] < Config.needs.warnThreshold
-		then
-			toast(player, "need_low_" .. need)
+		if needs[need] <= 0 then
+			if state.previous[need] > 0 or now >= (state.remindAt[need] or 0) then
+				toast(player, "need_effect_" .. need)
+				state.remindAt[need] = now + REMIND_SECONDS
+			end
+		else
+			state.remindAt[need] = nil
 		end
 		state.previous[need] = needs[need]
 	end
@@ -162,6 +169,8 @@ local function bindPrompt(instance: Instance, tag: string, need: Need)
 	prompt.ActionText = Strings.t("restore_" .. need .. "_prompt")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = PROMPT_DISTANCE
+	-- toilets sit in stalls and the pool zones under water: walls and water must not hide the prompt
+	prompt.RequiresLineOfSight = false
 	prompt.Parent = instance
 	prompt.Triggered:Connect(function(player)
 		local character = player.Character
@@ -261,6 +270,7 @@ local function updatePlayers()
 				previous = table.clone(profile.needs),
 				humanoid = nil,
 				movementMultiplier = 1,
+				remindAt = {},
 			}
 			states[player] = state
 		end

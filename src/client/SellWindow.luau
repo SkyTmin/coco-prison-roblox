@@ -68,6 +68,7 @@ function SellWindow.build(
 	sellAll.TextSize = 18
 	sellAll.Activated:Connect(function()
 		Remotes.event("Sell"):FireServer()
+		onClose() -- [владелец 21.10] the window closes after selling everything
 	end)
 
 	-- rows: every location in level order; its sell list from the buyer menu [меню] (fallback: mine shares)

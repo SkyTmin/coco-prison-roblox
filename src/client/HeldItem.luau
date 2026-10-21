@@ -19,7 +19,6 @@ local started = false
 local posed: { [Motor6D]: CFrame } = {}
 local enchantedParts: { [BasePart]: Color3 } = {} -- part → base colour, pulsed toward purple
 local GLINT = Color3.fromRGB(170, 90, 255)
-local visibleArms: { [BasePart]: boolean } = {}
 
 function HeldItem.SetDigging(active: boolean)
 	if active == (swingTween ~= nil) then
@@ -42,6 +41,11 @@ function HeldItem.SetDigging(active: boolean)
 end
 
 -- One attack swing like Minecraft's arm swing (about 6 ticks there); ignored while digging.
+-- 0..1 while the arm swings (digging loop or a single hit); FirstPersonHand animates with it
+function HeldItem.SwingAmount(): number
+	return swing.Value
+end
+
 function HeldItem.Swing()
 	if swingTween then
 		return
@@ -67,32 +71,24 @@ local function rightHand(character: Model): BasePart?
 	return if hand and hand:IsA("BasePart") then hand else nil
 end
 
-local function render(rig: Rig)
-	if rig.visual then
-		rig.visual:Destroy()
-		rig.visual = nil
-	end
-	local attribute = rig.character:GetAttribute("HeldItem")
-	local hand = rightHand(rig.character)
-	if typeof(attribute) ~= "string" or attribute == "" or not hand then
-		return
-	end
-	local id, rawLevel = string.match(attribute, "^([^:]+):(%d+)$")
-	if not id then
-		return
-	end
-	local level = tonumber(rawLevel) or 0
+-- The held item as a model: a textured cube for blocks, the extruded sprite for items (ItemModels),
+-- a flat icon plane when there is no sprite. Used for characters and the first-person hand.
+function HeldItem.MakeVisual(
+	id: string,
+	level: number,
+	spriteScale: number?
+): (Instance, BasePart, boolean)
 	local icon = Config.iconFor(id, if level > 0 then level else nil)
 	local block = Config.block(id)
 	local cube = block ~= nil and not block.itemOnly
 	local tool = Config.tools[id] ~= nil
-	local spriteSize = if tool then 1.45 else 1.2
+	local spriteSize = (if tool then 1.45 else 1.2) * (spriteScale or 1)
 	local visual: BasePart
 	local container: Instance
 	if cube then
 		local p = Instance.new("Part")
 		p.Name = "HeldItemVisual"
-		p.Size = Vector3.new(1.2, 1.2, 1.2)
+		p.Size = Vector3.one * 1.2 * (spriteScale or 1)
 		p.Material = Enum.Material.Plastic
 		if MaterialService:FindFirstChild("px_" .. id) then
 			p.MaterialVariant = "px_" .. id
@@ -145,6 +141,27 @@ local function render(rig: Rig)
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
 	visual.Massless = true
 	visual.CastShadow = false
+	return container, visual, cube
+end
+
+local function render(rig: Rig)
+	if rig.visual then
+		rig.visual:Destroy()
+		rig.visual = nil
+	end
+	local attribute = rig.character:GetAttribute("HeldItem")
+	local hand = rightHand(rig.character)
+	if typeof(attribute) ~= "string" or attribute == "" or not hand then
+		return
+	end
+	local id, rawLevel = string.match(attribute, "^([^:]+):(%d+)$")
+	if not id then
+		return
+	end
+	local level = tonumber(rawLevel) or 0
+	local tool = Config.tools[id] ~= nil
+	local spriteSize = if tool then 1.45 else 1.2
+	local container, visual, cube = HeldItem.MakeVisual(id, level)
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
@@ -274,19 +291,8 @@ function HeldItem.Start()
 			end
 		end
 		table.clear(posed)
+		-- first person is drawn by FirstPersonHand (a Minecraft-style hand at the camera)
 		local character = Players.LocalPlayer.Character
-		local camera = workspace.CurrentCamera
-		local head = character and character:FindFirstChild("Head")
-		local firstPerson = camera ~= nil
-			and head ~= nil
-			and head:IsA("BasePart")
-			and (camera.CFrame.Position - head.Position).Magnitude < 1
-		for arm in pairs(visibleArms) do
-			if arm.Parent then
-				arm.LocalTransparencyModifier = if firstPerson then 1 else 0
-			end
-		end
-		table.clear(visibleArms)
 		if not character then
 			return
 		end
@@ -300,30 +306,7 @@ function HeldItem.Start()
 						0,
 						math.rad(15) * swing.Value
 					)
-				elseif
-					firstPerson
-					and descendant.Name == "RightShoulder"
-					and camera
-					and descendant.Part0
-				then
-					local base = descendant.C0
-					posed[descendant] = base
-					local look = descendant.Part0.CFrame:ToObjectSpace(camera.CFrame).Rotation
-					descendant.C0 = CFrame.new(base.Position)
-						* look
-						* base.Rotation
-						* CFrame.Angles(math.rad(85 - 15 * swing.Value), 0, math.rad(-10))
 				end
-			elseif
-				descendant:IsA("BasePart")
-				and firstPerson
-				and table.find(
-					{ "RightHand", "RightLowerArm", "RightUpperArm", "Right Arm", "HeldItemVisual" },
-					descendant.Name
-				)
-			then
-				descendant.LocalTransparencyModifier = 0
-				visibleArms[descendant] = true
 			end
 		end
 	end)

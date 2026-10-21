@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Types = require(Shared.Types)
 local Remotes = require(Shared.Remotes)
+local Wire = require(Shared.Wire)
 local Config = require(Shared.Config)
 
 type Profile = Types.Profile
@@ -22,6 +23,7 @@ local AUTOSAVE_SECONDS = 120
 
 local ProfileService = {}
 local sessions: { [Player]: Session } = {}
+local onLoaded: ((Player) -> ())? = nil -- set in Start: puts the character back at the logout spot
 local store: DataStore? = nil
 
 function ProfileService.defaultProfile(): Profile
@@ -214,6 +216,9 @@ local function load(player: Player)
 	end
 	sessions[player] = session
 	ProfileService.Replicate(player)
+	if onLoaded then
+		onLoaded(player)
+	end
 end
 
 local function save(player: Player, session: Session)
@@ -288,7 +293,7 @@ function ProfileService.Replicate(player: Player)
 			character:SetAttribute("Armor", table.concat(armor, ","))
 		end
 		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
-		Remotes.event("ProfileUpdated"):FireClient(player, session.profile)
+		Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
 	end
 end
 
@@ -304,8 +309,9 @@ function ProfileService.Start()
 			if not player then
 				return nil
 			end
+			-- tables cross the BindableFunction Wire-encoded too (sparse slots would be cut at the first gap)
 			if op == "get" then
-				return ProfileService.Get(player)
+				return Wire.encode(ProfileService.Get(player))
 			elseif op == "give" then
 				local overflow = 0
 				local inside = ""
@@ -332,7 +338,7 @@ function ProfileService.Start()
 				return true
 			elseif op == "set" then
 				ProfileService.Mutate(player, function(profile)
-					(profile :: any)[a] = b
+					(profile :: any)[a] = Wire.decode(b)
 				end)
 				return true
 			end
@@ -369,6 +375,11 @@ function ProfileService.Start()
 	-- and on leave, and applied to the first character of the next session (not after a death).
 	local restored: { [Player]: boolean } = {}
 	local function rememberPosition(player: Player)
+		-- nothing is written until the character has been put back at the saved spot: otherwise a slow
+		-- DataStore load let this overwrite the logout spot with the spawn position (bug 21.10)
+		if not restored[player] then
+			return
+		end
 		local session = sessions[player]
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
@@ -386,24 +397,24 @@ function ProfileService.Start()
 		end
 	end
 	local function restorePosition(player: Player, character: Model)
-		if restored[player] then
+		-- runs on spawn and again when the profile finishes loading (however long that takes)
+		local session = sessions[player]
+		if restored[player] or not session then
 			return
 		end
-		for _ = 1, 50 do
-			if sessions[player] then
-				break
-			end
-			task.wait(0.2)
-		end
-		local session = sessions[player]
 		restored[player] = true
-		local pos = session and session.profile.lastPosition
-		if not session or typeof(pos) ~= "table" or #pos ~= 3 then
+		local pos = session.profile.lastPosition
+		if typeof(pos) ~= "table" or #pos ~= 3 then
 			return
 		end
 		local root = character:WaitForChild("HumanoidRootPart", 10)
 		if root and root:IsA("BasePart") and player.Character == character then
 			character:PivotTo(CFrame.new(pos[1], pos[2] + 1, pos[3]))
+		end
+	end
+	onLoaded = function(player: Player)
+		if player.Character then
+			task.spawn(restorePosition, player, player.Character)
 		end
 	end
 	local function added(player: Player)

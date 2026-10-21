@@ -55,6 +55,8 @@ local HungerService = require(script.Services.HungerService)
 local DeathService = require(script.Services.DeathService)
 local TrainerService = require(script.Services.TrainerService)
 local FallService = require(script.Services.FallService)
+local LightingService = require(script.Services.LightingService)
+local HurtService = require(script.Services.HurtService)
 
 HungerService.Start()
 DeathService.Start()
@@ -72,6 +74,8 @@ CombatService.Start()
 LocationService.Start()
 TrainerService.Start()
 FallService.Start()
+LightingService.Start()
+HurtService.Start()
 
 -- Hearts by level on spawn
 game:GetService("Players").PlayerAdded:Connect(function(player)

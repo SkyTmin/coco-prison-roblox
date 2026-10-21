@@ -23,6 +23,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local Types = require(ReplicatedStorage.Shared.Types)
 local Strings = require(ReplicatedStorage.Shared.Strings)
+local BlockColors = require(ReplicatedStorage.Shared.BlockColors)
 local Ui = require(script.Parent.Ui)
 local ItemTooltip = require(script.Parent.ItemTooltip)
 
@@ -121,10 +122,13 @@ function DragDrop.new(
 			return
 		end
 		local icon = Config.iconFor(stack.id, stack.level)
-		ghostIcon.Image, ghostIcon.Visible = icon or "", icon ~= nil
+		local tile = if not icon then BlockColors.of(stack.id) else nil
+		ghostIcon.Image, ghostIcon.Visible = icon or "", true
+		ghostIcon.BackgroundColor3 = tile or Color3.new()
+		ghostIcon.BackgroundTransparency = if tile then 0 else 1
 		ghostName.Text =
 			Strings.itemName(stack.id, stack.level, Strings.localeOf(Players.LocalPlayer))
-		ghostName.Visible = icon == nil
+		ghostName.Visible = false
 		local count = if held and held.count then held.count else stack.count
 		ghostCount.Text = if count > 1 then tostring(count) else ""
 		ghost.Position = UDim2.fromOffset(point.X, point.Y)
