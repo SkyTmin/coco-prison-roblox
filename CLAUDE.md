@@ -84,6 +84,9 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    selected or long-pressed slot). A new item needs `item_<id>` (+ optional `desc_<id>`) in Strings in
    all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
    server warns `[ItemInfo] missing translations` in Studio when something is missing.
+   StreamingEnabled is on (`scripts/setup-streaming.luau`, Edit): never assume a far part exists on the client;
+   move players only after `RequestStreamAroundAsync`; small models that must arrive whole are Atomic.
+   Mine resets are time-sliced (4 ms a frame), skip untouched mines; QA `MineDebug` ("reset" | "state", mineId).
    Ground items: `ItemDropService` (thrown items via DropItem, death loot, ClearLag sweep every 5 min, cap 400);
    the profile reaches the client once whole (ProfileUpdated), then as deltas (ProfilePatch) at most 10×/s — never
    send it per action. Cosmetic broadcasts go to nearby players only, batched, via `Remotes.unreliable`.

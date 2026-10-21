@@ -498,6 +498,10 @@ function ProfileService.Start()
 			return
 		end
 		local root = character:WaitForChild("HumanoidRootPart", 10)
+		if workspace.StreamingEnabled then
+			-- the logout spot may not be loaded on the device yet (StreamingEnabled)
+			pcall(player.RequestStreamAroundAsync, player, Vector3.new(pos[1], pos[2], pos[3]), 5)
+		end
 		if root and root:IsA("BasePart") and player.Character == character then
 			character:PivotTo(CFrame.new(pos[1], pos[2] + 1, pos[3]))
 		end

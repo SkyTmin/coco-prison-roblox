@@ -16,7 +16,8 @@ local TextureService = require(script.Parent.TextureService)
 local BLOCK = 4 -- studs per block
 local ANCHOR_TAG = "MineAnchor"
 local BLOCK_TAG = "MineBlock"
-local CHUNK = 512 -- parts created per frame during rebuild
+-- a reset works at most this long per frame (60 FPS = 16.7 ms a frame) [docs/research/server-scaling.md]
+local FRAME_BUDGET = 0.004
 local LADDER_WIDTH = 4 -- [владелец] four ladders, 4 blocks wide, centred on every side, always free
 
 -- Cells of the four ladder shafts (one block deep against each wall, 4 wide, full depth). They are
@@ -43,6 +44,7 @@ export type Mine = {
 	generation: number,
 	resetAt: number,
 	rebuilding: boolean,
+	dug: number, -- blocks broken since the last reset: an untouched mine is not rebuilt
 }
 
 local MineService = {}
@@ -81,14 +83,29 @@ local COLORS: { [string]: Color3 } = {
 	red_sandstone = Color3.fromRGB(190, 100, 50),
 }
 
--- Block look and identity; used for new parts and for parts re-used by an in-place reset.
+-- Block look and identity; used for new parts and for parts re-used by an in-place reset. Only what
+-- differs is written: every property change is replicated to every client that has the part.
 local function stylePart(part: BasePart, id: string)
-	part.Name = id
-	part.Material = Enum.Material.SmoothPlastic
-	part.MaterialVariant = ""
-	part.Color = COLORS[id] or Color3.fromRGB(200, 200, 200)
-	TextureService.apply(part, id)
-	part:SetAttribute("Block", id)
+	local variant = TextureService.variantName(id)
+	local material = if variant then Enum.Material.Plastic else Enum.Material.SmoothPlastic
+	local color = if variant
+		then Color3.new(1, 1, 1)
+		else COLORS[id] or Color3.fromRGB(200, 200, 200)
+	if part.Name ~= id then
+		part.Name = id
+	end
+	if part.Material ~= material then
+		part.Material = material
+	end
+	if part.MaterialVariant ~= (variant or "") then
+		part.MaterialVariant = variant or ""
+	end
+	if part.Color ~= color then
+		part.Color = color
+	end
+	if part:GetAttribute("Block") ~= id then
+		part:SetAttribute("Block", id)
+	end
 end
 
 local function makePart(mine: Mine, i: number)
@@ -110,7 +127,6 @@ local function makePart(mine: Mine, i: number)
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part:SetAttribute("Index", i)
 	part:SetAttribute("MineId", mine.id)
-	part:SetAttribute("Generation", mine.generation)
 	CollectionService:AddTag(part, BLOCK_TAG)
 	part.Parent = mine.folder
 	mine.parts[i] = part
@@ -136,30 +152,31 @@ local function rebuild(mine: Mine)
 	local rng = Random.new(os.time() + mine.generation * 7919 + math.floor(os.clock() * 1000))
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
 	local layout: { [number]: string } = {}
+	local frameStart = os.clock()
+	local function yieldIfLong()
+		if os.clock() - frameStart > FRAME_BUDGET then
+			task.wait()
+			frameStart = os.clock()
+		end
+	end
 	for i = 1, total do
 		local x, _, z = coords(mine, i)
 		local id = if ladderShaft(mine.size, x, z) then nil else pickBlock(mine.shares, rng)
 		if id then
 			layout[i] = id
 		end
-		if i % 4096 == 0 then
-			task.wait()
-		end
+		yieldIfLong()
 	end
 	-- [владелец 21.10] reset IN PLACE: existing blocks change their type, dug cells get a block back,
 	-- nothing is removed first. Before, the whole mine was destroyed column by column and then rebuilt,
 	-- so players standing on it fell through. Every cell keeps a Part (no holes into the solid inside).
-	local touched = 0
 	for i = 1, total do
 		local id = layout[i]
 		local part = mine.parts[i]
 		mine.cells[i] = id
 		if id then
 			if part then
-				if part.Name ~= id then
-					stylePart(part, id)
-				end
-				part:SetAttribute("Generation", mine.generation)
+				stylePart(part, id) -- writes only what changed
 			else
 				makePart(mine, i)
 			end
@@ -168,11 +185,9 @@ local function rebuild(mine: Mine)
 			mine.parts[i] = nil
 			part:Destroy()
 		end
-		touched += 1
-		if touched % CHUNK == 0 then
-			task.wait()
-		end
+		yieldIfLong()
 	end
+	mine.dug = 0
 	mine.resetAt = os.clock() + mine.location.mine.resetSeconds
 	mine.rebuilding = false
 	Remotes.event("MineReset"):FireAllClients(mine.id, mine.generation)
@@ -203,6 +218,25 @@ local function evacuate(mine: Mine)
 	end
 end
 
+-- players close enough to care about this mine's reset warning
+local function playersNear(mine: Mine): { Player }
+	local centre = mine.origin
+		+ Vector3.new(
+			(mine.size[1] - 1) * BLOCK / 2,
+			-(mine.size[2] - 1) * BLOCK / 2,
+			(mine.size[3] - 1) * BLOCK / 2
+		)
+	local radius = math.max(mine.size[1], mine.size[2], mine.size[3]) * BLOCK + 64
+	local near = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") and (root.Position - centre).Magnitude <= radius then
+			table.insert(near, player)
+		end
+	end
+	return near
+end
+
 MineService.ladderShaft = ladderShaft
 
 function MineService.lookup(part: Instance): (Mine?, number?)
@@ -220,6 +254,7 @@ function MineService.breakBlock(mine: Mine, i: number): string?
 		return nil
 	end
 	mine.cells[i] = nil
+	mine.dug += 1
 	local part = mine.parts[i]
 	if part then
 		blockLookup[part] = nil
@@ -293,6 +328,7 @@ local function register(anchor: Instance)
 		generation = 0,
 		resetAt = 0,
 		rebuilding = false,
+		dug = 0,
 	}
 	mines[mineId] = mine
 	anchor.Transparency = 1
@@ -350,8 +386,18 @@ function MineService.Start()
 		debugApi.OnInvoke = function(op: string, id: string): any
 			local mine = mines[id]
 			if op == "reset" and mine then
+				mine.dug = math.max(mine.dug, 1) -- an untouched mine would skip the reset
 				mine.resetAt = os.clock() + 1
 				return true
+			elseif op == "state" and mine then
+				return string.format(
+					"rebuilding=%s generation=%d dug=%d resetIn=%.1f parts=%d",
+					tostring(mine.rebuilding),
+					mine.generation,
+					mine.dug,
+					mine.resetAt - os.clock(),
+					#mine.folder:GetChildren()
+				)
 			end
 			return false
 		end
@@ -371,9 +417,16 @@ function MineService.Start()
 					continue
 				end
 				local left = mine.resetAt - now
+				if mine.dug == 0 then
+					-- nobody dug since the last reset: nothing to restore, no work, no traffic
+					if left <= 0 then
+						mine.resetAt = now + mine.location.mine.resetSeconds
+					end
+					continue
+				end
 				if left <= mine.location.mine.warnSeconds and not warned[id] then
 					warned[id] = true
-					for _, player in ipairs(Players:GetPlayers()) do
+					for _, player in ipairs(playersNear(mine)) do
 						Remotes.event("Toast"):FireClient(
 							player,
 							Strings.t("mine_reset_warn", Strings.localeOf(player), math.ceil(left))

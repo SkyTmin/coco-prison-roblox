@@ -42,6 +42,14 @@ type Channel = {
 }
 local pending: { [Player]: Channel } = {}
 
+-- StreamingEnabled: the destination may not be loaded on the player's device yet — ask for it before
+-- moving them there, or they would land on nothing and fall [docs/research/server-scaling.md]
+local function streamAround(player: Player, position: Vector3)
+	if workspace.StreamingEnabled then
+		pcall(player.RequestStreamAroundAsync, player, position, 3)
+	end
+end
+
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
@@ -136,6 +144,10 @@ local function teleport(player: Player, locationId: any, spot: any)
 	if withinCurrent then
 		-- [владелец 21.10] spots inside the current location (Спавн, Шахта, Рынок…) are instant;
 		-- the 5 s channel stays for travelling between locations
+		streamAround(player, spawn.Position)
+		if player.Character ~= character or humanoid.Health <= 0 then
+			return
+		end
 		character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
 		root.AssemblyLinearVelocity = Vector3.zero
 		root.AssemblyAngularVelocity = Vector3.zero
@@ -159,6 +171,7 @@ local function teleport(player: Player, locationId: any, spot: any)
 		end
 	end)
 	Remotes.event("TeleportChannel"):FireClient(player, Config.rules.teleport.channelSeconds)
+	task.spawn(streamAround, player, spawn.Position) -- loads while the channel counts down
 end
 
 local function updateChannels()
