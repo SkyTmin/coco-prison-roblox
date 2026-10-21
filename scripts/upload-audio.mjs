@@ -1,6 +1,6 @@
 // Uploads the sound atlas (assets/sounds/build/atlas.ogg, see scripts/build-sounds.mjs) to Roblox through the
 // Open Cloud Assets API and writes its id into assets/sounds/ids.json → atlasId and every files[name].id.
-// The owner runs this (it needs their API key); Claude/Codex never see the key.
+// The owner runs this (it needs their API key); Claude/Codex never handle the key.
 //
 //   1. https://create.roblox.com/dashboard/credentials → "Create API key": add the "Assets" API system with
 //      the Write permission, IP restriction 0.0.0.0/0 (or your IP), copy the key.
@@ -10,15 +10,24 @@
 //
 // Audio uploads: free, but unverified accounts are limited to 10 per month — the atlas needs ONE. Roblox moderates
 // audio; a file stays unavailable until it is approved (usually minutes).
+// Without the environment variables the script asks for the key in the terminal (the owner pastes it there,
+// nobody else handles it); the user id defaults to the owner's account (coco_shamill).
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline/promises";
 
+const OWNER_USER_ID = "6182034556"; // coco_shamill, owner of the experience (placeId 92594200898716)
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
-const key = process.env.ROBLOX_API_KEY;
-const userId = process.env.ROBLOX_USER_ID;
+let key = process.env.ROBLOX_API_KEY;
 const groupId = process.env.ROBLOX_GROUP_ID;
-if (!key || (!userId && !groupId)) {
-  console.error("Set ROBLOX_API_KEY and ROBLOX_USER_ID (or ROBLOX_GROUP_ID) in the environment first.");
+const userId = process.env.ROBLOX_USER_ID || (groupId ? undefined : OWNER_USER_ID);
+if (!key) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  key = (await rl.question("Вставьте ключ Open Cloud и нажмите Enter: ")).trim();
+  rl.close();
+}
+if (!key) {
+  console.error("Нет ключа — загрузка отменена.");
   process.exit(1);
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "assets/sounds/manifest.json"), "utf8"));

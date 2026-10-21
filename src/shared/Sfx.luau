@@ -51,13 +51,54 @@ function Sfx.play(name: string, parent: Instance?, volume: number?, pitch: numbe
 	sound.PlaybackSpeed = speed
 	sound.RollOffMaxDistance = HEAR_DISTANCE
 	sound.Parent = parent or SoundService
-	sound.TimePosition = start
-	sound:Play()
-	task.delay(length / speed + 0.02, function()
-		sound:Stop()
-		sound:Destroy()
-	end)
+	-- a fresh Sound is not loaded yet, and seeking an unloaded sound can be ignored (it would play the
+	-- atlas from 0 — the wrong sound): seek and play once it has loaded (the atlas is preloaded, so fast)
+	local function begin()
+		sound.TimePosition = start
+		sound:Play()
+		task.delay(length / speed + 0.02, function()
+			sound:Stop()
+			sound:Destroy()
+		end)
+	end
+	if sound.IsLoaded then
+		begin()
+	else
+		local loaded: RBXScriptConnection
+		loaded = sound.Loaded:Connect(function()
+			loaded:Disconnect()
+			begin()
+		end)
+		task.delay(2, function()
+			if loaded.Connected then -- never loaded: drop it silently
+				loaded:Disconnect()
+				sound:Destroy()
+			end
+		end)
+	end
 	return sound
+end
+
+-- Client: fetch every sound file once at start so later sounds load instantly.
+local function preload()
+	local effects = Config.effects
+	local files = effects and effects.sounds and effects.sounds.files
+	local seen: { [string]: boolean } = {}
+	local sounds: { Instance } = {}
+	for name in pairs(files or {}) do
+		local id = Sfx.resolve(name)
+		if id and not seen[id] then
+			seen[id] = true
+			local sound = Instance.new("Sound")
+			sound.SoundId = id
+			table.insert(sounds, sound)
+		end
+	end
+	task.spawn(function()
+		pcall(function()
+			game:GetService("ContentProvider"):PreloadAsync(sounds)
+		end)
+	end)
 end
 
 -- Server: everyone within HEAR_DISTANCE of `anchor` hears `name` there.
@@ -85,6 +126,7 @@ function Sfx.listen()
 		Remotes.event("Sfx")
 		return
 	end
+	preload()
 	Remotes.event("Sfx").OnClientEvent
 		:Connect(function(name: any, anchor: any, volume: any, pitch: any)
 			if typeof(name) ~= "string" then
