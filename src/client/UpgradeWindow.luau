@@ -264,7 +264,7 @@ function UpgradeWindow.build(
 				if reqLines[i] then
 					reqLines[i].Text = string.format(
 						'%s  <font color="%s">%s</font> / <font color="%s">%s</font>%s',
-						counter,
+						Strings.counterName(counter, locale),
 						Ui.hex(if ok then Ui.colors.money else Ui.colors.red),
 						Strings.big(have),
 						Ui.hex(Ui.colors.money),

@@ -41,6 +41,7 @@ function SellWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local win, content = createWindow(parent, t("sell_title"), UDim2.fromOffset(620, 600), onClose)
+	Ui.titleColor(win, Ui.colors.header)
 	local mult = Ui.rich(win, "", UDim2.fromOffset(330, 28), UDim2.new(1, -374, 0, 6), 14)
 	mult.TextXAlignment = Enum.TextXAlignment.Right
 	mult.ZIndex = 3
@@ -99,7 +100,7 @@ function SellWindow.build(
 		end
 		Ui.label(
 			list,
-			loc.name,
+			Strings.locationName(loc.name, locale),
 			UDim2.new(1, -200, 0, GROUP),
 			UDim2.fromOffset(12, y),
 			15,
@@ -143,7 +144,7 @@ function SellWindow.build(
 			icon.Image, icon.Visible = image or "", image ~= nil
 			Ui.label(
 				row,
-				block.name,
+				Strings.itemName(blockId, nil, locale),
 				UDim2.new(0.6, 0, 0, 20),
 				UDim2.fromOffset(52, 4),
 				15,

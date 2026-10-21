@@ -1037,7 +1037,8 @@ local function buildLocations(): Frame
 		end
 		for _, card in ipairs(cards) do
 			local unlocked = locationAvailable(card.location)
-			card.name.Text = (if unlocked then "" else "🔒 ") .. card.location.name
+			card.name.Text = (if unlocked then "" else "🔒 ")
+				.. Strings.locationName(card.location.name, locale)
 			card.name.TextColor3 = if unlocked then Ui.colors.text else Ui.colors.muted
 			card.level.TextColor3 = if unlocked then Ui.colors.level else Ui.colors.muted
 			card.preview.ImageColor3 = if unlocked
@@ -1065,7 +1066,7 @@ local function buildLocations(): Frame
 		preview.LayoutOrder = 1
 		local name = Ui.label(
 			detail,
-			location.name,
+			Strings.locationName(location.name, locale),
 			UDim2.new(1, -8, 0, 40),
 			UDim2.fromOffset(2, 134),
 			18,
@@ -1465,12 +1466,48 @@ artifactButton.Activated:Connect(function()
 	open("artifacts")
 end)
 
+-- ---------------------------------------------------------------- world signs in the player's language
+-- Signs are built in Russian; the original text is kept in the "RuText" attribute and re-rendered
+-- whenever the locale changes.
+local function localizeLabel(label: TextLabel)
+	local ru = label:GetAttribute("RuText")
+	if typeof(ru) ~= "string" then
+		ru = label.Text
+		label:SetAttribute("RuText", ru)
+	end
+	label.Text = Strings.worldText(ru, locale)
+end
+local function localizeWorld()
+	for _, gui in ipairs(workspace:GetDescendants()) do
+		if gui:IsA("BillboardGui") or gui:IsA("SurfaceGui") then
+			for _, label in ipairs(gui:GetDescendants()) do
+				if label:IsA("TextLabel") then
+					localizeLabel(label)
+				end
+			end
+		end
+	end
+end
+workspace.DescendantAdded:Connect(function(instance)
+	if instance:IsA("TextLabel") then
+		local gui = instance:FindFirstAncestorWhichIsA("BillboardGui")
+			or instance:FindFirstAncestorWhichIsA("SurfaceGui")
+		if gui then
+			task.defer(localizeLabel, instance)
+		end
+	end
+end)
+task.defer(localizeWorld)
+
 -- ---------------------------------------------------------------- profile rendering
 local function render(p: Types.Profile)
 	local nextLocale = p.locale or Config.defaultLocale
 	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
 	profile = p
 	locale = nextLocale
+	if rebuild then
+		localizeWorld()
+	end
 	languageButton.Text = T("language_code")
 	renderCameraButton()
 	for button, key in pairs(localizedButtons) do

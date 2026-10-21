@@ -1060,11 +1060,350 @@ function Strings.big(n: number): string
 	return tostring(math.floor(n))
 end
 
+-- World signs, block names, upgrade counters and location names are Russian in the map/config
+-- (the source of truth); these tables translate them for the other locales [владелец 21.10].
+local WORLD: { [string]: { [string]: string } } = {
+	["Спавн"] = { en = "Spawn", es = "Spawn", fr = "Spawn" },
+	["Телепортатор"] = {
+		en = "Teleporter",
+		es = "Teletransportador",
+		fr = "Téléporteur",
+	},
+	["Тренер"] = { en = "Trainer", es = "Entrenador", fr = "Entraîneur" },
+	["Баня"] = { en = "Bathhouse", es = "Baños", fr = "Bains" },
+	["Рынок"] = { en = "Market", es = "Mercado", fr = "Marché" },
+	["Столовая"] = { en = "Canteen", es = "Comedor", fr = "Cantine" },
+	["Спальня"] = { en = "Bedroom", es = "Dormitorio", fr = "Dortoir" },
+	["Шахта"] = { en = "Mine", es = "Mina", fr = "Mine" },
+	["Малая шахта"] = { en = "Small mine", es = "Mina pequeña", fr = "Petite mine" },
+	["Тюрьма"] = { en = "Prison", es = "Prisión", fr = "Prison" },
+	["Задания"] = { en = "Quests", es = "Misiones", fr = "Quêtes" },
+	["Витрина"] = { en = "Showcase", es = "Vitrina", fr = "Vitrine" },
+	["Скупщик блоков"] = {
+		en = "Block buyer",
+		es = "Comprador de bloques",
+		fr = "Acheteur de blocs",
+	},
+	["Продавец предметов"] = {
+		en = "Item seller",
+		es = "Vendedor de objetos",
+		fr = "Vendeur d'objets",
+	},
+	["Продавец еды"] = {
+		en = "Food seller",
+		es = "Vendedor de comida",
+		fr = "Vendeur de nourriture",
+	},
+	["Обменник звёзд"] = {
+		en = "Star exchange",
+		es = "Cambio de estrellas",
+		fr = "Échange d'étoiles",
+	},
+	["Обменник осколков"] = {
+		en = "Shard exchange",
+		es = "Cambio de fragmentos",
+		fr = "Échange d'éclats",
+	},
+	["Охранник"] = { en = "Guard", es = "Guardia", fr = "Gardien" },
+	["Обычный кейс"] = {
+		en = "Ordinary case",
+		es = "Caja común",
+		fr = "Caisse ordinaire",
+	},
+	["Древний кейс"] = {
+		en = "Ancient case",
+		es = "Caja antigua",
+		fr = "Caisse antique",
+	},
+	["Кейс артефактов"] = {
+		en = "Artifact case",
+		es = "Caja de artefactos",
+		fr = "Caisse d'artefacts",
+	},
+	["Кейс с кличками"] = {
+		en = "Nickname case",
+		es = "Caja de apodos",
+		fr = "Caisse des surnoms",
+	},
+	["Эндер-сундук"] = {
+		en = "Ender chest",
+		es = "Cofre de Ender",
+		fr = "Coffre de l'Ender",
+	},
+	["Проводник: продать"] = {
+		en = "Buyer: sell",
+		es = "Comprador: vender",
+		fr = "Acheteur : vendre",
+	},
+	["Зачарованная: "] = {
+		en = "Enchanted: ",
+		es = "Encantada: ",
+		fr = "Enchantée : ",
+	},
+	["Ножницы"] = { en = "Shears", es = "Tijeras", fr = "Cisailles" },
+}
+local BLOCKS: { [string]: { [string]: string } } = {
+	["sand"] = { en = "Sand", es = "Arena", fr = "Sable" },
+	["gravel"] = { en = "Gravel", es = "Grava", fr = "Gravier" },
+	["dirt"] = { en = "Dirt", es = "Tierra", fr = "Terre" },
+	["oak_log"] = { en = "Oak log", es = "Tronco de roble", fr = "Bûche de chêne" },
+	["melon"] = { en = "Melon", es = "Sandía", fr = "Pastèque" },
+	["melon_slice"] = { en = "Melon slice", es = "Rodaja de sandía", fr = "Tranche de pastèque" },
+	["cobblestone"] = { en = "Cobblestone", es = "Piedra labrada", fr = "Pierre taillée" },
+	["stone"] = { en = "Stone", es = "Piedra", fr = "Pierre" },
+	["coal"] = { en = "Coal", es = "Carbón", fr = "Charbon" },
+	["coal_ore"] = { en = "Coal ore", es = "Mena de carbón", fr = "Minerai de charbon" },
+	["iron_ore"] = { en = "Iron ore", es = "Mena de hierro", fr = "Minerai de fer" },
+	["coal_block"] = { en = "Coal block", es = "Bloque de carbón", fr = "Bloc de charbon" },
+	["red_sand"] = { en = "Red sand", es = "Arena roja", fr = "Sable rouge" },
+	["gold_ore"] = { en = "Gold ore", es = "Mena de oro", fr = "Minerai d'or" },
+	["netherite"] = { en = "Netherite", es = "Netherita", fr = "Netherite" },
+	["soul_sand"] = { en = "Soul sand", es = "Arena de almas", fr = "Sable des âmes" },
+	["quartz"] = { en = "Nether quartz", es = "Cuarzo del Nether", fr = "Quartz du Nether" },
+	["quartz_ore"] = {
+		en = "Nether quartz ore",
+		es = "Mena de cuarzo del Nether",
+		fr = "Minerai de quartz du Nether",
+	},
+	["sandstone"] = { en = "Sandstone", es = "Arenisca", fr = "Grès" },
+	["red_sandstone"] = { en = "Red sandstone", es = "Arenisca roja", fr = "Grès rouge" },
+	["wisteria_leaves"] = {
+		en = "Pink wisteria leaves",
+		es = "Hojas de glicinia rosa",
+		fr = "Feuilles de glycine rose",
+	},
+	["cherry_log"] = { en = "Cherry log", es = "Tronco de cerezo", fr = "Bûche de cerisier" },
+	["cyan_concrete"] = { en = "Cyan concrete", es = "Hormigón cian", fr = "Béton cyan" },
+	["prismarine"] = { en = "Prismarine", es = "Prismarina", fr = "Prismarine" },
+	["prismarine_bricks"] = {
+		en = "Prismarine bricks",
+		es = "Ladrillos de prismarina",
+		fr = "Briques de prismarine",
+	},
+	["end_stone_bricks"] = {
+		en = "End stone bricks",
+		es = "Ladrillos de piedra del End",
+		fr = "Briques de pierre de l'End",
+	},
+	["purpur"] = { en = "Purpur", es = "Purpur", fr = "Purpur" },
+	["white_wool"] = { en = "White wool", es = "Lana blanca", fr = "Laine blanche" },
+	["cobweb"] = { en = "Cobweb", es = "Telaraña", fr = "Toile d'araignée" },
+	["ice"] = { en = "Ice", es = "Hielo", fr = "Glace" },
+	["packed_ice"] = { en = "Packed ice", es = "Hielo compacto", fr = "Glace compactée" },
+	["yellow_wool"] = { en = "Yellow wool", es = "Lana amarilla", fr = "Laine jaune" },
+	["red_wool"] = { en = "Red wool", es = "Lana roja", fr = "Laine rouge" },
+	["lime_wool"] = { en = "Lime wool", es = "Lana verde lima", fr = "Laine vert clair" },
+	["orange_concrete"] = { en = "Orange concrete", es = "Hormigón naranja", fr = "Béton orange" },
+	["yellow_concrete"] = { en = "Yellow concrete", es = "Hormigón amarillo", fr = "Béton jaune" },
+	["lime_concrete"] = {
+		en = "Lime concrete",
+		es = "Hormigón verde lima",
+		fr = "Béton vert clair",
+	},
+	["purple_concrete"] = { en = "Purple concrete", es = "Hormigón morado", fr = "Béton violet" },
+	["red_concrete"] = { en = "Red concrete", es = "Hormigón rojo", fr = "Béton rouge" },
+	["quartz_block"] = { en = "Quartz block", es = "Bloque de cuarzo", fr = "Bloc de quartz" },
+	["chiseled_quartz"] = {
+		en = "Chiseled quartz block",
+		es = "Bloque de cuarzo cincelado",
+		fr = "Bloc de quartz sculpté",
+	},
+	["dark_oak_leaves"] = {
+		en = "Dark oak leaves",
+		es = "Hojas de roble oscuro",
+		fr = "Feuilles de chêne noir",
+	},
+	["pink_wool"] = { en = "Pink wool", es = "Lana rosa", fr = "Laine rose" },
+	["sea_lantern"] = { en = "Sea lantern", es = "Linterna marina", fr = "Lanterne aquatique" },
+	["pumpkin"] = { en = "Pumpkin", es = "Calabaza", fr = "Citrouille" },
+	["green_wool"] = { en = "Green wool", es = "Lana verde", fr = "Laine verte" },
+	["jack_o_lantern"] = {
+		en = "Jack o'lantern",
+		es = "Calabaza iluminada",
+		fr = "Citrouille-lanterne",
+	},
+	["magenta_concrete"] = {
+		en = "Magenta concrete",
+		es = "Hormigón magenta",
+		fr = "Béton magenta",
+	},
+	["black_glass"] = { en = "Black glass", es = "Vidrio negro", fr = "Verre noir" },
+	["white_concrete"] = { en = "White concrete", es = "Hormigón blanco", fr = "Béton blanc" },
+	["clay"] = { en = "Clay", es = "Arcilla", fr = "Argile" },
+	["chiseled_sandstone"] = {
+		en = "Chiseled sandstone",
+		es = "Arenisca cincelada",
+		fr = "Grès sculpté",
+	},
+	["brown_mushroom_block"] = {
+		en = "Brown mushroom block",
+		es = "Bloque de champiñón marrón",
+		fr = "Bloc de champignon brun",
+	},
+	["snow"] = { en = "Snow", es = "Nieve", fr = "Neige" },
+	["smooth_sandstone"] = { en = "Smooth sandstone", es = "Arenisca lisa", fr = "Grès lisse" },
+	["red_mushroom_block"] = {
+		en = "Red mushroom block",
+		es = "Bloque de champiñón rojo",
+		fr = "Bloc de champignon rouge",
+	},
+	["lapis_block"] = {
+		en = "Lapis lazuli block",
+		es = "Bloque de lapislázuli",
+		fr = "Bloc de lapis-lazuli",
+	},
+	["iron_block"] = { en = "Iron block", es = "Bloque de hierro", fr = "Bloc de fer" },
+	["gold_block"] = { en = "Gold block", es = "Bloque de oro", fr = "Bloc d'or" },
+	["diamond_block"] = { en = "Diamond block", es = "Bloque de diamante", fr = "Bloc de diamant" },
+}
+local COUNTERS: { [string]: { [string]: string } } = {
+	["Камень"] = { en = "Stone", es = "Piedra", fr = "Pierre" },
+	["Каменный уголь"] = {
+		en = "Coal ore",
+		es = "Mena de carbón",
+		fr = "Minerai de charbon",
+	},
+	["Железная руда"] = {
+		en = "Iron ore",
+		es = "Mena de hierro",
+		fr = "Minerai de fer",
+	},
+	["Золотая руда"] = { en = "Gold ore", es = "Mena de oro", fr = "Minerai d'or" },
+	["Гравий"] = { en = "Gravel", es = "Grava", fr = "Gravier" },
+	["Песок"] = { en = "Sand", es = "Arena", fr = "Sable" },
+	["Земля"] = { en = "Dirt", es = "Tierra", fr = "Terre" },
+	["Крысы"] = { en = "Rats", es = "Ratas", fr = "Rats" },
+	["Оружейник"] = { en = "Armorer", es = "Armero", fr = "Armurier" },
+	["Дерево"] = { en = "Wood", es = "Madera", fr = "Bois" },
+	["Арбуз"] = { en = "Melon", es = "Sandía", fr = "Pastèque" },
+}
+local LOCATIONS: { [string]: { [string]: string } } = {
+	["Тюрьма"] = { en = "Prison", es = "Prisión", fr = "Prison" },
+	["Каменоломня"] = { en = "Quarry", es = "Cantera", fr = "Carrière" },
+	["Подножье горы"] = {
+		en = "Mountain foot",
+		es = "Pie de la montaña",
+		fr = "Pied de la montagne",
+	},
+	["Преисподняя"] = { en = "Underworld", es = "Inframundo", fr = "Enfers" },
+	["Пирамида"] = { en = "Pyramid", es = "Pirámide", fr = "Pyramide" },
+	["Королевский сад"] = {
+		en = "Royal garden",
+		es = "Jardín real",
+		fr = "Jardin royal",
+	},
+	["Затопленный маяк"] = {
+		en = "Sunken lighthouse",
+		es = "Faro hundido",
+		fr = "Phare englouti",
+	},
+	["Пустотная крепость"] = {
+		en = "Void fortress",
+		es = "Fortaleza del vacío",
+		fr = "Forteresse du vide",
+	},
+	["Паучье логово"] = {
+		en = "Spider lair",
+		es = "Guarida de arañas",
+		fr = "Antre des araignées",
+	},
+	["Снежная даль"] = {
+		en = "Snowy reach",
+		es = "Lejanía nevada",
+		fr = "Lointain enneigé",
+	},
+	["Снежная далнь"] = {
+		en = "Snowy reach",
+		es = "Lejanía nevada",
+		fr = "Lointain enneigé",
+	},
+	["Рынок"] = { en = "Market", es = "Mercado", fr = "Marché" },
+	["Лепреконовая долина"] = {
+		en = "Leprechaun valley",
+		es = "Valle del duende",
+		fr = "Vallée des leprechauns",
+	},
+	["Замок"] = { en = "Castle", es = "Castillo", fr = "Château" },
+	["Изнанка"] = { en = "The Other Side", es = "El reverso", fr = "L'Envers" },
+	["Киото"] = { en = "Kyoto", es = "Kioto", fr = "Kyoto" },
+	["Ферма"] = { en = "Farm", es = "Granja", fr = "Ferme" },
+	["Амбар"] = { en = "Barn", es = "Granero", fr = "Grange" },
+	["Врата края"] = { en = "End gate", es = "Puerta del Fin", fr = "Porte de l'End" },
+	["Древо"] = { en = "The Tree", es = "El Árbol", fr = "L'Arbre" },
+	["Церковь"] = { en = "Church", es = "Iglesia", fr = "Église" },
+	["Чистилище"] = { en = "Purgatory", es = "Purgatorio", fr = "Purgatoire" },
+	["Эдем"] = { en = "Eden", es = "Edén", fr = "Éden" },
+	["Херувимы"] = { en = "Cherubim", es = "Querubines", fr = "Chérubins" },
+	["Врата"] = { en = "Gates", es = "Puertas", fr = "Portes" },
+	["Рай"] = { en = "Paradise", es = "Paraíso", fr = "Paradis" },
+	["Подвал"] = { en = "Basement", es = "Sótano", fr = "Sous-sol" },
+	["База фракций"] = {
+		en = "Faction base",
+		es = "Base de facciones",
+		fr = "Base des factions",
+	},
+	["Дворы"] = { en = "Yards", es = "Patios", fr = "Cours" },
+	["Гетто"] = { en = "Ghetto", es = "Gueto", fr = "Ghetto" },
+	["База банды"] = { en = "Gang base", es = "Base de la banda", fr = "Base du gang" },
+	["Личная камера"] = {
+		en = "Private cell",
+		es = "Celda privada",
+		fr = "Cellule privée",
+	},
+	["Мертвозавод"] = { en = "Dead factory", es = "Fábrica muerta", fr = "Usine morte" },
+	["Карьеры"] = { en = "Quarries", es = "Canteras", fr = "Carrières" },
+}
+
+local function pick(table_: { [string]: { [string]: string } }, ru: string, locale: string?): string
+	local loc = locale or Config.defaultLocale
+	if loc == "ru" then
+		return ru
+	end
+	local row = table_[ru]
+	return if row and row[loc] then row[loc] else ru
+end
+
+-- Text of a world sign (BillboardGui / SurfaceGui label built in Russian). Keeps upper case.
+function Strings.worldText(ru: string, locale: string?): string
+	local upper = ru == string.upper(ru) and ru ~= string.lower(ru)
+	local key = if upper then nil else ru
+	if not key then
+		for candidate in pairs(WORLD) do
+			if string.upper(candidate) == ru then
+				key = candidate
+				break
+			end
+		end
+	end
+	if not key then
+		return ru
+	end
+	local text = pick(WORLD, key, locale)
+	return if upper then string.upper(text) else text
+end
+
+function Strings.blockName(id: string, ruName: string, locale: string?): string
+	local loc = locale or Config.defaultLocale
+	if loc == "ru" then
+		return ruName
+	end
+	local row = BLOCKS[id]
+	return if row and row[loc] then row[loc] else ruName
+end
+
+function Strings.counterName(ru: string, locale: string?): string
+	return pick(COUNTERS, ru, locale)
+end
+
+function Strings.locationName(ru: string, locale: string?): string
+	return pick(LOCATIONS, ru, locale)
+end
+
 function Strings.itemName(id: string, level: number?, locale: string?): string
 	local loc = locale or Config.defaultLocale
 	local block = Config.block(id)
 	if block then
-		return block.name
+		return Strings.blockName(id, block.name, loc)
 	end
 	local key = "item_" .. id
 	local base = Strings.t(key, loc)

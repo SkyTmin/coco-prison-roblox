@@ -324,6 +324,12 @@ function ProfileService.Start()
 					profile.coins += a
 				end)
 				return true
+			elseif op == "lastpos" then
+				local session = sessions[player]
+				if session then
+					session.profile.lastPosition = a
+				end
+				return true
 			elseif op == "set" then
 				ProfileService.Mutate(player, function(profile)
 					(profile :: any)[a] = b
@@ -359,17 +365,72 @@ function ProfileService.Start()
 		)
 	end
 
+	-- [владелец 21.10] rejoining puts you where you left: the position is stored every few seconds
+	-- and on leave, and applied to the first character of the next session (not after a death).
+	local restored: { [Player]: boolean } = {}
+	local function rememberPosition(player: Player)
+		local session = sessions[player]
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if session and root and root:IsA("BasePart") and humanoid and humanoid.Health > 0 then
+			local p = root.Position
+			if p.Y > -200 then
+				session.profile.lastPosition = {
+					math.floor(p.X * 10) / 10,
+					math.floor(p.Y * 10) / 10,
+					math.floor(p.Z * 10) / 10,
+				}
+				session.dirty = true
+			end
+		end
+	end
+	local function restorePosition(player: Player, character: Model)
+		if restored[player] then
+			return
+		end
+		for _ = 1, 50 do
+			if sessions[player] then
+				break
+			end
+			task.wait(0.2)
+		end
+		local session = sessions[player]
+		restored[player] = true
+		local pos = session and session.profile.lastPosition
+		if not session or typeof(pos) ~= "table" or #pos ~= 3 then
+			return
+		end
+		local root = character:WaitForChild("HumanoidRootPart", 10)
+		if root and root:IsA("BasePart") and player.Character == character then
+			character:PivotTo(CFrame.new(pos[1], pos[2] + 1, pos[3]))
+		end
+	end
 	local function added(player: Player)
-		player.CharacterAdded:Connect(function()
+		player.CharacterAdded:Connect(function(character)
 			ProfileService.Replicate(player)
+			task.spawn(restorePosition, player, character)
 		end)
+		if player.Character then
+			task.spawn(restorePosition, player, player.Character)
+		end
 		task.spawn(load, player)
 	end
+	task.spawn(function()
+		while true do
+			task.wait(5)
+			for _, player in ipairs(Players:GetPlayers()) do
+				rememberPosition(player)
+			end
+		end
+	end)
 	Players.PlayerAdded:Connect(added)
 	for _, player in ipairs(Players:GetPlayers()) do
 		added(player)
 	end
 	Players.PlayerRemoving:Connect(function(player)
+		rememberPosition(player)
+		restored[player] = nil
 		local session = sessions[player]
 		if session then
 			sessions[player] = nil
