@@ -183,7 +183,7 @@
       "ancientStars": null,
       "powderChance": null,
       "shard": null,
-      "hp": 600,
+      "hp": 200,
       "damage": 0.2,
       "respawnSeconds": 1200
     },
