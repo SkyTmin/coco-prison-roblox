@@ -1,7 +1,7 @@
 // Our own 16×16 pixel-art icons (keys, exchanger goods, trainer badges) in the Pixel Perfection style,
 // upscaled ×8 nearest-neighbour to assets/icons/items/<id>.png, then uploaded with the Studio MCP
 // (upload_image) and recorded in assets/icons/ids.json. Palette letters per sprite; "." = transparent.
-// Usage: node scripts/draw-icons.mjs   (needs the sharp module: cd scratchpad/imgtools && npm i sharp)
+// Usage: node scripts/draw-icons.mjs [id ...]   (ids limit the output; needs the sharp module: cd scratchpad/imgtools && npm i sharp)
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -313,6 +313,133 @@ const SPRITES = {
   trainer_strength: { rows: null, badge: { fill: "#2f7fd6", glyph: "arm" } },
   trainer_agility: { rows: null, badge: { fill: "#2f7fd6", glyph: "feather" } },
   trainer_needs: { rows: null, badge: { fill: "#2f7fd6", glyph: "bed" } },
+  // Status effect icons (HUD, Minecraft-style mob effects; own drawings) — src/shared/Effects.luau
+  effect_nausea: { rows: [
+    "................",
+    ".....OOOOOO.....",
+    "...OOggggggOO...",
+    "..OggggggggggO..",
+    ".OggOOOggOOOggO.",
+    ".OgOgOgOOgOgOgO.",
+    ".OggOOggggOOggO.",
+    ".OggggggggggggO.",
+    ".OggggggggggggO.",
+    ".OgggOOOOOOgggO.",
+    ".OggOGGGGGGOggO.",
+    "..OggggGGggggO..",
+    "...OOgggGgggOO..",
+    ".....OOOOOO.....",
+    "................",
+    "................",
+  ], palette: { O: "#1f3a14", g: "#7dbb3c", G: "#c8e86a" } },
+  effect_insomnia: { rows: [
+    "................",
+    "................",
+    "..k..k...k..k...",
+    "...OOOOOOOOOO...",
+    "..OwwwwwwwwwwO..",
+    ".OwwrwwbbwwwwwO.",
+    "OwwwwwbbbbwwrwwO",
+    "OwwwwbbkkbbwwwwO",
+    "OwrwwbbkkbbwwwwO",
+    "OwwwwwbbbbwwwwwO",
+    ".OwwwwwbbwwwrwO.",
+    "..OwwwwwwwwwwO..",
+    "...OOOOOOOOOO...",
+    "..vvvvvvvvvvvv..",
+    "................",
+    "................",
+  ], palette: { O: "#141a3c", w: "#eef0ff", b: "#4a5cd6", k: "#0a0a14", r: "#d23a3a", v: "#5b3e8a" } },
+  effect_slowness: { rows: [
+    "................",
+    "................",
+    "................",
+    ".......OOOO.....",
+    ".....OOssssOO...",
+    "....OssOOOOssO..",
+    "...OssOssssOssO.",
+    "...OsOssOOssOsO.",
+    "...OsOsOssOsOsO.",
+    "...OsOssOsOsOsO.",
+    ".O.OssOOOOsOsO..",
+    "OkOOOssssssOO...",
+    "OkkkOOOOOOOO....",
+    "OkkkkkkkkkkkO...",
+    ".OOOOOOOOOOOO...",
+    "................",
+  ], palette: { O: "#1e2a3c", s: "#8bafe0", k: "#9a9a9a" } },
+  effect_haste: { rows: [
+    "................",
+    "...OOOOOOOO.....",
+    "..OyyyyyyyyO....",
+    ".OyYYyyyyyyyO...",
+    ".OyOOOOOOdyyO...",
+    "..O.....OdOyyO..",
+    "........Od..OyO.",
+    ".......Od....OO.",
+    "......Od........",
+    ".....Od.........",
+    "....Od..........",
+    "...Od...........",
+    "..Od............",
+    ".Od.............",
+    ".O..............",
+    "................",
+  ], palette: { O: "#4a3a08", y: "#d9c043", Y: "#fff2a0", d: "#7a5230" } },
+  effect_speed: { rows: [
+    "................",
+    "................",
+    "..OO....OO......",
+    "..OcO...OcO.....",
+    "...OcO...OcO....",
+    "....OcO...OcO...",
+    ".....OcO...OcO..",
+    "......OcO...OcO.",
+    "......OcO...OcO.",
+    ".....OcO...OcO..",
+    "....OcO...OcO...",
+    "...OcO...OcO....",
+    "..OcO...OcO.....",
+    "..OO....OO......",
+    "................",
+    "................",
+  ], palette: { O: "#0b4a55", c: "#33ebff" } },
+  effect_regeneration: { rows: [
+    "................",
+    "................",
+    "..OOOO....OOOO..",
+    ".OppppO..OppppO.",
+    "OpPPpppOOppppppO",
+    "OpPpppppppppppO.",
+    "OppppppwwpppppO.",
+    "OpppppwwwwppppO.",
+    ".OpppppwwpppppO.",
+    "..OppppwwppppO..",
+    "...OppppppppO...",
+    "....OppppppO....",
+    ".....OppppO.....",
+    "......OppO......",
+    ".......OO.......",
+    "................",
+  ], palette: { O: "#4a1238", p: "#cd5cab", P: "#f2a8dc", w: "#ffffff" } },
+  effect_strength: { rows: [
+    "................",
+    "............OOO.",
+    "...........OsSO.",
+    "..........OsSO..",
+    ".........OsSO...",
+    "........OsSO....",
+    ".......OsSO.....",
+    "..OO..OsSO......",
+    "..OrOOsSO.......",
+    "...OrrSO........",
+    "....OrrO........",
+    "...OrOOrO.......",
+    "..OdO..OrO......",
+    ".OdO....OO......",
+    ".OO.............",
+    "................",
+  ], palette: { O: "#3a1a0a", s: "#ffc700", S: "#fff0a0", r: "#a01818", d: "#6b3d1e" } },
 };
 
 const BADGE = {
@@ -396,7 +523,9 @@ async function render(id, rows, palette, extras) {
   await sharp(buf, { raw: { width: 16, height: 16, channels: 4 } }).resize(128, 128, { kernel: "nearest" }).png().toFile(path.join(out, id + ".png"));
 }
 
+const only = process.argv.slice(2);
 for (const [id, spec] of Object.entries(SPRITES)) {
+  if (only.length && !only.includes(id)) continue;
   if (spec.badge) {
     await render(id, BADGE[spec.badge.glyph], badgePalette);
   } else {

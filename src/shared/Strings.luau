@@ -629,6 +629,41 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Régénération",
 	},
 	event_strength = { ru = "Сила", en = "Strength", es = "Fuerza", fr = "Force" },
+	-- status effects (HUD icons, src/shared/Effects.luau); Minecraft names in each language
+	effect_nausea = { ru = "Тошнота", en = "Nausea", es = "Náuseas", fr = "Nausée" },
+	effect_insomnia = {
+		ru = "Бессонница",
+		en = "Insomnia",
+		es = "Insomnio",
+		fr = "Insomnie",
+	},
+	effect_slowness = {
+		ru = "Замедление",
+		en = "Slowness",
+		es = "Lentitud",
+		fr = "Lenteur",
+	},
+	effect_haste = { ru = "Спешка", en = "Haste", es = "Prisa", fr = "Célérité" },
+	effect_speed = { ru = "Скорость", en = "Speed", es = "Velocidad", fr = "Vitesse" },
+	effect_regeneration = {
+		ru = "Регенерация",
+		en = "Regeneration",
+		es = "Regeneración",
+		fr = "Régénération",
+	},
+	effect_strength = { ru = "Сила", en = "Strength", es = "Fuerza", fr = "Force" },
+	effect_until_restored = {
+		ru = "пока нужда на нуле",
+		en = "while the need is at zero",
+		es = "mientras la necesidad esté a cero",
+		fr = "tant que le besoin est à zéro",
+	},
+	effect_insomnia_dig = {
+		ru = "Бессонница: вы не можете копать. Поспите в Спальне или используйте спальный мешок.",
+		en = "Insomnia: you can't dig. Sleep in the Dormitory or use a sleeping bag.",
+		es = "Insomnio: no puedes cavar. Duerme en el Dormitorio o usa un saco de dormir.",
+		fr = "Insomnie : vous ne pouvez pas creuser. Dormez au Dortoir ou utilisez un sac de couchage.",
+	},
 	event_started = {
 		ru = "Внезапное событие %s I началось!",
 		en = "Sudden event %s I has begun!",

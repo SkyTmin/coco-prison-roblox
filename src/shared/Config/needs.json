@@ -4,7 +4,6 @@
     "name": "Грязь",
     "minutesToZero": 90,
     "effectAtZero": "nausea",
-    "digSlowdownAtZero": 0.1,
     "restoreZone": "bath_water",
     "consumable": "soap"
   },

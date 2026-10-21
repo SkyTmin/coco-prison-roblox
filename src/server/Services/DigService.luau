@@ -48,6 +48,7 @@ local DigService = {}
 local digs: { [Player]: Dig } = {}
 local combos: { [Player]: Combo } = {}
 local lastBreakAt: { [Player]: number } = {} -- Minecraft's 5-tick pause after a break [ваниль]
+local insomniaToastAt: { [Player]: number } = {} -- holding dig must not spam the toast
 local random = Random.new()
 local nextToken = 0
 
@@ -135,21 +136,24 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 		return nil, nil, nil
 	end
 	if profile.needs.sleep <= 0 then
-		return nil, nil, nil -- insomnia: cannot dig [вики]
+		-- insomnia: cannot dig [вики, владелец]
+		local now = os.clock()
+		if now - (insomniaToastAt[player] or 0) > 3 then
+			insomniaToastAt[player] = now
+			toast(player, "effect_insomnia_dig")
+		end
+		return nil, nil, nil
 	end
 	if not InventoryService.canAdd(profile, block.dropsAs or block.id, 1) then
 		toast(player, "bag_full")
 		return nil, nil, nil
 	end
-	local slowdown = 0
-	if profile.needs.hygiene <= 0 then
-		slowdown += Config.needs.hygiene.digSlowdownAtZero
-	end
+	-- Nausea is visual only, as in Minecraft [ваниль, владелец 21.10]
 	local character = player.Character
 	if character and character:GetAttribute("Haste") == 1 then
 		needed /= 1.2 -- vanilla Haste I
 	end
-	return needed * (1 + slowdown), mine, i
+	return needed, mine, i
 end
 
 local function comboMultiplier(combo: Combo): number
@@ -305,6 +309,7 @@ function DigService.Start()
 		digs[player] = nil
 		combos[player] = nil
 		lastBreakAt[player] = nil
+		insomniaToastAt[player] = nil
 	end)
 	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client
 	local elapsed = 0

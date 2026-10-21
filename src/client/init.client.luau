@@ -6,7 +6,6 @@
 local ContextActionService = game:GetService("ContextActionService")
 local CollectionService = game:GetService("CollectionService")
 local GuiService = game:GetService("GuiService")
-local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -31,6 +30,7 @@ local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
+local EffectsHud = require(script.EffectsHud)
 HeldItem.Start()
 ArmorVisual.Start()
 BlockBreak.Start()
@@ -1576,63 +1576,9 @@ Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
 	renderCombo()
 end)
 
--- Camera changes run after Roblox's camera update; remove our previous roll when needed so a
--- stationary/Scriptable camera cannot accumulate it. Only our own blur is ever destroyed.
-local nauseaBlur: BlurEffect? = nil
-local nauseaAttributeConnection: RBXScriptConnection? = nil
-local rolledCamera: Camera? = nil
-local baseCFrame: CFrame? = nil
-local appliedCFrame: CFrame? = nil
-
-local function clearCameraRoll()
-	if rolledCamera and baseCFrame and rolledCamera.CFrame == appliedCFrame then
-		rolledCamera.CFrame = baseCFrame
-	end
-	rolledCamera, baseCFrame, appliedCFrame = nil, nil, nil
-end
-
-local function setNausea(enabled: boolean)
-	RunService:UnbindFromRenderStep("PrisonNausea")
-	clearCameraRoll()
-	if nauseaBlur then
-		nauseaBlur:Destroy()
-		nauseaBlur = nil
-	end
-	if not enabled then
-		return
-	end
-	local blur = Instance.new("BlurEffect")
-	blur.Name = "PrisonNausea"
-	blur.Size = 8
-	blur.Parent = Lighting
-	nauseaBlur = blur
-	RunService:BindToRenderStep("PrisonNausea", Enum.RenderPriority.Camera.Value + 1, function()
-		clearCameraRoll()
-		local currentCamera = workspace.CurrentCamera
-		if currentCamera then
-			local base = currentCamera.CFrame
-			local rolled = base
-				* CFrame.Angles(0, 0, math.rad(2) * math.sin(os.clock() * 2 * math.pi))
-			rolledCamera, baseCFrame, appliedCFrame = currentCamera, base, rolled
-			currentCamera.CFrame = rolled
-		end
-	end)
-end
-
-local function watchNausea(character: Model?)
-	if nauseaAttributeConnection then
-		nauseaAttributeConnection:Disconnect()
-		nauseaAttributeConnection = nil
-	end
-	setNausea(false)
-	if character then
-		nauseaAttributeConnection = character:GetAttributeChangedSignal("Nausea"):Connect(function()
-			setNausea(character:GetAttribute("Nausea") == true)
-		end)
-		setNausea(character:GetAttribute("Nausea") == true)
-	end
-end
-player.CharacterAdded:Connect(watchNausea)
+-- Status effects (Nausea / Insomnia / Slowness from needs, event effects): HUD icons and the
+-- Minecraft-like screen effects live in EffectsHud; it is placed next to the stats panel in updateLayout.
+local effectsHud = EffectsHud.start(gui, T, showToast)
 -- [владелец] no auto-jump on touch: jumping is the jump button only
 player.AutoJumpEnabled = false
 local function disableAutoJump(character: Model)
@@ -1645,10 +1591,6 @@ player.CharacterAdded:Connect(disableAutoJump)
 if player.Character then
 	disableAutoJump(player.Character)
 end
-player.CharacterRemoving:Connect(function()
-	watchNausea(nil)
-end)
-watchNausea(player.Character)
 
 -- ---------------------------------------------------------------- ladders [ваниль]
 -- On a Minecraft ladder you climb at ≈ 2.35 blocks/s and slide down at ≈ 3 blocks/s when idle.
@@ -1827,9 +1769,6 @@ local function expectedTime(part: BasePart): number?
 	end
 	local needed = Config.breakTime(block, toolId, level)
 	if needed then
-		if profile.needs.hygiene <= 0 then
-			needed *= 1 + Config.needs.hygiene.digSlowdownAtZero
-		end
 		local character = player.Character
 		if character and character:GetAttribute("Haste") == 1 then
 			needed /= 1.2
@@ -2210,6 +2149,8 @@ local needsScale = Instance.new("UIScale")
 needsScale.Parent = needsPanel
 local hotbarScale = Instance.new("UIScale")
 hotbarScale.Parent = hotbar
+local effectsScale = Instance.new("UIScale")
+effectsScale.Parent = effectsHud
 local slotScales: { UIScale } = {}
 for i, slot in ipairs(hotbarSlots) do
 	local scale = Instance.new("UIScale")
@@ -2228,6 +2169,9 @@ local function updateLayout()
 	needsPanel.Position = if mobile
 		then UDim2.new(1, -132, 0, 142)
 		else UDim2.new(1, -200, 0.42, 120)
+	-- effect icons sit left of the stats panel, top-aligned with it
+	effectsHud.Position = if mobile then UDim2.new(1, -136, 0, 64) else UDim2.new(1, -206, 0.42, 0)
+	effectsScale.Scale = if mobile then 0.75 else 1
 	cameraButton.Parent = if mobile then touchActions else gui
 	cameraButton.Size = if mobile then UDim2.fromOffset(64, 48) else UDim2.fromOffset(150, 28)
 	cameraButton.Position = if mobile

@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Effects = require(Shared.Effects)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -20,7 +21,7 @@ type State = {
 	humanoid: Humanoid?,
 	movementMultiplier: number,
 }
-type Event = { name: string, endsAt: number }
+type Event = { name: string, endsAt: number, endsAtServer: number }
 
 local NEEDS: { Need } = { "hygiene", "sleep", "toilet" }
 local RESTORE_TAGS: { [string]: Need } = {
@@ -41,18 +42,79 @@ local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
 
+-- Minecraft-style swirl particles in the mixed colour of all active effects, seen by every player.
+local function updateParticles(character: Model)
+	local root = character:FindFirstChild("HumanoidRootPart")
+	if not root or not root:IsA("BasePart") then
+		return
+	end
+	local active = Effects.active(character)
+	local emitter = root:FindFirstChild("EffectParticles")
+	if #active == 0 then
+		if emitter then
+			emitter:Destroy()
+		end
+		return
+	end
+	-- vanilla mixes the potion colours of all active effects (weighted by level)
+	local r, g, b, weight = 0, 0, 0, 0
+	for _, entry in ipairs(active) do
+		r += entry.effect.color.R * entry.level
+		g += entry.effect.color.G * entry.level
+		b += entry.effect.color.B * entry.level
+		weight += entry.level
+	end
+	local color = Color3.new(r / weight, g / weight, b / weight)
+	if not emitter or not emitter:IsA("ParticleEmitter") then
+		local new = Instance.new("ParticleEmitter")
+		new.Name = "EffectParticles"
+		new.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+		new.Shape = Enum.ParticleEmitterShape.Box
+		new.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+		new.EmissionDirection = Enum.NormalId.Top
+		new.Rate = 5
+		new.Lifetime = NumberRange.new(1, 1.6)
+		new.Speed = NumberRange.new(0.6, 1.2)
+		new.Acceleration = Vector3.new(0, 0.6, 0)
+		new.RotSpeed = NumberRange.new(-90, 90)
+		new.Size = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.35),
+			NumberSequenceKeypoint.new(1, 0.1),
+		})
+		new.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.1),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		new.LightEmission = 0.3
+		new.Parent = root
+		emitter = new
+	end
+	(emitter :: ParticleEmitter).Color = ColorSequence.new(color)
+end
+
+local function setEffect(character: Model, attribute: string, level: number?, endsAt: number?)
+	character:SetAttribute(attribute, level)
+	character:SetAttribute(attribute .. Effects.UNTIL, if level then endsAt else nil)
+end
+
 local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	local character = player.Character
 	if not character then
 		return
 	end
-	local eventName = if activeEvent and os.clock() < activeEvent.endsAt
-		then activeEvent.name
-		else nil
-	character:SetAttribute("Nausea", needs.hygiene <= 0)
-	character:SetAttribute("Insomnia", needs.sleep <= 0)
-	character:SetAttribute("Haste", if eventName == "haste" then 1 else nil)
-	character:SetAttribute("Strength", if eventName == "strength" then 1 else nil)
+	local event = if activeEvent and os.clock() < activeEvent.endsAt then activeEvent else nil
+	local eventName = if event then event.name else nil
+	local eventEnds = if event then event.endsAtServer else nil
+	-- needs at 0 [вики]: dirt → Nausea, sleep → Insomnia, toilet → Slowness; they last until restored
+	setEffect(character, "Nausea", if needs.hygiene <= 0 then 1 else nil)
+	setEffect(character, "Insomnia", if needs.sleep <= 0 then 1 else nil)
+	setEffect(character, "Slowness", if needs.toilet <= 0 then 1 else nil)
+	-- random events: a vanilla level-I effect for everyone [сеть, вики-скриншот]
+	for _, name in ipairs(EVENTS) do
+		local attribute = string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2)
+		setEffect(character, attribute, if eventName == name then 1 else nil, eventEnds)
+	end
+	updateParticles(character)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if not humanoid then
 		return
@@ -61,8 +123,8 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 		state.humanoid = humanoid
 		state.movementMultiplier = 1
 	end
-	local multiplier = (if needs.toilet <= 0 then 1 - Config.needs.toilet.moveSlowdownAtZero else 1)
-		* (if eventName == "speed" then 1.2 else 1)
+	local multiplier = (if needs.toilet <= 0 then 1 - Effects.SLOWNESS_PER_LEVEL else 1)
+		* (if eventName == "speed" then 1 + Effects.SPEED_PER_LEVEL else 1)
 	if multiplier ~= state.movementMultiplier then
 		humanoid.WalkSpeed = humanoid.WalkSpeed / state.movementMultiplier * multiplier
 		state.movementMultiplier = multiplier
@@ -235,6 +297,7 @@ local function startEvent()
 	local event: Event = {
 		name = EVENTS[math.random(1, #EVENTS)],
 		endsAt = os.clock() + Config.needs.randomEvent.durationSeconds,
+		endsAtServer = workspace:GetServerTimeNow() + Config.needs.randomEvent.durationSeconds,
 	}
 	activeEvent = event
 	for _, player in ipairs(Players:GetPlayers()) do
