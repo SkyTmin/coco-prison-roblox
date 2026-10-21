@@ -1858,7 +1858,7 @@ local accepted: { [BasePart]: boolean } = {} -- the server started its timer for
 -- before showing the block again (2 s made blocks vanish, come back and vanish again)
 local CONFIRM_TIMEOUT = 3
 local ACCEPTED_TIMEOUT = 8
-local nextDigAt = 0 -- Minecraft's 5-tick pause after a break [ваниль]
+local nextDigAt = 0 -- Minecraft's pause after a break, none after an instant one [ваниль]
 
 local function expectedTime(part: BasePart): number?
 	if not profile then
@@ -1878,14 +1878,9 @@ local function expectedTime(part: BasePart): number?
 	if profile.needs.sleep <= 0 then
 		return nil
 	end
-	local needed = Config.breakTime(block, toolId, level)
-	if needed then
-		local character = player.Character
-		if character and character:GetAttribute("Haste") == 1 then
-			needed /= 1.2
-		end
-	end
-	return needed
+	local character = player.Character
+	local haste = if character then tonumber(character:GetAttribute("Haste")) or 0 else 0
+	return Config.breakTime(block, toolId, level, haste)
 end
 
 -- Prediction: the block disappears for this client the moment its timer ends; the server removes it
@@ -2026,7 +2021,7 @@ RunService.RenderStepped:Connect(function()
 				hideLocally(digTarget)
 				digPredicted = true
 				progress.Visible = false
-				nextDigAt = now + Config.hitDelay()
+				nextDigAt = now + Config.hitDelayAfter(digNeeded)
 			end
 		end
 	elseif holding and aim and not pending[aim.part] and now >= nextDigAt then

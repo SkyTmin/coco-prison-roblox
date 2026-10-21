@@ -39,15 +39,18 @@ type Dig = {
 	generation: number,
 	startedAt: number,
 	needed: number,
+	pause: number, -- what was left of the pause after the previous block
 	toolId: string?,
 	toolLevel: number,
 }
+local TICK = 0.05
 type Combo = { count: number, lastAt: number }
 
 local DigService = {}
 local digs: { [Player]: Dig } = {}
 local combos: { [Player]: Combo } = {}
-local lastBreakAt: { [Player]: number } = {} -- Minecraft's 5-tick pause after a break [ваниль]
+local lastBreakAt: { [Player]: number } = {} -- Minecraft's pause after a break [ваниль]
+local lastPause: { [Player]: number } = {} -- that pause: 0 after an instantly broken block
 local insomniaToastAt: { [Player]: number } = {} -- holding dig must not spam the toast
 local random = Random.new()
 local nextToken = 0
@@ -127,9 +130,11 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 	end
 	local toolId, toolLevel = InventoryService.heldTool(profile)
 	-- creative test mode: every block breaks at once with any tool (CreativeService)
+	local character = player.Character
+	local haste = if character then tonumber(character:GetAttribute("Haste")) or 0 else 0
 	local needed = if player:GetAttribute("Creative")
 		then Config.rules.creative.breakSeconds
-		else Config.breakTime(block, toolId, toolLevel)
+		else Config.breakTime(block, toolId, toolLevel, haste)
 	if not needed then
 		if block.tool ~= "any" and toolId ~= block.tool then
 			toast(player, "wrong_tool")
@@ -152,10 +157,6 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 		return nil, nil, nil
 	end
 	-- Nausea is visual only, as in Minecraft [ваниль, владелец 21.10]
-	local character = player.Character
-	if character and character:GetAttribute("Haste") == 1 then
-		needed /= 1.2 -- vanilla Haste I
-	end
 	return needed, mine, i
 end
 
@@ -194,6 +195,7 @@ local function complete(player: Player, token: number)
 	local brokenCFrame, brokenSize, brokenColor = part.CFrame, part.Size, part.Color
 	local blockId = MineService.breakBlock(mine, i)
 	lastBreakAt[player] = os.clock()
+	lastPause[player] = Config.hitDelayAfter(dig.needed)
 	if not blockId then
 		Remotes.event("DigRejected"):FireClient(player, part)
 		return
@@ -267,6 +269,13 @@ local function complete(player: Player, token: number)
 end
 
 local function onDigStart(player: Player, part: any, hit: any)
+	-- The client's timer starts when it sends DigStart, ours when it arrives, so with no pause
+	-- (instant mining) the next DigStart races our timer of the previous block: finish that block
+	-- first if its time is up (one tick of grace for jitter) instead of dropping it.
+	local previous = digs[player]
+	if previous and os.clock() - previous.startedAt >= previous.needed + previous.pause - TICK then
+		complete(player, previous.token)
+	end
 	digs[player] = nil
 	local needed, mine = check(player, part, hit)
 	if not needed or not mine then
@@ -279,7 +288,7 @@ local function onDigStart(player: Player, part: any, hit: any)
 	local toolId, toolLevel = InventoryService.heldTool(profile)
 	-- rapid taps cannot skip the pause: the timer simply includes what is left of it
 	local pause =
-		math.max(0, Config.hitDelay() - (os.clock() - (lastBreakAt[player] or -math.huge)))
+		math.max(0, (lastPause[player] or 0) - (os.clock() - (lastBreakAt[player] or -math.huge)))
 	nextToken += 1
 	local token = nextToken
 	digs[player] = {
@@ -289,6 +298,7 @@ local function onDigStart(player: Player, part: any, hit: any)
 		generation = mine.generation,
 		startedAt = os.clock(),
 		needed = needed,
+		pause = pause,
 		toolId = toolId,
 		toolLevel = toolLevel,
 	}
@@ -312,6 +322,7 @@ function DigService.Start()
 		digs[player] = nil
 		combos[player] = nil
 		lastBreakAt[player] = nil
+		lastPause[player] = nil
 		insomniaToastAt[player] = nil
 	end)
 	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client

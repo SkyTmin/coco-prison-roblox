@@ -169,11 +169,11 @@ end
 --   speed = 1 by hand; with the matching tool type: toolSpeed[material] (wood 2, stone 4, iron 6,
 --   diamond 8) + (efficiency² + 1) when enchanted; damage per tick = speed / hardness / 30 when the
 --   tool can harvest the block (or the block needs no tool), / 100 otherwise; the block breaks after
---   ceil(1 / damage) ticks of 0.05 s, instantly when damage ≥ 1. Haste is applied by DigService.
+--   ceil(1 / damage) ticks of 0.05 s, instantly when damage ≥ 1; Haste ×(1 + 0.2·level) on the speed.
 -- [владелец 20.10] digging by hand / with the wrong tool is always allowed and the block still drops;
 -- it just takes the vanilla "wrong tool" time (pickaxe blocks: /100, e.g. stone by hand 7.5 s).
 local TICK = 0.05
-function Config.breakTime(block: Block, toolId: string?, toolLevel: number): number?
+function Config.breakTime(block: Block, toolId: string?, toolLevel: number, haste: number?): number?
 	if block.itemOnly then
 		return nil
 	end
@@ -199,6 +199,8 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number): num
 			canHarvest = block.tool ~= "pickaxe"
 		end
 	end
+	-- Haste multiplies the dig speed by 1 + 0.2 per level, before the instant check [ваниль]
+	speed *= 1 + 0.2 * math.max(0, haste or 0)
 	local damage = speed / hardness / (if canHarvest then 30 else 100)
 	if damage >= 1 then
 		return TICK -- instant break [ваниль]
@@ -206,7 +208,13 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number): num
 	return math.ceil(1 / damage - 1e-9) * TICK
 end
 
--- Minecraft pauses 5 ticks after a block breaks before the next one can start [ваниль]
+-- Minecraft pauses 6 ticks (0.3 s) after a block breaks before the next one starts; a block broken
+-- instantly (in one tick) has no pause, so instant mining runs at 20 blocks a second [ваниль,
+-- minecraft.wiki/w/Breaking]
+function Config.hitDelayAfter(needed: number): number
+	return if needed <= TICK + 1e-6 then 0 else Config.hitDelay()
+end
+
 function Config.hitDelay(): number
 	local digging = Config.rules.digging
 	local ticks = if digging and typeof(digging.hitDelayTicks) == "number"
