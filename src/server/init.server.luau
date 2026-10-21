@@ -73,8 +73,10 @@ TrainerService.Start()
 
 -- Hearts by level on spawn
 game:GetService("Players").PlayerAdded:Connect(function(player)
+	player.AutoJumpEnabled = false -- [владелец] no auto-jump on touch
 	player.CharacterAdded:Connect(function(character)
 		local humanoid = character:WaitForChild("Humanoid") :: Humanoid
+		humanoid.AutoJumpEnabled = false
 		task.defer(function()
 			local profile = ProfileService.Get(player)
 			local rule = if profile then Config.levelRule(profile.level) else nil

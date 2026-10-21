@@ -12,7 +12,7 @@
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
 --                          BlockBroken(userId, cframe, size, color, blockId) — for other players' effects
 --                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
--- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat)
+-- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

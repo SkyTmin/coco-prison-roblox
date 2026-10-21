@@ -1585,6 +1585,18 @@ local function watchNausea(character: Model?)
 	end
 end
 player.CharacterAdded:Connect(watchNausea)
+-- [владелец] no auto-jump on touch: jumping is the jump button only
+player.AutoJumpEnabled = false
+local function disableAutoJump(character: Model)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if humanoid and humanoid:IsA("Humanoid") then
+		humanoid.AutoJumpEnabled = false
+	end
+end
+player.CharacterAdded:Connect(disableAutoJump)
+if player.Character then
+	disableAutoJump(player.Character)
+end
 player.CharacterRemoving:Connect(function()
 	watchNausea(nil)
 end)
@@ -1904,6 +1916,16 @@ RunService.RenderStepped:Connect(function()
 	HeldItem.SetDigging(digging and not digPredicted)
 end)
 
+-- Melee swing along the look direction (Minecraft: click / tap with nothing to dig)
+local function attack()
+	local currentCamera = workspace.CurrentCamera
+	if not currentCamera or currentWindowKind then
+		return
+	end
+	HeldItem.Swing()
+	Remotes.event("Attack"):FireServer(currentCamera.CFrame.LookVector)
+end
+
 -- PC / gamepad: hold the mouse button (R2) on a block
 local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 	if state == Enum.UserInputState.Begin then
@@ -1921,11 +1943,14 @@ local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 				end
 			end
 		end
-		holding = true
 		local aim = aimAt()
 		if aim and not pending[aim.part] then
+			holding = true
 			stopDig(true)
 			startDig(aim)
+		else
+			holding = false
+			attack()
 		end
 	elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
 		holding = false
@@ -1948,6 +1973,7 @@ ContextActionService:BindAction(
 -- hold eats it. The left half stays with Roblox's thumbstick and jump button.
 local activeTouch: InputObject? = nil
 local touchHeldSince = 0
+local touchStart = Vector2.zero
 local touchAte = false
 local EAT_HOLD = 0.6 -- s, like Bedrock's hold-to-use
 local function isFood(): boolean
@@ -1976,16 +2002,27 @@ UserInputService.TouchStarted:Connect(function(input: InputObject, processed: bo
 		return
 	end
 	activeTouch, touchHeldSince, touchAte = input, os.clock(), false
-	holding = true
+	touchStart = Vector2.new(input.Position.X, input.Position.Y)
 	local aim = aimAt()
 	if aim and not pending[aim.part] then
+		-- a block under the crosshair when the finger lands: dig, and keep digging while held
+		holding = true
 		stopDig(true)
 		startDig(aim)
+	else
+		-- nothing to dig: this finger only turns the camera (never starts digging later) or eats
+		holding = false
 	end
 end)
 UserInputService.TouchEnded:Connect(function(input: InputObject)
 	if input == activeTouch then
+		local tapped = os.clock() - touchHeldSince < 0.3
+			and (Vector2.new(input.Position.X, input.Position.Y) - touchStart).Magnitude < 12
+		local wasDigging = holding
 		cancelDigInput()
+		if tapped and not wasDigging and not touchAte then
+			attack() -- a short tap on empty space = a swing, like Minecraft's attack tap
+		end
 	end
 end)
 RunService.Heartbeat:Connect(function()
@@ -2009,7 +2046,7 @@ player.CharacterRemoving:Connect(cancelDigInput)
 local touchMenus = Instance.new("Frame")
 touchMenus.Name = "TouchMenus"
 touchMenus.Position = UDim2.fromOffset(8, 64)
-touchMenus.Size = UDim2.fromOffset(2 * 50, 4 * 50)
+touchMenus.Size = UDim2.fromOffset(2 * 60, 4 * 60)
 touchMenus.BackgroundTransparency = 1
 touchMenus.Parent = gui
 local menuKeys =
@@ -2018,7 +2055,8 @@ local function touchIconButton(
 	parent: Instance,
 	iconId: string?,
 	fallbackText: string,
-	size: number
+	size: number,
+	caption: string?
 ): TextButton
 	local button = Ui.button(
 		parent,
@@ -2041,14 +2079,36 @@ local function touchIconButton(
 		image.ResampleMode = Enum.ResamplerMode.Pixelated
 		image.Image = iconId
 		image.Parent = button
+		if caption then
+			image.Size = UDim2.fromScale(0.55, 0.55)
+			image.Position = UDim2.fromScale(0.5, 0.4)
+			local label = Ui.label(
+				button,
+				caption,
+				UDim2.new(1, -2, 0, 12),
+				UDim2.new(0, 1, 1, -13),
+				9,
+				Ui.colors.white
+			)
+			label.Name = "Caption"
+			label.TextXAlignment = Enum.TextXAlignment.Center
+			label.TextScaled = true
+			label.TextStrokeTransparency = 0.5
+		end
 	end
 	return button
 end
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
-	local button =
-		touchIconButton(touchMenus, icon, if kind == "language_code" then T(kind) else "", 44)
-	button.Position = UDim2.fromOffset(((i - 1) % 2) * 50, math.floor((i - 1) / 2) * 50)
+	local captionKey = if kind == "level" then "level_up" else kind
+	local button = touchIconButton(
+		touchMenus,
+		icon,
+		if kind == "language_code" then T(kind) else "",
+		56,
+		if kind == "language_code" then nil else T(captionKey)
+	)
+	button.Position = UDim2.fromOffset(((i - 1) % 2) * 60, math.floor((i - 1) / 2) * 60)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
@@ -2071,6 +2131,12 @@ local function useConsumable()
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end
+-- "Съесть" appears above the jump button whenever food is in the selected slot (hold-to-eat stays too)
+local eatButton = touchIconButton(touchActions, Config.icons.icons["apple"], T("eat"), 60, T("eat"))
+eatButton.Name = "TouchEat"
+eatButton.Position = UDim2.new(1, -180, 1, -200)
+eatButton.Visible = false
+eatButton.Activated:Connect(useConsumable)
 local inventoryButton = touchIconButton(touchActions, nil, "•••", 40)
 inventoryButton.Name = "TouchInventory"
 inventoryButton.TextSize = 20
@@ -2176,6 +2242,7 @@ watchViewport()
 RunService.RenderStepped:Connect(function()
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
+	eatButton.Visible = controlsVisible and isFood()
 	crosshair.Visible = (firstPerson or isMobile()) and currentWindowKind == nil
 	if currentWindowKind then
 		cancelDigInput()

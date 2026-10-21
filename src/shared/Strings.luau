@@ -6,6 +6,7 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {
+	eat = { ru = "Съесть", en = "Eat", es = "Comer", fr = "Manger" },
 	-- upgrade window [меню]
 	upgrades = { ru = "Улучшения", en = "Upgrades", es = "Mejoras", fr = "Améliorations" },
 	upgrade_button = { ru = "Улучшить", en = "Upgrade", es = "Mejorar", fr = "Améliorer" },

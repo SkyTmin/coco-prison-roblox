@@ -41,6 +41,27 @@ function HeldItem.SetDigging(active: boolean)
 	end
 end
 
+-- One attack swing like Minecraft's arm swing (about 6 ticks there); ignored while digging.
+function HeldItem.Swing()
+	if swingTween then
+		return
+	end
+	swing.Value = 0
+	local tween = TweenService:Create(
+		swing,
+		TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, true),
+		{ Value = 1 }
+	)
+	swingTween = tween
+	tween.Completed:Once(function()
+		if swingTween == tween then
+			swingTween = nil
+			swing.Value = 0
+		end
+	end)
+	tween:Play()
+end
+
 local function rightHand(character: Model): BasePart?
 	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
 	return if hand and hand:IsA("BasePart") then hand else nil

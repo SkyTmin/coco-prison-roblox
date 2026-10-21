@@ -144,6 +144,10 @@ for (const [id, item] of Object.entries(armorWiki.items)) {
 write("tools.json", {
 	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
 	vanilla: {
+		// [ваниль] Java: attack speed per second and tool damage by material; hand 1 damage at 4/s
+		attackSpeed: { hand: 4, sword: 1.6, axe: { wood: 0.8, stone: 0.8, iron: 0.9, diamond: 1 }, pickaxe: 1.2, shovel: 1 },
+		toolDamage: { axe: { wood: 7, stone: 9, iron: 9, diamond: 9 }, pickaxe: { wood: 2, stone: 3, iron: 4, diamond: 5 }, shovel: { wood: 2.5, stone: 3.5, iron: 4.5, diamond: 5.5 } },
+		handDamage: 1,
 		swordDamage: { wood: 4, stone: 5, iron: 6, diamond: 7 },
 		sharpnessBonus: [0, 1.0, 1.5, 2.0, 2.5, 3.0],
 		toolSpeed: { hand: 1, wood: 2, stone: 4, iron: 6, diamond: 8 },

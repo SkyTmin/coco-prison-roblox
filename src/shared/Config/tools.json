@@ -1,6 +1,39 @@
 {
   "source": "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
   "vanilla": {
+    "attackSpeed": {
+      "hand": 4,
+      "sword": 1.6,
+      "axe": {
+        "wood": 0.8,
+        "stone": 0.8,
+        "iron": 0.9,
+        "diamond": 1
+      },
+      "pickaxe": 1.2,
+      "shovel": 1
+    },
+    "toolDamage": {
+      "axe": {
+        "wood": 7,
+        "stone": 9,
+        "iron": 9,
+        "diamond": 9
+      },
+      "pickaxe": {
+        "wood": 2,
+        "stone": 3,
+        "iron": 4,
+        "diamond": 5
+      },
+      "shovel": {
+        "wood": 2.5,
+        "stone": 3.5,
+        "iron": 4.5,
+        "diamond": 5.5
+      }
+    },
+    "handDamage": 1,
     "swordDamage": {
       "wood": 4,
       "stone": 5,
