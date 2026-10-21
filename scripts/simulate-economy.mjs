@@ -48,10 +48,8 @@ const player = {
 const milestones = [];
 const log = [];
 
-// the owner's dig reward boost; profession upgrade points are ignored in the conservative model
-const DIG_REWARD = cfg("rules.json").money.digRewardMultiplier || 1;
 function priceMultiplier() {
-	return DIG_REWARD;
+	return 1; // upgrade multiplier is earned via profession points; ignored in the conservative model
 }
 function bestMine() {
 	let best = null;

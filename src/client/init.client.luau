@@ -315,11 +315,20 @@ local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): 
 		clip.Size = UDim2.fromScale(1, 1)
 		clip.BackgroundTransparency = 1
 		clip.ClipsDescendants = true
-		if rightAligned then
-			clip.AnchorPoint, clip.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
-		end
 		clip.Parent = cell
-		drawIcon(clip, true)
+		if rightAligned then
+			-- a half icon keeps its right half: the clip shrinks towards the right and the icon inside
+			-- stays pinned to the cell's right edge (it was drawn from the clip's left edge, shifted)
+			clip.AnchorPoint, clip.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
+			local holder = Instance.new("Frame")
+			holder.BackgroundTransparency = 1
+			holder.Size = UDim2.fromOffset(18, 24)
+			holder.AnchorPoint, holder.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
+			holder.Parent = clip
+			drawIcon(holder, true)
+		else
+			drawIcon(clip, true)
+		end
 		fills[i] = clip
 	end
 	return { fills = fills, tooltip = tooltip }
@@ -338,15 +347,35 @@ local function hudLine(y: number, size: number, color: Color3): TextLabel
 	return label
 end
 -- [владелец 21.10] combo above the hearts and food; resets after 30 s without digging (server)
-local combo = hudLine(-34, 14, Ui.colors.muted)
+local combo = hudLine(-38, 14, Ui.colors.muted)
 local comboMultiplier: number? = nil
 local comboBlocks = 0
+local comboAt = 0 -- os.clock() of the last dug block
+-- [владелец 21.10] combo timer: a bar under the combo text, full after every block, draining over the
+-- idle time (rules.combo.breakAfterIdleSeconds = 30 s) — empty means the combo resets
+local comboBar = Ui.inset(hotbar, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -31))
+comboBar.AnchorPoint = Vector2.new(0.5, 1)
+comboBar.Visible = false
+local comboFill = Instance.new("Frame")
+comboFill.BackgroundColor3 = Ui.colors.money
+comboFill.BorderSizePixel = 0
+comboFill.Size = UDim2.fromScale(1, 1)
+comboFill.Parent = comboBar
 local function renderCombo()
 	if comboMultiplier then
 		combo.Text = T("combo", comboMultiplier, comboBlocks, Config.rules.combo.blocksPerStep)
 		combo.TextColor3 = if comboMultiplier > 1 then Ui.colors.money else Ui.colors.muted
 	end
 end
+RunService.Heartbeat:Connect(function()
+	local active = comboMultiplier ~= nil and (comboMultiplier > 1 or comboBlocks > 0)
+	local left = if active
+		then 1 - (os.clock() - comboAt) / Config.rules.combo.breakAfterIdleSeconds
+		else 0
+	comboBar.Visible = active and left > 0
+	comboFill.Size = UDim2.fromScale(math.clamp(left, 0, 1), 1)
+	comboFill.BackgroundColor3 = if left < 0.25 then Ui.colors.close else Ui.colors.money
+end)
 local trackedHumanoid: Humanoid? = nil
 local healthConnections: { RBXScriptConnection } = {}
 local function fillMeter(meter: SurvivalMeter, value: number)
@@ -503,12 +532,12 @@ local function renderHotbar()
 end
 
 -- Minecraft: the name of the newly selected item shows above the hotbar for 2 s, then fades
-local heldName = hudLine(-54, 17, Ui.colors.white)
+local heldName = hudLine(-58, 17, Ui.colors.white)
 heldName.Visible = false
 local heldNameToken = 0
 
 -- [владелец 21.10] while a need's effect lasts, its hint (where to go / what to use) stays on screen
-local effectHint = hudLine(-80, 14, Color3.fromRGB(255, 225, 120))
+local effectHint = hudLine(-84, 14, Color3.fromRGB(255, 225, 120))
 effectHint.TextWrapped = true
 effectHint.BackgroundColor3 = Ui.colors.panel
 effectHint.BackgroundTransparency = 0.35
@@ -1629,6 +1658,9 @@ Remotes.event("CaseUpdated").OnClientEvent:Connect(function(id: string, active: 
 	end
 end)
 Remotes.event("Combo").OnClientEvent:Connect(function(mult: number, n: number)
+	if mult > 1 or n > 0 then
+		comboAt = os.clock() -- a block was dug (a reset arrives as ×1, 0 blocks)
+	end
 	comboMultiplier, comboBlocks = mult, n
 	renderCombo()
 end)
@@ -2109,13 +2141,11 @@ UserInputService.TouchMoved:Connect(function(input: InputObject)
 		return
 	end
 	if (Vector2.new(input.Position.X, input.Position.Y) - touchStart).Magnitude > DRAG_SLOP then
+		-- [владелец 21.10, like Minecraft] a finger that moves BEFORE digging started only turns the
+		-- camera; once digging has started, moving it aims the next blocks and digging goes on
+		-- (cancelling here made digging stop every ~3 blocks, as soon as the crosshair had to move)
 		touchDragged = true
 		touchAim = nil
-		if holding then
-			holding = false
-			tapTarget = nil
-			stopDig(true)
-		end
 	end
 end)
 UserInputService.TouchEnded:Connect(function(input: InputObject)
@@ -2384,7 +2414,8 @@ local function updateLayout()
 	end
 	if mobile then
 		cameraButton.Size = UDim2.fromOffset(56, 56)
-		cameraButton.Position = UDim2.new(1, -176, 1, -130)
+		-- above the jump button: lower, it covered the right end of the food row on narrow phones
+		cameraButton.Position = UDim2.new(1, -78, 1, -205)
 	end
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8

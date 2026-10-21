@@ -263,17 +263,7 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			if block.sellable == false then
 				add(t("tip_not_sellable"), RED)
 			elseif block.basePrice and block.basePrice > 0 then
-				add(
-					t(
-						"tip_sell_price",
-						Strings.money(
-							block.basePrice
-								* Config.moneyScale
-								* (Config.money.digRewardMultiplier or 1)
-						)
-					),
-					GOLD
-				)
+				add(t("tip_sell_price", Strings.money(block.basePrice * Config.moneyScale)), GOLD)
 			end
 		end
 	end

@@ -5,8 +5,6 @@
     "displayDecimals": 3,
     "priceMultiplierPerLevel": 0,
     "upgradeMultiplierPerPoint": 0.01,
-    "digRewardMultiplier": 2,
-    "_digReward": "[владелец 21.10] награды с копания ×2, чтобы в начале легче качаться: множитель денег за проданные блоки",
     "_note": "[меню] множитель цен = 1 + 0.01 × уровень Прокачки «Бустер денег»; очки за уровни профессий"
   },
   "blocks": {

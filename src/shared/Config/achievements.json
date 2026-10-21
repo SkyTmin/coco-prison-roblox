@@ -4,7 +4,8 @@
   "tiers": 12,
   "thresholdBase": 64,
   "thresholdGrowth": 1.7,
-  "rewardFirst": 5,
+  "rewardFirst": 10,
+  "_rewardFirst": "[владелец 21.10] награды за достижения «скопать N блоков» ×2 (было 5 $), цены продажи блоков — как в вики",
   "rewardGrowth": 1.3,
   "chains": {
     "pickaxe": {

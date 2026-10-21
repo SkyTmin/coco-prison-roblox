@@ -35,10 +35,8 @@ function ProfessionService.addXp(profile: Profile, job: string, amount: number)
 	pro.level[job] = level
 end
 
--- money from selling mined blocks: the owner's dig reward boost × the «Бустер денег» upgrade points
 function ProfessionService.moneyMultiplier(profile: Profile): number
-	return (Config.money.digRewardMultiplier or 1)
-		* (1 + profile.professions.upgrades.money * Config.professions.upgrades.money)
+	return 1 + profile.professions.upgrades.money * Config.professions.upgrades.money
 end
 
 local function onSpendPoint(player: Player, kind: any)
