@@ -89,3 +89,10 @@ game:GetService("Players").PlayerAdded:Connect(function(player)
 end)
 
 print("[coco-prison] server started, locations:", #Config.locationsFile.locations)
+-- Studio: every item needs its name (and books their description) in all locales — see ItemInfo
+if game:GetService("RunService"):IsStudio() then
+	local missing = require(ReplicatedStorage.Shared.ItemInfo).audit()
+	if #missing > 0 then
+		warn("[ItemInfo] missing translations: " .. table.concat(missing, ", "))
+	end
+end

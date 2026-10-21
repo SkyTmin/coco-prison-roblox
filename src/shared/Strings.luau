@@ -22,6 +22,7 @@ local STRINGS: { [string]: Entry } = {
 		es = "Eficiencia",
 		fr = "Efficacité",
 	},
+	enchant_sharpness = { ru = "Острота", en = "Sharpness", es = "Filo", fr = "Tranchant" },
 	enchant_protection = {
 		ru = "Защита",
 		en = "Protection",
@@ -423,6 +424,7 @@ local STRINGS: { [string]: Entry } = {
 	},
 	touch_dig = { ru = "Копать", en = "Dig", es = "Cavar", fr = "Creuser" },
 	touch_use = { ru = "Использовать", en = "Use", es = "Usar", fr = "Utiliser" },
+	touch_menu = { ru = "Меню", en = "Menu", es = "Menú", fr = "Menu" },
 	touch_menu_upgrade = {
 		ru = "Улучшить",
 		en = "Upgrade",
@@ -971,6 +973,7 @@ local STRINGS: { [string]: Entry } = {
 	item_apple = { ru = "Яблоко", en = "Apple", es = "Manzana", fr = "Pomme" },
 	item_bread = { ru = "Хлеб", en = "Bread", es = "Pan", fr = "Pain" },
 	item_arrow = { ru = "Стрела", en = "Arrow", es = "Flecha", fr = "Flèche" },
+	item_bow = { ru = "Лук", en = "Bow", es = "Arco", fr = "Arc" },
 	item_golden_apple = {
 		ru = "Золотое яблоко",
 		en = "Golden apple",
@@ -1032,6 +1035,300 @@ local STRINGS: { [string]: Entry } = {
 		es = "Llave de caja común",
 		fr = "Clé de caisse ordinaire",
 	},
+	-- item tooltips (src/shared/ItemInfo.luau): property lines, Minecraft wording where vanilla has it
+	tip_kind_tool = { ru = "Инструмент", en = "Tool", es = "Herramienta", fr = "Outil" },
+	tip_kind_weapon = { ru = "Оружие", en = "Weapon", es = "Arma", fr = "Arme" },
+	tip_kind_armor = { ru = "Броня", en = "Armor", es = "Armadura", fr = "Armure" },
+	tip_kind_block = { ru = "Блок", en = "Block", es = "Bloque", fr = "Bloc" },
+	tip_kind_food = { ru = "Еда", en = "Food", es = "Comida", fr = "Nourriture" },
+	tip_kind_key = { ru = "Ключ", en = "Key", es = "Llave", fr = "Clé" },
+	tip_kind_book = {
+		ru = "Древняя книга",
+		en = "Ancient book",
+		es = "Libro antiguo",
+		fr = "Livre ancien",
+	},
+	tip_kind_consumable = {
+		ru = "Расходник",
+		en = "Consumable",
+		es = "Consumible",
+		fr = "Consommable",
+	},
+	tip_kind_item = { ru = "Предмет", en = "Item", es = "Objeto", fr = "Objet" },
+	tip_main_hand = {
+		ru = "В основной руке:",
+		en = "When in Main Hand:",
+		es = "En la mano principal:",
+		fr = "Dans la main principale :",
+	},
+	tip_on_body = {
+		ru = "На теле:",
+		en = "When on Body:",
+		es = "En el cuerpo:",
+		fr = "Sur le corps :",
+	},
+	tip_attack_damage = {
+		ru = "%s урона атаки",
+		en = "%s Attack Damage",
+		es = "%s de daño de ataque",
+		fr = "%s de dégâts d'attaque",
+	},
+	tip_attack_speed = {
+		ru = "%s скорости атаки",
+		en = "%s Attack Speed",
+		es = "%s de velocidad de ataque",
+		fr = "%s de vitesse d'attaque",
+	},
+	tip_mining_speed = {
+		ru = "%s скорости копания",
+		en = "%s Mining Speed",
+		es = "%s de velocidad de minado",
+		fr = "%s de vitesse de minage",
+	},
+	tip_armor = {
+		ru = "+%s к броне",
+		en = "+%s Armor",
+		es = "+%s de armadura",
+		fr = "+%s d'armure",
+	},
+	tip_toughness = {
+		ru = "+%s к твёрдости брони",
+		en = "+%s Armor Toughness",
+		es = "+%s de dureza de armadura",
+		fr = "+%s de robustesse d'armure",
+	},
+	tip_upgrade_level = {
+		ru = "Уровень улучшения: %d / %d",
+		en = "Upgrade level: %d / %d",
+		es = "Nivel de mejora: %d / %d",
+		fr = "Niveau d'amélioration : %d / %d",
+	},
+	tip_ancient_slots = {
+		ru = "Древние зачарования: %d / %d",
+		en = "Ancient enchantments: %d / %d",
+		es = "Encantamientos antiguos: %d / %d",
+		fr = "Enchantements anciens : %d / %d",
+	},
+	tip_block_tool = {
+		ru = "Добывается: %s",
+		en = "Harvested with: %s",
+		es = "Se extrae con: %s",
+		fr = "S'extrait avec : %s",
+	},
+	tip_block_any_tool = {
+		ru = "Добывается любым инструментом и рукой",
+		en = "Harvested with any tool or by hand",
+		es = "Se extrae con cualquier herramienta o a mano",
+		fr = "S'extrait avec n'importe quel outil ou à la main",
+	},
+	tip_sell_price = {
+		ru = "Цена у скупщика: %s $",
+		en = "Buyer price: %s $",
+		es = "Precio del comprador: %s $",
+		fr = "Prix chez l'acheteur : %s $",
+	},
+	tip_not_sellable = {
+		ru = "Скупщик не принимает",
+		en = "The buyer doesn't take it",
+		es = "El comprador no lo acepta",
+		fr = "L'acheteur ne le prend pas",
+	},
+	tip_food = {
+		ru = "Восстанавливает %s голода",
+		en = "Restores %s hunger",
+		es = "Restaura %s de hambre",
+		fr = "Restaure %s de faim",
+	},
+	tip_heals = {
+		ru = "Восстанавливает %s ❤",
+		en = "Restores %s ❤",
+		es = "Restaura %s ❤",
+		fr = "Restaure %s ❤",
+	},
+	tip_restores_need = {
+		ru = "Снимает нужду: %s",
+		en = "Restores need: %s",
+		es = "Satisface la necesidad: %s",
+		fr = "Satisfait le besoin : %s",
+	},
+	tip_opens = {
+		ru = "Открывает: %s",
+		en = "Opens: %s",
+		es = "Abre: %s",
+		fr = "Ouvre : %s",
+	},
+	tip_contains_money = {
+		ru = "Внутри: %s $",
+		en = "Contains: %s $",
+		es = "Contiene: %s $",
+		fr = "Contient : %s $",
+	},
+	tip_book_targets = {
+		ru = "Подходит для: %s",
+		en = "Applies to: %s",
+		es = "Se aplica a: %s",
+		fr = "S'applique à : %s",
+	},
+	tip_apply_chance = {
+		ru = "Шанс наложения: %d %%",
+		en = "Apply chance: %d%%",
+		es = "Probabilidad de aplicar: %d %%",
+		fr = "Chance d'application : %d %%",
+	},
+	rarity_common = { ru = "Обычное", en = "Common", es = "Común", fr = "Commun" },
+	rarity_rare = { ru = "Редкое", en = "Rare", es = "Raro", fr = "Rare" },
+	rarity_legendary = {
+		ru = "Легендарное",
+		en = "Legendary",
+		es = "Legendario",
+		fr = "Légendaire",
+	},
+	-- ancient enchantments [меню] (wiki/client-audit/BOOKS-SYSTEM.md); %s = strength of the level
+	book_trader = { ru = "Барыга", en = "Hustler", es = "Buhonero", fr = "Trafiquant" },
+	book_toxic = { ru = "Токсичный", en = "Toxic", es = "Tóxico", fr = "Toxique" },
+	book_berserk = { ru = "Берсерк", en = "Berserk", es = "Berserker", fr = "Berserker" },
+	book_springs = { ru = "Пружины", en = "Springs", es = "Resortes", fr = "Ressorts" },
+	book_tank = { ru = "Танк", en = "Tank", es = "Tanque", fr = "Tank" },
+	book_archaeologist = {
+		ru = "Археолог",
+		en = "Archaeologist",
+		es = "Arqueólogo",
+		fr = "Archéologue",
+	},
+	book_hammer = { ru = "Молот", en = "Hammer", es = "Martillo", fr = "Marteau" },
+	book_vampirism = {
+		ru = "Вампиризм",
+		en = "Vampirism",
+		es = "Vampirismo",
+		fr = "Vampirisme",
+	},
+	book_enlightened = {
+		ru = "Просвещённый",
+		en = "Enlightened",
+		es = "Iluminado",
+		fr = "Illuminé",
+	},
+	book_silk_touch = {
+		ru = "Шёлковое касание",
+		en = "Silk Touch",
+		es = "Toque de seda",
+		fr = "Toucher de soie",
+	},
+	book_desc_trader = {
+		ru = "При добыче шанс %s получить ещё один такой же блок",
+		en = "When mining, %s chance to get one more of the same block",
+		es = "Al minar, %s de probabilidad de obtener otro bloque igual",
+		fr = "En minant, %s de chances d'obtenir un bloc identique en plus",
+	},
+	book_desc_toxic = {
+		ru = "При ударе шанс %s отравить врага",
+		en = "On hit, %s chance to poison the enemy",
+		es = "Al golpear, %s de probabilidad de envenenar al enemigo",
+		fr = "À l'impact, %s de chances d'empoisonner l'ennemi",
+	},
+	book_desc_berserk = {
+		ru = "Если у вас меньше 10 сердец, шанс %s нанести двойной урон",
+		en = "Below 10 hearts, %s chance to deal double damage",
+		es = "Con menos de 10 corazones, %s de probabilidad de hacer daño doble",
+		fr = "Sous 10 cœurs, %s de chances d'infliger des dégâts doublés",
+	},
+	book_desc_springs = {
+		ru = "Прыжок выше на %s бл.",
+		en = "Jump %s block(s) higher",
+		es = "Salto %s bloque(s) más alto",
+		fr = "Saut plus haut de %s bloc(s)",
+	},
+	book_desc_tank = {
+		ru = "+%s ❤ к здоровью",
+		en = "+%s ❤ max health",
+		es = "+%s ❤ de salud",
+		fr = "+%s ❤ de santé",
+	},
+	book_desc_archaeologist = {
+		ru = "При добыче шанс %s получить ускоренное копание",
+		en = "When mining, %s chance to get faster digging",
+		es = "Al minar, %s de probabilidad de cavar más rápido",
+		fr = "En minant, %s de chances de creuser plus vite",
+	},
+	book_desc_hammer = {
+		ru = "При добыче шанс %s вскопать блоки вокруг",
+		en = "When mining, %s chance to dig the blocks around",
+		es = "Al minar, %s de probabilidad de cavar los bloques de alrededor",
+		fr = "En minant, %s de chances de creuser les blocs autour",
+	},
+	book_desc_vampirism = {
+		ru = "Лечит на %s от нанесённого урона",
+		en = "Heals %s of the damage dealt",
+		es = "Cura el %s del daño infligido",
+		fr = "Soigne %s des dégâts infligés",
+	},
+	book_desc_enlightened = {
+		ru = "При получении урона шанс %s восстановить здоровье",
+		en = "When hurt, %s chance to restore health",
+		es = "Al recibir daño, %s de probabilidad de recuperar salud",
+		fr = "En subissant des dégâts, %s de chances de récupérer de la santé",
+	},
+	book_desc_silk_touch = {
+		ru = "Блоки выпадают сами собой",
+		en = "Mined blocks drop as themselves",
+		es = "Los bloques minados caen tal cual",
+		fr = "Les blocs minés tombent tels quels",
+	},
+	-- item descriptions (lore) where the configs can't tell what the item does [меню, клиент]
+	desc_ancient_star = {
+		ru = "Падает с боссов и из Обычного кейса. Меняется на ключи у обменника звёзд на Рынке",
+		en = "Dropped by bosses and the Ordinary case. Trade it for keys at the star exchange in the Market",
+		es = "La sueltan los jefes y la caja común. Cámbiala por llaves en el cambio de estrellas del Mercado",
+		fr = "Lâchée par les boss et la caisse ordinaire. Échangez-la contre des clés au Marché",
+	},
+	desc_ancient_powder = {
+		ru = "+2 % к шансу наложения древней книги за штуку",
+		en = "+2% apply chance of an ancient book per piece",
+		es = "+2 % de probabilidad de aplicar un libro antiguo por unidad",
+		fr = "+2 % de chance d'application d'un livre ancien par unité",
+	},
+	desc_dispeller = {
+		ru = "Снимает все древние зачарования с предмета. Книги не возвращаются",
+		en = "Removes all ancient enchantments from an item. Books are not returned",
+		es = "Quita todos los encantamientos antiguos de un objeto. Los libros no se devuelven",
+		fr = "Retire tous les enchantements anciens d'un objet. Les livres ne sont pas rendus",
+	},
+	desc_basement_pass = {
+		ru = "Открывает вход в Подвал",
+		en = "Lets you into the Basement",
+		es = "Da acceso al Sótano",
+		fr = "Donne accès au Sous-sol",
+	},
+	desc_oblivion_scroll = {
+		ru = "Сбрасывает древо навыков",
+		en = "Resets the skill tree",
+		es = "Reinicia el árbol de habilidades",
+		fr = "Réinitialise l'arbre de compétences",
+	},
+	desc_moon_steel = {
+		ru = "4 штуки меняются на Лунное лезвие у обменника осколков",
+		en = "Trade 4 for a Moon blade at the shard exchange",
+		es = "Cambia 4 por una Hoja lunar en el cambio de fragmentos",
+		fr = "Échangez-en 4 contre une Lame lunaire",
+	},
+	desc_fire_shard = {
+		ru = "4 штуки меняются на Вулканический камень у обменника осколков",
+		en = "Trade 4 for a Volcanic stone at the shard exchange",
+		es = "Cambia 4 por una Piedra volcánica en el cambio de fragmentos",
+		fr = "Échangez-en 4 contre une Pierre volcanique",
+	},
+	desc_moon_blade = {
+		ru = "Топор максимального уровня: новый облик и Эффективность IV",
+		en = "Max-level axe: new look and Efficiency IV",
+		es = "Hacha de nivel máximo: nuevo aspecto y Eficiencia IV",
+		fr = "Hache de niveau max : nouvel aspect et Efficacité IV",
+	},
+	desc_volcanic_stone = {
+		ru = "Меч максимального уровня поджигает тех, кого бьёт",
+		en = "A max-level sword sets its targets on fire",
+		es = "Una espada de nivel máximo prende fuego a sus objetivos",
+		fr = "Une épée de niveau max enflamme ses cibles",
+	},
 	mat_wood = { ru = "Деревянн.", en = "Wooden", es = "De madera", fr = "En bois" },
 	mat_stone = { ru = "Каменн.", en = "Stone", es = "De piedra", fr = "En pierre" },
 	mat_iron = { ru = "Железн.", en = "Iron", es = "De hierro", fr = "En fer" },
@@ -1066,6 +1363,12 @@ function Strings.localeOf(player: Player?): string
 		end
 	end
 	return Config.defaultLocale
+end
+
+-- True when the key exists in that locale (tooltips skip lines that are not translated yet).
+function Strings.has(key: string, locale: string?): boolean
+	local entry = STRINGS[key]
+	return entry ~= nil and entry[locale or Config.defaultLocale] ~= nil
 end
 
 function Strings.t(key: string, locale: string?, ...: any): string
@@ -1441,6 +1744,22 @@ function Strings.locationName(ru: string, locale: string?): string
 	return pick(LOCATIONS, ru, locale)
 end
 
+-- string.lower only handles ASCII; Cyrillic capitals (А–Я, Ё) need their own mapping.
+local function utf8lower(text: string): string
+	local out = {}
+	for _, code in utf8.codes(text) do
+		if code >= 0x0410 and code <= 0x042F then
+			code += 0x20
+		elseif code == 0x0401 then
+			code = 0x0451
+		elseif code >= 65 and code <= 90 then
+			code += 32
+		end
+		table.insert(out, utf8.char(code))
+	end
+	return table.concat(out)
+end
+
 function Strings.itemName(id: string, level: number?, locale: string?): string
 	local loc = locale or Config.defaultLocale
 	local block = Config.block(id)
@@ -1453,9 +1772,86 @@ function Strings.itemName(id: string, level: number?, locale: string?): string
 		return base .. " " .. tostring(level)
 	end
 	if Config.tools[id] and level then
-		return Strings.t("mat_" .. Config.materialForLevel(level), loc) .. " " .. string.lower(base)
+		local material = Strings.t("mat_" .. Config.materialForLevel(level), loc)
+		if loc == "es" or loc == "fr" then
+			return base .. " " .. utf8lower(material) -- "Pala de madera", "Pelle en bois"
+		end
+		return material .. " " .. utf8lower(base)
 	end
 	return base
+end
+
+-- Full tool/armor names for tooltips, as Minecraft says them in each language: armor tiers are
+-- leather / chainmail / iron / diamond; Russian adjectives agree with the noun's gender; Spanish and
+-- French put the material after the noun. Other items: same as itemName.
+local ARMOR_PIECES = { helmet = true, chestplate = true, leggings = true, boots = true }
+local RU_GENDER: { [string]: string } = {
+	pickaxe = "f",
+	shovel = "f",
+	axe = "m",
+	sword = "m",
+	helmet = "m",
+	chestplate = "m",
+	leggings = "p",
+	boots = "p",
+}
+local RU_STEMS = {
+	tool = {
+		wood = "Деревянн",
+		stone = "Каменн",
+		iron = "Железн",
+		diamond = "Алмазн",
+	},
+	armor = {
+		wood = "Кожан",
+		stone = "Кольчужн",
+		iron = "Железн",
+		diamond = "Алмазн",
+	},
+}
+local RU_ENDINGS = { f = "ая", m = "ый", p = "ые" }
+local MATERIAL_WORDS: { [string]: { tool: { [string]: string }, armor: { [string]: string } } } = {
+	en = {
+		tool = { wood = "Wooden", stone = "Stone", iron = "Iron", diamond = "Diamond" },
+		armor = { wood = "Leather", stone = "Chainmail", iron = "Iron", diamond = "Diamond" },
+	},
+	es = {
+		tool = {
+			wood = "de madera",
+			stone = "de piedra",
+			iron = "de hierro",
+			diamond = "de diamante",
+		},
+		armor = {
+			wood = "de cuero",
+			stone = "de malla",
+			iron = "de hierro",
+			diamond = "de diamante",
+		},
+	},
+	fr = {
+		tool = { wood = "en bois", stone = "en pierre", iron = "en fer", diamond = "en diamant" },
+		armor = { wood = "en cuir", stone = "en mailles", iron = "en fer", diamond = "en diamant" },
+	},
+}
+function Strings.itemFullName(id: string, level: number?, locale: string?): string
+	local loc = locale or Config.defaultLocale
+	if not (Config.tools[id] and level) then
+		return Strings.itemName(id, level, loc)
+	end
+	local material = Config.materialForLevel(level :: number)
+	local kind = if ARMOR_PIECES[id] then "armor" else "tool"
+	local noun = Strings.t("item_" .. id, loc)
+	if loc == "ru" then
+		local ending = RU_ENDINGS[RU_GENDER[id] or "m"]
+		return RU_STEMS[kind][material] .. ending .. " " .. utf8lower(noun)
+	end
+	local words = MATERIAL_WORDS[loc] or MATERIAL_WORDS.en
+	local word = words[kind][material]
+	if loc == "es" or loc == "fr" then
+		return noun .. " " .. word
+	end
+	return word .. " " .. utf8lower(noun)
 end
 
 return Strings

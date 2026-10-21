@@ -221,12 +221,23 @@ end
 
 local function ancientBook(improved: boolean): Types.ItemStack
 	local rules = Config.keys.ancientCase
+	-- rarity belongs to the book type [меню]: roll the rarity, then a book of that rarity
+	local rarity = weightedKey(rules.rarity)
 	local effects: { string } = {}
+	local any: { string } = {}
 	for id in pairs(Config.books.effects) do
-		table.insert(effects, id)
+		local entry = Config.books.catalog[id]
+		table.insert(any, id)
+		if entry and entry.rarity == rarity then
+			table.insert(effects, id)
+		end
+	end
+	if #effects == 0 then
+		effects = any
 	end
 	table.sort(effects)
 	local effect = effects[random:NextInteger(1, #effects)]
+	local catalogEntry = Config.books.catalog[effect]
 	local maxLevel = #Config.books.effects[effect]
 	local level = if improved
 		then maxLevel
@@ -237,7 +248,7 @@ local function ancientBook(improved: boolean): Types.ItemStack
 		count = 1,
 		level = level,
 		books = { { id = effect, level = level } },
-		rarity = weightedKey(rules.rarity),
+		rarity = if catalogEntry then catalogEntry.rarity else rarity,
 		applyChance = random:NextInteger(chance[1], chance[2]),
 	}
 end

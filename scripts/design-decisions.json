@@ -837,6 +837,88 @@
         0.1,
         0.15
       ]
+    },
+    "catalog": {
+      "_source": "[меню] wiki/client-audit/BOOKS-SYSTEM.md: редкость и подходящие предметы каждой книги; silk_touch — ванильное Шёлковое касание, «редкая кирка» в Обычном кейсе [меню]. Новая книга: запись здесь + effects (сила по уровням) + Strings book_<id> и book_desc_<id> в 4 языках",
+      "trader": {
+        "rarity": "common",
+        "items": [
+          "pickaxe",
+          "axe",
+          "shovel",
+          "shears"
+        ]
+      },
+      "toxic": {
+        "rarity": "common",
+        "items": [
+          "sword"
+        ]
+      },
+      "berserk": {
+        "rarity": "common",
+        "items": [
+          "sword"
+        ]
+      },
+      "springs": {
+        "rarity": "common",
+        "items": [
+          "boots"
+        ]
+      },
+      "tank": {
+        "rarity": "rare",
+        "items": [
+          "helmet",
+          "chestplate",
+          "leggings",
+          "boots"
+        ]
+      },
+      "archaeologist": {
+        "rarity": "legendary",
+        "items": [
+          "pickaxe",
+          "axe",
+          "shovel",
+          "shears"
+        ]
+      },
+      "hammer": {
+        "rarity": "legendary",
+        "items": [
+          "pickaxe",
+          "axe",
+          "shovel",
+          "shears"
+        ]
+      },
+      "vampirism": {
+        "rarity": "legendary",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "enlightened": {
+        "rarity": "legendary",
+        "items": [
+          "helmet",
+          "chestplate",
+          "leggings",
+          "boots"
+        ]
+      },
+      "silk_touch": {
+        "rarity": "rare",
+        "items": [
+          "pickaxe",
+          "axe",
+          "shovel",
+          "shears"
+        ]
+      }
     }
   },
   "death": {

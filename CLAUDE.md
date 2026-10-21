@@ -73,6 +73,14 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Status effects: `src/shared/Effects.luau` lists them; the server sets character attributes
    `<Effect>` = level and `<Effect>Until` = server time (nil = until the need is restored) plus the
    `EffectParticles` emitter; `src/client/EffectsHud.luau` draws the icons and the camera effects.
+   Item info (Minecraft tooltip): `src/shared/ItemInfo.luau` derives every line from the configs
+   (tools/armor vanilla stats, enchants, ancient books via `books.catalog`, blocks, food, keys, needs
+   consumables); `src/client/ItemTooltip.luau` draws it, `DragDrop` shows it (mouse hover; touch: tap-
+   selected or long-pressed slot). A new item needs `item_<id>` (+ optional `desc_<id>`) in Strings in
+   all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
+   server warns `[ItemInfo] missing translations` in Studio when something is missing.
+   Phone layout in Studio: the emulator may report a keyboard — set workspace attribute
+   `ForceMobile = true` (Studio-only) to force it; remove it afterwards.
    Digging is server-authoritative (`DigService`): DigStart(part, hitPoint) starts a server timer,
    DigAccepted(needed) syncs the client bar, the client hides the block when its bar ends and the server
    removes it right after; DigCancel on release; reach = 4.5 blocks eye → hit point, LoS to the hit

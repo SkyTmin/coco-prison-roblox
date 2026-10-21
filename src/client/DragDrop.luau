@@ -13,6 +13,8 @@
 --   hold (0.35 s)       split: a green bar appears, slide the finger up or down to choose how many
 --                       to take, lift the finger — that part is now selected
 --   double tap          quick move to the other container
+-- Item info (Minecraft tooltip, ItemTooltip): mouse — while hovering a slot with nothing on the cursor;
+-- touch — for the selected stack and while a slot is long-pressed (also during the split bar).
 -- A move is sent as move(from, to, count?) — count nil means "the whole stack".
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,6 +24,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local Types = require(ReplicatedStorage.Shared.Types)
 local Strings = require(ReplicatedStorage.Shared.Strings)
 local Ui = require(script.Parent.Ui)
+local ItemTooltip = require(script.Parent.ItemTooltip)
 
 export type Address = { container: "case" | "inv" | "armor", index: number }
 type Binding = { frame: Frame, address: Address }
@@ -55,6 +58,9 @@ function DragDrop.new(
 	local lastTapAt = 0
 	local splitting = false
 	local splitCount = 0
+	local hoverAddress: Address? = nil -- mouse over this slot
+	local touchFocus: Address? = nil -- long-pressed slot (touch)
+	local lastTouch = false -- the last slot press was a touch
 
 	local layer = Instance.new("ScreenGui")
 	layer.Name = "SlotDrag"
@@ -253,6 +259,7 @@ function DragDrop.new(
 		splitting = false
 		splitBar.Visible = false
 		lastTap = nil
+		touchFocus = nil
 		setHeld(nil)
 	end
 
@@ -321,6 +328,7 @@ function DragDrop.new(
 		then
 			return
 		end
+		touchFocus = nil
 		local point = position(input)
 		local isTouch = a.UserInputType == Enum.UserInputType.Touch
 		local rightButton = a.UserInputType == Enum.UserInputType.MouseButton2
@@ -404,6 +412,21 @@ function DragDrop.new(
 			then
 				showGhost(UserInputService:GetMouseLocation())
 			end
+			-- item info
+			local tipAddress: Address? = nil
+			local tipAnchor: (Vector2 | GuiObject)? = nil
+			if lastTouch then
+				tipAddress = touchFocus or (if held then held.from else nil)
+				tipAnchor = if tipAddress then frameOf(tipAddress) else nil
+			elseif hoverAddress and not held and not active then
+				tipAddress, tipAnchor = hoverAddress, UserInputService:GetMouseLocation()
+			end
+			local tipStack = if tipAddress then getStack(tipAddress) else nil
+			if tipStack and tipAnchor then
+				ItemTooltip.show(tipStack, tipAnchor)
+			else
+				ItemTooltip.hide()
+			end
 			if splitting and active then
 				local f = if pressAddress then frameOf(pressAddress) else nil
 				if f then
@@ -429,6 +452,22 @@ function DragDrop.new(
 		button.Parent = frame
 		table.insert(
 			connections,
+			button.MouseEnter:Connect(function()
+				if not UserInputService.TouchEnabled or UserInputService.MouseEnabled then
+					hoverAddress = address
+				end
+			end)
+		)
+		table.insert(
+			connections,
+			button.MouseLeave:Connect(function()
+				if same(hoverAddress, address) then
+					hoverAddress = nil
+				end
+			end)
+		)
+		table.insert(
+			connections,
 			button.InputBegan:Connect(function(input)
 				local kind = input.UserInputType
 				if
@@ -450,6 +489,16 @@ function DragDrop.new(
 				end
 				active, pressAddress, origin, moved = input, address, position(input), false
 				table.clear(dragPath)
+				lastTouch = kind == Enum.UserInputType.Touch
+				if lastTouch and getStack(address) then
+					-- long press shows the item info (with or without the split bar)
+					local press = input
+					task.delay(HOLD_SPLIT, function()
+						if active == press and not moved then
+							touchFocus = address
+						end
+					end)
+				end
 				if kind == Enum.UserInputType.Touch and not held then
 					local stack = getStack(address)
 					if stack and stack.count > 1 then
@@ -474,6 +523,7 @@ function DragDrop.new(
 	controller.Clear = cancel
 	owner.Destroying:Once(function()
 		cancel()
+		ItemTooltip.hide()
 		for _, connection in ipairs(connections) do
 			connection:Disconnect()
 		end

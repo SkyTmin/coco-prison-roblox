@@ -31,6 +31,7 @@ local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
+local ItemInfo = require(Shared.ItemInfo)
 HeldItem.Start()
 ArmorVisual.Start()
 BlockBreak.Start()
@@ -39,6 +40,11 @@ local player = Players.LocalPlayer
 local locale = Config.defaultLocale
 local camera = workspace.CurrentCamera
 local function isMobile(): boolean
+	-- QA (Studio only): the device emulator sometimes reports a keyboard; workspace attribute
+	-- ForceMobile = true forces the phone layout
+	if RunService:IsStudio() and workspace:GetAttribute("ForceMobile") == true then
+		return true
+	end
 	return UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 end
 local localizedButtons: { [TextButton]: string } = {}
@@ -501,11 +507,46 @@ local function renderHotbar()
 	end
 end
 
+-- Minecraft: the name of the newly selected item shows above the hotbar for 2 s, then fades
+local heldName =
+	Ui.label(gui, "", UDim2.fromOffset(420, 22), UDim2.new(0.5, -210, 1, -134), 17, Ui.colors.white)
+heldName.TextXAlignment = Enum.TextXAlignment.Center
+heldName.TextStrokeTransparency = 0.4
+heldName.Visible = false
+local heldNameToken = 0
+local function showHeldName(stack: Types.ItemStack?)
+	heldNameToken += 1
+	local token = heldNameToken
+	if not stack then
+		heldName.Visible = false
+		return
+	end
+	local first = ItemInfo.lines(stack, locale)[1]
+	heldName.Text = first.text
+	heldName.TextColor3 = first.color
+	heldName.TextTransparency, heldName.TextStrokeTransparency = 0, 0.4
+	heldName.Visible = true
+	task.delay(2, function()
+		for step = 1, 10 do
+			if heldNameToken ~= token then
+				return
+			end
+			heldName.TextTransparency = step / 10
+			heldName.TextStrokeTransparency = 0.4 + 0.6 * step / 10
+			task.wait(0.05)
+		end
+		if heldNameToken == token then
+			heldName.Visible = false
+		end
+	end)
+end
+
 local function selectSlot(n: number)
 	if profile and profile.selectedSlot ~= n then
 		profile.selectedSlot = n
 		renderHotbar()
 		Remotes.event("SelectSlot"):FireServer(n)
+		showHeldName(profile.inventory[n])
 	end
 end
 
@@ -2033,9 +2074,19 @@ player.CharacterRemoving:Connect(cancelDigInput)
 local touchMenus = Instance.new("Frame")
 touchMenus.Name = "TouchMenus"
 touchMenus.Position = UDim2.fromOffset(8, 64)
-touchMenus.Size = UDim2.fromOffset(2 * 60, 4 * 60)
+touchMenus.Size = UDim2.fromOffset(5 * 60, 2 * 60)
 touchMenus.BackgroundTransparency = 1
 touchMenus.Parent = gui
+-- [владелец 21.10] the menu buttons were hit by accident while playing: one "Menu" button stays on
+-- screen and unfolds the grid to its right (2 rows × 4, clear of the joystick); choosing an item or
+-- touching the game world folds it back
+local touchMenuGrid = Instance.new("Frame")
+touchMenuGrid.Name = "Grid"
+touchMenuGrid.Position = UDim2.fromOffset(60, 0)
+touchMenuGrid.Size = UDim2.fromOffset(4 * 60, 2 * 60)
+touchMenuGrid.BackgroundTransparency = 1
+touchMenuGrid.Visible = false
+touchMenuGrid.Parent = touchMenus
 local menuKeys =
 	{ "locations", "jobs", "upgrade", "level", "achievements", "artifacts", "language_code" }
 local function touchIconButton(
@@ -2085,6 +2136,54 @@ local function touchIconButton(
 	end
 	return button
 end
+local menuToggle =
+	Ui.button(touchMenus, "", UDim2.fromOffset(56, 56), UDim2.new(), Ui.colors.buttonGrey)
+menuToggle.Name = "Touch_menu"
+menuToggle.BackgroundTransparency = 0.35
+do
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(0, 8)
+	round.Parent = menuToggle
+	for bar = 0, 2 do -- the "hamburger": three bars drawn with frames (the font has no ☰)
+		local line = Instance.new("Frame")
+		line.AnchorPoint = Vector2.new(0.5, 0)
+		line.Position = UDim2.new(0.5, 0, 0, 12 + bar * 8)
+		line.Size = UDim2.fromOffset(26, 4)
+		line.BackgroundColor3 = Ui.colors.white
+		line.BorderSizePixel = 0
+		line.Parent = menuToggle
+	end
+	local caption = Ui.label(
+		menuToggle,
+		T("touch_menu"),
+		UDim2.new(1, -2, 0, 12),
+		UDim2.new(0, 1, 1, -13),
+		9,
+		Ui.colors.white
+	)
+	caption.Name = "Caption"
+	caption.TextXAlignment = Enum.TextXAlignment.Center
+	caption.TextScaled = true
+	caption.TextStrokeTransparency = 0.5
+	localizedLabels[caption] = "touch_menu"
+end
+local function setTouchMenuOpen(open: boolean)
+	touchMenuGrid.Visible = open
+	menuToggle.BackgroundColor3 = if open then Ui.colors.buttonBlue else Ui.colors.buttonGrey
+end
+menuToggle.Activated:Connect(function()
+	setTouchMenuOpen(not touchMenuGrid.Visible)
+end)
+-- a touch on the game world (not on a button) folds the menu
+UserInputService.InputBegan:Connect(function(input, processed)
+	if
+		input.UserInputType == Enum.UserInputType.Touch
+		and not processed
+		and touchMenuGrid.Visible
+	then
+		setTouchMenuOpen(false)
+	end
+end)
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
@@ -2093,18 +2192,19 @@ for i, kind in ipairs(menuKeys) do
 		elseif kind == "upgrade" then "touch_menu_upgrade"
 		else kind
 	local button = touchIconButton(
-		touchMenus,
+		touchMenuGrid,
 		icon,
 		if kind == "language_code" then T(kind) else "",
 		56,
 		if kind == "language_code" then nil else T(captionKey)
 	)
-	button.Position = UDim2.fromOffset(((i - 1) % 2) * 60, math.floor((i - 1) / 2) * 60)
+	button.Position = UDim2.fromOffset(((i - 1) % 4) * 60, math.floor((i - 1) / 4) * 60)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
-			cycleLocale()
+			cycleLocale() -- the menu stays open to see the new language
 		else
+			setTouchMenuOpen(false)
 			open(kind)
 		end
 	end)
@@ -2242,6 +2342,7 @@ end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchViewport)
 UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
 UserInputService:GetPropertyChangedSignal("KeyboardEnabled"):Connect(updateLayout)
+workspace:GetAttributeChangedSignal("ForceMobile"):Connect(updateLayout)
 watchViewport()
 RunService.RenderStepped:Connect(function()
 	local controlsVisible = isMobile() and currentWindowKind == nil
