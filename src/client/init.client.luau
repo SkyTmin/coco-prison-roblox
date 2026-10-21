@@ -25,6 +25,7 @@ local ExchangeWindow = require(script.ExchangeWindow)
 local ArtifactWindow = require(script.ArtifactWindow)
 local SellWindow = require(script.SellWindow)
 local ShopWindow = require(script.ShopWindow)
+local CreativeWindow = require(script.CreativeWindow)
 local TrainerWindow = require(script.TrainerWindow)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
@@ -1492,6 +1493,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	creative = function()
+		local win, refresh = CreativeWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	artifacts = function()
 		local win, refresh = ArtifactWindow.build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
@@ -1866,6 +1872,9 @@ local function expectedTime(part: BasePart): number?
 	local stack = profile.inventory[profile.selectedSlot]
 	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
 	local level = if stack and stack.level then stack.level else 0
+	if player:GetAttribute("Creative") then
+		return Config.rules.creative.breakSeconds -- creative test mode (CreativeService)
+	end
 	if profile.needs.sleep <= 0 then
 		return nil
 	end
@@ -2152,11 +2161,12 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 	if input == activeTouch then
 		local tapped = os.clock() - touchHeldSince < 0.3
 			and (Vector2.new(input.Position.X, input.Position.Y) - touchStart).Magnitude < 12
-		local wasDigging = holding or touchAim ~= nil
+		local wasDigging = holding
 		cancelDigInput()
 		touchAim = nil
 		if tapped and not touchDragged and not wasDigging and not touchAte then
-			attack() -- a short tap on empty space = a swing, like Minecraft's attack tap
+			-- a short tap = a swing, like Minecraft's attack tap; also on a block too short to start digging
+			attack()
 		end
 	end
 end)
@@ -2339,6 +2349,26 @@ for i, kind in ipairs(menuKeys) do
 		localizedLabels[caption] = captionKey
 	end
 end
+-- the 8th grid cell: creative test mode, only for players CreativeService allows
+do
+	local button =
+		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
+	button.Position = UDim2.fromOffset((#menuKeys % 4) * 60, math.floor(#menuKeys / 4) * 60)
+	button.Name = "Touch_creative"
+	local function show()
+		button.Visible = player:GetAttribute("CreativeAllowed") == true
+	end
+	player:GetAttributeChangedSignal("CreativeAllowed"):Connect(show)
+	show()
+	button.Activated:Connect(function()
+		setTouchMenuOpen(false)
+		open("creative")
+	end)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "creative"
+	end
+end
 local touchActions = Instance.new("Frame")
 touchActions.Name = "TouchActions"
 touchActions.Size = UDim2.fromScale(1, 1)
@@ -2515,6 +2545,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("artifacts")
 	elseif k == Enum.KeyCode.M then
 		open("locations")
+	elseif k == Enum.KeyCode.K and player:GetAttribute("CreativeAllowed") then
+		open("creative") -- test mode (CreativeService)
 	elseif k == Enum.KeyCode.V then
 		toggleFirstPerson()
 	elseif k == Enum.KeyCode.F then

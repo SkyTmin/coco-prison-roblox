@@ -187,7 +187,7 @@ write("needs.json", { source: "эффекты и зоны снятия [вики
 write("trainer.json", { source: "первые требования [меню]; остальное [решение]", ...decisions.trainer });
 write("keys.json", { source: "[решение]; цены ключей у обменника [меню]", starExchange: { ancient_key: 10, improved_ancient_key: 60, dispeller: 15 }, ...decisions.keys });
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
-write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival });
+write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival, creative: decisions.creative });
 write("effects.json", { source: "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков", cracks: read("assets/cracks/ids.json"), sounds: read("assets/sounds/ids.json") });
 write("achievements.json", { source: "[меню] ступени; [владелец] цепочки по инструменту", ...decisions.achievements });
 // Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`

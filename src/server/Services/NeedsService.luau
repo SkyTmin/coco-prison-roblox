@@ -272,7 +272,9 @@ local function updatePlayers()
 			}
 			states[player] = state
 		end
-		if now >= state.nextDecay then
+		if player:GetAttribute("Creative") then
+			state.nextDecay = now + DECAY_SECONDS -- creative test mode: needs never drain
+		elseif now >= state.nextDecay then
 			local ticks = math.floor((now - state.nextDecay) / DECAY_SECONDS) + 1
 			state.nextDecay += ticks * DECAY_SECONDS
 			ProfileService.Mutate(player, function(p)

@@ -126,7 +126,10 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 		return nil, nil, nil
 	end
 	local toolId, toolLevel = InventoryService.heldTool(profile)
-	local needed = Config.breakTime(block, toolId, toolLevel)
+	-- creative test mode: every block breaks at once with any tool (CreativeService)
+	local needed = if player:GetAttribute("Creative")
+		then Config.rules.creative.breakSeconds
+		else Config.breakTime(block, toolId, toolLevel)
 	if not needed then
 		if block.tool ~= "any" and toolId ~= block.tool then
 			toast(player, "wrong_tool")

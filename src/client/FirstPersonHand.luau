@@ -20,13 +20,13 @@ local REST = CFrame.new(0.5, -0.5, -0.95) * CFrame.Angles(math.rad(8), math.rad(
 
 local started = false
 
+-- Zoom from the camera focus, not the distance to the head: the head bobs with the walk animation
+-- (0.6..1.3 studs from the camera), which hid the hand every other frame while walking.
 local function isFirstPerson(character: Model?): boolean
 	local camera = workspace.CurrentCamera
-	local head = character and character:FindFirstChild("Head")
 	return camera ~= nil
-		and head ~= nil
-		and head:IsA("BasePart")
-		and (camera.CFrame.Position - head.Position).Magnitude < 1
+		and character ~= nil
+		and (camera.CFrame.Position - camera.Focus.Position).Magnitude < 1.5
 end
 
 local function skinColor(character: Model): Color3

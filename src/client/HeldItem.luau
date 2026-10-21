@@ -16,7 +16,7 @@ local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local swing = Instance.new("NumberValue")
 local swingTween: Tween? = nil
 local started = false
-local posed: { [Motor6D]: CFrame } = {}
+local posed: { [Motor6D]: CFrame } = {} -- motor → its unposed C0
 local enchantedParts: { [BasePart]: Color3 } = {} -- part → base colour, pulsed toward purple
 local GLINT = Color3.fromRGB(170, 90, 255)
 
@@ -283,6 +283,33 @@ function HeldItem.Start()
 			end
 		end
 	end)
+	-- Current Roblox avatars are rigged with AnimationConstraints (no C0): the swing goes into the
+	-- shoulder's Transform after the Animator wrote this frame's pose and before physics moves the arm.
+	-- If the Animator did not rewrite it (no track on the joint), start from our own base again.
+	local lastSet: CFrame? = nil
+	local lastBase = CFrame.identity
+	RunService.PreSimulation:Connect(function()
+		local character = Players.LocalPlayer.Character
+		local upperArm = character and character:FindFirstChild("RightUpperArm")
+		local joint = upperArm and upperArm:FindFirstChild("RightShoulder")
+		if not joint or not joint:IsA("AnimationConstraint") then
+			lastSet = nil
+			return
+		end
+		local current = joint.Transform
+		if lastSet and current == lastSet then
+			current = lastBase
+		end
+		local s = swing.Value
+		if s > 0 then
+			local turned = current * CFrame.Angles(math.rad(80) * s, 0, math.rad(-20) * s)
+			lastBase, lastSet = current, turned
+			joint.Transform = turned
+		elseif lastSet then
+			joint.Transform = current
+			lastSet = nil
+		end
+	end)
 	RunService:BindToRenderStep("HeldItemPose", Enum.RenderPriority.Last.Value, function()
 		-- Restore our offsets before applying this frame's pose; never accumulate rotations.
 		for motor, base in pairs(posed) do
@@ -296,16 +323,15 @@ function HeldItem.Start()
 		if not character then
 			return
 		end
-		local hand = rightHand(character)
-		for _, descendant in ipairs(character:GetDescendants()) do
-			if descendant:IsA("Motor6D") and descendant.Part1 then
-				if descendant.Part1 == hand then
+		-- the whole arm swings forward from the shoulder like Minecraft's (the wrist alone was barely visible)
+		local upperArm = character:FindFirstChild("RightUpperArm") or rightHand(character)
+		local s = swing.Value
+		if s > 0 and upperArm then
+			local turn = CFrame.Angles(math.rad(80) * s, 0, math.rad(-20) * s)
+			for _, descendant in ipairs(character:GetDescendants()) do
+				if descendant:IsA("Motor6D") and descendant.Part1 == upperArm then
 					posed[descendant] = descendant.C0
-					descendant.C0 *= CFrame.Angles(
-						math.rad(-35) * swing.Value,
-						0,
-						math.rad(15) * swing.Value
-					)
+					descendant.C0 *= turn
 				end
 			end
 		end

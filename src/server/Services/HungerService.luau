@@ -14,8 +14,8 @@ local started = false
 
 local function drain(player: Player, amount: number)
 	local profile = ProfileService.Get(player)
-	if not profile or profile.hunger <= 0 or amount <= 0 then
-		return
+	if not profile or profile.hunger <= 0 or amount <= 0 or player:GetAttribute("Creative") then
+		return -- creative test mode: no hunger at all
 	end
 	ProfileService.Mutate(player, function(p)
 		p.hunger = math.max(0, p.hunger - amount)
@@ -47,7 +47,12 @@ local function update(dt: number)
 		local profile = ProfileService.Get(player)
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if not profile or not humanoid or humanoid.Health <= 0 then
+		if
+			not profile
+			or not humanoid
+			or humanoid.Health <= 0
+			or player:GetAttribute("Creative")
+		then
 			continue
 		end
 		local cost = rules.drainPerMinuteIdle * dt / 60
