@@ -654,7 +654,7 @@ for i = 0, SEGMENTS - 1 do
 		textured(seg, "px_stone")
 	end
 end
-local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(AX, 1.3, AZ - 10), STONE, nil, arena)
+local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(AX, 1.3, AZ), STONE, nil, arena) -- the arena centre: BossService measures the arena from here
 bossSpawn.Transparency = 1
 bossSpawn.CanCollide = false
 bossSpawn.CanQuery = false

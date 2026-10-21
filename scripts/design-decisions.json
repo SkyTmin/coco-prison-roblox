@@ -487,9 +487,51 @@
   },
   "bosses": {
     "basalt_guardian": {
+      "_owner": "[владелец 22.10] босс каменоломни: урон почти нулевой (это 3-й уровень), появляется каждые 20 минут, сверху бар с именем и HP; арена в пещере каменоломни",
       "hp": 600,
-      "damage": 4,
-      "respawnSeconds": 1200
+      "damage": 0.2,
+      "respawnSeconds": 1200,
+      "unlockLevel": 3,
+      "locationId": "quarry",
+      "nameEn": "Basalt Guardian",
+      "_abilities": "[вики] клинок из лавы и шипы из земли; во время анимаций урон по боссу не проходит [клиент]. Параметры — [решение]",
+      "fight": {
+        "meleeDamage": 0.2,
+        "meleeRange": 8,
+        "meleeCooldown": 2.5,
+        "walkSpeed": 9,
+        "leashSeconds": 30,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 30,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 55,
+          "damage": 0.5
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 0.5,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 42,
+          "maxDistance": 40,
+          "width": 6,
+          "damage": 0.5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        }
+      },
+      "_charge": "[coco-instruments origin/prod, Минотавр этаж 5 / Древний страж этаж 11; docs/research/boss-from-instruments.md] таран по красной полосе; в колонну — оглушение 3,0 с, в стену — 2,3 с; оглушённый получает ×1,7 урона. Скорость/дальность — [решение]",
+      "_damage": "[владелец 22.10] «урон минимальный, практически без урона» (3-й уровень): удар 0,2 HP раз в 2,5 с, способности по 0,5 HP (у игрока 20 HP); первая проверка с 0,5/1 HP сняла 6 сердец за 40 с — слишком много"
     },
     "minotaur": {
       "hp": 1000,

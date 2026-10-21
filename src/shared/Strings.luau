@@ -984,6 +984,49 @@ local STRINGS: { [string]: Entry } = {
 		es = "Tomar todo",
 		fr = "Tout prendre",
 	},
+	-- bosses (BossService, BossHud) [владелец 22.10]
+	boss_spawned = {
+		ru = "Босс «%s» появился в каменоломне!",
+		en = "The boss %s has appeared in the quarry!",
+		es = "¡El jefe %s ha aparecido en la cantera!",
+		fr = "Le boss %s est apparu dans la carrière !",
+	},
+	boss_killed = {
+		ru = "«%s» повержен! Топ по урону: %s",
+		en = "%s is defeated! Top damage: %s",
+		es = "¡%s ha sido derrotado! Más daño: %s",
+		fr = "%s est vaincu ! Plus de dégâts : %s",
+	},
+	boss_reward = {
+		ru = "Награда за босса: %s $ (ваш урон %d%%)",
+		en = "Boss reward: %s $ (your damage %d%%)",
+		es = "Recompensa del jefe: %s $ (tu daño %d%%)",
+		fr = "Récompense du boss : %s $ (vos dégâts %d%%)",
+	},
+	boss_no_reward = {
+		ru = "Нет награды: нужно нанести хотя бы %d%% урона",
+		en = "No reward: deal at least %d%% of the damage",
+		es = "Sin recompensa: haz al menos el %d%% del daño",
+		fr = "Pas de récompense : infligez au moins %d%% des dégâts",
+	},
+	boss_respawn = {
+		ru = "%s · появится через %s",
+		en = "%s · appears in %s",
+		es = "%s · aparece en %s",
+		fr = "%s · apparaît dans %s",
+	},
+	boss_invulnerable = {
+		ru = "неуязвим",
+		en = "invulnerable",
+		es = "invulnerable",
+		fr = "invulnérable",
+	},
+	boss_stunned = {
+		ru = "оглушён ×1,7",
+		en = "stunned ×1.7",
+		es = "aturdido ×1,7",
+		fr = "étourdi ×1,7",
+	},
 	-- thrown items (ItemDropService) [владелец 21.10]
 	drop_not_tools = {
 		ru = "Инструменты и броню выбросить нельзя",

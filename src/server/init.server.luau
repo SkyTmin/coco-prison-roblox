@@ -63,6 +63,7 @@ local LightingService = require(script.Services.LightingService)
 local HurtService = require(script.Services.HurtService)
 local CreativeService = require(script.Services.CreativeService)
 local ItemDropService = require(script.Services.ItemDropService)
+local BossService = require(script.Services.BossService)
 
 HungerService.Start()
 DeathService.Start()
@@ -84,6 +85,7 @@ LightingService.Start()
 HurtService.Start()
 CreativeService.Start()
 ItemDropService.Start()
+BossService.Start()
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn

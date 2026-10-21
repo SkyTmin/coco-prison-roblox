@@ -12,6 +12,9 @@
       "name": "Жнец",
       "location": "Врата края",
       "unlockLevel": 35,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         18500
@@ -40,6 +43,9 @@
       "name": "Древесный хранитель",
       "location": "Амбар",
       "unlockLevel": 33,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         17300
@@ -68,6 +74,9 @@
       "name": "Самурай",
       "location": "Киото",
       "unlockLevel": 29,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         10000
@@ -96,6 +105,9 @@
       "name": "Рыцарь",
       "location": "Королевский сад",
       "unlockLevel": 11,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         3100
@@ -123,7 +135,44 @@
       "id": "basalt_guardian",
       "name": "Базальтовый страж",
       "location": "Каменоломня",
-      "unlockLevel": null,
+      "unlockLevel": 3,
+      "locationId": "quarry",
+      "nameEn": "Basalt Guardian",
+      "fight": {
+        "meleeDamage": 0.2,
+        "meleeRange": 8,
+        "meleeCooldown": 2.5,
+        "walkSpeed": 9,
+        "leashSeconds": 30,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 30,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 55,
+          "damage": 0.5
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 0.5,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 42,
+          "maxDistance": 40,
+          "width": 6,
+          "damage": 0.5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        }
+      },
       "money": [
         0,
         350
@@ -132,7 +181,7 @@
       "powderChance": null,
       "shard": null,
       "hp": 600,
-      "damage": 4,
+      "damage": 0.2,
       "respawnSeconds": 1200
     },
     {
@@ -140,6 +189,9 @@
       "name": "Минотавр",
       "location": "Подножье горы",
       "unlockLevel": null,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         450
@@ -156,6 +208,9 @@
       "name": "Король Пиглинов",
       "location": "Преисподняя",
       "unlockLevel": null,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         420
@@ -181,6 +236,9 @@
       "name": "Скелетон",
       "location": "Пирамида",
       "unlockLevel": 9,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         2200
@@ -209,6 +267,9 @@
       "name": "Иллюзионист",
       "location": "Пустотная крепость",
       "unlockLevel": 15,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         6500
@@ -237,6 +298,9 @@
       "name": "Векна",
       "location": "Изнанка",
       "unlockLevel": 27,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         6400
@@ -265,6 +329,9 @@
       "name": "Посейдон",
       "location": "Затопленный маяк",
       "unlockLevel": 13,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         3800
@@ -293,6 +360,9 @@
       "name": "Паучья матка",
       "location": "Паучье логово",
       "unlockLevel": 17,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         7700
@@ -321,6 +391,9 @@
       "name": "Лесной дух",
       "location": "Лепреконовая долина",
       "unlockLevel": 23,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         8600
@@ -340,6 +413,9 @@
       "name": "Грут",
       "location": "Ферма",
       "unlockLevel": 31,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         15000
@@ -359,6 +435,9 @@
       "name": "Моль",
       "location": "Снежная длань",
       "unlockLevel": 19,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         7900
@@ -387,6 +466,9 @@
       "name": "Вороний рыцарь",
       "location": "Замок",
       "unlockLevel": 25,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         9000
@@ -415,6 +497,9 @@
       "name": "Король нежити",
       "location": "Рынок",
       "unlockLevel": 21,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         9500

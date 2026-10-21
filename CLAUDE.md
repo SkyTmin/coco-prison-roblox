@@ -84,6 +84,9 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    selected or long-pressed slot). A new item needs `item_<id>` (+ optional `desc_<id>`) in Strings in
    all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
    server warns `[ItemInfo] missing translations` in Studio when something is missing.
+   Каменоломня: `scripts/build-quarry.luau` (Edit, after build-textures; Workspace.Quarry at X = 700, all in one cave).
+   Bosses: `BossService` (BossSpawn part + BossId; fight numbers in design-decisions bosses.<id>.fight) and
+   `src/client/BossHud.luau` (top bar, respawn board) via ReplicatedStorage.Bosses; QA `BossDebug`.
    StreamingEnabled is on (`scripts/setup-streaming.luau`, Edit): never assume a far part exists on the client;
    move players only after `RequestStreamAroundAsync`; small models that must arrive whole are Atomic.
    Mine resets are time-sliced (4 ms a frame), skip untouched mines; QA `MineDebug` ("reset" | "state", mineId).

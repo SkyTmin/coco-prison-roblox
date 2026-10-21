@@ -26,6 +26,7 @@ local ArtifactWindow = require(script.ArtifactWindow)
 local SellWindow = require(script.SellWindow)
 local ShopWindow = require(script.ShopWindow)
 local CreativeWindow = require(script.CreativeWindow)
+local BossHud = require(script.BossHud)
 local TrainerWindow = require(script.TrainerWindow)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
@@ -1242,7 +1243,10 @@ local function buildLocations(): Frame
 				table.insert(bossNames, boss.name)
 				table.insert(
 					bossLevels,
-					boss.name .. " · " .. T("location_level", boss.unlockLevel)
+					-- some bosses have no level in the wiki: fall back to their location's level
+					boss.name
+						.. " · "
+						.. T("location_level", boss.unlockLevel or location.unlockLevel)
 				)
 			end
 		end
@@ -2382,6 +2386,7 @@ end
 -- the 8th grid cell: creative test mode, only for players CreativeService allows
 do
 	CreativeWindow.Listen()
+	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
 	button.Position = UDim2.fromOffset((#menuKeys % 4) * 60, math.floor(#menuKeys / 4) * 60)
