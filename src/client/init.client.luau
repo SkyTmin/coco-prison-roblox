@@ -457,6 +457,10 @@ local function createWindow(
 	onClose: () -> ()
 ): (Frame, Frame)
 	local win, content = Ui.window(parent, title, size, onClose)
+	-- explicitly above the HUD: a window scaled down on a phone covers the hotbar, and with equal ZIndex
+	-- the order between the two siblings is not guaranteed (suspected cause of "Открыть" doing nothing
+	-- on the owner's phone, 22.10 — not reproduced in the emulator)
+	win.ZIndex = 10
 	local scale = Instance.new("UIScale")
 	scale.Parent = win
 	local layout: WindowLayout =

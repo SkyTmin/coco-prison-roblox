@@ -22,17 +22,25 @@ local LOG_LINES = 30
 local logLines: { { text: string, error: boolean, at: string } } = {} -- server warnings, newest last
 local logChanged = Instance.new("BindableEvent")
 
+local function addLog(text: string, isError: boolean)
+	table.insert(logLines, { text = text, error = isError, at = os.date("%H:%M:%S") :: string })
+	while #logLines > LOG_LINES do
+		table.remove(logLines, 1)
+	end
+	logChanged:Fire()
+end
+
+-- A client-side line in the same log (e.g. "the Open button was pressed"), for allowed players only.
+function CreativeWindow.LocalLog(text: string)
+	if Players.LocalPlayer:GetAttribute("CreativeAllowed") then
+		addLog("[клиент] " .. text, false)
+	end
+end
+
 -- Collects the server's warnings/errors (CreativeService relays them to allowed players only).
 function CreativeWindow.Listen()
 	Remotes.event("ServerLog").OnClientEvent:Connect(function(message: string, isError: boolean)
-		table.insert(
-			logLines,
-			{ text = message, error = isError, at = os.date("%H:%M:%S") :: string }
-		)
-		while #logLines > LOG_LINES do
-			table.remove(logLines, 1)
-		end
-		logChanged:Fire()
+		addLog(message, isError)
 	end)
 end
 

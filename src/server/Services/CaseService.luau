@@ -298,6 +298,11 @@ local function openCase(player: Player, id: any, requestedKey: any)
 		return
 	end
 	if session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
+		if player:GetAttribute("CreativeAllowed") and session.id ~= "enderChest" then
+			warn(
+				"[кейс] нажато слишком быстро после прошлого открытия — пропущено"
+			)
+		end
 		return
 	end
 	session.rolledAt = os.clock()
@@ -494,6 +499,29 @@ local function openCase(player: Player, id: any, requestedKey: any)
 		toast(player, failure)
 	elseif money > 0 then
 		toast(player, "case_money", Strings.money(money))
+	end
+	if player:GetAttribute("CreativeAllowed") then
+		-- trace for the owner's creative log (the case "opened empty" on the owner's phone, 22.10)
+		local profile = ProfileService.Get(player)
+		local inside, keys = 0, 0
+		if profile then
+			for _ in pairs(profile.caseContents[session.id] or {}) do
+				inside += 1
+			end
+			for _, key in ipairs(accepted) do
+				keys += InventoryService.count(profile, key)
+			end
+		end
+		warn(
+			string.format(
+				"[кейс] %s: %s, в кейсе %d, деньги %s, ключей осталось %d",
+				session.id,
+				failure or "открыт",
+				inside,
+				Strings.money(money),
+				keys
+			)
+		)
 	end
 	ArtifactService.Notify(player, artifactNotices)
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)

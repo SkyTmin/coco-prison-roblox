@@ -11,6 +11,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local BlockColors = require(Shared.BlockColors)
+local CreativeWindow = require(script.Parent.CreativeWindow)
 local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
 
@@ -141,7 +142,28 @@ function ChestWindow.build(
 	)
 	hint.TextXAlignment = Enum.TextXAlignment.Left
 
+	local function keyCount(key: string?): number
+		local profile = getProfile()
+		local n = 0
+		if profile and key then
+			for _, stack in pairs(profile.inventory) do
+				if stack.id == key then
+					n += stack.count
+				end
+			end
+		end
+		return n
+	end
 	open.Activated:Connect(function()
+		CreativeWindow.LocalLog(
+			string.format(
+				"нажато «Открыть»: %s, ключ %s ×%d, кнопка активна: %s",
+				id,
+				tostring(selectedKey),
+				keyCount(selectedKey),
+				tostring(open.Active)
+			)
+		)
 		if open.Active then
 			Remotes.event("CaseOpen"):FireServer(id, selectedKey)
 		end
@@ -169,18 +191,6 @@ function ChestWindow.build(
 			end
 		end
 	end)
-	local function keyCount(key: string?): number
-		local profile = getProfile()
-		local n = 0
-		if profile and key then
-			for _, stack in pairs(profile.inventory) do
-				if stack.id == key then
-					n += stack.count
-				end
-			end
-		end
-		return n
-	end
 	local function refresh()
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
