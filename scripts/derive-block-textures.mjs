@@ -166,6 +166,14 @@ await recolor("grass_top.png", "hedge.png", [[0, [24, 60, 26]], [0.5, [44, 96, 4
 await recolor("oak_log_side.png", "cherry_log.png", [[0, [38, 18, 22]], [0.5, [70, 36, 40]], [1, [110, 66, 66]]]);
 await recolor("planks.png", "cherry_planks.png", [[0, [170, 100, 96]], [0.5, [214, 150, 140]], [1, [240, 196, 184]]]);
 await recolor("stone_bricks.png", "white_stone_bricks.png", [[0, [170, 170, 176]], [0.5, [222, 222, 226]], [1, [246, 246, 248]]]);
+// [Затопленный маяк] cyan concrete (the mine block: a flat cyan with a faint grain), prismarine (teal, mottled),
+// prismarine bricks, dark prismarine, sea lantern (pale glowing blue), a pale coral base the map tints
+await recolor("concrete_floor.png", "cyan_concrete.png", [[0, [20, 110, 120]], [0.5, [30, 130, 140]], [1, [44, 150, 160]]], 0.7);
+await recolor("cobblestone.png", "prismarine.png", [[0, [40, 90, 84]], [0.4, [70, 140, 126]], [0.75, [100, 170, 150]], [1, [140, 200, 180]]]);
+await recolor("stone_bricks.png", "prismarine_bricks.png", [[0, [40, 96, 88]], [0.5, [84, 156, 140]], [1, [130, 196, 176]]]);
+await recolor("stone_bricks.png", "dark_prismarine.png", [[0, [18, 44, 40]], [0.5, [36, 80, 70]], [1, [62, 116, 100]]]);
+await recolor("glowstone.png", "sea_lantern.png", [[0, [120, 170, 180]], [0.5, [190, 225, 225]], [1, [245, 255, 250]]]);
+await recolor("sand.png", "coral.png", [[0, [150, 150, 150]], [0.5, [210, 210, 210]], [1, [250, 250, 250]]]);
 // magma: the dark mortar of cobblestone glows, the stones stay dark
 {
 	const [lo, hi] = await lumRange("cobblestone.png");

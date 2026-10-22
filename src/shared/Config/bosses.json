@@ -563,9 +563,66 @@
       "name": "Посейдон",
       "location": "Затопленный маяк",
       "unlockLevel": 13,
-      "locationId": null,
-      "nameEn": null,
-      "fight": null,
+      "locationId": "sunken_lighthouse",
+      "nameEn": "Poseidon",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.9,
+        "walkSpeed": 13,
+        "leashSeconds": 300,
+        "abilityCooldown": 6,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            60,
+            200,
+            220
+          ],
+          "blade": [
+            150,
+            230,
+            255
+          ],
+          "spikes": [
+            70,
+            160,
+            150
+          ],
+          "glow": [
+            120,
+            230,
+            255
+          ]
+        },
+        "_abilities": "[решение] волна прилива (полоса), удары трезубцем — молнии из-под пола (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+      },
       "money": [
         0,
         3800
@@ -585,9 +642,9 @@
         "count": null
       },
       "shard": null,
-      "hp": null,
-      "damage": null,
-      "respawnSeconds": null
+      "hp": 4500,
+      "damage": 9,
+      "respawnSeconds": 3000
     },
     {
       "id": "spider_queen",

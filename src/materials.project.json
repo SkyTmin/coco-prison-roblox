@@ -585,6 +585,54 @@
         "ColorMap": "rbxassetid://114385147409592",
         "StudsPerTile": 4
       }
+    },
+    "px_prismarine": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://96493112563500",
+        "StudsPerTile": 4
+      }
+    },
+    "px_prismarine_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://76585034663161",
+        "StudsPerTile": 4
+      }
+    },
+    "px_sea_lantern": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://106770117639658",
+        "StudsPerTile": 4
+      }
+    },
+    "px_dark_prismarine": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://97788211469680",
+        "StudsPerTile": 4
+      }
+    },
+    "px_coral": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://102463102058417",
+        "StudsPerTile": 4
+      }
+    },
+    "px_cyan_concrete": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://137274817592622",
+        "StudsPerTile": 4
+      }
     }
   }
 }

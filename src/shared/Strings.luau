@@ -1233,6 +1233,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡El choque del acero rompió el silencio: el Caballero ha entrado en combate!",
 		fr = "Le fracas de l'acier a rompu le silence : le Chevalier entre dans la bataille !",
 	},
+	boss_spawned_poseidon = { -- [клиент] prison.classic.boss.poseidon.notify.spawn
+		ru = "Море вскипело у Затопленного маяка — Посейдон пробудился!",
+		en = "The sea is boiling at the Sunken Lighthouse: Poseidon has awakened!",
+		es = "¡El mar hierve junto al Faro Hundido: Poseidón ha despertado!",
+		fr = "La mer bouillonne près du Phare englouti : Poséidon s'est réveillé !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

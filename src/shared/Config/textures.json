@@ -75,12 +75,19 @@
     "white_stone_bricks": "rbxassetid://84976577902573",
     "hedge": "rbxassetid://70773913217037",
     "cherry_planks": "rbxassetid://75926965632103",
-    "cherry_log": "rbxassetid://114385147409592"
+    "cherry_log": "rbxassetid://114385147409592",
+    "prismarine": "rbxassetid://96493112563500",
+    "prismarine_bricks": "rbxassetid://76585034663161",
+    "sea_lantern": "rbxassetid://106770117639658",
+    "dark_prismarine": "rbxassetid://97788211469680",
+    "coral": "rbxassetid://102463102058417",
+    "cyan_concrete": "rbxassetid://137274817592622"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",
   "_faction": "stone_bricks … gold_block (16): faction-blocks-sheet.png (Codex image gen 22.10.2026, style of our sheet), split by scripts/split-faction-sheet.mjs, uploaded 22.10.2026 — blocks of the faction base",
   "_nether": "Преисподняя: 21 texture derived from our own by scripts/derive-block-textures.mjs (colour ramps over the pattern), uploaded 22.10.2026; netherite = the menu's «Незерит» mine block (Nether rock look)",
   "_pyramid": "Пирамида: cut_sandstone, cut_red_sandstone, terracotta_blue (recoloured from ours), hieroglyphs (our own glyphs drawn by scripts/derive-block-textures.mjs, 3×3 glyphs, used as a Texture with 12 studs per tile), uploaded 23.10.2026",
-  "_garden": "Королевский сад: 6 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026"
+  "_garden": "Королевский сад: 6 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026",
+  "_lighthouse": "Затопленный маяк: 6 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026"
 }
