@@ -29,6 +29,7 @@ local CreativeWindow = require(script.CreativeWindow)
 local BossHud = require(script.BossHud)
 local BossAnimator = require(script.BossAnimator)
 local MobAnimator = require(script.MobAnimator)
+local TopBoards = require(script.TopBoards)
 local IndoorLighting = require(script.IndoorLighting)
 local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
@@ -126,13 +127,56 @@ local function toggleFirstPerson()
 end
 
 -- ---------------------------------------------------------------- HUD: stats panel (right), hints, toast, combo
-local stats = Ui.panel(gui, UDim2.fromOffset(190, 114), UDim2.new(1, -200, 0.42, 0))
-Ui.label(stats, "PRISON", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 2), 13, Ui.colors.header)
-local statLevel = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 20), 14)
-local statMoney = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 38), 14)
-local statBlocks = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 56), 14)
-local statRats = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 74), 14)
-local statKD = Ui.label(stats, "", UDim2.new(1, -12, 0, 18), UDim2.fromOffset(6, 92), 14)
+-- [владелец 22.10, скриншот; клиент prison.classic.scoreboard.*] «PRISON CLASSIC», then icon · label · value:
+-- Уровень, Баланс, Блоки (чистые in brackets), a divider, Фракция, Крыс (чистые in brackets), У / С.
+local SB_ROW = 20
+local stats =
+	Ui.panel(gui, UDim2.fromOffset(214, 30 + SB_ROW * 6 + 10), UDim2.new(1, -224, 0.40, 0))
+local sbTitle = Ui.label(
+	stats,
+	"",
+	UDim2.new(1, -12, 0, 22),
+	UDim2.fromOffset(6, 3),
+	14,
+	Color3.fromRGB(90, 150, 255)
+)
+sbTitle.TextXAlignment = Enum.TextXAlignment.Center
+local function sbRow(index: number, icon: string): (TextLabel, TextLabel)
+	local y = 28 + (index - 1) * SB_ROW + (if index >= 4 then 8 else 0)
+	local image = Instance.new("ImageLabel")
+	image.Size = UDim2.fromOffset(14, 14)
+	image.Position = UDim2.fromOffset(8, y + 3)
+	image.BackgroundTransparency = 1
+	image.Image = (Config.icons.icons :: any)[icon] or ""
+	image.ResampleMode = Enum.ResamplerMode.Pixelated
+	image.Parent = stats
+	local label = Ui.label(
+		stats,
+		"",
+		UDim2.fromOffset(100, SB_ROW),
+		UDim2.fromOffset(28, y),
+		14,
+		Ui.colors.text
+	)
+	local value = Ui.rich(stats, "", UDim2.new(1, -36, 0, SB_ROW), UDim2.fromOffset(28, y), 14)
+	value.TextXAlignment = Enum.TextXAlignment.Right
+	return label, value
+end
+local statLevelLabel, statLevel = sbRow(1, "hud_level")
+local statMoneyLabel, statMoney = sbRow(2, "hud_money")
+local statBlocksLabel, statBlocks = sbRow(3, "hud_blocks")
+local divider = Instance.new("Frame")
+divider.Size = UDim2.new(1, -16, 0, 1)
+divider.Position = UDim2.fromOffset(8, 28 + SB_ROW * 3 + 3)
+divider.BackgroundColor3 = Ui.colors.border
+divider.BorderSizePixel = 0
+divider.Parent = stats
+local statFactionLabel, statFaction = sbRow(4, "hud_faction")
+local statRatsLabel, statRats = sbRow(5, "hud_rat")
+local statKDLabel, statKD = sbRow(6, "hud_kd")
+local function sbColor(text: string, color: Color3): string
+	return string.format('<font color="%s">%s</font>', Ui.hex(color), text)
+end
 
 -- [владелец 21.10] no hygiene / sleep / toilet bars: NeedsService sends a message when a need runs out
 -- and the effect icon (EffectsHud) shows while it lasts
@@ -1726,6 +1770,7 @@ local function render(p: Types.Profile)
 	locale = nextLocale
 	if rebuild then
 		localizeWorld()
+		TopBoards.Refresh()
 	end
 	languageButton.Text = T("language_code")
 	renderCameraButton()
@@ -1738,16 +1783,34 @@ local function render(p: Types.Profile)
 	hints.Text = T("keys_hint")
 	renderTeleportCountdown()
 	renderCombo()
-	statLevel.Text = string.format("%s  %d", T("level"), p.level)
-	statLevel.TextColor3 = Ui.colors.level
-	-- [владелец 21.10] the bar shows whole money (exact amounts stay in the sell window)
-	-- the original's money format ("0.500"): rewards below 1 $ (a rat gives 0.5) were shown as 0 [владелец 22.10]
-	statMoney.Text = string.format("%s  %s $", T("coins"), Strings.money(p.coins))
-	statMoney.TextColor3 = Ui.colors.money
-	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
-	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)
-	statKD.Text =
-		string.format("%s  %d / %d", T("kd_label"), p.stats.kills or 0, p.stats.deaths or 0)
+	sbTitle.Text = T("sb_title")
+	statLevelLabel.Text = T("level")
+	statMoneyLabel.Text = T("coins")
+	statBlocksLabel.Text = T("blocks")
+	statFactionLabel.Text = T("sb_faction")
+	statRatsLabel.Text = T("sb_rats")
+	statKDLabel.Text = T("sb_kd")
+	statLevel.Text = sbColor(tostring(p.level), Ui.colors.yellow)
+	-- balance like the original: 8,507; below 1 000 the exact "0.500" format [владелец 22.10]
+	statMoney.Text = sbColor(
+		if p.coins >= 1000 * Config.moneyScale
+			then Strings.grouped(math.floor(p.coins / Config.moneyScale), 0)
+			else Strings.money(p.coins),
+		Ui.colors.green
+	)
+	statBlocks.Text = sbColor(Strings.big(p.blocksTotal), Ui.colors.orange)
+		.. " "
+		.. sbColor("(" .. Strings.big(p.stats.blocksClean or 0) .. ")", Ui.colors.gray)
+	statFaction.Text = sbColor(
+		if Config.faction(p.faction) then T("faction_" .. p.faction) else T("faction_none"),
+		Ui.colors.gray
+	)
+	statRats.Text = sbColor(Strings.big(p.stats.ratsTotal or p.stats.rats or 0), Ui.colors.orange)
+		.. " "
+		.. sbColor("(" .. Strings.big(p.stats.rats or 0) .. ")", Ui.colors.gray)
+	statKD.Text = sbColor(tostring(p.stats.kills or 0), Ui.colors.green)
+		.. sbColor(" / ", Ui.colors.text)
+		.. sbColor(tostring(p.stats.deaths or 0), Ui.colors.red)
 	renderHotbar()
 	renderSurvival()
 	refreshWindow(rebuild)
@@ -2559,6 +2622,9 @@ do
 	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
 	BossAnimator.Start() -- smooth boss joints from its Action attributes
 	MobAnimator.Start() -- Blender clips on the rats (idle, walk, bite, hurt, death)
+	TopBoards.Start(function() -- the spawn top boards
+		return locale
+	end)
 	CombatFeel.Start(gui, function() -- soft lock, predicted hits, damage numbers, mob health bars
 		local kind = heldKind()
 		return kind
@@ -2707,9 +2773,9 @@ local function updateLayout()
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
 	statsScale.Scale = if mobile then 0.65 else 1
-	stats.Position = if mobile then UDim2.new(1, -132, 0, 64) else UDim2.new(1, -200, 0.42, 0)
+	stats.Position = if mobile then UDim2.new(1, -148, 0, 64) else UDim2.new(1, -224, 0.4, 0)
 	-- effect icons sit left of the stats panel, top-aligned with it
-	effectsHud.Position = if mobile then UDim2.new(1, -136, 0, 64) else UDim2.new(1, -206, 0.42, 0)
+	effectsHud.Position = if mobile then UDim2.new(1, -152, 0, 64) else UDim2.new(1, -230, 0.4, 0)
 	effectsScale.Scale = if mobile then 0.75 else 1
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8

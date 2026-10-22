@@ -94,7 +94,11 @@ local function rewardKiller(mob: Mob, humanoid: Humanoid)
 		money = math.floor((mob.cfg.money or 0) * mult * Config.moneyScale + 0.5)
 		p.coins += money
 		if mob.cfg.statKey then
+			-- stats[statKey] = «чистые» (one per kill: trainer, spawn top); statKey.."Total" counts with the
+			-- «Мобы» upgrade, like blocksTotal with «Блоки» [сеть: rats / rats_clean; множитель — решение]
 			p.stats[mob.cfg.statKey] = (p.stats[mob.cfg.statKey] or 0) + 1
+			local total = mob.cfg.statKey .. "Total"
+			p.stats[total] = (p.stats[total] or p.stats[mob.cfg.statKey] - 1) + mult
 		end
 		ProfessionService.addXp(p, "blademaster", 1)
 	end)

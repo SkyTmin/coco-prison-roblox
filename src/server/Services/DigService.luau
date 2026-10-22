@@ -272,6 +272,8 @@ local function complete(player: Player, token: number)
 		overflow = InventoryService.add(p, dropId, dropCount)
 		local blockMult = 1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks
 		p.blocksTotal += blockMult * comboMult
+		-- «чистые» блоки: one per block, no multipliers (sidebar in brackets, the spawn top) [сеть: blocks_clean]
+		p.stats.blocksClean = (p.stats.blocksClean or 0) + 1
 		if block.upgradeCounter then
 			p.counters[block.upgradeCounter] = (p.counters[block.upgradeCounter] or 0) + 1
 		end

@@ -1,0 +1,23 @@
+{
+  "source": "5 скриншотов владельца 22.10.2026 (правая панель, 4 табло на спавне); тексты — wiki/client-audit/decoded/ru_RU-prison.json",
+  "status": "confirmed_screenshot",
+  "sidebar": {
+    "title": "PRISON CLASSIC",
+    "rows": [
+      { "key": "level", "label": "Уровень", "icon": "green_arrow_up", "example": "11", "color": "yellow" },
+      { "key": "balance", "label": "Баланс", "icon": "green_dollar", "example": "8,507", "color": "green" },
+      { "key": "blocks", "label": "Блоки", "icon": "block", "example": "76.68K (42.77K)", "color": "orange", "secondary": "blocks_clean" },
+      { "separator": true },
+      { "key": "fraction", "label": "Фракция", "icon": "four_squares", "example": "Афро", "color": "gray" },
+      { "key": "rats", "label": "Крыс", "icon": "rat", "example": "189 (141)", "color": "orange", "secondary": "rats_clean" },
+      { "key": "kills_deaths", "label": "У / С", "icon": "sword", "example": "8 / 47", "color": "green/red" }
+    ]
+  },
+  "boards": [
+    { "id": "cl_mobs", "title": "Топ по крысам", "value": "Крысы", "field": "rats_clean", "examples": [13919, 6260, 6182] },
+    { "id": "money", "title": "Топ по деньгам", "value": "Деньги", "field": "balance", "examples": [599945.6, 498415.45, 397307.28] },
+    { "id": "level", "title": "Топ по уровню", "value": "Уровень", "field": "level", "examples": [39, 37, 36] },
+    { "id": "cl_blocks", "title": "Топ по блокам", "value": "Блоки (чистые)", "field": "blocks_clean", "examples": [2668514, 2228742, 2046385] }
+  ],
+  "boardLayout": { "visibleRows": 10, "scrolls": true, "crowns": ["gold", "light_blue", "orange"] }
+}

@@ -1,5 +1,5 @@
 {
-  "_source": "Tools, shears and armor: VoxeLibre / Pixel Perfection textures (CC BY-SA 4.0, assets/thirdparty/voxelibre/ATTRIBUTION.md) upscaled ×8 nearest-neighbour; other items: Codex image gen 20.10.2026. Uploaded via Studio MCP upload_image. Keys (improved ancient, nickname, artifact), dispeller, powder, money bag, shard goods and trainer badges: own pixel art, scripts/draw-icons.mjs (21.10.2026). soap, sleeping_bag, ancient_book, booster_money, rotten_flesh: own pixel art, draw-icons.mjs (21.10.2026, no text in slots). Status effect icons (effect_*): own pixel art, draw-icons.mjs (21.10.2026). Touch menu icons: own pixel art (draw-icons.mjs); melon_slice: VoxeLibre farming_melon.png (CC BY-SA 4.0).",
+  "_source": "Tools, shears and armor: VoxeLibre / Pixel Perfection textures (CC BY-SA 4.0, assets/thirdparty/voxelibre/ATTRIBUTION.md) upscaled ×8 nearest-neighbour; other items: Codex image gen 20.10.2026. Uploaded via Studio MCP upload_image. Keys (improved ancient, nickname, artifact), dispeller, powder, money bag, shard goods and trainer badges: own pixel art, scripts/draw-icons.mjs (21.10.2026). soap, sleeping_bag, ancient_book, booster_money, rotten_flesh: own pixel art, draw-icons.mjs (21.10.2026, no text in slots). Status effect icons (effect_*): own pixel art, draw-icons.mjs (21.10.2026). Touch menu icons: own pixel art (draw-icons.mjs); melon_slice: VoxeLibre farming_melon.png (CC BY-SA 4.0). HUD scoreboard and top boards (hud_*, top_crown): own pixel art, draw-icons.mjs (22.10.2026).",
   "icons": {
     "axe_stone": "rbxassetid://109538785154164",
     "boots_iron": "rbxassetid://128018465863690",
@@ -85,7 +85,14 @@
     "booster_money": "rbxassetid://83208846338314",
     "rotten_flesh": "rbxassetid://127883673307597",
     "coal": "rbxassetid://127620871381987",
-    "menu_factions": "rbxassetid://94823847419992"
+    "menu_factions": "rbxassetid://94823847419992",
+    "hud_level": "rbxassetid://132949206322354",
+    "hud_money": "rbxassetid://119303065754849",
+    "hud_blocks": "rbxassetid://136277291532177",
+    "hud_faction": "rbxassetid://115131699734891",
+    "hud_rat": "rbxassetid://111665412119345",
+    "hud_kd": "rbxassetid://100085081985372",
+    "top_crown": "rbxassetid://132695456454870"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557"
 }

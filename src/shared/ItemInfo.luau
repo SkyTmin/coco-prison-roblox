@@ -308,6 +308,8 @@ function ItemInfo.knownIds(): { string }
 			and not NOT_ITEMS[id]
 			and not id:match("^menu_")
 			and not id:match("^effect_")
+			and not id:match("^hud_")
+			and not id:match("^top_")
 			and not id:match("^trainer_")
 			and not id:match("_wood$")
 			and not id:match("_stone$")

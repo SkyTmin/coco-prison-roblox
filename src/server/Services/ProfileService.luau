@@ -265,6 +265,12 @@ function ProfileService.Get(player: Player): Profile?
 	return if session then session.profile else nil
 end
 
+-- false when the profile failed to load (a default one that is never saved): keep it out of the global tops
+function ProfileService.IsReal(player: Player): boolean
+	local session = sessions[player]
+	return session ~= nil and not session.loadFailed
+end
+
 function ProfileService.Mutate(player: Player, mutator: (Profile) -> ())
 	local session = sessions[player]
 	if not session then

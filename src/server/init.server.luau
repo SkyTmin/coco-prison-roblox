@@ -76,6 +76,7 @@ local FactionStorageService = require(script.Services.FactionStorageService)
 local MobService = require(script.Services.MobService)
 local NameplateService = require(script.Services.NameplateService)
 local CollisionGroups = require(script.Services.CollisionGroups)
+local LeaderboardService = require(script.Services.LeaderboardService)
 
 HungerService.Start()
 DeathService.Start()
@@ -103,6 +104,7 @@ FactionStorageService.Start()
 CollisionGroups.Start() -- players and mobs pass through each other
 MobService.Start()
 NameplateService.Start()
+LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn

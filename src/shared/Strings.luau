@@ -293,6 +293,57 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Sac d’argent",
 	},
 	kd_label = { ru = "У/С", en = "K/D", es = "B/M", fr = "É/M" },
+	-- the right-hand scoreboard [клиент: prison.classic.scoreboard.*]
+	sb_title = {
+		ru = "PRISON CLASSIC",
+		en = "PRISON CLASSIC",
+		es = "PRISON CLASSIC",
+		fr = "PRISON CLASSIC",
+	},
+	sb_faction = { ru = "Фракция", en = "Faction", es = "Facción", fr = "Faction" },
+	sb_rats = { ru = "Крыс", en = "Rats", es = "Ratas", fr = "Rats" },
+	sb_kd = { ru = "У / С", en = "K / D", es = "B / M", fr = "É / M" },
+	-- the spawn top boards [клиент: prison.classic.board.top.*]
+	top_rats = {
+		ru = "Топ по крысам",
+		en = "Top rats",
+		es = "Top de ratas",
+		fr = "Top des rats",
+	},
+	top_money = {
+		ru = "Топ по деньгам",
+		en = "Top money",
+		es = "Top de dinero",
+		fr = "Top de l'argent",
+	},
+	top_level = {
+		ru = "Топ по уровню",
+		en = "Top level",
+		es = "Top de nivel",
+		fr = "Top des niveaux",
+	},
+	top_blocks = {
+		ru = "Топ по блокам",
+		en = "Top blocks",
+		es = "Top de bloques",
+		fr = "Top des blocs",
+	},
+	top_player = { ru = "Игрок", en = "Player", es = "Jugador", fr = "Joueur" },
+	top_value_rats = { ru = "Крысы", en = "Rats", es = "Ratas", fr = "Rats" },
+	top_value_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
+	top_value_level = { ru = "Уровень", en = "Level", es = "Nivel", fr = "Niveau" },
+	top_value_blocks = {
+		ru = "Блоки (чистые)",
+		en = "Blocks (clean)",
+		es = "Bloques (limpios)",
+		fr = "Blocs (nets)",
+	},
+	top_empty = {
+		ru = "Пока пусто",
+		en = "Empty for now",
+		es = "Vacío por ahora",
+		fr = "Vide pour l'instant",
+	},
 	exchange = { ru = "Обменять", en = "Exchange", es = "Canjear", fr = "Échanger" },
 	exchange_stars = {
 		ru = "Обмен звёзд",
@@ -1703,6 +1754,25 @@ function Strings.money(units: number): string
 		return string.format("%d", math.floor(value))
 	end
 	return string.format("%." .. tostring(Config.money.displayDecimals) .. "f", value)
+end
+
+-- 8507 → "8,507"; 599945.6 → "599,945.6" (up to decimals digits, trailing zeros dropped) — the original's tops
+function Strings.grouped(n: number, decimals: number): string
+	local scale = 10 ^ decimals
+	local v = math.floor(n * scale + 0.5) / scale
+	local whole = math.floor(v)
+	local frac = v - whole
+	local s = tostring(whole):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	if s:sub(1, 1) == "," then
+		s = s:sub(2)
+	end
+	if decimals > 0 and frac > 0 then
+		local f = string.format("%." .. decimals .. "f", frac):sub(3):gsub("0+$", "")
+		if f ~= "" then
+			s ..= "." .. f
+		end
+	end
+	return s
 end
 
 function Strings.big(n: number): string
