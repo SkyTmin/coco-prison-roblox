@@ -1,0 +1,196 @@
+{
+  "_doc": "Front-view voxeliser config (scripts/model-tools/voxelize-front.cjs) for giant-zombie-reference-2.png (Codex, the guardian sheet as the style): front = top-right panel, 38 px a stud (≈ 12 studs tall like the old Зомбарь), centre x 1167, ground y 490. Every joint takes its depth from the side view (top-left panel, facing left, body centre x 470); voxel: true colours the sides from the side view. Colours: a 16-colour k-means palette of the sheet; glowing cells are the yellow-green pus (glowRule pus). round: elliptic cross-sections (belly, head, limbs).",
+  "reference": "giant-zombie-reference-2.png",
+  "panel": [
+    900,
+    20,
+    570,
+    480
+  ],
+  "scale": 38,
+  "centreX": 1167,
+  "groundY": 490,
+  "cell": 10,
+  "background": [
+    175,
+    174,
+    174
+  ],
+  "tolerance": 40,
+  "bevelStep": 0.22,
+  "palette": 12,
+  "glowRule": "pus",
+  "lava": {
+    "deep": [
+      150,
+      180,
+      40
+    ],
+    "warm": [
+      184,
+      214,
+      58
+    ],
+    "bright": [
+      214,
+      238,
+      92
+    ],
+    "hot": [
+      238,
+      255,
+      150
+    ]
+  },
+  "regions": [
+    {
+      "joint": "head",
+      "rect": [
+        1100,
+        30,
+        1235,
+        205
+      ],
+      "y": [
+        0.5,
+        3
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "armL",
+      "rect": [
+        900,
+        160,
+        1072,
+        345
+      ],
+      "y": [
+        3,
+        11
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "armR",
+      "rect": [
+        1262,
+        160,
+        1470,
+        345
+      ],
+      "y": [
+        3,
+        11
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "legL",
+      "rect": [
+        995,
+        360,
+        1167,
+        500
+      ],
+      "y": [
+        -1.5,
+        1.5
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "legR",
+      "rect": [
+        1167,
+        360,
+        1340,
+        500
+      ],
+      "y": [
+        -1.5,
+        1.5
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "body",
+      "rect": [
+        900,
+        0,
+        1470,
+        500
+      ],
+      "y": [
+        -3.5,
+        3.5
+      ],
+      "bevel": 3
+    }
+  ],
+  "side": {
+    "centreX": 470,
+    "groundY": 490,
+    "regions": [
+      {
+        "joints": [
+          "head"
+        ],
+        "rect": [
+          205,
+          20,
+          345,
+          178
+        ],
+        "voxel": true
+      },
+      {
+        "joints": [
+          "armL",
+          "armR"
+        ],
+        "rect": [
+          25,
+          128,
+          362,
+          322
+        ],
+        "voxel": true
+      },
+      {
+        "joints": [
+          "legL",
+          "legR"
+        ],
+        "rect": [
+          345,
+          352,
+          645,
+          495
+        ],
+        "voxel": true
+      },
+      {
+        "joints": [
+          "body"
+        ],
+        "rect": [
+          285,
+          25,
+          655,
+          405
+        ],
+        "voxel": true
+      }
+    ]
+  },
+  "sideCell": 20,
+  "round": {
+    "body": 0.85,
+    "head": 0.55,
+    "legL": 0.5,
+    "legR": 0.5,
+    "armL": 0.45,
+    "armR": 0.45
+  }
+}

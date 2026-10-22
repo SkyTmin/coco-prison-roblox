@@ -1,0 +1,177 @@
+{
+  "_doc": "Part-by-part config (scripts/model-tools/parts.cjs) for giant-zombie-reference-2.png [владелец 22.10: «делай по частям, смотри каждую часть с нужной стороны, потом соедини»]. Rects in sheet px: front = top-right panel (38 px a stud, centre x 1167, ground y 490), side = top-left panel (facing left, body centre x 470), top = bottom-left panel (head left, +X downwards). Each part's side and top silhouettes are stretched to its own front height / width. round / axis: superellipse cross-sections (along z for the body, head, legs; along y for the forward arms); the body's top view is covered by the arms and the head, so it is not used.",
+  "reference": "giant-zombie-reference-2.png",
+  "cell": 14,
+  "scale": 38,
+  "background": [
+    175,
+    174,
+    174
+  ],
+  "tolerance": 40,
+  "palette": 9,
+  "glowRule": "pus",
+  "thinGlow": true,
+  "topXSign": 1,
+  "glow": {
+    "deep": [
+      150,
+      180,
+      40
+    ],
+    "warm": [
+      184,
+      214,
+      58
+    ],
+    "bright": [
+      214,
+      238,
+      92
+    ],
+    "hot": [
+      238,
+      255,
+      150
+    ]
+  },
+  "front": {
+    "centreX": 1167,
+    "groundY": 490
+  },
+  "side": {
+    "centreX": 470,
+    "groundY": 490
+  },
+  "priority": [
+    "head",
+    "armL",
+    "armR",
+    "legL",
+    "legR",
+    "body"
+  ],
+  "parts": [
+    {
+      "joint": "head",
+      "front": [
+        1100,
+        30,
+        1236,
+        206
+      ],
+      "side": [
+        205,
+        20,
+        346,
+        178
+      ],
+      "top": [
+        295,
+        655,
+        405,
+        815
+      ],
+      "round": 3.2,
+      "axis": "z"
+    },
+    {
+      "joint": "armL",
+      "front": [
+        900,
+        160,
+        1074,
+        346
+      ],
+      "side": [
+        20,
+        128,
+        362,
+        335
+      ],
+      "top": [
+        70,
+        765,
+        390,
+        912
+      ],
+      "round": 2.4,
+      "axis": "y"
+    },
+    {
+      "joint": "armR",
+      "front": [
+        1260,
+        160,
+        1470,
+        346
+      ],
+      "side": [
+        20,
+        128,
+        362,
+        335
+      ],
+      "top": [
+        70,
+        568,
+        390,
+        702
+      ],
+      "round": 2.4,
+      "axis": "y"
+    },
+    {
+      "joint": "legL",
+      "front": [
+        994,
+        358,
+        1168,
+        500
+      ],
+      "side": [
+        355,
+        400,
+        640,
+        500
+      ],
+      "round": 2.6,
+      "axis": "z"
+    },
+    {
+      "joint": "legR",
+      "front": [
+        1166,
+        358,
+        1342,
+        500
+      ],
+      "side": [
+        355,
+        400,
+        640,
+        500
+      ],
+      "round": 2.6,
+      "axis": "z"
+    },
+    {
+      "joint": "body",
+      "front": [
+        900,
+        30,
+        1470,
+        420
+      ],
+      "side": [
+        285,
+        10,
+        670,
+        412
+      ],
+      "round": 2.4,
+      "axis": "z"
+    }
+  ],
+  "neonOnly": "hot"
+}

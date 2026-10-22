@@ -78,9 +78,21 @@ function BlockRig.build(def: any, model: Model, root: BasePart, origin: CFrame, 
 	local saturate, gain = tex.saturate or 1, tex.gain or 1
 	local rnd = Random.new(7)
 	for i, raw in ipairs(def.parts) do
-		-- big models store parts as arrays [joint, centre, size, colour, top, glow, rot] (blockmob export)
+		-- big models store parts as arrays (blockmob export): format 2 [joint index, cx, cy, cz, sx, sy, sz,
+		-- colour index, glow, top index | -1] with def.jointNames / def.palette; the older form
+		-- [joint, centre, size, colour, top, glow, rot]
 		local d = if raw.joint
 			then raw
+			elseif typeof(raw[1]) == "number" then {
+				name = "P" .. i,
+				joint = def.jointNames[raw[1] + 1],
+				centre = { raw[2], raw[3], raw[4] },
+				size = { raw[5], raw[6], raw[7] },
+				colour = def.palette[raw[8] + 1],
+				glow = raw[9] == 1,
+				top = if raw[10] and raw[10] >= 0 then def.palette[raw[10] + 1] else nil,
+				rot = nil,
+			}
 			else {
 				name = "P" .. i,
 				joint = raw[1],

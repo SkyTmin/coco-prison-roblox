@@ -649,6 +649,9 @@
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
         },
+        "model": "giant_zombie",
+        "texture": "rbxassetid://125898523534644",
+        "_blender": "[владелец 22.10] модель из Blender по референсу Codex (assets/models/giant_zombie: по частям — каждая часть по своим видам, скруглённые сечения), анимации — клипы Blender (BossAnimator); template — запасной шаблон",
         "template": "giant_zombie",
         "scale": 1,
         "palette": {

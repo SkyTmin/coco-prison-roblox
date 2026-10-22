@@ -1,0 +1,186 @@
+{
+  "_doc": "Two-view inflation config (scripts/model-tools/inflate.cjs) for giant-zombie-reference-2.png: front = top-right panel (38 px a stud, centre x 1167, ground y 490), side = top-left panel (facing left, body centre x 470, ground y 490). Regions: sheet px rects → joints, first match wins. The head and arm cells also belong to the body, so the body fills in behind them (priority keeps the head / arms where they overlap).",
+  "reference": "giant-zombie-reference-2.png",
+  "cell": 12,
+  "scale": 38,
+  "background": [
+    175,
+    174,
+    174
+  ],
+  "tolerance": 40,
+  "palette": 10,
+  "glowRule": "pus",
+  "thinGlow": true,
+  "power": 0.8,
+  "minFill": 0.3,
+  "glow": {
+    "deep": [
+      150,
+      180,
+      40
+    ],
+    "warm": [
+      184,
+      214,
+      58
+    ],
+    "bright": [
+      214,
+      238,
+      92
+    ],
+    "hot": [
+      238,
+      255,
+      150
+    ]
+  },
+  "front": {
+    "rect": [
+      900,
+      20,
+      1470,
+      500
+    ],
+    "centreX": 1167,
+    "groundY": 490,
+    "regions": [
+      {
+        "joints": [
+          "head",
+          "body"
+        ],
+        "rect": [
+          1100,
+          30,
+          1235,
+          205
+        ]
+      },
+      {
+        "joints": [
+          "armL",
+          "body"
+        ],
+        "rect": [
+          900,
+          160,
+          1072,
+          345
+        ]
+      },
+      {
+        "joints": [
+          "armR",
+          "body"
+        ],
+        "rect": [
+          1262,
+          160,
+          1470,
+          345
+        ]
+      },
+      {
+        "joints": [
+          "legL"
+        ],
+        "rect": [
+          995,
+          360,
+          1167,
+          500
+        ]
+      },
+      {
+        "joints": [
+          "legR"
+        ],
+        "rect": [
+          1167,
+          360,
+          1340,
+          500
+        ]
+      },
+      {
+        "joints": [
+          "body"
+        ],
+        "rect": [
+          900,
+          0,
+          1470,
+          500
+        ]
+      }
+    ]
+  },
+  "side": {
+    "rect": [
+      20,
+      10,
+      670,
+      500
+    ],
+    "centreX": 470,
+    "groundY": 490,
+    "regions": [
+      {
+        "joints": [
+          "head"
+        ],
+        "rect": [
+          205,
+          20,
+          345,
+          178
+        ]
+      },
+      {
+        "joints": [
+          "armL",
+          "armR"
+        ],
+        "rect": [
+          20,
+          128,
+          362,
+          335
+        ]
+      },
+      {
+        "joints": [
+          "legL",
+          "legR"
+        ],
+        "rect": [
+          345,
+          352,
+          660,
+          500
+        ]
+      },
+      {
+        "joints": [
+          "body"
+        ],
+        "rect": [
+          285,
+          10,
+          670,
+          410
+        ]
+      }
+    ]
+  },
+  "priority": [
+    "head",
+    "armL",
+    "armR",
+    "legL",
+    "legR",
+    "body"
+  ]
+}

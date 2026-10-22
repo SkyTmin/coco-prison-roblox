@@ -45,7 +45,7 @@ line and the ground line. Blender space: X lateral (+X = the mob's right hand, n
 Y forward, Z up; X = (centreX − x) / S, Z = (groundY − y) / S on the front view; Y = (centreX − x) / S on the
 side view (facing left). Colours: `sample.cjs` on lit faces; stone/fur noise is ±20 % around them.
 
-## 3. Build the model — two ways
+## 3. Build the model — three ways (C is the default for anything with limbs)
 
 **A. Hand boxes (creatures: rat, small mobs).** `box(name, joint, (x0, x1), (y0, y1), (z0, z1), colour, top,
 mirror=True)`, `turned(...)` for slightly rotated groups, rotated parts via the 7th tuple element. Every box from
@@ -60,6 +60,18 @@ boxes are merged. Extras: `side` regions give a joint its depth from the side vi
 also colours its outer sides from the side view — used for the sword), `lavaBias` keeps thin molten cores,
 `stoneByJoint` (obsidian blade), region splits for a hump. The mob file loads `voxels.json` into `PARTS`. The
 owner liked this for the guardian: the front matches pixel for pixel. Keep depths moderate (body ≈ ±1.5–3).
+
+**C. Part by part (Зомбарь; the owner's method — «делай по частям: руки, ноги и т. д., смотри каждую часть с
+нужной стороны, потом соедини»).** `assets/models/<id>/parts.json` + `scripts/model-tools/parts.cjs`: every part
+(head, body, each arm, each leg) gets its own rects on the front, side and (if it shows there) top view. Its X/Z
+box comes from the front, its Y from the side; the side and top silhouettes are stretched to the part's own box,
+so views drawn at different scales still agree per part. A voxel stays when it is inside every silhouette AND
+inside a rounded cross-section (`round`: superellipse exponent 2.2–3.2; `axis` "z" for upright parts, "y" for
+limbs pointing forward) — round bellies and backs, tube-like arms stepping thinner at the ends, never flat
+extrusions. Faces take the colour of the view they face (front / top / side; the back from the side view, never
+glowing), inner voxels the part's main colour. `priority` decides overlaps; give the body rects that cover the
+head and the arms so nothing is hollow behind them. `neonOnly: "hot"` keeps only the brightest glow Neon.
+Render "back" and "back34" cameras too: the owner checks the back («пустота в спине», «спина плоская»).
 
 ## 4. Compare until it matches (the step that made the rat "точь в точь")
 
@@ -80,8 +92,8 @@ BossAnimator maps from the server's Action attribute. `PREVIEWS` renders key fra
 
 ## 6. Export and the game
 
-1. `-- export` → `src/shared/Models/<id>.json` (big models use compact array parts: a ModuleScript holds at most
-   200 000 characters) + `noise.png` + previews.
+1. `-- export` → `src/shared/Models/<id>.json` (big models use format 2 — joint and palette indexes, 2 decimals: a
+   ModuleScript holds at most 200 000 characters; ~3000 parts fit) + `noise.png` + previews.
 2. Upload the noise tile (serve `assets/` PNGs on 127.0.0.1:8767, `upload_image`) → id into
    `assets/models/<id>/ids.json` and `scripts/design-decisions.json`: mobs → `mobs.<id>.furTexture` (+ `model`);
    bosses → `bosses.<id>.fight.model` + `fight.texture`; `node scripts/build-configs.mjs`. Re-upload after any
@@ -96,6 +108,8 @@ BossAnimator maps from the server's Action attribute. `PREVIEWS` renders key fra
 
 ## Lessons
 
+- The owner prefers a convincing 3D shape over a pixel-exact copy of every view («может, не надо точь в точь»):
+  match the front, keep the side close, and make every part round from all sides.
 - AI sheets are not consistent 3D: the views disagree in depth and scale. A visual hull of two or three views
   goes boxy or loses parts. Match the front exactly and take depth carefully from the side; ask Codex for a
   consistent turnaround if the owner wants every view exact.

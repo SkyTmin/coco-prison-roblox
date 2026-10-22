@@ -321,9 +321,31 @@ class Mob:
         if len(out["parts"]) > 300:
             # Roblox caps a ModuleScript at 200 000 characters: big models store each part as one array
             # [joint, centre, size, colour, top | null, glow 0/1, rot | null] (BlockRig reads both forms)
-            r3 = lambda v: [round(x, 3) for x in v]
-            out["parts"] = [[p["joint"], r3(p["centre"]), r3(p["size"]), p["colour"], p.get("top"),
-                             1 if p.get("glow") else 0, p.get("rot")] for p in out["parts"]]
+            # format 2: [joint index, cx, cy, cz, sx, sy, sz, colour index, glow, top colour index | -1] with
+            # "jointNames" and "palette" lists; parts with a rotation keep the object form
+            names = [j["name"] for j in out["joints"]]
+            palette, index = [], {}
+
+            def ci(c):
+                key = tuple(c)
+                if key not in index:
+                    index[key] = len(palette)
+                    palette.append(list(c))
+                return index[key]
+
+            packed = []
+            for p in out["parts"]:
+                if p.get("rot"):
+                    packed.append(p)
+                    continue
+                c, s = p["centre"], p["size"]
+                packed.append([names.index(p["joint"]), round(c[0], 2), round(c[1], 2), round(c[2], 2),
+                               round(s[0], 2), round(s[1], 2), round(s[2], 2), ci(p["colour"]),
+                               1 if p.get("glow") else 0, ci(p["top"]) if p.get("top") else -1])
+            out["format"] = 2
+            out["jointNames"] = names
+            out["palette"] = palette
+            out["parts"] = packed
             with open(self.json_out, "w", encoding="utf-8") as f:
                 json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
         else:
@@ -404,7 +426,7 @@ class Mob:
         self.pose(joints, order, None, 0)
         scene, cam = self.setup_render(768, 512)
         for name, spec in self.g["COMPARE"].items():
-            if name == "34":
+            if len(spec) == 3:  # (location, target, lens): a perspective camera
                 self.perspective(cam, spec)
             else:
                 ortho(cam, *spec)

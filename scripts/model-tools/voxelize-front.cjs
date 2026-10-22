@@ -25,7 +25,11 @@ const dir = path.dirname(cfgPath);
 	const cols = Math.floor(pw / C), rows = Math.floor(ph / C);
 	const bg = cfg.background, tol = cfg.tolerance;
 	const lum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
-	const isLava = (m) => (m[0] > 225 && m[1] > 160) || (m[0] > 150 && m[0] - m[2] > 90);
+	// glowing cells: molten lava (orange) or, with glowRule "pus", bright yellow-green pus
+	const isLava = (m) =>
+		cfg.glowRule === "pus"
+			? m[1] > 195 && m[0] > 160 && m[2] < 130
+			: (m[0] > 225 && m[1] > 160) || (m[0] > 150 && m[0] - m[2] > 90);
 	// lava tones by brightness (cfg.lava.deep / warm / bright / hot): white-yellow core → orange → dark red edge
 	const lavaColour = (m) => {
 		if (!cfg.lava.bright) return m[0] > 225 && m[1] > 160 ? cfg.lava.hot : cfg.lava.warm;
@@ -76,6 +80,46 @@ const dir = path.dirname(cfgPath);
 		}
 		return null;
 	};
+	// palette: with cfg.palette = N the solid colours are the N main colours of the front panel (k-means), so
+	// a many-coloured model (skin, shirt, trousers, rot) keeps its hues; otherwise stone tones by luminance
+	let palette = null;
+	if (cfg.palette) {
+		const samples = [];
+		for (let y = 0; y < info.height; y += 3)
+			for (let x = 0; x < info.width; x += 3) {
+				const i = (y * info.width + x) * 3;
+				const q = [data[i], data[i + 1], data[i + 2]];
+				if (Math.abs(q[0] - bg[0]) + Math.abs(q[1] - bg[1]) + Math.abs(q[2] - bg[2]) > tol && !isLava(q)) samples.push(q);
+			}
+		samples.sort((a, b) => lum(a) - lum(b));
+		let centres = Array.from({ length: cfg.palette }, (_, k) => samples[Math.floor(((k + 0.5) / cfg.palette) * samples.length)].slice());
+		for (let it = 0; it < 12; it++) {
+			const sums = centres.map(() => [0, 0, 0, 0]);
+			for (const q of samples) {
+				let best = 0, bd = Infinity;
+				centres.forEach((c, k) => {
+					const d = (c[0] - q[0]) ** 2 + (c[1] - q[1]) ** 2 + (c[2] - q[2]) ** 2;
+					if (d < bd) (bd = d), (best = k);
+				});
+				const t = sums[best];
+				t[0] += q[0], t[1] += q[1], t[2] += q[2], t[3]++;
+			}
+			centres = centres.map((c, k) => (sums[k][3] ? sums[k].slice(0, 3).map((v) => Math.round(v / sums[k][3])) : c));
+		}
+		palette = centres;
+	}
+	const toneOf = (m, joint) => {
+		if (palette) {
+			let best = palette[0], bd = Infinity;
+			for (const c of palette) {
+				const d = (c[0] - m[0]) ** 2 + (c[1] - m[1]) ** 2 + (c[2] - m[2]) ** 2;
+				if (d < bd) (bd = d), (best = c);
+			}
+			return best;
+		}
+		const L = lum(m);
+		return ((cfg.stoneByJoint || {})[joint] || cfg.stone).reduce((best, t) => (Math.abs(lum(t) - L) < Math.abs(lum(best) - L) ? t : best));
+	};
 	// 1. cells: foreground share + median colour of the centre
 	const cells = [];
 	for (let r = 0; r < rows; r++) {
@@ -108,9 +152,7 @@ const dir = path.dirname(cfgPath);
 				colour = lavaColour(m);
 				glow = true;
 			} else {
-				// the nearest stone tone by luminance
-				const L = lum(m);
-				colour = ((cfg.stoneByJoint || {})[reg0 && reg0.joint] || cfg.stone).reduce((best, s) => (Math.abs(lum(s) - L) < Math.abs(lum(best) - L) ? s : best));
+				colour = toneOf(m, reg0 && reg0.joint);
 			}
 			const sx = pl + c * C + C / 2, sy = pt + r * C + C / 2; // sheet coordinates of the cell centre
 			const region = cfg.regions.find((g) => sx >= g.rect[0] && sx < g.rect[2] && sy >= g.rect[1] && sy < g.rect[3]);
@@ -148,6 +190,28 @@ const dir = path.dirname(cfgPath);
 		const y0 = Math.min(range[0] + inset, y1 - 0.1);
 		return { joint: g.joint, colour: cell.colour, glow: cell.glow, y0, y1 };
 	}));
+	// round cross-sections (cfg.round[joint] = strength): a column's depth shrinks towards the part's sides like an
+	// ellipse, so a belly or a head is round from above instead of a box
+	if (cfg.round) {
+		for (let r = 0; r < rows; r++) {
+			const byJoint = {};
+			spec[r].forEach((sp, c) => sp && (byJoint[sp.joint] = byJoint[sp.joint] || []).push(c));
+			for (const [j, cs] of Object.entries(byJoint)) {
+				const k = cfg.round[j];
+				if (!k) continue;
+				const lo = Math.min(...cs), hi = Math.max(...cs);
+				const mid = (lo + hi) / 2, half = Math.max(1, (hi - lo + 1) / 2);
+				for (const c of cs) {
+					const sp = spec[r][c];
+					const t = (c - mid) / half;
+					const f = Math.sqrt(Math.max(0.12, 1 - k * t * t));
+					const cy = (sp.y0 + sp.y1) / 2, hy = (sp.y1 - sp.y0) / 2;
+					sp.y0 = cy - hy * f;
+					sp.y1 = cy + hy * f;
+				}
+			}
+		}
+	}
 	// 4. boxes: with caps, the exact front colour is a thin front layer and the rest of the depth is one stone
 	// tone (the texture gives it grain) — no front pixels streaking along the sides
 	const capDepth = cfg.capDepth || 0;
@@ -160,25 +224,25 @@ const dir = path.dirname(cfgPath);
 		const W = full.info.width;
 		for (const sr of cfg.side.regions.filter((g) => g.voxel)) {
 			const grid = [];
-			for (let y = sr.rect[1]; y + C <= sr.rect[3]; y += C) {
+			const SC = cfg.sideCell || C; // coarser side cells: fewer, longer boxes along the depth
+			for (let y = sr.rect[1]; y + SC <= sr.rect[3]; y += SC) {
 				const row = [];
-				for (let x = sr.rect[0]; x + C <= sr.rect[2]; x += C) {
+				for (let x = sr.rect[0]; x + SC <= sr.rect[2]; x += SC) {
 					const px = [];
-					for (let yy = y; yy < y + C; yy++)
-						for (let xx = x; xx < x + C; xx++) {
+					for (let yy = y; yy < y + SC; yy++)
+						for (let xx = x; xx < x + SC; xx++) {
 							const i = (yy * W + xx) * 3;
 							const q = [full.data[i], full.data[i + 1], full.data[i + 2]];
 							if (Math.abs(q[0] - bg[0]) + Math.abs(q[1] - bg[1]) + Math.abs(q[2] - bg[2]) > tol) px.push(q);
 						}
-					if (px.length < C * C * 0.5) continue;
+					if (px.length < SC * SC * 0.3) continue;
 					px.sort((u, v) => lum(u) - lum(v));
 					const m = pick(px, sr.joints[0]);
 					const lava = isLava(m);
-					const L = lum(m);
-					const colour = lava ? lavaColour(m) : ((cfg.stoneByJoint || {})[sr.joints[0]] || cfg.stone).reduce((best, t) => (Math.abs(lum(t) - L) < Math.abs(lum(best) - L) ? t : best));
-					row.push({ y0: (cfg.side.centreX - (x + C)) / cfg.scale, y1: (cfg.side.centreX - x) / cfg.scale, colour, glow: lava });
+					const colour = lava ? lavaColour(m) : toneOf(m, sr.joints[0]);
+					row.push({ y0: (cfg.side.centreX - (x + SC)) / cfg.scale, y1: (cfg.side.centreX - x) / cfg.scale, colour, glow: lava });
 				}
-				grid.push({ z: (cfg.side.groundY - (y + C / 2)) / cfg.scale, row });
+				grid.push({ z: (cfg.side.groundY - (y + SC / 2)) / cfg.scale, row });
 			}
 			for (const j of sr.joints) sideCells[j] = grid;
 		}
@@ -186,7 +250,7 @@ const dir = path.dirname(cfgPath);
 	const sideRowAt = (j, z) => {
 		let best = null;
 		for (const g of sideCells[j]) if (g.row.length && (!best || Math.abs(g.z - z) < Math.abs(best.z - z))) best = g;
-		return best && Math.abs(best.z - z) < (3 * C) / cfg.scale ? best.row : null;
+		return best && Math.abs(best.z - z) < (0.75 * (cfg.sideCell || C)) / cfg.scale ? best.row : null;
 	};
 	for (let r = 0; r < rows; r++)
 		for (let c = 0; c < cols; c++) {
@@ -195,12 +259,17 @@ const dir = path.dirname(cfgPath);
 			if (sideCells[sp.joint]) {
 				const zMid = (cfg.groundY - (pt + r * C + C / 2)) / cfg.scale;
 				const srow = sideRowAt(sp.joint, zMid);
+				if (!srow && sp.glow) continue; // a thin drip with nothing on the side view at its height
 				if (srow) {
 					const inRow = spec[r].map((q, k) => (q && q.joint === sp.joint ? k : -1)).filter((k) => k >= 0);
 					const outer = c === Math.min(...inRow) || c === Math.max(...inRow);
 					// consecutive side cells of one colour become one box along the depth
 					let run = null;
-					for (const sc of [...srow].sort((u, v) => u.y0 - v.y0)) {
+					// only the side cells inside this column's (rounded) depth
+					const inside = srow
+						.filter((sc) => sc.y1 > sp.y0 && sc.y0 < sp.y1)
+						.map((sc) => ({ ...sc, y0: Math.max(sc.y0, sp.y0), y1: Math.min(sc.y1, sp.y1) }));
+					for (const sc of inside.sort((u, v) => u.y0 - v.y0)) {
 						const col = outer ? sc : sp;
 						if (run && run.colour === col.colour && Math.abs(run.y1 - sc.y0) < 1e-6) run.y1 = sc.y1;
 						else {
