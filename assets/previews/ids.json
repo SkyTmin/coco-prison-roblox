@@ -1,10 +1,10 @@
 {
   "_source": "assets/previews/preview-*.png — Codex image gen (gpt-6-luna → image_gen), 20.10.2026; uploaded via Studio MCP upload_image 20.10.2026",
   "previews": {
-    "prison": "rbxassetid://111467020815673",
-    "quarry": "rbxassetid://112621612593965",
-    "fraction_base": "rbxassetid://74220220000026"
+    "prison": "rbxassetid://130594876226502",
+    "quarry": "rbxassetid://72160106242295",
+    "fraction_base": "rbxassetid://88768395156265"
   },
-  "_topdown": "[владелец 22.10: «вид с высоты под углом, как будто человек стоит в воздухе; без чужих объектов и без голубого неба»] prison, quarry, fraction_base: elevated three-quarter Studio screen_capture (scripts/preview-shot.luau parks the other locations, fills the mine pits, removes the quarry roof), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
+  "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base: Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
   "_removed": "[владелец 22.10: «другие превью у шахт удали»] the Codex art previews of mountain_foot, underworld, pyramid, basement removed (the menu draws its block diorama) until top-down shots of their built maps exist"
 }

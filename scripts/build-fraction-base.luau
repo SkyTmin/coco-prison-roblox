@@ -20,7 +20,7 @@
 --     FactionChest + an EnderChest); in front of it the faction spawn (LocationSpawn, attribute Faction);
 --     a 12×6×12 mini-mine (quarry blocks [меню]), a block buyer (SellPoint), a banner monument at the
 --     trail, rat spawn points (MobSpawn, for the future MobService).
--- A separate zone at X = −700 (StreamingEnabled loads it only for players there). Run in Studio (Edit) via
+-- A separate zone at X = −1050 (StreamingEnabled loads it only for players there). Run in Studio (Edit) via
 -- scripts/studio-loader.luau after build-textures (and after build-prison: that one clears Terrain).
 -- Idempotent: replaces Workspace.FactionBase.
 
@@ -39,7 +39,8 @@ local root = Instance.new("Folder")
 root.Name = "FactionBase"
 root.Parent = workspace
 
-local BASE_X, BASE_Z = -700, 0 -- zone centre
+-- [22.10] at X = −1050: at −700 its outer mountains (to −144) reached into the prison (west wall at −202)
+local BASE_X, BASE_Z = -1050, 0 -- zone centre
 local FX, FZ = BASE_X, BASE_Z -- the current origin: districts are built in their own frame (see the end)
 local B = 4 -- block size
 local rng = Random.new(20261023) -- fixed seed: the same base every rebuild

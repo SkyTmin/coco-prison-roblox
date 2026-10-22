@@ -13,9 +13,9 @@ local mode = if modeValue and modeValue.Value ~= "" then modeValue.Value else "r
 local FOLDERS = { prison = "Prison", quarry = "Quarry", fraction_base = "FactionBase" }
 -- camera: position, look-at (an elevated three-quarter view of the whole location)
 local SHOTS = {
-	prison = { Vector3.new(0, 190, 250), Vector3.new(0, 0, 20) },
-	quarry = { Vector3.new(751, 190, 250), Vector3.new(751, 0, 10) },
-	fraction_base = { Vector3.new(-700, 380, 520), Vector3.new(-700, 0, 40) },
+	prison = { Vector3.new(0, 150, 110), Vector3.new(0, 0, -30) },
+	quarry = { Vector3.new(751, 135, 125), Vector3.new(751, 0, -5) },
+	fraction_base = { Vector3.new(-1050, 250, 200), Vector3.new(-1050, 0, -40) },
 }
 
 local function restore()

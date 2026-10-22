@@ -1,5 +1,6 @@
 // Crops a Studio screen_capture to the largest 1.9:1 rectangle without sky (sky = sky-blue pixels connected to
 // the border), upscaled to 760 px wide. Usage: node scripts/crop-preview.cjs <capture.jpg> assets/previews/topdown-<id>.png
+// In a Play capture the Roblox top-bar buttons (top-left corner) are kept out of the crop too.
 const fs = require('fs');
 const sharpPath = process.env.SHARP_PATH || (process.env.LOCALAPPDATA + '/Temp/claude/C--Users-user-Desktop--------claud/5519c892-7982-41f2-b081-ec30cc78a89a/scratchpad/imgtools/node_modules/sharp');
 const sharp = require(fs.existsSync(sharpPath) ? sharpPath : 'sharp');
@@ -19,6 +20,7 @@ const [src, dst] = process.argv.slice(2);
     mask[y * W + x] = 1;
     stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
   }
+  for (let y = 0; y < Math.min(H, 64); y++) for (let x = 0; x < Math.min(W, 180); x++) mask[y * W + x] = 1; // Roblox buttons
   const sky = new Int32Array((W + 1) * (H + 1));
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     sky[(y + 1) * (W + 1) + x + 1] = mask[y * W + x] + sky[y * (W + 1) + x + 1] + sky[(y + 1) * (W + 1) + x] - sky[y * (W + 1) + x];
