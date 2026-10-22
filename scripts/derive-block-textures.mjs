@@ -125,6 +125,39 @@ await recolor("white_wool.png", "nether_wart.png", [[0, [80, 4, 6]], [0.5, [130,
 await recolor("white_wool.png", "warped_wart.png", [[0, [10, 80, 76]], [0.5, [20, 128, 116]], [1, [60, 180, 160]]]);
 await recolor("hay.png", "shroomlight.png", [[0, [190, 90, 30]], [0.5, [240, 150, 60]], [1, [255, 214, 140]]]);
 await recolor("water.png", "lava.png", [[0, [190, 50, 10]], [0.45, [240, 110, 20]], [0.8, [255, 170, 40]], [1, [255, 230, 120]]]);
+// [Пирамида] cut sandstone (the sandstone pattern flattened into a narrow light range), its red twin, a
+// lapis-blue glazed terracotta for the tomb's painted bands, and a hieroglyph panel: our own glyphs (an eye,
+// a bird, an ankh-like key, water, a beetle, a reed) drawn as pixel masks over the cut sandstone
+await recolor("sandstone.png", "cut_sandstone.png", [[0, [196, 176, 120]], [0.5, [222, 204, 150]], [1, [238, 224, 176]]], 0.6);
+await recolor("red_sandstone.png", "cut_red_sandstone.png", [[0, [150, 70, 30]], [0.5, [182, 92, 44]], [1, [206, 116, 62]]], 0.6);
+await recolor("terracotta.png", "terracotta_blue.png", [[0, [20, 40, 100]], [0.5, [40, 76, 160]], [1, [90, 130, 210]]]);
+{
+	const G = [
+		["................", "................", "....XXXXXXXX....", "..XX........XX..", ".X....XXXX....X.", "X....XX..XX....X", ".X....XXXX....X.", "..XX........XX..", "....XXXXXXXX....", ".......X........", "......X.X.......", ".....X...X......", "....X.....XX....", "................", "................", "................"],
+		["................", "......XX........", ".....XXXX.......", "....XX.XX.......", "......XXX.......", ".....XXXXX......", "....XXXXXXX.....", "...XXXXXXXXX....", "..XXXXXXXXXXX...", "......XXXXXXXX..", "......X..X......", "......X..X......", ".....XX..XX.....", "................", "................", "................"],
+		["................", "......XXXX......", ".....X....X.....", ".....X....X.....", "......X..X......", ".......XX.......", "..XXXXXXXXXXXX..", ".......XX.......", ".......XX.......", ".......XX.......", ".......XX.......", ".......XX.......", "......XXXX......", "................", "................", "................"],
+		["................", "................", "................", ".X...X...X...X..", "X.X.X.X.X.X.X.X.", "...X...X...X...X", "................", ".X...X...X...X..", "X.X.X.X.X.X.X.X.", "...X...X...X...X", "................", ".X...X...X...X..", "X.X.X.X.X.X.X.X.", "...X...X...X...X", "................", "................"],
+		["................", "...X........X...", "....X..XX..X....", ".....XXXXXX.....", "....XXXXXXXX....", "...XX.XXXX.XX...", "..X..XXXXXX..X..", ".....XXXXXX.....", "..X..XXXXXX..X..", "...XX.XXXX.XX...", "....XXXXXXXX....", ".....XXXXXX.....", "......XXXX......", "................", "................", "................"],
+		["................", ".......X........", "......XXX.......", ".....X.X.X......", ".......X........", "....X..X..X.....", ".....X.X.X......", "......XXX.......", ".......X........", ".......X........", ".......X........", ".......X........", "......XXX.......", "................", "................", "................"],
+	];
+	const base = await sharp(path.join(dir, "cut_sandstone.png")).resize(48, 48, { kernel: "nearest" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+	const { data, info } = base;
+	for (let g = 0; g < 9; g++) {
+		const ox = (g % 3) * 16, oy = Math.floor(g / 3) * 16;
+		for (let y = 0; y < 16; y++) {
+			for (let x = 0; x < 16; x++) {
+				const i = ((oy + y) * info.width + ox + x) * 4;
+				if (G[(g + Math.floor(g / 3)) % 6][y][x] === "X") {
+					data[i] = 96; data[i + 1] = 66; data[i + 2] = 34;
+				} else if (y === 0 || y === 15 || x === 0) {
+					data[i] = 176; data[i + 1] = 150; data[i + 2] = 96; // the carved frame lines between glyphs
+				}
+			}
+		}
+	}
+	await sharp(data, { raw: info }).resize(384, 384, { kernel: "nearest" }).png().toFile(path.join(dir, "hieroglyphs.png"));
+	console.log("wrote hieroglyphs.png");
+}
 // magma: the dark mortar of cobblestone glows, the stones stay dark
 {
 	const [lo, hi] = await lumRange("cobblestone.png");

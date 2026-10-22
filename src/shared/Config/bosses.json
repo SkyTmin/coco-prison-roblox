@@ -356,9 +356,66 @@
       "name": "Скелетон",
       "location": "Пирамида",
       "unlockLevel": 9,
-      "locationId": null,
-      "nameEn": null,
-      "fight": null,
+      "locationId": "pyramid",
+      "nameEn": "Skeletron",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 2,
+        "walkSpeed": 12,
+        "leashSeconds": 300,
+        "abilityCooldown": 6,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            200,
+            190,
+            150
+          ],
+          "blade": [
+            230,
+            225,
+            205
+          ],
+          "spikes": [
+            226,
+            220,
+            198
+          ],
+          "glow": [
+            140,
+            220,
+            255
+          ]
+        },
+        "_abilities": "[решение] волна проклятия (полоса), кости из пола гробницы (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+      },
       "money": [
         0,
         2200

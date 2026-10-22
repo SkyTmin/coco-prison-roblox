@@ -1221,6 +1221,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡Las llamas del Inframundo se han abierto: el Rey de los Piglins ansía trofeos!",
 		fr = "Les flammes des Enfers se sont ouvertes : le Roi des Piglins réclame des trophées !",
 	},
+	boss_spawned_skeleton = { -- [клиент] prison.classic.boss.skeleton.notify.spawn
+		ru = "Звон старых костей разрезал тишину — Скелетон восстал вернуть утраченную власть!",
+		en = "The ringing of old bones cut the silence: Skeletron has risen to reclaim his lost power!",
+		es = "¡El tintineo de huesos viejos rompió el silencio: Skeletron se ha alzado para recuperar su poder perdido!",
+		fr = "Le cliquetis de vieux os a brisé le silence : Skeletron s'est relevé pour reprendre son pouvoir perdu !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

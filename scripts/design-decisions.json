@@ -400,7 +400,13 @@
         "sandstone": 0.5,
         "red_sandstone": 0.5
       },
-      "pvp": true
+      "pvp": true,
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 23.10] 32×12×32 — шахта в большом зале внутри пирамиды (scripts/build-pyramid.luau); состав из меню (mine-shares: песчаник 61 / красный песчаник 39)"
     },
     "basement": {
       "size": [
@@ -763,7 +769,70 @@
     "skeleton": {
       "hp": 2500,
       "damage": 7,
-      "respawnSeconds": 2400
+      "respawnSeconds": 2400,
+      "name": "Скелетон",
+      "nameEn": "Skeletron",
+      "locationId": "pyramid",
+      "unlockLevel": 9,
+      "_source": "[клиент] имя, описание («павший предводитель навеки забытой армии»), объявление о появлении, свита «Скелет-воин»; [меню] 0–2200 $, древние звёзды 1–3, порошок 1–5 %; hp/урон/респаун [решение]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 2,
+        "walkSpeed": 12,
+        "leashSeconds": 300,
+        "abilityCooldown": 6,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            200,
+            190,
+            150
+          ],
+          "blade": [
+            230,
+            225,
+            205
+          ],
+          "spikes": [
+            226,
+            220,
+            198
+          ],
+          "glow": [
+            140,
+            220,
+            255
+          ]
+        },
+        "_abilities": "[решение] волна проклятия (полоса), кости из пола гробницы (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+      }
     },
     "splinter": {
       "name": "Сплинтер",
