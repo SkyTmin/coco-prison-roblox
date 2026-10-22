@@ -130,14 +130,24 @@ for _, m in ipairs({ M1, M2 }) do
 	m.w = m.size * B
 	m.hole = m.w / 2 + 2 * B -- half size of the hole in the floor (the pit plus its bedrock walls)
 end
-local LAIR = { cx = 0, cz = -496, r = 100, floor = -8 } -- [владелец 22.10: «увеличь арену босса и комнату в 2 раза»] r 50 → 100
+-- the lair: a hall of an ancient abandoned castle [владелец 22.10: «зал в древнем заброшенном замке, статуи»],
+-- 160 × 192 (×2 of the first lair [владелец: «увеличь арену и комнату в 2 раза»]), its south wall at z = −404
+local LAIR = { cx = 0, cz = -500, hx = 80, hz = 96, floor = -8, door = 12 }
+LAIR.z0, LAIR.z1 = LAIR.cz + LAIR.hz, LAIR.cz - LAIR.hz
+-- the castle's barrel vault over the hall: 34 above the floor at the walls, 42 in the middle
+local function lairCeil(x)
+	return LAIR.floor + 26 + 2 * math.floor(8 * math.sqrt(math.max(0, 1 - (x / 88) ^ 2)) + 0.5)
+end
+local function inLair(x, z)
+	return math.abs(x - LAIR.cx) < LAIR.hx and z < LAIR.z0 and z > LAIR.z1
+end
 local SHAPES = {
 	{ id = "tunnel1", kind = "line", r = 14, pts = { { 0, -12 }, { 5, -34 }, { -7, -58 }, { 2, -80 }, { 0, -92 } }, h = { 13, 21 } },
 	{ id = "cave1", kind = "ellipse", cx = 0, cz = M1.cz, rx = 62, rz = 56, h = { 15, 38 } },
 	{ id = "tunnel2", kind = "line", r = 14, pts = { { 0, -186 }, { -9, -208 }, { 7, -230 }, { 0, -252 } }, h = { 13, 21 } },
 	{ id = "cave2", kind = "ellipse", cx = 0, cz = M2.cz, rx = 52, rz = 48, h = { 15, 34 } },
 	{ id = "tunnel3", kind = "line", r = 14, pts = { { 0, -334 }, { 9, -354 }, { -5, -376 }, { 0, -400 } }, h = { 13, 21 } },
-	{ id = "lair", kind = "ellipse", cx = LAIR.cx, cz = LAIR.cz, rx = LAIR.r, rz = LAIR.r, h = { 20, 58 } },
+	{ id = "lair", kind = "rect" }, -- carved exactly (inLair), not by the noise
 	-- side grottos off the route, each with its own little story (see "grottos" below)
 	{ id = "storeroom", kind = "ellipse", cx = 17, cz = -66, rx = 14, rz = 10, h = { 11, 17 } },
 	{ id = "spring", kind = "ellipse", cx = -27, cz = -212, rx = 15, rz = 11, h = { 11, 18 } },
@@ -237,6 +247,13 @@ for iz = 0, NZ - 1 do
 		local shape, best = nil, math.huge
 		if inHall(x, z) or inAlcove(x, z) then
 			shape, best = "hall", 0
+		elseif z < LAIR.z0 + 4 then
+			-- the castle hall: straight walls, one great door in the south wall
+			if inLair(x, z) then
+				shape, best = "lair", 0
+			elseif z > LAIR.z0 and math.abs(x) < LAIR.door then
+				shape, best = "tunnel3", 0
+			end
 		elseif z > HALL.z1 - 4 then
 			-- the hall's walls stay straight: only the portal opens north
 			if math.abs(x) < PORTAL and z < HALL.z1 then
@@ -244,10 +261,10 @@ for iz = 0, NZ - 1 do
 			end
 		else
 			for _, s in ipairs(SHAPES) do
-				local score
+				local score = math.huge
 				if s.kind == "line" then
 					score = lineDist(s.pts, x, z) / (s.r + n2(x, z, 1.7, 0.08) * 3)
-				else
+				elseif s.kind == "ellipse" then
 					local d = math.sqrt(((x - s.cx) / s.rx) ^ 2 + ((z - s.cz) / s.rz) ^ 2)
 					score = d / (1 + n2(x, z, 4.2, 0.05) * 0.07)
 				end
@@ -314,8 +331,6 @@ local function onTrail(c)
 		local m = if c.shape == "cave1" then M1 else M2
 		local d = math.max(math.abs(c.x), math.abs(c.z - m.cz))
 		return d > m.hole and d < m.hole + 8
-	elseif c.shape == "lair" then
-		return math.abs(c.x) < 4 and c.z > LAIR.cz + 32
 	end
 	return false
 end
@@ -327,6 +342,8 @@ for _, c in pairs(cells) do
 		c.ceil = 10
 	elseif c.shape == "hall" then
 		c.ceil = hallCeil(c.x)
+	elseif c.shape == "lair" then
+		c.ceil = lairCeil(c.x)
 	else
 		local R = if s.kind == "line" then 3 elseif s.id == "lair" then 14 else 7
 		local k = math.min(1, (c.edge - 1) / R) ^ 0.7
@@ -355,6 +372,13 @@ local function wallVariant(x, z, shape)
 	if shape == "hall" then
 		return if v > 0.25 then "px_mossy_stone_bricks" else "px_stone_bricks"
 	end
+	if shape == "lair" then
+		-- the castle masonry, patched with cobble; in the north-east corner the cave rock has broken in
+		if x > 44 and z < LAIR.z1 + 40 then
+			return if v > 0.2 then "px_mossy_cobblestone" elseif v > -0.1 then "px_cobblestone" else "px_stone"
+		end
+		return if v > 0.28 then "px_mossy_stone_bricks" elseif r < 0.07 then "px_cobblestone" else "px_stone_bricks"
+	end
 	-- the masonry of the first tunnel crumbles into the rock: brick near the hall, cobble, then stone
 	if shape == "tunnel1" and z > -44 then
 		local brick = math.clamp((z + 44) / 30, 0, 1)
@@ -377,9 +401,6 @@ local function wallVariant(x, z, shape)
 		return "px_coal_ore"
 	elseif r < 0.065 then
 		return "px_iron_ore"
-	end
-	if shape == "lair" and v > 0.1 then
-		return if v > 0.35 then "px_mossy_cobblestone" else "px_cobblestone"
 	end
 	if v > 0.32 then
 		return "px_mossy_cobblestone"
@@ -404,7 +425,13 @@ local function floorVariant(c)
 	end
 	local v = pick(c, 13.7)
 	if c.shape == "lair" then
-		return if v > 0.15 then "px_dirt" elseif v > -0.2 then "px_gravel" else "px_mossy_cobblestone"
+		-- the castle floor: big slabs in a checker, moss creeping in, broken through to the earth in places
+		if v < -0.42 then
+			return if v < -0.55 then "px_dirt" else "px_gravel"
+		elseif v > 0.3 then
+			return "px_mossy_stone_bricks"
+		end
+		return if (math.floor(c.x / 8) + math.floor(c.z / 8)) % 2 == 0 then "px_stone_bricks" else "px_smooth_stone"
 	end
 	if c.shape == "tunnel1" and c.z > -40 then
 		return if v > 0 then "px_cobblestone" else "px_mossy_cobblestone"
@@ -439,13 +466,13 @@ for iz = 0, NZ - 1 do
 			fr.ix1 = ix
 		end
 		-- ceiling: a column from the dome surface up to TOP
-		local ck = c and (if c.shape == "hall" then "px_stone_bricks" else "px_stone") .. "|" .. c.ceil or nil
+		local ck = c and (if c.shape == "hall" or c.shape == "lair" then "px_stone_bricks" else "px_stone") .. "|" .. c.ceil or nil
 		if cr and cr.key ~= ck then
 			table.insert(ceilRuns, cr)
 			cr = nil
 		end
 		if ck and not cr then
-			cr = { key = ck, ix0 = ix, variant = if c.shape == "hall" then "px_stone_bricks" else "px_stone", bottom = c.ceil }
+			cr = { key = ck, ix0 = ix, variant = if c.shape == "hall" or c.shape == "lair" then "px_stone_bricks" else "px_stone", bottom = c.ceil }
 		end
 		if cr then
 			cr.ix1 = ix
@@ -561,7 +588,7 @@ end
 local function cobweb(x, y, z, yaw)
 	for _, a in ipairs({ 0.6, -0.6 }) do
 		local w = decor(part("Cobweb", Vector3.new(3.6, 3.6, 0.05), at(x, y, z) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(0, 0, a), Color3.fromRGB(235, 235, 240), Enum.Material.SmoothPlastic, props))
-		w.Transparency = 0.82
+		w.Transparency = 0.9
 	end
 end
 
@@ -858,102 +885,409 @@ end
 minecart(-M2.hole - 14, M2.cz + 10, 0.3, "px_gold_block")
 minecart(M1.hole + 13, M1.cz + 14, -0.2, "px_gravel")
 
--- ================================================================ the lair of Сплинтер
+-- ================================================================ the lair of Сплинтер: a hall of an abandoned castle
+-- [владелец 22.10: «декорации у босса, будто это зал в древнем заброшенном замке; статуи тоже»]. The barrel vault
+-- (lairCeil) rests on ribs over a colonnade (some columns snapped, their drums lying on the floor); blind gothic
+-- windows with a cold glow and torn banners on the walls; knight statues on pedestals along the aisles (one headless,
+-- one without an arm, one toppled), two giant knights and the throne of the dead king at the north end under a torn
+-- tapestry; stone lions at the great door; a red carpet runner, torn; one chandelier still hanging, one crashed;
+-- the north-east corner has caved in. Сплинтер made it his lair: the round dais in the middle of the nave, a nest of
+-- straw and bones round it, heaps of rubbish [меню: «горы мусора»].
 local lairF = folder("Lair")
 local LF = LAIR.floor
 local PLATFORM_R = 32 -- the arena dais, ×2 with the lair
-local dais = part("LairDais", Vector3.new(1.4, 2 * PLATFORM_R, 2 * PLATFORM_R), at(0, LF + 0.7, LAIR.cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, lairF)
+local STATUE = Color3.fromRGB(196, 194, 188)
+local MOSSY = Color3.fromRGB(150, 168, 128)
+local GOLD = Color3.fromRGB(200, 160, 60)
+local CLOTH = Color3.fromRGB(120, 28, 30)
+local function lairAt(x, y, z)
+	return at(x, LF + y, z)
+end
+local function stoneTint()
+	return if rng:NextNumber() < 0.2 then MOSSY else STATUE
+end
+
+-- the dais (the arena): a ring of bricks, a smooth disc, an inlaid gold star, claw scratches
+local dais = part("LairDais", Vector3.new(1.4, 2 * PLATFORM_R, 2 * PLATFORM_R), lairAt(0, 0.7, LAIR.cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, lairF)
 dais.Shape = Enum.PartType.Cylinder
 textured(dais, "px_stone_bricks")
-local daisTop = part("LairDaisTop", Vector3.new(1.7, 2 * (PLATFORM_R - 3), 2 * (PLATFORM_R - 3)), at(0, LF + 0.85, LAIR.cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, lairF)
+local daisTop = part("LairDaisTop", Vector3.new(1.7, 2 * (PLATFORM_R - 3), 2 * (PLATFORM_R - 3)), lairAt(0, 0.85, LAIR.cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, lairF)
 daisTop.Shape = Enum.PartType.Cylinder
 textured(daisTop, "px_smooth_stone")
--- cracked slabs and claw scratches on the dais
+for i = 0, 7 do
+	local a = i / 8 * math.pi * 2
+	decor(part("Inlay", Vector3.new(1.2, 0.06, PLATFORM_R - 8), CFrame.new(BX, LF + 1.72, BZ + LAIR.cz) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -(PLATFORM_R - 8) / 2), GOLD, Enum.Material.Metal, lairF))
+end
 for i = 0, 5 do
 	local a = i / 6 * math.pi * 2 + rng:NextNumber(-0.3, 0.3)
 	for k = -1, 1 do
-		decor(part("Scratch", Vector3.new(0.25, 0.08, 9), CFrame.new(BX, LF + 1.72, BZ + LAIR.cz) * CFrame.Angles(0, a, 0) * CFrame.new(k * 0.6, 0, -16), Color3.fromRGB(45, 42, 40), nil, lairF))
+		decor(part("Scratch", Vector3.new(0.25, 0.08, 9), CFrame.new(BX, LF + 1.74, BZ + LAIR.cz) * CFrame.Angles(0, a + 0.3, 0) * CFrame.new(k * 0.6, 0, -16), Color3.fromRGB(45, 42, 40), nil, lairF))
 	end
 end
 -- the nest: a broken ring of straw, planks and bones round the dais edge
 for i = 0, 55 do
 	local a = i / 56 * math.pi * 2
-	if math.sin(a) < 0.9 then -- open towards the entrance (south)
+	if math.sin(a) < 0.9 then -- open towards the door (south)
 		local r = PLATFORM_R + rng:NextNumber(0.5, 2.5)
 		local s = rng:NextNumber(1.6, 2.8)
-		local p = part("Nest", Vector3.new(s, s * 0.6, s * 1.4), at(math.cos(a) * r, LF + s * 0.3, LAIR.cz + math.sin(a) * r) * CFrame.Angles(rng:NextNumber(-0.3, 0.3), -a + rng:NextNumber(-0.4, 0.4), rng:NextNumber(-0.3, 0.3)), WOOD, nil, lairF)
+		local p = part("Nest", Vector3.new(s, s * 0.6, s * 1.4), lairAt(math.cos(a) * r, s * 0.3, LAIR.cz + math.sin(a) * r) * CFrame.Angles(rng:NextNumber(-0.3, 0.3), -a + rng:NextNumber(-0.4, 0.4), rng:NextNumber(-0.3, 0.3)), WOOD, nil, lairF)
 		textured(p, ({ "px_hay", "px_hay", "px_planks", "px_spruce_planks", "px_dirt" })[rng:NextInteger(1, 5)])
 		if i % 4 == 0 then
 			bones(math.cos(a) * (r + 2), LF, LAIR.cz + math.sin(a) * (r + 2), 2)
 		end
 	end
 end
--- heaps of rubbish against the walls at the diagonals: mounds of blocks, planks, bones [меню: «горы мусора»]
+-- heaps of rubbish in the nave: mounds of blocks, planks, bones [меню: «горы мусора»]
 local function heap(x, z, size)
-	for i = 1, 44 do
+	for _ = 1, 40 do
 		local s = rng:NextNumber(1.4, 3.4)
 		local r = rng:NextNumber(0, size)
 		local a = rng:NextNumber(0, 6.28)
-		local y = LF + s / 2 + math.max(0, size - r) * 0.9
-		local p = part("Rubbish", Vector3.new(s, s * rng:NextNumber(0.5, 1), s), at(x + math.cos(a) * r, y, z + math.sin(a) * r) * CFrame.Angles(rng:NextNumber(-0.5, 0.5), a, rng:NextNumber(-0.5, 0.5)), STONE, nil, lairF)
+		local y = s / 2 + math.max(0, size - r) * 0.8
+		local p = part("Rubbish", Vector3.new(s, s * rng:NextNumber(0.5, 1), s), lairAt(x + math.cos(a) * r, y, z + math.sin(a) * r) * CFrame.Angles(rng:NextNumber(-0.5, 0.5), a, rng:NextNumber(-0.5, 0.5)), STONE, nil, lairF)
 		textured(p, ({ "px_dirt", "px_gravel", "px_planks", "px_cobblestone", "px_mossy_cobblestone", "px_spruce_planks", "px_hay" })[rng:NextInteger(1, 7)])
 	end
 	bones(x, LF + 0.5, z, 5)
-	barrel(x + rng:NextNumber(-3, 3), LF + size * 0.5, z + rng:NextNumber(-3, 3), true)
+	barrel(x + rng:NextNumber(-3, 3), LF + size * 0.4, z + rng:NextNumber(-3, 3), true)
 end
 for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-	heap(c[1] * 62, LAIR.cz + c[2] * 62, 9)
+	heap(c[1] * 30, LAIR.cz + c[2] * 68, 7)
 end
--- eight broken columns round the dais: stacked bricks, some reaching the dome, some snapped off
-for i = 0, 11 do
-	local a = (i + 0.5) / 12 * math.pi * 2
-	local x, z = math.cos(a) * (PLATFORM_R + 14), LAIR.cz + math.sin(a) * (PLATFORM_R + 14)
-	local cl = cellAtPos(x, z)
-	local full = (cl and cl.ceil or LF + 24) - LF
-	local height = if i % 3 == 0 then full else rng:NextNumber(5, 11)
-	local y = LF
-	while y < LF + height - 0.1 do
-		local seg = math.min(4, LF + height - y)
-		local s = 3.4 - (if y > LF + height - 4 and height < full then 0.6 else 0)
-		textured(part("Column", Vector3.new(s, seg, s), at(x + rng:NextNumber(-0.15, 0.15), y + seg / 2, z + rng:NextNumber(-0.15, 0.15)) * CFrame.Angles(0, rng:NextNumber(-0.1, 0.1), 0), STONE, nil, lairF), if rng:NextNumber() < 0.35 then "px_mossy_stone_bricks" else "px_stone_bricks", Color3.fromRGB(200, 195, 190))
-		y += seg
+
+-- the colonnade and the vault ribs: columns at x = ±52 every 24 studs, a rib arch over each pair
+local COL_X = 52
+local COL_Z = {}
+for z = LAIR.z0 - 24, LAIR.z1 + 30, -24 do
+	table.insert(COL_Z, z)
+end
+for i, z in ipairs(COL_Z) do
+	for _, side in ipairs({ -1, 1 }) do
+		local x = side * COL_X
+		local full = lairCeil(x) - LF - 2
+		local broken = (i + (if side > 0 then 1 else 0)) % 3 == 0
+		textured(part("ColumnBase", Vector3.new(6.5, 1.5, 6.5), lairAt(x, 0.75, z), STONE, nil, lairF), "px_smooth_stone", STATUE)
+		textured(part("ColumnPlinth", Vector3.new(5.5, 1, 5.5), lairAt(x, 2, z), STONE, nil, lairF), "px_smooth_stone", STATUE)
+		local top = if broken then rng:NextNumber(7, 14) else full - 2
+		local y = 2.5
+		while y < top - 0.05 do
+			local h = math.min(4, top - y)
+			local tint = if rng:NextNumber() < 0.25 then MOSSY else Color3.fromRGB(205, 200, 194)
+			textured(part("ColumnDrum", Vector3.new(4, h, 4), lairAt(x + rng:NextNumber(-0.1, 0.1), y + h / 2, z + rng:NextNumber(-0.1, 0.1)), STONE, nil, lairF), "px_stone_bricks", tint)
+			y += h
+		end
+		if broken then
+			-- the snapped-off drums lie on the floor beside it, a heap of chips
+			for k = 1, 3 do
+				local a = rng:NextNumber(0, 6.28)
+				local d = 5 + k * 4.2
+				textured(part("FallenDrum", Vector3.new(4, 4, 4), lairAt(x - side * d * 0.6 + math.cos(a), 2, z + math.sin(a) * 3 + k * 1.5) * CFrame.Angles(0, a, rng:NextNumber(-0.3, 0.3)), STONE, nil, lairF), "px_stone_bricks", Color3.fromRGB(200, 195, 190))
+			end
+			pile(x, z + 4, { "px_stone_bricks", "px_mossy_stone_bricks", "px_cobblestone" }, 6)
+		else
+			textured(part("Capital", Vector3.new(6, 1.6, 6), lairAt(x, full - 1.2, z), STONE, nil, lairF), "px_smooth_stone", STATUE)
+			textured(part("CapitalTop", Vector3.new(7, 1, 7), lairAt(x, full - 0.1, z), STONE, nil, lairF), "px_stone_bricks", STATUE)
+		end
+		-- a brazier on an iron stand by every other column, on the nave side
+		if not broken and i % 2 == 1 then
+			local bx = x - side * 5
+			part("BrazierStand", Vector3.new(0.6, 5, 0.6), lairAt(bx, 2.5, z), IRON, Enum.Material.Metal, lairF)
+			part("BrazierBowl", Vector3.new(2.6, 0.8, 2.6), lairAt(bx, 5.2, z), IRON, Enum.Material.Metal, lairF)
+			local coals = decor(part("BrazierCoals", Vector3.new(2.2, 0.3, 2.2), lairAt(bx, 5.7, z), Color3.fromRGB(255, 110, 40), Enum.Material.Neon, lairF))
+			local fire = Instance.new("Fire")
+			fire.Size = 3.5
+			fire.Heat = 6
+			fire.Parent = coals
+			light(coals, 30, 1.4, Color3.fromRGB(255, 150, 80))
+		end
 	end
-	if height < full then
-		pile(x + math.cos(a) * 3, z + math.sin(a) * 3, { "px_stone_bricks", "px_mossy_stone_bricks", "px_cobblestone" }, 4)
-	end
-	-- a fire bowl on every other column stump
-	if i % 2 == 1 and height < full then
-		local bowl = decor(part("FireBowl", Vector3.new(1.8, 0.8, 1.8), at(x, LF + height + 0.4, z), Color3.fromRGB(255, 110, 50), Enum.Material.Neon, lairF))
-		local fire = Instance.new("Fire")
-		fire.Size = 3
-		fire.Heat = 5
-		fire.Parent = bowl
-		light(bowl, 26, 1.3, Color3.fromRGB(255, 140, 80))
+	-- the rib: stepped arch blocks following the vault, 1.5 below it, across the hall
+	for x = -LAIR.hx, LAIR.hx - 4, 4 do
+		local y = lairCeil(x + 2) - 1.5
+		box("Rib", x, y, z - 1, x + 4, y + 1.5, z + 1, "px_stone_bricks", Color3.fromRGB(165, 158, 150), lairF)
 	end
 end
--- a murky pool in the east of the lair, green slime glowing faintly
-local pool = part("Pool", Vector3.new(0.3, 24, 24), at(-36, LF + 0.1, LAIR.cz - 72) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 90, 50), Enum.Material.Glass, lairF)
+
+-- the walls: pilasters in line with the columns, a blind gothic window between each pair, torn banners
+local function banner(x, z, len)
+	-- a banner hanging from an iron rod on the wall face, its bottom torn into strips
+	part("BannerRod", Vector3.new(0.3, 0.3, 4.8), lairAt(x, 22, z), IRON, Enum.Material.Metal, lairF)
+	local strips = 6
+	for k = 0, strips - 1 do
+		local w = 4 / strips
+		local l = len - rng:NextNumber(0, len * 0.45) * (if k % 2 == 0 then 1 else 0.4)
+		local strip = decor(part("Banner", Vector3.new(0.12, l, w), lairAt(x, 22 - l / 2, z - 2 + w / 2 + k * w), CLOTH, Enum.Material.Fabric, lairF))
+		strip.Color = CLOTH:Lerp(Color3.fromRGB(70, 20, 20), rng:NextNumber(0, 0.4))
+	end
+	decor(part("BannerTrim", Vector3.new(0.14, 0.5, 4), lairAt(x, 21.6, z), GOLD, Enum.Material.Fabric, lairF))
+	decor(part("BannerSign", Vector3.new(0.15, 1.6, 1.6), lairAt(x, 18.5, z) * CFrame.Angles(math.pi / 4, 0, 0), GOLD, Enum.Material.Fabric, lairF))
+end
+local function window(x, z, side)
+	-- a tall lancet window bricked up long ago: a smooth stone frame, a dark pane with a cold glow, a mullion
+	local fx = x - side * 0.5
+	local pane = decor(part("WindowPane", Vector3.new(0.2, 13, 5), lairAt(x - side * 0.15, 15.5, z), Color3.fromRGB(70, 95, 140), Enum.Material.Glass, lairF))
+	pane.Transparency = 0.15
+	light(pane, 14, 0.5, Color3.fromRGB(130, 160, 230))
+	for _, dz in ipairs({ -3, 3 }) do
+		textured(part("WindowJamb", Vector3.new(1, 15, 1), lairAt(fx, 15.5, z + dz), STONE, nil, lairF), "px_smooth_stone", STATUE)
+	end
+	textured(part("WindowSill", Vector3.new(1.4, 1, 7.4), lairAt(fx, 8.5, z), STONE, nil, lairF), "px_smooth_stone", STATUE)
+	-- the pointed head: blocks stepping in from both jambs and a keystone
+	for k = 1, 3 do
+		for _, dz in ipairs({ -1, 1 }) do
+			textured(part("WindowHead", Vector3.new(1, 1, 1.2), lairAt(fx, 22.5 + k, z + dz * (3 - k)), STONE, nil, lairF), "px_smooth_stone", STATUE)
+		end
+	end
+	textured(part("WindowKey", Vector3.new(1, 1.4, 1.2), lairAt(fx, 26.6, z), STONE, nil, lairF), "px_smooth_stone", STATUE)
+	part("Mullion", Vector3.new(0.3, 13, 0.3), lairAt(fx, 15.5, z), IRON, Enum.Material.Metal, lairF)
+	part("Transom", Vector3.new(0.3, 0.3, 5), lairAt(fx, 16, z), IRON, Enum.Material.Metal, lairF)
+end
+local function ruinedCorner(x, z)
+	return x > 44 and z < LAIR.z1 + 44
+end
+for i, z in ipairs(COL_Z) do
+	for _, side in ipairs({ -1, 1 }) do
+		local wx = side * LAIR.hx
+		local h = lairCeil(wx) - LF
+		textured(part("Pilaster", Vector3.new(2, h, 3), lairAt(wx - side, h / 2, z), STONE, nil, lairF), "px_stone_bricks", Color3.fromRGB(200, 194, 188))
+		local mid = z - 12
+		if mid > LAIR.z1 + 20 and not ruinedCorner(wx, mid) then
+			window(wx, mid, side)
+		end
+		if i % 2 == 0 and not ruinedCorner(wx, z) then
+			banner(wx - side * 2.4, z, rng:NextNumber(9, 13))
+		end
+	end
+end
+
+-- knight statues: a figure in plate holding a sword point-down, on a pedestal; parts may be missing
+local function knight(x, z, yaw, scale, damage)
+	local base = CFrame.new(BX + x, LF, BZ + z) * CFrame.Angles(0, yaw, 0)
+	local function piece(name, size, offset, angles)
+		local cf = base * CFrame.new(offset[1] * scale, offset[2] * scale, offset[3] * scale)
+		if angles then
+			cf *= CFrame.Angles(angles[1], angles[2], angles[3])
+		end
+		return textured(part(name, size * scale, cf, STONE, nil, lairF), "px_smooth_stone", stoneTint())
+	end
+	piece("Pedestal", Vector3.new(4.4, 1.6, 4.4), { 0, 0.8, 0 })
+	piece("Plinth", Vector3.new(3.6, 0.5, 3.6), { 0, 1.85, 0 })
+	local figure = Instance.new("Model")
+	figure.Name = "KnightStatue"
+	figure.Parent = lairF
+	local function fig(name, size, offset, angles)
+		local p = piece(name, size, offset, angles)
+		p.Parent = figure
+		return p
+	end
+	fig("Leg", Vector3.new(0.95, 2.7, 1.05), { -0.52, 3.45, 0 })
+	fig("Leg", Vector3.new(0.95, 2.7, 1.05), { 0.52, 3.45, 0 })
+	fig("Tasset", Vector3.new(2.5, 0.9, 1.4), { 0, 5.1, 0 })
+	fig("Torso", Vector3.new(2.3, 2.5, 1.3), { 0, 6.75, 0 })
+	fig("Breastplate", Vector3.new(1.7, 1.4, 0.3), { 0, 7, -0.7 })
+	fig("Cape", Vector3.new(2.5, 5, 0.25), { 0, 5.5, 0.8 }, { -0.08, 0, 0 })
+	fig("Pauldron", Vector3.new(1.1, 0.8, 1.5), { -1.45, 7.75, 0 })
+	fig("Pauldron", Vector3.new(1.1, 0.8, 1.5), { 1.45, 7.75, 0 })
+	fig("UpperArm", Vector3.new(0.8, 1.6, 0.9), { -1.4, 6.7, -0.1 })
+	fig("Forearm", Vector3.new(0.7, 0.6, 1.7), { -0.75, 5.85, -0.7 }, { 0, -0.75, 0 })
+	if damage ~= "armless" then
+		fig("UpperArm", Vector3.new(0.8, 1.6, 0.9), { 1.4, 6.7, -0.1 })
+		fig("Forearm", Vector3.new(0.7, 0.6, 1.7), { 0.75, 5.85, -0.7 }, { 0, 0.75, 0 })
+	else
+		fig("Stump", Vector3.new(0.8, 0.6, 0.9), { 1.4, 7.25, -0.1 })
+		piece("FallenArm", Vector3.new(0.8, 2.4, 0.9), { 2.6, 0.45, -1.6 }, { 0, 0.4, math.pi / 2 })
+	end
+	fig("Hands", Vector3.new(1, 0.8, 0.8), { 0, 5.75, -1.2 })
+	fig("Blade", Vector3.new(0.32, 3.4, 0.14), { 0, 3.75, -1.25 })
+	fig("Guard", Vector3.new(1.9, 0.26, 0.32), { 0, 5.4, -1.25 })
+	fig("Pommel", Vector3.new(0.45, 0.45, 0.45), { 0, 6.35, -1.25 })
+	if damage ~= "headless" then
+		fig("Helmet", Vector3.new(1.25, 1.35, 1.25), { 0, 8.65, 0 })
+		fig("Crest", Vector3.new(0.22, 0.45, 1.1), { 0, 9.5, 0.05 })
+		local visor = fig("Visor", Vector3.new(0.9, 0.12, 0.05), { 0, 8.75, -0.64 })
+		visor.MaterialVariant = ""
+		visor.Material = Enum.Material.SmoothPlastic
+		visor.Color = Color3.fromRGB(30, 28, 26)
+	else
+		-- the head lies at the foot of the pedestal
+		piece("FallenHelmet", Vector3.new(1.25, 1.35, 1.25), { 1.8, 0.62, -2.6 }, { 0.3, 0.8, 1.2 })
+	end
+	if damage == "toppled" then
+		-- the whole figure has fallen off its pedestal and lies face down across the floor
+		figure:PivotTo(base * CFrame.new(0, 0.7 * scale, -5.4 * scale) * CFrame.Angles(-math.pi / 2, 0, 0.1) * CFrame.new(0, -3.4 * scale, 0))
+	end
+	return figure
+end
+-- a stone lion lying on a pedestal (the guardians of the great door)
+local function lion(x, z, yaw)
+	local base = CFrame.new(BX + x, LF, BZ + z) * CFrame.Angles(0, yaw, 0)
+	local function piece(name, size, offset)
+		return textured(part(name, size, base * CFrame.new(offset[1], offset[2], offset[3]), STONE, nil, lairF), "px_smooth_stone", stoneTint())
+	end
+	piece("LionPedestal", Vector3.new(4, 2, 7), { 0, 1, 0 })
+	piece("LionBody", Vector3.new(2.6, 2.2, 4.6), { 0, 3.1, 0.4 })
+	piece("LionHaunch", Vector3.new(3, 2.4, 1.8), { 0, 3.2, 2 })
+	piece("LionMane", Vector3.new(3.2, 3, 1.6), { 0, 4.6, -1.9 })
+	piece("LionHead", Vector3.new(2.2, 2.2, 1.6), { 0, 4.8, -2.8 })
+	piece("LionMuzzle", Vector3.new(1.3, 0.9, 0.8), { 0, 4.3, -3.8 })
+	for _, sx in ipairs({ -0.75, 0.75 }) do
+		piece("LionPaw", Vector3.new(0.9, 0.7, 2), { sx, 2.35, -2.9 })
+		piece("LionEar", Vector3.new(0.5, 0.5, 0.4), { sx, 6, -2.7 })
+	end
+	piece("LionTail", Vector3.new(0.4, 0.4, 2.6), { 1.3, 2.4, 2.9 })
+end
+-- the aisles: a knight between every pair of columns along both walls, facing the nave
+local STATUE_X = 68
+local damage = { [2] = "headless", [5] = "armless", [9] = "toppled", [11] = "headless" }
+local n = 0
+for i, z in ipairs(COL_Z) do
+	if i < #COL_Z then
+		for _, side in ipairs({ -1, 1 }) do
+			n += 1
+			local mid = z - 12
+			if not ruinedCorner(side * STATUE_X, mid) then
+				knight(side * STATUE_X, mid, if side > 0 then math.pi / 2 else -math.pi / 2, 1, damage[n])
+			end
+		end
+	end
+end
+lion(-16, LAIR.z0 - 12, math.pi) -- facing the door
+lion(16, LAIR.z0 - 12, math.pi)
+
+-- the north end: a stepped dais with the throne of the dead king, two giant knights, the torn tapestry
+local TZ = LAIR.z1 + 10
+for k = 0, 2 do
+	box("ThroneStep", -22 + k * 3, LF, TZ - 10, 22 - k * 3, LF + 1 + k, TZ + 8 - k * 2.5, "px_stone_bricks", STATUE, lairF)
+end
+local ty = 3
+textured(part("ThroneBase", Vector3.new(5.4, 1.4, 4.2), lairAt(0, ty + 0.7, TZ - 4), STONE, nil, lairF), "px_stone_bricks", STATUE)
+textured(part("ThroneSeat", Vector3.new(6, 1, 4.6), lairAt(0, ty + 1.9, TZ - 4), STONE, nil, lairF), "px_smooth_stone", STATUE)
+textured(part("ThroneBack", Vector3.new(6, 9, 1.2), lairAt(0, ty + 6.4, TZ - 6.2), STONE, nil, lairF), "px_smooth_stone", STATUE)
+for k = 1, 3 do
+	textured(part("ThroneSpire", Vector3.new(6 - k * 1.6, 1, 1.2), lairAt(0, ty + 10.4 + k, TZ - 6.2), STONE, nil, lairF), "px_smooth_stone", STATUE)
+end
+for _, sx in ipairs({ -1, 1 }) do
+	textured(part("ThroneArm", Vector3.new(1, 2.2, 4.6), lairAt(sx * 3.3, ty + 3, TZ - 4), STONE, nil, lairF), "px_smooth_stone", STATUE)
+	textured(part("ThroneFinial", Vector3.new(1.4, 1.4, 1.4), lairAt(sx * 3.3, ty + 11.2, TZ - 6.2), STONE, nil, lairF), "px_gold_block")
+end
+decor(part("ThroneCushion", Vector3.new(4.6, 0.4, 3.8), lairAt(0, ty + 2.6, TZ - 3.8), CLOTH, Enum.Material.Fabric, lairF))
+decor(part("ThroneBackCloth", Vector3.new(4.2, 6, 0.2), lairAt(0, ty + 6.2, TZ - 5.5), CLOTH, Enum.Material.Fabric, lairF))
+-- the dead king still sits on it: a skull with a crown, bones on the cushion, a sceptre on the steps
+local skull = decor(part("KingSkull", Vector3.new(1.2, 1.1, 1.3), lairAt(0.2, ty + 4.6, TZ - 4.9) * CFrame.Angles(0.3, 0.2, 0.15), Color3.fromRGB(226, 220, 198), nil, lairF))
+for _, s in ipairs({ -0.27, 0.27 }) do
+	decor(part("Eye", Vector3.new(0.32, 0.32, 0.05), skull.CFrame * CFrame.new(s, 0.1, -0.66), Color3.fromRGB(25, 22, 20), nil, lairF))
+end
+decor(part("Crown", Vector3.new(1.4, 0.4, 1.4), skull.CFrame * CFrame.new(0, 0.7, 0), GOLD, Enum.Material.Metal, lairF))
+for k = 0, 3 do
+	local a = k / 4 * math.pi * 2
+	decor(part("CrownTooth", Vector3.new(0.3, 0.5, 0.3), skull.CFrame * CFrame.new(math.cos(a) * 0.55, 1.1, math.sin(a) * 0.55), GOLD, Enum.Material.Metal, lairF))
+end
+bones(0, LF + ty + 2.8, TZ - 3.6, 4)
+decor(part("Sceptre", Vector3.new(0.25, 0.25, 3.2), lairAt(4, 1.2, TZ + 4) * CFrame.Angles(0, 0.6, 0), GOLD, Enum.Material.Metal, lairF))
+decor(part("SceptreGem", Vector3.new(0.6, 0.6, 0.6), lairAt(4.9, 1.2, TZ + 2.7), Color3.fromRGB(180, 30, 40), Enum.Material.Neon, lairF))
+-- the tapestry on the north wall: a red cloth with a gold border and emblem, its bottom torn into strips
+local tw = 24
+for k = 0, 11 do
+	local w = tw / 12
+	local l = 22 - rng:NextNumber(0, 7) * (if k % 3 == 0 then 1 else 0.35)
+	local strip = decor(part("Tapestry", Vector3.new(w, l, 0.15), lairAt(-tw / 2 + w / 2 + k * w, 30 - l / 2, LAIR.z1 + 0.3), CLOTH, Enum.Material.Fabric, lairF))
+	strip.Color = CLOTH:Lerp(Color3.fromRGB(60, 18, 18), rng:NextNumber(0, 0.35))
+end
+decor(part("TapestryTop", Vector3.new(tw + 1, 1, 0.3), lairAt(0, 30, LAIR.z1 + 0.25), GOLD, Enum.Material.Fabric, lairF))
+decor(part("TapestryEmblem", Vector3.new(5, 5, 0.2), lairAt(0, 22, LAIR.z1 + 0.45) * CFrame.Angles(0, 0, math.pi / 4), GOLD, Enum.Material.Fabric, lairF))
+decor(part("TapestryEmblemIn", Vector3.new(3, 3, 0.25), lairAt(0, 22, LAIR.z1 + 0.5) * CFrame.Angles(0, 0, math.pi / 4), CLOTH, Enum.Material.Fabric, lairF))
+knight(-28, TZ - 2, math.pi, 2.1, nil) -- facing the hall
+knight(28, TZ - 2, math.pi, 2.1, nil)
+local throneLight = decor(part("ThroneLight", Vector3.new(1, 1, 1), lairAt(0, 14, TZ + 8), STONE, nil, lairF))
+throneLight.Transparency = 1
+light(throneLight, 40, 1, Color3.fromRGB(255, 200, 150))
+
+-- the red carpet runner from the door to the throne, torn and gone in places (not across the dais)
+do
+	local z = LAIR.z0 - 2
+	while z > TZ + 9 do
+		local len = rng:NextNumber(5, 14)
+		local z2 = math.max(TZ + 9, z - len)
+		local mz = (z + z2) / 2
+		if math.abs(mz - LAIR.cz) > PLATFORM_R + 2 then
+			local rug = part("Carpet", Vector3.new(9, 0.12, z - z2), lairAt(rng:NextNumber(-0.3, 0.3), 0.06, mz) * CFrame.Angles(0, rng:NextNumber(-0.03, 0.03), 0), CLOTH, Enum.Material.Fabric, lairF)
+			rug.CanCollide = false
+			decor(part("CarpetTrim", Vector3.new(9.8, 0.1, z - z2), rug.CFrame * CFrame.new(0, -0.01, 0), GOLD, Enum.Material.Fabric, lairF))
+		end
+		z = z2 - rng:NextNumber(0.5, 3)
+	end
+end
+
+-- chandeliers: an iron ring with candles on a chain (two still hanging over the nave, one crashed)
+local function chandelier(x, y, z, crashed)
+	local tilt = if crashed then CFrame.Angles(0.25, 0, -0.2) else CFrame.new()
+	local centre = lairAt(x, y, z) * tilt
+	for k = 0, 11 do
+		local a = k / 12 * math.pi * 2
+		decor(part("ChandelierRing", Vector3.new(0.4, 0.4, 2.2), centre * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -4.2), IRON, Enum.Material.Metal, lairF))
+		if k % 2 == 0 then
+			local cpos = centre * CFrame.Angles(0, a, 0) * CFrame.new(0, 0.6, -4.2)
+			decor(part("Candle", Vector3.new(0.35, 0.8, 0.35), cpos, Color3.fromRGB(238, 228, 200), nil, lairF))
+			if not crashed then
+				decor(part("CandleFlame", Vector3.new(0.22, 0.35, 0.22), cpos * CFrame.new(0, 0.6, 0), TORCH, Enum.Material.Neon, lairF))
+			end
+		end
+	end
+	for k = 0, 3 do
+		local a = k / 4 * math.pi * 2
+		decor(part("ChandelierSpoke", Vector3.new(0.3, 0.3, 4.2), centre * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -2.1), IRON, Enum.Material.Metal, lairF))
+	end
+	if crashed then
+		pile(x + 2, z + 1, { "px_stone_bricks", "px_cobblestone" }, 4)
+		decor(part("BrokenChain", Vector3.new(0.25, 8, 0.25), lairAt(x + 3, 0.3, z - 2) * CFrame.Angles(math.pi / 2, 0.4, 0), IRON, Enum.Material.Metal, lairF))
+	else
+		local ceil = lairCeil(x) - LF
+		decor(part("ChandelierChain", Vector3.new(0.3, ceil - y, 0.3), lairAt(x, (ceil + y) / 2, z), IRON, Enum.Material.Metal, lairF))
+		local glow = decor(part("ChandelierGlow", Vector3.new(0.5, 0.5, 0.5), lairAt(x, y + 1, z), TORCH, nil, lairF))
+		glow.Transparency = 1
+		light(glow, 40, 1.2, TORCH)
+	end
+end
+chandelier(0, 22, LAIR.z0 - 30, false)
+chandelier(0, 22, TZ + 30, false)
+chandelier(34, 0.5, LAIR.cz + 46, true)
+
+-- the caved-in north-east corner: the cave rock broke the walls, boulders and masonry everywhere
+for _ = 1, 5 do
+	pile(LAIR.hx - 10 - rng:NextNumber(0, 18), LAIR.z1 + 10 + rng:NextNumber(0, 24), { "px_stone", "px_cobblestone", "px_mossy_cobblestone", "px_stone_bricks" }, 10)
+end
+for _ = 1, 6 do
+	local s = rng:NextNumber(3, 6)
+	textured(part("Boulder", Vector3.new(s, s * 0.8, s), lairAt(LAIR.hx - 6 - rng:NextNumber(0, 20), s * 0.35, LAIR.z1 + 6 + rng:NextNumber(0, 30)) * CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 6), rng:NextNumber(-0.3, 0.3)), STONE, nil, lairF), "px_stone", WALL_TINT)
+end
+-- a pool of murky water where the floor sank (in the west aisle)
+local pool = part("Pool", Vector3.new(0.3, 16, 16), lairAt(-66, 0.1, LAIR.cz - 24) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 90, 50), Enum.Material.Glass, lairF)
 pool.Shape = Enum.PartType.Cylinder
 pool.Transparency = 0.25
 pool.Reflectance = 0.15
 pool.CanCollide = false
-pool.Size = Vector3.new(0.3, 22, 22)
-light(pool, 16, 0.6, Color3.fromRGB(120, 220, 90))
-local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(0, LF + 1.7, LAIR.cz), STONE, nil, lairF)
+light(pool, 16, 0.5, Color3.fromRGB(120, 220, 90))
+
+local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), lairAt(0, 1.7, LAIR.cz), STONE, nil, lairF)
 bossSpawn.Transparency = 1
 bossSpawn.CanCollide = false
 bossSpawn.CanQuery = false
 bossSpawn:SetAttribute("BossId", "splinter")
-bossSpawn:SetAttribute("ArenaRadius", LAIR.r - 6)
+bossSpawn:SetAttribute("ArenaRadius", LAIR.hx - 6)
 CollectionService:AddTag(bossSpawn, "BossSpawn")
--- the entrance to the lair: an old mossy arch over the stair, a warning of bones and a skull on a stake
-arch(STAIR_BOTTOM - 10, 12, LF + 8, 6, "px_mossy_stone_bricks", Color3.fromRGB(190, 185, 180), lairF)
-local lairSign = decor(part("LairSign", Vector3.new(1, 1, 1), at(0, LF + 19, STAIR_BOTTOM - 10), STONE, nil, lairF))
+-- the great door: a high arch on the hall side, one wooden leaf still on its hinges, the other fallen in
+arch(LAIR.z0 - 0.75, LAIR.door, LF + 12, 8, "px_stone_bricks", Color3.fromRGB(205, 198, 192), lairF)
+local hinge = lairAt(-LAIR.door + 0.5, 8, LAIR.z0 - 1.5) * CFrame.Angles(0, 1.1, 0)
+textured(part("DoorLeaf", Vector3.new(10, 16, 0.8), hinge * CFrame.new(5, 0, 0), WOOD, nil, lairF), "px_dark_oak_planks")
+for _, y in ipairs({ -5, 5 }) do
+	decor(part("DoorBand", Vector3.new(10.2, 0.6, 1), hinge * CFrame.new(5, y, 0), IRON, Enum.Material.Metal, lairF))
+end
+textured(part("FallenLeaf", Vector3.new(10, 0.8, 16), lairAt(6, 0.4, LAIR.z0 - 11) * CFrame.Angles(0, 0.2, 0.05), WOOD, nil, lairF), "px_dark_oak_planks")
+local lairSign = decor(part("LairSign", Vector3.new(1, 1, 1), lairAt(0, 25, LAIR.z0 - 2), STONE, nil, lairF))
 lairSign.Transparency = 1
 sign(lairSign, "Логово Сплинтера", 0, Color3.fromRGB(255, 80, 60))
 for _, side in ipairs({ -1, 1 }) do
-	part("Stake", Vector3.new(0.4, 5, 0.4), at(side * 9, LF + 2.5, STAIR_BOTTOM - 14), WOOD, Enum.Material.Wood, lairF)
-	bones(side * 9, LF, STAIR_BOTTOM - 14, 2)
+	part("Stake", Vector3.new(0.4, 5, 0.4), at(side * 9, LF + 2.5, STAIR_BOTTOM - 8), WOOD, Enum.Material.Wood, lairF)
+	bones(side * 9, LF, STAIR_BOTTOM - 8, 2)
 end
 
 -- the broken arch where the masonry ends in tunnel 1
@@ -996,7 +1330,7 @@ for _, c in pairs(cells) do
 		local onDais = c.shape == "lair" and math.sqrt(c.x ^ 2 + (c.z - LAIR.cz) ^ 2) < PLATFORM_R + 18
 		local r = rng:NextNumber()
 		-- stalactites: a short stack of shrinking stone blocks under the dome
-		if (cave or c.edge >= 2) and r < (if cave then 0.09 else 0.05) and c.edge >= 2 then
+		if c.shape ~= "lair" and (cave or c.edge >= 2) and r < (if cave then 0.09 else 0.05) and c.edge >= 2 then
 			local y = c.ceil
 			local s0 = rng:NextNumber(1.6, 2.6)
 			for k = 0, rng:NextInteger(1, 3) do
@@ -1025,7 +1359,7 @@ for _, c in pairs(cells) do
 			end
 		end
 		-- glowing mushrooms at the foot of the walls (cyan and violet, a soft light on every few)
-		if c.edge == 1 and not c.path and c.shape ~= "hall" and r > 0.3 and r < 0.37 then
+		if c.edge == 1 and not c.path and c.shape ~= "hall" and c.shape ~= "lair" and r > 0.3 and r < 0.37 then
 			local hue = if rng:NextNumber() < 0.6 then Color3.fromRGB(90, 230, 230) else Color3.fromRGB(190, 110, 255)
 			for k = 1, rng:NextInteger(2, 4) do
 				local h = rng:NextNumber(0.5, 1.3)
@@ -1230,10 +1564,10 @@ for _, side in ipairs({ -1, 1 }) do
 end
 -- the lair: a rat at each diagonal (by the rubbish heaps), a zombie at each side
 for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-	mobSpawn("rat", c[1] * 50, LAIR.cz + c[2] * 50, 4)
+	mobSpawn("rat", c[1] * 36, LAIR.cz + c[2] * 60, 4)
 end
 for _, d in ipairs({ { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } }) do
-	mobSpawn("zombie", d[1] * 74, LAIR.cz + d[2] * 74, 4)
+	mobSpawn("zombie", d[1] * 60, LAIR.cz + d[2] * 74, 4)
 end
 
 print(("[build-basement] built: %d parts"):format(#root:GetDescendants()))
