@@ -1,5 +1,5 @@
 {
- "_source": "assets/models/rat/rat.blend (Blender, made by rat.py; reference rat-reference.png by Codex) [владелец 22.10]",
+ "_source": "assets/models/rat/rat.blend (Blender, made by rat.py + assets/models/blockmob.py; reference by Codex)",
  "fps": 30,
  "texture": {
   "studsPerTile": 2.25,

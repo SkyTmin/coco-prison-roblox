@@ -555,6 +555,9 @@
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
         },
+        "model": "basalt_guardian",
+        "texture": "rbxassetid://90771552374484",
+        "_blender": "[владелец 22.10] модель из Blender по референсу Codex (assets/models/basalt_guardian: вид спереди по пикселям, меч и горб — по виду сбоку), анимации — клипы Blender (BossAnimator); template — запасной шаблон из места",
         "template": "basalt_guardian",
         "scale": 0.55
       },

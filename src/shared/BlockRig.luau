@@ -4,7 +4,7 @@
 -- keyframes (Roblox space, the model faces −Z, origin on the ground).
 -- BlockRig.build (server): one invisible part per joint, chained by Motor6Ds (C0 = the pivot in the parent
 -- joint's space), the boxes welded to their joints; the fur is one grey pixel-noise texture tinted per face
--- (top faces may take a darker colour). BlockRig.sample (client): the joint CFrames of a clip at a time, for
+-- (top faces may take a darker colour); parts with glow = true are Neon. BlockRig.sample (client): the joint CFrames of a clip at a time, for
 -- Motor6D.Transform (src/client/MobAnimator.luau).
 
 local BlockRig = {}
@@ -77,7 +77,20 @@ function BlockRig.build(def: any, model: Model, root: BasePart, origin: CFrame, 
 	local mean = tex.mean or 0.92
 	local saturate, gain = tex.saturate or 1, tex.gain or 1
 	local rnd = Random.new(7)
-	for _, d in ipairs(def.parts) do
+	for i, raw in ipairs(def.parts) do
+		-- big models store parts as arrays [joint, centre, size, colour, top, glow, rot] (blockmob export)
+		local d = if raw.joint
+			then raw
+			else {
+				name = "P" .. i,
+				joint = raw[1],
+				centre = raw[2],
+				size = raw[3],
+				colour = raw[4],
+				top = raw[5],
+				glow = raw[6] == 1,
+				rot = raw[7],
+			}
 		local p = Instance.new("Part")
 		p.Name = d.name
 		p.Size = vec(d.size)
@@ -86,15 +99,16 @@ function BlockRig.build(def: any, model: Model, root: BasePart, origin: CFrame, 
 			cf *= CFrame.new(0, 0, 0, d.rot[1], d.rot[2], d.rot[3], d.rot[4])
 		end
 		p.CFrame = cf
-		p.Color = lift(rgb(d.colour), saturate, gain)
-		p.Material = Enum.Material.SmoothPlastic
+		p.Color = if d.glow then rgb(d.colour) else lift(rgb(d.colour), saturate, gain) -- lava keeps its colour
+		-- glowing parts (lava cracks, eyes): Neon in their own colour, no texture
+		p.Material = if d.glow then Enum.Material.Neon else Enum.Material.SmoothPlastic
 		p.TopSurface = Enum.SurfaceType.Smooth
 		p.BottomSurface = Enum.SurfaceType.Smooth
 		p.CanCollide = false
 		p.CanQuery = true
 		p.CanTouch = false
 		p.Massless = true
-		if texture then
+		if texture and not d.glow then
 			local u, v = rnd:NextNumber(0, studs), rnd:NextNumber(0, studs)
 			for _, f in ipairs(FACES) do
 				local size = p.Size :: any

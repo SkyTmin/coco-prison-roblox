@@ -33,6 +33,8 @@ local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
+local BlockRig = require(Shared.BlockRig)
+local Models = Shared:WaitForChild("Models")
 
 local BossService = {}
 local started = false
@@ -367,7 +369,69 @@ local function rigFromTemplate(boss: Boss, template: Model): Model?
 	return model
 end
 
+-- A boss made in Blender like the rat [владелец 22.10: «босс в каменоломне по этой же логике, точь в точь»]:
+-- fight.model names Shared.Models.<id> (assets/models/<id>): BlockRig boxes on Motor6D joints, the lava cracks
+-- Neon, posed by BossAnimator from the Blender clips (model attribute BlockModel). The physics stay an invisible
+-- root box over the hips with an R6 humanoid floating it; the model's ground origin sits under it.
+local BLOCK_ROOT_HEIGHT = 4.5
+local function buildBlock(boss: Boss, def: any): Model
+	local fight = boss.fight :: any
+	local model = Instance.new("Model")
+	local top = boss.spawn.CFrame * CFrame.new(0, boss.spawn.Size.Y / 2, 0)
+	local root = Instance.new("Part")
+	root.Name = "HumanoidRootPart"
+	root.Size = Vector3.new(4, 5, 3)
+	root.Transparency = 1
+	root.CanCollide = true
+	root.CFrame = top * CFrame.new(0, BLOCK_ROOT_HEIGHT, 0)
+	root.Parent = model
+	BlockRig.build(
+		def,
+		model,
+		root,
+		root.CFrame * CFrame.new(0, -BLOCK_ROOT_HEIGHT, 0),
+		fight.texture
+	)
+	for _, d in ipairs(model:GetDescendants()) do
+		if d:IsA("Motor6D") then
+			boss.motors[d.Name] = d -- the crumble on death takes them apart
+		end
+	end
+	local glow = Instance.new("PointLight") -- lava glow from the chest
+	glow.Range = 16
+	glow.Brightness = 1.4
+	glow.Color = paletteColor(boss, "glow", LAVA)
+	glow.Parent = model:FindFirstChild("J_body") or root
+	local humanoid = Instance.new("Humanoid")
+	humanoid.RigType = Enum.HumanoidRigType.R6
+	humanoid.HipHeight = BLOCK_ROOT_HEIGHT - root.Size.Y / 2
+	humanoid.MaxHealth = boss.card.hp
+	humanoid.Health = boss.card.hp
+	humanoid.WalkSpeed = boss.fight.walkSpeed
+	humanoid.UseJumpPower = true
+	humanoid.JumpPower = 55 -- clears a 4-stud block when it gets stuck on one
+	humanoid.BreakJointsOnDeath = false
+	humanoid.RequiresNeck = false
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+	humanoid.Parent = model
+	model.Name = "Boss_" .. boss.id
+	model:SetAttribute("BossId", boss.id)
+	model:SetAttribute("BlockModel", fight.model)
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	model.PrimaryPart = root
+	CollectionService:AddTag(model, "Boss")
+	CollisionGroups.mob(model) -- players walk through bosses; only the hits push
+	model.Parent = workspace
+	root:SetNetworkOwner(nil)
+	return model
+end
+
 local function buildModel(boss: Boss): Model
+	local blockDef = (boss.fight :: any).model and Models:FindFirstChild((boss.fight :: any).model)
+	if blockDef and blockDef:IsA("ModuleScript") then
+		return buildBlock(boss, require(blockDef) :: any)
+	end
 	local templates = ServerStorage:FindFirstChild("BossTemplates")
 	local template = templates and templates:FindFirstChild((boss.fight :: any).template or boss.id)
 	if template and template:IsA("Model") then
@@ -839,7 +903,7 @@ local function charge(boss: Boss, target: Vector3)
 		Sfx.broadcast("player_fall", root, 1, 0.5)
 		-- dizzy: a spinning ring of sparks over the head, the golem slumps forward
 		local model = boss.model
-		local head = model and model:FindFirstChild("Head")
+		local head = model and (model:FindFirstChild("Head") or model:FindFirstChild("J_head"))
 		if head then
 			local sparks = Instance.new("ParticleEmitter")
 			sparks.Name = "Stunned"

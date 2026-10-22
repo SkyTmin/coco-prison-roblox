@@ -1,0 +1,213 @@
+{
+  "_doc": "Voxel sculpture config (assets/models/voxelsculpt.py) for basalt-guardian-turnaround-2.png (the consistent Codex turnaround: side and front share the ground y 497 and the head-top line): front = top-right panel (48 px a stud, centre x 1118), side = top-left panel (facing left, body centre x 490). Regions in sheet px, first match wins. The top view is drawn at another scale and is not used. The arms overlap the torso on the side view, so their depth is the fallback range (three-quarter view: fists a little forward); the body also fills behind the head.",
+  "reference": "basalt-guardian-turnaround-2.png",
+  "cell": 10,
+  "scale": 48,
+  "background": [
+    178,
+    180,
+    182
+  ],
+  "tolerance": 40,
+  "relief": 2,
+  "glowStrength": 1,
+  "front": {
+    "rect": [
+      860,
+      10,
+      1390,
+      500
+    ],
+    "centreX": 1118,
+    "groundY": 497,
+    "regions": [
+      {
+        "joint": "sword",
+        "rect": [
+          860,
+          385,
+          955,
+          500
+        ]
+      },
+      {
+        "joint": "head",
+        "rect": [
+          1065,
+          75,
+          1170,
+          190
+        ],
+        "also": [
+          "body"
+        ]
+      },
+      {
+        "joint": "armL",
+        "rect": [
+          860,
+          215,
+          1005,
+          285
+        ]
+      },
+      {
+        "joint": "foreL",
+        "rect": [
+          860,
+          285,
+          1005,
+          385
+        ]
+      },
+      {
+        "joint": "armR",
+        "rect": [
+          1240,
+          215,
+          1390,
+          300
+        ]
+      },
+      {
+        "joint": "foreR",
+        "rect": [
+          1240,
+          300,
+          1390,
+          460
+        ]
+      },
+      {
+        "joint": "legL",
+        "rect": [
+          1005,
+          298,
+          1118,
+          500
+        ]
+      },
+      {
+        "joint": "legR",
+        "rect": [
+          1118,
+          298,
+          1240,
+          500
+        ]
+      },
+      {
+        "joint": "body",
+        "rect": [
+          860,
+          0,
+          1390,
+          500
+        ]
+      }
+    ]
+  },
+  "side": {
+    "rect": [
+      270,
+      10,
+      670,
+      500
+    ],
+    "centreX": 490,
+    "groundY": 497,
+    "regions": [
+      {
+        "joints": [
+          "head"
+        ],
+        "rect": [
+          280,
+          70,
+          360,
+          195
+        ]
+      },
+      {
+        "joints": [
+          "sword"
+        ],
+        "rect": [
+          280,
+          230,
+          345,
+          500
+        ]
+      },
+      {
+        "joints": [
+          "body"
+        ],
+        "rect": [
+          330,
+          20,
+          665,
+          330
+        ]
+      },
+      {
+        "joints": [
+          "legL",
+          "legR"
+        ],
+        "rect": [
+          345,
+          290,
+          645,
+          500
+        ]
+      }
+    ]
+  },
+  "bottomColour": [
+    40,
+    36,
+    42
+  ],
+  "topColour": [
+    96,
+    89,
+    99
+  ],
+  "depthFallback": {
+    "armL": [
+      -1.2,
+      2
+    ],
+    "armR": [
+      -1.2,
+      2
+    ],
+    "foreL": [
+      -1.3,
+      2.6
+    ],
+    "foreR": [
+      -1.3,
+      2.6
+    ]
+  },
+  "top": {
+    "rect": [
+      120,
+      555,
+      720,
+      925
+    ],
+    "xFront": 288,
+    "yFront": 4.208333333333333,
+    "yScale": 54.5,
+    "centreY": 741,
+    "xScale": 33.5,
+    "xSign": 1,
+    "dilate": 1,
+    "exclude": [
+      "sword"
+    ]
+  }
+}

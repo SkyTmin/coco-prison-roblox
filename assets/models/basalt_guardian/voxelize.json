@@ -1,0 +1,337 @@
+{
+  "_doc": "Front-view voxeliser config (scripts/model-tools/voxelize-front.cjs) for basalt-guardian-reference.png [владелец 22.10: «вот тут было норм» — the first front extrusion]: the top-right panel, 45 px a stud, the golem's centre x 1188, ground y 473. Regions in sheet px, first match wins; y = depth range in studs (Blender +Y = forward), bevel = rounding steps towards the silhouette. side: only the sword takes its depth from the side view (top-left panel), shifted so its hilt sits in the fist (side x 305 = Y 0): the blade goes down, outward and forward like on the sheet. Hump [владелец 22.10: «добавь горб»]: the upper back (sheet y < 215) reaches 3.1 studs back (side view: up to x 605), the mid back 2.1, the shoulders 2.2. lava: four tones by brightness; lavaBias: blade cells count as lava when their brightest fifth is (the thin molten core of the sword). stoneByJoint: the blade is purple-black obsidian.",
+  "reference": "basalt-guardian-reference.png",
+  "panel": [
+    880,
+    0,
+    640,
+    500
+  ],
+  "scale": 45,
+  "centreX": 1188,
+  "groundY": 473,
+  "cell": 10,
+  "background": [
+    176,
+    175,
+    175
+  ],
+  "tolerance": 40,
+  "bevelStep": 0.2,
+  "stone": [
+    [
+      36,
+      32,
+      38
+    ],
+    [
+      53,
+      48,
+      55
+    ],
+    [
+      71,
+      65,
+      73
+    ],
+    [
+      90,
+      83,
+      92
+    ],
+    [
+      110,
+      103,
+      112
+    ],
+    [
+      132,
+      125,
+      134
+    ]
+  ],
+  "lava": {
+    "deep": [
+      178,
+      52,
+      22
+    ],
+    "warm": [
+      240,
+      104,
+      26
+    ],
+    "bright": [
+      255,
+      160,
+      44
+    ],
+    "hot": [
+      255,
+      226,
+      120
+    ]
+  },
+  "regions": [
+    {
+      "joint": "sword",
+      "rect": [
+        880,
+        255,
+        990,
+        500
+      ],
+      "y": [
+        0.1,
+        0.55
+      ],
+      "bevel": 0
+    },
+    {
+      "joint": "head",
+      "rect": [
+        1140,
+        70,
+        1236,
+        180
+      ],
+      "y": [
+        0.3,
+        2.1
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "armL",
+      "rect": [
+        880,
+        250,
+        1102,
+        330
+      ],
+      "y": [
+        -1,
+        1.2
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "foreL",
+      "rect": [
+        880,
+        330,
+        1102,
+        500
+      ],
+      "y": [
+        -1.15,
+        1.35
+      ],
+      "bevel": 3
+    },
+    {
+      "joint": "armR",
+      "rect": [
+        1290,
+        240,
+        1520,
+        330
+      ],
+      "y": [
+        -1,
+        1.2
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "foreR",
+      "rect": [
+        1290,
+        330,
+        1520,
+        500
+      ],
+      "y": [
+        -1.15,
+        1.35
+      ],
+      "bevel": 3
+    },
+    {
+      "joint": "legL",
+      "rect": [
+        1080,
+        430,
+        1188,
+        500
+      ],
+      "y": [
+        -0.9,
+        1.45
+      ],
+      "bevel": 1
+    },
+    {
+      "joint": "legR",
+      "rect": [
+        1188,
+        430,
+        1300,
+        500
+      ],
+      "y": [
+        -0.9,
+        1.45
+      ],
+      "bevel": 1
+    },
+    {
+      "joint": "legL",
+      "rect": [
+        1090,
+        318,
+        1188,
+        430
+      ],
+      "y": [
+        -0.8,
+        0.9
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "legR",
+      "rect": [
+        1188,
+        318,
+        1290,
+        430
+      ],
+      "y": [
+        -0.8,
+        0.9
+      ],
+      "bevel": 2
+    },
+    {
+      "joint": "body",
+      "rect": [
+        880,
+        0,
+        1102,
+        250
+      ],
+      "y": [
+        -2.2,
+        1.3
+      ],
+      "bevel": 3
+    },
+    {
+      "joint": "body",
+      "rect": [
+        1290,
+        0,
+        1520,
+        240
+      ],
+      "y": [
+        -2.2,
+        1.3
+      ],
+      "bevel": 3
+    },
+    {
+      "joint": "body",
+      "rect": [
+        1102,
+        0,
+        1290,
+        215
+      ],
+      "y": [
+        -3.1,
+        1.5
+      ],
+      "bevel": 4
+    },
+    {
+      "joint": "body",
+      "rect": [
+        1102,
+        215,
+        1290,
+        290
+      ],
+      "y": [
+        -2.1,
+        1.5
+      ],
+      "bevel": 4
+    },
+    {
+      "joint": "body",
+      "rect": [
+        1102,
+        0,
+        1290,
+        500
+      ],
+      "y": [
+        -1.5,
+        1.5
+      ],
+      "bevel": 3
+    }
+  ],
+  "side": {
+    "centreX": 305,
+    "groundY": 475,
+    "regions": [
+      {
+        "joints": [
+          "sword"
+        ],
+        "rect": [
+          30,
+          285,
+          300,
+          482
+        ],
+        "voxel": true
+      }
+    ]
+  },
+  "lavaBias": {
+    "sword": 0.8
+  },
+  "stoneByJoint": {
+    "sword": [
+      [
+        30,
+        22,
+        36
+      ],
+      [
+        46,
+        36,
+        54
+      ],
+      [
+        64,
+        52,
+        74
+      ],
+      [
+        84,
+        70,
+        96
+      ],
+      [
+        106,
+        90,
+        118
+      ]
+    ]
+  }
+}
