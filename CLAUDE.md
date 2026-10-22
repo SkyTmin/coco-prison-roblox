@@ -131,8 +131,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    from the client with `prompt:InputHoldBegin()/InputHoldEnd()`. Injected keyboard input does NOT
    reach our hotkeys; `screen_capture` and window layout break while the Studio viewport is 1×1
    (window minimized/hidden) — check `camera.ViewportSize` first.
-   The published place (placeId 92594200898716) needs "Enable Studio Access to API Services" in Game
-   Settings → Security before DataStore works in Studio (ProfileService then loads real profiles).
+   The published place (placeId 92594200898716) needs "Enable Studio Access to API Services" (File → Experience
+   Settings → Security → Save) before DataStore works in Studio (ProfileService then loads real profiles).
 6. If `list_roblox_studios` returns `[]`, restart Studio with the place file and wait ~1 min. Never
    start a second `mcp.bat` (probe scripts etc.): only one proxy holds the Studio connection, and the
    second one steals it. Studio follows the Windows system proxy (Happ VPN, 127.0.0.1:10809); when

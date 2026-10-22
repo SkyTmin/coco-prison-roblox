@@ -1,7 +1,7 @@
 --!strict
 -- Spawn top boards [владелец 22.10, скриншоты; клиент prison.classic.board.top.*]: Топ по крысам (чистые),
 -- по деньгам, по уровню, по блокам (чистые). One OrderedDataStore per board for the whole game: each player's
--- values are written every WRITE_EVERY seconds when they changed, and when they leave; the top TOP_N of each
+-- values are written every WRITE_EVERY seconds when they changed, when they leave and on shutdown; the top TOP_N of each
 -- board is read every READ_EVERY seconds. Names (display name, nickname, faction) live in TopNames_v1, written
 -- when they change. Every PUBLISH_EVERY seconds the stored top, overlaid with the live values of the players
 -- on this server, goes to ReplicatedStorage.Tops.<board> (a JSON StringValue) for src/client/TopBoards.luau.
@@ -230,6 +230,21 @@ function LeaderboardService.Start()
 			writePlayer(player)
 			written[player], metaWritten[player] = nil, nil
 		end)
+	end)
+	-- a shutdown may close the server before the PlayerRemoving writes finish: wait for them (Roblox gives ~30 s)
+	game:BindToClose(function()
+		local pending = 0
+		for _, player in ipairs(Players:GetPlayers()) do
+			pending += 1
+			task.spawn(function()
+				writePlayer(player)
+				pending -= 1
+			end)
+		end
+		local deadline = os.clock() + 20
+		while pending > 0 and os.clock() < deadline do
+			task.wait(0.1)
+		end
 	end)
 	task.spawn(function()
 		task.wait(5)
