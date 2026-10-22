@@ -12,7 +12,7 @@
 param(
 	[Parameter(Mandatory = $true, Position = 0)][string]$Task,
 	[switch]$Edit,
-	[double]$Budget = 1.0,
+	[double]$Budget = 50,
 	[string]$Model = "claude-opus-5-5"
 )
 $ErrorActionPreference = "Stop"
