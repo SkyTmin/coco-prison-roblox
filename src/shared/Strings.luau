@@ -813,6 +813,13 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Acheté : %s",
 	},
 	-- factions [клиент: prison.classic.fraction.*]
+	mob_rat = { ru = "Крыса", en = "Rat", es = "Rata", fr = "Rat" },
+	mob_killed = {
+		ru = "%s убита: +%s $",
+		en = "%s killed: +%s $",
+		es = "%s eliminada: +%s $",
+		fr = "%s tué : +%s $",
+	},
 	faction_white = { ru = "Славяне", en = "Slavs", es = "Eslavos", fr = "Slaves" },
 	faction_black = { ru = "Афро", en = "Afro", es = "Afro", fr = "Afro" },
 	faction_yellow = { ru = "Азиаты", en = "Asians", es = "Asiáticos", fr = "Asiatiques" },

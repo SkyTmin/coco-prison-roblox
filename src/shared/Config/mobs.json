@@ -12,7 +12,15 @@
         "fraction_base",
         "ghetto"
       ],
-      "_source": "[владелец] 20 HP"
+      "_source": "[владелец] 20 HP",
+      "respawnSeconds": 120,
+      "_respawn": "[владелец 22.10] убитая крыса появляется снова через 2 минуты",
+      "walkSpeed": 13,
+      "aggroRange": 18,
+      "leashRange": 30,
+      "attackRange": 4.5,
+      "attackCooldown": 1.2,
+      "_ai": "[решение] бродит у точки, бежит к игроку ближе 18, кусает раз в 1,2 с, дальше 30 от точки — домой"
     },
     "zombie": {
       "name": "Зомби",

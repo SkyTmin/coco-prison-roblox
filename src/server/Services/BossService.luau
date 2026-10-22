@@ -915,8 +915,13 @@ local function reward(boss: Boss, lastHit: number?)
 		local share = if total > 0 then dealt / total else 0
 		toast(player, "boss_killed", bossName(boss, player), table.concat(top, "  "))
 		if share >= rules.minDamageShare then
-			local amount = math.floor(
-				bank * share * (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
+			-- [меню] the card says «0–350 $»: a share of the bank, the last hit +20 %, never above the bank
+			-- (a solo kill used to pay 350 × 1.2 = 420)
+			local amount = math.min(
+				bank,
+				math.floor(
+					bank * share * (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
+				)
 			)
 			ProfileService.Mutate(player, function(p)
 				p.coins += amount

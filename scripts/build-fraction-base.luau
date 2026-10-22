@@ -381,7 +381,8 @@ meadow.Parent = root
 local RING = PLAZA + 18
 for k = 0, 71 do
 	local a0, a1 = k / 72 * math.pi * 2, (k + 1) / 72 * math.pi * 2
-	strip("RingPath", math.cos(a0) * RING, math.sin(a0) * RING, math.cos(a1) * RING, math.sin(a1) * RING, 7, 0, 0.3, "px_gravel", nil, meadow)
+	-- neighbouring segments overlap at the joints: alternate their height so they never share a face
+	strip("RingPath", math.cos(a0) * RING, math.sin(a0) * RING, math.cos(a1) * RING, math.sin(a1) * RING, 7, 0, if k % 2 == 0 then 0.28 else 0.36, "px_gravel", nil, meadow)
 end
 local function onTrail(x, z, pad)
 	return math.abs(math.abs(x) - math.abs(z)) < PASS / math.sqrt(2) * 2 + (pad or 0)
@@ -432,7 +433,7 @@ local TRAIL_W = 22
 for _, d in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
 	local from = (PLAZA - 4) / math.sqrt(2)
 	local to = OFF + 30
-	strip("Trail", d[1] * from, d[2] * from, d[1] * to, d[2] * to, TRAIL_W, 0, 0.35, "px_stone_bricks", nil, trails)
+	strip("Trail", d[1] * from, d[2] * from, d[1] * to, d[2] * to, TRAIL_W, 0, 0.45, "px_stone_bricks", nil, trails)
 	for _, side in ipairs({ -1, 1 }) do
 		-- curbs and lanterns on both sides, offset across the diagonal
 		local nx, nz = -d[2] * side / math.sqrt(2), d[1] * side / math.sqrt(2)
@@ -447,6 +448,31 @@ for _, d in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
 			glowPart("TrailLantern", Vector3.new(1.6, 1.6, 1.6), at(lx, 9.8, lz), LAMP, 26, 1.3, trails)
 		end
 	end
+end
+
+-- ---------------------------------------------------------------- rats (MobService): MobSpawn points
+-- [владелец 22.10: «3 крысы по каждой тропинке и крысы вокруг круга босса, через 2 минуты появляются снова»]
+local mobs = Instance.new("Folder")
+mobs.Name = "MobSpawns"
+mobs.Parent = root
+local function mobSpawn(x, z, radius)
+	local m = decorOnly(mk("MobSpawn", Vector3.new(2, 1, 2), at(x, 0.5, z), STONE, STONE, mobs))
+	m.Transparency = 1
+	m:SetAttribute("MobId", "rat")
+	m:SetAttribute("LocationId", "fraction_base")
+	m:SetAttribute("Wander", radius)
+	CollectionService:AddTag(m, "MobSpawn")
+end
+for _, d in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+	local from, to = (PLAZA + 8) / math.sqrt(2), OFF + 20
+	for _, t in ipairs({ 0.25, 0.55, 0.85 }) do
+		local r = from + (to - from) * t
+		mobSpawn(d[1] * r, d[2] * r, 8)
+	end
+end
+for k = 0, 7 do
+	local a = (k + 0.5) / 8 * math.pi * 2 -- 22.5° off the trails
+	mobSpawn(math.cos(a) * (PLAZA + 30), math.sin(a) * (PLAZA + 30), 12)
 end
 
 -- ---------------------------------------------------------------- the central square: the graveyard of Зомбарь
@@ -644,8 +670,9 @@ local function indoor(frame, size, parent)
 	model.Parent = parent
 	local v = decorOnly(mk("IndoorVolume", size, frame * CFrame.new(0, size.Y / 2, 0), Enum.Material.SmoothPlastic, STONE, model))
 	v.Transparency = 1
-	v:SetAttribute("Ambient", Color3.fromRGB(170, 160, 150))
-	v:SetAttribute("Exposure", 0.15)
+	-- [владелец 22.10: «внутри очень светло, бьёт по глазам»] a soft indoor light, no extra exposure
+	v:SetAttribute("Ambient", Color3.fromRGB(105, 100, 96))
+	v:SetAttribute("Exposure", -0.1)
 	CollectionService:AddTag(v, "IndoorLighting")
 end
 local function banner(cf, cloth, accent, parent, height)
@@ -660,9 +687,9 @@ local function banner(cf, cloth, accent, parent, height)
 end
 -- a flat rug with a border (frame space)
 local function rug(frame, x, z, w, d, y, mat, color, border, parent)
-	mk("Rug", Vector3.new(w, 0.1, d), frame * CFrame.new(x, y + 0.05, z), mat, color, parent)
+	mk("Rug", Vector3.new(w, 0.16, d), frame * CFrame.new(x, y + 0.08, z), mat, color, parent)
 	if border then
-		mk("RugBorder", Vector3.new(w + 0.8, 0.08, d + 0.8), frame * CFrame.new(x, y + 0.04, z), Enum.Material.Fabric, border, parent)
+		mk("RugBorder", Vector3.new(w + 0.8, 0.06, d + 0.8), frame * CFrame.new(x, y + 0.03, z), Enum.Material.Fabric, border, parent)
 	end
 end
 
@@ -736,26 +763,17 @@ local function miniMine(cx, cz, faction, parent)
 	claim(cx, cz, w / 2 + 12)
 end
 local function spawnPad(x, z, faceX, faceZ, faction, cloth, parent)
-	box("SpawnPad", x - 7, 0, z - 7, x + 7, 0.5, z + 7, "px_smooth_stone", nil, parent)
-	box("SpawnInlay", x - 5, 0.5, z - 5, x + 5, 0.6, z + 5, cloth, nil, parent)
-	local p = mk("LocationSpawn_fraction_base_" .. faction, Vector3.new(4, 1, 4), CFrame.lookAt(world(x, 0.6, z), world(faceX, 0.6, faceZ)), "px_stone_bricks", nil, parent)
+	box("SpawnPad", x - 7, 0, z - 7, x + 7, 0.8, z + 7, "px_smooth_stone", nil, parent)
+	box("SpawnInlay", x - 5, 0.8, z - 5, x + 5, 0.95, z + 5, cloth, nil, parent)
+	local p = mk("LocationSpawn_fraction_base_" .. faction, Vector3.new(4, 1, 4), CFrame.lookAt(world(x, 1.05, z), world(faceX, 1.05, faceZ)), "px_stone_bricks", nil, parent)
 	p:SetAttribute("LocationId", "fraction_base")
 	p:SetAttribute("Faction", faction)
 	CollectionService:AddTag(p, "LocationSpawn")
 	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-		box("SpawnPost", x + c[1] * 6.5 - 0.5, 0.5, z + c[2] * 6.5 - 0.5, x + c[1] * 6.5 + 0.5, 4, z + c[2] * 6.5 + 0.5, "px_stone_bricks", nil, parent)
+		box("SpawnPost", x + c[1] * 6.5 - 0.5, 0.8, z + c[2] * 6.5 - 0.5, x + c[1] * 6.5 + 0.5, 4, z + c[2] * 6.5 + 0.5, "px_stone_bricks", nil, parent)
 		glowPart("SpawnLight", Vector3.new(1, 1, 1), at(x + c[1] * 6.5, 4.5, z + c[2] * 6.5), LAMP, 16, 0.9, parent)
 	end
 	claim(x, z, 13)
-	-- rats come out around the faction spawns [вики: «крысы на точках появления»] (for the future MobService)
-	for k = 0, 2 do
-		local a = k * 2.1 + 0.7
-		local m = decorOnly(mk("MobSpawn", Vector3.new(2, 1, 2), at(x + math.cos(a) * 26, 0.5, z + math.sin(a) * 26), STONE, STONE, parent))
-		m.Transparency = 1
-		m:SetAttribute("MobId", "rat")
-		m:SetAttribute("LocationId", "fraction_base")
-		CollectionService:AddTag(m, "MobSpawn")
-	end
 	return p
 end
 -- the monument by the trail: a tall pole with the faction's banners and its name
@@ -994,7 +1012,7 @@ local function slavs(sx, sz, parent)
 	mk("Stove", Vector3.new(8, 8, 7), rel(stoveX, F + 4, D / 2 - 6), "px_white_wool", Color3.fromRGB(245, 240, 230), parent)
 	mk("StoveTiles", Vector3.new(8.2, 0.8, 7.2), rel(stoveX, F + 2.5, D / 2 - 6), "px_brown_wool", Color3.fromRGB(80, 120, 200), parent)
 	mk("StoveMouth", Vector3.new(3, 2.4, 0.3), rel(stoveX, F + 2.8, D / 2 - 9.6), Enum.Material.SmoothPlastic, Color3.fromRGB(30, 25, 25), parent)
-	glowPart("StoveFire", Vector3.new(2.2, 1, 0.2), rel(stoveX, F + 2.4, D / 2 - 9.5), Color3.fromRGB(255, 140, 50), 14, 1.2, parent)
+	glowPart("StoveFire", Vector3.new(2.2, 1, 0.2), rel(stoveX, F + 2.4, D / 2 - 9.5), Color3.fromRGB(255, 140, 50), 12, 0.6, parent)
 	mk("StoveChimney", Vector3.new(3, 8, 3), rel(stoveX, F + 12, D / 2 - 6), "px_white_wool", Color3.fromRGB(245, 240, 230), parent)
 	for k = 0, 2 do
 		logX("Firewood", 4, 1, rel(stoveX + 6, F + 0.5 + k * 1, D / 2 - 4) * CFrame.Angles(0, math.pi / 2, 0), "px_oak_log", nil, parent)
@@ -1031,9 +1049,9 @@ local function slavs(sx, sz, parent)
 		decorOnly(mk("ChandelierChain", Vector3.new(0.2, 3, 0.2), rel(0, F + 14.8, z), IRON, IRON, parent))
 		for k = 0, 5 do
 			local ca = k * math.pi / 3
-			glowPart("Candle", Vector3.new(0.4, 0.8, 0.4), rel(math.cos(ca) * 2.6, F + 13.7, z + math.sin(ca) * 2.6), Color3.fromRGB(255, 200, 120), 0, 0, parent)
+			decorOnly(mk("Candle", Vector3.new(0.4, 0.8, 0.4), rel(math.cos(ca) * 2.6, F + 13.7, z + math.sin(ca) * 2.6), Enum.Material.SmoothPlastic, Color3.fromRGB(245, 235, 210), parent))
 		end
-		light(ring, LAMP, 34, 1.6)
+		light(ring, LAMP, 24, 0.7)
 	end
 	banner(rel(0, F + 2, D / 2 - 1.4), "px_white_wool", "px_brown_wool", parent, 10)
 	indoor(frame, Vector3.new(W, H + 2, D), parent)
@@ -1181,7 +1199,7 @@ local function afro(sx, sz, parent)
 	local F = 1.9
 	storage(frame, "black", 40, 40, F, parent)
 	cyl("FireRing", 3.4, 0.8, rel(0, F, -2), "px_cobblestone", nil, parent)
-	local embers = glowPart("Embers", Vector3.new(4.4, 0.4, 4.4), rel(0, F + 0.8, -2), Color3.fromRGB(255, 120, 40), 30, 1.6, parent)
+	local embers = glowPart("Embers", Vector3.new(4.4, 0.4, 4.4), rel(0, F + 0.8, -2), Color3.fromRGB(255, 120, 40), 22, 0.9, parent)
 	local fire = Instance.new("Fire")
 	fire.Size, fire.Heat = 5, 9
 	fire.Parent = embers
@@ -1191,7 +1209,7 @@ local function afro(sx, sz, parent)
 		local a = k * math.pi / 3 + 0.3
 		local mx, mz = math.cos(a) * 8, -2 + math.sin(a) * 8
 		mk("WovenMat", Vector3.new(4, 0.12, 3), rel(mx, F + 0.06, mz) * CFrame.Angles(0, -a, 0), Enum.Material.Fabric, MAT_COLORS[k % 4 + 1], parent)
-		mk("MatStripe", Vector3.new(4.02, 0.14, 0.6), rel(mx, F + 0.07, mz) * CFrame.Angles(0, -a, 0), Enum.Material.Fabric, MAT_COLORS[(k + 2) % 4 + 1], parent)
+		mk("MatStripe", Vector3.new(4.02, 0.24, 0.6), rel(mx, F + 0.12, mz) * CFrame.Angles(0, -a, 0), Enum.Material.Fabric, MAT_COLORS[(k + 2) % 4 + 1], parent)
 		mk("Cushion", Vector3.new(1.8, 0.8, 1.8), rel(mx * 1.15, F + 0.5, -2 + (mz + 2) * 1.15), Enum.Material.Fabric, MAT_COLORS[(k + 1) % 4 + 1], parent)
 	end
 	for _, d in ipairs({ { -6, 10 }, { 6, 10 }, { 0, 12 } }) do
@@ -1348,9 +1366,9 @@ local function asians(sx, sz, parent)
 				mk("PaperWall", Vector3.new(0.6, h - 4, d - 1.6), rel(s * w / 2, y0 + 2 + (h - 4) / 2, 0), "px_white_wool", Color3.fromRGB(250, 245, 230), parent)
 				mk("WallPanel", Vector3.new(0.8, 2, d - 1.6), rel(s * w / 2, y0 + 1, 0), "px_dark_oak_planks", nil, parent)
 				for lz = -d / 2 + 3, d / 2 - 3, 3 do
-					decorOnly(mk("Lattice", Vector3.new(0.7, h - 4, 0.25), rel(s * (w / 2 + 0.05), y0 + 2 + (h - 4) / 2, lz), "px_dark_oak_planks", nil, parent))
+					decorOnly(mk("Lattice", Vector3.new(0.3, h - 4, 0.25), rel(s * (w / 2 + 0.45), y0 + 2 + (h - 4) / 2, lz), "px_dark_oak_planks", nil, parent))
 				end
-				decorOnly(mk("LatticeBar", Vector3.new(0.7, 0.25, d - 1.6), rel(s * (w / 2 + 0.05), y0 + 2 + (h - 4) * 0.5, 0), "px_dark_oak_planks", nil, parent))
+				decorOnly(mk("LatticeBar", Vector3.new(0.3, 0.25, d - 1.6), rel(s * (w / 2 + 0.45), y0 + 2 + (h - 4) * 0.5, 0), "px_dark_oak_planks", nil, parent))
 			end
 			mk("PaperWall", Vector3.new(w - 1.6, h - 4, 0.6), rel(0, y0 + 2 + (h - 4) / 2, d / 2), "px_white_wool", Color3.fromRGB(250, 245, 230), parent)
 			mk("WallPanel", Vector3.new(w - 1.6, 2, 0.8), rel(0, y0 + 1, d / 2), "px_dark_oak_planks", nil, parent)
@@ -1360,7 +1378,7 @@ local function asians(sx, sz, parent)
 			end
 		end
 		mk("Beam", Vector3.new(w + 2, 1.4, d + 2), rel(0, y0 + h + 0.7, 0), Enum.Material.SmoothPlastic, RED, parent)
-		mk("BeamGold", Vector3.new(w + 2.1, 0.3, d + 2.1), rel(0, y0 + h + 0.2, 0), "px_gold_block", nil, parent)
+		mk("BeamGold", Vector3.new(w + 2.6, 0.3, d + 2.6), rel(0, y0 + h + 0.2, 0), "px_gold_block", nil, parent)
 		local layers = 4
 		for k = 0, layers - 1 do
 			local ow, od = w + roofOver * 2 - k * (roofOver * 0.9), d + roofOver * 2 - k * (roofOver * 0.9)
@@ -1392,8 +1410,8 @@ local function asians(sx, sz, parent)
 	-- tatami mats in dark borders
 	for i = -2, 2 do
 		for j = -2, 1 do
-			mk("Tatami", Vector3.new(7.6, 0.12, 3.6), rel(i * 8, F + 0.06, -6 + j * 4), "px_hay", Color3.fromRGB(215, 220, 150), parent)
-			mk("TatamiEdge", Vector3.new(7.8, 0.1, 3.8), rel(i * 8, F + 0.05, -6 + j * 4), Enum.Material.Fabric, Color3.fromRGB(40, 50, 40), parent)
+			mk("Tatami", Vector3.new(7.6, 0.18, 3.6), rel(i * 8, F + 0.09, -6 + j * 4), "px_hay", Color3.fromRGB(215, 220, 150), parent)
+			mk("TatamiEdge", Vector3.new(7.8, 0.06, 3.8), rel(i * 8, F + 0.03, -6 + j * 4), Enum.Material.Fabric, Color3.fromRGB(40, 50, 40), parent)
 		end
 	end
 	-- low tables with cushions and tea sets
@@ -1461,8 +1479,8 @@ local function asians(sx, sz, parent)
 	-- paper lanterns over the hall
 	for _, p in ipairs({ { -14, -10 }, { 14, -10 }, { -14, 8 }, { 14, 8 }, { 0, -12 } }) do
 		decorOnly(mk("LanternCord", Vector3.new(0.15, 2, 0.15), rel(p[1], F + 13, p[2]), Enum.Material.Fabric, DARK, parent))
-		local l = decorOnly(cyl("HallLantern", 1.3, 2.6, rel(p[1], F + 9.4, p[2]), Enum.Material.Neon, Color3.fromRGB(255, 200, 70), parent))
-		light(l, Color3.fromRGB(255, 205, 110), 30, 1.4)
+		local l = decorOnly(cyl("HallLantern", 1.3, 2.6, rel(p[1], F + 9.4, p[2]), Enum.Material.SmoothPlastic, Color3.fromRGB(235, 175, 80), parent))
+		light(l, Color3.fromRGB(255, 200, 120), 20, 0.6)
 	end
 	banner(rel(14, F + 1.2, D / 2 - 1.4), "px_yellow_wool", "px_gray_wool", parent, 10)
 	banner(rel(-14, F + 1.2, D / 2 - 1.4), "px_yellow_wool", "px_gray_wool", parent, 10)
@@ -1600,31 +1618,33 @@ local function latinos(sx, sz, parent)
 		local y0 = k * TH
 		if k < 2 then
 			-- the two lowest tiers are hollow: they hold the hall (walls only, the door in the middle)
-			mk("Tier", Vector3.new(w, TH, 3), rel(0, y0 + TH / 2, d / 2 - 1.5), mat, nil, parent)
+			-- (front and back walls fit between the side walls: overlapping walls flickered at the corners)
+			mk("Tier", Vector3.new(w - 6, TH, 3), rel(0, y0 + TH / 2, d / 2 - 1.5), mat, nil, parent)
 			for _, s in ipairs({ -1, 1 }) do
 				mk("Tier", Vector3.new(3, TH, d), rel(s * (w / 2 - 1.5), y0 + TH / 2, 0), mat, nil, parent)
-				mk("Tier", Vector3.new(w / 2 - 4.5, TH, 3), rel(s * (w / 4 + 2.25), y0 + TH / 2, -d / 2 + 1.5), mat, nil, parent)
+				mk("Tier", Vector3.new(w / 2 - 7.5, TH, 3), rel(s * (4.5 + (w / 2 - 7.5) / 2), y0 + TH / 2, -d / 2 + 1.5), mat, nil, parent)
 			end
 			if k == 1 then
 				mk("Tier", Vector3.new(9, 3, 3), rel(0, y0 + TH - 1.5, -d / 2 + 1.5), mat, nil, parent)
 			end
-			mk("TierBand", Vector3.new(w + 0.4, 0.8, 0.6), rel(0, y0 + TH - 0.4, d / 2), "px_stone_bricks", band, parent)
+			-- the bands stop just under the tier's top face and never overlap each other (no shared faces)
+			mk("TierBand", Vector3.new(w - 0.8, 0.8, 0.6), rel(0, y0 + TH - 0.5, d / 2), "px_stone_bricks", band, parent)
 			for _, s in ipairs({ -1, 1 }) do
-				mk("TierBand", Vector3.new(0.6, 0.8, d + 0.4), rel(s * w / 2, y0 + TH - 0.4, 0), "px_stone_bricks", band, parent)
-				mk("TierBand", Vector3.new(w / 2 - 4.5, 0.8, 0.6), rel(s * (w / 4 + 2.25), y0 + TH - 0.4, -d / 2), "px_stone_bricks", band, parent)
+				mk("TierBand", Vector3.new(0.6, 0.8, d + 0.4), rel(s * w / 2, y0 + TH - 0.5, 0), "px_stone_bricks", band, parent)
+				mk("TierBand", Vector3.new(w / 2 - 7.5, 0.8, 0.6), rel(s * (4.5 + (w / 2 - 7.5) / 2), y0 + TH - 0.5, -d / 2), "px_stone_bricks", band, parent)
 			end
 		else
 			mk("Tier", Vector3.new(w, TH, d), rel(0, y0 + TH / 2, 0), mat, nil, parent)
-			mk("TierBand", Vector3.new(w + 0.4, 0.8, d + 0.4), rel(0, y0 + TH - 0.4, 0), "px_stone_bricks", band, parent)
+			mk("TierBand", Vector3.new(w + 0.4, 0.8, d + 0.4), rel(0, y0 + TH - 0.5, 0), "px_stone_bricks", band, parent)
 		end
 		-- carved glyph blocks along the front of every tier
 		for g = -2, 2 do
 			if math.abs(g) >= 1 or k >= 2 then
-				mk("Glyph", Vector3.new(1.6, 1.6, 0.3), rel(g * (w / 6), y0 + TH / 2, -d / 2 - 0.15), Enum.Material.SmoothPlastic, Color3.fromRGB(60, 110, 70), parent)
+				mk("Glyph", Vector3.new(1.6, 1.6, 0.3), rel(g * (w / 6), y0 + TH / 2 - 0.3, -d / 2 - 0.2), Enum.Material.SmoothPlastic, Color3.fromRGB(60, 110, 70), parent)
 			end
 		end
 	end
-	mk("HallCeiling", Vector3.new(W - 8, 1, D - 8), rel(0, 2 * TH + 0.5, 0), "px_sandstone", nil, parent)
+	mk("HallCeiling", Vector3.new(W - 8, 1, D - 8), rel(0, 2 * TH + 0.4, 0), "px_sandstone", nil, parent)
 	mk("HallFloor", Vector3.new(W - 6, 0.4, D - 6), rel(0, 0.2, 0), "px_smooth_stone", Color3.fromRGB(230, 210, 170), parent)
 	-- two solid staircases up the front face, one on each side of the door, to the top tier
 	local steps = TIERS * TH
@@ -1632,7 +1652,7 @@ local function latinos(sx, sz, parent)
 	for _, s in ipairs({ -1, 1 }) do
 		for k = 0, steps - 1 do
 			local z = zFrom + k * (zTo - zFrom) / steps
-			mk("Stair", Vector3.new(5, k + 1, 1.4), rel(s * 8.5, (k + 1) / 2, z), "px_sandstone", nil, parent)
+			mk("Stair", Vector3.new(5, k + 1.07, 1.4), rel(s * 8.5, (k + 1.07) / 2, z), "px_sandstone", nil, parent)
 		end
 		mk("SerpentHead", Vector3.new(3.6, 3.6, 5), rel(s * 8.5, 1.8, zFrom - 3), "px_mossy_stone_bricks", nil, parent)
 		mk("SerpentJaw", Vector3.new(3.8, 1, 1.6), rel(s * 8.5, 0.7, zFrom - 6), "px_mossy_stone_bricks", nil, parent)
@@ -1675,7 +1695,7 @@ local function latinos(sx, sz, parent)
 		local a = k * math.pi / 6
 		mk("SunRay", Vector3.new(0.8, 2.2, 0.5), rel(math.cos(a) * 4.6, F + 8 + math.sin(a) * 4.6, D / 2 - 13.6) * CFrame.Angles(0, 0, a - math.pi / 2), "px_gold_block", nil, parent)
 	end
-	light(sun, Color3.fromRGB(255, 210, 120), 24, 1.2)
+	light(sun, Color3.fromRGB(255, 210, 120), 12, 0.5)
 	-- treasure: gold blocks round the altar
 	for _ = 1, 14 do
 		local x, z = rng:NextNumber(-7, 7), D / 2 - 16 + rng:NextNumber(-5, 3)
@@ -1691,7 +1711,7 @@ local function latinos(sx, sz, parent)
 			local fire = Instance.new("Fire")
 			fire.Size, fire.Heat = 3, 6
 			fire.Parent = b
-			light(b, Color3.fromRGB(255, 160, 80), 24, 1.3)
+			light(b, Color3.fromRGB(255, 160, 80), 18, 0.7)
 		end
 	end
 	-- painted murals on the side walls above the chests
@@ -1859,9 +1879,9 @@ for _, f in ipairs(FACTIONS) do
 	)
 	claim(sx * MINE_A, sz * 122, 6)
 	-- the paths: the trail continues to the spawn, the spawn to the hall door, a side path to the buyer
-	strip("Path", sx * 10, sz * 10, sx * SPAWN_A, sz * SPAWN_B, 12, 0, 0.35, "px_stone_bricks", Color3.fromRGB(230, 225, 215), district)
-	strip("Path", sx * SPAWN_A, sz * SPAWN_B, sx * SPAWN_A, sz * (HALL_B - 26), 8, 0, 0.36, "px_gravel", nil, district)
-	strip("Path", sx * SPAWN_A, sz * SPAWN_B, sx * MINE_A, sz * 125, 6, 0, 0.34, "px_gravel", nil, district)
+	strip("Path", sx * 10, sz * 10, sx * SPAWN_A, sz * SPAWN_B, 12, 0, 0.62, "px_stone_bricks", Color3.fromRGB(230, 225, 215), district)
+	strip("Path", sx * SPAWN_A, sz * SPAWN_B, sx * SPAWN_A, sz * (HALL_B - 26), 8, 0, 0.55, "px_gravel", nil, district)
+	strip("Path", sx * SPAWN_A, sz * SPAWN_B, sx * MINE_A, sz * 125, 6, 0, 0.5, "px_gravel", nil, district)
 	f.build(sx, sz, district)
 	dress(sx, sz, district, f.leaf, f.grass)
 	-- banners along the main path

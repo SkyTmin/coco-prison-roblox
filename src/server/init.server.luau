@@ -72,6 +72,8 @@ local ItemDropService = require(script.Services.ItemDropService)
 local BossService = require(script.Services.BossService)
 local FactionService = require(script.Services.FactionService)
 local FactionStorageService = require(script.Services.FactionStorageService)
+local MobService = require(script.Services.MobService)
+local NameplateService = require(script.Services.NameplateService)
 
 HungerService.Start()
 DeathService.Start()
@@ -96,6 +98,8 @@ CreativeService.Start()
 ItemDropService.Start()
 BossService.Start()
 FactionStorageService.Start()
+MobService.Start()
+NameplateService.Start()
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn

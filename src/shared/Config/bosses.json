@@ -556,7 +556,7 @@
       "locationId": "fraction_base",
       "nameEn": "Zombar",
       "fight": {
-        "meleeDamage": 0.4,
+        "meleeDamage": 0.8,
         "meleeRange": 7,
         "meleeCooldown": 2.4,
         "walkSpeed": 8,
@@ -570,12 +570,12 @@
           "length": 30,
           "width": 6,
           "speed": 45,
-          "damage": 0.8
+          "damage": 1.6
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 0.8,
+          "damage": 1.6,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -584,7 +584,7 @@
           "speed": 40,
           "maxDistance": 36,
           "width": 6,
-          "damage": 0.8,
+          "damage": 1.6,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
