@@ -39,6 +39,7 @@ function IndoorLighting.Start()
 		Density: number?,
 		Color: Color3?,
 		Decay: Color3?,
+		Haze: number?,
 	}? =
 		nil
 	local current: BasePart? = nil
@@ -59,6 +60,7 @@ function IndoorLighting.Start()
 					Density = if air then air.Density else nil,
 					Color = if air then air.Color else nil,
 					Decay = if air then air.Decay else nil,
+					Haze = if air then air.Haze else nil,
 				}
 			end
 			local ambient = volume:GetAttribute("Ambient")
@@ -82,6 +84,8 @@ function IndoorLighting.Start()
 						Decay = if typeof(decay) == "Color3"
 							then decay
 							else outdoor.Decay or air.Decay,
+						-- the outdoor haze glows in the sky colour; indoors it washed everything milky white
+						Haze = 0,
 					})
 					:Play()
 			end
@@ -95,6 +99,7 @@ function IndoorLighting.Start()
 					Density = outdoor.Density,
 					Color = outdoor.Color or air.Color,
 					Decay = outdoor.Decay or air.Decay,
+					Haze = outdoor.Haze or air.Haze,
 				}):Play()
 			end
 			outdoor = nil

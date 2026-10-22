@@ -27,6 +27,8 @@ if old then
 end
 local root = Instance.new("Folder")
 root.Name = "Pyramid"
+root:SetAttribute("LocationId", "pyramid")
+root:SetAttribute("SilentSteps", true) -- [владелец 23.10] no step sounds here (Footsteps)
 root.Parent = workspace
 
 local BX, BZ = 4400, 0
@@ -77,10 +79,13 @@ local function box(name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
 	end
 	return p
 end
+-- [владелец 23.10: «освещение ужасное, слишком яркое, что не видно»] dozens of warm lights on light stone
+-- washed the whole place out; every light is scaled down here (checked in Play)
+local LIGHT_POWER, LIGHT_RANGE = 0.35, 0.6
 local function light(p, range, brightness, color)
 	local l = Instance.new("PointLight")
-	l.Range = range
-	l.Brightness = brightness
+	l.Range = range * LIGHT_RANGE
+	l.Brightness = brightness * LIGHT_POWER
 	l.Color = color
 	l.Shadows = false
 	l.Parent = p

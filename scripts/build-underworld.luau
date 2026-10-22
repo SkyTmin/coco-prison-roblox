@@ -33,6 +33,8 @@ if old then
 end
 local root = Instance.new("Folder")
 root.Name = "Underworld"
+root:SetAttribute("LocationId", "underworld")
+root:SetAttribute("SilentSteps", true) -- [владелец 23.10] no step sounds here (Footsteps)
 root.Parent = workspace
 
 local BX, BZ = 3400, 0
@@ -83,10 +85,13 @@ local function box(name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
 	end
 	return p
 end
+-- [владелец 23.10: «освещение ужасное, слишком яркое, что не видно»] dozens of warm lights on light stone
+-- washed the whole place out; every light is scaled down here (checked in Play)
+local LIGHT_POWER, LIGHT_RANGE = 0.4, 0.65
 local function light(p, range, brightness, color)
 	local l = Instance.new("PointLight")
-	l.Range = range
-	l.Brightness = brightness
+	l.Range = range * LIGHT_RANGE
+	l.Brightness = brightness * LIGHT_POWER
 	l.Color = color
 	l.Shadows = false
 	l.Parent = p
@@ -1630,9 +1635,9 @@ air.Parent = root
 local volume = part("IndoorVolume", Vector3.new(2 * 288, 240, 2 * 288), at(0, 80, 0), STONE, nil, air)
 volume.Transparency = 1
 decor(volume)
-volume:SetAttribute("Ambient", Color3.fromRGB(150, 96, 86))
-volume:SetAttribute("Exposure", 0.15)
-volume:SetAttribute("Haze", 0.38)
+volume:SetAttribute("Ambient", Color3.fromRGB(115, 76, 70))
+volume:SetAttribute("Exposure", -0.15)
+volume:SetAttribute("Haze", 0.25) -- [владелец 23.10: «слишком ярко, не видно»]
 volume:SetAttribute("AtmosphereColor", Color3.fromRGB(150, 54, 36))
 volume:SetAttribute("AtmosphereDecay", Color3.fromRGB(110, 30, 18))
 CollectionService:AddTag(volume, "IndoorLighting")

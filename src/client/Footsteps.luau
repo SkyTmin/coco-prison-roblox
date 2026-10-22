@@ -66,7 +66,31 @@ local function stepSound(kind: string): string
 	return if entry and entry.step then entry.step else "stone_hit"
 end
 
-local function kindUnder(character: Model, root: BasePart, humanoid: Humanoid): string
+-- [владелец 23.10: «выключи этот неприятный звук, когда ходишь» — Преисподняя, Пирамида] a location root folder
+-- with the attribute SilentSteps (and LocationId) mutes the steps on its map and on the blocks of its mine
+local function silent(part: Instance): boolean
+	local node: Instance? = part
+	while node and node ~= workspace do
+		if node:GetAttribute("SilentSteps") == true then
+			return true
+		end
+		node = node.Parent
+	end
+	local mineId = part:GetAttribute("MineId")
+	if typeof(mineId) == "string" then
+		for _, child in ipairs(workspace:GetChildren()) do
+			if
+				child:GetAttribute("SilentSteps") == true
+				and child:GetAttribute("LocationId") == mineId
+			then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function kindUnder(character: Model, root: BasePart, humanoid: Humanoid): string?
 	if humanoid:GetState() == Enum.HumanoidStateType.Swimming then
 		return "water"
 	end
@@ -76,6 +100,9 @@ local function kindUnder(character: Model, root: BasePart, humanoid: Humanoid): 
 		return "stone"
 	end
 	local part = hit.Instance
+	if silent(part) then
+		return nil
+	end
 	local blockId = part:GetAttribute("Block")
 	if typeof(blockId) == "string" then
 		local map = Config.effects and Config.effects.sounds and Config.effects.sounds.blockMaterial
@@ -128,7 +155,10 @@ function Footsteps.Start()
 			walked[character] = (walked[character] or 0) + flat
 			if walked[character] >= STRIDE then
 				walked[character] = 0
-				Sfx.play(stepSound(kindUnder(character, root, humanoid)), root, VOLUME)
+				local kind = kindUnder(character, root, humanoid)
+				if kind then
+					Sfx.play(stepSound(kind), root, VOLUME)
+				end
 			end
 		end
 		for character in pairs(last) do
