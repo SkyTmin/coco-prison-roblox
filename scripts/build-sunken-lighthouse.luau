@@ -5,10 +5,10 @@
 -- [владелец 23.10: «следующий этаж с такой же мощностью»] An archipelago in real Terrain water (you can swim):
 --   * the main island: the mine (drained ocean ruins of prismarine) with the arrival and the buyer by its rim
 --     [владелец 23.10: старт и скупщик рядом с шахтой], a beach, a pier with rowboats, paths, lamps, benches;
---   * the headland with the old lighthouse — a round tower of white and red bands with algae on the lower half, a
---     door, windows, a gallery and a lantern room with a beam; a spiral stair inside goes UP to the gallery and
---     DOWN through a shaft to the sanctum of Poseidon on the sea floor — the arena (a prismarine hall with a glass
---     roof, the sea above it, pillars, sea lanterns, the throne with a giant trident);
+--   * v2 [владелец 23.10: «узко, люди будут толпиться, это PvP», 2/10]: the old lighthouse rises straight out of a
+--     wide shallow lagoon, leaning a little, algae up to half its height, a broken gallery, the lantern and its beam;
+--     at its foot the flooded temple of Poseidon — a plaza 112 studs across under ankle-deep water, a ring of broken
+--     columns, a statue with a trident: the arena, open from every side, three 18-stud causeways, the lagoon wadeable;
 --   * a fishing village on stilts on the east island (a measured plank bridge to it), a shipwreck on the western
 --     rocks, a coral reef in the south-west shallows, kelp, ocean ruins, sea stacks round the edge;
 --   * every name at its place; edges unclimbable (sea stacks + invisible walls); few soft lights.
@@ -171,31 +171,45 @@ local function emitter(p, props)
 end
 
 -- ================================================================ the plan
-local PIT = { x = 0, z = 40, size = 32, depth = 12 } -- 32 × 12 × 32 blocks (locations.json sunken_lighthouse.mine)
+-- [владелец 23.10: «ужасно, особенно как попасть к боссу — узко, люди будут толпиться, это PvP»] v2: no stairs
+-- and no tunnels. The sunken lighthouse stands in a wide shallow lagoon; round its foot lies a huge flooded temple
+-- plaza (ankle-deep water) — the arena, open from every side: three wide causeways lead to it and the whole lagoon
+-- can be waded. The islands are bigger, terraced, with rock outcrops; the paths are wide.
+local PIT = { x = 0, z = 70, size = 32, depth = 12 } -- 32 × 12 × 32 blocks (locations.json sunken_lighthouse.mine)
 PIT.w = PIT.size * B
 PIT.hole = PIT.w / 2 + 2 * B
 local SPAWN_Z = PIT.z + PIT.hole + 12
-local LH = { x = 0, z = -110 } -- the lighthouse
-local SANCT = { x0 = -48, x1 = 48, z0 = -188, z1 = -92, floor = -50, ceil = -26 } -- the sanctum of Poseidon
-local VILLAGE = { x = 176, z = 60, r = 46 }
-local WRECK = { x = -176, z = -30, r = 26 }
-local REEF = { x = -130, z = 170, r = 60 }
+local LAGOON = { x = 0, z = -140, r = 112 } -- shallow (wading) water round the plaza
+local PLAZA = { x = 0, z = -140, r = 56, top = -1 } -- the flooded temple plaza: the arena
+local LH = { x = 0, z = -198, r = 15, tilt = 0.09 } -- the lighthouse, leaning a little to the east
+local VILLAGE = { x = 190, z = 40, r = 54 }
+local WRECK = { x = -186, z = -40, r = 34 }
+local REEF = { x = -150, z = 190, r = 60 }
 local ISLANDS = {
-	{ 0, 30, 112 },
-	{ LH.x, LH.z, 36 },
+	{ 0, 70, 128 },
 	{ VILLAGE.x, VILLAGE.z, VILLAGE.r },
 	{ WRECK.x, WRECK.z, WRECK.r },
-	{ -160, 120, 14 },
-	{ 150, -170, 20 },
+	{ -150, 130, 18 },
+	{ 170, -190, 26 },
+	{ -150, -230, 22 },
 }
+-- the causeways to the plaza: 18 studs wide, awash at the ends
+local CAUSEWAYS = {
+	{ 0, -54, 0, -84 }, -- from the main island (north shore)
+	{ 150, -40, 50, -120 }, -- from the village island
+	{ -160, -60, -50, -126 }, -- from the wreck island
+}
+local CAUSE_W = 9
 local TRAILS = {
-	{ { 14, SPAWN_Z }, { 84, SPAWN_Z - 10 }, { 86, -30 }, { 30, -70 }, { 0, -88 } }, -- the arrival → the lighthouse
-	{ { 86, 60 }, { 112, 60 } }, -- → the bridge to the village
-	{ { -14, SPAWN_Z }, { -84, SPAWN_Z - 14 }, { -88, 0 }, { -106, -20 } }, -- → the western beach (the wreck in view)
-	{ { 0, SPAWN_Z + 6 }, { 0, 146 } }, -- → the pier
+	{ { 0, PIT.z - PIT.hole - 4 }, { 0, -56 } }, -- the mine → the causeway to the arena
+	{ { PIT.hole + 4, PIT.z }, { 116, 40 }, { 140, 40 } }, -- → the village
+	{ { -PIT.hole - 4, PIT.z }, { -110, 20 }, { -150, -30 } }, -- → the wreck island
+	{ { 0, SPAWN_Z + 6 }, { 0, 196 } }, -- → the pier
+	{ { 30, SPAWN_Z }, { 96, SPAWN_Z - 20 }, { PIT.hole + 4, PIT.z } },
+	{ { -30, SPAWN_Z }, { -96, SPAWN_Z - 20 }, { -PIT.hole - 4, PIT.z } },
 }
 
--- ================================================================ the grid (8-stud cells): land, sea, the pit, the lighthouse shaft
+-- ================================================================ the grid (8-stud cells): land, lagoon, sea, the pit
 local C = 8
 local X0, Z0 = -320, -320
 local NX, NZ = 80, 80
@@ -204,68 +218,81 @@ local function landR(x, z)
 	local best = -math.huge
 	for _, s in ipairs(ISLANDS) do
 		local d = math.sqrt((x - s[1]) ^ 2 + (z - s[2]) ^ 2)
-		local r = s[3] * (1 + n2(x, z, 2.2 + s[1] * 0.01, 0.035) * 0.16)
+		local r = s[3] * (1 + n2(x, z, 2.2 + s[1] * 0.01, 0.03) * 0.18)
 		best = math.max(best, r - d)
 	end
-	-- the isthmus to the headland
-	best = math.max(best, 16 - segDist(x, z, 0, -60, 0, -92))
 	return best
 end
 local function inHole(x, z)
 	return math.abs(x - PIT.x) < PIT.hole and math.abs(z - PIT.z) < PIT.hole
 end
-local function inShaft(x, z)
-	return math.abs(x - LH.x) < 16 and math.abs(z - LH.z) < 16
-end
-local function inSanct(x, z)
-	return x > SANCT.x0 and x < SANCT.x1 and z > SANCT.z0 and z < SANCT.z1
-end
-local function onTrail(x, z)
-	for _, t in ipairs(TRAILS) do
-		if lineDist(t, x, z) < 4 + n2(x, z, 8.8, 0.15) then
+local function onCauseway(x, z)
+	for _, c in ipairs(CAUSEWAYS) do
+		if segDist(x, z, c[1], c[2], c[3], c[4]) < CAUSE_W then
 			return true
 		end
 	end
 	return false
 end
+local function onTrail(x, z)
+	for _, t in ipairs(TRAILS) do
+		if lineDist(t, x, z) < 7 + n2(x, z, 8.8, 0.15) then
+			return true
+		end
+	end
+	return false
+end
+local function plazaD(x, z)
+	return math.sqrt((x - PLAZA.x) ^ 2 + (z - PLAZA.z) ^ 2)
+end
 local function flat(x, z)
-	return (math.abs(x - PIT.x) < PIT.hole + 18 and math.abs(z - PIT.z) < PIT.hole + 18)
-		or math.sqrt((x - VILLAGE.x) ^ 2 + (z - VILLAGE.z) ^ 2) < VILLAGE.r - 6
-		or math.sqrt((x - LH.x) ^ 2 + (z - LH.z) ^ 2) < 26
+	return (math.abs(x - PIT.x) < PIT.hole + 20 and math.abs(z - PIT.z) < PIT.hole + 20)
+		or math.sqrt((x - VILLAGE.x) ^ 2 + (z - VILLAGE.z) ^ 2) < VILLAGE.r - 8
+		or onCauseway(x, z)
 end
 local cells = {}
 for iz = 0, NZ - 1 do
 	for ix = 0, NX - 1 do
 		local x, z = X0 + ix * C + C / 2, Z0 + iz * C + C / 2
 		local c = { x = x, z = z, land = landR(x, z) }
+		local lagoon = math.sqrt((x - LAGOON.x) ^ 2 + (z - LAGOON.z) ^ 2) < LAGOON.r * (1 + n2(x, z, 6.4, 0.02) * 0.12)
 		if inHole(x, z) then
 			c.kind = "hole"
-		elseif inShaft(x, z) then
-			c.kind = "shaft"
+		elseif plazaD(x, z) < PLAZA.r then
+			c.kind = "plaza"
 		elseif c.land > 0 then
 			c.kind = "land"
 			c.path = onTrail(x, z)
 			local h = 0
-			if c.land < 10 then
-				h = if c.land < 5 then 1 else 2 -- the beach
+			if c.land < 12 then
+				h = if c.land < 6 then 1 else 2 -- the beach, in two steps
 				c.beach = true
 			elseif not (flat(x, z) or c.path) then
-				h = 4 * math.clamp(math.floor(1 + n2(x, z, 3.3, 0.04) * 1.6 + n2(x, z, 6.1, 0.1) * 0.6), 0, 2)
+				-- terraces of grass, and rock outcrops rising in 8-stud cliffs
+				local v = n2(x, z, 3.3, 0.03) * 1.6 + n2(x, z, 6.1, 0.09) * 0.6
+				if v > 0.55 and c.land > 30 then
+					h = 12 + 8 * math.clamp(math.floor((v - 0.55) * 6), 0, 2)
+					c.rock = true
+				else
+					h = 4 * math.clamp(math.floor(1.2 + v * 1.5), 1, 2)
+				end
 			end
 			c.top = h
 		else
 			c.kind = "sea"
-			local shallow = math.clamp(-c.land / 50, 0, 1)
-			local depth = 4 * math.floor((4 + 28 * shallow + n2(x, z, 5.5, 0.04) * 6) / 4 + 0.5)
-			if math.sqrt((x - REEF.x) ^ 2 + (z - REEF.z) ^ 2) < REEF.r then
-				depth = 8
-				c.reef = true
+			if lagoon or onCauseway(x, z) then
+				c.seabed = -8 -- the lagoon round the plaza: turquoise, swimmable (2-stud water read as sand)
+				c.lagoon = true
+			else
+				local shallow = math.clamp(-c.land / 50, 0, 1)
+				local depth = 4 * math.floor((4 + 28 * shallow + n2(x, z, 5.5, 0.04) * 6) / 4 + 0.5)
+				if math.sqrt((x - REEF.x) ^ 2 + (z - REEF.z) ^ 2) < REEF.r then
+					depth = 8
+					c.reef = true
+				end
+				c.seabed = -math.clamp(depth, 4, 36)
 			end
-			c.seabed = -math.clamp(depth, 4, 36)
-			if inSanct(x, z) then
-				c.seabed = SANCT.ceil + 2 -- the sea sits on the glass roof of the sanctum
-				c.overSanct = true
-			end
+			c.causeway = onCauseway(x, z)
 		end
 		cells[ix + iz * NX] = c
 	end
@@ -323,13 +350,13 @@ for iz = 0, NZ - 1 do
 		local c = cellAt(ix, iz)
 		local used = {}
 		if c.kind == "land" then
-			local under = if inSanct(c.x, c.z) then SANCT.ceil + 2 else -40
+			local under = -40
 			local v, tint
 			if c.path then
 				v, tint = "px_gravel", Color3.fromRGB(220, 210, 190)
 			elseif c.beach then
 				v, tint = "px_sand", nil
-			elseif n2(c.x, c.z, 7.7, 0.06) > 0.45 then
+			elseif c.rock or n2(c.x, c.z, 7.7, 0.06) > 0.5 then
 				v, tint = "px_stone", nil
 			else
 				v, tint = "px_grass_top", Color3.fromRGB(150, 200, 120)
@@ -338,12 +365,20 @@ for iz = 0, NZ - 1 do
 			push(ix, "top", "GroundTop", c.top - 1, c.top, v, tint)
 			used.body, used.top = true, true
 		elseif c.kind == "sea" then
-			if not c.overSanct then
-				push(ix, "bed", "SeaBed", -44, c.seabed, "px_sand", if c.reef then Color3.fromRGB(240, 230, 200) else Color3.fromRGB(200, 195, 170))
-				used.bed = true
+			-- the bed must read as deep water through the clear Terrain water: dark prismarine paving in the lagoon
+			-- (the sunken temple), dark sand at sea, bright sand only on the reef
+			if c.lagoon then
+				push(ix, "bed", "SeaBed", -44, c.seabed, "px_prismarine", Color3.fromRGB(190, 225, 215))
+			else
+				push(ix, "bed", "SeaBed", -44, c.seabed, "px_sand", if c.reef then Color3.fromRGB(240, 230, 200) else Color3.fromRGB(120, 125, 120))
 			end
-			push(ix, "water", "Water", c.seabed, 0, nil, nil, true)
-			used.water = true
+			-- Terrain water comes in 4-stud voxels: it starts at the voxel below the bed (the bed hides the rest)
+			push(ix, "water", "Water", 4 * math.floor(c.seabed / 4), 0, nil, nil, true)
+			used.bed, used.water = true, true
+		elseif c.kind == "plaza" then
+			push(ix, "bed", "SeaBed", -44, -3, "px_prismarine_bricks", nil)
+			push(ix, "water", "Water", -4, 0, nil, nil, true)
+			used.bed, used.water = true, true
 		end
 		for k in pairs(runs) do
 			if not used[k] then
@@ -528,7 +563,7 @@ do
 		textured(decor(part("CrateLoad", Vector3.new(1.4, 0.3, 1.4), crate.CFrame * CFrame.new(0, 0.9, 0), nil, nil, harbour)), c[3])
 	end
 	-- the pier south into the sea: planks on posts, rowboats tied up, a bell, nets and barrels
-	local p0, p1 = 140, 196
+	local p0, p1 = 190, 246
 	textured(part("PierDeck", Vector3.new(8, 0.8, p1 - p0), at(0, 1.6, (p0 + p1) / 2), nil, nil, harbour), "px_spruce_planks")
 	for z = p0 + 2, p1, 6 do
 		for _, s in ipairs({ -1, 1 }) do
@@ -546,263 +581,220 @@ do
 	for k = 0, 3 do
 		lamp(if k % 2 == 0 then -4 else 4, p0 + 6 + k * 14, 5, harbour)
 	end
-	zoneSign(6, 140, "Причал", 0)
+	zoneSign(8, 188, "Причал", 0)
 end
 task.wait()
 
--- ================================================================ the lighthouse: tower, stair up and down, gallery, lantern, beam
+-- ================================================================ the causeways, the flooded temple plaza (the arena) and the lighthouse
+local arena = folder("TemplePlaza")
 local lighthouse = folder("Lighthouse")
-local STEP_RISE, STEPS_PER_TURN = 1.4, 16
-local DOOR_Y = 6
 do
-	local lx, lz = LH.x, LH.z
-	-- the rock platform it stands on: mossy stone, steps down to the path
-	-- (each tier is four slabs round a 14 × 14 opening: the spiral stair passes through the base)
-	for k = 0, 2 do
-		local r = 22 - k * 3
-		local v = if k == 0 then "px_mossy_cobblestone" else "px_mossy_stone_bricks"
-		local y0 = k * 2
-		for _, b in ipairs({ { -r, -7, -r, r }, { 7, r, -r, r }, { -7, 7, -r, -7 }, { -7, 7, 7, r } }) do
-			box("LighthouseBase", lx + b[1], y0, lz + b[3], lx + b[2], y0 + 2, lz + b[4], v, nil, lighthouse)
-		end
-	end
-	-- the rock round the shaft between the sanctum ceiling and the base (outside the shaft ring)
-	for _, b in ipairs({ { 7, 16, 7, 16 }, { -16, -7, 7, 16 }, { 7, 16, -16, -7 }, { -16, -7, -16, -7 }, { 9.8, 16, -7, 7 }, { -16, -9.8, -7, 7 }, { -7, 7, 9.8, 16 }, { -7, 7, -16, -9.8 } }) do
-		box("ShaftRock", lx + b[1], SANCT.ceil, lz + b[3], lx + b[2], 0, lz + b[4], "px_stone", nil, lighthouse)
-	end
-	-- the tower: a ring of block segments, bands of white and red, algae on the lower half; door and windows open
-	local N = 28
-	local BAND = 8
-	local bands = 10
-	local doorA = 0 -- the door faces south (+z)
-	local function ring(y0, y1, r, variantFor, skip)
-		for i = 0, N - 1 do
-			local a = (i + 0.5) / N * math.pi * 2
-			if not skip(a, i) then
-				local seg = 2 * math.pi * r / N + 0.35
-				local v, tint = variantFor(a, i)
-				textured(part("TowerWall", Vector3.new(seg, y1 - y0, 1.6), CFrame.new(BX + lx + math.sin(a) * r, (y0 + y1) / 2, BZ + lz + math.cos(a) * r) * CFrame.Angles(0, a, 0), nil, nil, lighthouse), v, tint)
+	-- the causeways: wide stone roads just above the water, kerbs, sea lanterns on posts every 16 studs
+	for _, cw in ipairs(CAUSEWAYS) do
+		local ax, az, bx, bz = cw[1], cw[2], cw[3], cw[4]
+		local len = math.sqrt((bx - ax) ^ 2 + (bz - az) ^ 2) + 8
+		local yaw = math.atan2(bx - ax, bz - az)
+		local cf = at((ax + bx) / 2, 0, (az + bz) / 2) * CFrame.Angles(0, yaw, 0)
+		textured(part("Causeway", Vector3.new(CAUSE_W * 2, 6, len), cf * CFrame.new(0, -2.6, 0), nil, nil, arena), "px_prismarine_bricks")
+		textured(part("CausewayTop", Vector3.new(CAUSE_W * 2 - 2, 0.3, len), cf * CFrame.new(0, 0.55, 0), nil, nil, arena), "px_dark_prismarine")
+		for _, s in ipairs({ -1, 1 }) do
+			textured(part("CausewayKerb", Vector3.new(1.2, 1, len), cf * CFrame.new(s * (CAUSE_W - 0.6), 0.9, 0), nil, nil, arena), "px_prismarine")
+			for d = -len / 2 + 6, len / 2 - 6, 16 do
+				textured(part("CausewayPost", Vector3.new(1.4, 4, 1.4), cf * CFrame.new(s * (CAUSE_W - 0.6), 2.4, d), nil, nil, arena), "px_dark_prismarine")
+				local g = glow("CausewayLantern", Vector3.new(1.8, 1.8, 1.8), cf * CFrame.new(s * (CAUSE_W - 0.6), 5.3, d), SEA, "sea_lantern", arena)
+				if math.floor(d / 16) % 2 == 0 then
+					light(g, 22, 1, Color3.fromRGB(170, 240, 255))
+				end
 			end
 		end
 	end
+	-- the plaza: a wide disc of dark prismarine under ankle-deep water, rings of bricks, a mosaic star
+	local px, pz, R = PLAZA.x, PLAZA.z, PLAZA.r
+	for iz = 0, NZ - 1 do
+		for ix = 0, NX - 1 do
+			local c = cellAt(ix, iz)
+			if c.kind == "plaza" then
+				local d = plazaD(c.x, c.z)
+				local v = if d > R - 8 then "px_prismarine_bricks" elseif math.floor(d / 12) % 2 == 0 then "px_dark_prismarine" else "px_prismarine"
+				box("PlazaFloor", c.x - C / 2, -3, c.z - C / 2, c.x + C / 2, PLAZA.top, c.z + C / 2, v, nil, arena)
+			end
+		end
+	end
+	for k = 0, 7 do
+		local a = k / 8 * math.pi * 2
+		local strip = textured(decor(part("MosaicRay", Vector3.new(2, 0.1, R - 14), at(px + math.sin(a) * (R - 14) / 2, PLAZA.top + 0.05, pz + math.cos(a) * (R - 14) / 2) * CFrame.Angles(0, a, 0), nil, nil, arena)), "px_sea_lantern")
+		strip.Transparency = 0.2
+	end
+	-- a ring of 12 broken columns (the charge stuns on them: names Pillar*), some joined by arches, sea lanterns
+	local RING = R - 10
+	for k = 0, 11 do
+		local a = (k + 0.5) / 12 * math.pi * 2
+		local cx, cz = px + math.sin(a) * RING, pz + math.cos(a) * RING
+		local h = ({ 22, 14, 22, 9, 22, 18, 22, 12, 22, 16, 22, 10 })[k + 1]
+		textured(part("PillarBase", Vector3.new(7, 2, 7), at(cx, PLAZA.top + 1, cz) * CFrame.Angles(0, a, 0), nil, nil, arena), "px_dark_prismarine")
+		textured(part("Pillar", Vector3.new(4.6, h, 4.6), at(cx, PLAZA.top + 2 + h / 2, cz) * CFrame.Angles(0, a, 0), nil, nil, arena), "px_prismarine")
+		for y = 4, h - 2, 7 do
+			decor(part("PillarAlgae", Vector3.new(4.8, 1.6, 4.8), at(cx, PLAZA.top + 2 + y, cz) * CFrame.Angles(0, a + 0.3, 0), Color3.fromRGB(60, 120, 60), Enum.Material.Grass, arena)).Transparency = 0.4
+		end
+		if h >= 22 then
+			textured(part("PillarCap", Vector3.new(6.4, 1.6, 6.4), at(cx, PLAZA.top + 2 + h + 0.8, cz) * CFrame.Angles(0, a, 0), nil, nil, arena), "px_dark_prismarine")
+			local g = glow("PillarLantern", Vector3.new(3, 3, 3), at(cx, PLAZA.top + 2 + h + 3.1, cz), SEA, "sea_lantern", arena)
+			light(g, 30, 1, Color3.fromRGB(170, 240, 255))
+			-- an arch to the next tall column
+			local a2 = (k + 2.5) / 12 * math.pi * 2
+			local nx, nz = px + math.sin(a2) * RING, pz + math.cos(a2) * RING
+			if k % 4 == 0 then
+				local len = math.sqrt((nx - cx) ^ 2 + (nz - cz) ^ 2)
+				textured(part("Architrave", Vector3.new(len, 2.4, 3.6), CFrame.lookAt(Vector3.new(BX + (cx + nx) / 2, PLAZA.top + 2 + h + 1.2, BZ + (cz + nz) / 2), Vector3.new(BX + nx, PLAZA.top + 2 + h + 1.2, BZ + nz)) * CFrame.Angles(0, math.pi / 2, 0), nil, nil, arena), "px_prismarine_bricks")
+			end
+		else
+			-- the broken top fallen beside it
+			textured(part("FallenDrum", Vector3.new(4.6, 4.6, 8), at(cx + math.cos(a) * 6, PLAZA.top + 2.3, cz - math.sin(a) * 6) * CFrame.Angles(0, a + 1.2, math.pi / 2), nil, nil, arena), "px_prismarine")
+		end
+	end
+	-- the statue of Poseidon at the north edge, before the lighthouse: on a plinth, trident raised (our design)
+	do
+		local sx, sz = px, pz - 26
+		local base = at(sx, PLAZA.top, sz)
+		local function b(name, size, off, variant, col)
+			local p = part(name, size, base * CFrame.new(off[1], off[2], off[3]), col or STONE, nil, arena)
+			if variant then
+				textured(p, variant, col)
+			end
+			return p
+		end
+		b("StatuePlinth", Vector3.new(14, 4, 10), { 0, 2, 0 }, "px_dark_prismarine")
+		b("StatueLegs", Vector3.new(5, 8, 3), { 0, 8, 0 }, "px_prismarine")
+		b("StatueRobe", Vector3.new(6, 4, 3.4), { 0, 10, 0 }, "px_prismarine_bricks")
+		b("StatueBody", Vector3.new(6, 7, 3.4), { 0, 15.5, 0 }, "px_prismarine")
+		b("StatueArmL", Vector3.new(2, 7, 2), { -4, 15, 0 }, "px_prismarine")
+		b("StatueArmR", Vector3.new(2, 7, 2), { 4, 20, 0 }, "px_prismarine")
+		b("StatueHead", Vector3.new(4, 4, 4), { 0, 21, 0 }, "px_prismarine")
+		b("StatueBeard", Vector3.new(4, 3, 1.4), { 0, 18.6, -2.4 }, "px_prismarine_bricks")
+		b("StatueCrown", Vector3.new(4.4, 1.4, 4.4), { 0, 23.7, 0 }, nil, GOLD).Material = Enum.Material.Metal
+		b("TridentShaft", Vector3.new(0.9, 26, 0.9), { 4.6, 18, -1 }, nil, GOLD).Material = Enum.Material.Metal
+		b("TridentHead", Vector3.new(6, 0.9, 0.9), { 4.6, 31, -1 }, nil, GOLD).Material = Enum.Material.Metal
+		for _, dx in ipairs({ -2.6, 0, 2.6 }) do
+			b("TridentProng", Vector3.new(0.7, 4, 0.7), { 4.6 + dx, 33.4, -1 }, nil, GOLD).Material = Enum.Material.Metal
+		end
+		local eye = b("StatueEyes", Vector3.new(2.6, 0.5, 0.2), { 0, 21.6, -2.05 }, nil, Color3.fromRGB(120, 230, 255))
+		eye.Material = Enum.Material.Neon
+		local plaque = textured(decor(part("PlazaSign", Vector3.new(12, 2, 0.3), base * CFrame.new(0, 2.4, -5.2), nil, nil, arena)), "px_dark_prismarine")
+		boardText(plaque, "Храм Посейдона", Color3.fromRGB(170, 240, 255), { Enum.NormalId.Front })
+	end
+	-- treasure, coral and seaweed scattered over the plaza edge
+	for _ = 1, 30 do
+		local a, r = rng:NextNumber(0, 6.28), rng:NextNumber(R - 8, R - 2)
+		local x, z = px + math.sin(a) * r, pz + math.cos(a) * r
+		local s = rng:NextNumber(1.4, 2.8)
+		textured(part("Coral", Vector3.new(s, s * 1.3, s), at(x, PLAZA.top + s * 0.65, z) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), nil, nil, arena), "px_coral", ({ Color3.fromRGB(255, 120, 160), Color3.fromRGB(255, 210, 90), Color3.fromRGB(120, 170, 255), Color3.fromRGB(190, 110, 230) })[rng:NextInteger(1, 4)])
+	end
+	for _, p in ipairs({ { -22, 0 }, { 22, -6 }, { 8, 24 } }) do
+		textured(part("TreasureChest", Vector3.new(3, 2.4, 2), at(px + p[1], PLAZA.top + 1.2, pz + p[2]) * CFrame.Angles(0, p[1] * 0.05, 0), nil, nil, arena), "px_spruce_planks")
+		decor(part("TreasureGold", Vector3.new(2.6, 0.6, 1.6), at(px + p[1], PLAZA.top + 2.6, pz + p[2]), GOLD, Enum.Material.Metal, arena))
+	end
+	-- the boss
+	local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(px, PLAZA.top + 1.2, pz + 6), nil, nil, arena)
+	bossSpawn.Transparency = 1
+	bossSpawn.CanCollide = false
+	bossSpawn.CanQuery = false
+	bossSpawn:SetAttribute("BossId", "poseidon")
+	bossSpawn:SetAttribute("ArenaRadius", R - 6)
+	CollectionService:AddTag(bossSpawn, "BossSpawn")
+
+	-- the lighthouse: rising straight out of the lagoon, leaning a little; white and red bands, algae up to half
+	-- its height, a broken gallery, the lantern room with its beam [меню: возвышается из океана, водоросли, волны]
+	local lean = CFrame.new(BX + LH.x, -4, BZ + LH.z) * CFrame.Angles(0, 0, -LH.tilt)
+	local N, BAND, bands = 32, 9, 11
 	local function angDiff(a, b)
 		local d = (a - b) % (math.pi * 2)
 		return math.min(d, math.pi * 2 - d)
 	end
 	for b = 0, bands - 1 do
-		local y0 = DOOR_Y + b * BAND
-		local r = 9 - b * 0.22
-		local white = b % 2 == 0
-		ring(y0, y0 + BAND, r, function(a, i)
-			if b < 4 and n2(i, b, 3.3, 0.5) > 0.1 then
-				return "px_mossy_stone_bricks", nil -- algae over the lower half [меню: стены покрыты водорослями]
+		local y0 = b * BAND
+		local r = LH.r - b * 0.45
+		for i = 0, N - 1 do
+			local a = (i + 0.5) / N * math.pi * 2
+			local seg = 2 * math.pi * r / N + 0.4
+			local v
+			if b < 5 and n2(i, b, 3.3, 0.5) > -0.1 then
+				v = "px_mossy_stone_bricks"
+			else
+				v = if b % 2 == 0 then "px_white_stone_bricks" else "px_red_brick"
 			end
-			return if white then "px_white_stone_bricks" else "px_red_brick", nil
-		end, function(a, i)
-			if b == 0 and angDiff(a, doorA) < 0.25 then
-				return true -- the door
-			end
-			return b > 0 and b % 2 == 1 and angDiff(a, (b * 1.7) % (math.pi * 2)) < 0.12 -- a window
-		end)
-	end
-	local topY = DOOR_Y + bands * BAND
-	local rTop = 9 - bands * 0.22
-	-- the lintel over the door, the door frame
-	textured(part("DoorLintel", Vector3.new(4, 1.4, 2), at(lx, DOOR_Y + 7, lz + 9.2), nil, nil, lighthouse), "px_dark_prismarine")
-	local nameBoard = textured(decor(part("LighthouseName", Vector3.new(6, 1.4, 0.3), at(lx, DOOR_Y + 9.2, lz + 9.95), nil, nil, lighthouse)), "px_white_stone_bricks")
-	boardText(nameBoard, "Маяк", Color3.fromRGB(40, 60, 120), { Enum.NormalId.Back })
-	-- kelp and vines hanging on the outside of the lower bands
-	for _ = 1, 24 do
-		local a = rng:NextNumber(0, 6.28)
-		if angDiff(a, doorA) > 0.4 then
-			local y = DOOR_Y + rng:NextNumber(6, 30)
-			local len = rng:NextNumber(3, 8)
-			decor(part("Algae", Vector3.new(0.6, len, 0.2), CFrame.new(BX + lx + math.sin(a) * 9.9, y - len / 2, BZ + lz + math.cos(a) * 9.9) * CFrame.Angles(0, a, 0), Color3.fromRGB(60, 120, 60), Enum.Material.Grass, lighthouse))
-		end
-	end
-	-- the shaft below the door level: a prismarine ring down to the sanctum ceiling
-	ring(SANCT.ceil, DOOR_Y, 9, function()
-		return "px_prismarine_bricks", nil
-	end, function()
-		return false
-	end)
-	-- the spiral stair: from the sanctum floor up to the gallery, round a central column; the step at the door
-	-- level faces the door
-	local stepBottom = SANCT.floor
-	local nSteps = math.floor((topY - stepBottom) / STEP_RISE)
-	local kDoor = math.floor((DOOR_Y - stepBottom) / STEP_RISE + 0.5) - 1
-	local dA = math.pi * 2 / STEPS_PER_TURN
-	local a0 = doorA - kDoor * dA
-	textured(part("StairColumn", Vector3.new(3, topY - stepBottom, 3), at(lx, (topY + stepBottom) / 2, lz), nil, nil, lighthouse), "px_white_stone_bricks")
-	for k = 0, nSteps - 1 do
-		local a = a0 + k * dA
-		local y = stepBottom + (k + 1) * STEP_RISE
-		textured(part("SpiralStep", Vector3.new(3, 0.8, 6.2), CFrame.new(BX + lx + math.sin(a) * 4.6, y - 0.4, BZ + lz + math.cos(a) * 4.6) * CFrame.Angles(0, a + math.pi / 2, 0), nil, nil, lighthouse), if y < DOOR_Y then "px_prismarine_bricks" else "px_spruce_planks")
-	end
-	-- a landing between the door and the stair, lanterns up the tower
-	textured(part("DoorLanding", Vector3.new(4, 0.8, 3), at(lx, DOOR_Y - 0.4, lz + 7.4), nil, nil, lighthouse), "px_spruce_planks")
-	for k = 0, 9 do
-		local y = DOOR_Y + 4 + k * 8
-		local a = k * 2.2
-		local l = decor(part("WallLantern", Vector3.new(0.8, 1, 0.8), CFrame.new(BX + lx + math.sin(a) * 7.6, y, BZ + lz + math.cos(a) * 7.6), LAMP, Enum.Material.Neon, lighthouse))
-		light(l, 16, 1, LAMP)
-	end
-	-- the gallery: a platform ring with a railing, the floor of the lantern room over the stair top
-	-- the gallery floor: a ring outside the tower, and inside it 2×2 tiles with a hatch over the last steps
-	for _, b in ipairs({ { -13, -7, -13, 13 }, { 7, 13, -13, 13 }, { -7, 7, -13, -7 }, { -7, 7, 7, 13 } }) do
-		box("GalleryFloor", lx + b[1], topY, lz + b[3], lx + b[2], topY + 1, lz + b[4], "px_dark_prismarine", nil, lighthouse)
-	end
-	local aEnd = a0 + (nSteps - 1) * dA
-	for gx = -6, 4, 2 do
-		for gz = -6, 4, 2 do
-			local tx, tz = gx + 1, gz + 1
-			local r = math.sqrt(tx * tx + tz * tz)
-			local a = math.atan2(tx, tz)
-			local d = (a - aEnd) % (math.pi * 2)
-			local inHatch = r > 1.6 and (d > math.pi * 2 - 5 * dA or d < 0.6 * dA)
-			if not inHatch then
-				box("GalleryTile", lx + gx, topY, lz + gz, lx + gx + 2, topY + 1, lz + gz + 2, "px_dark_prismarine", nil, lighthouse)
+			local window = b > 1 and b % 2 == 0 and angDiff(a, (b * 1.3) % (math.pi * 2)) < 0.12
+			if not window then
+				textured(part("TowerWall", Vector3.new(seg, BAND, 2), lean * CFrame.new(math.sin(a) * r, y0 + BAND / 2, math.cos(a) * r) * CFrame.Angles(0, a, 0), nil, nil, lighthouse), v)
 			end
 		end
 	end
-	for i = 0, 31 do
-		local a = i / 32 * math.pi * 2
-		part("GalleryRail", Vector3.new(0.3, 3, 0.3), at(lx + math.sin(a) * 12.4, topY + 2.5, lz + math.cos(a) * 12.4), IRON, Enum.Material.Metal, lighthouse)
+	local topY = bands * BAND
+	local rTop = LH.r - bands * 0.45
+	-- the inside is filled (no climbing in a PvP crush): a core column
+	textured(part("TowerCore", Vector3.new((rTop - 1) * 1.6, topY, (rTop - 1) * 1.6), lean * CFrame.new(0, topY / 2, 0), nil, nil, lighthouse), "px_stone")
+	-- the base: a ring of fallen blocks and rocks in the water, foam
+	for k = 0, 17 do
+		local a = k / 18 * math.pi * 2 + rng:NextNumber(-0.1, 0.1)
+		local r = LH.r + rng:NextNumber(2, 7)
+		local s = rng:NextNumber(3, 6)
+		part("BaseRock", Vector3.new(s, s * 0.8, s), at(LH.x + math.sin(a) * r, -1 + s * 0.2, LH.z + math.cos(a) * r) * CFrame.Angles(0, rng:NextNumber(0, 2), rng:NextNumber(-0.2, 0.2)), Color3.fromRGB(120, 120, 118), Enum.Material.Slate, lighthouse)
 	end
-	for _, s in ipairs({ -1, 1 }) do
-		part("GalleryTopRail", Vector3.new(25, 0.3, 0.3), at(lx, topY + 4, lz + s * 12.4), IRON, Enum.Material.Metal, lighthouse)
-		part("GalleryTopRail", Vector3.new(0.3, 0.3, 25), at(lx + s * 12.4, topY + 4, lz), IRON, Enum.Material.Metal, lighthouse)
+	-- the gallery (one side broken away), the lantern room, the beam, the green copper roof
+	textured(part("GalleryFloor", Vector3.new((rTop + 4) * 2, 1.2, (rTop + 4) * 2), lean * CFrame.new(0, topY + 0.6, 0), nil, nil, lighthouse), "px_dark_prismarine")
+	for i = 0, 27 do
+		local a = i / 28 * math.pi * 2
+		if angDiff(a, 2.2) > 0.6 then
+			part("GalleryRail", Vector3.new(0.4, 3, 0.4), lean * CFrame.new(math.sin(a) * (rTop + 3.6), topY + 2.7, math.cos(a) * (rTop + 3.6)), IRON, Enum.Material.Metal, lighthouse)
+		end
 	end
-	-- the stair comes up through a hatch: leave the floor open over the last turn (a hole cut by four slabs)
-	-- (simpler: the top steps reach the floor height; the floor part is lifted by its thickness above them)
-	-- the lantern room: glass panes on iron frames, the lamp of sea lanterns, the beam
-	local roomY = topY + 1
 	for i = 0, 11 do
 		local a = (i + 0.5) / 12 * math.pi * 2
-		local glass = i ~= 0 and part("LanternGlass", Vector3.new(3.4, 8, 0.3), CFrame.new(BX + lx + math.sin(a) * 6, roomY + 4, BZ + lz + math.cos(a) * 6) * CFrame.Angles(0, a, 0), Color3.fromRGB(200, 240, 250), Enum.Material.Glass, lighthouse)
-		if glass then
-			glass.Transparency = 0.55 -- (pane 0 is left open: the door out to the gallery)
-		end
-		part("LanternFrame", Vector3.new(0.4, 8, 0.4), CFrame.new(BX + lx + math.sin(a + 0.26) * 6.1, roomY + 4, BZ + lz + math.cos(a + 0.26) * 6.1), IRON, Enum.Material.Metal, lighthouse)
+		local glass = part("LanternGlass", Vector3.new(3.6, 9, 0.3), lean * CFrame.new(math.sin(a) * 6.4, topY + 5.7, math.cos(a) * 6.4) * CFrame.Angles(0, a, 0), Color3.fromRGB(200, 240, 250), Enum.Material.Glass, lighthouse)
+		glass.Transparency = 0.55
+		part("LanternFrame", Vector3.new(0.5, 9, 0.5), lean * CFrame.new(math.sin(a + 0.26) * 6.5, topY + 5.7, math.cos(a + 0.26) * 6.5), IRON, Enum.Material.Metal, lighthouse)
 	end
-	local lampCore = glow("LighthouseLamp", Vector3.new(4, 4, 4), at(lx, roomY + 3, lz), SEA, "sea_lantern", lighthouse)
-	light(lampCore, 70, 2.5, Color3.fromRGB(255, 245, 210))
+	local lampCore = glow("LighthouseLamp", Vector3.new(5, 5, 5), lean * CFrame.new(0, topY + 5, 0), SEA, "sea_lantern", lighthouse)
+	light(lampCore, 80, 2.5, Color3.fromRGB(255, 245, 210))
 	for _, dir in ipairs({ 0, math.pi }) do
-		local beam = decor(part("LighthouseBeam", Vector3.new(3, 3, 80), at(lx, roomY + 3, lz) * CFrame.Angles(0, dir + 0.5, 0) * CFrame.new(0, 0, -42), Color3.fromRGB(255, 250, 210), Enum.Material.Neon, lighthouse))
-		beam.Transparency = 0.85
+		local beam = decor(part("LighthouseBeam", Vector3.new(4, 4, 110), lean * CFrame.new(0, topY + 5, 0) * CFrame.Angles(0, dir + 0.7, 0) * CFrame.new(0, 0, -58), Color3.fromRGB(255, 250, 210), Enum.Material.Neon, lighthouse))
+		beam.Transparency = 0.86
 		beam.CastShadow = false
 	end
+	for k = 0, 4 do
+		part("LanternRoof", Vector3.new(16 - k * 3.2, 1.6, 16 - k * 3.2), lean * CFrame.new(0, topY + 11 + k * 1.6, 0), Color3.fromRGB(70, 140, 115), Enum.Material.Metal, lighthouse)
+	end
+	part("Vane", Vector3.new(0.4, 5, 0.4), lean * CFrame.new(0, topY + 21, 0), IRON, Enum.Material.Metal, lighthouse)
+	-- algae hanging down the lower half, gulls on the gallery
+	for _ = 1, 40 do
+		local a = rng:NextNumber(0, 6.28)
+		local y = rng:NextNumber(4, 40)
+		local len = rng:NextNumber(3, 9)
+		decor(part("Algae", Vector3.new(0.8, len, 0.25), lean * CFrame.new(math.sin(a) * (LH.r - y / BAND * 0.45 + 1.05), y - len / 2, math.cos(a) * (LH.r - y / BAND * 0.45 + 1.05)) * CFrame.Angles(0, a, 0), Color3.fromRGB(60, 125, 60), Enum.Material.Grass, lighthouse))
+	end
 	for k = 0, 3 do
-		part("LanternRoof", Vector3.new(14 - k * 3.2, 1.4, 14 - k * 3.2), at(lx, roomY + 8.7 + k * 1.4, lz), Color3.fromRGB(70, 130, 110), Enum.Material.Metal, lighthouse)
+		local a = k * 1.4
+		decor(part("Gull", Vector3.new(0.8, 0.6, 1.2), lean * CFrame.new(math.sin(a) * (rTop + 2.4), topY + 1.5, math.cos(a) * (rTop + 2.4)), WHITE, nil, lighthouse))
 	end
-	part("Vane", Vector3.new(0.3, 4, 0.3), at(lx, roomY + 15, lz), IRON, Enum.Material.Metal, lighthouse)
-	part("VaneArrow", Vector3.new(0.2, 0.6, 3), at(lx, roomY + 16.5, lz), GOLD, Enum.Material.Metal, lighthouse)
-	-- the inside light of the tower
-	local vol = decor(part("TowerVolume", Vector3.new(16, topY - SANCT.ceil, 16), at(lx, (topY + SANCT.ceil) / 2, lz), nil, nil, lighthouse))
-	vol.Transparency = 1
-	vol:SetAttribute("Ambient", Color3.fromRGB(150, 145, 140))
-	vol:SetAttribute("Exposure", 0)
-	CollectionService:AddTag(vol, "IndoorLighting")
-end
-task.wait()
-
--- ================================================================ the sanctum of Poseidon on the sea floor (the arena)
-local sanct = folder("Sanctum")
-do
-	local S = SANCT
-	local cx, cz = (S.x0 + S.x1) / 2, (S.z0 + S.z1) / 2
-	local W, D, H = S.x1 - S.x0, S.z1 - S.z0, S.ceil - S.floor
-	textured(part("SanctFloor", Vector3.new(W + 8, 4, D + 8), at(cx, S.floor - 2, cz), nil, nil, sanct), "px_dark_prismarine")
-	-- a glowing water channel in a cross on the floor
-	for _, s in ipairs({ { W - 12, 2 }, { 2, D - 12 } }) do
-		decor(part("FloorChannel", Vector3.new(s[1], 0.12, s[2]), at(cx, S.floor + 0.06, cz - 10), Color3.fromRGB(80, 200, 230), Enum.Material.Neon, sanct)).Transparency = 0.3
-	end
-	-- the walls (ArenaWall: the charge stops there) with a band of sea lanterns
-	for _, w in ipairs({
-		{ Vector3.new(4, H + 2, D + 8), at(S.x0 - 2, S.floor + (H + 2) / 2, cz) },
-		{ Vector3.new(4, H + 2, D + 8), at(S.x1 + 2, S.floor + (H + 2) / 2, cz) },
-		{ Vector3.new(W, H + 2, 4), at(cx, S.floor + (H + 2) / 2, S.z0 - 2) },
-		{ Vector3.new(W, H + 2, 4), at(cx, S.floor + (H + 2) / 2, S.z1 + 2) },
-	}) do
-		textured(part("ArenaWall", w[1], w[2], nil, nil, sanct), "px_prismarine_bricks")
-	end
-	for _, w in ipairs({ { S.x0 + 0.3, nil }, { S.x1 - 0.3, nil } }) do
-		for z = S.z0 + 8, S.z1 - 8, 12 do
-			local g = glow("WallSeaLantern", Vector3.new(0.6, 2, 2), at(w[1], S.floor + 12, z), SEA, "sea_lantern", sanct)
-			if (z - S.z0) % 24 < 12 then
-				light(g, 26, 1, Color3.fromRGB(150, 230, 255))
-			end
+	-- waves breaking round the foot of the tower and the plaza edge
+	for k = 0, 11 do
+		local a = k / 12 * math.pi * 2
+		for _, ring in ipairs({ { LH.x, LH.z, LH.r + 6 }, { px, pz, R + 4 } }) do
+			local p = decor(part("Spray", Vector3.new(10, 1, 3), at(ring[1] + math.sin(a) * ring[3], 0.4, ring[2] + math.cos(a) * ring[3]) * CFrame.Angles(0, a, 0), WHITE, nil, lighthouse))
+			p.Transparency = 1
+			emitter(p, {
+				Texture = "rbxasset://textures/particles/smoke_main.dds",
+				Color = ColorSequence.new(Color3.fromRGB(240, 250, 255)),
+				Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 4) }),
+				Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.45), NumberSequenceKeypoint.new(1, 1) }),
+				Rate = 3,
+				Lifetime = NumberRange.new(1, 1.8),
+				Speed = NumberRange.new(4, 8),
+				SpreadAngle = Vector2.new(30, 30),
+				Acceleration = Vector3.new(0, -8, 0),
+			})
 		end
 	end
-	-- the roof: glass where the sea is above, dark prismarine under the island; beams over it all
-	for iz = 0, NZ - 1 do
-		for ix = 0, NX - 1 do
-			local c = cellAt(ix, iz)
-			if inSanct(c.x, c.z) and not inShaft(c.x, c.z) then
-				if c.kind == "sea" then
-					local g = part("SanctGlass", Vector3.new(C, 1, C), at(c.x, S.ceil + 0.5, c.z), Color3.fromRGB(170, 230, 240), Enum.Material.Glass, sanct)
-					g.Transparency = 0.45
-				else
-					textured(part("SanctRoof", Vector3.new(C, 2, C), at(c.x, S.ceil + 1, c.z), nil, nil, sanct), "px_dark_prismarine")
-				end
-			end
-		end
-	end
-	for x = S.x0 + 8, S.x1 - 8, 16 do
-		textured(part("RoofBeam", Vector3.new(1.4, 1.6, D), at(x, S.ceil - 0.4, cz), nil, nil, sanct), "px_dark_prismarine")
-	end
-	-- four pillars round the arena centre (the charge stuns on them: names Pillar*) with sea-lantern caps
-	local ax, az = cx, S.z0 + 38
-	for _, p in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-		local px, pz = ax + p[1] * 20, az + p[2] * 16
-		textured(part("PillarBase", Vector3.new(7, 2, 7), at(px, S.floor + 1, pz), nil, nil, sanct), "px_dark_prismarine")
-		textured(part("Pillar", Vector3.new(5, H - 6, 5), at(px, S.floor + 2 + (H - 6) / 2, pz), nil, nil, sanct), "px_prismarine")
-		local g = glow("PillarLantern", Vector3.new(4, 4, 4), at(px, S.ceil - 4, pz), SEA, "sea_lantern", sanct)
-		light(g, 30, 1.2, Color3.fromRGB(150, 230, 255))
-	end
-	-- the throne of Poseidon at the north end, with a giant golden trident
-	local tz = S.z0 + 8
-	for k = 0, 2 do
-		textured(part("ThroneDais", Vector3.new(22 - k * 5, 1, 10 - k * 2), at(cx, S.floor + 0.5 + k, tz + k * 0.4), nil, nil, sanct), "px_dark_prismarine")
-	end
-	textured(part("Throne", Vector3.new(6, 10, 2), at(cx, S.floor + 8, tz - 2), nil, nil, sanct), "px_prismarine_bricks")
-	textured(part("ThroneSeat", Vector3.new(6, 1.4, 4), at(cx, S.floor + 4, tz), nil, nil, sanct), "px_prismarine")
-	part("TridentShaft", Vector3.new(0.8, 18, 0.8), at(cx + 6, S.floor + 12, tz - 1), GOLD, Enum.Material.Metal, sanct)
-	part("TridentHead", Vector3.new(5, 0.8, 0.8), at(cx + 6, S.floor + 20.6, tz - 1), GOLD, Enum.Material.Metal, sanct)
-	for _, dx in ipairs({ -2.2, 0, 2.2 }) do
-		part("TridentProng", Vector3.new(0.6, 3.4, 0.6), at(cx + 6 + dx, S.floor + 22.6, tz - 1), GOLD, Enum.Material.Metal, sanct)
-	end
-	local sanctSign = textured(decor(part("SanctSign", Vector3.new(16, 2.4, 0.3), at(cx, S.floor + 15, S.z0 + 0.15), nil, nil, sanct)), "px_dark_prismarine")
-	boardText(sanctSign, "Святилище Посейдона", Color3.fromRGB(170, 240, 255), { Enum.NormalId.Back })
-	-- coral, treasure and broken columns round the walls
-	for _ = 1, 22 do
-		local side = if rng:NextNumber() < 0.5 then -1 else 1
-		local x = cx + side * rng:NextNumber(W / 2 - 6, W / 2 - 2)
-		local z = rng:NextNumber(S.z0 + 6, S.z1 - 6)
-		local s = rng:NextNumber(1.6, 3)
-		textured(part("Coral", Vector3.new(s, s * 1.4, s), at(x, S.floor + s * 0.7, z) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), nil, nil, sanct), "px_coral", ({ Color3.fromRGB(255, 120, 160), Color3.fromRGB(255, 210, 90), Color3.fromRGB(120, 170, 255), Color3.fromRGB(190, 110, 230) })[rng:NextInteger(1, 4)])
-	end
-	for _, p in ipairs({ { -16, S.z0 + 12 }, { 16, S.z0 + 12 } }) do
-		textured(part("TreasureChest", Vector3.new(3, 2.4, 2), at(p[1], S.floor + 1.2, p[2]), nil, nil, sanct), "px_spruce_planks")
-		decor(part("TreasureGold", Vector3.new(2.6, 0.6, 1.6), at(p[1], S.floor + 2.6, p[2]), GOLD, Enum.Material.Metal, sanct))
-	end
-	-- the hall's light: blue-green, a little murk
-	local vol = decor(part("SanctVolume", Vector3.new(W, H, D), at(cx, (S.floor + S.ceil) / 2, cz), nil, nil, sanct))
-	vol.Transparency = 1
-	vol:SetAttribute("Ambient", Color3.fromRGB(110, 150, 160))
-	vol:SetAttribute("Exposure", 0)
-	vol:SetAttribute("Haze", 0.18)
-	vol:SetAttribute("AtmosphereColor", Color3.fromRGB(60, 140, 160))
-	vol:SetAttribute("AtmosphereDecay", Color3.fromRGB(20, 60, 80))
-	CollectionService:AddTag(vol, "IndoorLighting")
-	-- the boss
-	local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(ax, S.floor + 1.2, az), nil, nil, sanct)
-	bossSpawn.Transparency = 1
-	bossSpawn.CanCollide = false
-	bossSpawn.CanQuery = false
-	bossSpawn:SetAttribute("BossId", "poseidon")
-	bossSpawn:SetAttribute("ArenaRadius", 40)
-	CollectionService:AddTag(bossSpawn, "BossSpawn")
+	zoneSign(12, -50, "Храм Посейдона", 0)
 end
 task.wait()
 
@@ -810,7 +802,7 @@ task.wait()
 local village = folder("FishingVillage")
 do
 	-- the measured gap between the main island and the village along x at z = 60 (span the real water)
-	local bz = 60
+	local bz = 40
 	local function wet(x)
 		for _, dz in ipairs({ -3, 0, 3 }) do
 			local c = cellAtPos(x, bz + dz)
@@ -883,7 +875,7 @@ do
 	for _, p in ipairs({ { 176, 50 }, { 176, 70 } }) do
 		lamp(p[1], p[2], 5, village)
 	end
-	zoneSign(126, 66, "Рыбацкая деревня", math.pi / 2)
+	zoneSign(124, 52, "Рыбацкая деревня", math.pi / 2)
 end
 task.wait()
 
@@ -915,7 +907,7 @@ do
 	end
 	textured(part("WreckChest", Vector3.new(3, 2.4, 2), at(wx - 10, floorAt(wx - 10, wz + 8) + 1.2, wz + 8), nil, nil, wreck), "px_spruce_planks")
 	decor(part("WreckGold", Vector3.new(2.6, 0.6, 1.6), at(wx - 10, floorAt(wx - 10, wz + 8) + 2.6, wz + 8), GOLD, Enum.Material.Metal, wreck))
-	zoneSign(-108, -14, "Затонувший корабль", math.pi / 2)
+	zoneSign(-128, -6, "Затонувший корабль", math.pi / 2)
 end
 
 -- ================================================================ the sea: coral reef, kelp, ocean ruins, sea stacks, buoys, gulls
@@ -961,7 +953,7 @@ do
 			decor(part("Fish", Vector3.new(0.4, 0.6, 1.2), at(x, rng:NextNumber(c.seabed + 1, -1.5), z) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0), COLS[rng:NextInteger(1, #COLS)], nil, sea))
 		end
 	end
-	zoneSign(-96, 128, "Коралловый риф", math.pi * 0.75)
+	zoneSign(-92, 160, "Коралловый риф", math.pi * 0.75)
 	-- sea stacks round the edge: tall rock pillars rising from the sea (the edge of the map)
 	for k = 0, 59 do
 		local a = k / 60 * math.pi * 2 + rng:NextNumber(-0.04, 0.04)
@@ -1083,8 +1075,8 @@ do
 	-- spray where the waves hit the rocks round the main island and the headland [меню: вокруг бьются волны]
 	for k = 0, 13 do
 		local a = k / 14 * math.pi * 2
-		local r = if k % 2 == 0 then 118 else 40
-		local cx, cz = if k % 2 == 0 then 0 else LH.x, if k % 2 == 0 then 30 else LH.z
+		local r = if k % 2 == 0 then 134 else 64
+		local cx, cz = if k % 2 == 0 then 0 else WRECK.x, if k % 2 == 0 then 70 else WRECK.z
 		local p = decor(part("Spray", Vector3.new(14, 1, 4), at(cx + math.cos(a) * r, 0.5, cz + math.sin(a) * r), WHITE, nil, deco))
 		p.Transparency = 1
 		emitter(p, {
