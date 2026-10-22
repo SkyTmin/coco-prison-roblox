@@ -172,9 +172,12 @@ git -C C:\Users\user\Documents\coco-prison-roblox add -A; git -C C:\Users\user\D
 лимит. Каждый запуск ограничен `--max-budget-usd` (по умолчанию $1), стоимость печатается в конце, логи —
 в `%LOCALAPPDATA%\coco-api-agent`.
 
-1. Ключ — один раз, в своём PowerShell (ключ не попадает в историю и в репозиторий):
-   `[Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', (Read-Host 'Вставь API-ключ'), 'User')`
-2. Только чтение: `.\scripts\api-agent.ps1 "Изучи проект и предложи план проверки"`
-3. С правками: `.\scripts\api-agent.ps1 "Исправь … и прогони selene/stylua" -Edit -Budget 2`
+1. Ключ — один раз, в своём PowerShell (ввод скрыт; ключ не попадает в историю и в репозиторий):
+   `$k = Read-Host 'Вставь API-ключ' -MaskInput; [Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', $k, 'User')`
+2. Работать вместо основного Claude, когда кончился лимит Max (обычный диалог, CLAUDE.md, скиллы, Studio):
+   `C:\Users\user\Documents\coco-prison-roblox\scripts\api-claude.ps1` — на вопрос про найденный API-ключ ответь
+   Yes; `/status` покажет вход по ключу, `/cost` — потраченное. Studio ведёт только один Claude за раз.
+3. Разовое задание из папки проекта, только чтение: `.\scripts\api-agent.ps1 "Изучи проект и предложи план проверки"`
+4. Разовое задание с правками: `.\scripts\api-agent.ps1 "Исправь … и прогони selene/stylua" -Edit -Budget 2`
 
 В Claude Console заведи отдельный Workspace для игры с лимитом расходов и не включай Auto-reload.

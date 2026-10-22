@@ -20,7 +20,7 @@ $key = $env:ANTHROPIC_API_KEY
 if (-not $key) { $key = [Environment]::GetEnvironmentVariable("ANTHROPIC_API_KEY", "User") }
 if (-not $key) {
 	Write-Host "Нет ANTHROPIC_API_KEY. Один раз в своём PowerShell выполни:" -ForegroundColor Yellow
-	Write-Host "  [Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', (Read-Host 'Вставь API-ключ'), 'User')"
+	Write-Host "  `$k = Read-Host 'Вставь API-ключ' -MaskInput; [Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', `$k, 'User')"
 	exit 1
 }
 $env:ANTHROPIC_API_KEY = $key
