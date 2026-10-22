@@ -9,7 +9,7 @@
 # login, `/cost` the money spent. Only one Claude may drive Roblox Studio at a time (CLAUDE.md, Studio loop §6):
 # close the other session's Studio work first. The key comes from the user's environment variable (set once,
 # docs/SETUP.md) and is never printed or written to the repo.
-param([string]$Model = "opus")
+param([string]$Model = "claude-opus-5-5")
 $ErrorActionPreference = "Stop"
 $key = $env:ANTHROPIC_API_KEY
 if (-not $key) { $key = [Environment]::GetEnvironmentVariable("ANTHROPIC_API_KEY", "User") }
