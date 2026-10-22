@@ -1910,7 +1910,7 @@ local LADDER_SLIDE = 1 -- full "away" push while idle = climbing down at the cli
 local LADDER_FALL = -12 -- studs/s: 3 blocks/s like a Minecraft ladder [ваниль]
 local LADDER_REACH = 4.5 -- studs from the ladder (the shaft is one block deep)
 -- nearest ladder truss piece whose column (full height, one block deep) contains the position
-local LADDER_ROOTS = { "Prison", "Quarry" } -- map folders holding mine ladders and MineAnchor_ parts
+local LADDER_ROOTS = { "Prison", "Quarry", "Basement" } -- map folders holding mine ladders and MineAnchor_ parts
 local function ladderAt(position: Vector3): BasePart?
 	local best, bestD = nil, LADDER_REACH
 	for _, rootName in ipairs(LADDER_ROOTS) do

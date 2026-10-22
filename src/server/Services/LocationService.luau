@@ -12,6 +12,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local CombatService = require(script.Parent.CombatService)
+local InventoryService = require(script.Parent.InventoryService)
 
 local LocationService = {}
 local started = false
@@ -125,8 +126,22 @@ local function teleport(player: Player, locationId: any, spot: any)
 		return
 	end
 	if not withinCurrent and location.requiresPass and not profile.passes[locationId] then
-		toast(player, "location_pass_required")
-		return
+		-- [владелец] the pass is eternal: the first trip takes one pass item (<id>_pass) and opens the location for good
+		local passId = locationId .. "_pass"
+		local used = false
+		if InventoryService.count(profile, passId) > 0 then
+			ProfileService.Mutate(player, function(p)
+				if InventoryService.remove(p, passId, 1) == 1 then
+					p.passes[locationId] = true
+					used = true
+				end
+			end)
+		end
+		if not used then
+			toast(player, "location_pass_required")
+			return
+		end
+		toast(player, "location_pass_used")
 	end
 	if factionMissing(location, profile) then
 		toast(player, "faction_required")

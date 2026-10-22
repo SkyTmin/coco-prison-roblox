@@ -748,9 +748,9 @@
       "miniMine": null,
       "mine": {
         "size": [
-          24,
-          10,
-          24
+          16,
+          8,
+          16
         ],
         "resetSeconds": 30,
         "warnSeconds": 15,
@@ -760,7 +760,17 @@
           "gravel": 0.33
         }
       },
-      "mines": {},
+      "mines": {
+        "basement_ore": {
+          "shares": {
+            "lapis_block": 0.4,
+            "iron_block": 0.3,
+            "gold_block": 0.2,
+            "diamond_block": 0.1
+          },
+          "source": "[владелец 22.10] вторая шахта Подвала: железный, алмазный, золотой, лазуритовый блоки; доли [решение] 40/30/20/10 (принято владельцем), размер 16×6×16 — атрибут Size на якоре"
+        }
+      },
       "sellList": [
         "sand",
         "gravel",

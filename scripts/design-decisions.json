@@ -392,27 +392,24 @@
     },
     "basement": {
       "size": [
-        24,
-        10,
-        24
+        16,
+        8,
+        16
       ],
+      "_size": "[владелец 22.10: «шахта маленькая»] 16×8×16; рудная — 12×6×12 (атрибут Size на якоре, scripts/build-basement.luau)",
       "requiresPass": true,
       "pvp": true,
       "resetSeconds": 30,
-      "_note": "[меню] две шахты, обновление 30 с; состав рудной шахты [решение]",
-      "oreMine": {
-        "size": [
-          16,
-          6,
-          16
-        ],
-        "shares": {
-          "gold_block": 0.3,
-          "lapis_block": 0.3,
-          "diamond_block": 0.2,
-          "iron_block": 0.2
-        }
-      }
+      "_note": "[меню] две шахты, обновление 30 с; [владелец 22.10] линейный подвал: спавн → тропа → шахта 1 (земля/песок/гравий) → тропа → шахта 2 (руды) → тропа → логово Сплинтера"
+    },
+    "basement_ore": {
+      "shares": {
+        "lapis_block": 0.4,
+        "iron_block": 0.3,
+        "gold_block": 0.2,
+        "diamond_block": 0.1
+      },
+      "_source": "[владелец 22.10] вторая шахта Подвала: железный, алмазный, золотой, лазуритовый блоки; доли [решение] 40/30/20/10 (принято владельцем), размер 16×6×16 — атрибут Size на якоре"
     },
     "fraction_base": {
       "kind": "social",
@@ -489,12 +486,32 @@
       "money": 1.5,
       "statKey": "zombies",
       "drop": "rotten_flesh",
+      "dropChance": 1,
       "locations": [
         "basement",
         "fraction_base",
         "ghetto"
       ],
-      "_source": "[владелец] 25 HP"
+      "_source": "[владелец] 25 HP; урон 3, 1,5 $ и гнилая плоть — [решение], принято владельцем 22.10",
+      "respawnSeconds": 120,
+      "_respawn": "[владелец 22.10] зомби у шахты Подвала появляется через 2 минуты после смерти",
+      "walkSpeed": 9,
+      "aggroRange": 28,
+      "leashRange": 40,
+      "attackRange": 4.5,
+      "attackCooldown": 1.5,
+      "staggerSeconds": 0.4,
+      "windupSeconds": 0.4,
+      "_ai": "[решение] медленнее крысы, замах обеими руками 0,4 с, удар раз в 1,5 с",
+      "model": "zombie",
+      "rootSize": [2.2, 3.2, 1.4],
+      "hipHeight": 0.95,
+      "modelOffset": [0, -2.55, 0],
+      "furTexture": "rbxassetid://93131048217957",
+      "_model": "assets/models/zombie (Blender, ванильные пропорции, свои цвета); звуков зомби нет в атласе — звук урона игрока ниже тоном [решение]",
+      "hurtSound": ["player_hurt", 0.7, 0.6],
+      "deathSound": ["player_hurt", 0.8, 0.45],
+      "windupSound": ["player_hurt", 0.3, 0.5]
     },
     "bat": {
       "name": "Летучая мышь",
@@ -596,7 +613,54 @@
       "hp": 1200,
       "damage": 6,
       "respawnSeconds": 1500,
-      "_source": "[меню] награды и ~23 мин до респауна; hp/damage [решение]"
+      "_source": "[меню] награды и ~23 мин до респауна; hp/damage [решение]",
+      "locationId": "basement",
+      "nameEn": "Splinter",
+      "_fight": "[владелец 22.10] логово в конце Подвала; модель — крыса ×3 (scripts/model-tools/scale-model.cjs), своя модель позже; приёмы и урон [решение]: удар 1, визг-волна (полоса), обвал камней (круги), рывок по 2 HP",
+      "fight": {
+        "meleeDamage": 1,
+        "meleeRange": 8,
+        "meleeCooldown": 2.2,
+        "walkSpeed": 11,
+        "leashSeconds": 300,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 30,
+          "width": 6,
+          "speed": 45,
+          "damage": 2
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 2,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 44,
+          "maxDistance": 36,
+          "width": 7,
+          "damage": 2,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "model": "splinter",
+        "texture": "rbxassetid://93131048217957",
+        "scale": 1,
+        "palette": {
+          "telegraph": [170, 60, 50],
+          "blade": [190, 170, 150],
+          "spikes": [95, 85, 75],
+          "glow": [255, 120, 90]
+        }
+      }
     },
     "giant_zombie": {
       "name": "Зомбарь",

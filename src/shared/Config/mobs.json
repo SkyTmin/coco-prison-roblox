@@ -38,12 +38,52 @@
       "money": 1.5,
       "statKey": "zombies",
       "drop": "rotten_flesh",
+      "dropChance": 1,
       "locations": [
         "basement",
         "fraction_base",
         "ghetto"
       ],
-      "_source": "[владелец] 25 HP"
+      "_source": "[владелец] 25 HP; урон 3, 1,5 $ и гнилая плоть — [решение], принято владельцем 22.10",
+      "respawnSeconds": 120,
+      "_respawn": "[владелец 22.10] зомби у шахты Подвала появляется через 2 минуты после смерти",
+      "walkSpeed": 9,
+      "aggroRange": 28,
+      "leashRange": 40,
+      "attackRange": 4.5,
+      "attackCooldown": 1.5,
+      "staggerSeconds": 0.4,
+      "windupSeconds": 0.4,
+      "_ai": "[решение] медленнее крысы, замах обеими руками 0,4 с, удар раз в 1,5 с",
+      "model": "zombie",
+      "rootSize": [
+        2.2,
+        3.2,
+        1.4
+      ],
+      "hipHeight": 0.95,
+      "modelOffset": [
+        0,
+        -2.55,
+        0
+      ],
+      "furTexture": "rbxassetid://93131048217957",
+      "_model": "assets/models/zombie (Blender, ванильные пропорции, свои цвета); звуков зомби нет в атласе — звук урона игрока ниже тоном [решение]",
+      "hurtSound": [
+        "player_hurt",
+        0.7,
+        0.6
+      ],
+      "deathSound": [
+        "player_hurt",
+        0.8,
+        0.45
+      ],
+      "windupSound": [
+        "player_hurt",
+        0.3,
+        0.5
+      ]
     },
     "bat": {
       "name": "Летучая мышь",

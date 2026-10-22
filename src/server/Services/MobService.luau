@@ -19,7 +19,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Sfx = require(Shared.Sfx)
 local BlockRig = require(Shared.BlockRig)
-local RatModel = require(Shared:WaitForChild("Models"):WaitForChild("rat")) :: any
+local Models = Shared:WaitForChild("Models")
 local ProfileService = require(script.Parent.ProfileService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
@@ -46,23 +46,42 @@ type Mob = {
 }
 local mobs: { Mob } = {}
 
--- The rat from Blender (assets/models/rat/rat.py → Shared.Models.rat, after the Codex reference picture):
--- BlockRig boxes on Motor6D joints, posed by the client (MobAnimator). The physics stay a plain invisible
--- root box with an R6 humanoid floating it 0.6 above the ground; the model's ground origin sits under it.
-local function buildRat(at: CFrame, cfg: any): (Model, Humanoid, BasePart)
+-- Mobs from Blender (assets/models/<id>/<id>.py → Shared.Models.<cfg.model>: the rat after the Codex reference
+-- picture, the zombie on vanilla proportions): BlockRig boxes on Motor6D joints, posed by the client
+-- (MobAnimator). The physics stay a plain invisible root box (cfg.rootSize) with an R6 humanoid floating it
+-- cfg.hipHeight above the ground; the model's ground origin sits cfg.modelOffset from the root centre.
+local DEFAULT_ROOT = { 1.8, 1.2, 2.8 } -- the rat
+local defs: { [string]: any } = {}
+local function modelDef(name: string): any
+	if not defs[name] then
+		defs[name] = require(Models:WaitForChild(name)) :: any
+	end
+	return defs[name]
+end
+
+local function buildMob(id: string, at: CFrame, cfg: any): (Model, Humanoid, BasePart)
+	local size = cfg.rootSize or DEFAULT_ROOT
+	local offset = cfg.modelOffset or { 0, -1.2, 0.5 }
 	local model = Instance.new("Model")
-	model.Name = "Mob_rat"
+	model.Name = "Mob_" .. id
 	local root = Instance.new("Part")
 	root.Name = "HumanoidRootPart"
-	root.Size = Vector3.new(1.8, 1.2, 2.8)
+	root.Size = Vector3.new(size[1], size[2], size[3])
 	root.Transparency = 1
 	root.CanCollide = true
 	root.CFrame = at
 	root.Parent = model
-	BlockRig.build(RatModel, model, root, at * CFrame.new(0, -1.2, 0.5), cfg.furTexture)
+	local rig = modelDef(cfg.model or id)
+	BlockRig.build(
+		rig,
+		model,
+		root,
+		at * CFrame.new(offset[1], offset[2], offset[3]),
+		cfg.furTexture
+	)
 	local humanoid = Instance.new("Humanoid")
 	humanoid.RigType = Enum.HumanoidRigType.R6
-	humanoid.HipHeight = 0.6
+	humanoid.HipHeight = cfg.hipHeight or 0.6
 	humanoid.MaxHealth = cfg.hp
 	humanoid.Health = cfg.hp
 	humanoid.WalkSpeed = cfg.walkSpeed or 12
@@ -116,8 +135,10 @@ function spawnMob(mob: Mob)
 	if mob.model or not mob.spawn:IsDescendantOf(workspace) then
 		return
 	end
+	local size = mob.cfg.rootSize or DEFAULT_ROOT
+	local lift = mob.spawn.Size.Y / 2 + (mob.cfg.hipHeight or 0.6) + size[2] / 2
 	local model, humanoid, root =
-		buildRat(mob.spawn.CFrame * CFrame.new(0, mob.spawn.Size.Y / 2 + 1.2, 0), mob.cfg)
+		buildMob(mob.id, mob.spawn.CFrame * CFrame.new(0, lift, 0), mob.cfg)
 	model:SetAttribute("MobId", mob.id)
 	CollectionService:AddTag(model, "Mob")
 	CollisionGroups.mob(model) -- no stepping onto rats, no pushing: only knockback moves them
@@ -137,7 +158,8 @@ function spawnMob(mob: Mob)
 		last = health
 	end)
 	humanoid.Died:Once(function()
-		Sfx.broadcast("rat_death", root, 0.7)
+		local death = mob.cfg.deathSound or { "rat_death", 0.7, 1 }
+		Sfx.broadcast(death[1], root, death[2], death[3])
 		rewardKiller(mob, humanoid)
 		-- loot on the ground like in Minecraft [владелец 22.10: с крысы только плоть нежити, шанс 25 %]
 		if mob.cfg.drop and math.random() < (mob.cfg.dropChance or 1) then
@@ -213,7 +235,8 @@ local function think(mob: Mob, now: number)
 				if mob.model then
 					mob.model:SetAttribute("MobWindup", workspace:GetServerTimeNow())
 				end
-				Sfx.broadcast("rat_hurt", root, 0.35, 1.5)
+				local windup = mob.cfg.windupSound or { "rat_hurt", 0.35, 1.5 }
+				Sfx.broadcast(windup[1], root, windup[2], windup[3])
 			end
 		else
 			humanoid:MoveTo(targetRoot.Position)
@@ -235,7 +258,7 @@ local function register(part: Instance)
 	end
 	local id = part:GetAttribute("MobId")
 	local cfg = if typeof(id) == "string" then Config.mobs.mobs[id] else nil
-	if not cfg or id ~= "rat" then -- only rats have a model so far
+	if not cfg or not Models:FindFirstChild(cfg.model or id) then -- a mob needs its Blender model
 		return
 	end
 	for _, m in ipairs(mobs) do

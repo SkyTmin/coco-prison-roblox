@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 
@@ -48,7 +49,11 @@ local function playHurt(model: Model)
 		return
 	end
 	local pitch = 0.9 + math.random() * 0.2
-	if model:GetAttribute("MobId") == "rat" then
+	local mobId = model:GetAttribute("MobId")
+	local mob = if typeof(mobId) == "string" then Config.mobs.mobs[mobId] else nil
+	if mob and mob.hurtSound then
+		Sfx.broadcast(mob.hurtSound[1], root, mob.hurtSound[2], pitch * mob.hurtSound[3])
+	elseif mobId == "rat" then
 		Sfx.broadcast("rat_hurt", root, 0.6, pitch)
 	elseif CollectionService:HasTag(model, "Boss") then
 		Sfx.broadcast("hit_heavy", root, 0.9, pitch * 0.85)

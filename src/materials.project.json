@@ -289,6 +289,30 @@
         "ColorMap": "rbxassetid://116003033324791",
         "StudsPerTile": 4
       }
+    },
+    "px_iron_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://84349966503916",
+        "StudsPerTile": 4
+      }
+    },
+    "px_lapis_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://92036843008983",
+        "StudsPerTile": 4
+      }
+    },
+    "px_diamond_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://135672709707723",
+        "StudsPerTile": 4
+      }
     }
   }
 }

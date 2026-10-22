@@ -1,7 +1,8 @@
 // Derives the missing block textures from our own ones (assets/textures/blocks, Codex pixel art 20.10),
 // so the new blocks keep the same look [владелец 22.10: «где текстуры угольного блока и руды?»]:
 //   gold_ore   = coal_ore with the dark lumps recoloured to gold;
-//   coal_block = stone remapped to a dark anthracite range with a faint blue sheen.
+//   coal_block = stone remapped to a dark anthracite range with a faint blue sheen;
+//   iron_block / lapis_block / diamond_block = gold_block recoloured.
 // Usage: node scripts/derive-block-textures.mjs  → assets/textures/blocks/<id>.png (then upload_image → ids.json)
 import fs from "node:fs";
 import path from "node:path";
@@ -37,3 +38,14 @@ await remap("stone.png", "coal_block.png", (r, g, b) => {
 	const v = 10 + 78 * n * n;
 	return [clamp(v), clamp(v + 3), clamp(v + 10)];
 });
+// [владелец 22.10: рудная шахта Подвала] iron / lapis / diamond blocks: our gold block's pattern (bevel, rivets,
+// shine) with its brightness mapped onto each metal's dark → light range
+function metal(dark, light) {
+	return (r, g, b) => {
+		const n = Math.max(0, Math.min(1, (lum(r, g, b) - 60) / 170));
+		return dark.map((d, i) => clamp(d + (light[i] - d) * n));
+	};
+}
+await remap("gold_block.png", "iron_block.png", metal([110, 110, 112], [235, 235, 235]));
+await remap("gold_block.png", "lapis_block.png", metal([18, 40, 120], [80, 130, 230]));
+await remap("gold_block.png", "diamond_block.png", metal([30, 140, 135], [190, 255, 245]));

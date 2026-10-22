@@ -658,6 +658,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "Se requiere un pase",
 		fr = "Laissez-passer requis",
 	},
+	location_pass_used = {
+		ru = "Пропуск использован: доступ открыт навсегда",
+		en = "Pass used: access unlocked forever",
+		es = "Pase usado: acceso desbloqueado para siempre",
+		fr = "Laissez-passer utilisé : accès débloqué pour toujours",
+	},
 	location_no_spawn = {
 		ru = "Точка прибытия этой локации ещё не готова",
 		en = "This location's arrival point is not ready yet",
@@ -900,6 +906,7 @@ local STRINGS: { [string]: Entry } = {
 	},
 	combat_attack = { ru = "Удар", en = "Attack", es = "Atacar", fr = "Attaquer" },
 	mob_rat = { ru = "Крыса", en = "Rat", es = "Rata", fr = "Rat" },
+	mob_zombie = { ru = "Зомби", en = "Zombie", es = "Zombi", fr = "Zombie" },
 	mob_killed = {
 		ru = "%s убита: +%s $",
 		en = "%s killed: +%s $",
@@ -1201,6 +1208,12 @@ local STRINGS: { [string]: Entry } = {
 		en = "Zombar has risen from the depths, hungry for fresh flesh!",
 		es = "¡Zombar se ha alzado de las profundidades, hambriento de carne fresca!",
 		fr = "Zombar s'est levé des profondeurs, avide de chair fraîche !",
+	},
+	boss_spawned_splinter = { -- [меню] описание Сплинтера: огромная крыса из мрака подземелий
+		ru = "Из мрака подвала выполз Сплинтер — огромная крыса с острыми клыками!",
+		en = "Splinter has crawled out of the basement's darkness, a huge rat with sharp fangs!",
+		es = "¡Splinter ha salido de la oscuridad del sótano, una rata enorme de colmillos afilados!",
+		fr = "Splinter a surgi des ténèbres du sous-sol, un rat énorme aux crocs acérés !",
 	},
 	boss_spawned = {
 		ru = "Босс «%s» появился в каменоломне!",
