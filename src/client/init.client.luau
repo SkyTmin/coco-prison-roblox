@@ -1658,7 +1658,8 @@ local function render(p: Types.Profile)
 	statLevel.Text = string.format("%s  %d", T("level"), p.level)
 	statLevel.TextColor3 = Ui.colors.level
 	-- [владелец 21.10] the bar shows whole money (exact amounts stay in the sell window)
-	statMoney.Text = string.format("%s  %d $", T("coins"), math.floor(p.coins / Config.moneyScale))
+	-- the original's money format ("0.500"): rewards below 1 $ (a rat gives 0.5) were shown as 0 [владелец 22.10]
+	statMoney.Text = string.format("%s  %s $", T("coins"), Strings.money(p.coins))
 	statMoney.TextColor3 = Ui.colors.money
 	statBlocks.Text = string.format("%s  %s", T("blocks"), Strings.big(p.blocksTotal))
 	statRats.Text = string.format("%s  %d", T("rats"), p.stats.rats or 0)

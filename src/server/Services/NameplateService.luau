@@ -1,6 +1,6 @@
 --!strict
--- The name over a player [владелец 22.10: «ник персонажа: L(уровень, цвет фракции) Никнейм»; сеть 2019:
--- «цвет [9 УР] обозначает фракцию; если фракция не выбрана, цвет белый»]: «L5 [кличка] Ник», the level tag in
+-- The name over a player [владелец 22.10: «ник персонажа: lvl (уровень, цвет фракции) Никнейм»; сеть 2019:
+-- «цвет [9 УР] обозначает фракцию; если фракция не выбрана, цвет белый»]: «lvl 5 [кличка] Ник», the level tag in
 -- the faction's colour. A BillboardGui on the head replaces the Roblox name (hidden), refreshed once a
 -- second when the level, the faction or the nickname change; not shown to the player themself.
 
@@ -31,7 +31,7 @@ local function textFor(player: Player): string?
 		then "[" .. profile.nickname .. "] "
 		else ""
 	return string.format(
-		'<font color="%s">L%d</font> %s%s',
+		'<font color="%s">lvl %d</font> %s%s',
 		hex(color),
 		profile.level,
 		nick,
