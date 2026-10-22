@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -30,6 +31,7 @@ local BossHud = require(script.BossHud)
 local BossAnimator = require(script.BossAnimator)
 local MobAnimator = require(script.MobAnimator)
 local TopBoards = require(script.TopBoards)
+local HudLayout = require(script.HudLayout)
 local IndoorLighting = require(script.IndoorLighting)
 local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
@@ -1763,6 +1765,10 @@ end)
 task.defer(localizeWorld)
 
 -- ---------------------------------------------------------------- profile rendering
+-- the movable HUD (HudLayout): set up with the touch controls below
+local relayoutHud: () -> () = function() end
+local openHudEditor: () -> () = function() end
+local shownHudLayout = ""
 local function render(p: Types.Profile)
 	local nextLocale = p.locale or Config.defaultLocale
 	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
@@ -1774,6 +1780,11 @@ local function render(p: Types.Profile)
 	end
 	languageButton.Text = T("language_code")
 	renderCameraButton()
+	local hudJson = HttpService:JSONEncode(p.hudLayout or {})
+	if hudJson ~= shownHudLayout then
+		shownHudLayout = hudJson
+		relayoutHud()
+	end
 	for button, key in pairs(localizedButtons) do
 		button.Text = T(key)
 	end
@@ -2454,12 +2465,12 @@ touchMenus.Size = UDim2.fromOffset(6 * 60, 2 * 60)
 touchMenus.BackgroundTransparency = 1
 touchMenus.Parent = gui
 -- [владелец 21.10] the menu buttons were hit by accident while playing: one "Menu" button stays on
--- screen and unfolds the grid to its right (2 rows × 5, clear of the joystick); choosing an item or
+-- screen and unfolds the grid to its right (2 rows × 6, clear of the joystick); choosing an item or
 -- touching the game world folds it back
 local touchMenuGrid = Instance.new("Frame")
 touchMenuGrid.Name = "Grid"
 touchMenuGrid.Position = UDim2.fromOffset(60, 0)
-touchMenuGrid.Size = UDim2.fromOffset(5 * 60, 2 * 60)
+touchMenuGrid.Size = UDim2.fromOffset(6 * 60, 2 * 60)
 touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
@@ -2583,7 +2594,7 @@ for i, kind in ipairs(menuKeys) do
 		56,
 		if kind == "language_code" then nil else T(captionKey)
 	)
-	button.Position = UDim2.fromOffset(((i - 1) % 5) * 60, math.floor((i - 1) / 5) * 60)
+	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
 		if kind == "language_code" then
@@ -2605,7 +2616,7 @@ end
 do
 	local button =
 		touchIconButton(touchMenuGrid, Config.icons.icons["menu_camera"], "", 56, T("touch_camera"))
-	button.Position = UDim2.fromOffset((#menuKeys % 5) * 60, math.floor(#menuKeys / 5) * 60)
+	button.Position = UDim2.fromOffset((#menuKeys % 6) * 60, math.floor(#menuKeys / 6) * 60)
 	button.Name = "Touch_camera"
 	button.Activated:Connect(function()
 		setTouchMenuOpen(false)
@@ -2635,7 +2646,7 @@ do
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
 	button.Position =
-		UDim2.fromOffset(((#menuKeys + 1) % 5) * 60, math.floor((#menuKeys + 1) / 5) * 60)
+		UDim2.fromOffset(((#menuKeys + 1) % 6) * 60, math.floor((#menuKeys + 1) / 6) * 60)
 	button.Name = "Touch_creative"
 	local function show()
 		button.Visible = player:GetAttribute("CreativeAllowed") == true
@@ -2649,6 +2660,22 @@ do
 	local caption = button:FindFirstChild("Caption")
 	if caption and caption:IsA("TextLabel") then
 		localizedLabels[caption] = "creative"
+	end
+end
+-- the 11th grid cell: move the HUD buttons [владелец 22.10] (HudLayout; key H on a computer)
+do
+	local button =
+		touchIconButton(touchMenuGrid, Config.icons.icons["menu_layout"], "", 56, T("touch_layout"))
+	button.Position =
+		UDim2.fromOffset(((#menuKeys + 2) % 6) * 60, math.floor((#menuKeys + 2) / 6) * 60)
+	button.Name = "Touch_layout"
+	button.Activated:Connect(function()
+		setTouchMenuOpen(false)
+		openHudEditor()
+	end)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "touch_layout"
 	end
 end
 local touchActions = Instance.new("Frame")
@@ -2672,6 +2699,7 @@ do
 	button.ScaleType = Enum.ScaleType.Fit
 	button.ResampleMode = Enum.ResamplerMode.Pixelated
 	button.Parent = touchActions
+	HudLayout.register("attack", button, true, false)
 	local round = Instance.new("UICorner")
 	round.CornerRadius = UDim.new(1, 0)
 	round.Parent = button
@@ -2752,6 +2780,10 @@ inventoryButton.TextSize = 20
 inventoryButton.Activated:Connect(function()
 	open("inventory")
 end)
+HudLayout.register("eat", eatButton, true, false)
+HudLayout.register("menu", touchMenus, true, false, menuToggle)
+HudLayout.register("inventory", inventoryButton, true, false)
+HudLayout.register("stats", stats, true, true)
 
 local statsScale = Instance.new("UIScale")
 statsScale.Parent = stats
@@ -2765,6 +2797,7 @@ for i, slot in ipairs(hotbarSlots) do
 	scale.Parent = slot
 	slotScales[i] = scale
 end
+local hudOverride: { [string]: any } = {} -- mode → the layout just edited (false = reset)
 local function updateLayout()
 	local mobile = isMobile()
 	local currentCamera = workspace.CurrentCamera
@@ -2807,6 +2840,43 @@ local function updateLayout()
 	end
 	cancelDigInput()
 	renderCameraButton()
+	-- the player's own positions over the defaults (a fresh edit wins until the profile catches up)
+	local mode = if mobile then "mobile" else "desktop"
+	local saved = if profile and profile.hudLayout then profile.hudLayout[mode] else nil
+	local edited = hudOverride[mode]
+	local layout = if edited ~= nil then (if edited then edited else nil) else saved
+	HudLayout.setDefault(stats)
+	HudLayout.setDefault(inventoryButton)
+	HudLayout.apply(mode, layout)
+	-- the status effect icons stay just left of the stats panel wherever it goes
+	if layout and layout.stats then
+		effectsHud.Position = UDim2.new(
+			stats.Position.X.Scale,
+			stats.Position.X.Offset - 4,
+			stats.Position.Y.Scale,
+			stats.Position.Y.Offset
+		)
+	end
+end
+relayoutHud = function()
+	updateLayout()
+end
+openHudEditor = function()
+	if HudLayout.isEditing() then
+		return
+	end
+	closeWindow()
+	local mode = if isMobile() then "mobile" else "desktop"
+	HudLayout.edit(
+		gui,
+		mode,
+		{ title = T("layout_title"), done = T("layout_done"), reset = T("layout_reset") },
+		function(layout)
+			hudOverride[mode] = if layout then layout else false
+			Remotes.event("SetHudLayout"):FireServer(mode, layout)
+			updateLayout()
+		end
+	)
 end
 local viewportConnection: RBXScriptConnection? = nil
 local function watchViewport()
@@ -2828,7 +2898,7 @@ RunService.RenderStepped:Connect(function()
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
 	local food, needItem = isFood(), isNeedConsumable()
-	eatButton.Visible = controlsVisible and (food or needItem)
+	eatButton.Visible = controlsVisible and (food or needItem or HudLayout.isEditing())
 	if eatButton.Visible then
 		local stack = if profile then profile.inventory[profile.selectedSlot] else nil
 		local key = if food then "eat" else "touch_use"
@@ -2877,6 +2947,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("artifacts")
 	elseif k == Enum.KeyCode.M then
 		open("locations")
+	elseif k == Enum.KeyCode.H then
+		openHudEditor() -- move the HUD [владелец 22.10]
 	elseif k == Enum.KeyCode.K and player:GetAttribute("CreativeAllowed") then
 		open("creative") -- test mode (CreativeService)
 	elseif k == Enum.KeyCode.V or k == Enum.KeyCode.F5 then
@@ -2947,6 +3019,9 @@ if RunService:IsStudio() then
 		elseif action == "close" then
 			closeWindow()
 			return true
+		elseif action == "hudEdit" then
+			openHudEditor()
+			return HudLayout.isEditing()
 		elseif action == "aim" then
 			local aim = aimAt(if typeof(arg) == "Vector2" then arg else nil)
 			return if aim then { part = aim.part, hit = aim.hit } else nil

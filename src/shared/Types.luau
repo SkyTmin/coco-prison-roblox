@@ -52,6 +52,7 @@ export type Profile = {
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3
 	factionChanges: number?, -- «Смен фракций» [клиент]; schema stays v3
+	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y} screen fractions (HudLayout); schema stays v3
 	location: string,
 	operationIds: { [string]: boolean },
 }

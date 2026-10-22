@@ -294,6 +294,21 @@ local STRINGS: { [string]: Entry } = {
 	},
 	kd_label = { ru = "У/С", en = "K/D", es = "B/M", fr = "É/M" },
 	-- the right-hand scoreboard [клиент: prison.classic.scoreboard.*]
+	-- the movable HUD [владелец 22.10: «настройка, чтобы двигать кнопки»]
+	touch_layout = { ru = "Кнопки", en = "Buttons", es = "Botones", fr = "Boutons" },
+	layout_title = {
+		ru = "Перетащите кнопки, куда удобно",
+		en = "Drag the buttons where you like",
+		es = "Arrastra los botones donde quieras",
+		fr = "Déplacez les boutons où vous voulez",
+	},
+	layout_done = { ru = "Готово", en = "Done", es = "Listo", fr = "Terminé" },
+	layout_reset = {
+		ru = "Сбросить",
+		en = "Reset",
+		es = "Restablecer",
+		fr = "Réinitialiser",
+	},
 	sb_title = {
 		ru = "PRISON CLASSIC",
 		en = "PRISON CLASSIC",
@@ -1694,10 +1709,10 @@ local STRINGS: { [string]: Entry } = {
 	mat_iron = { ru = "Железн.", en = "Iron", es = "De hierro", fr = "En fer" },
 	mat_diamond = { ru = "Алмазн.", en = "Diamond", es = "De diamante", fr = "En diamant" },
 	keys_hint = {
-		ru = "Локации [M]  Работа [O]  Улучшить [J]  Уровень [U]  Инвентарь [E]  Использовать [F]  Достижения [L]  Фракции [G]  Вид [V]",
-		en = "Locations [M]  Jobs [O]  Upgrade [J]  Level [U]  Inventory [E]  Use [F]  Achievements [L]  Factions [G]  View [V]",
-		es = "Ubicaciones [M]  Trabajos [O]  Mejorar [J]  Nivel [U]  Inventario [E]  Usar [F]  Logros [L]  Facciones [G]  Vista [V]",
-		fr = "Lieux [M]  Métiers [O]  Améliorer [J]  Niveau [U]  Inventaire [E]  Utiliser [F]  Succès [L]  Factions [G]  Vue [V]",
+		ru = "Локации [M]  Работа [O]  Улучшить [J]  Уровень [U]  Инвентарь [E]  Использовать [F]  Достижения [L]  Фракции [G]  Вид [V]  Кнопки [H]",
+		en = "Locations [M]  Jobs [O]  Upgrade [J]  Level [U]  Inventory [E]  Use [F]  Achievements [L]  Factions [G]  View [V]  Buttons [H]",
+		es = "Ubicaciones [M]  Trabajos [O]  Mejorar [J]  Nivel [U]  Inventario [E]  Usar [F]  Logros [L]  Facciones [G]  Vista [V]  Botones [H]",
+		fr = "Lieux [M]  Métiers [O]  Améliorer [J]  Niveau [U]  Inventaire [E]  Utiliser [F]  Succès [L]  Factions [G]  Vue [V]  Boutons [H]",
 	},
 }
 

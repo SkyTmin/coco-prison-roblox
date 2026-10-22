@@ -92,7 +92,8 @@
     "hud_faction": "rbxassetid://115131699734891",
     "hud_rat": "rbxassetid://111665412119345",
     "hud_kd": "rbxassetid://100085081985372",
-    "top_crown": "rbxassetid://132695456454870"
+    "top_crown": "rbxassetid://132695456454870",
+    "menu_layout": "rbxassetid://88567271908859"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557"
 }

@@ -21,6 +21,7 @@
 -- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
+-- Client → server:        SetHudLayout(mode, layout?) — the player's moved HUD buttons (ProfileService, HudLayout.luau)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

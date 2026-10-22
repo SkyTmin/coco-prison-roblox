@@ -448,6 +448,52 @@ function ProfileService.Start()
 		end
 		debugApi.Parent = game:GetService("ServerStorage")
 	end
+	-- [владелец 22.10: «настройка в меню, чтобы двигать кнопки»] the player's HUD layout (src/client/HudLayout.luau):
+	-- per mode ("mobile" / "desktop") element id → {x, y}, the anchor point as a fraction of the screen; nil
+	-- for a mode resets it. Only known ids and positions on the screen are kept; one save a second.
+	local HUD_IDS =
+		{ attack = true, eat = true, menu = true, inventory = true, stats = true, effects = true }
+	local lastLayoutAt: { [Player]: number } = {}
+	Players.PlayerRemoving:Connect(function(player)
+		lastLayoutAt[player] = nil
+	end)
+	Remotes.event("SetHudLayout").OnServerEvent
+		:Connect(function(player: Player, mode: any, layout: any)
+			if mode ~= "mobile" and mode ~= "desktop" then
+				return
+			end
+			if os.clock() - (lastLayoutAt[player] or 0) < 1 then
+				return
+			end
+			lastLayoutAt[player] = os.clock()
+			local clean: { [string]: { number } }? = nil
+			if typeof(layout) == "table" then
+				clean = {}
+				for id, pos in pairs(layout) do
+					if
+						typeof(id) == "string"
+						and HUD_IDS[id]
+						and typeof(pos) == "table"
+						and typeof(pos[1]) == "number"
+						and typeof(pos[2]) == "number"
+						and pos[1] >= 0
+						and pos[1] <= 1
+						and pos[2] >= 0
+						and pos[2] <= 1
+					then
+						(clean :: any)[id] = {
+							math.floor(pos[1] * 10000) / 10000,
+							math.floor(pos[2] * 10000) / 10000,
+						}
+					end
+				end
+			end
+			ProfileService.Mutate(player, function(p)
+				local all = table.clone((p :: any).hudLayout or {}) -- a new table: the profile diff sees the change
+				all[mode] = clean;
+				(p :: any).hudLayout = all
+			end)
+		end)
 	Remotes.event("SetLocale").OnServerEvent:Connect(function(player: Player, locale: any)
 		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then
 			return

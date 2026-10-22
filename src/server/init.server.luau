@@ -46,6 +46,7 @@ for _, name in ipairs({
 	"FactionChestOpened",
 	"FactionChestMove",
 	"FactionChestClose",
+	"SetHudLayout",
 }) do
 	Remotes.event(name)
 end
