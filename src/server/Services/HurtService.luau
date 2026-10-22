@@ -40,10 +40,20 @@ local function flash(model: Model)
 	end)
 end
 
+-- [владелец 22.10: бой приятнее] each kind of target has its own hurt sound: a rat squeaks, a boss takes a
+-- heavy thud, a player gets the vanilla hurt sound; the pitch varies a little like vanilla
 local function playHurt(model: Model)
 	local root = model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart
-	if root and root:IsA("BasePart") then
-		Sfx.broadcast("player_hurt", root, 0.7, 0.9 + math.random() * 0.2) -- vanilla varies the pitch a little
+	if not root or not root:IsA("BasePart") then
+		return
+	end
+	local pitch = 0.9 + math.random() * 0.2
+	if model:GetAttribute("MobId") == "rat" then
+		Sfx.broadcast("rat_hurt", root, 0.6, pitch)
+	elseif CollectionService:HasTag(model, "Boss") then
+		Sfx.broadcast("hit_heavy", root, 0.9, pitch * 0.85)
+	else
+		Sfx.broadcast("player_hurt", root, 0.7, pitch)
 	end
 end
 
@@ -79,12 +89,15 @@ end
 
 -- Melee knockback away from the attacker. Players own their character physics, so their client
 -- applies it (remote Knockback); mobs and bosses are pushed here.
+-- Bosses are not pushed at all (every hit used to shove the golem out of reach), mobs a little less than
+-- players so a rat stays within reach of the next blow.
 function HurtService.Knockback(model: Model, direction: Vector3)
 	local flat = Vector3.new(direction.X, 0, direction.Z)
-	if flat.Magnitude < 0.01 then
+	if flat.Magnitude < 0.01 or CollectionService:HasTag(model, "Boss") then
 		return
 	end
-	local push = flat.Unit * KNOCKBACK_SPEED + Vector3.new(0, KNOCKBACK_LIFT, 0)
+	local scale = if CollectionService:HasTag(model, "Mob") then 0.6 else 1
+	local push = flat.Unit * KNOCKBACK_SPEED * scale + Vector3.new(0, KNOCKBACK_LIFT * scale, 0)
 	local victim = Players:GetPlayerFromCharacter(model)
 	if victim then
 		Remotes.event("Knockback"):FireClient(victim, push)

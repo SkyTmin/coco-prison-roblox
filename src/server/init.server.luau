@@ -41,6 +41,7 @@ for _, name in ipairs({
 	"ServerLog",
 	"Swing",
 	"FactionChoose",
+	"HitConfirm",
 	"FactionLeave",
 	"FactionChestOpened",
 	"FactionChestMove",

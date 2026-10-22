@@ -566,6 +566,69 @@
             0.285
           ]
         ]
+      },
+      "swing": {
+        "id": "rbxassetid://9120972444",
+        "segments": [
+          [
+            0,
+            0.5
+          ]
+        ]
+      },
+      "hit": {
+        "id": "rbxassetid://111982142063703",
+        "segments": [
+          [
+            0,
+            0.34
+          ]
+        ]
+      },
+      "hit_heavy": {
+        "id": "rbxassetid://133951524018082",
+        "segments": [
+          [
+            0,
+            0.28
+          ]
+        ]
+      },
+      "crit": {
+        "id": "rbxassetid://101374399980498",
+        "segments": [
+          [
+            0,
+            0.3
+          ]
+        ]
+      },
+      "block": {
+        "id": "rbxassetid://9118269934",
+        "segments": [
+          [
+            0,
+            0.55
+          ]
+        ]
+      },
+      "rat_hurt": {
+        "id": "rbxassetid://9118057950",
+        "segments": [
+          [
+            0,
+            0.45
+          ]
+        ]
+      },
+      "rat_death": {
+        "id": "rbxassetid://9118055004",
+        "segments": [
+          [
+            0,
+            0.9
+          ]
+        ]
       }
     },
     "materials": {
@@ -669,6 +732,7 @@
       "lapis_block": "metal",
       "netherite": "metal"
     },
-    "atlasId": "rbxassetid://97593679894065"
+    "atlasId": "rbxassetid://97593679894065",
+    "_combat": "[владелец 22.10: бой удобнее и приятнее] combat sounds from the Creator Store (Pro Sound Effects: swing 9120972444, block 9118269934, rat 9118057950 / 9118055004; free community clips: hit 111982142063703, hit_heavy 133951524018082, crit 101374399980498) — single files, not the atlas"
   }
 }

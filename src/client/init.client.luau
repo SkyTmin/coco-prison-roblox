@@ -34,6 +34,7 @@ local Combat = require(ReplicatedStorage.Shared.Combat)
 CharacterAnimator.Start() -- keyframed swings on every character (ours and the relayed ones)
 local TrainerWindow = require(script.TrainerWindow)
 local FactionWindow = require(script.FactionWindow)
+local CombatFeel = require(script.CombatFeel)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
@@ -2174,21 +2175,39 @@ end)
 -- Melee attack along the look direction (click / tap with nothing to dig), Better Combat-style
 -- [владелец 22.10]: attacks come at the weapon's pace (vanilla attack speed), each plays the next animation
 -- of the weapon's combo (sword: cut right, cut left, stab); the server hits along the arc (Combat).
+-- [владелец 22.10: «бой неудобный»; docs/research/combat-feel.md] the soft lock of CombatFeel picks the
+-- target, the character turns to it and the blow is aimed at it (the server re-aims at where it is when the
+-- blow lands); a press a little early is buffered instead of lost; the impact is predicted on the client.
 local attackState: Combat.ComboState = { lastAt = -math.huge, index = 0 }
+local attackQueued = false
+local BUFFER = 0.2 -- s before the weapon is ready in which a press is kept for later
+local function heldKind(): (string, number)
+	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
+	local kind = Combat.kind(toolId)
+	return kind, Combat.duration(kind, stack and stack.level)
+end
 local function attack()
 	local currentCamera = workspace.CurrentCamera
 	if not currentCamera or currentWindowKind then
 		return
 	end
-	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
-	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
-	local kind = Combat.kind(toolId)
-	local duration = Combat.duration(kind, stack and stack.level)
+	local kind, duration = heldKind()
 	local now = os.clock()
-	if now - attackState.lastAt < duration * 0.85 then
+	local readyAt = attackState.lastAt + duration * 0.85
+	if now < readyAt then
+		if readyAt - now <= BUFFER and not attackQueued then
+			attackQueued = true
+			task.delay(readyAt - now + 0.01, function()
+				attackQueued = false
+				attack()
+			end)
+		end
 		return -- still in the previous attack
 	end
 	local _, blow = Combat.next(attackState, kind, duration, now)
+	local target = CombatFeel.Target()
+	local aimed = if target then CombatFeel.FaceTarget(target) else nil
 	HeldItem.Attack(blow.animation, duration)
 	-- falling after a jump = a critical hit (×1.5) on the server, like Minecraft
 	local character = player.Character
@@ -2199,8 +2218,16 @@ local function attack()
 		and root:IsA("BasePart")
 		and humanoid.FloorMaterial == Enum.Material.Air
 		and root.AssemblyLinearVelocity.Y < -1
-	Remotes.event("Attack"):FireServer(currentCamera.CFrame.LookVector, falling)
+	CombatFeel.OnAttack(target, duration * blow.upswing, falling)
+	Remotes.event("Attack"):FireServer(aimed or currentCamera.CFrame.LookVector, falling, target)
 end
+-- holding the attack (mouse with nothing to dig, the touch attack button) keeps swinging at the weapon's pace
+local attackHeld = false
+RunService.Heartbeat:Connect(function()
+	if attackHeld and not currentWindowKind and not holding then
+		attack()
+	end
+end)
 
 -- PC / gamepad: hold the mouse button (R2) on a block
 local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
@@ -2226,10 +2253,12 @@ local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 			startDig(aim)
 		else
 			holding = false
+			attackHeld = true
 			attack()
 		end
 	elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
 		holding = false
+		attackHeld = false
 		stopDig(true)
 	end
 	return Enum.ContextActionResult.Sink
@@ -2535,6 +2564,12 @@ do
 	CreativeWindow.Listen()
 	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
 	BossAnimator.Start() -- smooth boss joints from its Action attributes
+	CombatFeel.Start(gui, function() -- soft lock, predicted hits, damage numbers, mob health bars
+		local kind = heldKind()
+		return kind
+	end, function()
+		return locale
+	end)
 	IndoorLighting.Start() -- brighter ambient light under the quarry cave roof
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
@@ -2560,6 +2595,73 @@ touchActions.Name = "TouchActions"
 touchActions.Size = UDim2.fromScale(1, 1)
 touchActions.BackgroundTransparency = 1
 touchActions.Parent = gui
+-- [владелец 22.10: бой удобнее] a big round attack button next to Jump: a tap swings, holding keeps
+-- swinging at the weapon's pace; the dark ring fills back while the weapon recovers. Taps on the screen
+-- still swing too.
+do
+	local button = Instance.new("ImageButton")
+	button.Name = "Touch_attack"
+	button.AnchorPoint = Vector2.new(1, 1)
+	button.Size = UDim2.fromOffset(84, 84)
+	button.Position = UDim2.new(1, -112, 1, -24)
+	button.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
+	button.BackgroundTransparency = 0.25
+	button.AutoButtonColor = true
+	button.Image = Config.iconFor("iron_sword") or ""
+	button.ScaleType = Enum.ScaleType.Fit
+	button.ResampleMode = Enum.ResamplerMode.Pixelated
+	button.Parent = touchActions
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(1, 0)
+	round.Parent = button
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 3
+	stroke.Color = Color3.fromRGB(255, 220, 200)
+	stroke.Transparency = 0.3
+	stroke.Parent = button
+	local pad = Instance.new("UIPadding")
+	for _, side in ipairs({ "PaddingTop", "PaddingBottom", "PaddingLeft", "PaddingRight" }) do
+		(pad :: any)[side] = UDim.new(0, 16)
+	end
+	pad.Parent = button
+	local cooldown = Instance.new("Frame")
+	cooldown.Name = "Cooldown"
+	cooldown.AnchorPoint = Vector2.new(0.5, 0.5)
+	cooldown.Position = UDim2.fromScale(0.5, 0.5)
+	cooldown.Size = UDim2.fromScale(0, 0)
+	cooldown.BackgroundColor3 = Color3.new(0, 0, 0)
+	cooldown.BackgroundTransparency = 0.45
+	cooldown.ZIndex = button.ZIndex + 1
+	cooldown.Parent = button
+	local cr = Instance.new("UICorner")
+	cr.CornerRadius = UDim.new(1, 0)
+	cr.Parent = cooldown
+	button.InputBegan:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1
+		then
+			attackHeld = true
+			attack()
+		end
+	end)
+	button.InputEnded:Connect(function(input)
+		if
+			input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1
+		then
+			attackHeld = false
+		end
+	end)
+	RunService.RenderStepped:Connect(function()
+		if not touchActions.Visible then
+			return
+		end
+		local _, duration = heldKind()
+		local left = math.clamp(1 - (os.clock() - attackState.lastAt) / (duration * 0.85), 0, 1)
+		cooldown.Size = UDim2.fromScale(left * 1.4, left * 1.4)
+	end)
+end
 local function useConsumable()
 	if profile then
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
@@ -2772,7 +2874,10 @@ if RunService:IsStudio() then
 	local hook = Instance.new("BindableFunction")
 	hook.Name = "ClientDebug"
 	hook.OnInvoke = function(action: string, arg: any): any
-		if action == "toggleCamera" then
+		if action == "attack" then
+			attack()
+			return CombatFeel.Target()
+		elseif action == "toggleCamera" then
 			toggleFirstPerson()
 			return firstPerson
 		elseif action == "open" then

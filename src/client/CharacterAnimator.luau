@@ -72,6 +72,15 @@ function CharacterAnimator.Play(character: Model?, kind: string, duration: numbe
 	end
 end
 
+-- hitstop on our own swing: the blow freezes for a moment when it lands (Sakurai) — the swing's clock
+-- is pushed forward by that time
+function CharacterAnimator.HoldLocal(seconds: number)
+	local entry = playing[Players.LocalPlayer.Character :: any]
+	if entry then
+		entry.startedAt += seconds
+	end
+end
+
 -- our own swing: play now, tell the others
 function CharacterAnimator.PlayLocal(kind: string, duration: number)
 	CharacterAnimator.Play(Players.LocalPlayer.Character, kind, duration)

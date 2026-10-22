@@ -17,6 +17,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local Sfx = require(Shared.Sfx)
 local ProfileService = require(script.Parent.ProfileService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
@@ -36,6 +37,8 @@ type Mob = {
 	target: Player?,
 	nextBiteAt: number,
 	nextWanderAt: number,
+	staggerUntil: number, -- hit: stunned for a moment, the bite is cancelled
+	windupAt: number?, -- the bite lands this long after the rat rears up (0 = not winding up)
 }
 local mobs: { Mob } = {}
 
@@ -184,7 +187,19 @@ function spawnMob(mob: Mob)
 	root:SetNetworkOwner(nil)
 	mob.model, mob.humanoid, mob.root = model, humanoid, root
 	mob.target, mob.nextBiteAt, mob.nextWanderAt = nil, 0, 0
+	mob.staggerUntil, mob.windupAt = 0, nil
+	-- [владелец 22.10: бой приятнее] a hit staggers the rat for a moment (it stops and its bite is cancelled)
+	local last = humanoid.Health
+	humanoid.HealthChanged:Connect(function(health)
+		if health < last - 0.01 and health > 0 then
+			mob.staggerUntil = os.clock() + (mob.cfg.staggerSeconds or 0.4)
+			mob.windupAt = nil
+			humanoid:MoveTo(root.Position)
+		end
+		last = health
+	end)
 	humanoid.Died:Once(function()
+		Sfx.broadcast("rat_death", root, 0.7)
 		rewardKiller(mob, humanoid)
 		mob.model, mob.humanoid, mob.root, mob.target = nil, nil, nil, nil
 		for _, p in ipairs(model:GetDescendants()) do
@@ -224,17 +239,39 @@ local function think(mob: Mob, now: number)
 	end
 	local home = mob.spawn.Position
 	local fromHome = ((root.Position - home) * Vector3.new(1, 0, 1)).Magnitude
+	if now < mob.staggerUntil then
+		return -- staggered by a hit
+	end
 	local player, targetRoot = nearestPlayer(mob, mob.cfg.aggroRange or 18)
 	if player and targetRoot and fromHome < (mob.cfg.leashRange or 30) then
 		local d = (targetRoot.Position - root.Position).Magnitude
-		if d <= (mob.cfg.attackRange or 4.5) then
-			humanoid:MoveTo(root.Position)
-			if now >= mob.nextBiteAt then
+		local reach = mob.cfg.attackRange or 4.5
+		if mob.windupAt then
+			-- the bite lands at the end of the wind-up if the player is still close (a step back dodges it)
+			if now >= mob.windupAt then
+				mob.windupAt = nil
 				mob.nextBiteAt = now + (mob.cfg.attackCooldown or 1.2)
 				local h = targetRoot.Parent and targetRoot.Parent:FindFirstChildOfClass("Humanoid")
-				if h then
+				if h and d <= reach + 1 then
 					CombatService.ApplyDamage(h, mob.cfg.damage or 2, "mob")
 				end
+			end
+			return
+		end
+		if d <= reach then
+			humanoid:MoveTo(root.Position)
+			-- face the player (standing still, the humanoid does not turn by itself)
+			local flat = Vector3.new(targetRoot.Position.X, root.Position.Y, targetRoot.Position.Z)
+			if (flat - root.Position).Magnitude > 0.1 then
+				root.CFrame = CFrame.lookAt(root.Position, flat)
+			end
+			if now >= mob.nextBiteAt then
+				-- a readable bite: a squeak and a short rear-up (attribute MobWindup for the client), then the bite
+				mob.windupAt = now + (mob.cfg.windupSeconds or 0.35)
+				if mob.model then
+					mob.model:SetAttribute("MobWindup", workspace:GetServerTimeNow())
+				end
+				Sfx.broadcast("rat_hurt", root, 0.35, 1.5)
 			end
 		else
 			humanoid:MoveTo(targetRoot.Position)
@@ -275,6 +312,8 @@ local function register(part: Instance)
 		root = nil,
 		target = nil,
 		nextBiteAt = 0,
+		staggerUntil = 0,
+		windupAt = nil,
 		nextWanderAt = 0,
 	}
 	table.insert(mobs, mob)

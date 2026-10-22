@@ -160,14 +160,24 @@ local function insideArc(
 		return angleBetween(flatLook, centre * Vector3.new(1, 0, 1)) <= 30
 			and angleBetween(look, centre) <= attack.angle / 2 + 30
 	end
-	-- forward box (stab, punch): the box must come within 2 studs of the look line
+	-- forward box (stab, punch): the box must come within 2.5 studs of the look line, measured flat — a
+	-- rat on the ground is far below a level look line from the head and the stab used to miss it
+	-- [владелец 22.10: бой неудобный]; height only has to be in reach
 	local along = offset:Dot(look)
 	if along < -1 then
 		return false
 	end
-	local onLine = eye + look * math.max(0, centre:Dot(look))
-	local lateral = (closestPoint(cf, size, onLine) - onLine).Magnitude
-	return lateral <= 2
+	local flatDir = if flatLook.Magnitude > 1e-3 then flatLook.Unit else Vector3.new(0, 0, -1)
+	local flatEye = Vector3.new(eye.X, 0, eye.Z)
+	local flatCentre = Vector3.new(cf.Position.X, 0, cf.Position.Z)
+	local onLine = flatEye + flatDir * math.max(0, (flatCentre - flatEye):Dot(flatDir))
+	local flatCf = CFrame.new(flatCentre) * (cf - cf.Position)
+	local lateral = (closestPoint(
+		flatCf,
+		size * Vector3.new(1, 0, 1) + Vector3.new(0, 0.1, 0),
+		onLine
+	) - onLine).Magnitude
+	return lateral <= 2.5
 end
 
 -- Minecraft crit particles: a burst of little stars at the target
@@ -195,7 +205,7 @@ local function critBurst(at: Vector3)
 	game:GetService("Debris"):AddItem(p, 1)
 end
 
-local function onAttack(player: Player, direction: any, falling: any)
+local function onAttack(player: Player, direction: any, falling: any, hint: any)
 	if
 		typeof(direction) ~= "Vector3"
 		or direction ~= direction
@@ -216,8 +226,8 @@ local function onAttack(player: Player, direction: any, falling: any)
 	local now = os.clock()
 	local state = combos[player] or { lastAt = -math.huge, index = 0 }
 	combos[player] = state
-	if now - state.lastAt < duration * 0.8 then
-		return -- still swinging: attacks come at the weapon's pace
+	if now - state.lastAt < duration * 0.7 then
+		return -- still swinging: attacks come at the weapon's pace (lenient: the client clock jitters)
 	end
 	local _, attack = Combat.next(state, kind, duration, now)
 	local baseDamage = weapon(profile)
@@ -239,6 +249,22 @@ local function onAttack(player: Player, direction: any, falling: any)
 		end
 		local eye = head.Position
 		local range = Combat.range(kind)
+		-- [владелец 22.10: бой удобнее] the client's soft lock names its target: the blow goes at where that
+		-- target is NOW (a running rat used to slip out of the arc during the upswing and the ping)
+		if typeof(hint) == "Instance" and hint:IsA("Model") and hint:IsDescendantOf(workspace) then
+			local th = hint:FindFirstChildOfClass("Humanoid")
+			if th and th.Health > 0 and hint ~= character then
+				local hcf, hsize = targetBox(hint)
+				local toCentre = hcf.Position - eye
+				if
+					(closestPoint(hcf, hsize, eye) - eye).Magnitude <= range + 3
+					and toCentre.Magnitude > 0.1
+				then
+					look = toCentre.Unit
+				end
+			end
+		end
+		local confirm = Remotes.event("HitConfirm")
 		local candidates: { Model } = {}
 		for _, other in ipairs(Players:GetPlayers()) do
 			if other ~= player and other.Character then
@@ -272,14 +298,46 @@ local function onAttack(player: Player, direction: any, falling: any)
 							and profile.faction ~= nil
 							and theirs.faction == profile.faction
 						if mine and mine.pvp and other and other.pvp and not sameFaction then
+							local before = target.Health
 							CombatService.ApplyDamage(target, damage, "player", player)
 							HurtService.Knockback(model, look)
+							local dealt = before - target.Health
+							confirm:FireClient(
+								player,
+								model,
+								dealt,
+								crit,
+								if target.Health <= 0
+									then "killed"
+									elseif dealt > 0 then "hit"
+									else "blocked"
+							)
+						else
+							confirm:FireClient(
+								player,
+								model,
+								0,
+								false,
+								if sameFaction then "ally" else "nopvp"
+							)
 						end
+					elseif model:FindFirstChildOfClass("ForceField") then
+						-- a boss casting is invulnerable: no damage, no shove, and the attacker is told so
+						confirm:FireClient(player, model, 0, false, "blocked")
 					else
 						target:SetAttribute("LastHitBy", player.UserId)
 						target:SetAttribute("LastHitAt", os.clock())
+						local before = target.Health
 						target:TakeDamage(damage)
 						HurtService.Knockback(model, look)
+						local dealt = before - target.Health
+						confirm:FireClient(
+							player,
+							model,
+							dealt,
+							crit,
+							if target.Health <= 0 then "killed" else "hit"
+						)
 					end
 				end
 			end

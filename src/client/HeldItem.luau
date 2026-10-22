@@ -28,6 +28,7 @@ local swingActive = false -- digging: keep swinging
 local swingPhase = -1 -- 0..1 inside a cycle, -1 = resting
 local swingKind = "slam" -- the animation of the current cycle
 local swingLength = SWING_SECONDS
+local heldUntil = 0 -- hitstop: the swing cycle stands still until then
 
 local function startCycle()
 	swingPhase = 0
@@ -57,6 +58,12 @@ function HeldItem.Swing()
 	if swingPhase < 0 then
 		startCycle()
 	end
+end
+
+-- Hitstop when a blow lands: the first-person swing and the body animation stand still for a moment
+function HeldItem.Hitstop(seconds: number)
+	heldUntil = os.clock() + seconds
+	CharacterAnimator.HoldLocal(seconds)
 end
 
 -- A melee attack of the combo (Combat): its animation over the weapon's attack length
@@ -309,7 +316,7 @@ function HeldItem.Start()
 	end)
 	-- the swing cycle
 	RunService.Heartbeat:Connect(function(dt)
-		if swingPhase >= 0 then
+		if swingPhase >= 0 and os.clock() >= heldUntil then
 			swingPhase += dt / swingLength
 			if swingPhase >= 1 then
 				if swingActive then

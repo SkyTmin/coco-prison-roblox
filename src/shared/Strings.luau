@@ -825,6 +825,14 @@ local STRINGS: { [string]: Entry } = {
 		es = "−%s $: te mató %s",
 		fr = "−%s $ : tué par %s",
 	},
+	combat_blocked = { ru = "Блок", en = "Blocked", es = "Bloqueado", fr = "Bloqué" },
+	combat_no_pvp = {
+		ru = "Здесь нельзя драться",
+		en = "No fighting here",
+		es = "Aquí no se pelea",
+		fr = "Pas de combat ici",
+	},
+	combat_attack = { ru = "Удар", en = "Attack", es = "Atacar", fr = "Attaquer" },
 	mob_rat = { ru = "Крыса", en = "Rat", es = "Rata", fr = "Rat" },
 	mob_killed = {
 		ru = "%s убита: +%s $",
@@ -1937,7 +1945,11 @@ local COUNTERS: { [string]: { [string]: string } } = {
 }
 local LOCATIONS: { [string]: { [string]: string } } = {
 	["Тюрьма"] = { en = "Prison", es = "Prisión", fr = "Prison" },
-	["Начальная локация"] = { en = "Starting location", es = "Zona inicial", fr = "Zone de départ" },
+	["Начальная локация"] = {
+		en = "Starting location",
+		es = "Zona inicial",
+		fr = "Zone de départ",
+	},
 	["Каменоломня"] = { en = "Quarry", es = "Cantera", fr = "Carrière" },
 	["Подножье горы"] = {
 		en = "Mountain foot",
