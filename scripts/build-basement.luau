@@ -49,7 +49,7 @@ local TORCH = Color3.fromRGB(255, 180, 100)
 local BEDROCK = Color3.fromRGB(62, 58, 66)
 local WALL_TINT = Color3.fromRGB(196, 192, 188) -- rock a little darker than the floor
 local CEIL_TINT = Color3.fromRGB(170, 166, 164)
-local TOP = 60 -- every rock column reaches this high: no gap ever shows the sky
+local TOP = 72 -- every rock column reaches this high: no gap ever shows the sky
 
 local function part(name, size, cf, color, material, parent)
 	local p = Instance.new("Part")
@@ -130,14 +130,14 @@ for _, m in ipairs({ M1, M2 }) do
 	m.w = m.size * B
 	m.hole = m.w / 2 + 2 * B -- half size of the hole in the floor (the pit plus its bedrock walls)
 end
-local LAIR = { cx = 0, cz = -448, r = 50, floor = -8 }
+local LAIR = { cx = 0, cz = -496, r = 100, floor = -8 } -- [владелец 22.10: «увеличь арену босса и комнату в 2 раза»] r 50 → 100
 local SHAPES = {
 	{ id = "tunnel1", kind = "line", r = 14, pts = { { 0, -12 }, { 5, -34 }, { -7, -58 }, { 2, -80 }, { 0, -92 } }, h = { 13, 21 } },
 	{ id = "cave1", kind = "ellipse", cx = 0, cz = M1.cz, rx = 62, rz = 56, h = { 15, 38 } },
 	{ id = "tunnel2", kind = "line", r = 14, pts = { { 0, -186 }, { -9, -208 }, { 7, -230 }, { 0, -252 } }, h = { 13, 21 } },
 	{ id = "cave2", kind = "ellipse", cx = 0, cz = M2.cz, rx = 52, rz = 48, h = { 15, 34 } },
 	{ id = "tunnel3", kind = "line", r = 14, pts = { { 0, -334 }, { 9, -354 }, { -5, -376 }, { 0, -400 } }, h = { 13, 21 } },
-	{ id = "lair", kind = "ellipse", cx = LAIR.cx, cz = LAIR.cz, rx = LAIR.r, rz = LAIR.r, h = { 18, 42 } },
+	{ id = "lair", kind = "ellipse", cx = LAIR.cx, cz = LAIR.cz, rx = LAIR.r, rz = LAIR.r, h = { 20, 58 } },
 	-- side grottos off the route, each with its own little story (see "grottos" below)
 	{ id = "storeroom", kind = "ellipse", cx = 17, cz = -66, rx = 14, rz = 10, h = { 11, 17 } },
 	{ id = "spring", kind = "ellipse", cx = -27, cz = -212, rx = 15, rz = 11, h = { 11, 18 } },
@@ -194,8 +194,8 @@ local function floorAt(z)
 end
 
 -- ================================================================ carve the grid
-local X0, ZTOP = -76, 28
-local NX, NZ = 38, 134
+local X0, ZTOP = -116, 28
+local NX, NZ = 58, 164
 local function cx(ix)
 	return X0 + ix * C + C / 2
 end
@@ -315,7 +315,7 @@ local function onTrail(c)
 		local d = math.max(math.abs(c.x), math.abs(c.z - m.cz))
 		return d > m.hole and d < m.hole + 8
 	elseif c.shape == "lair" then
-		return math.abs(c.x) < 4 and c.z > LAIR.cz + 16
+		return math.abs(c.x) < 4 and c.z > LAIR.cz + 32
 	end
 	return false
 end
@@ -328,7 +328,7 @@ for _, c in pairs(cells) do
 	elseif c.shape == "hall" then
 		c.ceil = hallCeil(c.x)
 	else
-		local R = if s.kind == "line" then 3 else 7
+		local R = if s.kind == "line" then 3 elseif s.id == "lair" then 14 else 7
 		local k = math.min(1, (c.edge - 1) / R) ^ 0.7
 		local ceil = s.h[1] + (s.h[2] - s.h[1]) * k + n2(c.x, c.z, 6.3, 0.09) * 3
 		c.ceil = c.floor + math.max(11, 2 * math.floor(ceil / 2 + 0.5))
@@ -861,7 +861,7 @@ minecart(M1.hole + 13, M1.cz + 14, -0.2, "px_gravel")
 -- ================================================================ the lair of Сплинтер
 local lairF = folder("Lair")
 local LF = LAIR.floor
-local PLATFORM_R = 16
+local PLATFORM_R = 32 -- the arena dais, ×2 with the lair
 local dais = part("LairDais", Vector3.new(1.4, 2 * PLATFORM_R, 2 * PLATFORM_R), at(0, LF + 0.7, LAIR.cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, lairF)
 dais.Shape = Enum.PartType.Cylinder
 textured(dais, "px_stone_bricks")
@@ -872,12 +872,12 @@ textured(daisTop, "px_smooth_stone")
 for i = 0, 5 do
 	local a = i / 6 * math.pi * 2 + rng:NextNumber(-0.3, 0.3)
 	for k = -1, 1 do
-		decor(part("Scratch", Vector3.new(0.25, 0.08, 5), CFrame.new(BX, LF + 1.72, BZ + LAIR.cz) * CFrame.Angles(0, a, 0) * CFrame.new(k * 0.6, 0, -8), Color3.fromRGB(45, 42, 40), nil, lairF))
+		decor(part("Scratch", Vector3.new(0.25, 0.08, 9), CFrame.new(BX, LF + 1.72, BZ + LAIR.cz) * CFrame.Angles(0, a, 0) * CFrame.new(k * 0.6, 0, -16), Color3.fromRGB(45, 42, 40), nil, lairF))
 	end
 end
 -- the nest: a broken ring of straw, planks and bones round the dais edge
-for i = 0, 27 do
-	local a = i / 28 * math.pi * 2
+for i = 0, 55 do
+	local a = i / 56 * math.pi * 2
 	if math.sin(a) < 0.9 then -- open towards the entrance (south)
 		local r = PLATFORM_R + rng:NextNumber(0.5, 2.5)
 		local s = rng:NextNumber(1.6, 2.8)
@@ -890,8 +890,8 @@ for i = 0, 27 do
 end
 -- heaps of rubbish against the walls at the diagonals: mounds of blocks, planks, bones [меню: «горы мусора»]
 local function heap(x, z, size)
-	for i = 1, 26 do
-		local s = rng:NextNumber(1.4, 3)
+	for i = 1, 44 do
+		local s = rng:NextNumber(1.4, 3.4)
 		local r = rng:NextNumber(0, size)
 		local a = rng:NextNumber(0, 6.28)
 		local y = LF + s / 2 + math.max(0, size - r) * 0.9
@@ -902,12 +902,12 @@ local function heap(x, z, size)
 	barrel(x + rng:NextNumber(-3, 3), LF + size * 0.5, z + rng:NextNumber(-3, 3), true)
 end
 for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-	heap(c[1] * 31, LAIR.cz + c[2] * 31, 5.5)
+	heap(c[1] * 62, LAIR.cz + c[2] * 62, 9)
 end
 -- eight broken columns round the dais: stacked bricks, some reaching the dome, some snapped off
-for i = 0, 7 do
-	local a = (i + 0.5) / 8 * math.pi * 2
-	local x, z = math.cos(a) * (PLATFORM_R + 8), LAIR.cz + math.sin(a) * (PLATFORM_R + 8)
+for i = 0, 11 do
+	local a = (i + 0.5) / 12 * math.pi * 2
+	local x, z = math.cos(a) * (PLATFORM_R + 14), LAIR.cz + math.sin(a) * (PLATFORM_R + 14)
 	local cl = cellAtPos(x, z)
 	local full = (cl and cl.ceil or LF + 24) - LF
 	local height = if i % 3 == 0 then full else rng:NextNumber(5, 11)
@@ -932,12 +932,12 @@ for i = 0, 7 do
 	end
 end
 -- a murky pool in the east of the lair, green slime glowing faintly
-local pool = part("Pool", Vector3.new(0.3, 16, 16), at(-18, LF + 0.1, LAIR.cz - 36) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 90, 50), Enum.Material.Glass, lairF)
+local pool = part("Pool", Vector3.new(0.3, 24, 24), at(-36, LF + 0.1, LAIR.cz - 72) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(60, 90, 50), Enum.Material.Glass, lairF)
 pool.Shape = Enum.PartType.Cylinder
 pool.Transparency = 0.25
 pool.Reflectance = 0.15
 pool.CanCollide = false
-pool.Size = Vector3.new(0.3, 12, 12)
+pool.Size = Vector3.new(0.3, 22, 22)
 light(pool, 16, 0.6, Color3.fromRGB(120, 220, 90))
 local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(0, LF + 1.7, LAIR.cz), STONE, nil, lairF)
 bossSpawn.Transparency = 1
@@ -993,7 +993,7 @@ for _, c in pairs(cells) do
 				nearHole = true
 			end
 		end
-		local onDais = c.shape == "lair" and math.sqrt(c.x ^ 2 + (c.z - LAIR.cz) ^ 2) < PLATFORM_R + 12
+		local onDais = c.shape == "lair" and math.sqrt(c.x ^ 2 + (c.z - LAIR.cz) ^ 2) < PLATFORM_R + 18
 		local r = rng:NextNumber()
 		-- stalactites: a short stack of shrinking stone blocks under the dome
 		if (cave or c.edge >= 2) and r < (if cave then 0.09 else 0.05) and c.edge >= 2 then
@@ -1178,9 +1178,18 @@ for _, m in ipairs({ { 0, M1.cz, 0 }, { 0, M2.cz, 0 }, { 0, LAIR.cz, LF } }) do
 	glow.Transparency = 1
 	light(glow, 60, 0.8, Color3.fromRGB(255, 225, 190))
 end
+-- the lair is huge now: four more soft lights round its dome
+for k = 0, 3 do
+	local a = k / 4 * math.pi * 2 + math.pi / 4
+	local x, z = math.cos(a) * 55, LAIR.cz + math.sin(a) * 55
+	local cl = cellAtPos(x, z)
+	local glow = decor(part("DomeLight", Vector3.new(1, 1, 1), at(x, (cl and cl.ceil or LF + 30) - 5, z), STONE, nil, life))
+	glow.Transparency = 1
+	light(glow, 60, 0.7, Color3.fromRGB(255, 205, 160))
+end
 -- a thin dust in the caves' air
 for _, m in ipairs({ { 0, M1.cz, 6 }, { 0, M2.cz, 6 }, { 0, LAIR.cz, LF + 6 } }) do
-	local e = decor(part("Dust", Vector3.new(80, 10, 80), at(m[1], m[3], m[2]), STONE, nil, life))
+	local e = decor(part("Dust", Vector3.new(if m[2] == LAIR.cz then 170 else 80, 10, if m[2] == LAIR.cz then 170 else 80), at(m[1], m[3], m[2]), STONE, nil, life))
 	e.Transparency = 1
 	local dust = Instance.new("ParticleEmitter")
 	dust.Texture = "rbxasset://textures/particles/smoke_main.dds"
@@ -1221,10 +1230,10 @@ for _, side in ipairs({ -1, 1 }) do
 end
 -- the lair: a rat at each diagonal (by the rubbish heaps), a zombie at each side
 for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-	mobSpawn("rat", c[1] * 24, LAIR.cz + c[2] * 24, 3)
+	mobSpawn("rat", c[1] * 50, LAIR.cz + c[2] * 50, 4)
 end
 for _, d in ipairs({ { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } }) do
-	mobSpawn("zombie", d[1] * 36, LAIR.cz + d[2] * 36, 3)
+	mobSpawn("zombie", d[1] * 74, LAIR.cz + d[2] * 74, 4)
 end
 
 print(("[build-basement] built: %d parts"):format(#root:GetDescendants()))
