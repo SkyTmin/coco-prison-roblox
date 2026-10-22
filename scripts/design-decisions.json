@@ -459,6 +459,14 @@
         "oak_log": 0.2
       },
       "_source": "[владелец 22.10, скриншот Малой шахты оригинала] гравий (больше половины), арбузы, брёвна дуба (21.10 было «только арбузы и дуб» — снимок новее); доли [решение] по снимку: 55 / 25 / 20 %"
+    },
+    "royal_garden": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 23.10] 32×12×32 — шахта в «нижнем саду» за фонтаном (scripts/build-royal-garden.luau); состав из меню (mine-shares: листья глицинии 70 / вишнёвое дерево 30)"
     }
   },
   "pvpFromLevel": 9,
@@ -995,6 +1003,74 @@
         }
       },
       "_hp": "[владелец 22.10] у Зомбаря 300 HP, с него 400 монет, раз в 20 минут"
+    },
+    "knight": {
+      "hp": 3500,
+      "damage": 8,
+      "respawnSeconds": 2700,
+      "name": "Рыцарь",
+      "nameEn": "Knight",
+      "locationId": "royal_garden",
+      "unlockLevel": 11,
+      "_source": "[клиент] имя, описание («хладнокровный воин в сияющих доспехах»), объявление о появлении; [меню] 0–3100 $, древние звёзды 3–5, порошок 1–8 %; hp 3500 / урон 8 / респаун 45 мин [решение] по шкале боссов (Скелетон 2500)",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.9,
+        "walkSpeed": 13,
+        "leashSeconds": 300,
+        "abilityCooldown": 6,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            220,
+            220,
+            235
+          ],
+          "blade": [
+            235,
+            240,
+            255
+          ],
+          "spikes": [
+            180,
+            185,
+            200
+          ],
+          "glow": [
+            255,
+            215,
+            120
+          ]
+        },
+        "_abilities": "[решение] рубящая волна (полоса), удар мечом в землю (круги), рыцарский таран — о колонну ристалища оглушение 3 с; набор как у Минотавра, своя модель позже"
+      }
     }
   },
   "bossRewards": {

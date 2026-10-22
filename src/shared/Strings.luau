@@ -1227,6 +1227,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡El tintineo de huesos viejos rompió el silencio: Skeletron se ha alzado para recuperar su poder perdido!",
 		fr = "Le cliquetis de vieux os a brisé le silence : Skeletron s'est relevé pour reprendre son pouvoir perdu !",
 	},
+	boss_spawned_knight = { -- [клиент] prison.classic.boss.knight.notify.spawn
+		ru = "Звон стали разорвал тишину — Рыцарь вступил в бой!",
+		en = "The ring of steel broke the silence: the Knight has entered the fight!",
+		es = "¡El choque del acero rompió el silencio: el Caballero ha entrado en combate!",
+		fr = "Le fracas de l'acier a rompu le silence : le Chevalier entre dans la bataille !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

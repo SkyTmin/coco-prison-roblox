@@ -537,6 +537,54 @@
         "ColorMap": "rbxassetid://79533461637771",
         "StudsPerTile": 4
       }
+    },
+    "px_cherry_leaves": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://118396967593202",
+        "StudsPerTile": 4
+      }
+    },
+    "px_wisteria_leaves": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://92439865095191",
+        "StudsPerTile": 4
+      }
+    },
+    "px_white_stone_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://84976577902573",
+        "StudsPerTile": 4
+      }
+    },
+    "px_hedge": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://70773913217037",
+        "StudsPerTile": 4
+      }
+    },
+    "px_cherry_planks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://75926965632103",
+        "StudsPerTile": 4
+      }
+    },
+    "px_cherry_log": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://114385147409592",
+        "StudsPerTile": 4
+      }
     }
   }
 }

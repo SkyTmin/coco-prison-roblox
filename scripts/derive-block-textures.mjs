@@ -158,6 +158,14 @@ await recolor("terracotta.png", "terracotta_blue.png", [[0, [20, 40, 100]], [0.5
 	await sharp(data, { raw: info }).resize(384, 384, { kernel: "nearest" }).png().toFile(path.join(dir, "hieroglyphs.png"));
 	console.log("wrote hieroglyphs.png");
 }
+// [Королевский сад] wisteria leaves (the mine block: pink-violet), cherry leaves, clipped hedge, cherry bark and
+// planks, white palace stone — the leafy ones from our grass top, the wood from our oak and planks
+await recolor("grass_top.png", "wisteria_leaves.png", [[0, [120, 60, 130]], [0.45, [190, 110, 190]], [0.8, [230, 160, 220]], [1, [250, 205, 240]]]);
+await recolor("grass_top.png", "cherry_leaves.png", [[0, [200, 100, 140]], [0.5, [240, 160, 190]], [1, [255, 215, 230]]]);
+await recolor("grass_top.png", "hedge.png", [[0, [24, 60, 26]], [0.5, [44, 96, 40]], [1, [80, 140, 64]]]);
+await recolor("oak_log_side.png", "cherry_log.png", [[0, [38, 18, 22]], [0.5, [70, 36, 40]], [1, [110, 66, 66]]]);
+await recolor("planks.png", "cherry_planks.png", [[0, [170, 100, 96]], [0.5, [214, 150, 140]], [1, [240, 196, 184]]]);
+await recolor("stone_bricks.png", "white_stone_bricks.png", [[0, [170, 170, 176]], [0.5, [222, 222, 226]], [1, [246, 246, 248]]]);
 // magma: the dark mortar of cobblestone glows, the stones stay dark
 {
 	const [lo, hi] = await lumRange("cobblestone.png");
