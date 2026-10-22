@@ -282,11 +282,11 @@
         "StudsPerTile": 4
       }
     },
-    "px_oak_leaves": {
+    "px_melon_top": {
       "$className": "MaterialVariant",
       "$properties": {
         "BaseMaterial": "Plastic",
-        "ColorMap": "rbxassetid://74510501143588",
+        "ColorMap": "rbxassetid://116003033324791",
         "StudsPerTile": 4
       }
     }

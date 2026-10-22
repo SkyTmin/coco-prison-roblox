@@ -22,29 +22,30 @@ function rng(seed) {
 }
 
 const TEXTURES = {
-	// Листья дуба [владелец 22.10: в малой шахте должна быть листва]: clumps of leaves in four greens with dark
-	// gaps between them (opaque — the "fast graphics" look of Minecraft leaves)
-	oak_leaves: () => {
-		const r = rng(42);
-		const greens = [
-			[0x2e, 0x5c, 0x1f],
-			[0x3d, 0x74, 0x28],
-			[0x4c, 0x8a, 0x30],
-			[0x5f, 0xa0, 0x3a],
-		];
-		const gap = [0x1c, 0x36, 0x13];
-		// clumps: random 3×3 cells (wrapping, so the tile repeats seamlessly) pick a tone, texels vary around it
-		const cells = Array.from({ length: 36 }, () => Math.floor(r() * 4));
-		const px = [];
-		for (let y = 0; y < N; y++) {
-			for (let x = 0; x < N; x++) {
-				const clump = cells[(Math.floor(((y + (x % 3)) % N) / 3) % 6) * 6 + (Math.floor(x / 3) % 6)];
-				let c;
-				if (r() < 0.16) c = gap;
-				else c = greens[Math.max(0, Math.min(3, clump + (r() < 0.5 ? 0 : r() < 0.5 ? -1 : 1)))];
-				px.push(c);
+	// Верх арбуза [владелец 22.10, скриншот Малой шахты: сверху арбуз светло-жёлто-зелёный с прожилками от
+	// середины]: a light centre, dark green veins running out to the corners and the edge middles, a darker rim
+	melon_top: () => {
+		const r = rng(7);
+		const light = [0xb4, 0xd0, 0x3c];
+		const mid = [0x8c, 0xb8, 0x2e];
+		const vein = [0x52, 0x8c, 0x22];
+		const rim = [0x6a, 0x9e, 0x26];
+		const grid = [];
+		for (let i = 0; i < N * N; i++) grid.push(r() < 0.55 ? light : mid);
+		// veins: lines from the middle out to the four corners and the four edge middles
+		const ends = [[0, 0], [15, 0], [0, 15], [15, 15], [7.5, 0], [7.5, 15], [0, 7.5], [15, 7.5]];
+		for (const [ex, ey] of ends) {
+			for (let t = 0.18; t <= 1; t += 0.02) {
+				const x = Math.round(7.5 + (ex - 7.5) * t);
+				const y = Math.round(7.5 + (ey - 7.5) * t);
+				grid[y * N + x] = vein;
 			}
 		}
+		for (let y = 0; y < N; y++)
+			for (let x = 0; x < N; x++)
+				if (x === 0 || y === 0 || x === N - 1 || y === N - 1) grid[y * N + x] = r() < 0.65 ? rim : vein;
+		for (const [x, y] of [[7, 7], [8, 7], [7, 8], [8, 8]]) grid[y * N + x] = light;
+		const px = grid;
 		return px;
 	},
 };

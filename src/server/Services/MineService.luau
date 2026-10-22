@@ -84,6 +84,40 @@ local COLORS: { [string]: Color3 } = {
 	red_sandstone = Color3.fromRGB(190, 100, 50),
 }
 
+-- Blocks whose top face differs (log rings, the melon's veined top — like the original Малая шахта
+-- [владелец 22.10, скриншот]):
+-- a Texture on the Top face from Config.textures "<id>_top".
+local TOP_FACES: { [string]: string } = {}
+for _, id in ipairs({ "oak_log", "melon" }) do
+	local top = (Config.textures :: any).textures[id .. "_top"]
+	if typeof(top) == "string" then
+		TOP_FACES[id] = top
+	end
+end
+
+local function styleTop(part: BasePart, id: string)
+	local want = TOP_FACES[id]
+	local tex = part:FindFirstChild("TopFace") :: Texture?
+	if not want then
+		if tex then
+			tex:Destroy()
+		end
+		return
+	end
+	if not tex then
+		local t = Instance.new("Texture")
+		t.Name = "TopFace"
+		t.Face = Enum.NormalId.Top
+		t.StudsPerTileU = BLOCK
+		t.StudsPerTileV = BLOCK
+		t.Parent = part
+		tex = t
+	end
+	if (tex :: Texture).Texture ~= want then
+		(tex :: Texture).Texture = want
+	end
+end
+
 -- Block look and identity; used for new parts and for parts re-used by an in-place reset. Only what
 -- differs is written: every property change is replicated to every client that has the part.
 local function stylePart(part: BasePart, id: string)
@@ -107,6 +141,7 @@ local function stylePart(part: BasePart, id: string)
 	if part:GetAttribute("Block") ~= id then
 		part:SetAttribute("Block", id)
 	end
+	styleTop(part, id)
 end
 
 local function makePart(mine: Mine, i: number)
