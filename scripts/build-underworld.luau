@@ -843,7 +843,7 @@ do
 			local x, z = px + math.cos(a) * r, pz + math.abs(math.sin(a)) * r * 0.6 - 2
 			textured(part("PortalRubble", Vector3.new(s, s, s), at(x, s / 2, z) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), STONE, nil, outpost), if rng:NextNumber() < 0.2 then "px_gold_block" elseif rng:NextNumber() < 0.5 then "px_netherrack_cobble" else "px_obsidian")
 		end
-		local spawn = part("LocationSpawn_underworld", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + ox, 0.5, BZ + 184), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), STONE, nil, outpost)
+		local spawn = part("LocationSpawn_underworld", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z + PIT.hole + 12), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), STONE, nil, outpost) -- [владелец 23.10] the arrival is by the mine, just south of the pit rim
 		textured(spawn, "px_blackstone_bricks")
 		spawn:SetAttribute("LocationId", "underworld")
 		CollectionService:AddTag(spawn, "LocationSpawn")
@@ -878,7 +878,9 @@ do
 	end
 	-- the block buyer at a stall of crimson stems under a nether-wart awning
 	do
-		local sx, sz = ox + 22, oz - 4
+		-- [владелец 23.10] the buyer stands by the mine, next to the arrival
+		local sx, sz = PIT.x + 18, PIT.z + PIT.hole + 10
+		local ox, oz = PIT.x, PIT.z + PIT.hole + 12
 		local desc = Instance.new("HumanoidDescription")
 		local skin = Color3.fromRGB(196, 136, 100)
 		desc.HeadColor, desc.LeftArmColor, desc.RightArmColor = skin, skin, skin

@@ -960,7 +960,7 @@ do
 	local plaza = part("Plaza", Vector3.new(0.4, 36, 36), at(ox, 0.15, oz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, camp)
 	plaza.Shape = Enum.PartType.Cylinder
 	textured(plaza, "px_cut_sandstone")
-	local spawn = part("LocationSpawn_pyramid", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + ox, 0.5, BZ + oz - 10), Vector3.new(BX + PYR.x, 0.5, BZ + PYR.z)), STONE, nil, camp)
+	local spawn = part("LocationSpawn_pyramid", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z + PIT.hole + 12), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), STONE, nil, camp) -- [владелец 23.10] the arrival is by the mine, just south of the pit rim
 	textured(spawn, "px_cut_red_sandstone")
 	spawn:SetAttribute("LocationId", "pyramid")
 	CollectionService:AddTag(spawn, "LocationSpawn")
@@ -1007,7 +1007,9 @@ do
 	end
 	-- the block buyer at a stall under a striped awning
 	do
-		local sx, sz = ox + 20, oz - 6
+		-- [владелец 23.10] the buyer stands by the mine, next to the arrival
+		local sx, sz = PIT.x + 18, PIT.z + PIT.hole + 14
+		local ox, oz = PIT.x, PIT.z + PIT.hole + 12
 		local desc = Instance.new("HumanoidDescription")
 		local skin = Color3.fromRGB(176, 120, 80)
 		desc.HeadColor, desc.LeftArmColor, desc.RightArmColor = skin, skin, skin

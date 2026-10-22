@@ -95,8 +95,11 @@ end
 local function cyl(name, height, diameter, cf, variant, tint, parent)
 	local p = part(name, Vector3.new(height, diameter, diameter), cf * CFrame.Angles(0, 0, math.pi / 2), tint, nil, parent)
 	p.Shape = Enum.PartType.Cylinder
+	-- [владелец 23.10: «проблемы с текстурами»] pixel textures smear on cylinders: round parts get a plain
+	-- material in the texture's colour instead
 	if variant then
-		textured(p, variant, tint)
+		p.Material = Enum.Material.SmoothPlastic
+		p.Color = tint or WHITE
 	end
 	return p
 end
@@ -171,6 +174,12 @@ local YARD = { x = 0, z = 250, r = 34 }
 local FOUNTAIN = { x = 0, z = 96, r = 26 }
 local LISTS = { x = 0, z = -176, hx = 56, hz = 30 } -- the tournament field (arena)
 local CASTLE_Z = -236 -- the front face of the castle wall
+local CASTLE = { x0 = -92, x1 = 92, z0 = -304, z1 = CASTLE_Z } -- the castle precinct (walls, courtyard, keep)
+local SPAWN_Z = PIT.z + PIT.hole + 12 -- the arrival: just south of the mine rim [владелец 23.10]
+local function inCastle(x, z, margin)
+	margin = margin or 0
+	return x > CASTLE.x0 - margin and x < CASTLE.x1 + margin and z > CASTLE.z0 - margin and z < CASTLE.z1 + margin
+end
 local POND = { x = 185, z = -30, rx = 40, rz = 22 } -- the koi pond
 local MAZE = { x0 = 120, z0 = 112, n = 13, c = 8 } -- 13 × 13 cells of 8 studs
 local TUNNEL = { x0 = -230, x1 = -64, z = 190, w = 10 } -- the wisteria tunnel
@@ -235,6 +244,7 @@ local function flat(x, z)
 		or (math.abs(x - LISTS.x) < LISTS.hx + 40 and z < LISTS.z + LISTS.hz + 12)
 		or (x > MAZE.x0 - 12 and x < MAZE.x0 + MAZE.n * MAZE.c + 12 and z > MAZE.z0 - 12 and z < MAZE.z0 + MAZE.n * MAZE.c + 12)
 		or (math.abs(z - TUNNEL.z) < TUNNEL.w and x > TUNNEL.x0 - 8 and x < TUNNEL.x1 + 8)
+		or inCastle(x, z, 10)
 end
 local cells = {}
 for iz = 0, NZ - 1 do
@@ -242,10 +252,12 @@ for iz = 0, NZ - 1 do
 		local x, z = X0 + ix * C + C / 2, Z0 + iz * C + C / 2
 		local d = caveD(x, z)
 		local c = { x = x, z = z, d = d, zone = zone(x, z) }
-		if d >= 1 then
+		if d >= 1 and not inCastle(x, z, 10) then
 			c.kind = "hill"
+			-- [владелец 23.10: «вокруг горы выше, игроки могут забраться»] terraces of 8 studs (a jump is ≈ 7):
+			-- the first one 24 high, rising to ≈ 100
 			local t = math.clamp((d - 1) / 0.14, 0, 1)
-			c.top = math.max(8, 4 * math.floor((8 + 36 * t ^ 0.8 + n2(x, z, 4.4, 0.04) * 8) / 4))
+			c.top = 24 + 8 * math.max(0, math.floor((76 * t ^ 0.7 + n2(x, z, 4.4, 0.04) * 8) / 8))
 		elseif inHole(x, z) then
 			c.kind = "hole"
 		elseif inPool(x, z) or (c.zone == "japan" and inPond(x, z)) then
@@ -287,7 +299,9 @@ local waterFolder = folder("Water")
 local count = 0
 local function floorLook(c)
 	local formal = inAllee(c.x, c.z) or math.sqrt((c.x - FOUNTAIN.x) ^ 2 + (c.z - FOUNTAIN.z) ^ 2) < FOUNTAIN.r
-	if formal or c.path then
+	if inCastle(c.x, c.z) then
+		return "px_cobblestone", Color3.fromRGB(225, 225, 225)
+	elseif formal or c.path then
 		return "px_gravel", Color3.fromRGB(235, 222, 200)
 	elseif math.sqrt((c.x - YARD.x) ^ 2 + (c.z - YARD.z) ^ 2) < YARD.r then
 		return "px_gravel", Color3.fromRGB(215, 200, 180)
@@ -457,7 +471,8 @@ end
 local yard = folder("Yard")
 do
 	local ox, oz = YARD.x, YARD.z
-	local spawn = part("LocationSpawn_royal_garden", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + ox, 0.5, BZ + oz - 12), Vector3.new(BX + ox, 0.5, BZ + FOUNTAIN.z)), nil, nil, yard)
+	-- [владелец 23.10] the arrival and the buyer are right by the mine (south rim), the yard stays a garden corner
+	local spawn = part("LocationSpawn_royal_garden", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + PIT.x, 0.5, BZ + SPAWN_Z), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), nil, nil, yard)
 	textured(spawn, "px_white_stone_bricks")
 	spawn:SetAttribute("LocationId", "royal_garden")
 	CollectionService:AddTag(spawn, "LocationSpawn")
@@ -484,7 +499,8 @@ do
 	end
 	-- the block buyer under a pink striped awning
 	do
-		local sx, sz = ox + 20, oz - 6
+		local sx, sz = PIT.x + 18, SPAWN_Z + 2
+		local ox, oz = PIT.x, SPAWN_Z -- the buyer faces the arrival point
 		local desc = Instance.new("HumanoidDescription")
 		local skin = Color3.fromRGB(230, 190, 160)
 		desc.HeadColor, desc.LeftArmColor, desc.RightArmColor = skin, skin, skin
@@ -610,15 +626,21 @@ do
 	-- the three-tier fountain: a wide basin, a pedestal, two bowls, a gold finial, jets and splashes
 	do
 		local fx, fz = FOUNTAIN.x, FOUNTAIN.z
-		cyl("FountainRim", 1.6, 30, at(fx, 0.8, fz), "px_white_stone_bricks", nil, formal)
-		local water = cyl("FountainWater", 0.4, 28, at(fx, 1.4, fz), "px_water", Color3.fromRGB(170, 220, 235), formal)
-		water.Transparency = 0.2
-		decor(water)
-		cyl("FountainPedestal", 6, 4, at(fx, 4, fz), "px_white_stone_bricks", nil, formal)
-		cyl("FountainBowl", 1.2, 14, at(fx, 7.4, fz), "px_white_stone_bricks", nil, formal)
-		decor(cyl("FountainBowlWater", 0.3, 12.4, at(fx, 8.05, fz), "px_water", Color3.fromRGB(170, 220, 235), formal)).Transparency = 0.2
-		cyl("FountainStem", 4, 2, at(fx, 10, fz), "px_white_stone_bricks", nil, formal)
-		cyl("FountainTopBowl", 1, 7, at(fx, 12.4, fz), "px_white_stone_bricks", nil, formal)
+		-- built of blocks (square tiers, as in Minecraft): textures on cylinders smeared [владелец 23.10]
+		local function basin(size, wall, y, h, name)
+			whiteStone(name .. "Floor", Vector3.new(size, 0.6, size), at(fx, y + 0.3, fz), formal)
+			for _, s in ipairs({ -1, 1 }) do
+				whiteStone(name .. "Wall", Vector3.new(size, h, wall), at(fx, y + h / 2, fz + s * (size - wall) / 2), formal)
+				whiteStone(name .. "Wall", Vector3.new(wall, h, size - 2 * wall), at(fx + s * (size - wall) / 2, y + h / 2, fz), formal)
+			end
+			local water = textured(decor(part(name .. "Water", Vector3.new(size - 2 * wall, 0.3, size - 2 * wall), at(fx, y + h - 0.45, fz), nil, nil, formal)), "px_water", Color3.fromRGB(170, 220, 235))
+			water.Transparency = 0.2
+		end
+		basin(30, 1.6, 0, 1.8, "FountainBasin")
+		whiteStone("FountainPedestal", Vector3.new(4, 6, 4), at(fx, 4, fz), formal)
+		basin(14, 1.2, 6.8, 1.4, "FountainBowl")
+		whiteStone("FountainStem", Vector3.new(2, 4, 2), at(fx, 10.2, fz), formal)
+		basin(7, 0.8, 12, 1, "FountainTopBowl")
 		local finial = part("FountainFinial", Vector3.new(1.2, 2.4, 1.2), at(fx, 14.1, fz), GOLD, Enum.Material.Metal, formal)
 		emitter(finial, {
 			Texture = "rbxasset://textures/particles/sparkles_main.dds",
@@ -1184,59 +1206,273 @@ task.wait()
 local castle = folder("Castle")
 local arena = folder("Lists")
 do
-	-- the castle: a white curtain wall with battlements, round towers with blue cone roofs, a gatehouse, the keep
-	local wallH, wallT = 30, 8
+	-- [владелец 23.10: «замок сделай полноценным, а не просто вид»] the castle is a whole precinct you walk into:
+	-- an open gatehouse, curtain walls with a walk on top (stairs up from the courtyard), corner towers, the
+	-- courtyard (well, smithy, stables, training dummies, market barrels) and the keep with its throne hall
+	local wallH, wallT = 28, 8
+	local K = CASTLE
+	local cxm = (K.x0 + K.x1) / 2
+	local roofBlue = Color3.fromRGB(78, 112, 200)
 	local function tower(x, z, r, h, roofTiers)
-		cyl("CastleTower", h, r * 2, at(x, h / 2, z), "px_white_stone_bricks", nil, castle)
-		cyl("TowerCornice", 1.6, r * 2 + 1.6, at(x, h + 0.2, z), "px_white_stone_bricks", Color3.fromRGB(225, 225, 232), castle)
+		cyl("CastleTower", h, r * 2, at(x, h / 2, z), "px_white_stone_bricks", Color3.fromRGB(238, 238, 242), castle)
+		cyl("TowerCornice", 1.6, r * 2 + 1.6, at(x, h + 0.2, z), "px_white_stone_bricks", Color3.fromRGB(222, 222, 230), castle)
 		for k = 0, roofTiers - 1 do
-			cyl("TowerRoof", 2.4, (r + 1) * 2 * (1 - k / roofTiers), at(x, h + 1.4 + k * 2.4, z), nil, Color3.fromRGB(78, 112, 200), castle)
+			cyl("TowerRoof", 2.4, (r + 1) * 2 * (1 - k / roofTiers), at(x, h + 1.4 + k * 2.4, z), nil, roofBlue, castle)
 		end
 		local poleTop = h + 1.4 + roofTiers * 2.4
 		part("FlagPole", Vector3.new(0.4, 6, 0.4), at(x, poleTop + 3, z), IRON, Enum.Material.Metal, castle)
 		decor(part("Flag", Vector3.new(0.12, 2.4, 4), at(x, poleTop + 4.6, z + 2), ROYAL, Enum.Material.Fabric, castle))
 		decor(part("FlagStripe", Vector3.new(0.14, 0.6, 4), at(x, poleTop + 4.6, z + 2), GOLD, Enum.Material.Fabric, castle))
 		for _, y in ipairs({ h * 0.45, h * 0.7 }) do
-			decor(part("TowerWindow", Vector3.new(1.2, 2.6, 0.3), at(x, y, z + r - 0.05), Color3.fromRGB(40, 50, 70), nil, castle))
+			for _, d in ipairs({ { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }) do
+				decor(part("TowerWindow", Vector3.new(if d[1] ~= 0 then 0.3 else 1.2, 2.6, if d[2] ~= 0 then 0.3 else 1.2), at(x + d[1] * (r - 0.05), y, z + d[2] * (r - 0.05)), Color3.fromRGB(40, 50, 70), nil, castle))
+			end
 		end
 	end
-	local x0, x1 = -120, 120
-	whiteStone("CastleWall", Vector3.new(x1 - x0, wallH, wallT), at(0, wallH / 2, CASTLE_Z - wallT / 2), castle)
-	for x = x0, x1, 4 do
-		whiteStone("Merlon", Vector3.new(2, 2.6, wallT + 0.4), at(x, wallH + 1.3, CASTLE_Z - wallT / 2), castle)
+	-- a straight wall segment with merlons on the outer edge (the top is a walk)
+	local function wall(xa, za, xb, zb, outward)
+		local alongX = za == zb
+		local len = if alongX then math.abs(xb - xa) else math.abs(zb - za)
+		local size = if alongX then Vector3.new(len, wallH, wallT) else Vector3.new(wallT, wallH, len)
+		whiteStone("CastleWall", size, at((xa + xb) / 2, wallH / 2, (za + zb) / 2), castle)
+		local band = if alongX then Vector3.new(len, 1.2, wallT + 0.4) else Vector3.new(wallT + 0.4, 1.2, len)
+		part("WallBand", band, at((xa + xb) / 2, wallH - 4, (za + zb) / 2), roofBlue, nil, castle)
+		for k = 0, math.floor(len / 4) do
+			local t = k * 4
+			local mx = if alongX then math.min(xa, xb) + t else (xa + xb) / 2 + outward * (wallT / 2 - 0.6)
+			local mz = if alongX then (za + zb) / 2 + outward * (wallT / 2 - 0.6) else math.min(za, zb) + t
+			if t <= len then
+				whiteStone("Merlon", Vector3.new(if alongX then 2 else 1.2, 2.6, if alongX then 1.2 else 2), at(mx, wallH + 1.3, mz), castle)
+			end
+		end
+		-- a low parapet on the courtyard side so nobody steps off the walk (not on the front wall: its stairs land there)
+		if outward == 1 and alongX then
+			return
+		end
+		local px = if alongX then (xa + xb) / 2 else (xa + xb) / 2 - outward * (wallT / 2 - 0.3)
+		local pz = if alongX then (za + zb) / 2 - outward * (wallT / 2 - 0.3) else (za + zb) / 2
+		whiteStone("Parapet", if alongX then Vector3.new(len, 1.4, 0.6) else Vector3.new(0.6, 1.4, len), at(px, wallH + 0.7, pz), castle)
 	end
-	part("WallBand", Vector3.new(x1 - x0, 1.2, wallT + 0.4), at(0, wallH - 4, CASTLE_Z - wallT / 2), Color3.fromRGB(78, 112, 200), nil, castle)
-	for _, x in ipairs({ x0, -60, 60, x1 }) do
-		tower(x, CASTLE_Z - wallT / 2, 8, 44, 6)
+	local fz = K.z1 - wallT / 2 -- the front wall centre line
+	local GATE = 8 -- half the gate passage
+	wall(K.x0, fz, -GATE, fz, 1)
+	wall(GATE, fz, K.x1, fz, 1)
+	wall(K.x0, K.z0 + wallT / 2, K.x1, K.z0 + wallT / 2, -1)
+	wall(K.x0 + wallT / 2, K.z0 + wallT, K.x0 + wallT / 2, K.z1 - wallT, -1)
+	wall(K.x1 - wallT / 2, K.z0 + wallT, K.x1 - wallT / 2, K.z1 - wallT, 1)
+	-- the gatehouse: two towers, a lintel over the open passage, the portcullis raised, the gates swung open
+	whiteStone("GateLintel", Vector3.new(GATE * 2, wallH - 18, wallT), at(0, 18 + (wallH - 18) / 2, fz), castle)
+	whiteStone("GatePassageRoof", Vector3.new(GATE * 2, 1, wallT), at(0, 18.5, fz), castle)
+	part("Portcullis", Vector3.new(GATE * 2 - 1, 3, 0.4), at(0, 16.5, fz + 1), IRON, Enum.Material.Metal, castle)
+	for x = -GATE + 1, GATE - 1, 2 do
+		part("PortcullisBar", Vector3.new(0.3, 4, 0.3), at(x, 15, fz + 1), IRON, Enum.Material.Metal, castle)
 	end
-	-- the gatehouse (the gate is shut), banners either side
 	for _, s in ipairs({ -1, 1 }) do
-		tower(s * 14, CASTLE_Z - 2, 7, 50, 6)
+		local door = part("GateDoor", Vector3.new(7, 16, 0.8), at(s * (GATE + 0.4), 8, fz - wallT / 2 - 3.4) * CFrame.Angles(0, s * math.pi / 2, 0), Color3.fromRGB(90, 60, 40), Enum.Material.WoodPlanks, castle)
+		for k = -2, 2, 2 do
+			part("GateDoorBand", Vector3.new(7.1, 0.5, 0.9), door.CFrame * CFrame.new(0, k * 3, 0), IRON, Enum.Material.Metal, castle)
+		end
+		tower(s * 15, fz, 7, 42, 6)
 	end
-	whiteStone("GateArch", Vector3.new(16, 8, wallT + 4), at(0, 22, CASTLE_Z - 2), castle)
-	part("Gate", Vector3.new(14, 18, 1), at(0, 9, CASTLE_Z + 0.6), Color3.fromRGB(90, 60, 40), Enum.Material.WoodPlanks, castle)
-	for x = -6, 6, 2 do
-		part("GateBand", Vector3.new(0.3, 18, 1.2), at(x, 9, CASTLE_Z + 0.7), IRON, Enum.Material.Metal, castle)
+	-- the corner and middle towers
+	for _, p in ipairs({ { K.x0, K.z0 }, { K.x1, K.z0 }, { K.x0, K.z1 }, { K.x1, K.z1 } }) do
+		tower(p[1], p[2], 9, 40, 6)
 	end
+	for _, p in ipairs({ { K.x0, (K.z0 + K.z1) / 2 }, { K.x1, (K.z0 + K.z1) / 2 } }) do
+		tower(p[1], p[2], 7, 36, 5)
+	end
+	-- banners outside on the front wall
 	for _, s in ipairs({ -1, 1 }) do
-		for _, x in ipairs({ 30, 90 }) do
-			decor(part("WallBanner", Vector3.new(5, 14, 0.2), at(s * x, wallH - 10, CASTLE_Z + 0.15), ROYAL, Enum.Material.Fabric, castle))
-			decor(part("WallBannerStripe", Vector3.new(1.2, 13.6, 0.22), at(s * x, wallH - 10, CASTLE_Z + 0.2), GOLD, Enum.Material.Fabric, castle))
+		for _, x in ipairs({ 34, 70 }) do
+			decor(part("WallBanner", Vector3.new(5, 14, 0.2), at(s * x, wallH - 10, K.z1 + 0.15), ROYAL, Enum.Material.Fabric, castle))
+			decor(part("WallBannerStripe", Vector3.new(1.2, 13.6, 0.22), at(s * x, wallH - 10, K.z1 + 0.2), GOLD, Enum.Material.Fabric, castle))
 		end
 	end
-	-- the keep behind the wall
-	whiteStone("Keep", Vector3.new(44, 64, 34), at(0, 32, CASTLE_Z - 40), castle)
-	for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
-		tower(s[1] * 22, CASTLE_Z - 40 + s[2] * 17, 6, 76, 7)
+	-- stairs up to the wall walk on both sides of the gate (visible steps on an invisible ramp)
+	for _, s in ipairs({ -1, 1 }) do
+		local zIn = K.z1 - wallT - 2.5 -- along the inner face of the front wall
+		local xStart, run = s * 26, 42
+		local steps = 20 -- 1.4-stud steps: a character walks up them without a ramp
+		for k = 0, steps - 1 do
+			local top = (k + 1) * wallH / steps
+			local x = xStart + s * (k + 0.5) * run / steps
+			whiteStone("WallStep", Vector3.new(run / steps, top, 5), at(x, top / 2, zIn), castle)
+		end
+		lamp(xStart - s * 3, zIn + 1, 6, castle)
 	end
-	for k = 0, 4 do
-		part("KeepRoof", Vector3.new(46 - k * 9, 3, 36 - k * 7), at(0, 65.5 + k * 3, CASTLE_Z - 40), Color3.fromRGB(78, 112, 200), nil, castle)
+	-- the courtyard: a well, the smithy, the stables, training dummies, carts and barrels, lamp posts
+	do
+		local wx, wz = -44, -258
+		local ring = cyl("Well", 3, 6, at(wx, 1.5, wz), "px_white_stone_bricks", Color3.fromRGB(200, 200, 205), castle)
+		_ = ring
+		decor(cyl("WellWater", 0.2, 5, at(wx, 2.6, wz), nil, Color3.fromRGB(60, 110, 140), castle))
+		for _, s in ipairs({ -1, 1 }) do
+			textured(part("WellPost", Vector3.new(0.6, 6, 0.6), at(wx + s * 2.6, 4, wz), nil, nil, castle), "px_cherry_log")
+		end
+		part("WellRoof", Vector3.new(7, 0.6, 4), at(wx, 7.3, wz), roofBlue, nil, castle)
+		part("WellBucket", Vector3.new(1, 1, 1), at(wx, 5, wz), WOOD, Enum.Material.Wood, castle)
 	end
-	for x = -16, 16, 8 do
-		for _, y in ipairs({ 36, 50 }) do
-			decor(part("KeepWindow", Vector3.new(2, 4, 0.3), at(x, y, CASTLE_Z - 22.9), Color3.fromRGB(40, 50, 70), nil, castle))
+	do
+		-- the smithy: an open shed against the east wall, a forge with fire, an anvil, a quench barrel, racks
+		local sx, sz = K.x1 - wallT - 10, -262
+		for _, p in ipairs({ { -7, -6 }, { 7, -6 }, { -7, 6 }, { 7, 6 } }) do
+			textured(part("SmithyPost", Vector3.new(0.8, 10, 0.8), at(sx + p[1], 5, sz + p[2]), nil, nil, castle), "px_cherry_log")
+		end
+		part("SmithyRoof", Vector3.new(16, 0.8, 14), at(sx, 10.4, sz) * CFrame.Angles(0, 0, 0.12), Color3.fromRGB(70, 70, 76), Enum.Material.Slate, castle)
+		local forge = textured(part("Forge", Vector3.new(5, 4, 4), at(sx + 4, 2, sz - 3), nil, nil, castle), "px_cobblestone")
+		local coals = decor(part("ForgeFire", Vector3.new(3.4, 0.4, 2.6), forge.CFrame * CFrame.new(0, 2.1, 0), Color3.fromRGB(255, 120, 40), Enum.Material.Neon, castle))
+		local fire = Instance.new("Fire")
+		fire.Size = 3
+		fire.Heat = 7
+		fire.Parent = coals
+		light(coals, 22, 1.4, Color3.fromRGB(255, 150, 70))
+		part("Chimney", Vector3.new(2.4, 9, 2.4), at(sx + 4, 8.5, sz - 4.4), Color3.fromRGB(120, 115, 110), Enum.Material.Slate, castle)
+		part("AnvilBase", Vector3.new(1.2, 1.6, 1.2), at(sx - 2, 0.8, sz), IRON, Enum.Material.Metal, castle)
+		part("Anvil", Vector3.new(3, 1, 1.4), at(sx - 2, 2.1, sz), IRON, Enum.Material.Metal, castle)
+		local barrel = cyl("QuenchBarrel", 2.4, 2.4, at(sx - 5, 1.2, sz + 3), nil, WOOD, castle)
+		barrel.Material = Enum.Material.Wood
+		for k = -2, 2 do
+			part("RackSword", Vector3.new(0.2, 3.2, 0.5), at(sx + k * 1.2, 2.6, sz + 5.6), Color3.fromRGB(200, 200, 210), Enum.Material.Metal, castle)
+		end
+		textured(part("SwordRack", Vector3.new(7, 0.4, 1), at(sx, 4, sz + 5.6), nil, nil, castle), "px_cherry_planks")
+	end
+	do
+		-- the stables along the back wall: stalls with hay and two blocky horses
+		local sz = K.z0 + wallT + 7
+		for k = 0, 4 do
+			local x = -80 + k * 9
+			textured(part("StallWall", Vector3.new(0.6, 5, 10), at(x - 4.5, 2.5, sz), nil, nil, castle), "px_cherry_planks")
+			textured(part("HayFloor", Vector3.new(8.4, 0.3, 9.6), at(x, 0.15, sz), nil, nil, castle), "px_hay")
+			if k % 2 == 0 then
+				textured(part("HayBale", Vector3.new(3, 2, 2), at(x + 2, 1, sz - 3), nil, nil, castle), "px_hay")
+			end
+		end
+		textured(part("StableRoof", Vector3.new(48, 0.8, 13), at(-62, 8, sz) * CFrame.Angles(0.15, 0, 0), nil, nil, castle), "px_cherry_planks")
+		for k = 0, 5 do
+			textured(part("StablePost", Vector3.new(0.7, 8, 0.7), at(-84.5 + k * 9, 4, sz + 5.2), nil, nil, castle), "px_cherry_log")
+		end
+		local function horse(x, z, col)
+			local base = at(x, 0, z) * CFrame.Angles(0, math.pi / 2, 0)
+			local function b(name, size, off, c)
+				part(name, size, base * CFrame.new(off[1], off[2], off[3]), c or col, nil, castle)
+			end
+			b("HorseBody", Vector3.new(2.4, 2.4, 5), { 0, 3.6, 0 })
+			for _, l in ipairs({ { -0.8, -1.8 }, { 0.8, -1.8 }, { -0.8, 1.8 }, { 0.8, 1.8 } }) do
+				b("HorseLeg", Vector3.new(0.7, 2.6, 0.7), { l[1], 1.3, l[2] })
+			end
+			b("HorseNeck", Vector3.new(1.4, 2.6, 1.4), { 0, 5.2, -2.6 })
+			b("HorseHead", Vector3.new(1.4, 1.4, 2.8), { 0, 6.4, -3.6 })
+			b("HorseMane", Vector3.new(0.5, 2.8, 1.6), { 0, 5.6, -2.2 }, Color3.fromRGB(40, 30, 24))
+			b("HorseTail", Vector3.new(0.6, 2.4, 0.6), { 0, 3.2, 2.7 }, Color3.fromRGB(40, 30, 24))
+		end
+		horse(-71, sz, Color3.fromRGB(130, 85, 50))
+		horse(-53, sz, Color3.fromRGB(235, 230, 220))
+	end
+	do
+		-- training dummies on posts, a target, carts and barrels by the walls
+		for k = 0, 2 do
+			local x, z = 52 + k * 8, -290
+			textured(part("DummyPost", Vector3.new(0.6, 5, 0.6), at(x, 2.5, z), nil, nil, castle), "px_cherry_log")
+			part("DummyBody", Vector3.new(2, 2.6, 1.2), at(x, 4.6, z), Color3.fromRGB(200, 180, 130), Enum.Material.Fabric, castle)
+			part("DummyHead", Vector3.new(1.3, 1.3, 1.3), at(x, 6.6, z), Color3.fromRGB(200, 180, 130), Enum.Material.Fabric, castle)
+			part("DummyArms", Vector3.new(4, 0.6, 0.6), at(x, 5.2, z), Color3.fromRGB(150, 110, 70), Enum.Material.Wood, castle)
+		end
+		local target = cyl("ArcheryTarget", 0.6, 5, at(78, 3.5, -276), nil, WHITE, castle)
+		target.CFrame = at(78, 3.5, -276) * CFrame.Angles(0, math.pi / 2, 0)
+		decor(cyl("TargetRing", 0.62, 3.2, at(78, 3.5, -276), nil, RED, castle)).CFrame = at(78, 3.5, -276.01) * CFrame.Angles(0, math.pi / 2, 0)
+		for _, b in ipairs({ { -80, -250 }, { -78, -253 }, { 80, -248 }, { 77, -250 }, { -20, -296 }, { 20, -296 } }) do
+			local barrel = cyl("Barrel", 2.6, 2.4, at(b[1], 1.3, b[2]), nil, WOOD, castle)
+			barrel.Material = Enum.Material.Wood
+		end
+		for _, p in ipairs({ { -60, -256 }, { 60, -256 }, { -36, -272 }, { 36, -272 } }) do
+			lamp(p[1], p[2], 6, castle)
 		end
 	end
+	-- the keep: walls you walk into, the throne hall inside (a carpet, the throne on a dais, long tables with
+	-- benches, fireplaces, banners, chandeliers), a stepped blue roof and four turrets
+	do
+		local kx, kz, KW, KD, KH = cxm, -282, 56, 32, 24
+		local T = 2
+		local x0, x1, z0, z1 = kx - KW / 2, kx + KW / 2, kz - KD / 2, kz + KD / 2
+		textured(part("KeepFloor", Vector3.new(KW, 0.4, KD), at(kx, 0.2, kz), nil, nil, castle), "px_cherry_planks")
+		whiteStone("KeepWall", Vector3.new(KW, KH, T), at(kx, KH / 2, z0 + T / 2), castle)
+		whiteStone("KeepWall", Vector3.new(T, KH, KD), at(x0 + T / 2, KH / 2, kz), castle)
+		whiteStone("KeepWall", Vector3.new(T, KH, KD), at(x1 - T / 2, KH / 2, kz), castle)
+		-- the front wall with the door (8 wide, 12 high) and tall windows
+		local DW = 4
+		whiteStone("KeepWall", Vector3.new(KW / 2 - DW, KH, T), at(x0 + (KW / 2 - DW) / 2, KH / 2, z1 - T / 2), castle)
+		whiteStone("KeepWall", Vector3.new(KW / 2 - DW, KH, T), at(x1 - (KW / 2 - DW) / 2, KH / 2, z1 - T / 2), castle)
+		whiteStone("KeepWall", Vector3.new(DW * 2, KH - 12, T), at(kx, 12 + (KH - 12) / 2, z1 - T / 2), castle)
+		part("KeepDoorArch", Vector3.new(DW * 2 + 2, 1.4, T + 0.6), at(kx, 12.7, z1 - T / 2), GOLD, Enum.Material.Metal, castle)
+		for _, x in ipairs({ -20, -12, 12, 20 }) do
+			decor(part("KeepWindow", Vector3.new(3, 8, T + 0.1), at(kx + x, 12, z1 - T / 2), Color3.fromRGB(150, 190, 230), Enum.Material.Glass, castle)).Transparency = 0.3
+		end
+		textured(part("KeepCeiling", Vector3.new(KW, 1, KD), at(kx, KH + 0.5, kz), nil, nil, castle), "px_cherry_planks")
+		for k = 0, 4 do
+			part("KeepRoof", Vector3.new(KW + 2 - k * 10, 3, KD + 2 - k * 6), at(kx, KH + 2.5 + k * 3, kz), roofBlue, nil, castle)
+		end
+		for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+			tower(kx + s[1] * KW / 2, kz + s[2] * KD / 2, 4, KH + 12, 5)
+		end
+		-- inside: the carpet, the dais with the throne, tables, fireplaces, banners, chandeliers
+		decor(part("HallCarpet", Vector3.new(6, 0.1, KD - 6), at(kx, 0.45, kz + 2), Color3.fromRGB(160, 30, 40), Enum.Material.Fabric, castle))
+		for k = 0, 1 do
+			textured(part("ThroneDais", Vector3.new(16 - k * 5, 1, 6 - k * 1.5), at(kx, 0.9 + k, z0 + T + 3.5 - k * 0.6), nil, nil, castle), "px_white_stone_bricks")
+		end
+		part("Throne", Vector3.new(3.4, 7, 1.4), at(kx, 6, z0 + T + 2), GOLD, Enum.Material.Metal, castle)
+		part("ThroneSeat", Vector3.new(3.4, 0.9, 2.6), at(kx, 3.6, z0 + T + 3.2), Color3.fromRGB(160, 30, 40), Enum.Material.Fabric, castle)
+		decor(part("ThroneBanner", Vector3.new(8, 12, 0.2), at(kx, 13, z0 + T + 0.15), ROYAL, Enum.Material.Fabric, castle))
+		decor(part("ThroneBannerCrown", Vector3.new(3, 2, 0.22), at(kx, 15, z0 + T + 0.2), GOLD, Enum.Material.Fabric, castle))
+		for _, s in ipairs({ -1, 1 }) do
+			local tx = kx + s * 11
+			textured(part("HallTable", Vector3.new(4, 0.6, 16), at(tx, 3, kz + 3), nil, nil, castle), "px_cherry_planks")
+			for _, dz in ipairs({ -6, 6 }) do
+				textured(part("TableLeg", Vector3.new(0.6, 2.7, 0.6), at(tx, 1.35, kz + 3 + dz), nil, nil, castle), "px_cherry_log")
+			end
+			for _, bx in ipairs({ -3, 3 }) do
+				textured(part("HallBench", Vector3.new(1.4, 1.6, 15), at(tx + bx, 0.8, kz + 3), nil, nil, castle), "px_cherry_planks")
+			end
+			for k = -2, 2 do
+				part("Goblet", Vector3.new(0.4, 0.8, 0.4), at(tx + 0.8, 3.7, kz + 3 + k * 3), GOLD, Enum.Material.Metal, castle)
+				part("Plate", Vector3.new(1, 0.1, 1), at(tx - 0.6, 3.35, kz + 3 + k * 3), WHITE, nil, castle)
+			end
+			-- the fireplace in the side wall
+			local fx = if s < 0 then x0 + T + 1 else x1 - T - 1
+			whiteStone("Fireplace", Vector3.new(2, 7, 7), at(fx, 3.5, kz), castle)
+			local hearth = decor(part("Hearth", Vector3.new(1.2, 0.5, 4), at(fx - s * 0.6, 0.65, kz), Color3.fromRGB(255, 120, 40), Enum.Material.Neon, castle))
+			local f = Instance.new("Fire")
+			f.Size = 3
+			f.Heat = 6
+			f.Parent = hearth
+			light(hearth, 20, 1.2, Color3.fromRGB(255, 160, 80))
+			for _, dz in ipairs({ -10, 10 }) do
+				decor(part("SideBanner", Vector3.new(0.2, 10, 4), at(if s < 0 then x0 + T + 0.15 else x1 - T - 0.15, 14, kz + dz), if dz < 0 then ROYAL else RED, Enum.Material.Fabric, castle))
+			end
+		end
+		for _, cz in ipairs({ kz - 4, kz + 8 }) do
+			local ring = cyl("Chandelier", 0.6, 7, at(kx, KH - 6, cz), nil, GOLD, castle)
+			ring.Material = Enum.Material.Metal
+			decor(part("ChandelierChain", Vector3.new(0.3, 5.6, 0.3), at(kx, KH - 3, cz), IRON, Enum.Material.Metal, castle))
+			for k = 0, 5 do
+				local a = k / 6 * math.pi * 2
+				local candle = decor(part("Candle", Vector3.new(0.4, 0.9, 0.4), at(kx + math.cos(a) * 3.2, KH - 5.3, cz + math.sin(a) * 3.2), LAMP, Enum.Material.Neon, castle))
+				_ = candle
+			end
+			local glow = decor(part("ChandelierGlow", Vector3.new(1, 1, 1), at(kx, KH - 7, cz), LAMP, nil, castle))
+			glow.Transparency = 1
+			light(glow, 34, 1.4, LAMP)
+		end
+		-- the hall's own light (an indoor volume: softer, warm)
+		local vol = decor(part("KeepVolume", Vector3.new(KW - 4, KH, KD - 4), at(kx, KH / 2, kz), nil, nil, castle))
+		vol.Transparency = 1
+		vol:SetAttribute("Ambient", Color3.fromRGB(150, 135, 120))
+		vol:SetAttribute("Exposure", 0)
+		CollectionService:AddTag(vol, "IndoorLighting")
+		local keepSign = textured(decor(part("KeepSign", Vector3.new(12, 2, 0.3), at(kx, 15, z1 + 0.15), nil, nil, castle)), "px_white_stone_bricks")
+		boardText(keepSign, "Тронный зал", Color3.fromRGB(40, 60, 150), { Enum.NormalId.Back })
+	end
+	local castleSign = textured(decor(part("CastleSign", Vector3.new(16, 2.4, 0.3), at(0, 21.5, K.z1 + 0.15), nil, nil, castle)), "px_white_stone_bricks")
+	boardText(castleSign, "Королевский замок", Color3.fromRGB(40, 60, 150), { Enum.NormalId.Back })
 
 	-- the lists: a sand field fenced with rails (ArenaWall: the charge stops there), entrances south and north
 	local lx, lz, hx, hz = LISTS.x, LISTS.z, LISTS.hx, LISTS.hz
@@ -1361,6 +1597,115 @@ do
 			cherryTree(x, z, rng:NextNumber(0.9, 1.2))
 			cherries += 1
 		end
+	end
+end
+
+-- ================================================================ decor over the whole plot [владелец 23.10: «декорации по участку норм сделай»]
+do
+	local deco = folder("Decor")
+	local function freeSpot(x, z, r)
+		for dx = -r, r, r do
+			for dz = -r, r, r do
+				local c = cellAtPos(x + dx, z + dz)
+				if not c or c.kind ~= "ground" or c.path then
+					return false
+				end
+			end
+		end
+		return not flat(x, z) and not inCastle(x, z, 12) and not (math.abs(x - LISTS.x) < LISTS.hx + 40 and math.abs(z - LISTS.z) < LISTS.hz + 20)
+	end
+	-- lamps and benches along every trail, on alternating sides
+	for _, t in ipairs(TRAILS) do
+		local k = 0
+		for i = 1, #t - 1 do
+			local ax, az, bx, bz = t[i][1], t[i][2], t[i + 1][1], t[i + 1][2]
+			local len = math.sqrt((bx - ax) ^ 2 + (bz - az) ^ 2)
+			local nx, nz = -(bz - az) / len, (bx - ax) / len
+			for d = 10, len - 6, 22 do
+				k += 1
+				local side = if k % 2 == 0 then 1 else -1
+				local x, z = ax + (bx - ax) * d / len + nx * 6 * side, az + (bz - az) * d / len + nz * 6 * side
+				local c = cellAtPos(x, z)
+				if c and c.kind == "ground" and not inCastle(x, z, 4) then
+					if k % 3 == 0 then
+						local y = floorAt(x, z)
+						local yaw = math.atan2(nx * side, nz * side)
+						textured(part("Bench", Vector3.new(4.4, 0.5, 1.4), at(x, y + 1.3, z) * CFrame.Angles(0, yaw, 0), nil, nil, deco), "px_cherry_planks")
+						textured(part("BenchBack", Vector3.new(4.4, 1.4, 0.3), at(x, y + 2.2, z) * CFrame.Angles(0, yaw, 0) * CFrame.new(0, 0, 0.6), nil, nil, deco), "px_cherry_planks")
+						for _, lx in ipairs({ -1.8, 1.8 }) do
+							part("BenchLeg", Vector3.new(0.4, 1.1, 1.2), at(x, y + 0.55, z) * CFrame.Angles(0, yaw, 0) * CFrame.new(lx, 0, 0), IRON, Enum.Material.Metal, deco)
+						end
+					else
+						lamp(x, z, 6, deco)
+					end
+				end
+			end
+		end
+	end
+	-- rose bushes, clipped shrubs, flower patches, bird baths and small statues on the free lawns
+	local made = 0
+	for _ = 1, 8000 do
+		if made >= 220 then
+			break
+		end
+		local x, z = rng:NextNumber(-R, R), rng:NextNumber(-R, R)
+		local c = cellAtPos(x, z)
+		if c and c.zone ~= "japan" and c.d < 0.95 and freeSpot(x, z, 3) then
+			made += 1
+			local y = floorAt(x, z)
+			local roll = rng:NextNumber()
+			if roll < 0.35 then
+				-- a rose bush: a round shrub with red, pink or white roses
+				local d = rng:NextNumber(2.2, 3.4)
+				local bush = part("RoseBush", Vector3.new(d, d * 0.8, d), at(x, y + d * 0.4, z), nil, nil, deco)
+				bush.Shape = Enum.PartType.Ball
+				bush.Material = Enum.Material.Grass
+				bush.Color = Color3.fromRGB(60, 120, 50)
+				local rose = ({ Color3.fromRGB(210, 30, 50), Color3.fromRGB(250, 150, 190), Color3.fromRGB(255, 250, 245) })[rng:NextInteger(1, 3)]
+				for _ = 1, 6 do
+					local a, e = rng:NextNumber(0, 6.28), rng:NextNumber(0.2, 1)
+					decor(part("Rose", Vector3.new(0.5, 0.5, 0.5), at(x + math.cos(a) * d * 0.45 * e, y + d * 0.55 + rng:NextNumber(-0.3, 0.3), z + math.sin(a) * d * 0.45 * e), rose, nil, deco))
+				end
+			elseif roll < 0.6 then
+				-- a little patch of flowers in the grass
+				for _ = 1, rng:NextInteger(5, 9) do
+					local col = FLOWERS_WARM[rng:NextInteger(1, #FLOWERS_WARM)]
+					if rng:NextNumber() < 0.5 then
+						col = FLOWERS_COOL[rng:NextInteger(1, #FLOWERS_COOL)]
+					end
+					local fx, fz = x + rng:NextNumber(-2.5, 2.5), z + rng:NextNumber(-2.5, 2.5)
+					decor(part("Stem", Vector3.new(0.15, 0.8, 0.15), at(fx, y + 0.4, fz), Color3.fromRGB(70, 130, 50), nil, deco))
+					decor(part("Bloom", Vector3.new(0.6, 0.35, 0.6), at(fx, y + 0.9, fz), col, nil, deco))
+				end
+			elseif roll < 0.8 then
+				-- a clipped box shrub
+				local w = rng:NextNumber(2, 3.4)
+				hedgeBox("Shrub", Vector3.new(w, w * 0.7, w), at(x, y + w * 0.35, z) * CFrame.Angles(0, rng:NextNumber(0, 1.5), 0), deco)
+			elseif roll < 0.9 then
+				-- a stone bird bath
+				whiteStone("BirdBathFoot", Vector3.new(1, 2.6, 1), at(x, y + 1.3, z), deco)
+				whiteStone("BirdBathBowl", Vector3.new(3, 0.5, 3), at(x, y + 2.8, z), deco)
+				textured(decor(part("BirdBathWater", Vector3.new(2.4, 0.1, 2.4), at(x, y + 3.06, z), nil, nil, deco)), "px_water", Color3.fromRGB(170, 220, 235))
+			else
+				-- a small statue on a plinth: an urn with a flowering plant
+				whiteStone("UrnPlinth", Vector3.new(2.2, 2, 2.2), at(x, y + 1, z), deco)
+				whiteStone("Urn", Vector3.new(1.8, 1.6, 1.8), at(x, y + 2.8, z), deco)
+				local plant = part("UrnPlant", Vector3.new(2.2, 1.8, 2.2), at(x, y + 4.4, z), Color3.fromRGB(240, 150, 190), Enum.Material.Grass, deco)
+				plant.Shape = Enum.PartType.Ball
+			end
+		end
+	end
+end
+
+-- invisible walls at the map edge: nobody walks off over the hills [владелец 23.10]
+do
+	local edge = folder("Edge")
+	local E = 318
+	for _, w in ipairs({ { 0, E, 2 * E, 4 }, { 0, -E, 2 * E, 4 }, { E, 0, 4, 2 * E }, { -E, 0, 4, 2 * E } }) do
+		local p = part("EdgeWall", Vector3.new(w[3], 400, w[4]), at(w[1], 150, w[2]), nil, nil, edge)
+		p.Transparency = 1
+		p.CanQuery = false
+		p.CastShadow = false
 	end
 end
 

@@ -627,7 +627,7 @@ do
 	local plaza = part("Plaza", Vector3.new(0.4, CAMP.r * 2, CAMP.r * 2), at(cx, 0.15, cz) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, camp)
 	plaza.Shape = Enum.PartType.Cylinder
 	textured(plaza, "px_gravel", Color3.fromRGB(200, 165, 135))
-	local spawn = part("LocationSpawn_mountain_foot", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + cx, 0.5, BZ + cz + 6), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), STONE, nil, camp)
+	local spawn = part("LocationSpawn_mountain_foot", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z + PIT.hole + 12), Vector3.new(BX + PIT.x, 0.5, BZ + PIT.z)), STONE, nil, camp) -- [владелец 23.10] the arrival is by the mine, just south of the pit rim
 	textured(spawn, "px_red_sandstone")
 	spawn:SetAttribute("LocationId", "mountain_foot")
 	CollectionService:AddTag(spawn, "LocationSpawn")
@@ -759,7 +759,9 @@ do
 	end
 	-- the block buyer at a stall with a striped awning, sacks and crates of ore
 	do
-		local sx, sz = cx + 10, cz - 6
+		-- [владелец 23.10] the buyer stands by the mine, next to the arrival
+		local sx, sz = PIT.x + 18, PIT.z + PIT.hole + 14
+		local cx, cz = PIT.x, PIT.z + PIT.hole + 12
 		local desc = Instance.new("HumanoidDescription")
 		local skin = Color3.fromRGB(198, 140, 100)
 		desc.HeadColor, desc.LeftArmColor, desc.RightArmColor = skin, skin, skin
