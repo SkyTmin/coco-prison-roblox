@@ -19,6 +19,7 @@ if (-not $key) {
 	exit 1
 }
 $env:ANTHROPIC_API_KEY = $key
+. (Join-Path $PSScriptRoot "use-system-proxy.ps1")
 Set-Location (Split-Path -Parent $PSScriptRoot)
 Write-Host "Claude на API-кредитах, модель $Model, папка $(Get-Location)." -ForegroundColor Cyan
 Write-Host "Если спросит про найденный API-ключ — ответь Yes. /status — чем вошёл, /cost — сколько потрачено." -ForegroundColor Cyan

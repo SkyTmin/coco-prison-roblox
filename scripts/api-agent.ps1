@@ -24,6 +24,7 @@ if (-not $key) {
 	exit 1
 }
 $env:ANTHROPIC_API_KEY = $key
+. (Join-Path $PSScriptRoot "use-system-proxy.ps1")
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
