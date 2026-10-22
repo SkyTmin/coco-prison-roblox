@@ -50,6 +50,8 @@ export type Profile = {
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
 	nickname: string?, -- shown as a prefix of the display name
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
+	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3
+	factionChanges: number?, -- «Смен фракций» [клиент]; schema stays v3
 	location: string,
 	operationIds: { [string]: boolean },
 }

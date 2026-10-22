@@ -12,6 +12,7 @@ local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local ArtifactService = require(script.Parent.ArtifactService)
+local FactionStorage = require(script.Parent.FactionStorageService)
 local Types = require(Shared.Types)
 
 type Reward = {
@@ -27,7 +28,15 @@ type Binding = {
 	connection: RBXScriptConnection,
 	attribute: RBXScriptConnection,
 }
-type Session = { id: string, part: BasePart, rolledAt: number, tokens: number, tokenAt: number }
+type Session = {
+	id: string,
+	part: BasePart,
+	rolledAt: number,
+	tokens: number,
+	tokenAt: number,
+	faction: string?, -- factionChest: whose storage and which of the 8 chests
+	index: number?,
+}
 type Address = { container: "case" | "inv", index: number }
 local CASES: { [string]: { tag: string, text: string } } = {
 	ordinaryCase = { tag = "OrdinaryCase", text = "ordinary_case" },
@@ -35,7 +44,8 @@ local CASES: { [string]: { tag: string, text: string } } = {
 	artifactCase = { tag = "ArtifactCase", text = "artifact_case" },
 	nicknameCase = { tag = "NicknameCase", text = "nickname_case" },
 }
-local TAGS = { "OrdinaryCase", "AncientCase", "ArtifactCase", "NicknameCase", "EnderChest" }
+local TAGS =
+	{ "OrdinaryCase", "AncientCase", "ArtifactCase", "NicknameCase", "EnderChest", "FactionChest" }
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
@@ -45,7 +55,24 @@ local started = false
 local CaseService = {}
 
 local function containerTitle(id: string): string
-	return if id == "enderChest" then "ender_chest" else CASES[id].text
+	return if id == "enderChest"
+		then "ender_chest"
+		elseif id == "factionChest" then "faction_chest"
+		else CASES[id].text
+end
+
+-- storage chests keep what is put in and need no key: the personal ender chest and the faction chests
+-- of the faction base (FactionStorageService; the profile only mirrors the open chest for the window)
+local function isStorage(id: string): boolean
+	return id == "enderChest" or id == "factionChest"
+end
+
+local function deepCopy(slots: { [number]: Types.ItemStack }): { [number]: Types.ItemStack }
+	local out = {}
+	for slot, stack in pairs(slots) do
+		out[slot] = table.clone(stack)
+	end
+	return out
 end
 
 local function contentsFor(profile: Types.Profile, id: string): { [number]: Types.ItemStack }
@@ -55,6 +82,9 @@ end
 local function caseId(part: Instance): string?
 	if CollectionService:HasTag(part, "EnderChest") then
 		return "enderChest"
+	end
+	if CollectionService:HasTag(part, "FactionChest") then
+		return "factionChest"
 	end
 	local attribute = part:GetAttribute("CaseId")
 	if attribute ~= nil then
@@ -111,17 +141,19 @@ local function close(player: Player)
 end
 
 local function validate(player: Player, id: any): Session?
-	if typeof(id) ~= "string" or (not CASES[id] and id ~= "enderChest") then
+	if typeof(id) ~= "string" or (not CASES[id] and not isStorage(id)) then
 		return nil
 	end
 	local session = sessions[player]
 	if not session or session.id ~= id then
 		return nil
 	end
+	local profile = ProfileService.Get(player)
 	if
 		caseId(session.part) ~= id
 		or not near(player, session.part)
-		or not ProfileService.Get(player)
+		or not profile
+		or (id == "factionChest" and profile.faction ~= session.faction) -- left the faction meanwhile
 	then
 		close(player)
 		return nil
@@ -211,7 +243,18 @@ local function openChest(player: Player, part: BasePart)
 		return
 	end
 	local heldKey: string? = nil
-	if id ~= "enderChest" then
+	local shared: { [number]: Types.ItemStack }? = nil
+	if id == "factionChest" then
+		-- [клиент] «Вы не можете открывать сундуки на чужой базе фракции!»
+		if profile.faction == nil or part:GetAttribute("Faction") ~= profile.faction then
+			toast(player, "faction_foreign_chest")
+			return
+		end
+		shared = FactionStorage.Chest(profile.faction, part:GetAttribute("ChestIndex"))
+		if not shared then
+			return
+		end
+	elseif id ~= "enderChest" then
 		local keys = acceptedKeys(id)
 		local held = profile.inventory[profile.selectedSlot]
 		heldKey = if held and table.find(keys, held.id) then held.id else nil
@@ -228,10 +271,19 @@ local function openChest(player: Player, part: BasePart)
 	if previous then
 		emptyCase(player, previous.id) -- another case opened over this one: the old one closes
 	end
-	sessions[player] =
-		{ id = id, part = part, rolledAt = -math.huge, tokens = 80, tokenAt = os.clock() }
+	sessions[player] = {
+		id = id,
+		part = part,
+		rolledAt = -math.huge,
+		tokens = 80,
+		tokenAt = os.clock(),
+		faction = if shared then profile.faction else nil,
+		index = if shared then part:GetAttribute("ChestIndex") :: number else nil,
+	}
 	ProfileService.Mutate(player, function(p)
-		if id ~= "enderChest" then
+		if shared then
+			p.caseContents[id] = deepCopy(shared)
+		elseif id ~= "enderChest" then
 			p.caseContents[id] = p.caseContents[id] or {}
 		end
 	end)
@@ -307,8 +359,8 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		end
 		return
 	end
-	if session.id == "enderChest" or os.clock() - session.rolledAt < 0.4 then
-		if player:GetAttribute("CreativeAllowed") and session.id ~= "enderChest" then
+	if isStorage(session.id) or os.clock() - session.rolledAt < 0.4 then
+		if player:GetAttribute("CreativeAllowed") and not isStorage(session.id) then
 			warn(
 				"[кейс] нажато слишком быстро после прошлого открытия — пропущено"
 			)
@@ -557,8 +609,14 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 	end
 	session.tokens -= 1
 	local claimedMoney = 0
+	local shared = if session.id == "factionChest"
+		then FactionStorage.Chest(session.faction, session.index)
+		else nil
+	if session.id == "factionChest" and not shared then
+		return
+	end
 	ProfileService.Mutate(player, function(p)
-		local contents = contentsFor(p, session.id)
+		local contents = shared or contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
 		if not source[from.index] then
@@ -593,6 +651,23 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 	end)
 	if claimedMoney > 0 then
 		toast(player, "case_money", Strings.money(claimedMoney))
+	end
+	if shared and session.faction then
+		-- the faction chest is shared: every member who has this chest open sees the change
+		FactionStorage.MarkDirty(session.faction)
+		for viewer, other in pairs(sessions) do
+			if
+				other.id == "factionChest"
+				and other.faction == session.faction
+				and other.index == session.index
+			then
+				ProfileService.Mutate(viewer, function(p)
+					p.caseContents.factionChest = deepCopy(shared)
+				end)
+				Remotes.event("CaseUpdated"):FireClient(viewer, "factionChest", true)
+			end
+		end
+		return
 	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end

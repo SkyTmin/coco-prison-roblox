@@ -95,6 +95,14 @@ type Saved = { hp: number?, respawnAt: number?, damageBy: { [string]: number }? 
 
 local bosses: { [string]: Boss } = {}
 
+-- per-boss colours of the abilities (fight.palette {telegraph, blade, spikes, glow} = {r, g, b}); the
+-- Базальтовый страж keeps its lava, Зомбарь has green pus and earth
+local function paletteColor(boss: Boss, key: string, default: Color3): Color3
+	local palette = (boss.fight :: any).palette
+	local c = palette and palette[key]
+	return if typeof(c) == "table" then Color3.fromRGB(c[1], c[2], c[3]) else default
+end
+
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
@@ -332,7 +340,7 @@ local function rigFromTemplate(boss: Boss, template: Model): Model?
 	local glow = Instance.new("PointLight") -- lava glow from the chest
 	glow.Range = 16
 	glow.Brightness = 1.4
-	glow.Color = LAVA
+	glow.Color = paletteColor(boss, "glow", LAVA)
 	glow.Parent = bones.torso
 	local humanoid = Instance.new("Humanoid")
 	humanoid.RigType = Enum.HumanoidRigType.R6
@@ -562,7 +570,7 @@ local function act(boss: Boss, action: string, seconds: number)
 	end
 end
 
-local function telegraphPart(size: Vector3, cf: CFrame, round: boolean): BasePart
+local function telegraphPart(size: Vector3, cf: CFrame, round: boolean, color: Color3?): BasePart
 	local p = Instance.new("Part")
 	p.Name = "BossTelegraph"
 	p.Anchored = true
@@ -570,7 +578,7 @@ local function telegraphPart(size: Vector3, cf: CFrame, round: boolean): BasePar
 	p.CanQuery = false
 	p.CanTouch = false
 	p.Material = Enum.Material.Neon
-	p.Color = TELEGRAPH
+	p.Color = color or TELEGRAPH
 	p.Transparency = 0.55
 	if round then
 		p.Shape = Enum.PartType.Cylinder
@@ -620,7 +628,8 @@ local function lavaBlade(boss: Boss, target: Vector3)
 	local strip = telegraphPart(
 		Vector3.new(cfg.width, 0.2, cfg.length),
 		CFrame.lookAt(from + dir * (cfg.length / 2), from + dir * cfg.length),
-		false
+		false,
+		paletteColor(boss, "telegraph", TELEGRAPH)
 	)
 	task.wait(cfg.telegraph)
 	strip:Destroy()
@@ -631,12 +640,14 @@ local function lavaBlade(boss: Boss, target: Vector3)
 	wave.CanQuery = false
 	wave.CanTouch = false
 	wave.Material = Enum.Material.Neon
-	wave.Color = LAVA
+	wave.Color = paletteColor(boss, "blade", LAVA)
 	wave.Size = Vector3.new(cfg.width, 5, 1.5)
 	wave.Parent = workspace
 	local fire = Instance.new("Fire")
 	fire.Size = 6
 	fire.Heat = 8
+	fire.Color = wave.Color
+	fire.SecondaryColor = wave.Color:Lerp(Color3.new(0, 0, 0), 0.4)
 	fire.Parent = wave
 	if boss.model then
 		Sfx.broadcast("player_hurt", root, 0.5, 0.5)
@@ -692,7 +703,12 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 	for _, at in ipairs(spots) do
 		table.insert(
 			marks,
-			telegraphPart(Vector3.new(cfg.radius * 2, 0.2, cfg.radius * 2), CFrame.new(at), true)
+			telegraphPart(
+				Vector3.new(cfg.radius * 2, 0.2, cfg.radius * 2),
+				CFrame.new(at),
+				true,
+				paletteColor(boss, "telegraph", TELEGRAPH)
+			)
 		)
 	end
 	task.wait(cfg.telegraph)
@@ -713,7 +729,7 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 			spike.CanQuery = false
 			spike.CanTouch = false
 			spike.Material = Enum.Material.Basalt
-			spike.Color = BASALT
+			spike.Color = paletteColor(boss, "spikes", BASALT)
 			spike.Size = Vector3.new(1.6, height, 1.6)
 			local base = CFrame.new(at + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r))
 				* CFrame.Angles(
@@ -786,7 +802,8 @@ local function charge(boss: Boss, target: Vector3)
 	local strip = telegraphPart(
 		Vector3.new(cfg.width, 0.2, math.max(distance, 1)),
 		CFrame.lookAt(from + dir * (distance / 2), from + dir * distance),
-		false
+		false,
+		paletteColor(boss, "telegraph", TELEGRAPH)
 	)
 	task.wait(cfg.telegraph)
 	strip:Destroy()
@@ -995,7 +1012,13 @@ function spawnBoss(boss: Boss, saved: Saved?)
 	act(boss, "roar", 1.8)
 	publish(boss)
 	for _, player in ipairs(Players:GetPlayers()) do
-		toast(player, "boss_spawned", bossName(boss, player))
+		-- a boss may have its own announcement [клиент: giant_zombie.notify.spawn]
+		local key = "boss_spawned_" .. boss.id
+		if Strings.has(key) then
+			toast(player, key)
+		else
+			toast(player, "boss_spawned", bossName(boss, player))
+		end
 	end
 end
 

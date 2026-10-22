@@ -531,6 +531,9 @@
       "name": "Сплинтер",
       "location": "Подвал",
       "unlockLevel": 5,
+      "locationId": null,
+      "nameEn": null,
+      "fight": null,
       "money": [
         0,
         1800
@@ -550,6 +553,67 @@
       "name": "Зомбарь",
       "location": "База фракций",
       "unlockLevel": 5,
+      "locationId": "fraction_base",
+      "nameEn": "Zombar",
+      "fight": {
+        "meleeDamage": 0.4,
+        "meleeRange": 7,
+        "meleeCooldown": 2.4,
+        "walkSpeed": 8,
+        "leashSeconds": 300,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 30,
+          "width": 6,
+          "speed": 45,
+          "damage": 0.8
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 0.8,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 40,
+          "maxDistance": 36,
+          "width": 6,
+          "damage": 0.8,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "template": "giant_zombie",
+        "scale": 1,
+        "palette": {
+          "telegraph": [
+            90,
+            200,
+            60
+          ],
+          "blade": [
+            120,
+            220,
+            70
+          ],
+          "spikes": [
+            80,
+            70,
+            55
+          ],
+          "glow": [
+            110,
+            255,
+            120
+          ]
+        }
+      },
       "money": [
         0,
         650
@@ -557,7 +621,7 @@
       "ancientStars": null,
       "powderChance": null,
       "shard": null,
-      "hp": 800,
+      "hp": 400,
       "damage": 5,
       "respawnSeconds": 480
     }

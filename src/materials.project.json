@@ -153,6 +153,134 @@
         "ColorMap": "rbxassetid://119623485372429",
         "StudsPerTile": 4
       }
+    },
+    "px_stone_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://122482835844891",
+        "StudsPerTile": 4
+      }
+    },
+    "px_mossy_cobblestone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://86413287757997",
+        "StudsPerTile": 4
+      }
+    },
+    "px_mossy_stone_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://90892262773341",
+        "StudsPerTile": 4
+      }
+    },
+    "px_smooth_stone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://85548173839548",
+        "StudsPerTile": 4
+      }
+    },
+    "px_white_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://120927953198084",
+        "StudsPerTile": 4
+      }
+    },
+    "px_yellow_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://126769727478863",
+        "StudsPerTile": 4
+      }
+    },
+    "px_brown_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://99396903151166",
+        "StudsPerTile": 4
+      }
+    },
+    "px_gray_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://115371429131042",
+        "StudsPerTile": 4
+      }
+    },
+    "px_birch_log": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://94000046295319",
+        "StudsPerTile": 4
+      }
+    },
+    "px_spruce_planks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://126485243877721",
+        "StudsPerTile": 4
+      }
+    },
+    "px_dark_oak_planks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://126066306776229",
+        "StudsPerTile": 4
+      }
+    },
+    "px_terracotta": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://80612962866962",
+        "StudsPerTile": 4
+      }
+    },
+    "px_sandstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://90207738459579",
+        "StudsPerTile": 4
+      }
+    },
+    "px_hay": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://134188446265196",
+        "StudsPerTile": 4
+      }
+    },
+    "px_roof_tiles": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://91948205303054",
+        "StudsPerTile": 4
+      }
+    },
+    "px_gold_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://132873931980825",
+        "StudsPerTile": 4
+      }
     }
   }
 }

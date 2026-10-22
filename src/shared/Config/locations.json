@@ -8,6 +8,8 @@
       "unlockLevel": 1,
       "requiresPass": false,
       "pvp": false,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           32,
@@ -47,6 +49,8 @@
       "unlockLevel": 3,
       "requiresPass": false,
       "pvp": false,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -80,6 +84,8 @@
       "unlockLevel": 5,
       "requiresPass": false,
       "pvp": false,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -109,6 +115,8 @@
       "unlockLevel": 7,
       "requiresPass": false,
       "pvp": false,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -140,6 +148,8 @@
       "unlockLevel": 9,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -167,6 +177,8 @@
       "unlockLevel": 11,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -194,6 +206,8 @@
       "unlockLevel": 13,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -222,6 +236,8 @@
       "unlockLevel": 15,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -249,6 +265,8 @@
       "unlockLevel": 17,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -276,6 +294,8 @@
       "unlockLevel": 19,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -303,6 +323,8 @@
       "unlockLevel": 21,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -330,6 +352,8 @@
       "unlockLevel": 23,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -359,6 +383,8 @@
       "unlockLevel": 25,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -385,6 +411,8 @@
       "unlockLevel": 27,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -410,6 +438,8 @@
       "unlockLevel": 29,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -437,6 +467,8 @@
       "unlockLevel": 31,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -466,6 +498,8 @@
       "unlockLevel": 33,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -491,6 +525,8 @@
       "unlockLevel": 35,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -518,6 +554,8 @@
       "unlockLevel": 37,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -543,6 +581,8 @@
       "unlockLevel": 39,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -568,6 +608,8 @@
       "unlockLevel": 41,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -593,6 +635,8 @@
       "unlockLevel": 43,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -618,6 +662,8 @@
       "unlockLevel": 45,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -643,6 +689,8 @@
       "unlockLevel": 47,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -668,6 +716,8 @@
       "unlockLevel": 49,
       "requiresPass": false,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           40,
@@ -693,6 +743,8 @@
       "unlockLevel": 5,
       "requiresPass": true,
       "pvp": true,
+      "requiresFaction": false,
+      "miniMine": null,
       "mine": {
         "size": [
           24,
@@ -725,7 +777,16 @@
       "name": "База фракций",
       "unlockLevel": 5,
       "requiresPass": false,
-      "pvp": false,
+      "pvp": true,
+      "requiresFaction": true,
+      "miniMine": {
+        "size": [
+          12,
+          6,
+          12
+        ],
+        "resetSeconds": 120
+      },
       "mine": {
         "size": [
           40,

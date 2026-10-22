@@ -26,6 +26,7 @@ local TITLES = {
 	artifactCase = "artifact_case",
 	nicknameCase = "nickname_case",
 	enderChest = "ender_chest",
+	factionChest = "faction_chest", -- the faction storage on the faction base (contents mirrored by the server)
 }
 
 function ChestWindow.build(
@@ -40,6 +41,7 @@ function ChestWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local isEnder = id == "enderChest"
+	local isStorage = isEnder or id == "factionChest" -- keeps items, no key, no Open button
 	-- vanilla chest GUI is 176×168 GUI px; our button row adds 30
 	local width, height = 176 * MC, (168 + 36) * MC
 	local win, raw = createWindow(
@@ -117,12 +119,12 @@ function ChestWindow.build(
 		UDim2.fromOffset(54 * MC, 20 * MC),
 		UDim2.fromOffset(8 * MC, rowY)
 	)
-	open.Visible = not isEnder
+	open.Visible = not isStorage
 	local take = Ui.mcButton(
 		content,
 		t("case_take_all"),
 		UDim2.fromOffset(54 * MC, 20 * MC),
-		UDim2.fromOffset(if isEnder then 8 * MC else 64 * MC, rowY)
+		UDim2.fromOffset(if isStorage then 8 * MC else 64 * MC, rowY)
 	)
 	local keyButton: TextButton? = nil
 	if #accepted > 1 then
@@ -213,7 +215,7 @@ function ChestWindow.build(
 				glint.Image, glint.Visible = icon or "", enchanted
 			end
 		end
-		if isEnder then
+		if isStorage then
 			return
 		end
 		local config = Config.keys[id]

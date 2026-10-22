@@ -119,6 +119,12 @@ local function migrate(data: any): Profile
 	if typeof(profile.trainer) ~= "table" then
 		profile.trainer = { strength = 0, agility = 0, needs = 0 }
 	end
+	if not Config.faction(profile.faction) then
+		profile.faction = nil
+	end
+	if typeof(profile.factionChanges) ~= "number" then
+		profile.factionChanges = 0
+	end
 	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
 	local rawArtifacts = profile.artifacts
 	profile.artifacts = {}

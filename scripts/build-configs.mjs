@@ -79,6 +79,8 @@ for (const loc of pricesWiki.locations) {
 		unlockLevel: loc.level,
 		requiresPass: loc.requiresPass ?? false,
 		pvp: dec.pvp ?? (loc.level >= decisions.pvpFromLevel && loc.id !== "fraction_base"),
+		requiresFaction: dec.requiresFaction ?? false,
+		miniMine: dec.miniMine ?? null,
 		mine: {
 			size: dec.size ?? def.size,
 			resetSeconds: dec.resetSeconds ?? def.resetSeconds,
@@ -181,7 +183,7 @@ const bosses = bossWiki.entries.map((e) => {
 		respawnSeconds: dec.respawnSeconds ?? null,
 	};
 });
-for (const [id, b] of Object.entries(decisions.bosses)) if (b.name && !bosses.some((x) => x.id === id)) bosses.push({ id, name: b.name, location: b.location, unlockLevel: b.unlockLevel, money: b.money, ancientStars: b.ancientStars ?? null, powderChance: b.powderChance ?? null, shard: null, hp: b.hp, damage: b.damage, respawnSeconds: b.respawnSeconds });
+for (const [id, b] of Object.entries(decisions.bosses)) if (b.name && !bosses.some((x) => x.id === id)) bosses.push({ id, name: b.name, location: b.location, unlockLevel: b.unlockLevel, locationId: b.locationId ?? null, nameEn: b.nameEn ?? null, fight: b.fight ?? null, money: b.money, ancientStars: b.ancientStars ?? null, powderChance: b.powderChance ?? null, shard: null, hp: b.hp, damage: b.damage, respawnSeconds: b.respawnSeconds });
 write("bosses.json", { source: "boss-menu-recovery.json [меню]; hp/damage/respawn [решение]", rewards: decisions.bossRewards, bosses });
 
 // ---------------------------------------------------------------- pure decisions
@@ -190,7 +192,7 @@ write("needs.json", { source: "эффекты и зоны снятия [вики
 write("trainer.json", { source: "первые требования [меню]; остальное [решение]", ...decisions.trainer });
 write("keys.json", { source: "[решение]; цены ключей у обменника [меню]", starExchange: { ancient_key: 10, improved_ancient_key: 60, dispeller: 15 }, ...decisions.keys });
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
-write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival, creative: decisions.creative, combat: decisions.combat });
+write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival, creative: decisions.creative, combat: decisions.combat, factions: decisions.factions });
 write("effects.json", { source: "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков", cracks: read("assets/cracks/ids.json"), sounds: read("assets/sounds/ids.json") });
 write("achievements.json", { source: "[меню] ступени; [владелец] цепочки по инструменту", ...decisions.achievements });
 // Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`

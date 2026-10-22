@@ -85,6 +85,7 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    all 4 locales; a new book needs `books.catalog` + `effects` + `book_<id>` / `book_desc_<id>`. The
    server warns `[ItemInfo] missing translations` in Studio when something is missing.
    Каменоломня: `scripts/build-quarry.luau` (Edit, after build-textures; Workspace.Quarry at X = 700, all in one cave).
+   База фракций: `scripts/build-fraction-base.luau` (Edit, after build-textures and build-prison; Workspace.FactionBase at X = −700: 4 valleys in mountains, trails to the Зомбарь square). Boss template: `scripts/build-boss-zombie.luau` (ServerStorage.BossTemplates.giant_zombie). New block textures: `scripts/split-faction-sheet.mjs`.
    Boss looks: ServerStorage.BossTemplates.<template> (mesh golem split into Head/Torso/LeftArm/RightArm/LeftLeg/
    RightLeg; lives only in the place file) is rigged in code; `src/client/BossAnimator.luau` poses it from the
    Action attributes. Player swing = our keyframes (`src/shared/SwingAnimations.luau`) played by

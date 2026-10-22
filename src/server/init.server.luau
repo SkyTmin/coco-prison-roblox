@@ -40,6 +40,11 @@ for _, name in ipairs({
 	"DropItem",
 	"ServerLog",
 	"Swing",
+	"FactionChoose",
+	"FactionLeave",
+	"FactionChestOpened",
+	"FactionChestMove",
+	"FactionChestClose",
 }) do
 	Remotes.event(name)
 end
@@ -65,10 +70,13 @@ local HurtService = require(script.Services.HurtService)
 local CreativeService = require(script.Services.CreativeService)
 local ItemDropService = require(script.Services.ItemDropService)
 local BossService = require(script.Services.BossService)
+local FactionService = require(script.Services.FactionService)
+local FactionStorageService = require(script.Services.FactionStorageService)
 
 HungerService.Start()
 DeathService.Start()
 ProfileService.Start()
+FactionService.Start()
 ProfessionService.Start()
 TextureService.Start()
 MineService.Start()
@@ -87,6 +95,7 @@ HurtService.Start()
 CreativeService.Start()
 ItemDropService.Start()
 BossService.Start()
+FactionStorageService.Start()
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level on spawn

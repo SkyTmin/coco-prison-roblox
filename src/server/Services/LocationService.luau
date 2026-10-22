@@ -76,6 +76,18 @@ local function matchesSpot(part: BasePart, spot: string?): boolean
 	return if spot then markedSpot == spot else markedSpot == nil or markedSpot == "spawn"
 end
 
+-- База фракций [владелец]: every faction has its own spawn (attribute Faction); a spawn without the
+-- attribute is for everybody
+local function matchesFaction(part: BasePart, faction: string?): boolean
+	local marked = part:GetAttribute("Faction")
+	return marked == nil or marked == faction
+end
+
+-- [клиент] «Необходимо находиться во фракции»
+local function factionMissing(location: Config.Location, profile: any): boolean
+	return location.requiresFaction == true and not Config.faction(profile.faction)
+end
+
 local function teleport(player: Player, locationId: any, spot: any)
 	if
 		typeof(locationId) ~= "string"
@@ -116,6 +128,10 @@ local function teleport(player: Player, locationId: any, spot: any)
 		toast(player, "location_pass_required")
 		return
 	end
+	if factionMissing(location, profile) then
+		toast(player, "faction_required")
+		return
+	end
 	local spawn: BasePart? = nil
 	for _, part in ipairs(CollectionService:GetTagged("LocationSpawn")) do
 		if
@@ -123,6 +139,7 @@ local function teleport(player: Player, locationId: any, spot: any)
 			and part:IsDescendantOf(workspace)
 			and part:GetAttribute("LocationId") == locationId
 			and matchesSpot(part, spot)
+			and matchesFaction(part, profile.faction)
 		then
 			spawn = part
 			break
@@ -201,6 +218,8 @@ local function updateChannels()
 				or not location
 				or (not withinCurrent and profile.level < location.unlockLevel)
 				or (not withinCurrent and location.requiresPass and not profile.passes[channel.locationId])
+				or factionMissing(location, profile)
+				or not matchesFaction(channel.spawn, profile.faction)
 				or not channel.spawn:IsDescendantOf(workspace)
 				or not CollectionService:HasTag(channel.spawn, "LocationSpawn")
 				or channel.spawn:GetAttribute("LocationId") ~= channel.locationId

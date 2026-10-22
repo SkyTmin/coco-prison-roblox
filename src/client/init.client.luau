@@ -33,6 +33,7 @@ local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
 CharacterAnimator.Start() -- keyframed swings on every character (ours and the relayed ones)
 local TrainerWindow = require(script.TrainerWindow)
+local FactionWindow = require(script.FactionWindow)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
 local ArmorVisual = require(script.ArmorVisual)
@@ -982,6 +983,7 @@ local function locationAvailable(location: Config.Location): boolean
 	return p ~= nil
 		and p.level >= location.unlockLevel
 		and (not location.requiresPass or p.passes[location.id] == true)
+		and (not location.requiresFaction or Config.faction(p.faction) ~= nil)
 end
 
 local function locationPreview(
@@ -1132,6 +1134,8 @@ local function buildLocations(): Frame
 				refusal.Text = T("teleport_not_ready")
 			elseif profile.level < selected.unlockLevel then
 				refusal.Text = T("level_too_low", selected.unlockLevel)
+			elseif selected.requiresFaction and not Config.faction(profile.faction) then
+				refusal.Text = T("faction_required") -- [клиент] «Необходимо находиться во фракции»
 			elseif not available then
 				refusal.Text = T("location_pass_required")
 			end
@@ -1541,6 +1545,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 	end,
 	case = buildCase,
 	locations = buildLocations,
+	factions = function()
+		local win, refresh = FactionWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 }
 local function open(kind: string)
 	local builder = windowBuilders[kind]
@@ -2279,8 +2288,16 @@ touchMenuGrid.Size = UDim2.fromOffset(5 * 60, 2 * 60)
 touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
-local menuKeys =
-	{ "locations", "jobs", "upgrade", "level", "achievements", "artifacts", "language_code" }
+local menuKeys = {
+	"locations",
+	"jobs",
+	"upgrade",
+	"level",
+	"achievements",
+	"artifacts",
+	"factions",
+	"language_code",
+}
 local function touchIconButton(
 	parent: Instance,
 	iconId: string?,
@@ -2382,6 +2399,7 @@ for i, kind in ipairs(menuKeys) do
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
 		elseif kind == "upgrade" then "touch_menu_upgrade"
+		elseif kind == "factions" then "factions_title"
 		else kind
 	local button = touchIconButton(
 		touchMenuGrid,
@@ -2601,6 +2619,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("jobs")
 	elseif k == Enum.KeyCode.L then
 		open("achievements")
+	elseif k == Enum.KeyCode.G then
+		open("factions") -- [клиент] /fraction
 	elseif k == Enum.KeyCode.I then
 		open("artifacts")
 	elseif k == Enum.KeyCode.M then

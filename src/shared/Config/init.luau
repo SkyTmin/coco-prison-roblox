@@ -77,6 +77,8 @@ export type Location = {
 	unlockLevel: number,
 	requiresPass: boolean,
 	pvp: boolean,
+	requiresFaction: boolean?, -- База фракций: only for faction members [клиент]
+	miniMine: { size: { number }, resetSeconds: number }?, -- the faction base's small mines
 	mine: {
 		size: { number },
 		resetSeconds: number,
@@ -97,6 +99,32 @@ end
 
 function Config.location(id: string): Location?
 	return locationsById[id]
+end
+
+-- Factions [клиент]: four of them, joined from level 5, leaving costs money; names and taglines live in
+-- Strings (faction_<id>, faction_<id>_desc), colours here
+export type Faction = { id: string, color: { number } }
+Config.factions = Config.rules.factions :: {
+	joinLevel: number,
+	leaveCost: number,
+	balanceSlack: number,
+	list: { Faction },
+}
+
+function Config.faction(id: any): Faction?
+	for _, f in ipairs(Config.factions.list) do
+		if f.id == id then
+			return f
+		end
+	end
+	return nil
+end
+
+function Config.factionColor(id: any): Color3
+	local f = Config.faction(id)
+	return if f
+		then Color3.fromRGB(f.color[1], f.color[2], f.color[3])
+		else Color3.fromRGB(170, 170, 170)
 end
 
 function Config.levelRule(level: number): LevelRule?

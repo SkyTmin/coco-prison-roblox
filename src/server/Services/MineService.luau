@@ -45,6 +45,7 @@ export type Mine = {
 	resetAt: number,
 	rebuilding: boolean,
 	dug: number, -- blocks broken since the last reset: an untouched mine is not rebuilt
+	resetSeconds: number, -- the location's timer, or the faction base mini-mine's
 }
 
 local MineService = {}
@@ -188,7 +189,7 @@ local function rebuild(mine: Mine)
 		yieldIfLong()
 	end
 	mine.dug = 0
-	mine.resetAt = os.clock() + mine.location.mine.resetSeconds
+	mine.resetAt = os.clock() + mine.resetSeconds
 	mine.rebuilding = false
 	Remotes.event("MineReset"):FireAllClients(mine.id, mine.generation)
 end
@@ -298,7 +299,11 @@ local function register(anchor: Instance)
 	end
 	local locationId = anchor:GetAttribute("LocationId")
 	local location = if typeof(locationId) == "string" then Config.location(locationId) else nil
-	if not location or location.kind ~= "mine" then
+	-- the faction base is not a mine location, but its districts have mini-mines (anchor attribute MiniMine)
+	local mini = anchor:GetAttribute("MiniMine") == true
+		and location ~= nil
+		and location.miniMine ~= nil
+	if not location or (location.kind ~= "mine" and not mini) then
 		warn("[MineService] anchor without valid LocationId:", anchor:GetFullName())
 		return
 	end
@@ -329,6 +334,9 @@ local function register(anchor: Instance)
 		resetAt = 0,
 		rebuilding = false,
 		dug = 0,
+		resetSeconds = if mini and location.miniMine
+			then location.miniMine.resetSeconds
+			else location.mine.resetSeconds,
 	}
 	mines[mineId] = mine
 	anchor.Transparency = 1
@@ -420,7 +428,7 @@ function MineService.Start()
 				if mine.dug == 0 then
 					-- nobody dug since the last reset: nothing to restore, no work, no traffic
 					if left <= 0 then
-						mine.resetAt = now + mine.location.mine.resetSeconds
+						mine.resetAt = now + mine.resetSeconds
 					end
 					continue
 				end

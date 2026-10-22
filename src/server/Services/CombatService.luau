@@ -267,7 +267,11 @@ local function onAttack(player: Player, direction: any, falling: any)
 						local mine = Config.location(profile.location)
 						local theirs = ProfileService.Get(victim)
 						local other = theirs and Config.location(theirs.location)
-						if mine and mine.pvp and other and other.pvp then
+						-- players of one faction do not fight [сеть, патч 2022; клиент: удар без урона]
+						local sameFaction = theirs ~= nil
+							and profile.faction ~= nil
+							and theirs.faction == profile.faction
+						if mine and mine.pvp and other and other.pvp and not sameFaction then
 							CombatService.ApplyDamage(target, damage, "player", player)
 							HurtService.Knockback(model, look)
 						end
