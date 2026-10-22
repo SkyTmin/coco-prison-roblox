@@ -164,3 +164,17 @@ git -C C:\Users\user\Documents\coco-prison-roblox add -A; git -C C:\Users\user\D
 - https://github.com/Roblox/studio-rust-mcp-server — прежний отдельный сервер, в архиве с 3 апреля 2026 года.
 - https://github.com/rojo-rbx/rokit — установка Rokit.
 - https://rojo.space/docs/v7/getting-started/installation/ — Rojo, плагин Studio, расширение VS Code.
+
+## API-агент (второй Claude на API-кредитах)
+
+`scripts/api-agent.ps1` запускает отдельного агента Claude Code в режиме `-p --bare`: он авторизуется
+**только** ключом `ANTHROPIC_API_KEY` (вход Max не используется), поэтому тратит API-кредиты, а не недельный
+лимит. Каждый запуск ограничен `--max-budget-usd` (по умолчанию $1), стоимость печатается в конце, логи —
+в `%LOCALAPPDATA%\coco-api-agent`.
+
+1. Ключ — один раз, в своём PowerShell (ключ не попадает в историю и в репозиторий):
+   `[Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', (Read-Host 'Вставь API-ключ'), 'User')`
+2. Только чтение: `.\scripts\api-agent.ps1 "Изучи проект и предложи план проверки"`
+3. С правками: `.\scripts\api-agent.ps1 "Исправь … и прогони selene/stylua" -Edit -Budget 2`
+
+В Claude Console заведи отдельный Workspace для игры с лимитом расходов и не включай Auto-reload.
