@@ -29,7 +29,7 @@ root.Name = "RoyalGarden"
 root:SetAttribute("LocationId", "royal_garden")
 root.Parent = workspace
 
-local BX, BZ = 5400, 0
+local BX, BZ = 5400, 20000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
 local B = 4
 local rng = Random.new(20261111)
 local WHITE = Color3.fromRGB(236, 236, 240)

@@ -37,7 +37,7 @@ root:SetAttribute("LocationId", "underworld")
 root:SetAttribute("SilentSteps", true) -- [владелец 23.10] no step sounds here (Footsteps)
 root.Parent = workspace
 
-local BX, BZ = 3400, 0
+local BX, BZ = 3400, 10000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
 local B = 4
 local rng = Random.new(20261025)
 local STONE = Color3.fromRGB(110, 50, 48)

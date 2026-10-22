@@ -31,7 +31,7 @@ root:SetAttribute("LocationId", "pyramid")
 root:SetAttribute("SilentSteps", true) -- [владелец 23.10] no step sounds here (Footsteps)
 root.Parent = workspace
 
-local BX, BZ = 4400, 0
+local BX, BZ = 4400, 15000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
 local B = 4
 local rng = Random.new(20261023)
 local STONE = Color3.fromRGB(220, 200, 150)

@@ -31,7 +31,7 @@ root.Name = "SunkenLighthouse"
 root:SetAttribute("LocationId", "sunken_lighthouse")
 root.Parent = workspace
 
-local BX, BZ = 6400, 0
+local BX, BZ = 6400, 25000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
 local B = 4
 local rng = Random.new(20261313)
 local STONE = Color3.fromRGB(130, 130, 128)

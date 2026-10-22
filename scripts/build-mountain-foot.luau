@@ -24,7 +24,7 @@ local root = Instance.new("Folder")
 root.Name = "MountainFoot"
 root.Parent = workspace
 
-local BX, BZ = 2400, 0
+local BX, BZ = 2400, 5000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
 local B = 4
 local rng = Random.new(20261024)
 local STONE = Color3.fromRGB(150, 140, 130)
@@ -375,10 +375,10 @@ for _, c in pairs(cells) do
 end
 
 -- ================================================================ the mountain behind the canyon (north)
--- a Persistent model: with streaming the far mountain would never load, and it is the backdrop of the whole valley
+-- the backdrop of the valley; it streams like the rest (Persistent made it visible from every other location
+-- [владелец 23.10]; within 600 studs of the valley it is inside the streaming radius anyway)
 local mountain = Instance.new("Model")
 mountain.Name = "Mountain"
-mountain.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
 mountain.Parent = root
 do
 	local MC, MX, MZ, MR = 24, 0, -600, 360
