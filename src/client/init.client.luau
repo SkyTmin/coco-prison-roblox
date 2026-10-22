@@ -1106,8 +1106,8 @@ local function locationPreview(
 	return view
 end
 
--- [владелец 22.10: «когда телепортируются — превью фото локации»] a card above the countdown with the
--- top-down picture of the destination, its name and the PVP plate
+-- A small card while the teleport channel runs: the destination's name, the countdown and the PVP plate.
+-- [владелец 22.10: «фото убрать, а то это мешает видимости игроку»] no picture, kept high above the middle.
 do
 	local card: Frame? = nil
 	showTeleportPreview = function(locationId: string?)
@@ -1119,36 +1119,29 @@ do
 		if not location then
 			return
 		end
-		-- centred a little above the middle, scaled down to fit small (phone) screens; the countdown
-		-- moves into the card
-		local frame = Ui.panel(gui, UDim2.fromOffset(380, 262), UDim2.fromScale(0.5, 0.42))
+		local frame = Ui.panel(gui, UDim2.fromOffset(300, 62), UDim2.fromScale(0.5, 0.16))
 		frame.Name = "TeleportPreview"
 		frame.AnchorPoint = Vector2.new(0.5, 0.5)
 		frame.ZIndex = 8
-		local camera = workspace.CurrentCamera
-		local viewport = if camera then camera.ViewportSize else Vector2.new(900, 600)
-		local fit = Instance.new("UIScale")
-		fit.Scale = math.min(1, viewport.Y * 0.62 / 262, viewport.X * 0.9 / 380)
-		fit.Parent = frame
-		locationPreview(frame, location, UDim2.new(1, -12, 0, 196), UDim2.fromOffset(6, 6))
 		local name = Ui.label(
 			frame,
 			Strings.locationName(location.name, locale),
-			UDim2.new(1, -12, 0, 26),
-			UDim2.fromOffset(6, 204),
+			UDim2.new(1, -70, 0, 24),
+			UDim2.fromOffset(10, 6),
 			18,
 			Ui.colors.header
 		)
-		name.TextXAlignment = Enum.TextXAlignment.Center
+		name.TextXAlignment = Enum.TextXAlignment.Left
 		local countdown = Ui.label(
 			frame,
 			"",
-			UDim2.new(1, -12, 0, 22),
-			UDim2.fromOffset(6, 232),
+			UDim2.new(1, -20, 0, 22),
+			UDim2.fromOffset(10, 32),
 			14,
 			Ui.colors.text
 		)
-		countdown.TextXAlignment = Enum.TextXAlignment.Center
+		countdown.TextXAlignment = Enum.TextXAlignment.Left
+		pvpBadge(frame, location)
 		teleportCardLabel = countdown
 		card = frame
 		frame.Destroying:Once(function()

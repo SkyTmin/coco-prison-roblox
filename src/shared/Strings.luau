@@ -1874,6 +1874,7 @@ local BLOCKS: { [string]: { [string]: string } } = {
 		es = "Bloque de cuarzo cincelado",
 		fr = "Bloc de quartz sculpté",
 	},
+	["oak_leaves"] = { en = "Oak leaves", es = "Hojas de roble", fr = "Feuilles de chêne" },
 	["dark_oak_leaves"] = {
 		en = "Dark oak leaves",
 		es = "Hojas de roble oscuro",

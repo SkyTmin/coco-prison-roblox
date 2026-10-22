@@ -5,15 +5,15 @@
 --     the camera gets a thin white outline; an attack turns the character to it and aims the blow at it
 --     (the server then aims at where that target is when the blow lands); the lock sticks while it lasts;
 --   * predicted hit: the moment the blow lands the client already plays the impact — a hit (crit) sound, a
---     red flash, a burst of particles, a 50 ms hitstop with a small FOV punch, a haptic tick — or a clank
+--     red flash, a burst of particles, a 50 ms hitstop — or a clank
 --     and «Блок» when the boss is shielded; a miss is just the swing whoosh; the damage numbers come from
 --     the server (HitConfirm);
 --   * health bars over mobs (shown when hurt, gone 4 s after the last hit); a rat about to bite flashes a
 --     red outline (its wind-up); a shielded boss glows with a pale blue outline;
---   * when we get hurt: a red flash at the screen edges and a haptic pulse.
+--   * when we get hurt: a red flash at the screen edges.
+-- No vibration and no camera punch [владелец 22.10: «выключи вибрацию в игре»].
 
 local CollectionService = game:GetService("CollectionService")
-local HapticService = game:GetService("HapticService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -172,20 +172,6 @@ function CombatFeel.FaceTarget(target: Model): Vector3?
 	return if dir.Magnitude > 0.1 then dir.Unit else nil
 end
 
-local function haptic(strength: number, seconds: number)
-	task.spawn(function()
-		for _, input in ipairs({ Enum.UserInputType.Gamepad1 }) do
-			pcall(function()
-				if HapticService:IsVibrationSupported(input) then
-					HapticService:SetMotor(input, Enum.VibrationMotor.Small, strength)
-					task.wait(seconds)
-					HapticService:SetMotor(input, Enum.VibrationMotor.Small, 0)
-				end
-			end)
-		end
-	end)
-end
-
 local function flash(model: Model, color: Color3, seconds: number, name: string)
 	local old = model:FindFirstChild(name)
 	if old then
@@ -230,17 +216,6 @@ local function burst(at: Vector3, color: Color3, count: number)
 	task.delay(0.8, function()
 		p:Destroy()
 	end)
-end
-
-local function fovPunch()
-	local camera = workspace.CurrentCamera
-	if not camera then
-		return
-	end
-	local base = camera.FieldOfView
-	camera.FieldOfView = base - 1.6
-	TweenService:Create(camera, TweenInfo.new(0.12, Enum.EasingStyle.Quad), { FieldOfView = base })
-		:Play()
 end
 
 -- a floating number / word over a model
@@ -329,8 +304,6 @@ function CombatFeel.OnAttack(target: Model?, delay: number, crit: boolean)
 			if crit then 14 else 8
 		)
 		HeldItem.Hitstop(if crit then HITSTOP * 1.8 else HITSTOP)
-		fovPunch()
-		haptic(if crit then 0.8 else 0.45, 0.05)
 	end)
 end
 
@@ -501,7 +474,6 @@ local function watchSelf(gui: ScreenGui)
 						{ BackgroundTransparency = 1 }
 					):Play()
 				end
-				haptic(0.9, 0.08)
 			end
 			last = health
 		end)

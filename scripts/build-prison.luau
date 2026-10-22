@@ -519,15 +519,17 @@ spot("bedroom", -120, 80)
 spot("bath", -120, -80)
 spot("trainer", 62, 132)
 
--- Teleporter board on the south edge of the plaza (facing the fountain)
+-- Teleporter board on the south edge of the plaza (facing the fountain), west of the gap to the Малая шахта
+-- [владелец 22.10: «стоит прям на дороге на входе в шахту, перемести»]
+local TX = -17
 local teleporter =
-	textured(part("Teleporter", Vector3.new(10, 6, 1), CFrame.new(0, 4.6, 40), WOOD), "px_planks")
-part("TeleporterPost", Vector3.new(1, 5, 1), CFrame.new(-4.2, 2.5, 40), WOOD, Enum.Material.Wood)
-part("TeleporterPost", Vector3.new(1, 5, 1), CFrame.new(4.2, 2.5, 40), WOOD, Enum.Material.Wood)
+	textured(part("Teleporter", Vector3.new(10, 6, 1), CFrame.new(TX, 4.6, 40), WOOD), "px_planks")
+part("TeleporterPost", Vector3.new(1, 5, 1), CFrame.new(TX - 4.2, 2.5, 40), WOOD, Enum.Material.Wood)
+part("TeleporterPost", Vector3.new(1, 5, 1), CFrame.new(TX + 4.2, 2.5, 40), WOOD, Enum.Material.Wood)
 part(
 	"TeleporterRoof",
 	Vector3.new(12, 0.5, 3),
-	CFrame.new(0, 7.9, 40),
+	CFrame.new(TX, 7.9, 40),
 	DARK,
 	Enum.Material.WoodPlanks
 )

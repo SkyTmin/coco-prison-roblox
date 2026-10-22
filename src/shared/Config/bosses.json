@@ -616,14 +616,14 @@
       },
       "money": [
         0,
-        650
+        400
       ],
       "ancientStars": null,
       "powderChance": null,
       "shard": null,
-      "hp": 400,
+      "hp": 300,
       "damage": 5,
-      "respawnSeconds": 480
+      "respawnSeconds": 1200
     }
   ]
 }

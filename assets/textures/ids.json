@@ -36,7 +36,8 @@
     "sandstone": "rbxassetid://90207738459579",
     "hay": "rbxassetid://134188446265196",
     "roof_tiles": "rbxassetid://91948205303054",
-    "gold_block": "rbxassetid://132873931980825"
+    "gold_block": "rbxassetid://132873931980825",
+    "oak_leaves": "rbxassetid://74510501143588"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",

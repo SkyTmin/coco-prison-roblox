@@ -98,6 +98,12 @@ for (const [id, phys] of Object.entries(decisions.blocks)) {
 		blocks[id] = { id, name: phys.name, basePrice: phys.basePrice, hardness: 0, tool: "any", minTier: 0, dropsAs: null, dropCount: null, sellable: phys.sellable ?? true, itemOnly: true, upgradeCounter: null };
 	}
 }
+// Extra blocks (in a mine but not in any buyer price list, e.g. Листья дуба in the Малая шахта): from design decisions.
+for (const [id, phys] of Object.entries(decisions.blocks)) {
+	if (phys.extra && !blocks[id]) {
+		blocks[id] = { id, name: phys.name, basePrice: phys.basePrice ?? 0, hardness: phys.hardness, tool: phys.tool, minTier: phys.minTier, dropsAs: phys.dropsAs ?? null, dropCount: phys.dropCount ?? null, sellable: phys.sellable ?? true, itemOnly: false, upgradeCounter: null };
+	}
+}
 write("blocks.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; твёрдость [ваниль]", money: decisions.money, blocks });
 write("locations.json", { source: "wiki/in-game-wiki/block-prices.json [меню]; размеры/доли/таймеры [решение]", locations });
 

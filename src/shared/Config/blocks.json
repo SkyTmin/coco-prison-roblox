@@ -790,6 +790,19 @@
       "sellable": false,
       "itemOnly": true,
       "upgradeCounter": null
+    },
+    "oak_leaves": {
+      "id": "oak_leaves",
+      "name": "Листья дуба",
+      "basePrice": 0,
+      "hardness": 0.2,
+      "tool": "shears",
+      "minTier": 0,
+      "dropsAs": null,
+      "dropCount": null,
+      "sellable": false,
+      "itemOnly": false,
+      "upgradeCounter": null
     }
   }
 }

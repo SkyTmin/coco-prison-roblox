@@ -4,9 +4,9 @@
 -- 2 минуты»]. One mob per point; numbers in Config.mobs (hp, damage, money [владелец]; the AI numbers
 -- [решение]). A rat is a small blocky grey rodent: it wanders round its point, runs at the nearest player
 -- within aggroRange, bites every attackCooldown (CombatService.ApplyDamage: armour counts), gives up past
--- leashRange from its point and goes home. The killer (LastHitBy, set by CombatService) gets the money
--- (× the «Мобы» upgrade of the professions), stats[statKey] +1 and Мастер клинка xp +1 [вики: xp за
--- убийства крыс, зомби, мышей].
+-- leashRange from its point and goes home. The killer (LastHitBy, set by CombatService) gets the money if
+-- the mob gives any (× the «Мобы» upgrade of the professions), stats[statKey] +1 and Мастер клинка xp +1
+-- [вики: xp за убийства крыс, зомби, мышей]; cfg.drop falls on the ground with cfg.dropChance.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -23,6 +23,8 @@ local RatModel = require(Shared:WaitForChild("Models"):WaitForChild("rat")) :: a
 local ProfileService = require(script.Parent.ProfileService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
+local ItemDropService = require(script.Parent.ItemDropService)
+local CollisionGroups = require(script.Parent.CollisionGroups)
 
 local MobService = {}
 local started = false
@@ -114,6 +116,7 @@ function spawnMob(mob: Mob)
 		buildRat(mob.spawn.CFrame * CFrame.new(0, mob.spawn.Size.Y / 2 + 1.2, 0), mob.cfg)
 	model:SetAttribute("MobId", mob.id)
 	CollectionService:AddTag(model, "Mob")
+	CollisionGroups.mob(model) -- no stepping onto rats, no pushing: only knockback moves them
 	model.Parent = workspace
 	root:SetNetworkOwner(nil)
 	mob.model, mob.humanoid, mob.root = model, humanoid, root
@@ -132,6 +135,10 @@ function spawnMob(mob: Mob)
 	humanoid.Died:Once(function()
 		Sfx.broadcast("rat_death", root, 0.7)
 		rewardKiller(mob, humanoid)
+		-- loot on the ground like in Minecraft [владелец 22.10: с крысы только плоть нежити, шанс 25 %]
+		if mob.cfg.drop and math.random() < (mob.cfg.dropChance or 1) then
+			ItemDropService.SpawnLoot({ id = mob.cfg.drop, count = 1 }, root.Position)
+		end
 		mob.model, mob.humanoid, mob.root, mob.target = nil, nil, nil, nil
 		for _, p in ipairs(model:GetDescendants()) do
 			if p:IsA("BasePart") then

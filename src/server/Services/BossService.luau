@@ -32,6 +32,7 @@ local Strings = require(Shared.Strings)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
+local CollisionGroups = require(script.Parent.CollisionGroups)
 
 local BossService = {}
 local started = false
@@ -360,6 +361,7 @@ local function rigFromTemplate(boss: Boss, template: Model): Model?
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	model.PrimaryPart = root
 	CollectionService:AddTag(model, "Boss")
+	CollisionGroups.mob(model) -- players walk through bosses; only the hits push
 	model.Parent = workspace
 	root:SetNetworkOwner(nil)
 	return model
@@ -459,6 +461,7 @@ local function buildModel(boss: Boss): Model
 	humanoid.Parent = model
 	model.PrimaryPart = root
 	CollectionService:AddTag(model, "Boss")
+	CollisionGroups.mob(model) -- players walk through bosses; only the hits push
 	model.Parent = workspace
 	root:SetNetworkOwner(nil)
 	return model

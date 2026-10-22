@@ -36,6 +36,16 @@
       "tool": "axe",
       "minTier": 0
     },
+    "oak_leaves": {
+      "hardness": 0.2,
+      "tool": "shears",
+      "minTier": 0,
+      "extra": true,
+      "name": "Листья дуба",
+      "basePrice": 0,
+      "sellable": false,
+      "_source": "[владелец 22.10] в малой шахте ещё листва; у скупщика её нет [меню: прайс Тюрьмы — песок, гравий, земля, дуб, арбуз] — не продаётся; твёрдость [ваниль]"
+    },
     "melon": {
       "hardness": 1,
       "tool": "axe",
@@ -437,9 +447,11 @@
     },
     "prison_small": {
       "shares": {
-        "melon": 0.35,
-        "oak_log": 0.65
+        "melon": 0.3,
+        "oak_log": 0.5,
+        "oak_leaves": 0.2
       },
+      "_leaves": "[владелец 22.10] в малой шахте должна быть листва — [решение] 50 % дуба, 20 % листьев, 30 % арбуза",
       "_source": "[владелец] 21.10: в малой шахте нет гравия, песка и земли — только арбузы и деревья (дуб); вики состав малой шахты не содержит — [решение] 65 % дуба, 35 % арбуза"
     }
   },
@@ -455,7 +467,10 @@
       "name": "Крыса",
       "hp": 20,
       "damage": 2,
-      "money": 0.5,
+      "money": 0,
+      "drop": "rotten_flesh",
+      "dropChance": 0.25,
+      "_reward": "[владелец 22.10] за крысу денег нет, только плоть нежити (гнилая плоть) с шансом 25 %",
       "statKey": "rats",
       "locations": [
         "basement",
@@ -466,11 +481,11 @@
       "respawnSeconds": 120,
       "_respawn": "[владелец 22.10] убитая крыса появляется снова через 2 минуты",
       "walkSpeed": 13,
-      "aggroRange": 18,
-      "leashRange": 30,
+      "aggroRange": 36,
+      "leashRange": 50,
       "attackRange": 4.5,
       "attackCooldown": 1.2,
-      "_ai": "[решение] бродит у точки, бежит к игроку ближе 18, кусает раз в 1,2 с, дальше 30 от точки — домой",
+      "_ai": "[решение] бродит у точки, бежит к игроку ближе 36 [владелец 22.10: замечает в 2 раза дальше], кусает раз в 1,2 с, дальше 50 от точки — домой",
       "model": "rat",
       "furTexture": "rbxassetid://93131048217957",
       "_model": "[владелец 22.10] модель и анимации из Blender по фото от Codex: assets/models/rat (rat.py, fur-noise.png)",
@@ -597,13 +612,13 @@
       "unlockLevel": 5,
       "money": [
         0,
-        650
+        400
       ],
       "ancientStars": null,
-      "hp": 400,
+      "hp": 300,
       "damage": 5,
-      "respawnSeconds": 480,
-      "_source": "[меню] награды и ~7 мин до респауна; HP 400 [владелец]; урон [решение]",
+      "respawnSeconds": 1200,
+      "_source": "[владелец 22.10] HP 300, банк 400 монет, появляется каждые 20 минут; урон [решение]",
       "locationId": "fraction_base",
       "nameEn": "Zombar",
       "_model": "[решение] гигантский блочный зомби как в Minecraft (Giant): зелёная кожа, бирюзовая рубаха, синие штаны; строится кодом в ServerStorage.BossTemplates.giant_zombie (scripts/build-boss-zombie.luau)",
@@ -667,7 +682,7 @@
           ]
         }
       },
-      "_hp": "[владелец 22.10] у Зомбаря 400 HP"
+      "_hp": "[владелец 22.10] у Зомбаря 300 HP, с него 400 монет, раз в 20 минут"
     }
   },
   "bossRewards": {
@@ -1128,6 +1143,7 @@
       "dirt": "orange",
       "oak_log": "green",
       "melon": "green",
+      "oak_leaves": "green",
       "cobblestone": "white",
       "stone": "gray",
       "coal": "gray",
