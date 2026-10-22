@@ -11,6 +11,8 @@ local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local AchievementService = require(script.Parent.AchievementService)
 local ItemDropService = require(script.Parent.ItemDropService)
+local Remotes = require(Shared.Remotes)
+local Strings = require(Shared.Strings)
 
 local KEPT_TOOLS = { pickaxe = true, shovel = true, axe = true, sword = true, shears = true }
 local ARMOR = { helmet = true, chestplate = true, leggings = true, boots = true }
@@ -63,6 +65,31 @@ local function died(player: Player, character: Model)
 			end)
 			if swordHeld then
 				AchievementService.AddProgress(killer, "sword", 1)
+			end
+			-- [владелец 22.10] the killer gets as many dollars as the victim's level, taken from the victim
+			-- (no more than the victim has)
+			local loss = math.min(profile.coins, profile.level * Config.moneyScale)
+			if loss > 0 then
+				ProfileService.Mutate(player, function(p)
+					p.coins -= loss
+				end)
+				ProfileService.Mutate(killer, function(p)
+					p.coins += loss
+				end)
+				local money = Strings.money(loss)
+				Remotes.event("Toast"):FireClient(
+					killer,
+					Strings.t(
+						"pvp_kill_reward",
+						Strings.localeOf(killer),
+						money,
+						player.DisplayName
+					)
+				)
+				Remotes.event("Toast"):FireClient(
+					player,
+					Strings.t("pvp_death_loss", Strings.localeOf(player), money, killer.DisplayName)
+				)
 			end
 		end
 	end

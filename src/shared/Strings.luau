@@ -813,6 +813,18 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Acheté : %s",
 	},
 	-- factions [клиент: prison.classic.fraction.*]
+	pvp_kill_reward = {
+		ru = "+%s $ за убийство %s",
+		en = "+%s $ for killing %s",
+		es = "+%s $ por matar a %s",
+		fr = "+%s $ pour avoir tué %s",
+	},
+	pvp_death_loss = {
+		ru = "−%s $: вас убил %s",
+		en = "−%s $: you were killed by %s",
+		es = "−%s $: te mató %s",
+		fr = "−%s $ : tué par %s",
+	},
 	mob_rat = { ru = "Крыса", en = "Rat", es = "Rata", fr = "Rat" },
 	mob_killed = {
 		ru = "%s убита: +%s $",

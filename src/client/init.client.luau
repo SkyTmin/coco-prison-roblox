@@ -171,18 +171,28 @@ local teleportCountdown = Ui.label(
 teleportCountdown.TextXAlignment = Enum.TextXAlignment.Center
 teleportCountdown.Visible = false
 local teleportEndsAt: number? = nil
+-- the destination's preview while the teleport channel runs (set up after locationPreview, below)
+local showTeleportPreview: (locationId: string?) -> () = function() end
+local teleportCardLabel: TextLabel? = nil -- the countdown inside the preview card, when there is one
 local function renderTeleportCountdown()
 	local endsAt = teleportEndsAt
-	teleportCountdown.Visible = endsAt ~= nil
+	local cardLabel = teleportCardLabel
+	teleportCountdown.Visible = endsAt ~= nil and cardLabel == nil
 	if endsAt then
-		teleportCountdown.Text = T("teleport_channel", math.max(0, math.ceil(endsAt - os.clock())))
+		local text = T("teleport_channel", math.max(0, math.ceil(endsAt - os.clock())))
+		teleportCountdown.Text = text
+		if cardLabel then
+			cardLabel.Text = text
+		end
 	end
 end
-Remotes.event("TeleportChannel").OnClientEvent:Connect(function(seconds: any)
+Remotes.event("TeleportChannel").OnClientEvent:Connect(function(seconds: any, locationId: any)
 	if seconds == nil then
 		teleportEndsAt = nil
+		showTeleportPreview(nil)
 	elseif typeof(seconds) == "number" and seconds > 0 and seconds < math.huge then
 		teleportEndsAt = os.clock() + seconds
+		showTeleportPreview(if typeof(locationId) == "string" then locationId else nil)
 	else
 		return
 	end
@@ -986,6 +996,29 @@ local function locationAvailable(location: Config.Location): boolean
 		and (not location.requiresFaction or Config.faction(p.faction) ~= nil)
 end
 
+-- [владелец 22.10] a red «PVP» plate in the corner of the preview of every PvP location
+local function pvpBadge(preview: GuiObject, location: Config.Location)
+	if not location.pvp then
+		return
+	end
+	local badge = Instance.new("TextLabel")
+	badge.Name = "PvpBadge"
+	badge.AnchorPoint = Vector2.new(1, 0)
+	badge.Position = UDim2.new(1, -6, 0, 6)
+	badge.Size = UDim2.fromOffset(48, 22)
+	badge.BackgroundColor3 = Color3.fromRGB(200, 35, 35)
+	badge.BorderSizePixel = 0
+	badge.Font = Enum.Font.GothamBold
+	badge.Text = "PVP"
+	badge.TextColor3 = Color3.new(1, 1, 1)
+	badge.TextSize = 14
+	badge.ZIndex = preview.ZIndex + 2
+	badge.Parent = preview
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 4)
+	corner.Parent = badge
+end
+
 local function locationPreview(
 	parent: Instance,
 	location: Config.Location,
@@ -1002,6 +1035,7 @@ local function locationPreview(
 		image.Image = previewId
 		image.ScaleType = Enum.ScaleType.Crop
 		image.Parent = parent
+		pvpBadge(image, location)
 		return image
 	end
 	local view = Instance.new("ViewportFrame")
@@ -1066,7 +1100,61 @@ local function locationPreview(
 			block(Vector3.new(2, height, 2), CFrame.new(i * 5 - 10, height / 2, -8), color)
 		end
 	end
+	pvpBadge(view, location)
 	return view
+end
+
+-- [владелец 22.10: «когда телепортируются — превью фото локации»] a card above the countdown with the
+-- top-down picture of the destination, its name and the PVP plate
+do
+	local card: Frame? = nil
+	showTeleportPreview = function(locationId: string?)
+		if card then
+			card:Destroy()
+			card = nil
+		end
+		local location = if locationId then Config.location(locationId) else nil
+		if not location then
+			return
+		end
+		-- centred a little above the middle, scaled down to fit small (phone) screens; the countdown
+		-- moves into the card
+		local frame = Ui.panel(gui, UDim2.fromOffset(380, 262), UDim2.fromScale(0.5, 0.42))
+		frame.Name = "TeleportPreview"
+		frame.AnchorPoint = Vector2.new(0.5, 0.5)
+		frame.ZIndex = 8
+		local camera = workspace.CurrentCamera
+		local viewport = if camera then camera.ViewportSize else Vector2.new(900, 600)
+		local fit = Instance.new("UIScale")
+		fit.Scale = math.min(1, viewport.Y * 0.62 / 262, viewport.X * 0.9 / 380)
+		fit.Parent = frame
+		locationPreview(frame, location, UDim2.new(1, -12, 0, 196), UDim2.fromOffset(6, 6))
+		local name = Ui.label(
+			frame,
+			Strings.locationName(location.name, locale),
+			UDim2.new(1, -12, 0, 26),
+			UDim2.fromOffset(6, 204),
+			18,
+			Ui.colors.header
+		)
+		name.TextXAlignment = Enum.TextXAlignment.Center
+		local countdown = Ui.label(
+			frame,
+			"",
+			UDim2.new(1, -12, 0, 22),
+			UDim2.fromOffset(6, 232),
+			14,
+			Ui.colors.text
+		)
+		countdown.TextXAlignment = Enum.TextXAlignment.Center
+		teleportCardLabel = countdown
+		card = frame
+		frame.Destroying:Once(function()
+			if teleportCardLabel == countdown then
+				teleportCardLabel = nil
+			end
+		end)
+	end
 end
 
 local function buildLocations(): Frame

@@ -191,7 +191,8 @@ local function teleport(player: Player, locationId: any, spot: any)
 			cancel(player)
 		end
 	end)
-	Remotes.event("TeleportChannel"):FireClient(player, Config.rules.teleport.channelSeconds)
+	Remotes.event("TeleportChannel")
+		:FireClient(player, Config.rules.teleport.channelSeconds, locationId)
 	task.spawn(streamAround, player, spawn.Position) -- loads while the channel counts down
 end
 
