@@ -444,6 +444,16 @@ local function floorVariant(c)
 	return if v > 0.3 then "px_cobblestone" elseif v < -0.3 then "px_gravel" elseif v < -0.15 then "px_dirt" else "px_stone"
 end
 
+-- the vault: plain stone over the caves, brick over the halls; the dome of the lair mixes in moss and cobble so it
+-- never reads as one flat colour [владелец 22.10: «плоские, однотонные»]
+local function ceilVariant(c)
+	if c.shape == "lair" then
+		local v = n2(c.x, c.z, 17.3, 0.12)
+		return if v > 0.3 then "px_mossy_stone_bricks" elseif v < -0.35 then "px_cobblestone" else "px_stone_bricks"
+	end
+	return if c.shape == "hall" then "px_stone_bricks" else "px_stone"
+end
+
 -- ================================================================ build the shell (runs merged along x)
 local shell = folder("Shell")
 local count = 0
@@ -471,13 +481,13 @@ for iz = 0, NZ - 1 do
 			fr.ix1 = ix
 		end
 		-- ceiling: a column from the dome surface up to TOP
-		local ck = c and (if c.shape == "hall" or c.shape == "lair" then "px_stone_bricks" else "px_stone") .. "|" .. c.ceil or nil
+		local ck = c and ceilVariant(c) .. "|" .. c.ceil or nil
 		if cr and cr.key ~= ck then
 			table.insert(ceilRuns, cr)
 			cr = nil
 		end
 		if ck and not cr then
-			cr = { key = ck, ix0 = ix, variant = if c.shape == "hall" or c.shape == "lair" then "px_stone_bricks" else "px_stone", bottom = c.ceil }
+			cr = { key = ck, ix0 = ix, variant = ceilVariant(c), bottom = c.ceil }
 		end
 		if cr then
 			cr.ix1 = ix
@@ -975,17 +985,130 @@ for _, th in ipairs({ 45, 135, 225, 315 }) do
 	heap(x, z, 6)
 end
 
--- ---------------------------------------------------------------- the dome: pilasters, 16 ribs, the crown ring
+-- ---------------------------------------------------------------- the wall: depth and weathering
+-- [владелец 22.10: «стены плоские, однотонные — добавь глубины»] Builders' rules for a wall that reads (the
+-- usual Minecraft advice: layers at different depths, ledges and corbels, a material gradient, mixed blocks):
+-- the round wall is dressed in courses of separate blocks, each pushed in or out a little; a protruding plinth of
+-- dark mossy cobble at the foot, stone brick courses getting cleaner and lighter towards the top, a string course
+-- ledge on corbels at mid height, recessed panels with darker backs between the pilasters, a two-step cornice on
+-- corbels under the dome; stepped pilasters (base, shaft, capital) carry the ribs; iron sconces light the relief.
+local WALL_R = LAIR.r - 0.6 -- the dressing's face line (the rock behind it is the carved grid)
+local SEG = 120
+local DARK_T, MID_T, LIGHT_T = Color3.fromRGB(140, 136, 130), Color3.fromRGB(190, 186, 180), Color3.fromRGB(222, 218, 210)
+local function gradient(y)
+	local t = math.clamp(y / 36, 0, 1)
+	local base = if t < 0.5 then DARK_T:Lerp(MID_T, t * 2) else MID_T:Lerp(LIGHT_T, (t - 0.5) * 2)
+	local k = rng:NextNumber(0.92, 1.06)
+	return Color3.new(math.min(1, base.R * k), math.min(1, base.G * k), math.min(1, base.B * k))
+end
+local function wallBlock(name, th, y0, y1, depth, inset, variant, tint, width)
+	local w = width or (2 * math.pi * WALL_R / SEG + 0.12)
+	local cf = facing(th, WALL_R - inset - depth / 2, (y0 + y1) / 2)
+	return textured(part(name, Vector3.new(w, y1 - y0, depth), cf, STONE, nil, lairF), variant, tint)
+end
+-- pilaster angles (16, between the statues) and the angular distance of a segment to the nearest one, in segments
+local PIL = {}
+for k = 0, 15 do
+	PIL[k + 1] = (k + 0.5) / 16 * math.pi * 2
+end
+local function pilasterDist(th)
+	local best = math.huge
+	for _, p in ipairs(PIL) do
+		local d = math.abs((th - p + math.pi) % (2 * math.pi) - math.pi)
+		best = math.min(best, d)
+	end
+	return best / (2 * math.pi / SEG)
+end
+local DOOR_TH = math.asin((LAIR.door + 1) / LAIR.r)
+for i = 0, SEG - 1 do
+	local th = (i + 0.5) / SEG * math.pi * 2
+	local x, z = polar(th, WALL_R)
+	local doorGap = math.abs((th + math.pi) % (2 * math.pi) - math.pi) < DOOR_TH
+	local ruined = ruinedCorner(x, z)
+	if not doorGap then
+		local function keep()
+			return not ruined or rng:NextNumber() < 0.45 -- the fallen corner: half the dressing is gone
+		end
+		-- the plinth: dark mossy cobble, protruding 2.4, with a chamfer course on top
+		if keep() then
+			wallBlock("Plinth", th, 0, 3, 2.4, 0, if rng:NextNumber() < 0.5 then "px_mossy_cobblestone" else "px_cobblestone", gradient(0))
+			wallBlock("PlinthCap", th, 3, 3.6, 1.6, 0, "px_smooth_stone", gradient(3))
+		end
+		-- the lower courses (3.6 → 16): bricks, moss thinning out upwards, a block now and then sticking out
+		local y = 3.6
+		while y < 15.9 do
+			local h = math.min(4, 16 - y)
+			if keep() then
+				local mossy = rng:NextNumber() < 0.45 - y * 0.02
+				local v = if mossy then "px_mossy_stone_bricks" elseif rng:NextNumber() < 0.1 then "px_cobblestone" else "px_stone_bricks"
+				wallBlock("Course", th, y, y + h, 1.2 + rng:NextNumber(-0.25, 0.35), 0, v, gradient(y))
+			end
+			y += h
+		end
+		-- the string course: a smooth ledge on corbels
+		if keep() then
+			wallBlock("StringCourse", th, 16, 17.4, 2.2, 0, "px_smooth_stone", gradient(16))
+			if i % 2 == 0 then
+				wallBlock("Corbel", th, 14.6, 16, 1.8, 0, "px_stone_bricks", gradient(15), 1.4)
+			end
+		end
+		-- the upper courses (17.4 → 33.4): a recessed panel with a darker back in every bay, the frame stands out
+		local inBay = pilasterDist(th) > 2.2
+		y = 17.4
+		while y < 33.3 do
+			local h = math.min(4, 33.4 - y)
+			if keep() then
+				local panel = inBay and y > 18 and y < 31
+				local v = if rng:NextNumber() < 0.12 then "px_mossy_stone_bricks" elseif rng:NextNumber() < 0.12 then "px_smooth_stone" else "px_stone_bricks"
+				local tint = gradient(y)
+				if panel then
+					tint = tint:Lerp(Color3.fromRGB(95, 90, 86), 0.35) -- the panel's back lies in shadow
+				end
+				wallBlock("Course", th, y, y + h, if panel then 0.6 else 1.4 + rng:NextNumber(-0.2, 0.3), 0, v, tint)
+			end
+			y += h
+		end
+		-- the cornice under the dome: two stepped courses on corbels
+		if keep() then
+			wallBlock("CorniceLow", th, 33.4, 35, 2.2, 0, "px_smooth_stone", gradient(34))
+			wallBlock("CorniceHigh", th, 35, 37, 3.4, 0, "px_stone_bricks", gradient(36))
+			if i % 2 == 1 then
+				wallBlock("CorniceCorbel", th, 31.8, 33.4, 1.8, 0, "px_smooth_stone", gradient(33), 1.2)
+			end
+		end
+	end
+end
+-- stepped pilasters between the bays: a wide base, a protruding shaft with a darker edge band, a capital under the
+-- cornice; an iron sconce with a flame on every other one
+for k, th in ipairs(PIL) do
+	if math.abs(math.cos(th)) < 0.995 then -- not across the door
+		local function pil(name, w, d, y0, y1, variant, tint)
+			return textured(part(name, Vector3.new(w, y1 - y0, d), facing(th, WALL_R - d / 2, (y0 + y1) / 2), STONE, nil, lairF), variant, tint)
+		end
+		pil("PilasterBase", 6, 4.2, 0, 3.6, "px_smooth_stone", gradient(1))
+		pil("PilasterBase2", 5, 3.6, 3.6, 5, "px_stone_bricks", gradient(4))
+		pil("PilasterShaft", 3.6, 3, 5, 33.4, "px_stone_bricks", gradient(18))
+		pil("PilasterEdge", 4.4, 2.2, 5, 33.4, "px_stone_bricks", gradient(14):Lerp(DARK_T, 0.4))
+		pil("PilasterCapital", 5, 3.8, 31, 33.4, "px_smooth_stone", gradient(32))
+		if k % 2 == 0 then
+			local cf = facing(th, WALL_R - 3.4, 0)
+			local pos = Vector3.new(cf.Position.X, LF + 12, cf.Position.Z)
+			part("SconceArm", Vector3.new(0.4, 0.4, 1.4), CFrame.new(pos) * cf.Rotation * CFrame.new(0, 0, -0.5), IRON, Enum.Material.Metal, lairF)
+			part("SconceCup", Vector3.new(1.2, 0.8, 1.2), CFrame.new(pos) * cf.Rotation * CFrame.new(0, 0.3, -1.2), IRON, Enum.Material.Metal, lairF)
+			local flame = decor(part("SconceFlame", Vector3.new(0.7, 0.7, 0.7), CFrame.new(pos) * cf.Rotation * CFrame.new(0, 1, -1.2), TORCH, Enum.Material.Neon, lairF))
+			light(flame, 22, 1.2, TORCH)
+			local fire = Instance.new("Fire")
+			fire.Size = 1.6
+			fire.Heat = 4
+			fire.Parent = flame
+		end
+	end
+end
+
+-- ---------------------------------------------------------------- the dome: 16 ribs, the crown ring
 local RIBS = 16
 for k = 0, RIBS - 1 do
 	local th = (k + 0.5) / RIBS * math.pi * 2
-	local wx, wz = polar(th, LAIR.r - 1)
-	local h = domeCeil(LAIR.r - 2) - LF
-	if math.abs(math.cos(th)) < 0.995 then -- not across the door
-		local pil = part("Pilaster", Vector3.new(3, h, 2.4), facing(th, LAIR.r - 1.2, h / 2), STONE, nil, lairF)
-		textured(pil, "px_stone_bricks", Color3.fromRGB(200, 194, 188))
-		textured(part("PilasterBase", Vector3.new(4, 2, 3.4), facing(th, LAIR.r - 1.6, 1), STONE, nil, lairF), "px_smooth_stone", STATUE)
-	end
 	-- the rib: blocks stepping up the dome along the radius, 1.5 below its surface
 	for r = LAIR.r - 3, 9, -3 do
 		local y = domeCeil(r) - 1.6
@@ -1011,62 +1134,126 @@ end
 textured(part("DomeBoss", Vector3.new(5, 2, 5), at(LAIR.cx, domeCeil(0) - 1, LAIR.cz), STONE, nil, lairF), "px_gold_block")
 
 -- ---------------------------------------------------------------- statues
--- a knight in plate holding a sword point-down, on a pedestal; base = the frame on the floor (−Z faces forward)
+-- a knight in plate holding a sword point-down, on a moulded pedestal; base = the frame on the floor (−Z forward).
+-- [владелец 22.10: «добавь глубины, также со статуями»] Built of layered plates (sabatons, greaves, knee cops,
+-- cuisses, a two-tier mail skirt, belt and buckle, plackart, breastplate with a ridge, gorget, three-plate
+-- pauldrons, elbow cops, gauntlets, a great helm with a brow and slits, a plume), the cape in folds; shaded like
+-- weathered stone: darker and mossier low down, lighter high up, every plate a slightly different tone.
+local STATUE_DARK, STATUE_LIGHT = Color3.fromRGB(128, 125, 119), Color3.fromRGB(218, 215, 208)
 local function knight(base, scale, damage)
-	local function piece(name, size, offset, angles)
+	local function shade(y)
+		local t = math.clamp(y / 10, 0, 1)
+		local c = STATUE_DARK:Lerp(STATUE_LIGHT, t ^ 0.8)
+		if rng:NextNumber() < 0.16 - t * 0.1 then
+			c = c:Lerp(MOSSY, 0.6)
+		end
+		local k = rng:NextNumber(0.93, 1.05)
+		return Color3.new(math.min(1, c.R * k), math.min(1, c.G * k), math.min(1, c.B * k))
+	end
+	local function piece(name, size, offset, angles, variant)
 		local cf = base * CFrame.new(offset[1] * scale, offset[2] * scale, offset[3] * scale)
 		if angles then
 			cf *= CFrame.Angles(angles[1], angles[2], angles[3])
 		end
-		return textured(part(name, size * scale, cf, STONE, nil, lairF), "px_smooth_stone", stoneTint())
+		return textured(part(name, size * scale, cf, STONE, nil, lairF), variant or "px_smooth_stone", shade(offset[2]))
 	end
-	piece("Pedestal", Vector3.new(4.4, 1.6, 4.4), { 0, 0.8, 0 })
-	piece("PedestalTrim", Vector3.new(4.8, 0.4, 4.8), { 0, 0.2, 0 })
-	piece("Plinth", Vector3.new(3.6, 0.5, 3.6), { 0, 1.85, 0 })
-	piece("Leg", Vector3.new(0.95, 2.7, 1.05), { -0.52, 3.45, 0 })
-	piece("Leg", Vector3.new(0.95, 2.7, 1.05), { 0.52, 3.45, 0 })
-	piece("Knee", Vector3.new(0.75, 0.5, 0.3), { -0.52, 3.6, -0.6 })
-	piece("Knee", Vector3.new(0.75, 0.5, 0.3), { 0.52, 3.6, -0.6 })
-	piece("Tasset", Vector3.new(2.5, 0.9, 1.4), { 0, 5.1, 0 })
-	piece("Belt", Vector3.new(2.4, 0.3, 1.35), { 0, 5.6, 0 })
-	piece("Torso", Vector3.new(2.3, 2.5, 1.3), { 0, 6.75, 0 })
-	piece("Breastplate", Vector3.new(1.7, 1.4, 0.3), { 0, 7, -0.7 })
-	piece("Cape", Vector3.new(2.5, 5, 0.25), { 0, 5.5, 0.8 }, { -0.08, 0, 0 })
-	piece("Pauldron", Vector3.new(1.1, 0.8, 1.5), { -1.45, 7.75, 0 })
-	piece("Pauldron", Vector3.new(1.1, 0.8, 1.5), { 1.45, 7.75, 0 })
-	piece("UpperArm", Vector3.new(0.8, 1.6, 0.9), { -1.4, 6.7, -0.1 })
-	piece("Forearm", Vector3.new(0.7, 0.6, 1.7), { -0.75, 5.85, -0.7 }, { 0, -0.75, 0 })
+	local function dark(p)
+		p.MaterialVariant = ""
+		p.Material = Enum.Material.SmoothPlastic
+		p.Color = Color3.fromRGB(32, 30, 28)
+		return p
+	end
+	-- the pedestal: a dark foot, a body with a sunken plaque, a moulded cornice, the plinth
+	piece("PedestalFoot", Vector3.new(5.4, 0.6, 5.4), { 0, 0.3, 0 }, nil, "px_stone_bricks")
+	piece("Pedestal", Vector3.new(4.4, 1.7, 4.4), { 0, 1.45, 0 }, nil, "px_stone_bricks")
+	piece("PedestalPlaque", Vector3.new(2.6, 0.9, 0.1), { 0, 1.45, -2.22 }).Color = Color3.fromRGB(110, 106, 100)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -1, 1 }) do
+			piece("PedestalCorner", Vector3.new(0.7, 1.7, 0.7), { sx * 2.1, 1.45, sz * 2.1 })
+		end
+	end
+	piece("PedestalCornice", Vector3.new(5, 0.4, 5), { 0, 2.5, 0 })
+	piece("Plinth", Vector3.new(3.8, 0.4, 3.8), { 0, 2.9, 0 })
+	local y0 = 3.1 -- the figure stands here
+	local function f(name, size, offset, angles)
+		return piece(name, size, { offset[1], offset[2] + y0 - 2, offset[3] }, angles)
+	end
+	-- legs
+	for _, sx in ipairs({ -0.52, 0.52 }) do
+		f("Sabaton", Vector3.new(1, 0.5, 1.5), { sx, 2.25, -0.2 })
+		f("Greave", Vector3.new(0.95, 1.5, 1.05), { sx, 3.2, 0 })
+		f("KneeCop", Vector3.new(0.8, 0.5, 0.45), { sx, 3.95, -0.55 })
+		f("Cuisse", Vector3.new(1.02, 1.1, 1.12), { sx, 4.5, 0 })
+	end
+	-- waist: two tiers of mail, the belt and its buckle, a stone tabard hanging in front
+	f("MailLow", Vector3.new(2.7, 0.6, 1.55), { 0, 5.05, 0 })
+	f("MailHigh", Vector3.new(2.5, 0.5, 1.45), { 0, 5.55, 0 })
+	f("Belt", Vector3.new(2.45, 0.32, 1.42), { 0, 5.9, 0 })
+	f("Buckle", Vector3.new(0.45, 0.35, 0.12), { 0, 5.9, -0.76 })
+	f("Tabard", Vector3.new(1.1, 1.9, 0.14), { 0, 4.8, -0.84 })
+	-- torso: the core, the plackart, the breastplate with its ridge, the gorget
+	f("Torso", Vector3.new(2.3, 2.3, 1.3), { 0, 7.1, 0 })
+	f("Plackart", Vector3.new(1.9, 0.8, 0.26), { 0, 6.45, -0.72 })
+	f("Breastplate", Vector3.new(2.05, 1.3, 0.3), { 0, 7.5, -0.74 })
+	f("Ridge", Vector3.new(0.26, 1.3, 0.16), { 0, 7.5, -0.95 })
+	f("Gorget", Vector3.new(1.35, 0.42, 1.05), { 0, 8.45, 0 })
+	-- the cape in three folds at different depths
+	for k = -1, 1 do
+		f("CapeFold", Vector3.new(0.86, 5.2 + k * 0.15, 0.24), { k * 0.84, 5.8, 0.8 + math.abs(k) * 0.08 }, { -0.07, 0, 0 })
+	end
+	-- arms: three-plate pauldrons, upper arms, elbow cops, forearms reaching to the hands on the sword
+	local function arm(sx)
+		f("Pauldron", Vector3.new(1.3, 0.45, 1.6), { sx * 1.45, 8.2, 0 })
+		f("Pauldron", Vector3.new(1.22, 0.4, 1.5), { sx * 1.52, 7.85, 0 })
+		f("Pauldron", Vector3.new(1.12, 0.35, 1.4), { sx * 1.58, 7.52, 0 })
+		f("UpperArm", Vector3.new(0.8, 1.3, 0.9), { sx * 1.45, 6.95, -0.1 })
+		f("ElbowCop", Vector3.new(0.62, 0.55, 0.62), { sx * 1.42, 6.25, -0.35 })
+		f("Forearm", Vector3.new(0.72, 0.62, 1.7), { sx * 0.76, 5.95, -0.72 }, { 0, sx * -0.75, 0 })
+	end
+	arm(-1)
 	if damage ~= "armless" then
-		piece("UpperArm", Vector3.new(0.8, 1.6, 0.9), { 1.4, 6.7, -0.1 })
-		piece("Forearm", Vector3.new(0.7, 0.6, 1.7), { 0.75, 5.85, -0.7 }, { 0, 0.75, 0 })
+		arm(1)
 	else
-		piece("Stump", Vector3.new(0.8, 0.6, 0.9), { 1.4, 7.25, -0.1 })
-		piece("FallenArm", Vector3.new(0.8, 2.4, 0.9), { 2.6, 0.45, -2 }, { 0, 0.4, math.pi / 2 })
+		f("Pauldron", Vector3.new(1.3, 0.45, 1.6), { 1.45, 8.2, 0 })
+		f("Stump", Vector3.new(0.8, 0.5, 0.9), { 1.45, 7.4, -0.1 })
+		piece("FallenArm", Vector3.new(0.8, 2.4, 0.9), { 2.8, 0.45, -3 }, { 0, 0.4, math.pi / 2 })
 	end
-	piece("Hands", Vector3.new(1, 0.8, 0.8), { 0, 5.75, -1.2 })
-	piece("Blade", Vector3.new(0.32, 3.4, 0.14), { 0, 3.75, -1.25 })
-	piece("Fuller", Vector3.new(0.1, 3, 0.16), { 0, 3.8, -1.25 })
-	piece("Guard", Vector3.new(1.9, 0.26, 0.32), { 0, 5.4, -1.25 })
-	piece("Pommel", Vector3.new(0.45, 0.45, 0.45), { 0, 6.35, -1.25 })
+	f("Gauntlets", Vector3.new(1.15, 0.85, 0.9), { 0, 5.85, -1.25 })
+	-- the sword, point down: blade, fuller, guard with quillon blocks, pommel
+	f("Blade", Vector3.new(0.34, 3.5, 0.15), { 0, 3.95, -1.3 })
+	dark(f("Fuller", Vector3.new(0.1, 3, 0.17), { 0, 4.05, -1.3 }))
+	f("Guard", Vector3.new(2, 0.26, 0.34), { 0, 5.55, -1.3 })
+	for _, sx in ipairs({ -1, 1 }) do
+		f("Quillon", Vector3.new(0.36, 0.42, 0.42), { sx * 1.05, 5.62, -1.3 })
+	end
+	f("Pommel", Vector3.new(0.48, 0.48, 0.48), { 0, 6.45, -1.3 })
+	-- the great helm with a brow band, eye slits, breaths and a plume sweeping back
 	if damage ~= "headless" then
-		piece("Helmet", Vector3.new(1.25, 1.35, 1.25), { 0, 8.65, 0 })
-		piece("Crest", Vector3.new(0.22, 0.45, 1.1), { 0, 9.5, 0.05 })
-		local visor = piece("Visor", Vector3.new(0.9, 0.12, 0.05), { 0, 8.75, -0.64 })
-		visor.MaterialVariant = ""
-		visor.Material = Enum.Material.SmoothPlastic
-		visor.Color = Color3.fromRGB(30, 28, 26)
+		f("Helm", Vector3.new(1.3, 1.45, 1.3), { 0, 9.15, 0 })
+		f("HelmTop", Vector3.new(1.1, 0.25, 1.1), { 0, 9.98, 0 })
+		f("Brow", Vector3.new(1.36, 0.22, 0.22), { 0, 9.35, -0.6 })
+		f("Nasal", Vector3.new(0.18, 0.7, 0.12), { 0, 8.95, -0.68 })
+		for _, sx in ipairs({ -0.33, 0.33 }) do
+			dark(f("EyeSlit", Vector3.new(0.36, 0.1, 0.06), { sx, 9.15, -0.66 }))
+			for k = 0, 1 do
+				dark(f("Breath", Vector3.new(0.08, 0.08, 0.06), { sx, 8.7 - k * 0.18, -0.66 }))
+			end
+		end
+		f("Plume", Vector3.new(0.26, 0.55, 0.5), { 0, 10.3, -0.1 })
+		f("Plume", Vector3.new(0.26, 0.5, 0.5), { 0, 10.4, 0.35 })
+		f("Plume", Vector3.new(0.24, 0.45, 0.5), { 0, 10.2, 0.78 }, { 0.4, 0, 0 })
 	else
-		piece("Neck", Vector3.new(0.7, 0.3, 0.7), { 0, 8.1, 0 })
-		piece("FallenHelmet", Vector3.new(1.25, 1.35, 1.25), { 1.6, 0.62, -3 }, { 0.3, 0.8, 1.2 })
+		f("Neck", Vector3.new(0.7, 0.3, 0.7), { 0, 8.75, 0 })
+		piece("FallenHelm", Vector3.new(1.3, 1.45, 1.3), { 1.6, 0.65, -3.4 }, { 0.3, 0.8, 1.2 })
 	end
 end
 -- eight giant knights round the wall, almost as tall as the hall, facing the middle (θ = 22.5° + 45° k: two flank
 -- the door, two flank the throne)
-local GIANT = 4.4
+local GIANT = 3.9
 for k = 0, 7 do
 	local th = math.rad(22.5 + 45 * k)
 	local dmg = if k == 2 then "headless" elseif k == 5 then "armless" else nil
-	knight(facing(th, LAIR.r - 13, 0), GIANT, dmg)
+	knight(facing(th, LAIR.r - 14, 0), GIANT, dmg)
 end
 -- a stone lion lying on a pedestal
 local function lion(base)
@@ -1158,9 +1345,9 @@ for k = 1, 7 do
 	local th = math.rad(45 * k)
 	local x, z = polar(th, LAIR.r - 3)
 	if k ~= 4 and not ruinedCorner(x, z) then -- not behind the throne, not in the fallen corner
-		banner(facing(th, LAIR.r - 2.5, 0), rng:NextNumber(10, 14))
+		banner(facing(th, LAIR.r - 3.6, 0), rng:NextNumber(10, 14))
 		for _, side in ipairs({ -1, 1 }) do
-			shield(facing(th, LAIR.r - 2.6, 12) * CFrame.new(side * 6, 0, 0), if k % 2 == 0 then Color3.fromRGB(40, 60, 120) else Color3.fromRGB(30, 90, 50))
+			shield(facing(th, LAIR.r - 3.2, 11) * CFrame.new(side * 6, 0, 0), if k % 2 == 0 then Color3.fromRGB(40, 60, 120) else Color3.fromRGB(30, 90, 50))
 		end
 		if k % 2 == 1 then
 			armourStand(facing(th, LAIR.r - 8, 0))
