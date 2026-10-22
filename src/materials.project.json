@@ -337,6 +337,174 @@
         "ColorMap": "rbxassetid://88631472680497",
         "StudsPerTile": 4
       }
+    },
+    "px_soul_soil": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://79202838639179",
+        "StudsPerTile": 4
+      }
+    },
+    "px_gilded_blackstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://103844468713280",
+        "StudsPerTile": 4
+      }
+    },
+    "px_crimson_stem": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://79497738968428",
+        "StudsPerTile": 4
+      }
+    },
+    "px_soul_sand": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://104209778377172",
+        "StudsPerTile": 4
+      }
+    },
+    "px_shroomlight": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://129175876102100",
+        "StudsPerTile": 4
+      }
+    },
+    "px_netherrack_cobble": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://112594736228450",
+        "StudsPerTile": 4
+      }
+    },
+    "px_nether_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://135366185017009",
+        "StudsPerTile": 4
+      }
+    },
+    "px_lava": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://99953329766426",
+        "StudsPerTile": 4
+      }
+    },
+    "px_blackstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://130072680759238",
+        "StudsPerTile": 4
+      }
+    },
+    "px_blackstone_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://133871877536337",
+        "StudsPerTile": 4
+      }
+    },
+    "px_obsidian": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://122896262834433",
+        "StudsPerTile": 4
+      }
+    },
+    "px_warped_nylium": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://97386550958655",
+        "StudsPerTile": 4
+      }
+    },
+    "px_crimson_nylium": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://75920746433343",
+        "StudsPerTile": 4
+      }
+    },
+    "px_warped_stem": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://82740704992817",
+        "StudsPerTile": 4
+      }
+    },
+    "px_warped_wart": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://110552908886824",
+        "StudsPerTile": 4
+      }
+    },
+    "px_netherite": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://92901315286246",
+        "StudsPerTile": 4
+      }
+    },
+    "px_quartz_ore": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://110894404618364",
+        "StudsPerTile": 4
+      }
+    },
+    "px_basalt": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://97032215299261",
+        "StudsPerTile": 4
+      }
+    },
+    "px_magma": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://134245404850700",
+        "StudsPerTile": 4
+      }
+    },
+    "px_glowstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://78268193620023",
+        "StudsPerTile": 4
+      }
+    },
+    "px_nether_wart": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://117266874468390",
+        "StudsPerTile": 4
+      }
     }
   }
 }

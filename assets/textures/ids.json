@@ -43,9 +43,31 @@
     "diamond_block": "rbxassetid://135672709707723",
     "red_sand": "rbxassetid://80708231032823",
     "red_sandstone": "rbxassetid://85410972979829",
-    "terracotta_pale": "rbxassetid://88631472680497"
+    "terracotta_pale": "rbxassetid://88631472680497",
+    "soul_soil": "rbxassetid://79202838639179",
+    "gilded_blackstone": "rbxassetid://103844468713280",
+    "crimson_stem": "rbxassetid://79497738968428",
+    "soul_sand": "rbxassetid://104209778377172",
+    "shroomlight": "rbxassetid://129175876102100",
+    "netherrack_cobble": "rbxassetid://112594736228450",
+    "nether_bricks": "rbxassetid://135366185017009",
+    "lava": "rbxassetid://99953329766426",
+    "blackstone": "rbxassetid://130072680759238",
+    "blackstone_bricks": "rbxassetid://133871877536337",
+    "obsidian": "rbxassetid://122896262834433",
+    "warped_nylium": "rbxassetid://97386550958655",
+    "crimson_nylium": "rbxassetid://75920746433343",
+    "warped_stem": "rbxassetid://82740704992817",
+    "warped_wart": "rbxassetid://110552908886824",
+    "netherite": "rbxassetid://92901315286246",
+    "quartz_ore": "rbxassetid://110894404618364",
+    "basalt": "rbxassetid://97032215299261",
+    "magma": "rbxassetid://134245404850700",
+    "glowstone": "rbxassetid://78268193620023",
+    "nether_wart": "rbxassetid://117266874468390"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",
-  "_faction": "stone_bricks … gold_block (16): faction-blocks-sheet.png (Codex image gen 22.10.2026, style of our sheet), split by scripts/split-faction-sheet.mjs, uploaded 22.10.2026 — blocks of the faction base"
+  "_faction": "stone_bricks … gold_block (16): faction-blocks-sheet.png (Codex image gen 22.10.2026, style of our sheet), split by scripts/split-faction-sheet.mjs, uploaded 22.10.2026 — blocks of the faction base",
+  "_nether": "Преисподняя: 21 texture derived from our own by scripts/derive-block-textures.mjs (colour ramps over the pattern), uploaded 22.10.2026; netherite = the menu's «Незерит» mine block (Nether rock look)"
 }

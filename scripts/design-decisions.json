@@ -387,7 +387,13 @@
         "netherite": 0.55,
         "soul_sand": 0.2,
         "quartz_ore": 0.25
-      }
+      },
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 22.10] 32×12×32 — шахта в центре пещеры Незера (scripts/build-underworld.luau); состав из меню (mine-shares: незерит 75 / кварцевая руда 10 / песок душ 10 / воздух 5)"
     },
     "pyramid": {
       "shares": {
@@ -685,7 +691,74 @@
     "piglin": {
       "hp": 1500,
       "damage": 6,
-      "respawnSeconds": 1800
+      "respawnSeconds": 1800,
+      "name": "Король Пиглинов",
+      "nameEn": "King of the Piglins",
+      "locationId": "underworld",
+      "unlockLevel": 7,
+      "_source": "[клиент] имя, описание («алчный вождь, одержимый лишь властью и золотом»), объявление о появлении, свита «Пиглин»; [меню] 0–420 $, древний порошок 1–3 %; hp/урон/респаун [решение]",
+      "money": [
+        0,
+        420
+      ],
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 2.2,
+        "walkSpeed": 12,
+        "leashSeconds": 300,
+        "abilityCooldown": 6.5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 32,
+          "width": 6,
+          "speed": 46,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            230,
+            170,
+            40
+          ],
+          "blade": [
+            255,
+            200,
+            80
+          ],
+          "spikes": [
+            40,
+            34,
+            44
+          ],
+          "glow": [
+            255,
+            190,
+            60
+          ]
+        },
+        "_abilities": "[решение] взмах золотым топором (огненная полоса), удар об пол (обломки чернокамня из земли), таран — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+      }
     },
     "skeleton": {
       "hp": 2500,

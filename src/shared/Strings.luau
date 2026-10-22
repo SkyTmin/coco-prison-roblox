@@ -1215,6 +1215,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡Zombar se ha alzado de las profundidades, hambriento de carne fresca!",
 		fr = "Zombar s'est levé des profondeurs, avide de chair fraîche !",
 	},
+	boss_spawned_piglin = { -- [клиент] prison.classic.boss.piglin.notify.spawn
+		ru = "Пламя Преисподней разверзлось — Король Пиглинов жаждет трофеев!",
+		en = "The flames of the Underworld have burst open: the King of the Piglins craves trophies!",
+		es = "¡Las llamas del Inframundo se han abierto: el Rey de los Piglins ansía trofeos!",
+		fr = "Les flammes des Enfers se sont ouvertes : le Roi des Piglins réclame des trophées !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

@@ -4,6 +4,8 @@
 -- quarry cave nearly black. Parts tagged IndoorLighting (scripts/build-quarry.luau: the cave volume)
 -- carry the attributes Ambient (Color3) and Exposure (number); while the local player stands inside one,
 -- the client eases Lighting toward those values and thins the outdoor haze, and eases back outside.
+-- Optional attributes tint the air of a whole location (Преисподняя: a red murk, scripts/build-underworld.luau):
+-- Haze (Atmosphere.Density instead of the thin indoor haze), AtmosphereColor, AtmosphereDecay (Color3).
 -- Local only: other players keep their own lighting.
 
 local CollectionService = game:GetService("CollectionService")
@@ -31,7 +33,14 @@ function IndoorLighting.Start()
 	end
 	started = true
 	local player = Players.LocalPlayer
-	local outdoor: { Ambient: Color3, ExposureCompensation: number, Density: number? }? = nil
+	local outdoor: {
+		Ambient: Color3,
+		ExposureCompensation: number,
+		Density: number?,
+		Color: Color3?,
+		Decay: Color3?,
+	}? =
+		nil
 	local current: BasePart? = nil
 	local function atmosphere(): Atmosphere?
 		return Lighting:FindFirstChildOfClass("Atmosphere")
@@ -48,6 +57,8 @@ function IndoorLighting.Start()
 					Ambient = Lighting.Ambient,
 					ExposureCompensation = Lighting.ExposureCompensation,
 					Density = if air then air.Density else nil,
+					Color = if air then air.Color else nil,
+					Decay = if air then air.Decay else nil,
 				}
 			end
 			local ambient = volume:GetAttribute("Ambient")
@@ -58,8 +69,21 @@ function IndoorLighting.Start()
 					then exposure
 					else Lighting.ExposureCompensation,
 			}):Play()
-			if air then
-				TweenService:Create(air, EASE, { Density = INDOOR_HAZE }):Play()
+			if air and outdoor then
+				local haze = volume:GetAttribute("Haze")
+				local color = volume:GetAttribute("AtmosphereColor")
+				local decay = volume:GetAttribute("AtmosphereDecay")
+				TweenService
+					:Create(air, EASE, {
+						Density = if typeof(haze) == "number" then haze else INDOOR_HAZE,
+						Color = if typeof(color) == "Color3"
+							then color
+							else outdoor.Color or air.Color,
+						Decay = if typeof(decay) == "Color3"
+							then decay
+							else outdoor.Decay or air.Decay,
+					})
+					:Play()
 			end
 		elseif outdoor then
 			TweenService:Create(Lighting, EASE, {
@@ -67,7 +91,11 @@ function IndoorLighting.Start()
 				ExposureCompensation = outdoor.ExposureCompensation,
 			}):Play()
 			if air and outdoor.Density then
-				TweenService:Create(air, EASE, { Density = outdoor.Density }):Play()
+				TweenService:Create(air, EASE, {
+					Density = outdoor.Density,
+					Color = outdoor.Color or air.Color,
+					Decay = outdoor.Decay or air.Decay,
+				}):Play()
 			end
 			outdoor = nil
 		end

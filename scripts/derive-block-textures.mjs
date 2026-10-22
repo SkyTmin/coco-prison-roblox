@@ -64,3 +64,73 @@ await remap("terracotta.png", "terracotta_pale.png", (r, g, b) => {
 	const v = clamp(150 + (l - 110) * 0.9);
 	return [v, clamp(v * 0.96), clamp(v * 0.9)];
 });
+
+// [Преисподняя] the Nether set. Each source's brightness is normalised to its own 2..98 % range (t = 0..1), then
+// mapped through a colour ramp, so the pattern (cracks, mortar, grain) of our own texture stays and only the
+// palette changes. Lumps of coal ore become quartz / gold; the dark mortar of cobblestone becomes magma cracks.
+async function lumRange(src) {
+	const { data } = await sharp(path.join(dir, src)).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+	const ls = [];
+	for (let i = 0; i < data.length; i += 4) ls.push(lum(data[i], data[i + 1], data[i + 2]));
+	ls.sort((a, b) => a - b);
+	return [ls[Math.floor(ls.length * 0.02)], ls[Math.floor(ls.length * 0.98)]];
+}
+function ramp(stops, t) {
+	t = Math.max(0, Math.min(1, t));
+	for (let i = 1; i < stops.length; i++) {
+		if (t <= stops[i][0]) {
+			const [t0, c0] = stops[i - 1];
+			const [t1, c1] = stops[i];
+			const k = (t - t0) / (t1 - t0 || 1);
+			return c0.map((c, j) => clamp(c + (c1[j] - c) * k));
+		}
+	}
+	return stops[stops.length - 1][1].map(clamp);
+}
+async function recolor(src, dst, stops, gamma = 1) {
+	const [lo, hi] = await lumRange(src);
+	await remap(src, dst, (r, g, b) => ramp(stops, Math.pow((lum(r, g, b) - lo) / (hi - lo), gamma)));
+}
+const NETHERRACK = [[0, [62, 18, 20]], [0.45, [112, 36, 36]], [0.8, [150, 60, 56]], [1, [178, 86, 78]]];
+// «Незерит» of the menu is the rough red Nether rock of the mine [меню: Незерит 75 % — the Nether stone]
+await recolor("stone.png", "netherite.png", NETHERRACK);
+await recolor("cobblestone.png", "netherrack_cobble.png", NETHERRACK, 0.9); // rubble, ruined walls
+// quartz ore: the stone of coal ore → netherrack, the dark lumps → milky quartz
+{
+	const [lo, hi] = await lumRange("coal_ore.png");
+	await remap("coal_ore.png", "quartz_ore.png", (r, g, b) => {
+		const l = lum(r, g, b);
+		if (l > 95) return ramp(NETHERRACK, (l - 95) / (hi - 95));
+		return ramp([[0, [196, 184, 170]], [0.6, [232, 224, 212]], [1, [250, 246, 238]]], (l - lo) / (95 - lo));
+	});
+	await remap("coal_ore.png", "gilded_blackstone.png", (r, g, b) => {
+		const l = lum(r, g, b);
+		if (l > 95) return ramp([[0, [22, 18, 24]], [1, [70, 62, 74]]], (l - 95) / (hi - 95));
+		return ramp([[0, [170, 110, 20]], [1, [255, 214, 80]]], (l - lo) / (95 - lo));
+	});
+}
+await recolor("gravel.png", "soul_sand.png", [[0, [40, 28, 22]], [0.5, [78, 58, 46]], [1, [120, 96, 78]]]);
+await recolor("dirt.png", "soul_soil.png", [[0, [44, 32, 26]], [0.6, [76, 58, 46]], [1, [100, 80, 64]]]);
+await recolor("red_brick.png", "nether_bricks.png", [[0, [22, 10, 14]], [0.5, [52, 22, 28]], [1, [86, 38, 44]]]);
+await recolor("stone_bricks.png", "blackstone_bricks.png", [[0, [16, 14, 18]], [0.55, [42, 38, 46]], [1, [74, 68, 80]]]);
+await recolor("cobblestone.png", "blackstone.png", [[0, [14, 12, 16]], [0.5, [38, 34, 42]], [1, [70, 64, 76]]]);
+await recolor("stone.png", "basalt.png", [[0, [40, 40, 44]], [0.5, [78, 78, 84]], [1, [124, 124, 130]]]);
+await recolor("sand.png", "glowstone.png", [[0, [150, 96, 40]], [0.4, [214, 160, 70]], [0.8, [250, 214, 120]], [1, [255, 240, 180]]], 0.8);
+await recolor("stone.png", "obsidian.png", [[0, [8, 5, 14]], [0.6, [26, 16, 40]], [0.92, [60, 36, 92]], [1, [110, 80, 150]]], 1.4);
+await recolor("grass_top.png", "crimson_nylium.png", [[0, [70, 8, 12]], [0.5, [130, 22, 26]], [1, [190, 50, 50]]]);
+await recolor("grass_top.png", "warped_nylium.png", [[0, [12, 60, 58]], [0.5, [24, 110, 100]], [1, [50, 170, 150]]]);
+await recolor("oak_log_side.png", "crimson_stem.png", [[0, [48, 16, 30]], [0.5, [100, 34, 56]], [1, [160, 70, 90]]]);
+await recolor("oak_log_side.png", "warped_stem.png", [[0, [20, 40, 46]], [0.5, [44, 90, 96]], [1, [80, 150, 150]]]);
+await recolor("white_wool.png", "nether_wart.png", [[0, [80, 4, 6]], [0.5, [130, 12, 14]], [1, [180, 36, 30]]]);
+await recolor("white_wool.png", "warped_wart.png", [[0, [10, 80, 76]], [0.5, [20, 128, 116]], [1, [60, 180, 160]]]);
+await recolor("hay.png", "shroomlight.png", [[0, [190, 90, 30]], [0.5, [240, 150, 60]], [1, [255, 214, 140]]]);
+await recolor("water.png", "lava.png", [[0, [190, 50, 10]], [0.45, [240, 110, 20]], [0.8, [255, 170, 40]], [1, [255, 230, 120]]]);
+// magma: the dark mortar of cobblestone glows, the stones stay dark
+{
+	const [lo, hi] = await lumRange("cobblestone.png");
+	await remap("cobblestone.png", "magma.png", (r, g, b) => {
+		const t = (lum(r, g, b) - lo) / (hi - lo);
+		if (t < 0.3) return ramp([[0, [255, 190, 60]], [1, [220, 80, 20]]], t / 0.3);
+		return ramp([[0, [90, 30, 16]], [1, [60, 18, 12]]], (t - 0.3) / 0.7);
+	});
+}
