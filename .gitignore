@@ -21,3 +21,5 @@ Thumbs.db
 __pycache__/
 .claude/worktrees/
 sync*.luau
+
+tools/sdk-agent/node_modules/

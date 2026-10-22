@@ -1,0 +1,9 @@
+{
+  "name": "coco-sdk-agent",
+  "private": true,
+  "type": "module",
+  "description": "Interactive Claude agent for coco-prison-roblox on the Agent SDK (API promo credits)",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.308"
+  }
+}
