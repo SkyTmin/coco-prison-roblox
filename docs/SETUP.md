@@ -174,8 +174,9 @@ git -C C:\Users\user\Documents\coco-prison-roblox add -A; git -C C:\Users\user\D
 
 1. Ключ — один раз, в своём PowerShell (ввод скрыт; ключ не попадает в историю и в репозиторий):
    `$k = Read-Host 'Вставь API-ключ' -MaskInput; [Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', $k, 'User')`
-   Ключ нужен **рабочей области** (`sk-ant-api…`, Console → Workspaces → API keys). Личный ключ `sk-ant-usr-…`
-   API принимает только с id рабочей области: `[Environment]::SetEnvironmentVariable('ANTHROPIC_WORKSPACE_ID', 'wrkspc_…', 'User')`.
+   При создании ключа в поле «Область» выбирай **рабочую область** (не «Организация»); начало `sk-ant-usr-` у всех
+   ключей, привязанных к аккаунту, — это нормально. Ключ с областью «Организация» API принимает только с id
+   рабочей области (ошибка «not scoped to a workspace»): `[Environment]::SetEnvironmentVariable('ANTHROPIC_WORKSPACE_ID', 'wrkspc_…', 'User')`.
 2. **Промо-кредиты ($100) покрывают API и Agent SDK, но не Claude Code** (он отвечает «Credit balance too low»).
    Поэтому работать вместо основного Claude — через Agent SDK (тот же Claude: CLAUDE.md, скиллы, Studio, правки;
    команды оболочки и MCP спрашивают разрешения): `C:\Users\user\Documents\coco-prison-roblox\scripts\sdk-agent.ps1`

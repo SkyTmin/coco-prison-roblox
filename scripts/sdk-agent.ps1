@@ -17,15 +17,13 @@ if (-not $key) {
 	exit 1
 }
 $env:ANTHROPIC_API_KEY = $key
-# a personal key (sk-ant-usr-…) is not tied to a workspace: the API wants the workspace id in a header. A workspace
-# key (sk-ant-api…, Console → Workspaces → API keys) needs nothing; otherwise set ANTHROPIC_WORKSPACE_ID once.
+# Account-linked keys all start with sk-ant-usr-; what matters is the scope chosen when the key was made. A key
+# scoped to the organization needs the workspace id in a header («not scoped to a workspace»): pick the workspace
+# scope when creating the key, or set ANTHROPIC_WORKSPACE_ID once (docs/SETUP.md).
 $workspace = $env:ANTHROPIC_WORKSPACE_ID
 if (-not $workspace) { $workspace = [Environment]::GetEnvironmentVariable("ANTHROPIC_WORKSPACE_ID", "User") }
 if ($workspace) {
 	$env:ANTHROPIC_CUSTOM_HEADERS = "anthropic-workspace-id: $workspace"
-} elseif ($key.StartsWith("sk-ant-usr-")) {
-	Write-Host "Ключ личный (sk-ant-usr-…), без рабочей области: API его не примет. Создай ключ рабочей области" -ForegroundColor Yellow
-	Write-Host "(console.anthropic.com → Workspaces → API keys) или задай ANTHROPIC_WORKSPACE_ID (docs/SETUP.md)." -ForegroundColor Yellow
 }
 . (Join-Path $PSScriptRoot "use-system-proxy.ps1")
 $dir = Join-Path (Split-Path -Parent $PSScriptRoot) "tools\sdk-agent"
