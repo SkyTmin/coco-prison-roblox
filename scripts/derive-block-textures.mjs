@@ -49,3 +49,18 @@ function metal(dark, light) {
 await remap("gold_block.png", "iron_block.png", metal([110, 110, 112], [235, 235, 235]));
 await remap("gold_block.png", "lapis_block.png", metal([18, 40, 120], [80, 130, 230]));
 await remap("gold_block.png", "diamond_block.png", metal([30, 140, 135], [190, 255, 245]));
+// [Подножье горы, бедленды] red sand from our sand, red sandstone from our sandstone, and a pale neutral terracotta
+// that the map tints into the strata colours (orange, red, yellow, white, brown bands)
+await remap("sand.png", "red_sand.png", (r, g, b) => {
+	const l = lum(r, g, b) / 255;
+	return [clamp(120 + 125 * l), clamp(45 + 70 * l), clamp(15 + 35 * l)];
+});
+await remap("sandstone.png", "red_sandstone.png", (r, g, b) => {
+	const l = lum(r, g, b) / 255;
+	return [clamp(105 + 120 * l), clamp(40 + 70 * l), clamp(12 + 38 * l)];
+});
+await remap("terracotta.png", "terracotta_pale.png", (r, g, b) => {
+	const l = lum(r, g, b);
+	const v = clamp(150 + (l - 110) * 0.9);
+	return [v, clamp(v * 0.96), clamp(v * 0.9)];
+});

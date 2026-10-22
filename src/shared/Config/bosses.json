@@ -194,10 +194,67 @@
       "id": "minotaur",
       "name": "Минотавр",
       "location": "Подножье горы",
-      "unlockLevel": null,
-      "locationId": null,
-      "nameEn": null,
-      "fight": null,
+      "unlockLevel": 5,
+      "locationId": "mountain_foot",
+      "nameEn": "Minotaur",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 2.4,
+        "walkSpeed": 11,
+        "leashSeconds": 300,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 30,
+          "width": 6,
+          "speed": 45,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 48,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            200,
+            90,
+            40
+          ],
+          "blade": [
+            230,
+            180,
+            120
+          ],
+          "spikes": [
+            150,
+            80,
+            45
+          ],
+          "glow": [
+            255,
+            140,
+            60
+          ]
+        },
+        "_abilities": "[решение] рёв-волна (полоса), удар копытом (обвал камня из земли), бычий таран — в колонну оглушение 3 с [coco-instruments: Минотавр, docs/research/boss-from-instruments.md]"
+      },
       "money": [
         0,
         450

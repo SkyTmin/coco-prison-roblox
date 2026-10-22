@@ -313,6 +313,30 @@
         "ColorMap": "rbxassetid://135672709707723",
         "StudsPerTile": 4
       }
+    },
+    "px_red_sand": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://80708231032823",
+        "StudsPerTile": 4
+      }
+    },
+    "px_red_sandstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://85410972979829",
+        "StudsPerTile": 4
+      }
+    },
+    "px_terracotta_pale": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://88631472680497",
+        "StudsPerTile": 4
+      }
     }
   }
 }

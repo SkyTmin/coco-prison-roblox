@@ -1215,6 +1215,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡Zombar se ha alzado de las profundidades, hambriento de carne fresca!",
 		fr = "Zombar s'est levé des profondeurs, avide de chair fraîche !",
 	},
+	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
+		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
+		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",
+		es = "¡Las cadenas se han roto al Pie de la montaña: el Minotauro despierta!",
+		fr = "Les chaînes ont cédé au Pied de la montagne : le Minotaure s'éveille !",
+	},
 	boss_spawned_splinter = { -- [меню] описание Сплинтера: огромная крыса из мрака подземелий
 		ru = "Из мрака подвала выполз Сплинтер — огромная крыса с острыми клыками!",
 		en = "Splinter has crawled out of the basement's darkness, a huge rat with sharp fangs!",

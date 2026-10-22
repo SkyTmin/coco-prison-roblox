@@ -40,7 +40,10 @@
     "melon_top": "rbxassetid://116003033324791",
     "iron_block": "rbxassetid://84349966503916",
     "lapis_block": "rbxassetid://92036843008983",
-    "diamond_block": "rbxassetid://135672709707723"
+    "diamond_block": "rbxassetid://135672709707723",
+    "red_sand": "rbxassetid://80708231032823",
+    "red_sandstone": "rbxassetid://85410972979829",
+    "terracotta_pale": "rbxassetid://88631472680497"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",

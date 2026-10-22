@@ -374,7 +374,13 @@
         "red_sand": 0.7,
         "iron_ore": 0.2,
         "gold_ore": 0.1
-      }
+      },
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 22.10] 32×12×32 — карьер в долине каньона (scripts/build-mountain-foot.luau); состав из меню (mine-shares: красный песок 91 / железная руда 6 / золотая руда 3)"
     },
     "underworld": {
       "shares": {
@@ -506,14 +512,34 @@
       "windupSeconds": 0.4,
       "_ai": "[решение] медленнее крысы, замах обеими руками 0,4 с, удар раз в 1,5 с",
       "model": "zombie",
-      "rootSize": [2.2, 3.2, 1.4],
+      "rootSize": [
+        2.2,
+        3.2,
+        1.4
+      ],
       "hipHeight": 0.95,
-      "modelOffset": [0, -2.55, 0],
+      "modelOffset": [
+        0,
+        -2.55,
+        0
+      ],
       "furTexture": "rbxassetid://93131048217957",
       "_model": "assets/models/zombie (Blender, ванильные пропорции, свои цвета); звуков зомби нет в атласе — звук урона игрока ниже тоном [решение]",
-      "hurtSound": ["player_hurt", 0.7, 0.6],
-      "deathSound": ["player_hurt", 0.8, 0.45],
-      "windupSound": ["player_hurt", 0.3, 0.5]
+      "hurtSound": [
+        "player_hurt",
+        0.7,
+        0.6
+      ],
+      "deathSound": [
+        "player_hurt",
+        0.8,
+        0.45
+      ],
+      "windupSound": [
+        "player_hurt",
+        0.3,
+        0.5
+      ]
     },
     "bat": {
       "name": "Летучая мышь",
@@ -587,7 +613,74 @@
     "minotaur": {
       "hp": 1000,
       "damage": 5,
-      "respawnSeconds": 1500
+      "respawnSeconds": 1500,
+      "name": "Минотавр",
+      "nameEn": "Minotaur",
+      "locationId": "mountain_foot",
+      "unlockLevel": 5,
+      "_source": "[клиент] имя, описание («древний страж Подножья горы, закованный в цепи»), объявление о пробуждении; [меню] 0–450 $, ~25 мин; hp/урон [решение]",
+      "money": [
+        0,
+        450
+      ],
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 2.4,
+        "walkSpeed": 11,
+        "leashSeconds": 300,
+        "abilityCooldown": 7,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.7,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 30,
+          "width": 6,
+          "speed": 45,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.2,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 48,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            200,
+            90,
+            40
+          ],
+          "blade": [
+            230,
+            180,
+            120
+          ],
+          "spikes": [
+            150,
+            80,
+            45
+          ],
+          "glow": [
+            255,
+            140,
+            60
+          ]
+        },
+        "_abilities": "[решение] рёв-волна (полоса), удар копытом (обвал камня из земли), бычий таран — в колонну оглушение 3 с [coco-instruments: Минотавр, docs/research/boss-from-instruments.md]"
+      }
     },
     "piglin": {
       "hp": 1500,
@@ -657,10 +750,26 @@
         "texture": "rbxassetid://93131048217957",
         "scale": 1,
         "palette": {
-          "telegraph": [170, 60, 50],
-          "blade": [190, 170, 150],
-          "spikes": [95, 85, 75],
-          "glow": [255, 120, 90]
+          "telegraph": [
+            170,
+            60,
+            50
+          ],
+          "blade": [
+            190,
+            170,
+            150
+          ],
+          "spikes": [
+            95,
+            85,
+            75
+          ],
+          "glow": [
+            255,
+            120,
+            90
+          ]
         }
       }
     },
