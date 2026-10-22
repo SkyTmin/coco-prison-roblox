@@ -28,6 +28,7 @@ local ShopWindow = require(script.ShopWindow)
 local CreativeWindow = require(script.CreativeWindow)
 local BossHud = require(script.BossHud)
 local BossAnimator = require(script.BossAnimator)
+local MobAnimator = require(script.MobAnimator)
 local IndoorLighting = require(script.IndoorLighting)
 local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
@@ -2564,6 +2565,7 @@ do
 	CreativeWindow.Listen()
 	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
 	BossAnimator.Start() -- smooth boss joints from its Action attributes
+	MobAnimator.Start() -- Blender clips on the rats (idle, walk, bite, hurt, death)
 	CombatFeel.Start(gui, function() -- soft lock, predicted hits, damage numbers, mob health bars
 		local kind = heldKind()
 		return kind

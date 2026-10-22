@@ -18,6 +18,8 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Sfx = require(Shared.Sfx)
+local BlockRig = require(Shared.BlockRig)
+local RatModel = require(Shared:WaitForChild("Models"):WaitForChild("rat")) :: any
 local ProfileService = require(script.Parent.ProfileService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
@@ -42,38 +44,9 @@ type Mob = {
 }
 local mobs: { Mob } = {}
 
-local function weld(root: BasePart, part: BasePart)
-	part.Anchored = false
-	part.CanCollide = false
-	part.CanQuery = true
-	part.Massless = true
-	local w = Instance.new("WeldConstraint")
-	w.Part0, w.Part1 = root, part
-	w.Parent = part
-end
-
-local function block(
-	model: Model,
-	name: string,
-	size: Vector3,
-	offset: CFrame,
-	color: Color3,
-	root: BasePart
-)
-	local p = Instance.new("Part")
-	p.Name = name
-	p.Size = size
-	p.CFrame = root.CFrame * offset
-	p.Material = Enum.Material.SmoothPlastic
-	p.Color = color
-	p.TopSurface = Enum.SurfaceType.Smooth
-	p.BottomSurface = Enum.SurfaceType.Smooth
-	p.Parent = model
-	weld(root, p)
-	return p
-end
-
--- A blocky rat facing −Z: grey body and head, pink ears, nose, feet and a long tail, black eyes.
+-- The rat from Blender (assets/models/rat/rat.py → Shared.Models.rat, after the Codex reference picture):
+-- BlockRig boxes on Motor6D joints, posed by the client (MobAnimator). The physics stay a plain invisible
+-- root box with an R6 humanoid floating it 0.6 above the ground; the model's ground origin sits under it.
 local function buildRat(at: CFrame, cfg: any): (Model, Humanoid, BasePart)
 	local model = Instance.new("Model")
 	model.Name = "Mob_rat"
@@ -84,49 +57,7 @@ local function buildRat(at: CFrame, cfg: any): (Model, Humanoid, BasePart)
 	root.CanCollide = true
 	root.CFrame = at
 	root.Parent = model
-	local GREY, DARK = Color3.fromRGB(110, 106, 110), Color3.fromRGB(80, 76, 80)
-	local PINK = Color3.fromRGB(235, 150, 160)
-	block(model, "Body", Vector3.new(1.8, 1.2, 2.6), CFrame.new(0, 0, 0.2), GREY, root)
-	block(model, "Back", Vector3.new(1.4, 0.3, 2), CFrame.new(0, 0.7, 0.3), DARK, root)
-	block(model, "Head", Vector3.new(1.3, 1, 1.2), CFrame.new(0, 0.2, -1.6), GREY, root)
-	block(model, "Snout", Vector3.new(0.7, 0.55, 0.6), CFrame.new(0, 0.05, -2.45), GREY, root)
-	block(model, "Nose", Vector3.new(0.3, 0.25, 0.15), CFrame.new(0, 0.15, -2.8), PINK, root)
-	for _, s in ipairs({ -1, 1 }) do
-		block(
-			model,
-			"Ear",
-			Vector3.new(0.5, 0.5, 0.15),
-			CFrame.new(s * 0.55, 0.85, -1.4),
-			PINK,
-			root
-		)
-		block(
-			model,
-			"Eye",
-			Vector3.new(0.2, 0.2, 0.1),
-			CFrame.new(s * 0.35, 0.4, -2.22),
-			Color3.fromRGB(20, 20, 20),
-			root
-		)
-		for _, z in ipairs({ -0.7, 1.0 }) do
-			block(
-				model,
-				"Foot",
-				Vector3.new(0.35, 0.4, 0.45),
-				CFrame.new(s * 0.7, -0.75, z),
-				PINK,
-				root
-			)
-		end
-	end
-	block(
-		model,
-		"Tail",
-		Vector3.new(0.18, 0.18, 2.6),
-		CFrame.new(0, -0.2, 2.6) * CFrame.Angles(0.25, 0, 0),
-		PINK,
-		root
-	)
+	BlockRig.build(RatModel, model, root, at * CFrame.new(0, -1.2, 0.5), cfg.furTexture)
 	local humanoid = Instance.new("Humanoid")
 	humanoid.RigType = Enum.HumanoidRigType.R6
 	humanoid.HipHeight = 0.6
