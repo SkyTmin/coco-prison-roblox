@@ -537,7 +537,7 @@
       "locationId": "basement",
       "nameEn": "Splinter",
       "fight": {
-        "meleeDamage": 1,
+        "meleeDamage": 2,
         "meleeRange": 8,
         "meleeCooldown": 2.2,
         "walkSpeed": 11,
@@ -551,12 +551,12 @@
           "length": 30,
           "width": 6,
           "speed": 45,
-          "damage": 2
+          "damage": 4
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 2,
+          "damage": 4,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -565,7 +565,7 @@
           "speed": 44,
           "maxDistance": 36,
           "width": 7,
-          "damage": 2,
+          "damage": 4,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -606,8 +606,8 @@
       ],
       "powderChance": "1-5%",
       "shard": null,
-      "hp": 1200,
-      "damage": 6,
+      "hp": 600,
+      "damage": 12,
       "respawnSeconds": 1500
     },
     {

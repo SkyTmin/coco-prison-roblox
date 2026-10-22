@@ -87,7 +87,7 @@ for (const loc of pricesWiki.locations) {
 			warnSeconds: dec.warnSeconds ?? def.warnSeconds,
 			shares,
 		},
-		mines: Object.fromEntries(Object.entries(decisions.mines).filter(([k, v]) => k.startsWith(loc.id + "_") && v.shares).map(([k, v]) => [k, { shares: v.shares, source: v._source || "[решение]" }])), // per-mine overrides (e.g. prison_small)
+		mines: Object.fromEntries(Object.entries(decisions.mines).filter(([k, v]) => k.startsWith(loc.id + "_") && v.shares).map(([k, v]) => [k, { shares: v.shares, ...(v.resetSeconds ? { resetSeconds: v.resetSeconds } : {}), source: v._source || "[решение]" }])), // per-mine overrides (e.g. prison_small)
 		sellList: loc.blocks.map((b) => b.id),
 		sharesSource: wikiShares ? "[меню]" : "[решение]",
 	});

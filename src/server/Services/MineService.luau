@@ -371,6 +371,7 @@ local function register(anchor: Instance)
 		dug = 0,
 		resetSeconds = if mini and location.miniMine
 			then location.miniMine.resetSeconds
+			elseif override and override.resetSeconds then override.resetSeconds
 			else location.mine.resetSeconds,
 	}
 	mines[mineId] = mine

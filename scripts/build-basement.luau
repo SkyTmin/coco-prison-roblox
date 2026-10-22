@@ -49,7 +49,7 @@ local TORCH = Color3.fromRGB(255, 180, 100)
 local BEDROCK = Color3.fromRGB(62, 58, 66)
 local WALL_TINT = Color3.fromRGB(196, 192, 188) -- rock a little darker than the floor
 local CEIL_TINT = Color3.fromRGB(170, 166, 164)
-local TOP = 44 -- every rock column reaches this high: no gap ever shows the sky
+local TOP = 60 -- every rock column reaches this high: no gap ever shows the sky
 
 local function part(name, size, cf, color, material, parent)
 	local p = Instance.new("Part")
@@ -123,7 +123,7 @@ end
 -- Shapes in zone coordinates (z runs north = negative). Tunnels are polylines with a radius, caves are
 -- ellipses; the noise on the radius makes the outline ragged. heights = { min at the wall, max in the middle }.
 local HALL = { x0 = -16, x1 = 16, z0 = 16, z1 = -16 } -- the arrival hall interior (32 × 32)
-local PORTAL = 8 -- half width of the hall's open side
+local PORTAL = 12 -- half width of the hall's open side
 local M1 = { size = 16, depth = 8, cz = -136 } -- mine 1: 16 × 8 × 16 blocks (locations.json basement.mine.size)
 local M2 = { size = 12, depth = 6, cz = -292 } -- mine 2: 12 × 6 × 12 blocks (anchor attribute Size)
 for _, m in ipairs({ M1, M2 }) do
@@ -132,16 +132,16 @@ for _, m in ipairs({ M1, M2 }) do
 end
 local LAIR = { cx = 0, cz = -448, r = 50, floor = -8 }
 local SHAPES = {
-	{ id = "tunnel1", kind = "line", r = 9, pts = { { 0, -12 }, { 5, -34 }, { -7, -58 }, { 2, -80 }, { 0, -92 } }, h = { 8, 13 } },
-	{ id = "cave1", kind = "ellipse", cx = 0, cz = M1.cz, rx = 62, rz = 56, h = { 10, 30 } },
-	{ id = "tunnel2", kind = "line", r = 9, pts = { { 0, -186 }, { -9, -208 }, { 7, -230 }, { 0, -252 } }, h = { 8, 13 } },
-	{ id = "cave2", kind = "ellipse", cx = 0, cz = M2.cz, rx = 52, rz = 48, h = { 10, 26 } },
-	{ id = "tunnel3", kind = "line", r = 9, pts = { { 0, -334 }, { 9, -354 }, { -5, -376 }, { 0, -400 } }, h = { 8, 13 } },
-	{ id = "lair", kind = "ellipse", cx = LAIR.cx, cz = LAIR.cz, rx = LAIR.r, rz = LAIR.r, h = { 12, 34 } },
+	{ id = "tunnel1", kind = "line", r = 14, pts = { { 0, -12 }, { 5, -34 }, { -7, -58 }, { 2, -80 }, { 0, -92 } }, h = { 13, 21 } },
+	{ id = "cave1", kind = "ellipse", cx = 0, cz = M1.cz, rx = 62, rz = 56, h = { 15, 38 } },
+	{ id = "tunnel2", kind = "line", r = 14, pts = { { 0, -186 }, { -9, -208 }, { 7, -230 }, { 0, -252 } }, h = { 13, 21 } },
+	{ id = "cave2", kind = "ellipse", cx = 0, cz = M2.cz, rx = 52, rz = 48, h = { 15, 34 } },
+	{ id = "tunnel3", kind = "line", r = 14, pts = { { 0, -334 }, { 9, -354 }, { -5, -376 }, { 0, -400 } }, h = { 13, 21 } },
+	{ id = "lair", kind = "ellipse", cx = LAIR.cx, cz = LAIR.cz, rx = LAIR.r, rz = LAIR.r, h = { 18, 42 } },
 	-- side grottos off the route, each with its own little story (see "grottos" below)
-	{ id = "storeroom", kind = "ellipse", cx = 17, cz = -66, rx = 14, rz = 10, h = { 7, 12 } },
-	{ id = "spring", kind = "ellipse", cx = -27, cz = -212, rx = 15, rz = 11, h = { 7, 14 } },
-	{ id = "shaft", kind = "ellipse", cx = 52, cz = -308, rx = 15, rz = 10, h = { 7, 12 } },
+	{ id = "storeroom", kind = "ellipse", cx = 17, cz = -66, rx = 14, rz = 10, h = { 11, 17 } },
+	{ id = "spring", kind = "ellipse", cx = -27, cz = -212, rx = 15, rz = 11, h = { 11, 18 } },
+	{ id = "shaft", kind = "ellipse", cx = 52, cz = -308, rx = 15, rz = 10, h = { 11, 17 } },
 }
 local SHAPE = {}
 for _, s in ipairs(SHAPES) do
@@ -205,6 +205,10 @@ end
 local cells = {} -- [ix + iz * NX] = { shape, floor, ceil, edge, hole, path, ... } for open cells
 local function key(ix, iz)
 	return ix + iz * NX
+end
+-- the hall's barrel vault: 14 at the walls, 22 in the middle, 2-stud steps
+local function hallCeil(x)
+	return 14 + 2 * math.floor(4 * math.sqrt(math.max(0, 1 - (x / 18) ^ 2)) + 0.5)
 end
 local function inHall(x, z)
 	return x > HALL.x0 and x < HALL.x1 and z < HALL.z0 and z > HALL.z1
@@ -320,15 +324,14 @@ for _, c in pairs(cells) do
 	c.path = onTrail(c)
 	local s = SHAPE[c.shape]
 	if c.alcove then
-		c.ceil = 8
+		c.ceil = 10
 	elseif c.shape == "hall" then
-		-- the barrel vault: 10 at the walls, 18 in the middle, 2-stud steps
-		c.ceil = 10 + 2 * math.floor(4 * math.sqrt(math.max(0, 1 - (c.x / 18) ^ 2)) + 0.5)
+		c.ceil = hallCeil(c.x)
 	else
 		local R = if s.kind == "line" then 3 else 7
 		local k = math.min(1, (c.edge - 1) / R) ^ 0.7
 		local ceil = s.h[1] + (s.h[2] - s.h[1]) * k + n2(c.x, c.z, 6.3, 0.09) * 3
-		c.ceil = c.floor + math.max(7, 2 * math.floor(ceil / 2 + 0.5))
+		c.ceil = c.floor + math.max(11, 2 * math.floor(ceil / 2 + 0.5))
 		-- rubble along the cave walls: the floor steps up a stud or two (never on the trail or by a pit)
 		local nearHole = false
 		for _, m in ipairs({ M1, M2 }) do
@@ -569,18 +572,18 @@ local hall = folder("Hall")
 for _, z in ipairs({ 12, 4, -4, -12 }) do
 	for _, side in ipairs({ -1, 1 }) do
 		local x = side * (HALL.x1 - 0.75)
-		box("Pilaster", x - 0.75, 0, z - 1.25, x + 0.75, 10, z + 1.25, "px_stone_bricks", Color3.fromRGB(215, 210, 205), hall)
+		box("Pilaster", x - 0.75, 0, z - 1.25, x + 0.75, 14, z + 1.25, "px_stone_bricks", Color3.fromRGB(215, 210, 205), hall)
 		box("PilasterBase", x - 1, 0, z - 1.5, x + 1, 1, z + 1.5, "px_smooth_stone", nil, hall)
-		box("PilasterCap", x - 1.1, 9.4, z - 1.6, x + 1.1, 10.2, z + 1.6, "px_smooth_stone", nil, hall)
+		box("PilasterCap", x - 1.1, 13.4, z - 1.6, x + 1.1, 14.2, z + 1.6, "px_smooth_stone", nil, hall)
 		if z == 4 or z == -12 then
-			torch(x - side * 0.9, 6.5, z, -side, 0)
+			torch(x - side * 0.9, 8, z, -side, 0)
 		end
 	end
 	-- the rib: a stepped arch of darker bricks under the barrel vault, 1 stud below it
 	for k = 0, 15 do
 		local x0 = HALL.x0 + k * 2
 		local xm = x0 + 1
-		local ceil = 10 + 2 * math.floor(4 * math.sqrt(math.max(0, 1 - (xm / 18) ^ 2)) + 0.5)
+		local ceil = hallCeil(xm)
 		box("Rib", x0, ceil - 1, z - 1, x0 + 2, ceil, z + 1, "px_stone_bricks", Color3.fromRGB(160, 150, 145), hall)
 	end
 end
@@ -623,7 +626,7 @@ end
 box("DoorLock", 1.2, 5.6, HALL.z0 - 1.25, 1.8, 6.6, HALL.z0 - 0.9, nil, Color3.fromRGB(150, 120, 50), hall).Material = Enum.Material.Metal
 local lamp = decor(part("DoorLamp", Vector3.new(1, 1.3, 1), at(0, 11.2, HALL.z0 - 1.2), TORCH, Enum.Material.Neon, hall))
 light(lamp, 22, 1.2, TORCH)
-local signPart = decor(part("BasementSign", Vector3.new(1, 1, 1), at(0, 14, HALL.z0 - 2), STONE, nil, hall))
+local signPart = decor(part("BasementSign", Vector3.new(1, 1, 1), at(0, 18, HALL.z0 - 2), STONE, nil, hall))
 signPart.Transparency = 1
 sign(signPart, "Подвал", 0)
 -- the portal: a brick arch framing the open side (on the hall side of the wall)
@@ -641,7 +644,7 @@ local function arch(z, half, springY, rise, variant, tint, parent)
 		box("ArchPier", side * half - (if side > 0 then 0 else 1.5), 0, z - 1, side * half + (if side > 0 then 1.5 else 0), springY + 1, z + 1, variant, tint, parent)
 	end
 end
-arch(HALL.z1 + 0.75, PORTAL, 6, 4, "px_stone_bricks", Color3.fromRGB(205, 198, 192), hall)
+arch(HALL.z1 + 0.75, PORTAL, 8, 6, "px_stone_bricks", Color3.fromRGB(205, 198, 192), hall)
 -- arrival point, a worn rug, crates and barrels, a table with a candle, cobwebs in the upper corners
 local spawnPart = part("LocationSpawn_basement", Vector3.new(4, 1, 4), CFrame.lookAt(Vector3.new(BX, 0.5, BZ + 6), Vector3.new(BX, 0.5, BZ - 100)), STONE, nil, hall)
 textured(spawnPart, "px_smooth_stone")
@@ -664,7 +667,7 @@ decor(part("Candle", Vector3.new(0.4, 0.8, 0.4), at(11.5, 3.2, 0.3), Color3.from
 local candle = decor(part("CandleFlame", Vector3.new(0.25, 0.4, 0.25), at(11.5, 3.8, 0.3), TORCH, Enum.Material.Neon, hall))
 light(candle, 10, 0.8, TORCH)
 for _, c in ipairs({ { -15, 15, 0.8 }, { 15, 15, -0.8 }, { -15, -15, -0.8 }, { 15, -15, 0.8 } }) do
-	cobweb(c[1], 9, c[2], c[3])
+	cobweb(c[1], 13, c[2], c[3])
 end
 
 -- block buyers (SellPoint on the rig's root, like scripts/build-quarry.luau): in the hall and in cave 2
@@ -816,7 +819,7 @@ local function pit(m, id, label)
 		local x, z = c[1] * (edge + 2), mz + c[2] * (edge + 2)
 		local cl = cellAtPos(x, z)
 		local ceil = if cl then cl.ceil else 20
-		local drop = math.max(3, ceil - 9)
+		local drop = math.max(3, ceil - 12)
 		decor(part("Chain", Vector3.new(0.2, drop, 0.2), at(x, ceil - drop / 2, z), IRON, Enum.Material.Metal, props))
 		local lantern = decor(part("Lantern", Vector3.new(1.3, 1.6, 1.3), at(x, ceil - drop - 0.8, z), TORCH, Enum.Material.Neon, props))
 		decor(part("LanternCap", Vector3.new(1.7, 0.4, 1.7), at(x, ceil - drop, z), IRON, Enum.Material.Metal, props))
@@ -944,13 +947,13 @@ bossSpawn:SetAttribute("BossId", "splinter")
 bossSpawn:SetAttribute("ArenaRadius", LAIR.r - 6)
 CollectionService:AddTag(bossSpawn, "BossSpawn")
 -- the entrance to the lair: an old mossy arch over the stair, a warning of bones and a skull on a stake
-arch(STAIR_BOTTOM - 10, 8, LF + 6, 4, "px_mossy_stone_bricks", Color3.fromRGB(190, 185, 180), lairF)
-local lairSign = decor(part("LairSign", Vector3.new(1, 1, 1), at(0, LF + 15, STAIR_BOTTOM - 10), STONE, nil, lairF))
+arch(STAIR_BOTTOM - 10, 12, LF + 8, 6, "px_mossy_stone_bricks", Color3.fromRGB(190, 185, 180), lairF)
+local lairSign = decor(part("LairSign", Vector3.new(1, 1, 1), at(0, LF + 19, STAIR_BOTTOM - 10), STONE, nil, lairF))
 lairSign.Transparency = 1
 sign(lairSign, "Логово Сплинтера", 0, Color3.fromRGB(255, 80, 60))
 for _, side in ipairs({ -1, 1 }) do
-	part("Stake", Vector3.new(0.4, 5, 0.4), at(side * 6, LF + 2.5, STAIR_BOTTOM - 14), WOOD, Enum.Material.Wood, lairF)
-	bones(side * 6, LF, STAIR_BOTTOM - 14, 2)
+	part("Stake", Vector3.new(0.4, 5, 0.4), at(side * 9, LF + 2.5, STAIR_BOTTOM - 14), WOOD, Enum.Material.Wood, lairF)
+	bones(side * 9, LF, STAIR_BOTTOM - 14, 2)
 end
 
 -- the broken arch where the masonry ends in tunnel 1
@@ -967,11 +970,11 @@ do
 			local xL = mid - half + k * 2
 			local t = (xL + 1 - mid) / half
 			if t < 0.35 then -- the right half has fallen
-				local top = 5 + 4 * math.sqrt(math.max(0, 1 - t * t))
-				box("Arch", xL, 2 * math.floor(top / 2 + 0.5), az4 - 1, xL + 2, 14, az4 + 1, "px_mossy_stone_bricks", Color3.fromRGB(190, 185, 180), f)
+				local top = 8 + 6 * math.sqrt(math.max(0, 1 - t * t))
+				box("Arch", xL, 2 * math.floor(top / 2 + 0.5), az4 - 1, xL + 2, 22, az4 + 1, "px_mossy_stone_bricks", Color3.fromRGB(190, 185, 180), f)
 			end
 		end
-		box("ArchPier", left, 0, az4 - 1, left + 1.5, 7, az4 + 1, "px_stone_bricks", nil, f)
+		box("ArchPier", left, 0, az4 - 1, left + 1.5, 10, az4 + 1, "px_stone_bricks", nil, f)
 		box("ArchPierStub", right - 1.5, 0, az4 - 1, right, 2.5, az4 + 1, "px_stone_bricks", nil, f)
 		pile(right - 3, az4 - 3, { "px_stone_bricks", "px_mossy_stone_bricks", "px_cobblestone" }, 7)
 	end
@@ -1153,7 +1156,7 @@ for _, id in ipairs({ "tunnel1", "tunnel2", "tunnel3" }) do
 		local face = wallFace(x, z, dir)
 		if face then
 			local cl = cellAtPos(x, z)
-			torch(face - dir * 0.3, (cl and cl.floor or 0) + 5.5, z, -dir, 0)
+			torch(face - dir * 0.3, (cl and cl.floor or 0) + 7, z, -dir, 0)
 		end
 	end
 end
@@ -1163,7 +1166,7 @@ for _, m in ipairs({ M1, M2 }) do
 		for _, dir in ipairs({ -1, 1 }) do
 			local face = wallFace(0, m.cz + dz, dir)
 			if face then
-				torch(face - dir * 0.3, 6, m.cz + dz, -dir, 0)
+				torch(face - dir * 0.3, 8, m.cz + dz, -dir, 0)
 			end
 		end
 	end
@@ -1209,7 +1212,7 @@ for _, id in ipairs({ "tunnel1", "tunnel2" }) do
 	local pts = SHAPE[id].pts
 	for _, t in ipairs({ 0.45, 0.8 }) do
 		local x, z = linePoint(pts, t)
-		mobSpawn("rat", x, z, 4)
+		mobSpawn("rat", x, z, 7)
 	end
 end
 -- a zombie on each side of mine 1 [владелец 22.10: «2 зомби по бокам шахты, кд 2 минуты»]
