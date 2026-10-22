@@ -361,7 +361,7 @@ for _, c in pairs(cells) do
 				nearHole = true
 			end
 		end
-		if c.edge == 1 and not c.path and not nearHole and n2(c.x, c.z, 2.2, 0.15) > 0.05 then
+		if false and c.edge == 1 and not c.path and not nearHole and n2(c.x, c.z, 2.2, 0.15) > 0.05 then
 			c.floor += if n2(c.x, c.z, 3.3, 0.3) > 0.2 then 2 else 1
 		end
 	end
@@ -384,37 +384,8 @@ local function wallVariant(x, z, shape)
 		end
 		return if v > 0.28 then "px_mossy_stone_bricks" elseif r < 0.07 then "px_cobblestone" else "px_stone_bricks"
 	end
-	-- the masonry of the first tunnel crumbles into the rock: brick near the hall, cobble, then stone
-	if shape == "tunnel1" and z > -44 then
-		local brick = math.clamp((z + 44) / 30, 0, 1)
-		if r < brick then
-			return if v > 0.2 then "px_mossy_stone_bricks" else "px_stone_bricks"
-		elseif r < brick + 0.3 then
-			return if v > 0 then "px_mossy_cobblestone" else "px_cobblestone"
-		end
-	end
-	if shape == "cave2" then
-		if r < 0.03 then
-			return "px_gold_ore"
-		elseif r < 0.045 then
-			return "px_lapis_block"
-		elseif r < 0.055 then
-			return "px_iron_block"
-		end
-	end
-	if r < 0.04 then
-		return "px_coal_ore"
-	elseif r < 0.065 then
-		return "px_iron_ore"
-	end
-	if v > 0.32 then
-		return "px_mossy_cobblestone"
-	elseif v > 0.18 then
-		return "px_cobblestone"
-	elseif v < -0.35 then
-		return "px_gravel"
-	end
-	return "px_stone"
+	-- [владелец 22.10: интерьер всего подвала как у босса] the castle's cellars: brick, moss, cobble patches
+	return if v > 0.3 then "px_mossy_stone_bricks" elseif r < 0.08 then "px_cobblestone" elseif r < 0.12 then "px_mossy_cobblestone" else "px_stone_bricks"
 end
 local function floorVariant(c)
 	if c.alcove then
@@ -425,10 +396,16 @@ local function floorVariant(c)
 		end
 		return if (math.floor(c.x / 4) + math.floor(c.z / 4)) % 2 == 0 then "px_smooth_stone" else "px_stone_bricks"
 	end
-	if c.path then
-		return if pick(c, 21.5) > -0.1 then "px_gravel" else "px_dirt"
-	end
 	local v = pick(c, 13.7)
+	if c.shape ~= "lair" then
+		-- the castle cellars: flagstones in a checker, moss creeping in, worn through to gravel here and there
+		if v < -0.45 then
+			return "px_gravel"
+		elseif v > 0.32 then
+			return "px_mossy_stone_bricks"
+		end
+		return if (math.floor(c.x / 8) + math.floor(c.z / 8)) % 2 == 0 then "px_stone_bricks" else "px_smooth_stone"
+	end
 	if c.shape == "lair" then
 		-- the castle floor: big slabs in a checker, moss creeping in, broken through to the earth in places
 		if v < -0.42 then
@@ -447,7 +424,7 @@ end
 -- the vault: plain stone over the caves, brick over the halls; the dome of the lair mixes in moss and cobble so it
 -- never reads as one flat colour [владелец 22.10: «плоские, однотонные»]
 local function ceilVariant(c)
-	if c.shape == "lair" then
+	if c.shape ~= "hall" then
 		local v = n2(c.x, c.z, 17.3, 0.12)
 		return if v > 0.3 then "px_mossy_stone_bricks" elseif v < -0.35 then "px_cobblestone" else "px_stone_bricks"
 	end
@@ -1279,17 +1256,18 @@ end
 
 -- ---------------------------------------------------------------- the walls between the statues
 -- a banner on the wall face: an iron rod, the cloth torn into strips at the bottom, a gold charge
-local function banner(cf, len)
-	part("BannerRod", Vector3.new(4.8, 0.3, 0.3), cf * CFrame.new(0, 22, 0), IRON, Enum.Material.Metal, lairF)
+local function banner(cf, len, rodY)
+	rodY = rodY or 22
+	part("BannerRod", Vector3.new(4.8, 0.3, 0.3), cf * CFrame.new(0, rodY, 0), IRON, Enum.Material.Metal, lairF)
 	local strips = 6
 	for k = 0, strips - 1 do
 		local w = 4 / strips
 		local l = len - rng:NextNumber(0, len * 0.45) * (if k % 2 == 0 then 1 else 0.4)
-		local strip = decor(part("Banner", Vector3.new(w, l, 0.12), cf * CFrame.new(-2 + w / 2 + k * w, 22 - l / 2, 0), CLOTH, Enum.Material.Fabric, lairF))
+		local strip = decor(part("Banner", Vector3.new(w, l, 0.12), cf * CFrame.new(-2 + w / 2 + k * w, rodY - l / 2, 0), CLOTH, Enum.Material.Fabric, lairF))
 		strip.Color = CLOTH:Lerp(Color3.fromRGB(70, 20, 20), rng:NextNumber(0, 0.4))
 	end
-	decor(part("BannerTrim", Vector3.new(4, 0.5, 0.14), cf * CFrame.new(0, 21.6, -0.02), GOLD, Enum.Material.Fabric, lairF))
-	decor(part("BannerCharge", Vector3.new(1.6, 1.6, 0.15), cf * CFrame.new(0, 18.5, -0.05) * CFrame.Angles(0, 0, math.pi / 4), GOLD, Enum.Material.Fabric, lairF))
+	decor(part("BannerTrim", Vector3.new(4, 0.5, 0.14), cf * CFrame.new(0, rodY - 0.4, -0.02), GOLD, Enum.Material.Fabric, lairF))
+	decor(part("BannerCharge", Vector3.new(1.6, 1.6, 0.15), cf * CFrame.new(0, rodY - 3.5, -0.05) * CFrame.Angles(0, 0, math.pi / 4), GOLD, Enum.Material.Fabric, lairF))
 end
 -- a heater shield with a coat of arms (field, a band, a boss), and two swords crossed behind it
 local function shield(cf, field)
@@ -1513,7 +1491,7 @@ for k = 0, 7 do
 	light(coals, 32, 1.4, Color3.fromRGB(255, 150, 80))
 end
 -- chandeliers: an iron ring with candles; the great one hangs from the crown of the dome over the arena
-local function chandelier(x, y, z, radius, crashed)
+local function chandelier(x, y, z, radius, crashed, ceilAbs)
 	local tilt = if crashed then CFrame.Angles(0.25, 0, -0.2) else CFrame.new()
 	local centre = lairAt(x, y, z) * tilt
 	local n = math.floor(radius * 3)
@@ -1536,7 +1514,7 @@ local function chandelier(x, y, z, radius, crashed)
 		pile(x + 2, z + 1, { "px_stone_bricks", "px_cobblestone" }, 4)
 		decor(part("BrokenChain", Vector3.new(0.25, 8, 0.25), lairAt(x + 3, 0.3, z - 2) * CFrame.Angles(math.pi / 2, 0.4, 0), IRON, Enum.Material.Metal, lairF))
 	else
-		local ceil = lairCeil(x, z) - LF
+		local ceil = (ceilAbs or lairCeil(x, z)) - LF
 		decor(part("ChandelierChain", Vector3.new(0.4, ceil - y, 0.4), lairAt(x, (ceil + y) / 2, z), IRON, Enum.Material.Metal, lairF))
 		local glow = decor(part("ChandelierGlow", Vector3.new(0.5, 0.5, 0.5), lairAt(x, y + 1, z), TORCH, nil, lairF))
 		glow.Transparency = 1
@@ -1629,49 +1607,6 @@ for _, c in pairs(cells) do
 		end
 		local onDais = c.shape == "lair" and math.sqrt(c.x ^ 2 + (c.z - LAIR.cz) ^ 2) < PLATFORM_R + 18
 		local r = rng:NextNumber()
-		-- stalactites: a short stack of shrinking stone blocks under the dome
-		if c.shape ~= "lair" and (cave or c.edge >= 2) and r < (if cave then 0.09 else 0.05) and c.edge >= 2 then
-			local y = c.ceil
-			local s0 = rng:NextNumber(1.6, 2.6)
-			for k = 0, rng:NextInteger(1, 3) do
-				local sz = s0 * (1 - k * 0.28)
-				local len = rng:NextNumber(1.4, 2.6)
-				textured(decor(part("Stalactite", Vector3.new(sz, len, sz), at(c.x + rng:NextNumber(-0.8, 0.8), y - len / 2, c.z + rng:NextNumber(-0.8, 0.8)), STONE, nil, life)), "px_stone", CEIL_TINT)
-				y -= len
-			end
-		end
-		-- stalagmites on the cave floors, away from the trail, the pits and the dais
-		if cave and not c.path and not nearHole and not onDais and c.edge >= 2 and r > 0.955 then
-			local y = c.floor
-			local s0 = rng:NextNumber(1.8, 3)
-			for k = 0, rng:NextInteger(1, 3) do
-				local sz = s0 * (1 - k * 0.27)
-				local len = rng:NextNumber(1.6, 2.8)
-				textured(part("Stalagmite", Vector3.new(sz, len, sz), at(c.x + rng:NextNumber(-0.6, 0.6), y + len / 2, c.z + rng:NextNumber(-0.6, 0.6)), STONE, nil, life), "px_stone", WALL_TINT)
-				y += len
-			end
-		end
-		-- roots hanging from the tunnel ceilings
-		if s.kind == "line" and r > 0.25 and r < 0.29 then
-			for _ = 1, rng:NextInteger(2, 4) do
-				local len = rng:NextNumber(1.5, 4)
-				decor(part("Root", Vector3.new(0.25, len, 0.25), at(c.x + rng:NextNumber(-1.5, 1.5), c.ceil - len / 2, c.z + rng:NextNumber(-1.5, 1.5)) * CFrame.Angles(rng:NextNumber(-0.25, 0.25), 0, rng:NextNumber(-0.25, 0.25)), Color3.fromRGB(80, 60, 40), Enum.Material.Wood, life))
-			end
-		end
-		-- glowing mushrooms at the foot of the walls (cyan and violet, a soft light on every few)
-		if c.edge == 1 and not c.path and c.shape ~= "hall" and c.shape ~= "lair" and r > 0.3 and r < 0.37 then
-			local hue = if rng:NextNumber() < 0.6 then Color3.fromRGB(90, 230, 230) else Color3.fromRGB(190, 110, 255)
-			for k = 1, rng:NextInteger(2, 4) do
-				local h = rng:NextNumber(0.5, 1.3)
-				local mx, mz = c.x + rng:NextNumber(-1.4, 1.4), c.z + rng:NextNumber(-1.4, 1.4)
-				decor(part("MushStem", Vector3.new(0.25, h, 0.25), at(mx, c.floor + h / 2, mz), Color3.fromRGB(220, 215, 200), nil, life))
-				local cap = decor(part("MushCap", Vector3.new(0.7 + h * 0.4, 0.3, 0.7 + h * 0.4), at(mx, c.floor + h + 0.1, mz), hue, Enum.Material.Neon, life))
-				if k == 1 and lights < 40 then
-					light(cap, 9, 0.9, hue)
-					lights += 1
-				end
-			end
-		end
 		-- cobwebs in the corners of the tunnel vaults
 		if s.kind == "line" and c.edge == 1 and r > 0.5 and r < 0.53 then
 			cobweb(c.x, c.ceil - 1.6, c.z, rng:NextNumber(0, 6.28))
@@ -1700,6 +1635,141 @@ for _, c in pairs(cells) do
 	end
 	count += 1
 end
+-- ================================================================ the castle interior everywhere
+-- [владелец 22.10: «интерьер во всём подвале примерно так же, как у босса, только без рыцарей»] The tunnels and the
+-- mine caves are the castle's cellars now: brick walls (wallVariant), flagstone floors, brick vaults (ceilVariant);
+-- every stretch of wall is dressed like the lair's: a dark mossy plinth, stones sticking out of the courses, a
+-- string course where the room is tall enough, a cornice on corbels under the vault; banners and shields with arms
+-- on the long stretches, torn red carpets down the corridors, braziers by the pit fences, a chandelier over each
+-- pit, suits of armour and weapon racks in the mine halls.
+local castle = folder("Castle")
+local function shadeAt(y)
+	local t = math.clamp(y / 24, 0, 1)
+	local c = DARK_T:Lerp(LIGHT_T, t)
+	local k = rng:NextNumber(0.92, 1.06)
+	return Color3.new(math.min(1, c.R * k), math.min(1, c.G * k), math.min(1, c.B * k))
+end
+local DIRS = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+local faces = {} -- long flat stretches of wall for banners / shields: { cf on the floor facing the room, cell }
+for iz = 0, NZ - 1 do
+	for ix = 0, NX - 1 do
+		local c = cellAt(ix, iz)
+		if c and c.shape ~= "lair" and c.shape ~= "hall" and not c.hole then
+			for _, d in ipairs(DIRS) do
+				if not cellAt(ix + d[1], iz + d[2]) then
+					-- the wall face of this cell towards (d): dress it
+					local fx, fz = c.x + d[1] * C / 2, c.z - d[2] * C / 2 -- iz grows southwards… z falls
+					local inward = Vector3.new(-d[1], 0, d[2])
+					local function block(name, y0, y1, depth, variant, tint, width)
+						local pos = Vector3.new(BX + fx, (y0 + y1) / 2, BZ + fz) + inward * (depth / 2)
+						local cf = CFrame.lookAt(pos, pos + inward)
+						return textured(part(name, Vector3.new(width or C + 0.1, y1 - y0, depth), cf, STONE, nil, castle), variant, tint)
+					end
+					local f, h = c.floor, c.ceil - c.floor
+					block("Plinth", f, f + 2.5, 1.4, if rng:NextNumber() < 0.5 then "px_mossy_cobblestone" else "px_cobblestone", shadeAt(0))
+					block("PlinthCap", f + 2.5, f + 3, 1, "px_smooth_stone", shadeAt(3))
+					if rng:NextNumber() < 0.45 then -- a stone sticking out of the courses
+						local y = f + 3 + 4 * rng:NextInteger(0, math.max(0, math.floor((h - 8) / 4)))
+						block("Course", y, math.min(c.ceil - 2, y + 4), rng:NextNumber(0.4, 0.8), if rng:NextNumber() < 0.3 then "px_mossy_stone_bricks" else "px_stone_bricks", shadeAt(y - f))
+					end
+					if h > 15 then
+						block("StringCourse", f + 10, f + 11, 1, "px_smooth_stone", shadeAt(10))
+					end
+					block("Cornice", c.ceil - 1.6, c.ceil, 1.6, "px_stone_bricks", shadeAt(h))
+					block("Corbel", c.ceil - 2.8, c.ceil - 1.6, 1, "px_smooth_stone", shadeAt(h - 2), 1.4)
+					-- a flat stretch (the cells left and right along the wall are walled the same way)?
+					local ax, az = d[2], d[1]
+					local left, right = cellAt(ix + ax, iz + az), cellAt(ix - ax, iz - az)
+					if left and right and not cellAt(ix + ax + d[1], iz + az + d[2]) and not cellAt(ix - ax + d[1], iz - az + d[2]) then
+						local pos = Vector3.new(BX + fx, f, BZ + fz) + inward * 1.6
+						table.insert(faces, { cf = CFrame.lookAt(pos, pos + inward), cell = c })
+					end
+				end
+			end
+		end
+	end
+	if iz % 6 == 0 then
+		task.wait()
+	end
+end
+-- banners and shields on every few flat stretches (not too close to each other)
+local placed = {}
+for _, fc in ipairs(faces) do
+	local p = fc.cf.Position
+	local near = false
+	for _, q in ipairs(placed) do
+		if (q - p).Magnitude < 18 then
+			near = true
+			break
+		end
+	end
+	if not near and rng:NextNumber() < 0.5 then
+		table.insert(placed, p)
+		local room = fc.cell.ceil - fc.cell.floor
+		if rng:NextNumber() < 0.6 then
+			banner(fc.cf, math.min(10, room - 6), math.min(room - 2.5, 15))
+		else
+			shield(fc.cf * CFrame.new(0, 7, 0), if rng:NextNumber() < 0.5 then Color3.fromRGB(40, 60, 120) else Color3.fromRGB(30, 90, 50))
+		end
+	end
+end
+-- torn red carpets down the corridors (and on to the caves)
+for _, id in ipairs({ "tunnel1", "tunnel2", "tunnel3" }) do
+	local pts = SHAPE[id].pts
+	local t = if id == "tunnel1" then 0.08 else 0
+	while t < 1 do
+		local dt = rng:NextNumber(0.06, 0.14)
+		local x0, z0 = linePoint(pts, t)
+		local x1, z1 = linePoint(pts, math.min(1, t + dt))
+		local len = math.sqrt((x1 - x0) ^ 2 + (z1 - z0) ^ 2)
+		if len > 2 then
+			local cl = cellAtPos((x0 + x1) / 2, (z0 + z1) / 2)
+			local y = (if cl then cl.floor else 0) + 0.07
+			local a, b = Vector3.new(BX + x0, y, BZ + z0), Vector3.new(BX + x1, y, BZ + z1)
+			local cf = CFrame.lookAt((a + b) / 2, b)
+			local rug = part("Carpet", Vector3.new(7, 0.12, len), cf, CLOTH, Enum.Material.Fabric, castle)
+			rug.CanCollide = false
+			decor(part("CarpetTrim", Vector3.new(7.8, 0.1, len), cf * CFrame.new(0, -0.01, 0), GOLD, Enum.Material.Fabric, castle))
+		end
+		t += dt + rng:NextNumber(0.01, 0.05)
+	end
+end
+-- a brazier on an iron tripod
+local function brazier(x, y, z)
+	for leg = 0, 2 do
+		local a = leg / 3 * math.pi * 2
+		part("TripodLeg", Vector3.new(0.35, 5.4, 0.35), at(x + math.cos(a) * 0.9, y + 2.6, z + math.sin(a) * 0.9) * CFrame.Angles(math.sin(a) * 0.2, 0, -math.cos(a) * 0.2), IRON, Enum.Material.Metal, castle)
+	end
+	part("BrazierBowl", Vector3.new(2.8, 0.9, 2.8), at(x, y + 5.3, z), IRON, Enum.Material.Metal, castle)
+	local coals = decor(part("BrazierCoals", Vector3.new(2.3, 0.3, 2.3), at(x, y + 5.85, z), Color3.fromRGB(255, 110, 40), Enum.Material.Neon, castle))
+	local fire = Instance.new("Fire")
+	fire.Size = 3.5
+	fire.Heat = 6
+	fire.Parent = coals
+	light(coals, 30, 1.3, Color3.fromRGB(255, 150, 80))
+end
+-- the mine halls: braziers at the fence corners, a chandelier over the pit, armour and weapon racks by the walls
+for _, m in ipairs({ M1, M2 }) do
+	local e = m.hole + 3
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+		brazier(c[1] * e, 0, m.cz + c[2] * e)
+	end
+	local cl = cellAtPos(0, m.cz)
+	chandelier(0, (cl and cl.ceil or 24) - 12 - LF, m.cz, 6, false, cl and cl.ceil)
+	for _, side in ipairs({ -1, 1 }) do
+		local face = wallFace(0, m.cz - m.hole + 6, side)
+		if face then
+			local pos = Vector3.new(BX + face - side * 2.5, 0, BZ + m.cz - m.hole + 6)
+			local cf = CFrame.lookAt(pos, pos - Vector3.new(side, 0, 0))
+			if side < 0 then
+				armourStand(cf)
+			else
+				weaponRack(cf)
+			end
+		end
+	end
+end
+
 -- ================================================================ grottos
 local grottos = folder("Grottos")
 -- the old storeroom of the prison: crates and sacks the guards forgot, a broken shelf, a lantern

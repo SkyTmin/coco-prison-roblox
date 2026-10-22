@@ -2369,7 +2369,10 @@ local function isNeedConsumable(): boolean
 			return true
 		end
 	end
-	return false
+	-- a location pass is used the same way (the server opens the location for good) [владелец 22.10]
+	local passFor = stack.id:match("^(.+)_pass$")
+	local location = passFor and Config.location(passFor)
+	return location ~= nil and location.requiresPass == true
 end
 local function cancelDigInput()
 	activeTouch = nil

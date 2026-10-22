@@ -658,6 +658,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "Se requiere un pase",
 		fr = "Laissez-passer requis",
 	},
+	location_pass_owned = {
+		ru = "Доступ уже открыт навсегда — пропуск не нужен",
+		en = "You already have permanent access, no pass needed",
+		es = "Ya tienes acceso permanente, no necesitas el pase",
+		fr = "Vous avez déjà un accès permanent, pas besoin de laissez-passer",
+	},
 	location_pass_used = {
 		ru = "Пропуск использован: доступ открыт навсегда",
 		en = "Pass used: access unlocked forever",

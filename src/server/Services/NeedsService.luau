@@ -208,6 +208,30 @@ local function useConsumable(player: Player, slot: any)
 		end
 	end
 	local food = Config.rules.survival.food[stack.id]
+	-- a location pass (<location>_pass) is used like food [владелец 22.10: «кнопка использовать, как еду есть»]:
+	-- it opens the location for good and is gone
+	local passFor = stack.id:match("^(.+)_pass$")
+	local passLocation = passFor and Config.location(passFor)
+	if passLocation and passLocation.requiresPass then
+		if profile.passes[passFor] then
+			toast(player, "location_pass_owned")
+			return
+		end
+		local used = false
+		ProfileService.Mutate(player, function(p)
+			local last = InventoryService.SLOTS
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			used = InventoryService.remove(p, stack.id, 1) == 1
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			if used then
+				p.passes[passFor] = true
+			end
+		end)
+		if used then
+			toast(player, "location_pass_used")
+		end
+		return
+	end
 	if not need and not food then
 		return
 	end
