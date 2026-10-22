@@ -215,6 +215,32 @@ local CARVE = {
 	{ GALLERY.x0, GALLERY.x1, GALLERY.z0, GALLERY.z1 + 8, 0, GALLERY.y1 },
 	{ STAIR.x0, STAIR.x1, -160, STAIR.z1, 0, 16 },
 }
+-- [владелец 23.10: «потолок внутри тоже как пирамида, а не плоский»] over the hall the ceiling steps inwards like
+-- the pyramid itself (a corbelled vault, as in the Grand Gallery): every 8-stud layer above the hall walls is
+-- carved 8 studs narrower on each side, up to an apex
+local HALL_APEX = HALL.y1
+do
+	local cz = (HALL.z0 + HALL.z1) / 2
+	local hx, hz = (HALL.x1 - HALL.x0) / 2, (HALL.z1 - HALL.z0) / 2
+	local j = 0
+	while hx - 8 * (j + 1) >= 8 and hz - 8 * (j + 1) >= 8 do
+		j += 1
+		local y0 = HALL.y1 + 8 * (j - 1)
+		table.insert(CARVE, { -(hx - 8 * j), hx - 8 * j, cz - (hz - 8 * j), cz + (hz - 8 * j), y0, y0 + 8 })
+		HALL_APEX = y0 + 8
+	end
+end
+-- the ceiling height over a point of the hall (for chains hung from it)
+local function hallCeilingAt(x, z)
+	local top = HALL.y1
+	for i = 4, #CARVE do
+		local b = CARVE[i]
+		if x > b[1] and x < b[2] and z > b[3] and z < b[4] then
+			top = math.max(top, b[6])
+		end
+	end
+	return top
+end
 local TRAILS = {
 	{ { -24, 220 }, { -110, 150 }, { -170, 80 }, { -200, 0 }, { -200, -200 }, { -130, -250 } }, -- the army field → the necropolis
 	{ { 24, 220 }, { 110, 150 }, { 190, 70 }, { 205, 0 }, { 205, -200 }, { 130, -250 } }, -- the ruined temple → the necropolis
@@ -687,7 +713,7 @@ do
 	-- braziers hanging on chains from the ceiling over the pit corners, and standing ones by the columns
 	for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
 		local x, z = mx + s[1] * (edge + 8), mz + s[2] * (edge + 8)
-		for y = HALL.y1 - 1, 24, -1.6 do
+		for y = hallCeilingAt(x, z) - 1, 24, -1.6 do
 			decor(part("ChainLink", Vector3.new(0.35, 1.7, 0.9), at(x, y, z) * CFrame.Angles(0, if math.floor(y) % 2 == 0 then 0 else math.pi / 2, 0), IRON, Enum.Material.Metal, inside))
 		end
 		local bowl = part("HangingBowl", Vector3.new(4, 1.4, 4), at(x, 22.4, z), GOLD, Enum.Material.Metal, inside)
@@ -702,6 +728,36 @@ do
 		for z = HALL.z0 + 28, HALL.z1 - 28, 48 do
 			brazier(s * 78, 0, z, false, inside)
 		end
+	end
+	-- the great chandelier over the pit, hung from the apex of the stepped vault: a gold ring of flames
+	do
+		local top = hallCeilingAt(mx, mz)
+		local ringY = 34
+		for y = top - 1, ringY + 2, -1.6 do
+			decor(part("ChainLink", Vector3.new(0.5, 1.7, 1.2), at(mx, y, mz) * CFrame.Angles(0, if math.floor(y) % 2 == 0 then 0 else math.pi / 2, 0), IRON, Enum.Material.Metal, inside))
+		end
+		local ring = part("ChandelierRing", Vector3.new(1, 22, 22), at(mx, ringY, mz) * CFrame.Angles(0, 0, math.pi / 2), GOLD, Enum.Material.Metal, inside)
+		ring.Shape = Enum.PartType.Cylinder
+		for k = 0, 7 do
+			local a = k / 8 * math.pi * 2
+			local x, z = mx + math.cos(a) * 10, mz + math.sin(a) * 10
+			decor(part("ChandelierArm", Vector3.new(0.4, 0.4, 10), CFrame.lookAt(Vector3.new(BX + mx, ringY + 3, BZ + mz), Vector3.new(BX + x, ringY, BZ + z)) * CFrame.new(0, 0, -5), GOLD, Enum.Material.Metal, inside))
+			local cup = part("ChandelierCup", Vector3.new(1.6, 0.8, 1.6), at(x, ringY + 0.9, z), GOLD, Enum.Material.Metal, inside)
+			local flame = decor(part("ChandelierFlame", Vector3.new(1, 1, 1), cup.CFrame * CFrame.new(0, 0.9, 0), Color3.fromRGB(255, 190, 90), Enum.Material.Neon, inside))
+			local f = Instance.new("Fire")
+			f.Size = 2.5
+			f.Heat = 6
+			f.Parent = flame
+		end
+		-- one broad soft light under it reaches the pit floor (48 studs down)
+		local glow = decor(part("ChandelierGlow", Vector3.new(1, 1, 1), at(mx, ringY - 2, mz), Color3.fromRGB(255, 200, 120), nil, inside))
+		glow.Transparency = 1
+		local l = Instance.new("PointLight")
+		l.Range = 60
+		l.Brightness = 1.2
+		l.Color = Color3.fromRGB(255, 215, 160)
+		l.Shadows = false
+		l.Parent = glow
 	end
 	-- two seated pharaohs flanking the stair door in the north wall
 	pharaoh(-26, HALL.z0 + 9, math.pi, 2.2)
@@ -1191,7 +1247,8 @@ local function volume(name, x0, y0, z0, x1, y1, z1, ambient, exposure, haze, col
 	end
 	CollectionService:AddTag(v, "IndoorLighting")
 end
-volume("HallVolume", HALL.x0, -52, HALL.z0, HALL.x1, HALL.y1, HALL.z1, Color3.fromRGB(118, 104, 88), -0.25, 0.08, Color3.fromRGB(140, 115, 85), Color3.fromRGB(80, 60, 42))
+-- [владелец 23.10: «шахту светлее»] the hall ambient lifted (the lamps stay soft: they were the glare)
+volume("HallVolume", HALL.x0, -52, HALL.z0, HALL.x1, HALL_APEX, HALL.z1, Color3.fromRGB(175, 160, 138), 0, 0.06, Color3.fromRGB(140, 115, 85), Color3.fromRGB(80, 60, 42))
 volume("GalleryVolume", GALLERY.x0, 0, GALLERY.z0, GALLERY.x1, GALLERY.y1, GALLERY.z1 + 2, Color3.fromRGB(112, 98, 84), -0.25, 0.08, Color3.fromRGB(140, 115, 85), Color3.fromRGB(80, 60, 42))
 volume("TombVolume", CRYPT.x0 - 4, CRYPT.floor - 2, CRYPT.z0 - 4, CRYPT.x1 + 4, 0, STAIR.z1, Color3.fromRGB(88, 92, 112), 0, 0.14, Color3.fromRGB(50, 56, 86), Color3.fromRGB(24, 28, 50))
 for _, spot in ipairs({ { -160, 60 }, { 160, 60 }, { 0, 200 }, { -150, -200 }, { 150, -200 } }) do
