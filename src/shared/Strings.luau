@@ -1937,6 +1937,7 @@ local COUNTERS: { [string]: { [string]: string } } = {
 }
 local LOCATIONS: { [string]: { [string]: string } } = {
 	["Тюрьма"] = { en = "Prison", es = "Prisión", fr = "Prison" },
+	["Начальная локация"] = { en = "Starting location", es = "Zona inicial", fr = "Zone de départ" },
 	["Каменоломня"] = { en = "Quarry", es = "Cantera", fr = "Carrière" },
 	["Подножье горы"] = {
 		en = "Mountain foot",

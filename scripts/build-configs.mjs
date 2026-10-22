@@ -75,7 +75,7 @@ for (const loc of pricesWiki.locations) {
 	locations.push({
 		id: loc.id,
 		kind: dec.kind ?? "mine",
-		name: loc.name,
+		name: dec.name ?? loc.name, // [владелец] a location may be renamed (prison → «Начальная локация»)
 		unlockLevel: loc.level,
 		requiresPass: loc.requiresPass ?? false,
 		pvp: dec.pvp ?? (loc.level >= decisions.pvpFromLevel && loc.id !== "fraction_base"),

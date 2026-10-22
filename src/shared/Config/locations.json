@@ -4,7 +4,7 @@
     {
       "id": "prison",
       "kind": "mine",
-      "name": "Тюрьма",
+      "name": "Начальная локация",
       "unlockLevel": 1,
       "requiresPass": false,
       "pvp": false,
