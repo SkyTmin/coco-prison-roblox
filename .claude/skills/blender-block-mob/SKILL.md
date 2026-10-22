@@ -117,3 +117,7 @@ BossAnimator maps from the server's Action attribute. `PREVIEWS` renders key fra
   or a one-tone body (`capDepth`/`bodyTone` in voxelize-front).
 - Blender 5: no `action.fcurves`; unassigned actions vanish on save without `use_fake_user`; set the image
   colorspace before filling pixels; Workbench/AgX darken flat colours — the renders use Eevee + Standard.
+- Never change a block model's parts at runtime (Color, Transparency, Material, joints, physics, a ForceField
+  in the model): one change rebuilds the render of all ~3000 boxes on every client — a ~0.6 s frozen frame.
+  Show states with a Highlight or separate effect parts; move the model only through its joints and root CFrame;
+  the death is one piece (BossService.died: topple + puff), never per-box physics or fades.

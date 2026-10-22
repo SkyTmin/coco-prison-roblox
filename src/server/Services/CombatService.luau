@@ -45,7 +45,13 @@ function CombatService.ApplyDamage(
 		return
 	end
 	local character = humanoid.Parent
-	if character and character:FindFirstChildOfClass("ForceField") then
+	if
+		character
+		and (
+			character:FindFirstChildOfClass("ForceField")
+			or character:GetAttribute("Shielded") == true -- a boss casting a skill
+		)
+	then
 		return
 	end
 	local victim = if character and character:IsA("Model")
@@ -321,7 +327,10 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 								if sameFaction then "ally" else "nopvp"
 							)
 						end
-					elseif model:FindFirstChildOfClass("ForceField") then
+					elseif
+						model:GetAttribute("Shielded") == true
+						or model:FindFirstChildOfClass("ForceField")
+					then
 						-- a boss casting is invulnerable: no damage, no shove, and the attacker is told so
 						confirm:FireClient(player, model, 0, false, "blocked")
 					else

@@ -288,13 +288,10 @@ local function animate(rig: Rig, dt: number)
 		return
 	end
 	if rig.block then
+		-- no lava flare here: recolouring one Neon part of a ~3000-part block model rebuilds the whole model's
+		-- render (~650 ms frozen frame each skill [владелец 22.10: «очень сильно логает»]); CombatFeel's
+		-- ShieldGlow highlight shows the shield instead
 		animateBlock(rig, dt, root, os.clock())
-		local flare = if model:GetAttribute("Shielded") == true
-			then 0.5 + 0.5 * math.sin(os.clock() * 12)
-			else 0
-		for part, base in pairs(rig.lava) do
-			part.Color = base:Lerp(Color3.fromRGB(255, 240, 160), flare)
-		end
 		return
 	end
 	for _, name in ipairs({

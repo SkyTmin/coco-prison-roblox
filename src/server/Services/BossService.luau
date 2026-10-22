@@ -18,6 +18,7 @@
 --     servers the last writer wins (fine while the game runs one server).
 
 local CollectionService = game:GetService("CollectionService")
+local Debris = game:GetService("Debris")
 local MemoryStoreService = game:GetService("MemoryStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -602,23 +603,15 @@ local function setInvulnerable(boss: Boss, seconds: number)
 	if not model then
 		return
 	end
-	if not model:FindFirstChild("CastShield") then
-		local field = Instance.new("ForceField") -- TakeDamage (CombatService) ignores a humanoid under it
-		field.Name = "CastShield"
-		field.Visible = false
-		field.Parent = model
-		-- no Highlight: it also outlined the invisible root box; BossAnimator pulses the lava instead
-		model:SetAttribute("Shielded", true)
-	end
+	-- only the attribute (CombatService refuses damage while it is set): a ForceField in a ~3000-part block
+	-- model froze the server for ~600 ms each time a skill started [владелец 22.10: «очень сильно логает»].
+	-- No Highlight: it also outlined the invisible root box; BossAnimator pulses the lava instead.
+	model:SetAttribute("Shielded", true)
 	task.delay(seconds, function()
 		if
 			(os.clock() >= boss.busyUntil - 0.01 or os.clock() < boss.stunnedUntil)
 			and boss.model == model
 		then
-			local x = model:FindFirstChild("CastShield")
-			if x then
-				x:Destroy()
-			end
 			model:SetAttribute("Shielded", false)
 			publish(boss)
 		end
@@ -921,10 +914,6 @@ local function charge(boss: Boss, target: Vector3)
 		end
 		-- the shield of the charge is gone at once: the stun is the window to hit it
 		if model then
-			local x = model:FindFirstChild("CastShield")
-			if x then
-				x:Destroy()
-			end
 			model:SetAttribute("Shielded", false)
 		end
 		publish(boss)
@@ -1013,6 +1002,62 @@ local function died(boss: Boss)
 	table.clear(boss.damageBy)
 	boss.state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + boss.card.respawnSeconds)
 	publish(boss)
+	local root = model.PrimaryPart
+	if model:GetAttribute("BlockModel") and root then
+		-- a Blender block model (thousands of voxel boxes) never changes its parts: breaking the joints, physics
+		-- or a fade on every box rebuilt its render on every client (~0.6 s frozen frames [владелец 22.10:
+		-- «очень сильно логает»]). It slumps (the stunned clip), topples forward over its feet into the ground
+		-- as one piece, then vanishes in a puff of rot.
+		act(boss, "stunned", 3)
+		root.Anchored = true
+		local start = root.CFrame
+		local feet = start * CFrame.new(0, -BLOCK_ROOT_HEIGHT, 0)
+		local fromFeet = feet:ToObjectSpace(start)
+		task.spawn(function()
+			local t0 = os.clock()
+			while os.clock() - t0 < 1 and root.Parent do
+				local k = TweenService:GetValue(
+					os.clock() - t0,
+					Enum.EasingStyle.Quad,
+					Enum.EasingDirection.In
+				)
+				root.CFrame = feet
+					* CFrame.Angles(math.rad(-80) * k, 0, 0)
+					* CFrame.new(0, -1.5 * k, 0)
+					* fromFeet
+				RunService.Heartbeat:Wait()
+			end
+			Sfx.broadcast("player_fall", root, 1, 0.5)
+		end)
+		task.delay(2.2, function()
+			local at = Instance.new("Part")
+			at.Anchored, at.CanCollide, at.CanQuery, at.CanTouch = true, false, false, false
+			at.Transparency = 1
+			at.Size = Vector3.new(8, 2, 8)
+			at.CFrame = CFrame.new(model:GetBoundingBox().Position)
+			at.Parent = workspace
+			Debris:AddItem(at, 2)
+			local puff = Instance.new("ParticleEmitter")
+			puff.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			puff.Shape = Enum.ParticleEmitterShape.Box
+			puff.Rate = 0
+			puff.Lifetime = NumberRange.new(0.8, 1.3)
+			puff.Speed = NumberRange.new(2, 6)
+			puff.SpreadAngle = Vector2.new(180, 180)
+			puff.Size = NumberSequence.new(4, 7)
+			puff.Transparency = NumberSequence.new(0.2, 1)
+			puff.Color = ColorSequence.new(
+				paletteColor(boss, "glow", LAVA):Lerp(Color3.fromRGB(70, 80, 60), 0.6)
+			)
+			puff.Parent = at
+			puff:Emit(40)
+			model:Destroy()
+		end)
+		task.delay(boss.card.respawnSeconds, function()
+			spawnBoss(boss)
+		end)
+		return
+	end
 	-- it crumbles: joints go, the parts fall apart and fade
 	for _, m in pairs(boss.motors) do
 		m:Destroy()
