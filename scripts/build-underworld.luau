@@ -37,7 +37,8 @@ root:SetAttribute("LocationId", "underworld")
 root:SetAttribute("SilentSteps", true) -- [владелец 23.10] no step sounds here (Footsteps)
 root.Parent = workspace
 
-local BX, BZ = 3400, 10000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
+local BX, BZ = 3400, 0
+local BY = 3000 -- the location's own height [владелец 23.10]: neighbours along X are 1000 apart, so each new one sits 1500 higher
 local B = 4
 local rng = Random.new(20261025)
 local STONE = Color3.fromRGB(110, 50, 48)
@@ -1676,5 +1677,18 @@ airEmitter(-140, 180, 90, {
 	SpreadAngle = Vector2.new(50, 50),
 })
 
+-- [владелец 23.10: «пусть находятся, как находились, просто по высоте по-разному»] the location keeps its X and is
+-- lifted to its own height: every neighbour is then ≥ 1800 studs away, beyond the streaming radius
+if BY ~= 0 then
+	local up = Vector3.new(0, BY, 0)
+	for i, d in ipairs(root:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.CFrame += up
+		end
+		if i % 3000 == 0 then
+			task.wait()
+		end
+	end
+end
 print(("[build-underworld] built: %d parts (terrain runs %d, bridges %s)"):format(#root:GetDescendants(), count, game:GetService("HttpService"):JSONEncode(bridgeSpans)))
 return ("built %d parts, terrain runs %d, spans %s"):format(#root:GetDescendants(), count, game:GetService("HttpService"):JSONEncode(bridgeSpans))

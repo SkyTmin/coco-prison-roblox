@@ -29,7 +29,8 @@ root.Name = "RoyalGarden"
 root:SetAttribute("LocationId", "royal_garden")
 root.Parent = workspace
 
-local BX, BZ = 5400, 20000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
+local BX, BZ = 5400, 0
+local BY = 6000 -- the location's own height [владелец 23.10]: neighbours along X are 1000 apart, so each new one sits 1500 higher
 local B = 4
 local rng = Random.new(20261111)
 local WHITE = Color3.fromRGB(236, 236, 240)
@@ -1758,5 +1759,18 @@ for _, b in ipairs({ { 46, 60 }, { -46, 60 }, { 46, 132 }, { -46, 132 }, { 185, 
 end
 
 local total = #root:GetDescendants()
+-- [владелец 23.10: «пусть находятся, как находились, просто по высоте по-разному»] the location keeps its X and is
+-- lifted to its own height: every neighbour is then ≥ 1800 studs away, beyond the streaming radius
+if BY ~= 0 then
+	local up = Vector3.new(0, BY, 0)
+	for i, d in ipairs(root:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.CFrame += up
+		end
+		if i % 3000 == 0 then
+			task.wait()
+		end
+	end
+end
 print(("[build-royal-garden] built: %d instances (terrain runs %d, bridge %s)"):format(total, count, game:GetService("HttpService"):JSONEncode(bridgeSpan)))
 return ("built %d instances, runs %d, bridge %s"):format(total, count, game:GetService("HttpService"):JSONEncode(bridgeSpan))

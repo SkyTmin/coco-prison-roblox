@@ -31,7 +31,8 @@ root.Name = "SunkenLighthouse"
 root:SetAttribute("LocationId", "sunken_lighthouse")
 root.Parent = workspace
 
-local BX, BZ = 6400, 25000 -- [владелец 23.10: «вижу соседние локации»] 5000 studs from any other location: beyond streaming and haze
+local BX, BZ = 6400, 0
+local BY = 7500 -- the location's own height [владелец 23.10]: neighbours along X are 1000 apart, so each new one sits 1500 higher
 local B = 4
 local rng = Random.new(20261313)
 local STONE = Color3.fromRGB(130, 130, 128)
@@ -316,7 +317,7 @@ local terrain = folder("Terrain")
 local T = workspace.Terrain
 -- clear this region's terrain first (idempotent), in slices so Studio stays responsive
 for zz = -320, 280, 40 do
-	T:FillBlock(CFrame.new(BX, -20, BZ + zz + 20), Vector3.new(640, 120, 40), Enum.Material.Air)
+	T:FillBlock(CFrame.new(BX, BY - 20, BZ + zz + 20), Vector3.new(640, 120, 40), Enum.Material.Air)
 	task.wait()
 end
 local count = 0
@@ -330,7 +331,7 @@ for iz = 0, NZ - 1 do
 		end
 		local x0, x1 = X0 + r.ix0 * C, X0 + (r.ix1 + 1) * C
 		if r.water then
-			T:FillBlock(CFrame.new(BX + (x0 + x1) / 2, r.y0 / 2, BZ + (z0 + z1) / 2), Vector3.new(x1 - x0, -r.y0, z1 - z0), Enum.Material.Water)
+			T:FillBlock(CFrame.new(BX + (x0 + x1) / 2, BY + r.y0 / 2, BZ + (z0 + z1) / 2), Vector3.new(x1 - x0, -r.y0, z1 - z0), Enum.Material.Water)
 		else
 			box(r.name, x0, r.y0, z0, x1, r.y1, z1, r.variant, r.tint, terrain)
 		end
@@ -1094,5 +1095,18 @@ do
 end
 
 local total = #root:GetDescendants()
+-- [владелец 23.10: «пусть находятся, как находились, просто по высоте по-разному»] the location keeps its X and is
+-- lifted to its own height: every neighbour is then ≥ 1800 studs away, beyond the streaming radius
+if BY ~= 0 then
+	local up = Vector3.new(0, BY, 0)
+	for i, d in ipairs(root:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.CFrame += up
+		end
+		if i % 3000 == 0 then
+			task.wait()
+		end
+	end
+end
 print(("[build-sunken-lighthouse] built: %d instances (runs %d)"):format(total, count))
 return ("built %d instances, runs %d"):format(total, count)
