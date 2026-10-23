@@ -483,6 +483,14 @@
         32
       ],
       "_size": "[решение 23.10] 32×12×32 — шахта на главном парящем острове (scripts/build-end-castle.luau); состав из меню (mine-shares: эндерняковые кирпичи 50 / пурпур 50)"
+    },
+    "spider_lair": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 23.10] 32×12×32 — заброшенная штольня в пещере логова (scripts/build-spider-lair.luau); состав из меню (mine-shares: белая шерсть 90 / паутина 10)"
     }
   },
   "pvpFromLevel": 9,
@@ -1222,6 +1230,74 @@
           ]
         },
         "_abilities": "[решение] волна иллюзий (полоса), клинки из пола (круги), рывок-телепорт — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Кролик» [клиент] позже"
+      }
+    },
+    "spider_queen": {
+      "hp": 7500,
+      "damage": 11,
+      "respawnSeconds": 3600,
+      "name": "Паучья матка",
+      "nameEn": "Spider Queen",
+      "locationId": "spider_lair",
+      "unlockLevel": 17,
+      "_source": "[клиент] имя, описание («королева, скрывающаяся в тени своей армии…»), объявление о появлении; [меню] 0–7700 $, древние звёзды 7–12, порошок 1–25 %; hp 7500 / урон 11 / респаун 60 мин [решение] по шкале боссов (Иллюзионист 6000)",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.7,
+        "walkSpeed": 15,
+        "leashSeconds": 300,
+        "abilityCooldown": 5.2,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            120,
+            200,
+            90
+          ],
+          "blade": [
+            235,
+            240,
+            225
+          ],
+          "spikes": [
+            90,
+            110,
+            70
+          ],
+          "glow": [
+            150,
+            255,
+            120
+          ]
+        },
+        "_abilities": "[решение] волна паутины (полоса), паучьи жвала из-под пола (круги), прыжок-рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Паук» позже"
       }
     }
   },

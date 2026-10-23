@@ -190,3 +190,69 @@ await recolor("grass_top.png", "chorus.png", [[0, [70, 50, 80]], [0.5, [110, 84,
 		return ramp([[0, [90, 30, 16]], [1, [60, 18, 12]]], (t - 0.3) / 0.7);
 	});
 }
+// [Паучье логово] our own cobweb, drawn as pixel lines: the mine block «Паутина» (white strands over a dark
+// stone shadow, 32 px grid ×12), two transparent decals for the decor — an orb web (64 px ×8) and a corner web
+// anchored at the top-left (a quarter fan) — used as Decals on invisible plates; a dark oak bark and a
+// moss-dark forest floor for the location
+{
+	function web(n, cx, cy, spokes, rings, rng, startA = 0, endA = Math.PI * 2) {
+		const px = new Uint8Array(n * n);
+		const plot = (x, y) => {
+			x = Math.round(x); y = Math.round(y);
+			if (x >= 0 && y >= 0 && x < n && y < n) px[y * n + x] = 1;
+		};
+		const line = (x0, y0, x1, y1) => {
+			const steps = Math.ceil(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0))) + 1;
+			for (let s = 0; s <= steps; s++) plot(x0 + (x1 - x0) * s / steps, y0 + (y1 - y0) * s / steps);
+		};
+		const full = endA - startA >= Math.PI * 2 - 1e-6;
+		const angles = [];
+		for (let k = 0; k < spokes; k++) angles.push(startA + (endA - startA) * (full ? k / spokes : k / (spokes - 1)) + (rng() - 0.5) * 0.12);
+		const reach = n * 1.5;
+		for (const a of angles) line(cx, cy, cx + Math.cos(a) * reach, cy + Math.sin(a) * reach);
+		for (const r of rings) {
+			const pts = angles.map((a) => { const rr = r * (0.92 + rng() * 0.16); return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; });
+			for (let k = 0; k < pts.length - (full ? 0 : 1); k++) {
+				const [x0, y0] = pts[k], [x1, y1] = pts[(k + 1) % pts.length];
+				// the thread sags a little between the spokes
+				const mx = (x0 + x1) / 2 + (cx - (x0 + x1) / 2) * 0.08, my = (y0 + y1) / 2 + (cy - (y0 + y1) / 2) * 0.08;
+				line(x0, y0, mx, my); line(mx, my, x1, y1);
+			}
+		}
+		return px;
+	}
+	let seed = 1717;
+	const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+	// the block
+	{
+		const n = 32;
+		const base = await sharp(path.join(dir, "stone.png")).resize(n, n, { kernel: "nearest" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+		const { data, info } = base;
+		const mask = web(n, 15.5, 15.5, 8, [6, 11.5, 17], rng);
+		for (let i = 0; i < n * n; i++) {
+			const l = lum(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]) / 255;
+			const c = mask[i] ? [236 + 14 * l, 236 + 14 * l, 242 + 10 * l] : [38 + 34 * l, 38 + 34 * l, 46 + 36 * l];
+			data[i * 4] = clamp(c[0]); data[i * 4 + 1] = clamp(c[1]); data[i * 4 + 2] = clamp(c[2]);
+		}
+		await sharp(data, { raw: info }).resize(384, 384, { kernel: "nearest" }).png().toFile(path.join(dir, "cobweb.png"));
+		console.log("wrote cobweb.png");
+	}
+	// the decals (transparent)
+	const decalDir = path.join(root, "assets/textures/decals");
+	fs.mkdirSync(decalDir, { recursive: true });
+	for (const [name, mask, n] of [
+		["web_orb.png", web(64, 31.5, 31.5, 12, [4, 8, 12.5, 17, 21.5, 26, 30.5], rng), 64],
+		["web_corner.png", web(64, 0, 0, 7, [8, 16, 25, 34, 44, 54], rng, 0, Math.PI / 2), 64],
+	]) {
+		const data = Buffer.alloc(n * n * 4);
+		for (let i = 0; i < n * n; i++) {
+			if (mask[i]) {
+				data[i * 4] = 245; data[i * 4 + 1] = 245; data[i * 4 + 2] = 250; data[i * 4 + 3] = 225;
+			}
+		}
+		await sharp(data, { raw: { width: n, height: n, channels: 4 } }).resize(n * 8, n * 8, { kernel: "nearest" }).png().toFile(path.join(decalDir, name));
+		console.log("wrote", name);
+	}
+}
+await recolor("oak_log_side.png", "dark_oak_log.png", [[0, [30, 20, 12]], [0.5, [56, 40, 26]], [1, [90, 68, 46]]]);
+await recolor("grass_top.png", "forest_floor.png", [[0, [26, 34, 20]], [0.5, [44, 56, 32]], [1, [70, 84, 50]]]);

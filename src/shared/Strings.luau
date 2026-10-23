@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_spider_queen = { -- [клиент] prison.classic.boss.spider_queen.notify.spawn
+		ru = "В воздухе завитала паутина… Паучья матка взошла на тропу охоты!",
+		en = "There was a web in the air... the Spider Queen has taken to the hunting trail!",
+		es = "Una telaraña flota en el aire... ¡la Reina Araña ha salido de caza!",
+		fr = "Une toile flotte dans l'air… la Reine araignée est partie en chasse !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

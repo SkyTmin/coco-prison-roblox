@@ -82,6 +82,7 @@ local COLORS: { [string]: Color3 } = {
 	quartz_ore = Color3.fromRGB(170, 120, 110),
 	sandstone = Color3.fromRGB(220, 205, 150),
 	red_sandstone = Color3.fromRGB(190, 100, 50),
+	cobweb = Color3.fromRGB(165, 168, 180), -- until assets/textures/blocks/cobweb.png is uploaded: grey, apart from the wool
 }
 
 -- Blocks whose top face differs (log rings, the melon's veined top — like the original Малая шахта
