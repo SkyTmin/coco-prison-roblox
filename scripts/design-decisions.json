@@ -491,6 +491,14 @@
         32
       ],
       "_size": "[решение 23.10] 32×12×32 — заброшенная штольня в пещере логова (scripts/build-spider-lair.luau); состав из меню (mine-shares: белая шерсть 90 / паутина 10)"
+    },
+    "snowy_hand": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 23.10] 32×12×32 — ледяной карьер в запястье «длани» (scripts/build-snowy-hand.luau); состав из меню (mine-shares: лёд 50 / плотный лёд 50)"
     }
   },
   "pvpFromLevel": 9,
@@ -1298,6 +1306,74 @@
           ]
         },
         "_abilities": "[решение] волна паутины (полоса), паучьи жвала из-под пола (круги), прыжок-рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Паук» позже"
+      }
+    },
+    "mole": {
+      "hp": 9000,
+      "damage": 12,
+      "respawnSeconds": 3900,
+      "name": "Моль",
+      "nameEn": "Moth",
+      "locationId": "snowy_hand",
+      "unlockLevel": 19,
+      "_source": "[клиент] имя «Моль» (en Moth), описание («убийца, выходящая на охоту под покровом ночи…»), объявление о появлении и об оглушении; [меню] 0–7900 $, древние звёзды 8–13, порошок 1–35 %; hp 9000 / урон 12 / респаун 65 мин [решение] по шкале боссов (Паучья матка 7500)",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            150,
+            200,
+            255
+          ],
+          "blade": [
+            220,
+            240,
+            255
+          ],
+          "spikes": [
+            120,
+            160,
+            210
+          ],
+          "glow": [
+            190,
+            225,
+            255
+          ]
+        },
+        "_abilities": "[решение] вихрь пыльцы (полоса), ледяные шипы из-под озера (круги), бросок из тьмы — о фонарный столб оглушение 3 с; набор как у Минотавра, своя модель позже"
       }
     }
   },

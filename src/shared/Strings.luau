@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_mole = { -- [клиент] prison.classic.boss.mole.notify.spawn (the boss is «Моль», a moth)
+		ru = "Тьма сгущается… Моль начинает охоту!",
+		en = "The darkness is thickening... the Moth is on the hunt!",
+		es = "La oscuridad se espesa... ¡la Polilla sale de caza!",
+		fr = "Les ténèbres s'épaississent… la Phalène part en chasse !",
+	},
 	boss_spawned_spider_queen = { -- [клиент] prison.classic.boss.spider_queen.notify.spawn
 		ru = "В воздухе завитала паутина… Паучья матка взошла на тропу охоты!",
 		en = "There was a web in the air... the Spider Queen has taken to the hunting trail!",

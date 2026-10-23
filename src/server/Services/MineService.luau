@@ -83,6 +83,8 @@ local COLORS: { [string]: Color3 } = {
 	sandstone = Color3.fromRGB(220, 205, 150),
 	red_sandstone = Color3.fromRGB(190, 100, 50),
 	cobweb = Color3.fromRGB(165, 168, 180), -- until assets/textures/blocks/cobweb.png is uploaded: grey, apart from the wool
+	ice = Color3.fromRGB(170, 210, 245),
+	packed_ice = Color3.fromRGB(125, 165, 225),
 }
 
 -- Blocks whose top face differs (log rings, the melon's veined top — like the original Малая шахта
@@ -121,9 +123,17 @@ end
 
 -- Block look and identity; used for new parts and for parts re-used by an in-place reset. Only what
 -- differs is written: every property change is replicated to every client that has the part.
+-- Blocks with no texture of ours that read well in a Roblox material (Снежная длань: ice, packed ice)
+local MATERIALS: { [string]: Enum.Material } = {
+	ice = Enum.Material.Ice,
+	packed_ice = Enum.Material.Glacier,
+}
+
 local function stylePart(part: BasePart, id: string)
 	local variant = TextureService.variantName(id)
-	local material = if variant then Enum.Material.Plastic else Enum.Material.SmoothPlastic
+	local material = if variant
+		then Enum.Material.Plastic
+		else MATERIALS[id] or Enum.Material.SmoothPlastic
 	local color = if variant
 		then Color3.new(1, 1, 1)
 		else COLORS[id] or Color3.fromRGB(200, 200, 200)

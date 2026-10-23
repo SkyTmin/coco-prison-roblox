@@ -840,9 +840,66 @@
       "name": "Моль",
       "location": "Снежная длань",
       "unlockLevel": 19,
-      "locationId": null,
-      "nameEn": null,
-      "fight": null,
+      "locationId": "snowy_hand",
+      "nameEn": "Moth",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            150,
+            200,
+            255
+          ],
+          "blade": [
+            220,
+            240,
+            255
+          ],
+          "spikes": [
+            120,
+            160,
+            210
+          ],
+          "glow": [
+            190,
+            225,
+            255
+          ]
+        },
+        "_abilities": "[решение] вихрь пыльцы (полоса), ледяные шипы из-под озера (круги), бросок из тьмы — о фонарный столб оглушение 3 с; набор как у Минотавра, своя модель позже"
+      },
       "money": [
         0,
         7900
@@ -862,9 +919,9 @@
         "count": null
       },
       "shard": null,
-      "hp": null,
-      "damage": null,
-      "respawnSeconds": null
+      "hp": 9000,
+      "damage": 12,
+      "respawnSeconds": 3900
     },
     {
       "id": "raven_knight",
