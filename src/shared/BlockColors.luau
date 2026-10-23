@@ -35,8 +35,8 @@ local KNOWN: { [string]: Color3 } = {
 	pumpkin = Color3.fromRGB(198, 118, 24),
 	jack_o_lantern = Color3.fromRGB(214, 140, 30),
 	snow = Color3.fromRGB(249, 254, 254),
-	ice = Color3.fromRGB(145, 183, 253),
-	packed_ice = Color3.fromRGB(141, 180, 250),
+	ice = Color3.fromRGB(170, 210, 245),
+	packed_ice = Color3.fromRGB(125, 165, 225),
 	quartz = Color3.fromRGB(235, 229, 222),
 	black_glass = Color3.fromRGB(25, 25, 29),
 }

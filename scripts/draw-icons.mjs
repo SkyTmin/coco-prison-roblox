@@ -717,6 +717,45 @@ const SPRITES = {
     ".OO.............",
     "................",
   ], palette: { O: "#3a1a0a", s: "#ffc700", S: "#fff0a0", r: "#a01818", d: "#6b3d1e" } },
+  // [владелец 23.10: «модели у льда одинаковые»] the two ice blocks have no texture of ours (the mine uses Roblox
+  // Ice / Glacier), so their slots get block faces: ice is pale and clear with long white streaks, packed ice is a
+  // darker, denser blue with fine cracks
+  ice: { rows: [
+    "lliiiiiwiiiilliw",
+    "liiiiiwwiiiiiiwl",
+    "iiiiiwwiiiiiiwwi",
+    "iiiiwwiiiidiiwii",
+    "iiiwwiiiiddiiiii",
+    "iiwwiiiiiiiiiiil",
+    "iwwiiiiiiiiiiill",
+    "wwiiiiliiiiiilli",
+    "wiiiilliiiiwiiii",
+    "iiiilliiiiwwiiii",
+    "iiiliiiiiwwiiiii",
+    "iiiiiiiiwwiiiidi",
+    "idiiiiiwwiiiiidd",
+    "iddiiiwwiiiiiiii",
+    "iiiiiwwiiiiilliw",
+    "iiiiwwiiiiilliww",
+  ], palette: { i: "#93bcf7", l: "#bcd6fd", w: "#eaf4ff", d: "#79a2ea" } },
+  packed_ice: { rows: [
+    "kkmkkkkkkkmkkkkk",
+    "kkkkklkkkkkkkckk",
+    "mkkkkkkkcckkkkkm",
+    "kkkckkkkkcckkkkk",
+    "kkcckklkkkkkkkkk",
+    "kkkkkkkkkkkklkkk",
+    "klkkkmkkkkkkkkkk",
+    "kkkkkkkkkckkkkmk",
+    "kkkkkkkkcckkkkkk",
+    "kkmkkkkckkkklkkk",
+    "kkkkklkkkkkkkkkk",
+    "kckkkkkkkkmkkkkk",
+    "kcckkkkkkkkkkckk",
+    "kkkkkkmkkkkkcckl",
+    "kkklkkkkkkkkkkkk",
+    "mkkkkkkkklkkkkkm",
+  ], palette: { k: "#6f93d8", m: "#5f82c7", l: "#9ab8ee", c: "#4a6ab0" } },
 };
 
 const BADGE = {
