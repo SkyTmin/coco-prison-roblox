@@ -165,7 +165,12 @@ function Config.iconFor(itemId: string, level: number?): string?
 			return materialIcon
 		end
 	end
-	return icons[itemId] or icons[ICON_FALLBACKS[itemId]] or Config.textures.textures[itemId]
+	-- a cross-sprite block (cobweb) shows its flat sprite in slots, as in Minecraft [ваниль]
+	local sprites = (Config.textures :: any).sprites
+	return icons[itemId]
+		or icons[ICON_FALLBACKS[itemId]]
+		or (sprites and sprites[itemId])
+		or Config.textures.textures[itemId]
 end
 
 function Config.tierIndex(material: string): number

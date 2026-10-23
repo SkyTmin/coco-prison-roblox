@@ -86,7 +86,9 @@ function HeldItem.MakeVisual(
 ): (Instance, BasePart, boolean)
 	local icon = Config.iconFor(id, if level > 0 then level else nil)
 	local block = Config.block(id)
-	local cube = block ~= nil and not block.itemOnly
+	-- a cross-sprite block (cobweb) is held as its extruded sprite, as in Minecraft [ваниль]
+	local sprites = (Config.textures :: any).sprites
+	local cube = block ~= nil and not block.itemOnly and not (sprites and sprites[id])
 	local tool = Config.tools[id] ~= nil
 	local spriteSize = (if tool then 1.45 else 1.2) * (spriteScale or 1)
 	local visual: BasePart

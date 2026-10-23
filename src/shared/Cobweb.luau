@@ -15,6 +15,14 @@ local Cobweb = {}
 Cobweb.TAG = "Cobweb"
 Cobweb.HORIZONTAL = 0.25 -- [ваниль] stuckSpeedMultiplier (0.25, 0.05, 0.25)
 Cobweb.VERTICAL = 0.05
+-- What that feels like [ваниль]: Entity.move multiplies the tick's motion by the multiplier AND zeroes the
+-- velocity, so momentum never builds — every tick moves only that tick's input acceleration × 0.25. Walking
+-- on the ground: 0.098 blocks/tick of acceleration against a 0.2159 blocks/tick top speed (4.317 m/s) →
+-- 0.098 · 0.25 / 0.2159 ≈ 0.113 of the walk speed (≈ 0.49 blocks/s). Hanging in the web (airborne) the
+-- input is 0.02 · 0.98 a tick → 0.0196 · 0.25 / 0.2159 ≈ 0.023 (≈ 0.1 blocks/s): you barely crawl until
+-- your feet touch the floor. A jump gives 0.42 · 0.05 ≈ 0.02 blocks — no jump at all.
+Cobweb.WALK = 0.098 * Cobweb.HORIZONTAL / 0.2159
+Cobweb.AIR = 0.02 * 0.98 * Cobweb.HORIZONTAL / 0.2159
 
 local sprites = (Config.textures :: any).sprites
 Cobweb.TEXTURE = (if sprites then sprites.cobweb else nil) :: string?
