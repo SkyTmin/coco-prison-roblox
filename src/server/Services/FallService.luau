@@ -1,12 +1,14 @@
 --!strict
 -- Fall damage as in Minecraft [ваниль]: ceil(N − 3) damage (half-hearts) for a fall of N blocks, none in
--- water or while on a ladder. Humanoid.FloorMaterial replicates to the server (Air while airborne),
+-- water, in a cobweb or while on a ladder. Humanoid.FloorMaterial replicates to the server (Air while airborne),
 -- so the apex is the highest point seen while in the air and the landing is the first grounded
 -- frame. Fall deaths are not player/mob/boss deaths (stats untouched).
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Sfx = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared").Sfx)
+local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
+local Sfx = require(Shared.Sfx)
+local Cobweb = require(Shared.Cobweb)
 
 local BLOCK = 4
 local SAFE_BLOCKS = 3
@@ -38,6 +40,7 @@ local function step()
 		local safe = state == Enum.HumanoidStateType.Climbing
 			or state == Enum.HumanoidStateType.Swimming
 			or humanoid.FloorMaterial == Enum.Material.Water
+			or Cobweb.holds(character) -- a web stops the fall [ваниль]
 		if safe then
 			track.apex = nil -- ladders and water cancel the fall
 		elseif humanoid.FloorMaterial == Enum.Material.Air then
@@ -66,6 +69,7 @@ local function step()
 end
 
 function FallService.Start()
+	Cobweb.start()
 	RunService.Heartbeat:Connect(step)
 	Players.PlayerRemoving:Connect(function(player)
 		tracks[player] = nil

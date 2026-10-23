@@ -85,7 +85,9 @@
     "end_stone": "rbxassetid://117421395326354",
     "purpur_pillar": "rbxassetid://77632167553024",
     "end_stone_bricks": "rbxassetid://98332367665802",
-    "chorus": "rbxassetid://111900490810729"
+    "chorus": "rbxassetid://111900490810729",
+    "dark_oak_log": "rbxassetid://108007646714376",
+    "forest_floor": "rbxassetid://122143706233578"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",
@@ -94,5 +96,9 @@
   "_pyramid": "Пирамида: cut_sandstone, cut_red_sandstone, terracotta_blue (recoloured from ours), hieroglyphs (our own glyphs drawn by scripts/derive-block-textures.mjs, 3×3 glyphs, used as a Texture with 12 studs per tile), uploaded 23.10.2026",
   "_garden": "Королевский сад: 6 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026",
   "_lighthouse": "Затопленный маяк: 6 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026",
-  "_endcastle": "Пустотная крепость: 5 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026"
+  "_endcastle": "Пустотная крепость: 5 textures recoloured from ours by scripts/derive-block-textures.mjs, uploaded 23.10.2026",
+  "sprites": {
+    "_source": "assets/textures/sprites/*.png (cobweb: VoxeLibre mcl_core_web.png recoloured white, CC BY-SA 4.0) uploaded via upload_image; drawn as Minecraft cross sprites",
+    "cobweb": "rbxassetid://113751081539289"
+  }
 }

@@ -6,7 +6,7 @@ License: Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0) — https://
 
 Files: `default_tool_{wood,stone,steel,diamond}{pick,shovel,axe,sword}.png`, `default_tool_shears.png`,
 `mcl_armor_{helmet,chestplate,leggings,boots}_{leather,chain,iron,diamond}.png` (Minecraft skin-layout armor layers),
-`mcl_armor_inv_*` (inventory icons).
+`mcl_armor_inv_*` (inventory icons), `mcl_core_web.png` (cobweb; recoloured white → `assets/textures/sprites/cobweb.png`, the Minecraft-style cross sprite of the cobweb block and the decor webs).
 
 Derived files in this repo (`assets/icons/items/*` for tools and armor, `assets/armor/*`, `assets/icons/voxels.json`
 entries for tools) are modifications (nearest-neighbour upscales, face crops, voxel extrusions) and are shared under the

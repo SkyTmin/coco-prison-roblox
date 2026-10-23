@@ -4,7 +4,10 @@
 -- Studio MCP execute_luau in Edit mode after syncing scripts; idempotent.
 
 local MaterialService = game:GetService("MaterialService")
-local cfg = require(game:GetService("ReplicatedStorage").Shared.Config.textures)
+-- a clone: require() caches a module for the whole Studio session, the synced config would be ignored
+local cfgModule = game:GetService("ReplicatedStorage").Shared.Config.textures:Clone()
+local cfg = require(cfgModule)
+cfgModule:Destroy()
 
 local made, kept = 0, 0
 for id, assetId in pairs(cfg.textures) do

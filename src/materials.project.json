@@ -673,6 +673,22 @@
         "ColorMap": "rbxassetid://111900490810729",
         "StudsPerTile": 4
       }
+    },
+    "px_dark_oak_log": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://108007646714376",
+        "StudsPerTile": 4
+      }
+    },
+    "px_forest_floor": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://122143706233578",
+        "StudsPerTile": 4
+      }
     }
   }
 }

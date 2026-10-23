@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local Cobweb = require(Shared.Cobweb)
 local TextureService = require(script.Parent.TextureService)
 
 local BLOCK = 4 -- studs per block
@@ -82,7 +83,6 @@ local COLORS: { [string]: Color3 } = {
 	quartz_ore = Color3.fromRGB(170, 120, 110),
 	sandstone = Color3.fromRGB(220, 205, 150),
 	red_sandstone = Color3.fromRGB(190, 100, 50),
-	cobweb = Color3.fromRGB(165, 168, 180), -- until assets/textures/blocks/cobweb.png is uploaded: grey, apart from the wool
 	ice = Color3.fromRGB(170, 210, 245),
 	packed_ice = Color3.fromRGB(125, 165, 225),
 }
@@ -129,6 +129,31 @@ local MATERIALS: { [string]: Enum.Material } = {
 	packed_ice = Enum.Material.Glacier,
 }
 
+-- [владелец 23.10: «паутина как в майнкрафте, и персонаж застревает»] a cobweb cell is an invisible box with no
+-- collision (the player sinks into it and Cobweb slows them) holding the Minecraft cross sprite; it still takes rays,
+-- so it can be aimed at and dug
+local function styleCobweb(part: BasePart, web: boolean)
+	local transparency = if web then 1 else 0
+	if part.Transparency ~= transparency then
+		part.Transparency = transparency
+	end
+	if part.CanCollide == web then
+		part.CanCollide = not web
+	end
+	local sprite = part:FindFirstChild("CobwebSprite")
+	if web and not sprite then
+		Cobweb.sprite(part.CFrame, BLOCK, part)
+		part:AddTag(Cobweb.TAG)
+	elseif not web and sprite then
+		for _, child in ipairs(part:GetChildren()) do
+			if child.Name == "CobwebSprite" then
+				child:Destroy()
+			end
+		end
+		part:RemoveTag(Cobweb.TAG)
+	end
+end
+
 local function stylePart(part: BasePart, id: string)
 	local variant = TextureService.variantName(id)
 	local material = if variant
@@ -153,6 +178,7 @@ local function stylePart(part: BasePart, id: string)
 		part:SetAttribute("Block", id)
 	end
 	styleTop(part, id)
+	styleCobweb(part, id == "cobweb")
 end
 
 local function makePart(mine: Mine, i: number)
@@ -396,6 +422,10 @@ end
 -- A player whose root is inside a solid cell (rendered or not) is lifted onto the mine top. Solid
 -- cells deeper than the exposed layer have no Parts, so anything that slips past the surface would
 -- otherwise fall to the pit floor "through" the blocks.
+local function solidCell(id: string?): boolean
+	return id ~= nil and id ~= "cobweb"
+end
+
 local function rescue(mine: Mine)
 	if mine.rebuilding then
 		return
@@ -414,7 +444,12 @@ local function rescue(mine: Mine)
 				inside
 				and (
 					below
-					or (y >= 1 and y <= mine.size[2] and mine.cells[index(mine, x, y, z)] ~= nil)
+					-- a cobweb cell has no collision: being in it is being stuck in a web, not in a block
+					or (
+						y >= 1
+						and y <= mine.size[2]
+						and solidCell(mine.cells[index(mine, x, y, z)])
+					)
 				)
 			then
 				-- still fine while standing on a rendered block: only the root centre deep inside counts

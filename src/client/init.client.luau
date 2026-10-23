@@ -46,12 +46,16 @@ local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
 local FirstPersonHand = require(script.FirstPersonHand)
 local Footsteps = require(script.Footsteps)
+local AmbientMotion = require(script.AmbientMotion)
+local CobwebStuck = require(script.CobwebStuck)
 local ItemInfo = require(Shared.ItemInfo)
 local Wire = require(Shared.Wire)
 local BlockColors = require(Shared.BlockColors)
 HeldItem.Start()
 FirstPersonHand.Start()
 Footsteps.Start()
+CobwebStuck.Start()
+AmbientMotion.Start()
 require(Shared.Sfx).listen() -- sounds the server asks for (hurt, chests, eating, level up…)
 ArmorVisual.Start()
 BlockBreak.Start()
@@ -2100,8 +2104,17 @@ end
 -- a few ms later. If the server rejects (or nothing arrives in 2 s) the block comes back as it was.
 -- Only the look changes: collision stays until the server really removes the part, otherwise the
 -- player could sink into the cell and fall through the unrendered solid cells below.
+-- a cobweb block draws its cross sprite with child planes: they hide with it
+local function setSpriteHidden(part: BasePart, hidden: boolean)
+	for _, d in ipairs(part:GetDescendants()) do
+		if d:IsA("BasePart") or d:IsA("Decal") then
+			d.LocalTransparencyModifier = if hidden then 1 else 0
+		end
+	end
+end
 local function hideLocally(part: BasePart)
 	part.LocalTransparencyModifier = 1
+	setSpriteHidden(part, true)
 	part.CanQuery = false
 	pending[part] = os.clock()
 end
@@ -2111,6 +2124,7 @@ local function restoreLocally(part: BasePart)
 		pending[part] = nil
 		if part.Parent then
 			part.LocalTransparencyModifier = 0
+			setSpriteHidden(part, false)
 			part.CanQuery = true
 		end
 	end
