@@ -633,6 +633,46 @@
         "ColorMap": "rbxassetid://137274817592622",
         "StudsPerTile": 4
       }
+    },
+    "px_purpur": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://138499124767067",
+        "StudsPerTile": 4
+      }
+    },
+    "px_end_stone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://117421395326354",
+        "StudsPerTile": 4
+      }
+    },
+    "px_purpur_pillar": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://77632167553024",
+        "StudsPerTile": 4
+      }
+    },
+    "px_end_stone_bricks": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://98332367665802",
+        "StudsPerTile": 4
+      }
+    },
+    "px_chorus": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://111900490810729",
+        "StudsPerTile": 4
+      }
     }
   }
 }

@@ -1239,6 +1239,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡El mar hierve junto al Faro Hundido: Poseidón ha despertado!",
 		fr = "La mer bouillonne près du Phare englouti : Poséidon s'est réveillé !",
 	},
+	boss_spawned_illusionist = { -- [клиент] prison.classic.boss.illusionist.notify.spawn
+		ru = "Реальность дрогнула… Иллюзионист вышел из мира иллюзий!",
+		en = "Reality trembled... the Illusionist has stepped out of the world of illusions!",
+		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
+		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
+	},
 	boss_spawned_minotaur = { -- [клиент] prison.classic.boss.minotaur.notify.spawn
 		ru = "Цепи лопнули у Подножья горы: Минотавр пробуждается!",
 		en = "The chains have snapped at the Mountain Foot: the Minotaur awakens!",

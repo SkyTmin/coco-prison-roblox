@@ -174,6 +174,13 @@ await recolor("stone_bricks.png", "prismarine_bricks.png", [[0, [40, 96, 88]], [
 await recolor("stone_bricks.png", "dark_prismarine.png", [[0, [18, 44, 40]], [0.5, [36, 80, 70]], [1, [62, 116, 100]]]);
 await recolor("glowstone.png", "sea_lantern.png", [[0, [120, 170, 180]], [0.5, [190, 225, 225]], [1, [245, 255, 250]]]);
 await recolor("sand.png", "coral.png", [[0, [150, 150, 150]], [0.5, [210, 210, 210]], [1, [250, 250, 250]]]);
+// [Пустотная крепость] end stone (the islands), end stone bricks and purpur (the mine blocks), a purpur pillar,
+// chorus (the plants)
+await recolor("cobblestone.png", "end_stone.png", [[0, [180, 176, 120]], [0.5, [218, 214, 160]], [1, [240, 238, 190]]], 0.8);
+await recolor("stone_bricks.png", "end_stone_bricks.png", [[0, [170, 166, 112]], [0.5, [215, 212, 156]], [1, [238, 236, 186]]]);
+await recolor("smooth_stone.png", "purpur.png", [[0, [120, 80, 120]], [0.5, [168, 120, 168]], [1, [200, 160, 200]]], 0.9);
+await recolor("oak_log_side.png", "purpur_pillar.png", [[0, [124, 84, 124]], [0.5, [170, 124, 170]], [1, [206, 166, 206]]]);
+await recolor("grass_top.png", "chorus.png", [[0, [70, 50, 80]], [0.5, [110, 84, 120]], [1, [170, 140, 175]]]);
 // magma: the dark mortar of cobblestone glows, the stones stay dark
 {
 	const [lo, hi] = await lumRange("cobblestone.png");

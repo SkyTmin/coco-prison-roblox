@@ -5,7 +5,8 @@
 -- carry the attributes Ambient (Color3) and Exposure (number); while the local player stands inside one,
 -- the client eases Lighting toward those values and thins the outdoor haze, and eases back outside.
 -- Optional attributes tint the air of a whole location (Преисподняя: a red murk, scripts/build-underworld.luau):
--- Haze (Atmosphere.Density instead of the thin indoor haze), AtmosphereColor, AtmosphereDecay (Color3).
+-- Haze (Atmosphere.Density instead of the thin indoor haze), AtmosphereColor, AtmosphereDecay (Color3);
+-- ClockTime and Brightness turn an open location to night (Пустотная крепость: scripts/build-end-castle.luau).
 -- Local only: other players keep their own lighting.
 
 local CollectionService = game:GetService("CollectionService")
@@ -36,6 +37,8 @@ function IndoorLighting.Start()
 	local outdoor: {
 		Ambient: Color3,
 		ExposureCompensation: number,
+		ClockTime: number,
+		Brightness: number,
 		Density: number?,
 		Color: Color3?,
 		Decay: Color3?,
@@ -57,6 +60,8 @@ function IndoorLighting.Start()
 				outdoor = {
 					Ambient = Lighting.Ambient,
 					ExposureCompensation = Lighting.ExposureCompensation,
+					ClockTime = Lighting.ClockTime,
+					Brightness = Lighting.Brightness,
 					Density = if air then air.Density else nil,
 					Color = if air then air.Color else nil,
 					Decay = if air then air.Decay else nil,
@@ -71,6 +76,15 @@ function IndoorLighting.Start()
 					then exposure
 					else Lighting.ExposureCompensation,
 			}):Play()
+			-- the clock jumps (a tween would sweep the sun across the sky)
+			local clock = volume:GetAttribute("ClockTime")
+			local brightness = volume:GetAttribute("Brightness")
+			if outdoor then
+				Lighting.ClockTime = if typeof(clock) == "number" then clock else outdoor.ClockTime
+				Lighting.Brightness = if typeof(brightness) == "number"
+					then brightness
+					else outdoor.Brightness
+			end
 			if air and outdoor then
 				local haze = volume:GetAttribute("Haze")
 				local color = volume:GetAttribute("AtmosphereColor")
@@ -94,6 +108,8 @@ function IndoorLighting.Start()
 				Ambient = outdoor.Ambient,
 				ExposureCompensation = outdoor.ExposureCompensation,
 			}):Play()
+			Lighting.ClockTime = outdoor.ClockTime
+			Lighting.Brightness = outdoor.Brightness
 			if air and outdoor.Density then
 				TweenService:Create(air, EASE, {
 					Density = outdoor.Density,
