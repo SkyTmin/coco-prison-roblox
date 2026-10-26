@@ -151,6 +151,41 @@ def build(vox, name):
     return obj
 
 
+def export_boxes(vox, n=None):
+    """The game's 3D item model (ItemModels.luau): same-colour voxels merged into boxes (greedy: along x, then y,
+    then z). Coordinates from the minimum corner; with `n`, x and z keep the n×n item grid (0 … n−1) so every stage
+    of an item shares one frame. Returns {"size": [x, y, z], "p": [hex…], "b": [x, y, z, w, d, h, paletteIndex, …]}."""
+    xs, ys, zs = [p[0] for p in vox], [p[1] for p in vox], [p[2] for p in vox]
+    ox, oy, oz = (0 if n else min(xs)), min(ys), (0 if n else min(zs))
+    size = [n if n else max(xs) - ox + 1, max(ys) - oy + 1, n if n else max(zs) - oz + 1]
+    palette, boxes, done = [], [], set()
+    for x, y, z in sorted(vox, key=lambda p: (p[2], p[1], p[0])):
+        if (x, y, z) in done:
+            continue
+        col = vox[(x, y, z)]
+
+        def free(p):
+            return p not in done and vox.get(p) == col
+
+        w = 1
+        while free((x + w, y, z)):
+            w += 1
+        d = 1
+        while all(free((x + i, y + d, z)) for i in range(w)):
+            d += 1
+        h = 1
+        while all(free((x + i, y + j, z + h)) for i in range(w) for j in range(d)):
+            h += 1
+        for i in range(w):
+            for j in range(d):
+                for k in range(h):
+                    done.add((x + i, y + j, z + k))
+        if col not in palette:
+            palette.append(col)
+        boxes += [x - ox, y - oy, z - oz, w, d, h, palette.index(col)]
+    return {"size": size, "p": [c.lstrip("#") for c in palette], "b": boxes}
+
+
 def setup(w, h):
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
