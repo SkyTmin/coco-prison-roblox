@@ -65,6 +65,7 @@ local function rockDepth(x, z)
 end
 
 local _, islandRuns = island({
+	pit = PIT, -- the mine hole stays open
 	x0 = -ISLAND_R - 16,
 	x1 = ISLAND_R + 16,
 	z0 = -ISLAND_R - 16,

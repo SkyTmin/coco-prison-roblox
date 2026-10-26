@@ -576,12 +576,19 @@ end
 -- -> studs of rock below the ground block. The column is: ground (1 block, the top variant), rock (24 studs,
 -- opt.rockTop) and below that opt.rockLow down to the depth. opt.voids = { {x0, x1, z0, z1, y0, y1} or
 -- {cx, cz, r, y0, y1, circle = true} }: carved out of the column (crypts, tunnels, holes) — the parts that live
--- there are built by the location itself. Equal neighbouring cells along x are merged into one run.
+-- there are built by the location itself. opt.pit = PIT ({x, z, size, depth}): the mine hole is carved out too (half a
+-- cell wider, under the pit walls) so the mine blocks are not buried in rock. Equal neighbouring cells along x are
+-- merged into one run.
 local function island(opt, parent)
 	local f = folder("Island", parent)
 	local C = opt.cell or 8
 	local x0, x1, z0, z1 = opt.x0, opt.x1, opt.z0, opt.z1
-	local voids = opt.voids or {}
+	local voids = table.clone(opt.voids or {})
+	if opt.pit then
+		local p = opt.pit
+		local e = p.size * B / 2 + C / 2
+		table.insert(voids, { p.x - e, p.x + e, p.z - e, p.z + e, -p.depth * B, 2 * B })
+	end
 	local runs = 0
 	-- the column segments of one cell: { {ya, yb, layer}, ... } with layer 1 ground, 2 rock, 3 low rock
 	local function column(cx, cz)
@@ -819,6 +826,7 @@ local function rockDepth(x, z)
 end
 
 local _, islandRuns = island({
+	pit = PIT, -- the mine hole stays open
 	x0 = -ISLAND_R - 16,
 	x1 = ISLAND_R + 16,
 	z0 = -ISLAND_R - 16,
