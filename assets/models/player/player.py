@@ -12,7 +12,7 @@
 #   face, the pixel rectangles of each role over the part's base colour; layers (hairstyles, beard, armband) the same
 #   way; the palettes;
 # "… -- check" → render-check-{front,34}.png: the body built from player.json the way AvatarService.luau builds it in
-#   the game (parts, the layers merged per face, greedy plates) — the export and the game's face geometry checked.
+#   the game (parts, the layers merged per face, greedy plates) — the export and the game's face geometry checked;
 #
 # Space: Roblox axes in pixels — X = the character's right, Y = up from the ground, Z = back (the face looks to −Z).
 # Face grids (rows top → bottom, columns left → right as you look at the face): front tl (+X, +Y, −Z) → −X;
@@ -508,36 +508,83 @@ def game_boxes(data, colours, layers):
     return out
 
 
+def load_body():
+    with open(os.path.join(ROOT, "src", "shared", "Models", "player.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def check_colours(data, skin=2, hair=0, iris=1, faction="#3c7fd8"):
+    """The role colours of one look from the exported palettes."""
+    pal = data["palettes"]
+    colours = {k: "#" + v for k, v in data["fixed"].items()}
+    colours.update(skin="#" + pal["skin"][skin], skin_dark="#" + pal["skin_dark"][skin], mouth="#" + pal["mouth"][skin],
+                   hair="#" + pal["hair"][hair], hair_dark="#" + pal["hair_dark"][hair], brow="#" + pal["hair_dark"][hair],
+                   iris="#" + pal["iris"][iris], faction=faction)
+    return colours
+
+
+def add_boxes(boxes, name="boxes"):
+    """One Blender mesh of boxes [(centre studs, size studs, hex)] in Roblox axes (also used by the armor)."""
+    import bmesh
+    import bpy
+
+    sys.path.insert(0, os.path.dirname(HERE))
+    from voxeltool import hexrgb, srgb_to_linear
+
+    me = bpy.data.meshes.new(name)
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(obj)
+    bm = bmesh.new()
+    index = {}
+    for centre, size, col in boxes:
+        if col not in index:
+            m = bpy.data.materials.get("box" + col)
+            if not m:
+                m = bpy.data.materials.new("box" + col)
+                m.use_nodes = True
+                bsdf = m.node_tree.nodes["Principled BSDF"]
+                bsdf.inputs["Base Color"].default_value = srgb_to_linear(hexrgb(col)) + (1,)
+                bsdf.inputs["Roughness"].default_value = 1.0
+            me.materials.append(m)
+            index[col] = len(me.materials) - 1
+        vs = {}
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                for sz in (-1, 1):
+                    p = [centre[0] + sx * size[0] / 2, centre[1] + sy * size[1] / 2, centre[2] + sz * size[2] / 2]
+                    vs[(sx, sy, sz)] = bm.verts.new((-p[0], p[2], p[1]))  # Roblox (X, Y, Z) → Blender (−X, Z, Y)
+        quads = [
+            [(1, -1, -1), (1, 1, -1), (1, 1, 1), (1, -1, 1)], [(-1, -1, -1), (-1, -1, 1), (-1, 1, 1), (-1, 1, -1)],
+            [(-1, 1, -1), (-1, 1, 1), (1, 1, 1), (1, 1, -1)], [(-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)],
+            [(-1, -1, 1), (1, -1, 1), (1, 1, 1), (-1, 1, 1)], [(-1, -1, -1), (-1, 1, -1), (1, 1, -1), (1, -1, -1)],
+        ]
+        for q in quads:
+            f = bm.faces.new([vs[k] for k in q])
+            f.material_index = index[col]
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me)
+    bm.free()
+    return obj
+
+
+def clear_meshes():
+    import bpy
+
+    for o in list(bpy.data.objects):
+        if o.type == "MESH":
+            bpy.data.objects.remove(o)
+
+
 def check():
     import bpy
     from mathutils import Vector
 
     sys.path.insert(0, os.path.dirname(HERE))
-    from voxeltool import hexrgb, look, setup, srgb_to_linear
+    from voxeltool import look, setup
 
-    with open(os.path.join(ROOT, "src", "shared", "Models", "player.json"), encoding="utf-8") as f:
-        data = json.load(f)
-    pal = data["palettes"]
-    colours = {k: "#" + v for k, v in data["fixed"].items()}
-    colours.update(skin="#" + pal["skin"][2], skin_dark="#" + pal["skin_dark"][2], mouth="#" + pal["mouth"][2],
-                   hair="#" + pal["hair"][0], hair_dark="#" + pal["hair_dark"][0], brow="#" + pal["hair_dark"][0],
-                   iris="#" + pal["iris"][1], faction="#3c7fd8")
-    for o in list(bpy.data.objects):
-        if o.type == "MESH":
-            bpy.data.objects.remove(o)
-    mats = {}
-    for i, (centre, size, col) in enumerate(game_boxes(data, colours, ["hair_fringe", "armband"])):
-        bpy.ops.mesh.primitive_cube_add(size=1, location=(-centre[0], centre[2], centre[1]))
-        obj = bpy.context.active_object
-        obj.scale = (size[0], size[2], size[1])
-        if col not in mats:
-            m = bpy.data.materials.new(col)
-            m.use_nodes = True
-            bsdf = m.node_tree.nodes["Principled BSDF"]
-            bsdf.inputs["Base Color"].default_value = srgb_to_linear(hexrgb(col)) + (1,)
-            bsdf.inputs["Roughness"].default_value = 1.0
-            mats[col] = m
-        obj.data.materials.append(mats[col])
+    data = load_body()
+    clear_meshes()
+    add_boxes(game_boxes(data, check_colours(data), ["hair_fringe", "armband"]), "player")
     scene, cam = setup(700, 900)
     mid = Vector((0, 0, 16 * PX))
     for view, loc in (("front", (0, -20, 16 * PX)), ("34", (-11, -14, 16 * PX + 3.5))):
@@ -546,9 +593,10 @@ def check():
         bpy.ops.render.render(write_still=True)
 
 
-if sys.argv[-1] == "export":
-    export()
-elif sys.argv[-1] == "check":
-    check()
-else:
-    render()
+if __name__ == "__main__":
+    if sys.argv[-1] == "export":
+        export()
+    elif sys.argv[-1] == "check":
+        check()
+    else:
+        render()

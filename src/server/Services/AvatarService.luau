@@ -14,6 +14,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local BlockFaces = require(Shared.BlockFaces)
 local Config = require(Shared.Config)
 local Body = require(Shared.Models.player) :: any
 
@@ -26,48 +27,7 @@ local PLATE = 0.02 -- studs: the detail plates stand this far out of the faces
 local ROOT_SIZE = Vector3.new(2, Body.root.size[2] * PX, 1)
 local COLLIDE = { Head = true, UpperTorso = true, LowerTorso = true }
 
--- face → (top-left corner as signs of the half size, right and down unit vectors, outward normal); the grids of
--- player.py: front tl (+X, +Y, −Z) → −X; back tl (−X, +Y, +Z) → +X; right tl (+X, +Y, +Z) → −Z; left tl (−X, +Y, −Z)
--- → +Z; top tl (+X, +Y, +Z) → −X, rows → −Z; bottom tl (+X, −Y, −Z) → −X, rows → +Z
-type Face = { tl: Vector3, right: Vector3, down: Vector3, normal: Vector3 }
-local FACES: { [string]: Face } = {
-	front = {
-		tl = Vector3.new(1, 1, -1),
-		right = Vector3.new(-1, 0, 0),
-		down = Vector3.new(0, -1, 0),
-		normal = Vector3.new(0, 0, -1),
-	},
-	back = {
-		tl = Vector3.new(-1, 1, 1),
-		right = Vector3.new(1, 0, 0),
-		down = Vector3.new(0, -1, 0),
-		normal = Vector3.new(0, 0, 1),
-	},
-	right = {
-		tl = Vector3.new(1, 1, 1),
-		right = Vector3.new(0, 0, -1),
-		down = Vector3.new(0, -1, 0),
-		normal = Vector3.new(1, 0, 0),
-	},
-	left = {
-		tl = Vector3.new(-1, 1, -1),
-		right = Vector3.new(0, 0, 1),
-		down = Vector3.new(0, -1, 0),
-		normal = Vector3.new(-1, 0, 0),
-	},
-	top = {
-		tl = Vector3.new(1, 1, 1),
-		right = Vector3.new(-1, 0, 0),
-		down = Vector3.new(0, 0, -1),
-		normal = Vector3.new(0, 1, 0),
-	},
-	bottom = {
-		tl = Vector3.new(1, -1, -1),
-		right = Vector3.new(-1, 0, 0),
-		down = Vector3.new(0, 0, 1),
-		normal = Vector3.new(0, -1, 0),
-	},
-}
+local FACES = BlockFaces -- the face grids of player.py
 
 local function vec(t: { number }): Vector3
 	return Vector3.new(t[1], t[2], t[3])

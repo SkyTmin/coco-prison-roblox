@@ -4,12 +4,23 @@
 -- assets/thirdparty/voxelibre/ATTRIBUTION.md) as Decals. Faces come from Config.armor (generated from
 -- assets/armor/ids.json). Enchanted pieces (level with an enchant > 0) get a purple glint overlay.
 -- The server owns the `Armor` attribute ("helmet:<level>,chestplate:<level>,...").
+-- Our block body (character attribute BlockBody, AvatarService) wears our own armor [владелец 26.10: «броню сделаем по
+-- телу»; «броню также делаем новую в блендер: кожаная, кольчужная, железная и алмазная»]: assets/models/armor/armor.py
+-- → Shared.Models.armor. It sits as Minecraft's: each box wraps a whole limb grown by 1 px on every side (leggings ½ px,
+-- the inner layer, so the chestplate and the boots cover them) and covers rows r0..r1 of it; its faces are thin plates
+-- (a shell sunk under the grown surface, details standing on it), transparent where the body shows. The limbs never
+-- bend (CharacterAnimator), so a box may run past its part onto the next one (the lower arm's over the hand, the boots
+-- up the shin). R15 avatars (showcase mannequins) keep the old textured per-part boxes.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Config = require(Shared.Config)
+local BlockFaces = require(Shared.BlockFaces)
+local Body = require(Shared.Models.player) :: any
+local Armor = require(Shared.Models.armor) :: any
 
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Model? }
 
@@ -64,6 +75,11 @@ for _, boxes in pairs(BOXES) do
 		limbNames[box.limb] = true
 	end
 end
+for _, boxes in pairs(Armor.boxes) do
+	for _, box in ipairs(boxes) do
+		limbNames[box[1]] = true
+	end
+end
 
 local function faceTexture(piece: string, material: string, key: string, face: string): string?
 	local faces = Config.armor and Config.armor.faces
@@ -78,21 +94,20 @@ local function enchanted(id: string, level: number): boolean
 	return ok and type(value) == "number" and value > 0
 end
 
-local function buildBox(
+-- one textured box welded to the limb: `size` in studs, its centre `centreY` studs above the limb's centre
+local function makeBox(
 	parent: Model,
 	limb: BasePart,
 	piece: string,
 	material: string,
-	box: Box,
+	key: string,
+	size: Vector3,
+	centreY: number,
 	glint: boolean
 )
-	local pad = box.pad or PAD
-	local fullY = limb.Size.Y + pad
-	local height = fullY * (box.y1 - box.y0)
-	local centreY = fullY / 2 - fullY * (box.y0 + box.y1) / 2 -- limb-space Y of the slice centre
 	local part = Instance.new("Part")
-	part.Name = piece .. "_" .. box.limb
-	part.Size = Vector3.new(limb.Size.X + pad, height, limb.Size.Z + pad)
+	part.Name = piece .. "_" .. limb.Name
+	part.Size = size
 	part.Transparency = 1 -- faces are drawn by the decals; the part itself is invisible
 	part.Massless = true
 	part.CanCollide, part.CanTouch, part.CanQuery = false, false, false
@@ -102,7 +117,7 @@ local function buildBox(
 	part.CFrame = limb.CFrame * offset
 	local any = false
 	for face, normal in pairs(FACES) do
-		local texture = faceTexture(piece, material, box.key, face)
+		local texture = faceTexture(piece, material, key, face)
 		if texture then
 			local decal = Instance.new("Decal")
 			decal.Name = face
@@ -133,6 +148,89 @@ local function buildBox(
 	weld.C0 = offset
 	weld.Parent = part
 	part.Parent = parent
+end
+
+-- an R15 avatar's box: the part grown by `pad`, the slice y0..y1 of its height
+local function buildBox(
+	parent: Model,
+	limb: BasePart,
+	piece: string,
+	material: string,
+	box: Box,
+	glint: boolean
+)
+	local pad = box.pad or PAD
+	local fullY = limb.Size.Y + pad
+	local height = fullY * (box.y1 - box.y0)
+	local centreY = fullY / 2 - fullY * (box.y0 + box.y1) / 2 -- limb-space Y of the slice centre
+	local size = Vector3.new(limb.Size.X + pad, height, limb.Size.Z + pad)
+	makeBox(parent, limb, piece, material, box.key, size, centreY, glint)
+end
+
+-- a block body's armor piece: per box [part, a0, a1, length, width, depth, r0, r1, grow] (px: the part holds rows
+-- a0..a1 of a limb length × width × depth, the box is rows r0..r1 of that limb grown by `grow` a side) the plates of
+-- its faces, [u0, v0, u1, v1, hex, layer] fractions of the face
+local function buildBlockArmor(parent: Model, character: Model, piece: string, material: string)
+	local set = Armor.sets[material] and Armor.sets[material][piece]
+	if not set then
+		return
+	end
+	local px: number = Body.px
+	local thick: number, lift: number = Armor.thick, Armor.lift
+	for i, box in ipairs(Armor.boxes[piece]) do
+		local limb = character:FindFirstChild(box[1])
+		local faces = set[i]
+		if not limb or not limb:IsA("BasePart") or not faces then
+			continue
+		end
+		local a0, a1, length, width, depth, r0, r1, grow = table.unpack(box, 2, 9)
+		local grown = length + 2 * grow
+		local top = (a0 + a1) / 2 + grow -- the grown limb's top, px above the part's centre
+		local y0 = top - grown * r0 / length
+		local y1 = top - grown * r1 / length
+		local size = Vector3.new(width + 2 * grow, y0 - y1, depth + 2 * grow) * px
+		local centre = limb.CFrame * CFrame.new(0, (y0 + y1) / 2 * px, 0)
+		local half = size / 2
+		for face, rects in pairs(faces) do
+			local f = BlockFaces[face]
+			local alongRight = math.abs(f.right:Dot(size))
+			local alongDown = math.abs(f.down:Dot(size))
+			local origin = f.tl * half
+			for _, rect in ipairs(rects) do
+				local u0, v0, u1, v1, colour, layer =
+					rect[1], rect[2], rect[3], rect[4], rect[5], rect[6]
+				local plate = Instance.new("Part")
+				plate.Name = piece
+				plate.Size = Vector3.new(
+					math.abs(f.right.X) * (u1 - u0) * alongRight
+						+ math.abs(f.down.X) * (v1 - v0) * alongDown
+						+ math.abs(f.normal.X) * thick,
+					math.abs(f.right.Y) * (u1 - u0) * alongRight
+						+ math.abs(f.down.Y) * (v1 - v0) * alongDown
+						+ math.abs(f.normal.Y) * thick,
+					math.abs(f.right.Z) * (u1 - u0) * alongRight
+						+ math.abs(f.down.Z) * (v1 - v0) * alongDown
+						+ math.abs(f.normal.Z) * thick
+				)
+				local at = origin
+					+ f.right * ((u0 + u1) / 2 * alongRight)
+					+ f.down * ((v0 + v1) / 2 * alongDown)
+					- f.normal * (thick / 2 - (if layer == 1 then lift else 0))
+				plate.CFrame = centre * CFrame.new(at)
+				plate.Color = Color3.fromHex(colour)
+				plate.Material = Enum.Material.SmoothPlastic
+				plate.TopSurface, plate.BottomSurface =
+					Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+				plate.Massless = true
+				plate.CanCollide, plate.CanTouch, plate.CanQuery = false, false, false
+				plate.CastShadow = layer == 0
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0, weld.Part1 = limb, plate
+				weld.Parent = plate
+				plate.Parent = parent
+			end
+		end
+	end
 end
 
 -- Minecraft draws armor over the skin and hides nothing else, but Roblox avatars wear bulky layered
@@ -184,6 +282,7 @@ local function render(rig: Rig)
 	visual.Name = "ArmorVisual"
 	local rendered: { [string]: boolean } = {}
 	local anyGlint = false
+	local block = rig.character:GetAttribute("BlockBody") == true
 	for entry in string.gmatch(attribute, "[^,]+") do
 		local id, rawLevel = string.match(entry, "^([^:]+):(%d+)$")
 		local level = tonumber(rawLevel)
@@ -195,10 +294,14 @@ local function render(rig: Rig)
 		local material = Config.materialForLevel(level)
 		local glint = enchanted(id, level)
 		anyGlint = anyGlint or glint
-		for _, box in ipairs(boxes) do
-			local limb = rig.character:FindFirstChild(box.limb)
-			if limb and limb:IsA("BasePart") then
-				buildBox(visual, limb, id, material, box, glint)
+		if block then
+			buildBlockArmor(visual, rig.character, id, material) -- an enchanted piece glows (EnchantGlow below)
+		else
+			for _, box in ipairs(boxes) do
+				local limb = rig.character:FindFirstChild(box.limb)
+				if limb and limb:IsA("BasePart") then
+					buildBox(visual, limb, id, material, box, glint)
+				end
 			end
 		end
 	end
