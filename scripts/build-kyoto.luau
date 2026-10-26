@@ -917,6 +917,4251 @@ print(("[build-kyoto] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ kyoto/20-temple.luau
+do
+-- ================================================================ kyoto: the torii stair, the temple hall, the stage, the pond, the pagoda
+-- The main stair x 24..44 (kit stairs): flight A z 12 → -8 (y 0 → 16), the stone landing on L1 z -8..-40, flight B
+-- z -40 → -72 (y 16 → 32); stone kerbs 1 block high on both flights (x 20..24, 44..48), a tunnel of 15 red torii
+-- (posts on the kerb line x 20..24 / 44..48, black feet, red nuki at +15, black kasagi with raised ends; every 5 studs
+-- on the flights, every 8 on the landing, where the gaps between the posts open to L1), stone lanterns at the landing
+-- ends, a pair of stone kitsune at the foot (z 8) and at the top (z -77).
+-- The hall (TEMPLE x 64..176, z -124..-76) on a stone footing filled down to wherever L2 ends: a wooden floor 1 stud
+-- above the court, dark post-and-beam walls with white plaster, shoji bays and an open middle bay (x 106..134) to the
+-- altar, a row of red posts along the veranda (z -78), a stepped hip roof of dark tiles (y 53..75, eaves x 60..180,
+-- z -128..-72) with up-turned corner tips and a south cross-gable with a white plaster face.
+-- The stage deck x 72..176, z -72..-16 at y 32 on 13 × 7 dark log stilts (every 8 studs from x 76, z -20) with tie
+-- beams at y 6, 14, 22 in both directions and a cap row at 28; a dark railing on the south, west and east sides.
+-- Three waterfalls (x 108, 124, 140) out of mossy rock mouths under the south edge into the POND (the side ones by a
+-- short stream); the pond gets stone and moss edges, lily pads, 10 koi, reeds, a red arched bridge (x 76..172 along
+-- z 24, deck z 16..32, top y 6, invisible chord ramps over the steps), stone lanterns at its ends and a small shrine
+-- with the white ghost of the samurai's beloved on the east bank. Under and beside the stage: bamboo, moss rocks,
+-- a gravel path from the square. The five-storey pagoda at (PAGODA.x, PAGODA.z + 4) on a stone platform (to y ≈ 129),
+-- a bell tower, stone paths and lanterns in the east bailey; cherry trees with petal carpets and bamboo in the rest.
+local temple = folder("Temple")
+local partsBefore = count
+local lights = 0
+local INK = Color3.fromRGB(34, 30, 32)
+local BRONZE = Color3.fromRGB(150, 112, 64)
+local BAMBOO_C = Color3.fromRGB(170, 214, 110)
+local LEAF_C = Color3.fromRGB(96, 150, 70)
+local FOX_STONE = Color3.fromRGB(214, 212, 206)
+local ROOF_V = "px_roof_tiles"
+
+-- the height of the island cell under a point (the core samples the ground at the 8-stud cell centres)
+local function cellY(x, z)
+	return groundY(math.floor(x / 8) * 8 + 4, math.floor(z / 8) * 8 + 4)
+end
+-- 8-stud cells of a rect: key(cx, cz) -> value or nil; equal values along x merge into one run -> emit(x0, x1, z, value)
+local function cellRuns(x0, z0, x1, z1, key, emit)
+	for z = z0, z1 - 8, 8 do
+		local runX, runKey = nil, nil
+		for x = x0, x1, 8 do
+			local k = if x < x1 then key(x + 4, z + 4) else nil
+			if k ~= runKey then
+				if runKey ~= nil then
+					emit(runX, x, z, runKey)
+				end
+				runX, runKey = x, k
+			end
+		end
+	end
+end
+-- a stone footing under a rect up to `top` wherever the ground is lower (the L2 edge wanders by ±8 studs)
+local function fillTo(x0, z0, x1, z1, top, parent)
+	cellRuns(x0, z0, x1, z1, function(cx, cz)
+		local gy = groundY(cx, cz)
+		return if gy < top - 0.5 then gy else nil
+	end, function(xa, xb, z, gy)
+		box("Footing", xa, gy - B, z, xb, top, z + 8, "px_stone_bricks", STONE, parent)
+	end)
+end
+local function glow(p, range)
+	if lights < 26 then
+		lights += 1
+		light(p, range or 24, 1.1, LANTERN_GLOW)
+	end
+end
+-- a stone lantern (tōrō) about 2.5 blocks tall standing on (x, y, z)
+local function stoneLantern(x, y, z, parent, lit)
+	local f = folder("StoneLantern", parent)
+	cube("LanternBase", x, y + 0.5, z, 4, 1, 4, "px_stone_bricks", STONE, f)
+	cube("LanternShaft", x, y + 2.5, z, 2, 3, 2, "px_smooth_stone", STONE, f)
+	cube("LanternTable", x, y + 4.4, z, 3.6, 0.8, 3.6, "px_stone_bricks", STONE, f)
+	cube("LanternBox", x, y + 6, z, 2.8, 2.4, 2.8, "px_smooth_stone", STONE, f)
+	local g = decor(cube("LanternLight", x, y + 6, z, 3.1, 1.2, 1.4, "px_glowstone", nil, f))
+	decor(cube("LanternLight", x, y + 6, z, 1.4, 1.2, 3.1, "px_glowstone", nil, f))
+	cube(
+		"LanternRoof",
+		x,
+		y + 7.7,
+		z,
+		4.6,
+		1,
+		4.6,
+		"px_stone_bricks",
+		Color3.fromRGB(120, 118, 116),
+		f
+	)
+	cube(
+		"LanternRoof",
+		x,
+		y + 8.6,
+		z,
+		2.6,
+		0.8,
+		2.6,
+		"px_stone_bricks",
+		Color3.fromRGB(120, 118, 116),
+		f
+	)
+	cube("LanternCap", x, y + 9.5, z, 1, 1, 1, "px_smooth_stone", STONE, f)
+	if lit then
+		glow(g, 26)
+	end
+	return f
+end
+-- a paper lantern (chōchin) hanging from (x, yTop, z)
+local function paperLantern(x, yTop, z, tint, parent, lit)
+	decor(cube("LanternCord", x, yTop - 0.5, z, 0.3, 1, 0.3, nil, INK, parent))
+	decor(cube("PaperCap", x, yTop - 1.2, z, 1.4, 0.4, 1.4, "px_dark_oak_planks", INK, parent))
+	local body =
+		decor(cube("PaperLantern", x, yTop - 2.5, z, 1.8, 2.2, 1.8, "px_white_wool", tint, parent))
+	decor(cube("PaperCap", x, yTop - 3.8, z, 1.4, 0.4, 1.4, "px_dark_oak_planks", INK, parent))
+	if lit then
+		glow(body, 18)
+	end
+	return body
+end
+-- up-turned corner tips on a roof layer x0..x1, z0..z1 whose top is y: a block raised half a step at each corner and
+-- a smaller one on it reaching out past the corner (the tip ends one block above the layer)
+local function roofTips(x0, z0, x1, z1, y, tint, parent, s)
+	s = s or B
+	for _, cx in ipairs({ x0, x1 }) do
+		for _, cz in ipairs({ z0, z1 }) do
+			local ix = if cx == x0 then 1 else -1
+			local iz = if cz == z0 then 1 else -1
+			box(
+				"RoofTip",
+				cx,
+				y,
+				cz,
+				cx + ix * 2 * s,
+				y + s / 2,
+				cz + iz * 2 * s,
+				ROOF_V,
+				tint,
+				parent
+			)
+			box(
+				"RoofTip",
+				cx - ix * s / 2,
+				y + s / 2,
+				cz - iz * s / 2,
+				cx + ix * s,
+				y + s,
+				cz + iz * s,
+				ROOF_V,
+				tint,
+				parent
+			)
+		end
+	end
+end
+-- the surface of the main stair at z (flight A 10 steps of 1.6, the landing, flight B 16 steps of 1)
+local function stairY(z)
+	if z >= 12 then
+		return 0
+	elseif z > -8 then
+		return 1.6 * (math.clamp(math.floor((12 - z) / 2), 0, 9) + 1)
+	elseif z >= -40 then
+		return L1_Y
+	elseif z > -72 then
+		return L1_Y + math.clamp(math.floor((-40 - z) / 2), 0, 15) + 1
+	end
+	return L2_Y
+end
+-- keep-out rects of this part (x0, z0, x1, z1) for trees and bamboo: buildings, paths, the bridge, the falls, the stair
+local BLOCK = {
+	{ 60, -132, 180, -68 }, -- the hall and its eaves
+	{ 86, -180, 134, -130 }, -- the pagoda platform and its steps
+	{ 138, -152, 162, -128 }, -- the bell tower
+	{ 54, -166, 66, -70 }, -- the west path
+	{ 64, -164, 92, -150 }, -- the path to the pagoda
+	{ 100, -136, 120, -122 }, -- the path behind the hall
+	{ 70, 10, 206, 40 }, -- the bridge, its paths, the shrine
+	{ 96, -22, 152, -6 }, -- the waterfalls
+	{ 70, -10, 100, 2 }, -- the gravel path
+	{ 16, -84, 52, 18 }, -- the torii stair
+}
+local function blocked(x, z, pad)
+	for _, r in ipairs(BLOCK) do
+		if inRect(x, z, r, pad) then
+			return true
+		end
+	end
+	return false
+end
+local function flat(x, z, r)
+	local y = cellY(x, z)
+	return cellY(x - r, z - r) == y
+		and cellY(x + r, z - r) == y
+		and cellY(x - r, z + r) == y
+		and cellY(x + r, z + r) == y
+end
+-- a blooming cherry: a log trunk with two branches, a crown of cherry leaves round a pink wool core (`size` blocks
+-- wide), loose blocks on its edge and a carpet of fallen petals
+local function cherry(x, z, size, parent)
+	local y0 = cellY(x, z)
+	local f = folder("CherryTree", parent)
+	local h = if size >= 7 then 16 elseif size == 6 then 14 else 12
+	local log = if rng:NextNumber() < 0.5 then "px_cherry_log" else "px_dark_oak_log"
+	local core = if rng:NextNumber() < 0.35 then SAKURA_DEEP else SAKURA
+	local W = size * B
+	local hw = W / 2
+	box("Trunk", x - 2, y0, z - 2, x + 2, y0 + h, z + 2, log, nil, f)
+	local sx = if rng:NextNumber() < 0.5 then 1 else -1
+	box("Branch", x + sx * 2, y0 + h - 6, z - 2, x + sx * 6, y0 + h - 2, z + 2, log, nil, f)
+	box("Branch", x - 2, y0 + h - 4, z - sx * 2, x + 2, y0 + h, z - sx * 6, log, nil, f)
+	box(
+		"Leaves",
+		x - hw,
+		y0 + h - 2,
+		z - hw + 4,
+		x + hw,
+		y0 + h + 2,
+		z + hw - 4,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Leaves",
+		x - hw + 4,
+		y0 + h - 2,
+		z - hw,
+		x + hw - 4,
+		y0 + h + 2,
+		z + hw,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Blossom",
+		x - hw + 2,
+		y0 + h + 2,
+		z - hw + 2,
+		x + hw - 2,
+		y0 + h + 8,
+		z + hw - 2,
+		"px_white_wool",
+		core,
+		f
+	)
+	box(
+		"Leaves",
+		x - hw + 4,
+		y0 + h + 8,
+		z - hw + 4,
+		x + hw - 4,
+		y0 + h + 10,
+		z + hw - 4,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Leaves",
+		x - hw,
+		y0 + h + 2,
+		z - hw + 4,
+		x - hw + 2,
+		y0 + h + 6,
+		z + hw - 4,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Leaves",
+		x + hw - 2,
+		y0 + h + 2,
+		z - hw + 4,
+		x + hw,
+		y0 + h + 6,
+		z + hw - 4,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Leaves",
+		x - hw + 4,
+		y0 + h + 2,
+		z - hw,
+		x + hw - 4,
+		y0 + h + 6,
+		z - hw + 2,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	box(
+		"Leaves",
+		x - hw + 4,
+		y0 + h + 2,
+		z + hw - 2,
+		x + hw - 4,
+		y0 + h + 6,
+		z + hw,
+		"px_cherry_leaves",
+		nil,
+		f
+	)
+	for i = 1, 3 do
+		local lx = x + rng:NextInteger(-(size // 2), size // 2) * B
+		local lz = z + (if i % 2 == 0 then 1 else -1) * (hw - 2)
+		local ly = y0 + h + rng:NextInteger(-1, 1) * B
+		cube(
+			if i == 2 then "Blossom" else "Leaves",
+			lx,
+			ly,
+			lz,
+			B,
+			B,
+			B,
+			if i == 2 then "px_white_wool" else "px_cherry_leaves",
+			if i == 2 then core else nil,
+			f
+		)
+	end
+	if flat(x, z, hw) then
+		decor(
+			box(
+				"Petals",
+				x - hw,
+				y0 + 0.05,
+				z - hw,
+				x + hw,
+				y0 + 0.35,
+				z + hw,
+				"px_white_wool",
+				SAKURA,
+				f
+			)
+		)
+	end
+	return f
+end
+-- a clump of bamboo: 1×1-block green stalks 4–8 blocks tall on a 4-stud grid round (cx, cz); every stalk is checked
+local function bambooClump(cx, cz, parent)
+	local f = folder("Bamboo", parent)
+	local n = 0
+	for gx = -2, 2 do
+		for gz = -2, 2 do
+			local x, z = snap(cx) + gx * B, snap(cz) + gz * B
+			if
+				math.abs(gx) + math.abs(gz) <= 3
+				and rng:NextNumber() < 0.5
+				and zoneOf(x, z) == "temple"
+				and onIsland(x, z, 10)
+				and not inStairCorridor(x, z)
+				and not inRect(x, z, { STAGE.x0, STAGE.z0, STAGE.x1, STAGE.z1 }, 3)
+				and not inPond(x, z, 5)
+				and not (x < 74 and z > -10)
+				and not blocked(x, z, 2)
+				and flat(x, z, 2)
+			then
+				local y0 = cellY(x, z)
+				local h = rng:NextInteger(4, 8) * B
+				box("BambooStalk", x - 2, y0, z - 2, x + 2, y0 + h, z + 2, "px_hedge", BAMBOO_C, f)
+				decor(
+					box(
+						"BambooNode",
+						x - 2.2,
+						y0 + h * 0.5,
+						z - 2.2,
+						x + 2.2,
+						y0 + h * 0.5 + 0.5,
+						z + 2.2,
+						"px_hedge",
+						LEAF_C,
+						f
+					)
+				)
+				decor(
+					box(
+						"BambooLeaves",
+						x - 3,
+						y0 + h - 1,
+						z - 3,
+						x + 3,
+						y0 + h + 2,
+						z + 3,
+						"px_hedge",
+						LEAF_C,
+						f
+					)
+				)
+				n += 1
+			end
+		end
+	end
+	return n
+end
+-- a stone kitsune (fox) on a plinth at (x, y, z) looking south (+Z), a red bib round its neck
+local function fox(x, y, z, parent)
+	local f = folder("Kitsune", parent)
+	local function fb(name, x0, y0, z0, x1, y1, z1, variant, tint, deco)
+		local p = box(name, x + x0, y + y0, z + z0, x + x1, y + y1, z + z1, variant, tint, f)
+		if deco then
+			decor(p)
+		end
+	end
+	fb("FoxPlinth", -2.4, -1, -4.4, 2.4, 3, 4.4, "px_stone_bricks", STONE)
+	fb("FoxBody", -2, 3, -3.6, 2, 8, 1, "px_smooth_stone", FOX_STONE)
+	fb("FoxChest", -1.6, 3, 0.6, 1.6, 10.4, 3, "px_smooth_stone", FOX_STONE)
+	fb("FoxHead", -1.8, 10.4, 0.4, 1.8, 13.6, 3.8, "px_smooth_stone", FOX_STONE)
+	fb("FoxSnout", -0.8, 10.8, 3.8, 0.8, 12, 5.4, "px_smooth_stone", FOX_STONE)
+	fb("FoxEar", -1.7, 13.6, 1.2, -0.5, 15.4, 2.4, "px_smooth_stone", FOX_STONE)
+	fb("FoxEar", 0.5, 13.6, 1.2, 1.7, 15.4, 2.4, "px_smooth_stone", FOX_STONE)
+	fb("FoxTail", -1, 5, -4.4, 1, 12, -2.8, "px_smooth_stone", FOX_STONE)
+	fb("FoxTailTip", -1.1, 12, -4.5, 1.1, 13.6, -2.7, "px_white_wool", PAPER)
+	fb("FoxBib", -1.9, 8.6, 2.6, 1.9, 10.2, 3.3, "px_white_wool", TORII_RED, true)
+	fb("FoxBib", -1, 7.6, 2.9, 1, 8.6, 3.4, "px_white_wool", TORII_RED, true)
+	fb("FoxEye", -1.4, 12.2, 3.8, -0.6, 12.6, 3.9, nil, TORII_RED, true)
+	fb("FoxEye", 0.6, 12.2, 3.8, 1.4, 12.6, 3.9, nil, TORII_RED, true)
+end
+
+-- ================================================================ the main stair and the torii tunnel
+do
+	local st = folder("MainStair", temple)
+	local S = MAIN_STAIR
+	local cx, w = (S.x0 + S.x1) / 2, S.x1 - S.x0
+	stairs("FlightA", cx, S.zA0, S.zA1, 0, L1_Y, w, "px_stone_bricks", st)
+	stairs("FlightB", cx, S.zB0, S.zB1, L1_Y, L2_Y - L1_Y, w, "px_stone_bricks", st)
+	for _, p in ipairs(st:GetChildren()) do
+		if p:IsA("Part") then
+			p.Color = STONE
+		end
+	end
+	-- the kerbs: one block above every step on both sides
+	for k = 0, 9 do
+		local top = 1.6 * (k + 1)
+		for _, wx in ipairs({ S.x0 - B, S.x1 }) do
+			box(
+				"StairKerb",
+				wx,
+				-1,
+				S.zA0 - 2 * k - 2,
+				wx + B,
+				top + B,
+				S.zA0 - 2 * k,
+				"px_stone_bricks",
+				STONE,
+				st
+			)
+		end
+	end
+	for k = 0, 15 do
+		local top = L1_Y + k + 1
+		for _, wx in ipairs({ S.x0 - B, S.x1 }) do
+			box(
+				"StairKerb",
+				wx,
+				L1_Y - 1,
+				S.zB0 - 2 * k - 2,
+				wx + B,
+				top + B,
+				S.zB0 - 2 * k,
+				"px_stone_bricks",
+				STONE,
+				st
+			)
+		end
+	end
+	-- the stone landing on L1 and the paving at the top
+	box("Landing", S.x0, L1_Y - 0.5, S.zB0, S.x1, L1_Y + 0.1, S.zA1, "px_stone_bricks", STONE, st)
+	box(
+		"TopPaving",
+		S.x0 - B,
+		L2_Y - 0.5,
+		-80,
+		S.x1 + B,
+		L2_Y + 0.1,
+		S.zB1,
+		"px_stone_bricks",
+		STONE,
+		st
+	)
+	for _, z in ipairs({ -11, -37 }) do
+		stoneLantern(S.x0 - 2, L1_Y, z, st, true)
+		stoneLantern(S.x1 + 2, L1_Y, z, st, true)
+	end
+	-- the torii: posts on the kerb line, black feet, red nuki and shimaki, a black kasagi with raised ends
+	local zs = { 14, 9, 4, -1, -6, -16, -24, -32, -43, -48, -53, -58, -63, -68, -73 }
+	for _, zc in ipairs(zs) do
+		local f = folder("Torii", st)
+		local lo, hi = stairY(zc + 2), stairY(zc - 2.5)
+		box(
+			"ToriiFoot",
+			S.x0 - 4.8,
+			lo - 1,
+			zc - 2.4,
+			S.x0,
+			lo + B,
+			zc + 2.4,
+			"px_white_wool",
+			INK,
+			f
+		)
+		box(
+			"ToriiFoot",
+			S.x1,
+			lo - 1,
+			zc - 2.4,
+			S.x1 + 4.8,
+			lo + B,
+			zc + 2.4,
+			"px_white_wool",
+			INK,
+			f
+		)
+		box(
+			"ToriiPost",
+			S.x0 - B,
+			lo + B,
+			zc - 2,
+			S.x0,
+			hi + 21,
+			zc + 2,
+			"px_smooth_stone",
+			TORII_RED,
+			f
+		)
+		box(
+			"ToriiPost",
+			S.x1,
+			lo + B,
+			zc - 2,
+			S.x1 + B,
+			hi + 21,
+			zc + 2,
+			"px_smooth_stone",
+			TORII_RED,
+			f
+		)
+		box(
+			"ToriiNuki",
+			S.x0 - 7,
+			hi + 15,
+			zc - 1,
+			S.x1 + 7,
+			hi + 17,
+			zc + 1,
+			"px_smooth_stone",
+			TORII_RED,
+			f
+		)
+		box(
+			"ToriiTablet",
+			cx - 2,
+			hi + 17,
+			zc - 0.8,
+			cx + 2,
+			hi + 19,
+			zc + 0.8,
+			"px_white_wool",
+			INK,
+			f
+		)
+		box(
+			"ToriiShimaki",
+			S.x0 - 8,
+			hi + 19,
+			zc - 1.5,
+			S.x1 + 8,
+			hi + 21,
+			zc + 1.5,
+			"px_smooth_stone",
+			TORII_RED,
+			f
+		)
+		box(
+			"ToriiKasagi",
+			S.x0 - 10,
+			hi + 21,
+			zc - 2,
+			S.x1 + 10,
+			hi + 23,
+			zc + 2,
+			"px_white_wool",
+			INK,
+			f
+		)
+		box(
+			"ToriiKasagiEnd",
+			S.x0 - 12,
+			hi + 22,
+			zc - 2,
+			S.x0 - 8,
+			hi + 25,
+			zc + 2,
+			"px_white_wool",
+			INK,
+			f
+		)
+		box(
+			"ToriiKasagiEnd",
+			S.x1 + 8,
+			hi + 22,
+			zc - 2,
+			S.x1 + 12,
+			hi + 25,
+			zc + 2,
+			"px_white_wool",
+			INK,
+			f
+		)
+	end
+	-- the kitsune guarding the foot and the top
+	fox(S.x0 - 7.2, 0, 8, st)
+	fox(S.x1 + 7.2, 0, 8, st)
+	fox(S.x0 - 7.2, L2_Y, -77, st)
+	fox(S.x1 + 7.2, L2_Y, -77, st)
+end
+task.wait()
+
+-- ================================================================ the temple hall on L2
+do
+	local hall = folder("Hall", temple)
+	local T = TEMPLE
+	local FY = L2_Y + 1 -- the hall floor, one stud above the court
+	local WT = 53 -- the top of the walls, where the roof starts
+	fillTo(56, -128, 176, -72, L2_Y, hall)
+	box("HallFloor", T.x0, L2_Y - 1, T.z0, T.x1, FY, T.z1, "px_spruce_planks", nil, hall)
+	-- the walls: back, sides, the front with shoji bays and the open middle bay
+	box("WallFoot", 72, FY, -120, 168, FY + 4, -116, "px_dark_oak_planks", nil, hall)
+	box("Plaster", 72, FY + 4, -120, 168, WT, -116, "px_white_wool", PAPER, hall)
+	for _, sx in ipairs({ 72, 164 }) do
+		box("WallFoot", sx, FY, -116, sx + 4, FY + 4, -92, "px_dark_oak_planks", nil, hall)
+		box("Plaster", sx, FY + 4, -116, sx + 4, WT, -92, "px_white_wool", PAPER, hall)
+		box("Nageshi", sx - 0.5, 45, -120.5, sx + 4.5, 47, -91.5, "px_dark_oak_planks", nil, hall)
+	end
+	box("Nageshi", 71.5, 45, -120.5, 168.5, 47, -115.5, "px_dark_oak_planks", nil, hall)
+	box("Plaster", 72, 47, -92, 168, WT, -88, "px_white_wool", PAPER, hall)
+	box("Nageshi", 71, 45, -93, 169, 47, -87, "px_dark_oak_planks", nil, hall)
+	for _, bay in ipairs({ { 76, 86 }, { 90, 102 }, { 138, 150 }, { 154, 164 } }) do
+		box("Shoji", bay[1], FY, -91, bay[2], 45, -89, "px_white_wool", PAPER, hall)
+		decor(box("ShojiBar", bay[1], 38.6, -89, bay[2], 39.4, -88.6, nil, DARK_WOOD, hall))
+		local mx = (bay[1] + bay[2]) / 2
+		decor(box("ShojiBar", mx - 0.4, FY, -89, mx + 0.4, 45, -88.6, nil, DARK_WOOD, hall))
+	end
+	for _, x in ipairs({ 74, 88, 104, 136, 152, 166 }) do
+		box("HallPost", x - 2, FY, -93, x + 2, WT, -87, "px_dark_oak_planks", nil, hall)
+	end
+	for _, x in ipairs({ 74, 104, 136, 166 }) do
+		box("HallPost", x - 2, FY, -121, x + 2, WT, -115, "px_dark_oak_planks", nil, hall)
+	end
+	for _, x in ipairs({ 71, 165 }) do
+		box("HallPost", x, FY, -106, x + 4, WT, -102, "px_dark_oak_planks", nil, hall)
+	end
+	-- the red posts along the veranda
+	for k = 0, 9 do
+		local x = 66 + 12 * k
+		box("VerandaPost", x - 2, FY, -80, x + 2, WT, -76, "px_smooth_stone", TORII_RED, hall)
+	end
+	box("VerandaBeam", T.x0, WT - 3, -80, T.x1, WT, -76, "px_smooth_stone", TORII_RED, hall)
+	-- inside: the altar with offerings, a bell rope at the entrance, two hanging lanterns
+	box("Altar", 108, FY, -116, 132, FY + 4, -110, "px_dark_oak_planks", nil, hall)
+	box("AltarTop", 107, FY + 4, -116, 133, FY + 5, -109, "px_spruce_planks", DARK_WOOD, hall)
+	cube("OfferingBox", 120, FY + 6.5, -111.5, 4, 3, 3, "px_gold_block", nil, hall)
+	decor(cube("Mirror", 120, FY + 9.5, -114, 3, 3, 0.6, "px_gold_block", nil, hall))
+	decor(cube("MirrorStand", 120, FY + 6.5, -114, 1, 3, 1, "px_dark_oak_planks", nil, hall))
+	for _, x in ipairs({ 110, 130 }) do
+		paperLantern(x, FY + 11, -113, PAPER, hall, false)
+		decor(cube("LanternStand", x, FY + 7, -113, 0.6, 4, 0.6, "px_dark_oak_planks", nil, hall))
+	end
+	banner(at(120, FY + 13, -115.8), TORII_RED, hall, PAPER, 2 * B, 3 * B)
+	decor(cube("BellSuzu", 120, 43, -89, 2.4, 2.4, 2.4, "px_gold_block", nil, hall))
+	decor(cube("BellRope", 120, 38, -89, 0.6, 8, 0.6, "px_white_wool", TORII_RED, hall))
+	decor(cube("BellRope", 120.7, 38, -89, 0.6, 8, 0.6, "px_white_wool", PAPER, hall))
+	for _, x in ipairs({ 92, 148 }) do
+		lantern(V(x, 44, -104), hall, false, BY + WT)
+		lights += 1
+	end
+	-- the roof: a stepped hip of dark tiles (thin flared eaves, steeper above), the ridge, the corner tips
+	local LAYERS = { { 0, 2 }, { 4, 2 }, { 8, 3 }, { 12, 3 }, { 16, 4 }, { 20, 4 }, { 24, 4 } }
+	local y = WT
+	local ys = {}
+	for i, l in ipairs(LAYERS) do
+		local d = l[1]
+		ys[i] = y
+		box("HallRoof", 60 + d, y, -128 + d, 180 - d, y + l[2], -72 - d, ROOF_V, ROOF_DARK, hall)
+		y += l[2]
+	end
+	box("Ridge", 82, y, -102, 158, y + 3, -98, "px_white_wool", INK, hall)
+	box("RidgeEnd", 78, y + 1, -103, 84, y + 6, -97, "px_white_wool", INK, hall)
+	box("RidgeEnd", 156, y + 1, -103, 162, y + 6, -97, "px_white_wool", INK, hall)
+	roofTips(60, -128, 180, -72, WT + 2, ROOF_DARK, hall)
+	-- the south cross-gable: a north-south stepped roof over the middle bays with a white plaster face
+	for k = 0, 5 do
+		local l = LAYERS[k + 1]
+		box(
+			"GableRoof",
+			96 + 4 * k,
+			ys[k + 1],
+			-100,
+			144 - 4 * k,
+			ys[k + 1] + l[2],
+			-70,
+			ROOF_V,
+			ROOF_DARK,
+			hall
+		)
+		if k >= 1 then
+			box(
+				"GableFace",
+				96 + 4 * k,
+				WT,
+				-75,
+				144 - 4 * k,
+				ys[k + 1],
+				-73,
+				"px_white_wool",
+				PAPER,
+				hall
+			)
+		end
+	end
+	box("GableTip", 92, WT + 2, -72, 98, WT + 5, -68, ROOF_V, ROOF_DARK, hall)
+	box("GableTip", 142, WT + 2, -72, 148, WT + 5, -68, ROOF_V, ROOF_DARK, hall)
+	box("GableTrim", 99, WT, -73.5, 141, WT + 1.5, -72.5, "px_dark_oak_planks", nil, hall)
+	decor(box("GableCrest", 118, ys[6] - 5, -73, 122, ys[6] - 1, -72.4, "px_gold_block", nil, hall))
+	-- stone lanterns by the east side of the hall
+	for _, z in ipairs({ -84, -116 }) do
+		if onIsland(182, z, 10) and cellY(182, z) == L2_Y then
+			stoneLantern(182, L2_Y, z, hall, true)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the stage on its log stilts
+do
+	local stage = folder("Stage", temple)
+	local S = STAGE
+	local DY = S.y + 0.1 -- the deck top (a hair over the L2 court so the faces never fight)
+	for z = S.z0, S.z1 - 8, 8 do
+		local tint = if (z // 8) % 2 == 0 then nil else Color3.fromRGB(232, 222, 210)
+		box("Deck", S.x0, S.y - 2, z, S.x1, DY, z + 8, "px_spruce_planks", tint, stage)
+	end
+	-- the stilts: 1×1-block logs every 2 blocks from the ground (L0) up to the deck, stone feet
+	local nStilts = 0
+	for i = 0, 12 do
+		local x = 76 + 8 * i
+		for k = 0, 6 do
+			local z = -20 - 8 * k
+			local gy = cellY(x, z)
+			if gy < S.y - 4 then
+				box(
+					"Stilt",
+					x - 2,
+					gy - 1,
+					z - 2,
+					x + 2,
+					S.y - 2,
+					z + 2,
+					"px_dark_oak_log",
+					nil,
+					stage
+				)
+				box(
+					"StiltFoot",
+					x - 2.6,
+					gy - 0.5,
+					z - 2.6,
+					x + 2.6,
+					gy + 1.5,
+					z + 2.6,
+					"px_stone_bricks",
+					STONE,
+					stage
+				)
+				nStilts += 1
+			end
+		end
+	end
+	-- the tie beams: one long box per row and level (y 6, 14, 22), a cap row under the deck along x
+	for k = 0, 6 do
+		local z = -20 - 8 * k
+		for _, h in ipairs({ 6, 14, 22, 28 }) do
+			box("TieBeam", S.x0, h, z - 1, S.x1, h + 2, z + 1, "px_dark_oak_planks", nil, stage)
+		end
+	end
+	for i = 0, 12 do
+		local x = 76 + 8 * i
+		for _, h in ipairs({ 6, 14, 22 }) do
+			box("TieBeam", x - 1, h, S.z0, x + 1, h + 2, S.z1, "px_dark_oak_planks", nil, stage)
+		end
+	end
+	-- the railing on the open sides (south, west, east); the north side stays open to the hall
+	local RAIL = "px_dark_oak_planks"
+	for x = S.x0 + 1, S.x1 - 1, 8 do
+		box("RailPost", x - 1, DY, S.z1 - 2, x + 1, DY + 4.4, S.z1, RAIL, nil, stage)
+	end
+	box("RailPost", S.x1 - 2, DY, S.z1 - 2, S.x1, DY + 4.4, S.z1, RAIL, nil, stage)
+	for z = S.z1 - 9, S.z0, -8 do
+		box("RailPost", S.x0, DY, z - 1, S.x0 + 2, DY + 4.4, z + 1, RAIL, nil, stage)
+		box("RailPost", S.x1 - 2, DY, z - 1, S.x1, DY + 4.4, z + 1, RAIL, nil, stage)
+	end
+	box("RailTop", S.x0, DY + 3.4, S.z1 - 2.3, S.x1, DY + 4.6, S.z1 + 0.3, RAIL, nil, stage)
+	box("RailMid", S.x0, DY + 1.6, S.z1 - 1.6, S.x1, DY + 2.4, S.z1 - 0.4, RAIL, nil, stage)
+	for _, x0 in ipairs({ S.x0, S.x1 - 2 }) do
+		box("RailTop", x0 - 0.3, DY + 3.4, S.z0, x0 + 2.3, DY + 4.6, S.z1, RAIL, nil, stage)
+		box("RailMid", x0 + 0.4, DY + 1.6, S.z0, x0 + 1.6, DY + 2.4, S.z1, RAIL, nil, stage)
+	end
+	-- paper lanterns hung out over the south edge on short brackets
+	for i, x in ipairs({ 88, 112, 136, 160 }) do
+		decor(
+			box(
+				"LanternArm",
+				x - 0.4,
+				DY + 3.4,
+				S.z1,
+				x + 0.4,
+				DY + 4.2,
+				S.z1 + 2.4,
+				RAIL,
+				nil,
+				stage
+			)
+		)
+		paperLantern(
+			x,
+			DY + 3.4,
+			S.z1 + 2,
+			if i % 2 == 0 then PAPER else TORII_RED,
+			stage,
+			i == 2 or i == 3
+		)
+	end
+	print(("[build-kyoto] temple: stage stilts %d"):format(nStilts))
+end
+task.wait()
+
+-- ================================================================ three waterfalls from under the stage into the pond
+do
+	local falls = folder("Waterfalls", temple)
+	local function water(p)
+		p.Transparency = 0.3
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CastShadow = false
+		return p
+	end
+	for _, c in ipairs({ 108, 124, 140 }) do
+		local inWater = cellY(c, -11) == POND.bed
+		local foot = if inWater then -1 else 0.2
+		-- the rock mouth under the deck edge, moss over it
+		box("SpoutRock", c - 6, 26, -18, c + 6, 30, -12, "px_mossy_stone_bricks", nil, falls)
+		box("SpoutRock", c - 8, 22, -17, c - 3, 26, -13, "px_mossy_cobblestone", nil, falls)
+		box("SpoutRock", c + 3, 23, -17, c + 8, 26, -14, "px_mossy_cobblestone", nil, falls)
+		decor(box("Moss", c - 6.3, 28, -12.3, c + 6.3, 30.2, -11.8, "px_hedge", LEAF_C, falls))
+		water(box("FallLip", c - 3, 25, -16, c + 3, 26.2, -11.4, "px_water", WATER_C, falls))
+		water(box("Waterfall", c - 3, foot, -11.6, c + 3, 26, -10, "px_water", WATER_C, falls))
+		-- the side falls land on the bank and run to the pond in a short stream
+		if not inWater then
+			local zEnd = -8
+			for zc = -8, 8, 8 do
+				if cellY(c, zc + 4) == POND.bed then
+					zEnd = zc
+					break
+				end
+			end
+			water(box("Stream", c - 3, 0, -10, c + 3, 0.35, zEnd, "px_water", WATER_C, falls))
+			box("StreamBank", c - 5, -0.5, -12, c - 3, 1, zEnd, "px_mossy_cobblestone", nil, falls)
+			box("StreamBank", c + 3, -0.5, -12, c + 5, 1, zEnd, "px_mossy_cobblestone", nil, falls)
+		end
+		local foam =
+			decor(box("Foam", c - 4, foot, -13, c + 4, foot + 0.4, -7, "px_white_wool", nil, falls))
+		foam.Transparency = 0.35
+		foam.CastShadow = false
+		local spray =
+			decor(part("Splash", Vector3.new(6, 1, 3), at(c, foot + 0.5, -10.8), nil, nil, falls))
+		spray.Transparency = 1
+		emitter(spray, {
+			Rate = 10,
+			Lifetime = NumberRange.new(0.6, 1.2),
+			Speed = NumberRange.new(4, 8),
+			SpreadAngle = Vector2.new(50, 50),
+			Acceleration = Vector3.new(0, -14, 0),
+			Size = NumberSequence.new(0.8, 1.6),
+			Color = ColorSequence.new(Color3.new(1, 1, 1)),
+			Transparency = NumberSequence.new(0.3, 1),
+		})
+		emitter(spray, {
+			Rate = 3,
+			Lifetime = NumberRange.new(2.5, 4),
+			Speed = NumberRange.new(1, 2.5),
+			SpreadAngle = Vector2.new(70, 70),
+			Size = NumberSequence.new(4, 9),
+			Color = ColorSequence.new(Color3.fromRGB(235, 245, 250)),
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.3, 0.75),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		})
+	end
+end
+task.wait()
+
+-- ================================================================ the koi pond: edges, lilies, koi, reeds, the bridge, the shrine
+do
+	local pond = folder("Pond", temple)
+	local NO_RIM = { { 72, 14, 176, 34 }, { 104, -16, 112, -8 }, { 136, -16, 144, -8 } }
+	local function isPond(cx, cz)
+		return groundY(cx, cz) == POND.bed
+	end
+	-- the stone and moss edge on every bank cell next to the water
+	local EDGE =
+		{ "px_stone_bricks", "px_mossy_stone_bricks", "px_cobblestone", "px_mossy_stone_bricks" }
+	local nRim = 0
+	for z = -16, 64, 8 do
+		for x = 80, 168, 8 do
+			local cx, cz = x + 4, z + 4
+			local skip = cz > 64 or isPond(cx, cz) or cellY(cx, cz) ~= 0
+			for _, r in ipairs(NO_RIM) do
+				skip = skip or inRect(cx, cz, r)
+			end
+			if
+				not skip
+				and (
+					isPond(cx + 8, cz)
+					or isPond(cx - 8, cz)
+					or isPond(cx, cz + 8)
+					or isPond(cx, cz - 8)
+				)
+			then
+				local v = pick(EDGE)
+				box(
+					"PondEdge",
+					x,
+					-0.4,
+					z,
+					x + 8,
+					0.5,
+					z + 8,
+					v,
+					if v == "px_stone_bricks" then STONE else nil,
+					pond
+				)
+				if rng:NextNumber() < 0.5 then
+					local qx, qz = x + rng:NextInteger(0, 1) * 4, z + rng:NextInteger(0, 1) * 4
+					box(
+						"PondRock",
+						qx,
+						0,
+						qz,
+						qx + 4,
+						rng:NextInteger(2, 4),
+						qz + 4,
+						pick({ "px_mossy_cobblestone", "px_stone" }),
+						nil,
+						pond
+					)
+				elseif rng:NextNumber() < 0.6 then
+					-- reeds and irises
+					for _ = 1, 3 do
+						local rx, rz = x + 1 + rng:NextNumber() * 6, z + 1 + rng:NextNumber() * 6
+						local h = 2 + rng:NextNumber() * 2
+						decor(
+							cube("Reed", rx, 0.5 + h / 2, rz, 0.6, h, 0.6, "px_hedge", LEAF_C, pond)
+						)
+						if rng:NextNumber() < 0.5 then
+							decor(
+								cube(
+									"Iris",
+									rx,
+									0.5 + h + 0.4,
+									rz,
+									0.9,
+									0.8,
+									0.9,
+									"px_white_wool",
+									Color3.fromRGB(130, 90, 200),
+									pond
+								)
+							)
+						end
+					end
+				end
+				nRim += 1
+			end
+		end
+	end
+	-- flat stepping stones along the south-west shore
+	for i = 0, 4 do
+		local a = math.rad(110 + i * 14)
+		local sx, sz = POND.x + math.cos(a) * (POND.r - 8), POND.z + math.sin(a) * (POND.r - 8)
+		if cellY(sx, sz) == POND.bed then
+			box(
+				"SteppingStone",
+				sx - 2,
+				-1.6,
+				sz - 2,
+				sx + 2,
+				-0.4,
+				sz + 2,
+				"px_smooth_stone",
+				STONE,
+				pond
+			)
+		end
+	end
+	-- lily pads (some in bloom) and koi under the surface
+	local function inWater(x, z, pad)
+		return inPond(x, z, -pad) and cellY(x, z) == POND.bed and not (z > 12 and z < 36)
+	end
+	local nLily = 0
+	for _ = 1, 60 do
+		if nLily >= 16 then
+			break
+		end
+		local x, z = POND.x + rng:NextInteger(-30, 30), POND.z + rng:NextInteger(-30, 30)
+		if inWater(x, z, 5) then
+			decor(
+				cube(
+					"LilyPad",
+					x,
+					-0.9,
+					z,
+					2.6,
+					0.2,
+					2.6,
+					"px_hedge",
+					Color3.fromRGB(80, 140, 60),
+					pond
+				)
+			)
+			if rng:NextNumber() < 0.35 then
+				decor(
+					cube(
+						"LilyFlower",
+						x + 0.4,
+						-0.5,
+						z - 0.3,
+						0.8,
+						0.6,
+						0.8,
+						"px_white_wool",
+						SAKURA,
+						pond
+					)
+				)
+			end
+			nLily += 1
+		end
+	end
+	local KOI = {
+		{ Color3.fromRGB(240, 120, 40), Color3.fromRGB(250, 250, 245) },
+		{ Color3.fromRGB(250, 250, 245), Color3.fromRGB(235, 100, 30) },
+		{ Color3.fromRGB(250, 250, 245), Color3.fromRGB(30, 30, 34) },
+		{ Color3.fromRGB(235, 110, 35), Color3.fromRGB(30, 30, 34) },
+	}
+	local nKoi = 0
+	for _ = 1, 80 do
+		if nKoi >= 10 then
+			break
+		end
+		local x, z = POND.x + rng:NextInteger(-28, 28), POND.z + rng:NextInteger(-28, 28)
+		if inWater(x, z, 6) then
+			local c = KOI[nKoi % #KOI + 1]
+			local cf = at(x, -1.7, z) * CFrame.Angles(0, rng:NextNumber() * math.pi * 2, 0)
+			textured(
+				decor(part("Koi", Vector3.new(2.4, 0.7, 1), cf, nil, nil, pond)),
+				"px_white_wool",
+				c[1]
+			)
+			textured(
+				decor(
+					part(
+						"KoiPatch",
+						Vector3.new(0.9, 0.75, 1.05),
+						cf * CFrame.new(0.5, 0, 0),
+						nil,
+						nil,
+						pond
+					)
+				),
+				"px_white_wool",
+				c[2]
+			)
+			textured(
+				decor(
+					part(
+						"KoiTail",
+						Vector3.new(0.6, 0.5, 0.9),
+						cf * CFrame.new(-1.5, 0, 0),
+						nil,
+						nil,
+						pond
+					)
+				),
+				"px_white_wool",
+				c[1]
+			)
+			nKoi += 1
+		end
+	end
+	task.wait()
+
+	-- the red arched bridge: stepped deck segments (≤ 1.1 stud apart) with a plank walkway, red rails, invisible
+	-- chord ramps over the step noses so it walks like a slope
+	local br = folder("Bridge", pond)
+	local X0, X1, ZC = 76, 172, POND.z
+	local N = (X1 - X0) // 4
+	local tops = {}
+	for i = 0, N - 1 do
+		local xc = X0 + 4 * i + 2
+		local t = 6 * (1 - ((xc - 124) / 48) ^ 2)
+		t = math.max(0.4, math.floor(t * 5 + 0.5) / 5)
+		tops[i] = t
+		local xa = X0 + 4 * i
+		box("BridgeDeck", xa, t - 2.5, ZC - 8, xa + 4, t, ZC + 8, "px_planks", TORII_RED, br)
+		box(
+			"BridgeWalk",
+			xa,
+			t - 0.4,
+			ZC - 6,
+			xa + 4,
+			t + 0.05,
+			ZC + 6,
+			"px_spruce_planks",
+			nil,
+			br
+		)
+		for _, s in ipairs({ -1, 1 }) do
+			box(
+				"BridgeRail",
+				xa,
+				t + 3.4,
+				ZC + s * 7 - 0.6,
+				xa + 4,
+				t + 4.2,
+				ZC + s * 7 + 0.6,
+				"px_planks",
+				TORII_RED,
+				br
+			)
+		end
+	end
+	for k = 0, N // 2 do
+		local x = X0 + 8 * k
+		local i0, i1 = math.clamp(2 * k - 1, 0, N - 1), math.clamp(2 * k, 0, N - 1)
+		local t = math.max(tops[i0], tops[i1])
+		for _, s in ipairs({ -1, 1 }) do
+			local px = math.clamp(x, X0 + 1, X1 - 1)
+			box(
+				"BridgePost",
+				px - 1,
+				t - 0.5,
+				ZC + s * 7 - 1,
+				px + 1,
+				t + 4.6,
+				ZC + s * 7 + 1,
+				"px_planks",
+				TORII_RED,
+				br
+			)
+			if k == 0 or k == N // 2 then
+				cube("BridgeCap", px, t + 5.2, ZC + s * 7, 1.6, 1.2, 1.6, "px_gold_block", nil, br)
+			end
+		end
+	end
+	local pts = { { X0 - 4, 0 } }
+	for i = 0, N - 1 do
+		local xc = X0 + 4 * i + 2
+		table.insert(pts, { if xc < 124 then X0 + 4 * i else X0 + 4 * i + 4, tops[i] })
+	end
+	table.insert(pts, { X1 + 4, 0 })
+	for i = 1, #pts - 1 do
+		local a, b = V(pts[i][1], pts[i][2], ZC), V(pts[i + 1][1], pts[i + 1][2], ZC)
+		local ramp = part(
+			"BridgeRamp",
+			Vector3.new(12, 1, (b - a).Magnitude),
+			CFrame.lookAt((a + b) / 2, b) * CFrame.new(0, -0.5, 0),
+			nil,
+			nil,
+			br
+		)
+		ramp.Transparency = 1
+		ramp.CastShadow = false
+	end
+	-- gravel paths: from the square to the bridge, from the square along the north bank, east to the shrine
+	box("GravelPath", 72, -0.2, ZC - 6, X0, 0.15, ZC + 6, "px_gravel", nil, pond)
+	box("GravelPath", X1, -0.2, ZC - 6, 186, 0.15, ZC + 6, "px_gravel", nil, pond)
+	box("GravelPath", 72, -0.2, -8, 96, 0.15, 0, "px_gravel", nil, pond)
+	for _, p in ipairs({ { 74, ZC - 12 }, { 74, ZC + 12 }, { 174, ZC - 12 }, { 174, ZC + 12 } }) do
+		stoneLantern(p[1], 0, p[2], br, true)
+	end
+	task.wait()
+
+	-- the little shrine on the east bank (facing the bridge) and the ghost of the samurai's beloved
+	local sh = folder("Shrine", pond)
+	local SX, SZ = 194, ZC
+	box("ShrineBase", SX - 6, -0.5, SZ - 6, SX + 6, 1, SZ + 6, "px_stone_bricks", STONE, sh)
+	box("ShrineBody", SX - 2, 1, SZ - 4, SX + 4, 8, SZ + 4, "px_dark_oak_planks", nil, sh)
+	decor(box("ShrineDoor", SX - 2.2, 2, SZ - 3, SX - 2, 7, SZ + 3, "px_white_wool", PAPER, sh))
+	decor(box("ShrineDoorBar", SX - 2.4, 2, SZ - 0.3, SX - 2.1, 7, SZ + 0.3, nil, DARK_WOOD, sh))
+	for _, s in ipairs({ -1, 1 }) do
+		box(
+			"ShrinePost",
+			SX - 5,
+			1,
+			SZ + s * 4 - 1,
+			SX - 3,
+			9,
+			SZ + s * 4 + 1,
+			"px_smooth_stone",
+			TORII_RED,
+			sh
+		)
+		paperLantern(SX - 4, 9, SZ + s * 2.2, PAPER, sh, true)
+	end
+	box("ShrineRoof", SX - 7, 9, SZ - 7, SX + 7, 10, SZ + 7, ROOF_V, ROOF_DARK, sh)
+	box("ShrineRoof", SX - 5, 10, SZ - 5, SX + 5, 11.5, SZ + 5, ROOF_V, ROOF_DARK, sh)
+	box("ShrineRidge", SX - 1, 11.5, SZ - 5, SX + 1, 13, SZ + 5, "px_white_wool", INK, sh)
+	roofTips(SX - 7, SZ - 7, SX + 7, SZ + 7, 10, ROOF_DARK, sh, 2)
+	box("OfferingTable", SX - 5, 1, SZ - 1.5, SX - 3, 2.6, SZ + 1.5, "px_dark_oak_planks", nil, sh)
+	decor(cube("Offering", SX - 4, 3.2, SZ, 1.2, 1.2, 1.2, "px_gold_block", nil, sh))
+	local gx, gz = 184, ZC + 12
+	local ghost = {
+		{ "GhostRobe", Vector3.new(1.8, 4.2, 1.4), Vector3.new(0, 2.6, 0), PAPER },
+		{ "GhostBody", Vector3.new(1.4, 1.8, 1), Vector3.new(0, 5.6, 0), PAPER },
+		{
+			"GhostHead",
+			Vector3.new(1.3, 1.3, 1.3),
+			Vector3.new(0, 7.2, 0),
+			Color3.fromRGB(250, 250, 255),
+		},
+		{ "GhostHair", Vector3.new(1.4, 3, 0.4), Vector3.new(0, 6.4, 0.75), INK },
+		{ "GhostSleeve", Vector3.new(2.6, 0.8, 0.9), Vector3.new(0, 5.4, -0.4), PAPER },
+	}
+	local gcf = CFrame.lookAt(V(gx, 0, gz), V(POND.x, 0, POND.z)) -- -Z (her face) toward the water
+	for _, g in ipairs(ghost) do
+		local p = textured(
+			decor(part(g[1], g[2], gcf * CFrame.new(g[3]), nil, nil, sh)),
+			"px_white_wool",
+			g[4]
+		)
+		p.Transparency = if g[1] == "GhostHair" then 0.4 else 0.5
+		p.CastShadow = false
+	end
+	print(("[build-kyoto] temple: pond edge cells %d, lilies %d, koi %d"):format(nRim, nLily, nKoi))
+end
+task.wait()
+
+-- ================================================================ under the stage: moss rocks and bamboo beside it
+do
+	local under = folder("UnderStage", temple)
+	for i = 0, 11 do
+		for k = 0, 5 do
+			local x, z = 80 + 8 * i, -24 - 8 * k
+			if rng:NextNumber() < 0.16 and cellY(x, z) == 0 then
+				box(
+					"MossRock",
+					x - 2,
+					-0.5,
+					z - 2,
+					x + 2,
+					rng:NextInteger(2, 4),
+					z + 2,
+					pick({ "px_mossy_cobblestone", "px_mossy_stone_bricks" }),
+					nil,
+					under
+				)
+				if rng:NextNumber() < 0.5 then
+					decor(
+						box(
+							"Fern",
+							x - 1.5,
+							0,
+							z + 2,
+							x + 1.5,
+							1.6,
+							z + 3.2,
+							"px_hedge",
+							LEAF_C,
+							under
+						)
+					)
+				end
+			end
+		end
+	end
+	local nb = 0
+	for _, c in ipairs({
+		{ 62, -62 },
+		{ 62, -44 },
+		{ 62, -26 },
+		{ 186, -62 },
+		{ 194, -44 },
+		{ 186, -26 },
+		{ 204, -58 },
+		{ 204, -30 },
+	}) do
+		nb += bambooClump(c[1], c[2], under)
+	end
+	print(("[build-kyoto] temple: bamboo stalks by the stage %d"):format(nb))
+end
+task.wait()
+
+-- ================================================================ the five-storey pagoda (hero) on L2
+do
+	local pg = folder("Pagoda", temple)
+	local px, pz = PAGODA.x, PAGODA.z + 4 -- nudged 4 studs in, away from the island rim
+	box(
+		"PagodaPlatform",
+		px - 18,
+		L2_Y - 4,
+		pz - 18,
+		px + 18,
+		L2_Y + 2,
+		pz + 18,
+		"px_stone_bricks",
+		STONE,
+		pg
+	)
+	box(
+		"PagodaKerb",
+		px - 18.5,
+		L2_Y + 1.6,
+		pz - 18.5,
+		px + 18.5,
+		L2_Y + 2.2,
+		pz + 18.5,
+		"px_smooth_stone",
+		STONE,
+		pg
+	)
+	box(
+		"PagodaStep",
+		px - 8,
+		L2_Y - 1,
+		pz + 18,
+		px + 8,
+		L2_Y + 1,
+		pz + 22,
+		"px_stone_bricks",
+		STONE,
+		pg
+	)
+	local y = L2_Y + 2
+	for i, h in ipairs({ 14, 12, 10, 8, 6 }) do
+		local wallH = if i == 1 then 12 else 8
+		box("PagodaWall", px - h, y, pz - h, px + h, y + wallH, pz + h, "px_white_wool", PAPER, pg)
+		box(
+			"PagodaSill",
+			px - h - 0.5,
+			y,
+			pz - h - 0.5,
+			px + h + 0.5,
+			y + 1.5,
+			pz + h + 0.5,
+			"px_dark_oak_planks",
+			nil,
+			pg
+		)
+		box(
+			"PagodaBand",
+			px - h - 0.5,
+			y + wallH - 2,
+			pz - h - 0.5,
+			px + h + 0.5,
+			y + wallH,
+			pz + h + 0.5,
+			"px_smooth_stone",
+			TORII_RED,
+			pg
+		)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				box(
+					"PagodaPost",
+					px + sx * (h + 1),
+					y,
+					pz + sz * (h + 1),
+					px + sx * (h - 3),
+					y + wallH,
+					pz + sz * (h - 3),
+					"px_smooth_stone",
+					TORII_RED,
+					pg
+				)
+			end
+		end
+		-- a door on the south of the ground floor, red lattice windows elsewhere
+		local dh = if i == 1 then 8 else 4
+		local dw = if i == 1 then 3 else 2
+		decor(
+			box(
+				"PagodaDoor",
+				px - dw,
+				y + 1.5,
+				pz + h,
+				px + dw,
+				y + 1.5 + dh,
+				pz + h + 0.3,
+				"px_dark_oak_planks",
+				nil,
+				pg
+			)
+		)
+		decor(
+			box(
+				"PagodaWindow",
+				px - dw,
+				y + 2,
+				pz - h - 0.3,
+				px + dw,
+				y + 2 + dh * 0.75,
+				pz - h,
+				"px_smooth_stone",
+				TORII_RED,
+				pg
+			)
+		)
+		decor(
+			box(
+				"PagodaWindow",
+				px - h - 0.3,
+				y + 2,
+				pz - dw,
+				px - h,
+				y + 2 + dh * 0.75,
+				pz + dw,
+				"px_smooth_stone",
+				TORII_RED,
+				pg
+			)
+		)
+		decor(
+			box(
+				"PagodaWindow",
+				px + h,
+				y + 2,
+				pz - dw,
+				px + h + 0.3,
+				y + 2 + dh * 0.75,
+				pz + dw,
+				"px_smooth_stone",
+				TORII_RED,
+				pg
+			)
+		)
+		-- the roof: two wide dark layers, the up-turned tips, paper lanterns at the eave corners
+		local r = y + wallH
+		box(
+			"PagodaRoof",
+			px - h - 8,
+			r,
+			pz - h - 8,
+			px + h + 8,
+			r + 2,
+			pz + h + 8,
+			ROOF_V,
+			ROOF_DARK,
+			pg
+		)
+		box(
+			"PagodaRoof",
+			px - h - 4,
+			r + 2,
+			pz - h - 4,
+			px + h + 4,
+			r + 4,
+			pz + h + 4,
+			ROOF_V,
+			ROOF_DARK,
+			pg
+		)
+		roofTips(px - h - 8, pz - h - 8, px + h + 8, pz + h + 8, r + 2, ROOF_DARK, pg)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				paperLantern(
+					px + sx * (h + 5),
+					r,
+					pz + sz * (h + 5),
+					if i % 2 == 0 then TORII_RED else PAPER,
+					pg,
+					false
+				)
+			end
+		end
+		y = r + 4
+	end
+	-- the top: a stepped cap and the gold spire (sorin) with its rings
+	box("PagodaCap", px - 6, y, pz - 6, px + 6, y + 2, pz + 6, ROOF_V, ROOF_DARK, pg)
+	box("PagodaCap", px - 4, y + 2, pz - 4, px + 4, y + 4, pz + 4, ROOF_V, ROOF_DARK, pg)
+	box("PagodaCap", px - 2, y + 4, pz - 2, px + 2, y + 6, pz + 2, "px_iron_block", nil, pg)
+	box("Sorin", px - 0.7, y + 6, pz - 0.7, px + 0.7, y + 30, pz + 0.7, "px_iron_block", nil, pg)
+	for k = 0, 6 do
+		cube(
+			"SorinRing",
+			px,
+			y + 10 + 2 * k,
+			pz,
+			3 - k * 0.2,
+			0.6,
+			3 - k * 0.2,
+			"px_gold_block",
+			nil,
+			pg
+		)
+	end
+	cube("SorinFlame", px, y + 26, pz, 2, 2.6, 2, "px_gold_block", nil, pg)
+	cube("SorinJewel", px, y + 30.7, pz, 1.4, 1.4, 1.4, "px_gold_block", nil, pg)
+	-- stone lanterns by the steps and at the back corners
+	for _, p in ipairs({
+		{ px - 12, pz + 22 },
+		{ px + 12, pz + 22 },
+		{ px - 22, pz - 16 },
+		{ px + 22, pz - 16 },
+	}) do
+		if onIsland(p[1], p[2], 10) and cellY(p[1], p[2]) == L2_Y then
+			stoneLantern(p[1], L2_Y, p[2], pg, true)
+		end
+	end
+	print(("[build-kyoto] temple: pagoda top y %.1f"):format(y + 31.4))
+end
+task.wait()
+
+-- ================================================================ the east bailey: paths, the bell tower, lanterns
+do
+	local bailey = folder("Bailey", temple)
+	local function path(x0, z0, x1, z1)
+		box("StonePath", x0, L2_Y - 0.2, z0, x1, L2_Y + 0.15, z1, "px_stone_bricks", STONE, bailey)
+	end
+	path(56, -164, 64, -72) -- from the arena side along the hall to the pagoda yard
+	path(64, -160, 92, -152)
+	path(104, -134, 116, -124) -- behind the hall to the pagoda steps
+	stoneLantern(100, L2_Y, -130, bailey, true)
+	stoneLantern(120, L2_Y, -130, bailey, true)
+	-- the bell tower (shōrō): stone base, four red posts, the bronze bell, a stepped roof
+	local bx, bz = 150, -140
+	box(
+		"BellBase",
+		bx - 8,
+		L2_Y - 1,
+		bz - 8,
+		bx + 8,
+		L2_Y + 1.5,
+		bz + 8,
+		"px_stone_bricks",
+		STONE,
+		bailey
+	)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -1, 1 }) do
+			box(
+				"BellPost",
+				bx + sx * 5,
+				L2_Y + 1.5,
+				bz + sz * 5,
+				bx + sx * 7,
+				L2_Y + 14,
+				bz + sz * 7,
+				"px_smooth_stone",
+				TORII_RED,
+				bailey
+			)
+		end
+	end
+	box(
+		"BellBeam",
+		bx - 7,
+		L2_Y + 12,
+		bz - 1,
+		bx + 7,
+		L2_Y + 14,
+		bz + 1,
+		"px_dark_oak_planks",
+		nil,
+		bailey
+	)
+	box(
+		"Bell",
+		bx - 2.5,
+		L2_Y + 5,
+		bz - 2.5,
+		bx + 2.5,
+		L2_Y + 11,
+		bz + 2.5,
+		"px_iron_block",
+		BRONZE,
+		bailey
+	)
+	box(
+		"BellLip",
+		bx - 3,
+		L2_Y + 4.4,
+		bz - 3,
+		bx + 3,
+		L2_Y + 5.4,
+		bz + 3,
+		"px_iron_block",
+		BRONZE,
+		bailey
+	)
+	decor(
+		box(
+			"BellHanger",
+			bx - 0.5,
+			L2_Y + 11,
+			bz - 0.5,
+			bx + 0.5,
+			L2_Y + 12,
+			bz + 0.5,
+			nil,
+			INK,
+			bailey
+		)
+	)
+	decor(
+		box(
+			"BellStriker",
+			bx - 7,
+			L2_Y + 8,
+			bz - 0.5,
+			bx - 3.4,
+			L2_Y + 9,
+			bz + 0.5,
+			"px_dark_oak_log",
+			nil,
+			bailey
+		)
+	)
+	local ry = L2_Y + 14
+	for k, half in ipairs({ 12, 9, 6, 3 }) do
+		box(
+			"BellRoof",
+			bx - half,
+			ry,
+			bz - half,
+			bx + half,
+			ry + 2,
+			bz + half,
+			ROOF_V,
+			ROOF_DARK,
+			bailey
+		)
+		if k == 1 then
+			roofTips(bx - half, bz - half, bx + half, bz + half, ry + 2, ROOF_DARK, bailey, 3)
+		end
+		ry += 2
+	end
+	cube("BellFinial", bx, ry + 1, bz, 1.6, 2, 1.6, "px_gold_block", nil, bailey)
+end
+task.wait()
+
+-- ================================================================ cherry trees and bamboo over the rest of the zone
+do
+	local grove = folder("Grove", temple)
+	local nTrees, nClumps = 0, 0
+	local placed = {}
+	local function roomy(x, z, hw)
+		for _, t in ipairs(placed) do
+			if math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2) < (hw + t[3]) * 0.8 then
+				return false
+			end
+		end
+		return true
+	end
+	for x = 60, 228, 20 do
+		for z = -228, 60, 20 do
+			local tx, tz = snap(x + rng:NextInteger(-6, 6)), snap(z + rng:NextInteger(-6, 6))
+			local size = rng:NextInteger(5, 7)
+			local hw = size * B / 2
+			local ok = zoneOf(tx, tz) == "temple"
+				and freeGround(tx, tz, 4)
+				and not (tx < 76 + hw and tz > -12 - hw) -- the square
+				and not (tx < 76 and tz > -80 and tz < -8) -- the bamboo strip under the L1 cliff
+				and not inRect(tx, tz, { STAGE.x0, STAGE.z0, STAGE.x1, STAGE.z1 }, hw + 2)
+				and not blocked(tx, tz, hw)
+				and onIsland(tx, tz, 10 + hw / 2)
+				and tx - hw >= 56
+				and tz + hw <= 64
+				and roomy(tx, tz, hw)
+			if ok then
+				if rng:NextNumber() < 0.2 then
+					if flat(tx, tz, 6) and bambooClump(tx, tz, grove) > 0 then
+						nClumps += 1
+						table.insert(placed, { tx, tz, 8 })
+					end
+				elseif nTrees < 44 and flat(tx, tz, hw) then
+					cherry(tx, tz, size, grove)
+					nTrees += 1
+					table.insert(placed, { tx, tz, hw })
+				end
+			end
+		end
+		task.wait()
+	end
+	print(
+		("[build-kyoto] temple: %d cherry trees, %d bamboo clumps, %d lights, %d parts"):format(
+			nTrees,
+			nClumps,
+			lights,
+			count - partsBefore
+		)
+	)
+end
+
+end
+task.wait()
+-- ================================================================================ kyoto/30-hill.luau
+do
+-- ================================================================ kyoto: the hill — the L1 terrace, the west of L2, the boss arena
+-- The HILL part (zoneOf == "hill": x < 56, z < -8, except the main stair corridor):
+--   arena       ARENA (-88, -128) r 56 on L2 (y 32): a wooden floor laid flush on the core's stone (a five-petal red mon
+--               with a white rim, a cherry dash ring, a red ring, a red-white chequer, a dark border, a stone ring
+--               r 50..56); four red pillars at r 34 on the diagonals (black base 3×3 blocks, red shaft 2×2 blocks up to
+--               +24, a dark stepped roof with raised tips and two paper lanterns; base and shaft tagged Pillar);
+--               a red fence ring r 58 with openings (6 blocks) east (0°, the L2 path to the temple court), south (90°,
+--               the arena stair) and west-north-west (200°, the cliff path to the overlook); stone lanterns flank each
+--               opening; a stone retaining platform where the round terrace hangs over L1 in the south
+--   outside     nobori banners, a weapon rack with straw targets, a katana stand, a fox shrine with a torii and a fox pair,
+--               a bell tower, cherry trees, bamboo behind the shrine
+--   stairs      the arena stair L1 → L2 (x -96..-80, z -40 → -72) with stepped side walls and a torii at its foot;
+--               the west stair L0 → L1 (x -180..-164, z 24 → -8) with a stone lantern pair at the top
+--   L1          a gravel path from the west stair top along z -36..-16 to the main stair landing (x 16), a spur to the
+--               arena stair; the dry zen garden x -168..-112, z -68..-40 (raked rows and rings, three black rock piles
+--               on moss, a plaster wall with a dark tile coping west and north, a tea veranda east); three machiya
+--               x -68..8, z -60..-40 facing the path; a bamboo grove x -220..-188; cherry trees, petals, lanterns
+--   cliffs      moss plates, leafy lips and hanging vine curtains on some cliff faces of the hill zone
+local hill = folder("Hill")
+local startCount = count
+local lightsLeft = 26 -- PointLights this part may still add
+local RED_V = "px_white_wool" -- red lacquer: white wool tinted TORII_RED
+local WHITE = Color3.fromRGB(246, 242, 236)
+local BAMBOO = Color3.fromRGB(150, 205, 100)
+local MOSS = Color3.fromRGB(96, 140, 70)
+local CORNERS = { { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }
+local OPENINGS = { 0, 90, 200 } -- the arena ways in: degrees from +X toward +Z (90 = south)
+local OPEN_HALF = 12 -- half the clear width of an opening (6 blocks)
+local RES = {} -- reserved rects {x0, z0, x1, z1} and path segments the scatter keeps off
+
+local function warm(p, range, bright)
+	if lightsLeft > 0 then
+		lightsLeft -= 1
+		light(p, range or 24, bright or 1.1, LANTERN_GLOW)
+	end
+end
+local function reserve(x0, z0, x1, z1)
+	table.insert(RES, { x0, z0, x1, z1 })
+end
+local function reserved(x, z, pad)
+	pad = pad or 0
+	for _, r in ipairs(RES) do
+		if r[6] then
+			if segDist(x, z, r[1], r[2], r[3], r[4]) < r[5] + pad then
+				return true
+			end
+		elseif x >= r[1] - pad and x <= r[3] + pad and z >= r[2] - pad and z <= r[4] + pad then
+			return true
+		end
+	end
+	return false
+end
+-- the terrace height of the island cell (8 studs) holding a point: tests agree with the core's ground runs
+local function gy8(x, z)
+	return groundY(math.floor((x + 248) / 8) * 8 - 244, math.floor((z + 248) / 8) * 8 - 244)
+end
+-- flush pattern runs: fn(cx, cz, ix, iz) -> variant, tint[, y0, y1] or nil for each cell of c studs; equal neighbours
+-- along x merge into one box
+local function layRuns(name, x0, z0, nx, nz, c, y0, y1, fn, parent)
+	local n = 0
+	for iz = 0, nz - 1 do
+		local zc = z0 + iz * c
+		local runX, runKey, runV, runT, runY0, runY1 = nil, nil, nil, nil, nil, nil
+		local function flush(xEnd)
+			if runX then
+				box(name, runX, runY0, zc, xEnd, runY1, zc + c, runV, runT, parent)
+				n += 1
+			end
+			runX = nil
+		end
+		for ix = 0, nx - 1 do
+			local xc = x0 + ix * c
+			local v, t, ya, yb = fn(xc + c / 2, zc + c / 2, ix, iz)
+			ya, yb = ya or y0, yb or y1
+			local key = if v then v .. "|" .. tostring(t) .. "|" .. ya .. "|" .. yb else nil
+			if key ~= runKey then
+				flush(xc)
+				if v then
+					runX, runV, runT, runY0, runY1 = xc, v, t, ya, yb
+				end
+				runKey = key
+			end
+		end
+		flush(x0 + nx * c)
+	end
+	return n
+end
+-- a textured part in a frame cf by size and local centre
+local function lp(cf, name, sx, sy, sz, x, y, z, variant, tint, parent)
+	local p = part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), tint, nil, parent)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+-- the distance of (dx, dz) (from the arena centre) to the nearest opening axis, on the outward side of it
+local function openPerp(dx, dz)
+	local best = math.huge
+	for _, deg in ipairs(OPENINGS) do
+		local a = math.rad(deg)
+		local ux, uz = math.cos(a), math.sin(a)
+		if dx * ux + dz * uz > 0 then
+			best = math.min(best, math.abs(-dx * uz + dz * ux))
+		end
+	end
+	return best
+end
+-- a stone lantern (tōrō): base, stem, seat, a fire box with glowing windows on four sides, a stepped roof
+local function stoneLantern(x, y, z, parent, lit)
+	local f = folder("StoneLantern", parent)
+	local DARKER = Color3.fromRGB(128, 126, 124)
+	cube("ToroBase", x, y + 0.6, z, 4, 1.2, 4, "px_stone_bricks", STONE, f)
+	cube("ToroStem", x, y + 2.6, z, 2.2, 2.8, 2.2, "px_smooth_stone", STONE, f)
+	cube("ToroSeat", x, y + 4.4, z, 3.6, 0.8, 3.6, "px_stone_bricks", STONE, f)
+	cube("ToroBox", x, y + 6, z, 3, 2.4, 3, "px_smooth_stone", STONE, f)
+	local glow = decor(part("ToroGlow", Vector3.new(3.2, 1.3, 1.3), at(x, y + 6, z), LANTERN_GLOW, Enum.Material.Neon, f))
+	decor(part("ToroGlow", Vector3.new(1.3, 1.3, 3.2), at(x, y + 6, z), LANTERN_GLOW, Enum.Material.Neon, f))
+	cube("ToroRoof", x, y + 7.7, z, 4.6, 1, 4.6, "px_stone_bricks", DARKER, f)
+	cube("ToroRoofTop", x, y + 8.6, z, 2.6, 0.8, 2.6, "px_stone_bricks", DARKER, f)
+	cube("ToroKnob", x, y + 9.4, z, 1.2, 0.8, 1.2, "px_smooth_stone", STONE, f)
+	if lit then
+		warm(glow, 24, 1)
+	end
+	return f
+end
+-- a paper lantern hanging on a cord from hangTop (local y)
+local function paperLantern(x, y, z, parent, hangTop, lit, color)
+	local body = textured(decor(part("PaperLantern", Vector3.new(2.2, 2.8, 2.2), at(x, y, z), nil, nil, parent)), "px_white_wool", color or PAPER)
+	decor(part("LanternRim", Vector3.new(1.6, 0.4, 1.6), at(x, y + 1.6, z), DARK_WOOD, Enum.Material.Wood, parent))
+	decor(part("LanternRim", Vector3.new(1.6, 0.4, 1.6), at(x, y - 1.6, z), DARK_WOOD, Enum.Material.Wood, parent))
+	if hangTop and hangTop > y + 1.8 then
+		decor(part("LanternCord", Vector3.new(0.25, hangTop - y - 1.8, 0.25), at(x, (hangTop + y + 1.8) / 2, z), Color3.fromRGB(40, 36, 34), Enum.Material.Fabric, parent))
+	end
+	if lit then
+		warm(body, 22, 1)
+	end
+	return body
+end
+-- a square dark roof with raised tips: y = its base (top of the posts), s = half the main roof
+local function squareRoof(cx, y, cz, s, parent)
+	local T = "px_roof_tiles"
+	box("Eave", cx - s - 2, y, cz - s - 2, cx + s + 2, y + 1.5, cz + s + 2, T, ROOF_DARK, parent)
+	box("Roof", cx - s, y + 1.5, cz - s, cx + s, y + 4.5, cz + s, T, ROOF_DARK, parent)
+	box("RoofTop", cx - s / 2, y + 4.5, cz - s / 2, cx + s / 2, y + 7.5, cz + s / 2, T, ROOF_DARK, parent)
+	box("RoofCrown", cx - 2, y + 7.5, cz - 2, cx + 2, y + 9.5, cz + 2, "px_blackstone", nil, parent)
+	for _, c in ipairs(CORNERS) do
+		-- each corner climbs out in two blocks: the curved tip of the concept
+		local tx, tz = cx + c[1] * (s + 2), cz + c[2] * (s + 2)
+		box("RoofTip", tx - 2, y + 1.5, tz - 2, tx + 2, y + 4, tz + 2, T, ROOF_DARK, parent)
+		local ux, uz = cx + c[1] * (s + 3.5), cz + c[2] * (s + 3.5)
+		box("RoofTipEnd", ux - 1.5, y + 3.5, uz - 1.5, ux + 1.5, y + 6, uz + 1.5, T, ROOF_DARK, parent)
+	end
+end
+-- a cherry tree of blocks: a crooked trunk, a leafy skirt, a pink wool core, a cap, loose lumps and drips, petals below
+local function cherry(x, z, y, parent, h)
+	h = h or rng:NextInteger(3, 4) * B
+	local f = folder("CherryTree", parent)
+	local trunkV = if rng:NextNumber() < 0.5 then "px_cherry_log" else "px_dark_oak_log"
+	box("Trunk", x - 2, y, z - 2, x + 2, y + h, z + 2, trunkV, nil, f)
+	local d = pick({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } })
+	box("Branch", x - 2 + d[1] * 4, y + h - 4, z - 2 + d[2] * 4, x + 2 + d[1] * 4, y + h, z + 2 + d[2] * 4, trunkV, nil, f)
+	box("Root", x - 2 - d[1] * 4, y, z - 2 - d[2] * 4, x + 2 - d[1] * 4, y + 1.5, z + 2 - d[2] * 4, trunkV, nil, f)
+	local cy = y + h
+	local ox, oz = d[1] * 2, d[2] * 2 -- the crown leans over the branch
+	box("CrownSkirt", x + ox - 14, cy - 2, z + oz - 14, x + ox + 14, cy + 2, z + oz + 14, "px_cherry_leaves", nil, f)
+	box("CrownCore", x + ox - 10, cy + 2, z + oz - 10, x + ox + 10, cy + 10, z + oz + 10, "px_white_wool", SAKURA, f)
+	box("CrownCap", x + ox - 6, cy + 10, z + oz - 6, x + ox + 6, cy + 14, z + oz + 6, "px_cherry_leaves", nil, f)
+	local spots = { -8, -4, 0, 4, 8 }
+	for i = 1, 4 do
+		local side, along = pick({ -12, 12 }), pick(spots)
+		local lx, lz = if i % 2 == 0 then side else along, if i % 2 == 0 then along else side
+		if i <= 2 then
+			box("CrownLump", x + ox + lx - 2, cy + 2, z + oz + lz - 2, x + ox + lx + 2, cy + 6, z + oz + lz + 2, "px_white_wool", SAKURA_DEEP, f)
+		else
+			box("CrownLump", x + ox + lx - 2, cy + 2, z + oz + lz - 2, x + ox + lx + 2, cy + 6, z + oz + lz + 2, "px_cherry_leaves", nil, f)
+		end
+	end
+	for _ = 1, 2 do
+		local lx, lz = pick({ -12, 12 }), pick(spots)
+		if rng:NextNumber() < 0.5 then
+			lx, lz = lz, lx
+		end
+		decor(box("CrownDrip", x + ox + lx - 2, cy - 6, z + oz + lz - 2, x + ox + lx + 2, cy - 2, z + oz + lz + 2, "px_cherry_leaves", nil, f))
+	end
+	-- the petal carpet under the crown (only where the ground is level)
+	local r = 12
+	for _, c in ipairs(CORNERS) do
+		if gy8(x + c[1] * 12, z + c[2] * 12) ~= y then
+			r = 6
+		end
+	end
+	decor(box("Petals", x + ox - r, y + 0.06, z + oz - r, x + ox + r, y + 0.36, z + oz + r, "px_white_wool", SAKURA, f))
+	return f
+end
+-- a clump of bamboo: 4..6 stalks (4..8 blocks tall) with a node band and leaf tufts on top
+local function bambooClump(x, z, y, parent)
+	local f = folder("Bamboo", parent)
+	local slots = {}
+	for _, a in ipairs({ -2.8, 0, 2.8 }) do
+		for _, b in ipairs({ -2.8, 0, 2.8 }) do
+			table.insert(slots, { a, b })
+		end
+	end
+	local n = rng:NextInteger(4, 6)
+	local tallest, tx, tz = 0, x, z
+	for i = 1, n do
+		local k = rng:NextInteger(i, #slots)
+		slots[i], slots[k] = slots[k], slots[i]
+		local sx, sz = x + slots[i][1], z + slots[i][2]
+		local h = rng:NextInteger(4, 8) * B
+		box("BambooStalk", sx - 1.2, y, sz - 1.2, sx + 1.2, y + h, sz + 1.2, "px_hedge", BAMBOO, f)
+		decor(box("BambooNode", sx - 1.35, y + h * 0.55, sz - 1.35, sx + 1.35, y + h * 0.55 + 0.5, sz + 1.35, "px_hedge", Color3.fromRGB(120, 170, 80), f))
+		if h > tallest then
+			tallest, tx, tz = h, sx, sz
+		end
+	end
+	decor(box("BambooLeaves", tx - 4, y + tallest - 2, tz - 4, tx + 4, y + tallest + 2, tz + 4, "px_hedge", Color3.fromRGB(116, 170, 84), f))
+	decor(box("BambooLeaves", x - 2, y + tallest - 8, z - 2, x + 2, y + tallest - 4, z + 2, "px_hedge", Color3.fromRGB(130, 186, 92), f))
+	return f
+end
+-- a torii: axis "x" = the gate spans along x (walk through along z); span = post centre to post centre
+local function torii(cx, cz, y, span, h, axis, parent)
+	local f = folder("Torii", parent)
+	local function tb(name, a0, y0, b0, a1, y1, b1, v, t)
+		if axis == "x" then
+			return box(name, cx + a0, y + y0, cz + b0, cx + a1, y + y1, cz + b1, v, t, f)
+		end
+		return box(name, cx + b0, y + y0, cz + a0, cx + b1, y + y1, cz + a1, v, t, f)
+	end
+	local hs = span / 2
+	for _, s in ipairs({ -1, 1 }) do
+		tb("ToriiFoot", s * hs - 1.7, 0, -1.7, s * hs + 1.7, 1.5, 1.7, "px_blackstone", nil)
+		tb("ToriiPost", s * hs - 1.2, 1.5, -1.2, s * hs + 1.2, h, 1.2, RED_V, TORII_RED)
+		tb("ToriiTip", s * (hs + 3.5) - 1.5, h + 2.4, -1.6, s * (hs + 3.5) + 1.5, h + 3.4, 1.6, "px_blackstone", nil)
+	end
+	tb("ToriiNuki", -hs - 2.5, h - 4, -0.8, hs + 2.5, h - 2.8, 0.8, RED_V, TORII_RED)
+	tb("ToriiKasagi", -hs - 3.5, h, -1.4, hs + 3.5, h + 1.4, 1.4, RED_V, TORII_RED)
+	tb("ToriiTop", -hs - 5, h + 1.4, -1.6, hs + 5, h + 2.4, 1.6, "px_blackstone", nil)
+	tb("ToriiPlaque", -1, h - 2.8, -0.5, 1, h, 0.5, "px_blackstone", nil)
+	return f
+end
+-- a red wooden fence span from (ax, az) to (bx, bz) at y: end posts (shared joints kept in `posts`) and two rails
+local function redFence(ax, az, bx, bz, y, parent, posts)
+	for _, p in ipairs({ { ax, az }, { bx, bz } }) do
+		local key = ("%.2f,%.2f"):format(p[1], p[2])
+		if not posts[key] then
+			posts[key] = true
+			box("FencePost", p[1] - 0.7, y, p[2] - 0.7, p[1] + 0.7, y + 5, p[2] + 0.7, RED_V, TORII_RED, parent)
+			box("FenceCap", p[1] - 0.9, y + 5, p[2] - 0.9, p[1] + 0.9, y + 5.6, p[2] + 0.9, "px_blackstone", nil, parent)
+		end
+	end
+	for _, h in ipairs({ 1.6, 3.8 }) do
+		textured(beam("FenceRail", V(ax, y + h, az), V(bx, y + h, bz), 0.7, nil, parent), RED_V, TORII_RED)
+	end
+end
+-- a sitting stone fox (kitsune) with a red bib on a plinth; cf at the ground, the fox looks along -Z of cf
+local function foxStatue(cf, parent)
+	local f = folder("FoxStatue", parent)
+	local FOX = Color3.fromRGB(222, 220, 214)
+	lp(cf, "FoxPlinth", 4, 2.4, 4, 0, 1.2, 0, "px_stone_bricks", STONE, f)
+	lp(cf, "FoxBody", 2.6, 2.8, 3, 0, 3.8, 0.4, "px_smooth_stone", FOX, f)
+	lp(cf, "FoxChest", 2.2, 2.6, 1.4, 0, 4.5, -1.4, "px_smooth_stone", FOX, f)
+	lp(cf, "FoxHead", 2.2, 2, 2.2, 0, 6.8, -1.2, "px_smooth_stone", FOX, f)
+	lp(cf, "FoxSnout", 1.2, 1, 1.2, 0, 6.5, -2.9, "px_smooth_stone", FOX, f)
+	for _, s in ipairs({ -1, 1 }) do
+		decor(lp(cf, "FoxEar", 0.7, 1.2, 0.7, s * 0.7, 8.4, -1, "px_smooth_stone", FOX, f))
+	end
+	decor(lp(cf, "FoxBib", 2.4, 1, 1.6, 0, 5.3, -1.5, RED_V, TORII_RED, f))
+	lp(cf, "FoxTail", 1.4, 3.2, 1.4, 0.9, 4.6, 2.2, "px_smooth_stone", FOX, f)
+	decor(lp(cf, "FoxTailTip", 1.2, 1, 1.2, 0.9, 6.7, 2.2, "px_white_wool", WHITE, f))
+	return f
+end
+-- a machiya (dark-wood town house / tea house) on x0..x1, z0..z1 at ground y: the front (+Z) is an open shop with a
+-- noren curtain, paper lanterns and a sign; dark wood below, paper panels above, a stepped dark roof with raised tips
+local function machiya(x0, z0, x1, z1, y, parent, signText, curtain, lanternColor)
+	local f = folder("Machiya", parent)
+	local DW, DP, T = "px_dark_oak_planks", "px_dark_oak_log", "px_roof_tiles"
+	local yf = y + 1
+	local xc, zc = (x0 + x1) / 2, (z0 + z1) / 2
+	box("HouseBase", x0, y, z0, x1, yf, z1, "px_cobblestone", STONE, f)
+	box("HouseFloor", x0 + 1, yf, z0 + 1, x1 - 1, yf + 0.2, z1 - 1, "px_spruce_planks", nil, f)
+	local function wall(ax0, az0, ax1, az1)
+		box("WallLow", ax0, yf, az0, ax1, yf + 3, az1, DW, nil, f)
+		box("WallPaper", ax0, yf + 3, az0, ax1, yf + 9, az1, "px_white_wool", PAPER, f)
+		box("WallBeam", ax0, yf + 9, az0, ax1, yf + 10, az1, DW, nil, f)
+	end
+	wall(x0, z0, x1, z0 + 1)
+	wall(x0, z0 + 1, x0 + 1, z1)
+	wall(x1 - 1, z0 + 1, x1, z1)
+	-- the shoji grid on the side walls
+	for _, sx in ipairs({ x0 - 0.15, x1 + 0.15 }) do
+		decor(box("ShojiRail", sx - 0.2, yf + 5.8, z0 + 1, sx + 0.2, yf + 6.3, z1 - 1, DW, nil, f))
+		for zz = z0 + 4, z1 - 4, 4 do
+			decor(box("ShojiBar", sx - 0.2, yf + 3, zz - 0.25, sx + 0.2, yf + 9, zz + 0.25, DW, nil, f))
+		end
+	end
+	-- the front: lattice panels at the sides, an open shop between, a lintel and a paper band over it
+	box("FrontLattice", x0 + 1, yf, z1 - 1, x0 + 4, yf + 7, z1, "px_spruce_planks", DARK_WOOD, f)
+	box("FrontLattice", x1 - 4, yf, z1 - 1, x1 - 1, yf + 7, z1, "px_spruce_planks", DARK_WOOD, f)
+	box("Lintel", x0 + 1, yf + 7, z1 - 1, x1 - 1, yf + 8, z1, DP, nil, f)
+	box("FrontPaper", x0 + 1, yf + 8, z1 - 1, x1 - 1, yf + 9, z1, "px_white_wool", PAPER, f)
+	box("FrontBeam", x0 + 1, yf + 9, z1 - 1, x1 - 1, yf + 10, z1, DW, nil, f)
+	for _, c in ipairs(CORNERS) do
+		local px, pz = if c[1] > 0 then x1 else x0, if c[2] > 0 then z1 else z0
+		box("HousePost", px - 0.7, y, pz - 0.7, px + 0.7, yf + 10, pz + 0.7, DP, nil, f)
+	end
+	-- the noren: three cloth strips under the lintel, a white mon on the middle one
+	local ow = (x1 - x0 - 8) / 3
+	for i = 0, 2 do
+		local nx0 = x0 + 4 + i * ow
+		decor(box("Noren", nx0 + 0.1, yf + 4.5, z1 - 0.6, nx0 + ow - 0.1, yf + 7, z1 - 0.4, "px_white_wool", curtain, f))
+	end
+	decor(box("NorenMon", xc - 0.8, yf + 5.2, z1 - 0.38, xc + 0.8, yf + 6.6, z1 - 0.3, "px_white_wool", WHITE, f))
+	-- inside: a counter, a shelf with sake jars, a barrel
+	box("Counter", x0 + 5, yf, z0 + 8, x1 - 5, yf + 3, z0 + 10, "px_spruce_planks", nil, f)
+	box("CounterTop", x0 + 4.7, yf + 3, z0 + 7.7, x1 - 4.7, yf + 3.4, z0 + 10.3, DW, nil, f)
+	box("Shelf", x0 + 2, yf + 4, z0 + 1, x1 - 2, yf + 4.5, z0 + 3, DW, nil, f)
+	for jx = x0 + 4, x1 - 4, 4 do
+		decor(box("Jar", jx - 0.8, yf + 4.5, z0 + 1.2, jx + 0.8, yf + 6.3, z0 + 2.8, "px_white_wool", WHITE, f))
+	end
+	barrel(x0 + 3.5, yf, z0 + 4, f)
+	-- the roof: a wide eave, two stepped layers, a dark ridge with raised ends, raised eave corners
+	local yr = yf + 10
+	box("Eave", x0 - 3, yr, z0 - 3, x1 + 3, yr + 1.5, z1 + 3, T, ROOF_DARK, f)
+	box("Roof", x0 - 2, yr + 1.5, z0 + 1, x1 + 2, yr + 4.5, z1 - 1, T, ROOF_DARK, f)
+	box("RoofUpper", x0 - 1, yr + 4.5, z0 + 5, x1 + 1, yr + 7.5, z1 - 5, T, ROOF_DARK, f)
+	box("Ridge", x0 - 2, yr + 7.5, zc - 2, x1 + 2, yr + 9, zc + 2, "px_blackstone", nil, f)
+	for _, s in ipairs({ -1, 1 }) do
+		local ex = if s < 0 then x0 - 2.5 else x1 + 2.5
+		box("RidgeTip", ex - 1.5, yr + 8, zc - 1.5, ex + 1.5, yr + 10.5, zc + 1.5, "px_blackstone", nil, f)
+	end
+	for _, c in ipairs(CORNERS) do
+		local tx, tz = if c[1] > 0 then x1 + 2 else x0 - 2, if c[2] > 0 then z1 + 2 else z0 - 2
+		box("EaveTip", tx - 2, yr + 1.5, tz - 2, tx + 2, yr + 3, tz + 2, T, ROOF_DARK, f)
+	end
+	-- lanterns at the front corners, one lit; the sign over the shop
+	paperLantern(x0 + 2.5, yf + 5.5, z1 + 1.6, f, yr, true, lanternColor)
+	paperLantern(x1 - 2.5, yf + 5.5, z1 + 1.6, f, yr, false, lanternColor)
+	local board = box("ShopSign", xc - 4, yf + 7.9, z1, xc + 4, yf + 9.5, z1 + 0.4, DW, nil, f)
+	boardText(board, signText)
+	return f
+end
+-- free ground for a tree / prop in the hill zone at terrace height y
+local function okSpot(x, z, y, pad)
+	if zoneOf(x, z) ~= "hill" or not freeGround(x, z, pad or 0) or reserved(x, z, pad or 0) then
+		return false
+	end
+	for _, d in ipairs({ { 0, 0 }, { 3, 0 }, { -3, 0 }, { 0, 3 }, { 0, -3 } }) do
+		if gy8(x + d[1], z + d[2]) ~= y then
+			return false
+		end
+	end
+	return true
+end
+
+-- the reserved footprints (paths, houses, garden, stairs, the temple's landing, the shrines)
+reserve(-186, -38, 18, -14) -- the L1 path
+reserve(-184, -38, -160, -6) -- the west stair approach
+reserve(-72, -62, 10, -36) -- the machiya
+reserve(-176, -72, -100, -38) -- the zen garden and the veranda
+reserve(12, -44, 56, -4) -- the main stair landing (temple part)
+reserve(-36, -142, 56, -114) -- the L2 path to the temple court
+reserve(-38, -190, -8, -156) -- the fox shrine
+reserve(8, -108, 34, -84) -- the bell tower
+reserve(-30, -110, -6, -86) -- the weapon rack and the targets
+reserve(-8, -158, 8, -146) -- the katana stand
+local WEST_PATH = { { -140, -147 }, { -158, -128 }, { -160, -104 }, { -152, -90 } }
+for i = 1, #WEST_PATH - 1 do
+	local a, b = WEST_PATH[i], WEST_PATH[i + 1]
+	table.insert(RES, { a[1], a[2], b[1], b[2], 10, true }) -- a segment: {ax, az, bx, bz, radius, true}
+end
+
+-- ================================================================ 1. the boss arena
+do
+	local arena = folder("Arena", hill)
+	local AX, AZ, Y = ARENA.x, ARENA.z, L2_Y
+	local RING_C = Color3.fromRGB(150, 148, 146)
+	-- 1a. the retaining platform: where the round terrace hangs over L1 (the south rim) stone fills up to y 32
+	-- (the notch x -100..-76 south of z -72 stays open for the arena stair)
+	layRuns("ArenaFooting", AX - 64, AZ - 64, 32, 32, B, 0, Y, function(cx, cz)
+		local rr = math.sqrt((cx - AX) ^ 2 + (cz - AZ) ^ 2)
+		if rr > 61 or (cx > -100 and cx < -76 and cz > -72) then
+			return nil
+		end
+		local gy = gy8(cx, cz)
+		if gy >= Y then
+			return nil
+		end
+		return "px_stone_bricks", Color3.fromRGB(138, 136, 134), gy, Y
+	end, arena)
+	-- 1b. the wooden floor laid flush (y 31.8..32.1) on the stone in runs along x
+	layRuns("ArenaFloor", AX - 56, AZ - 56, 28, 28, B, Y - 0.2, Y + 0.1, function(cx, cz, ix, iz)
+		local dx, dz = cx - AX, cz - AZ
+		local rr = math.sqrt(dx * dx + dz * dz)
+		if rr >= 56 then
+			return nil
+		end
+		if rr >= 50 then
+			if openPerp(dx, dz) < 8 then
+				return "px_spruce_planks", nil -- the plank paths entering through the stone ring
+			end
+			return "px_smooth_stone", RING_C
+		end
+		local th = math.atan2(dz, dx)
+		if rr < 32 then
+			-- the mon: five red petals (discs at r 17 pointing north first) split by white gaps, a white rim, a white
+			-- heart with a pink stamen
+			if rr < 5 then
+				return RED_V, SAKURA_DEEP
+			end
+			if rr < 8 then
+				return RED_V, WHITE
+			end
+			local petal, gap = math.huge, math.huge
+			for k = 0, 4 do
+				local a = k * 2 * math.pi / 5 - math.pi / 2
+				petal = math.min(petal, math.sqrt((dx - math.cos(a) * 17) ^ 2 + (dz - math.sin(a) * 17) ^ 2))
+				local ux, uz = math.cos(a + math.pi / 5), math.sin(a + math.pi / 5)
+				if dx * ux + dz * uz > 0 then
+					gap = math.min(gap, math.abs(-dx * uz + dz * ux))
+				end
+			end
+			if petal < 10.5 and gap >= 2.5 then
+				return RED_V, TORII_RED
+			end
+			if petal < 14.5 then
+				return RED_V, WHITE
+			end
+		end
+		if rr >= 47 then
+			return "px_dark_oak_planks", nil
+		end
+		if rr >= 43 then
+			return RED_V, if (ix + iz) % 2 == 0 then TORII_RED else WHITE
+		end
+		if rr >= 39.5 then
+			return RED_V, TORII_RED -- the red border ring
+		end
+		if rr >= 34 and rr < 37.5 and math.floor((th + math.pi) / (math.pi / 10)) % 2 == 0 then
+			return "px_cherry_planks", nil
+		end
+		return "px_spruce_planks", nil
+	end, arena)
+	task.wait()
+
+	-- 1c. four red pillars on the diagonals (r 34): black base, red shaft, a dark roof with raised tips, two lanterns
+	for _, c in ipairs(CORNERS) do
+		local px, pz = AX + c[1] * 24, AZ + c[2] * 24
+		pillarTag(box("PillarBase", px - 6, Y, pz - 6, px + 6, Y + 4, pz + 6, "px_blackstone", nil, arena))
+		pillarTag(box("Pillar", px - 4, Y + 4, pz - 4, px + 4, Y + 24, pz + 4, RED_V, TORII_RED, arena))
+		decor(box("PillarBand", px - 4.3, Y + 20, pz - 4.3, px + 4.3, Y + 21, pz + 4.3, "px_blackstone", nil, arena))
+		box("PillarBracket", px - 6, Y + 24, pz - 6, px + 6, Y + 26, pz + 6, "px_dark_oak_planks", nil, arena)
+		squareRoof(px, Y + 26, pz, 8, arena)
+		for i, l in ipairs({ { c[1], -c[2] }, { -c[1], c[2] } }) do
+			paperLantern(px + l[1] * 10, Y + 21.5, pz + l[2] * 10, arena, Y + 26, i == 1)
+		end
+	end
+
+	-- 1d. the red fence ring r 58 (posts every 2 blocks, 2 rails), cut at the three openings
+	local posts, ring = {}, {}
+	local N = 45
+	for k = 0, N - 1 do
+		local a = (k + 0.5) / N * 2 * math.pi
+		local dx, dz = math.cos(a) * 58, math.sin(a) * 58
+		if openPerp(dx, dz) >= OPEN_HALF and onIsland(AX + dx, AZ + dz, 4) then
+			ring[k] = { AX + dx, AZ + dz }
+		end
+	end
+	for k = 0, N - 1 do
+		local a, b = ring[k], ring[(k + 1) % N]
+		if a and b then
+			redFence(a[1], a[2], b[1], b[2], Y, arena, posts)
+		end
+	end
+	-- stone lanterns flank every opening on the stone ring
+	for _, deg in ipairs(OPENINGS) do
+		local a = math.rad(deg)
+		local ux, uz = math.cos(a), math.sin(a)
+		for i, s in ipairs({ -1, 1 }) do
+			stoneLantern(AX + ux * 52 - uz * s * 17, Y, AZ + uz * 52 + ux * s * 17, arena, i == 1)
+		end
+	end
+	task.wait()
+
+	-- 1e. outside the fence: nobori banners, the training corner, the katana stand
+	for _, deg in ipairs({ 20, 340, 300 }) do
+		local a = math.rad(deg)
+		local x, z = AX + math.cos(a) * 64, AZ + math.sin(a) * 64
+		if gy8(x, z) == Y and onIsland(x, z, 10) then
+			box("NoboriFoot", x - 1.5, Y, z - 1.5, x + 1.5, Y + 1.5, z + 1.5, "px_stone_bricks", STONE, arena)
+			box("NoboriPole", x - 0.4, Y + 1.5, z - 0.4, x + 0.4, Y + 17, z + 0.4, "px_dark_oak_log", nil, arena)
+			local cf = CFrame.lookAt(V(x, Y + 10, z), V(AX, Y + 10, AZ)) * CFrame.new(2, 0, 0)
+			banner(cf, WHITE, arena, TORII_RED, 3, 10)
+		end
+	end
+	do
+		local f = folder("WeaponRack", arena)
+		local cf = at(-20, Y, -98) * CFrame.Angles(0, math.pi / 2, 0) -- faces west, to the arena
+		lp(cf, "RackBase", 13, 0.8, 3, 0, 0.4, 0, "px_dark_oak_planks", nil, f)
+		for _, s in ipairs({ -1, 1 }) do
+			lp(cf, "RackPost", 1, 8, 1, s * 6, 4.8, 0, "px_dark_oak_log", nil, f)
+		end
+		lp(cf, "RackBar", 13, 0.8, 1, 0, 8.2, 0, "px_dark_oak_planks", nil, f)
+		lp(cf, "RackBar", 13, 0.8, 1, 0, 3.4, 0, "px_dark_oak_planks", nil, f)
+		local STEEL = Color3.fromRGB(196, 200, 206)
+		for i, wx in ipairs({ -4.2, -1.4, 1.4, 4.2 }) do
+			decor(lp(cf, "Spear", 0.45, 10, 0.45, wx, 5.8, -0.9, "px_dark_oak_planks", nil, f))
+			local blade = decor(lp(cf, "SpearBlade", 0.5, if i == 2 then 2.8 else 1.8, if i == 2 then 0.8 else 0.3, wx, if i == 2 then 12.2 else 11.7, -0.9, nil, STEEL, f))
+			blade.Material = Enum.Material.Metal
+			decor(lp(cf, "Tassel", 0.7, 0.7, 0.7, wx, 10.6, -0.9, RED_V, TORII_RED, f))
+		end
+		-- two straw targets (makiwara) beside the rack
+		for _, tz in ipairs({ -106, -90 }) do
+			box("TargetPost", -15, Y, tz - 0.6, -13.8, Y + 4, tz + 0.6, "px_dark_oak_log", nil, f)
+			box("TargetStraw", -16.4, Y + 3, tz - 1, -12.4, Y + 8, tz + 1, "px_hay", nil, f)
+			decor(box("TargetBand", -16.6, Y + 5.2, tz - 1.1, -12.2, Y + 5.8, tz + 1.1, RED_V, TORII_RED, f))
+		end
+	end
+	do
+		local f = folder("KatanaStand", arena)
+		local cf = at(0, Y, -152) * CFrame.Angles(0, math.pi, 0) -- faces south, to the path
+		lp(cf, "StandBase", 7, 1, 2.4, 0, 0.5, 0, "px_dark_oak_planks", nil, f)
+		for _, s in ipairs({ -1, 1 }) do
+			lp(cf, "StandArm", 0.8, 3.8, 1, s * 2.6, 2.9, 0, "px_dark_oak_planks", nil, f)
+		end
+		for _, h in ipairs({ 2.6, 4 }) do
+			decor(lp(cf, "Scabbard", 7.4, 0.5, 0.6, 0.6, h, -0.6, nil, Color3.fromRGB(26, 22, 24), f))
+			decor(lp(cf, "Hilt", 2.2, 0.55, 0.65, -4.2, h, -0.6, RED_V, TORII_RED, f))
+			decor(lp(cf, "Tsuba", 0.3, 1, 1, -3, h, -0.6, nil, Color3.fromRGB(200, 160, 60), f))
+		end
+	end
+
+	-- 1f. the fox shrine north-east of the arena: a stone plinth, a small hokora, an offering box, a fox pair, a torii
+	do
+		local sh = folder("FoxShrine", arena)
+		local sx, sz = -24, -178
+		box("ShrinePlinth", sx - 8, Y, sz - 8, sx + 8, Y + 1, sz + 6, "px_stone_bricks", STONE, sh)
+		box("Hokora", sx - 4, Y + 1, sz - 6, sx + 4, Y + 7, sz + 1, "px_dark_oak_planks", nil, sh)
+		for _, s in ipairs({ -1, 1 }) do
+			box("HokoraPost", sx + s * 4 - 0.6, Y + 1, sz + 0.6, sx + s * 4 + 0.6, Y + 7.5, sz + 1.8, RED_V, TORII_RED, sh)
+		end
+		box("HokoraLintel", sx - 4.6, Y + 7, sz + 0.6, sx + 4.6, Y + 8, sz + 1.8, RED_V, TORII_RED, sh)
+		decor(box("HokoraDoor", sx - 2.6, Y + 1.6, sz + 1, sx + 2.6, Y + 6, sz + 1.3, "px_white_wool", PAPER, sh))
+		squareRoof(sx, Y + 8, sz - 2.5, 5, sh)
+		box("OfferingBox", sx - 2.5, Y + 1, sz + 2.5, sx + 2.5, Y + 3.4, sz + 5, "px_dark_oak_planks", nil, sh)
+		decor(box("OfferingSlats", sx - 2.2, Y + 3.4, sz + 2.8, sx + 2.2, Y + 3.7, sz + 4.7, "px_spruce_planks", nil, sh))
+		paperLantern(sx, Y + 5.2, sz + 3.6, sh, Y + 8, true, TORII_RED)
+		for _, s in ipairs({ -1, 1 }) do
+			foxStatue(at(sx + s * 8, Y, sz + 10) * CFrame.Angles(0, math.pi + s * 0.25, 0), sh)
+		end
+		torii(sx, sz + 16, Y, 12, 11, "x", sh)
+		for _, b in ipairs({ { -36, -192 }, { -26, -195 }, { -14, -193 } }) do
+			if gy8(b[1], b[2]) == Y and onIsland(b[1], b[2], 10) then
+				bambooClump(b[1], b[2], Y, sh)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 2. the stairs: arena stair L1 → L2, west stair L0 → L1
+do
+	local st = folder("Stairs", hill)
+	local WALL_C = Color3.fromRGB(132, 130, 128)
+	-- stepped side walls 4 studs wide, one segment per 8 studs of run, 2.5 studs over the steps
+	local function sideWalls(xa, xb, zStart, dir, y0, name)
+		for i = 0, 3 do
+			local za, zb = zStart + dir * 8 * i, zStart + dir * 8 * (i + 1)
+			local top = y0 + 4 * (i + 1) + 2.5
+			for _, wx in ipairs({ xa, xb }) do
+				box(name, wx, y0, za, wx + 4, top, zb, "px_stone_bricks", WALL_C, st)
+				box(name .. "Cap", wx - 0.3, top, za, wx + 4.3, top + 0.6, zb, "px_smooth_stone", STONE, st)
+			end
+		end
+	end
+	stairs("ArenaStair", (ARENA_STAIR.x0 + ARENA_STAIR.x1) / 2, ARENA_STAIR.z0, ARENA_STAIR.z1, L1_Y, L2_Y - L1_Y, ARENA_STAIR.x1 - ARENA_STAIR.x0, "px_stone_bricks", st)
+	sideWalls(ARENA_STAIR.x0 - 4, ARENA_STAIR.x1, ARENA_STAIR.z0, -1, L1_Y, "ArenaStairWall")
+	torii(-88, -38, L1_Y, 20, 14, "x", st)
+	stairs("WestStair", (WEST_STAIR.x0 + WEST_STAIR.x1) / 2, WEST_STAIR.z0, WEST_STAIR.z1, 0, L1_Y, WEST_STAIR.x1 - WEST_STAIR.x0, "px_stone_bricks", st)
+	sideWalls(WEST_STAIR.x0 - 4, WEST_STAIR.x1, WEST_STAIR.z0, -1, 0, "WestStairWall")
+	stoneLantern(WEST_STAIR.x0 - 6, L1_Y, WEST_STAIR.z1 - 4, st, true)
+	stoneLantern(WEST_STAIR.x1 + 6, L1_Y, WEST_STAIR.z1 - 4, st, false)
+end
+task.wait()
+
+-- ================================================================ 3. the L1 terrace: the path, the zen garden, the machiya
+do
+	local l1 = folder("Terrace", hill)
+	local Y = L1_Y
+	-- 3a. the gravel path with stone edges: the main band z -36..-16 from x -180 to the main stair landing (x 16), the
+	-- approach to the west stair top and the spur to the arena stair
+	layRuns("Path", -184, -40, 50, 8, B, Y - 0.2, Y + 0.1, function(cx, cz)
+		local onMain = cz > -36 and cz < -16 and cx > -180 and cx < 16
+		local onApproach = cx > -180 and cx < -164 and cz > -36 and cz < -8
+		local onSpur = cx > -96 and cx < -80 and cz > -40 and cz < -36
+		if not (onMain or onApproach or onSpur) or gy8(cx, cz) ~= Y then
+			return nil
+		end
+		local edge
+		if onApproach and cz > -16 then
+			edge = cx < -176 or cx > -168
+		elseif onSpur then
+			edge = cx < -92 or cx > -84
+		else
+			edge = (cz < -32 and not (cx > -96 and cx < -80)) or (cz > -20 and not (cx > -180 and cx < -164))
+		end
+		if edge then
+			return "px_stone_bricks", STONE
+		end
+		return "px_gravel", Color3.fromRGB(214, 208, 198)
+	end, l1)
+	-- stone lanterns along the path: the north edge between the houses and by the garden, the south edge on the rim
+	local li = 0
+	for _, p in ipairs({ { -156, -38 }, { -124, -38 }, { -44, -38 }, { -16, -38 }, { -150, -13 }, { -120, -13 }, { -60, -13 }, { -30, -13 }, { -2, -13 } }) do
+		if gy8(p[1], p[2]) == Y and gy8(p[1], p[2] + 2) == Y then
+			li += 1
+			stoneLantern(p[1], Y, p[2], l1, li % 2 == 1)
+		end
+	end
+	-- petals blown onto the path
+	for _ = 1, 12 do
+		local x, z = rng:NextInteger(-44, 2) * B, rng:NextInteger(-9, -5) * B
+		if gy8(x, z) == Y then
+			decor(box("PathPetals", x, Y + 0.1, z, x + rng:NextInteger(1, 2) * B, Y + 0.3, z + B, "px_white_wool", SAKURA, l1))
+		end
+	end
+	task.wait()
+
+	-- 3b. the dry zen garden x -168..-112, z -68..-40: raked rows (2-stud strips), rings round three black rock piles
+	-- standing on moss; a plaster wall with a dark tile coping west and north, a low curb south, a tea veranda east
+	do
+		local g = folder("ZenGarden", l1)
+		local GX0, GZ0 = -168, -68
+		local ROCKS = { { -152, -56, 12 }, { -134, -48, 10 }, { -122, -60, 8 } }
+		local RAKE_L, RAKE_D = Color3.fromRGB(246, 244, 236), Color3.fromRGB(214, 212, 204)
+		layRuns("RakedGravel", GX0, GZ0, 28, 14, 2, Y - 0.2, Y + 0.1, function(cx, cz, _, iz)
+			if gy8(cx, cz) ~= Y then
+				return nil
+			end
+			for _, r in ipairs(ROCKS) do
+				local d = math.sqrt((cx - r[1]) ^ 2 + (cz - r[2]) ^ 2)
+				if d < 5.5 then
+					return "px_hedge", MOSS, Y - 0.2, Y + 0.2
+				end
+				if d < r[3] then
+					if math.floor(d / 2) % 2 == 0 then
+						return "px_sand", RAKE_L
+					end
+					return "px_gravel", RAKE_D
+				end
+			end
+			if iz % 2 == 0 then
+				return "px_sand", RAKE_L
+			end
+			return "px_gravel", RAKE_D
+		end, g)
+		-- the rock piles (stepped blackstone and coal blocks)
+		box("Rock", -156, Y, -60, -148, Y + 4, -52, "px_blackstone", nil, g)
+		box("Rock", -156, Y + 4, -60, -152, Y + 8, -56, "px_coal_block", nil, g)
+		box("Rock", -155, Y + 8, -59, -153, Y + 10, -57, "px_blackstone", nil, g)
+		box("Rock", -148, Y, -56, -144, Y + 2, -52, "px_coal_block", nil, g)
+		box("Rock", -138, Y, -52, -130, Y + 3, -44, "px_blackstone", nil, g)
+		box("Rock", -136, Y + 3, -50, -132, Y + 7, -46, "px_coal_block", nil, g)
+		box("Rock", -124, Y, -62, -120, Y + 4, -58, "px_blackstone", nil, g)
+		box("Rock", -120, Y, -61, -117, Y + 2, -58, "px_coal_block", nil, g)
+		-- the plaster walls with a tile coping (the north one only where L1 reaches it, the cliff stands elsewhere)
+		local PLASTER = Color3.fromRGB(236, 228, 212)
+		local function gardenWall(x0, z0, x1, z1, alongX)
+			box("GardenWallBase", x0, Y, z0, x1, Y + 2, z1, "px_stone_bricks", STONE, g)
+			box("GardenWall", x0, Y + 2, z0, x1, Y + 6, z1, "px_white_wool", PLASTER, g)
+			if alongX then
+				box("WallCoping", x0, Y + 6, z0 - 0.6, x1, Y + 7, z1 + 0.6, "px_roof_tiles", ROOF_DARK, g)
+				box("WallRidge", x0, Y + 7, z0 + 1, x1, Y + 7.8, z1 - 1, "px_blackstone", nil, g)
+			else
+				box("WallCoping", x0 - 0.6, Y + 6, z0, x1 + 0.6, Y + 7, z1, "px_roof_tiles", ROOF_DARK, g)
+				box("WallRidge", x0 + 1, Y + 7, z0, x1 - 1, Y + 7.8, z1, "px_blackstone", nil, g)
+			end
+		end
+		gardenWall(-172, -68, -168, -40, false)
+		local runX = nil
+		for x = -172, -100, 8 do
+			local okCell = x < -104 and gy8(x + 4, -70) == Y and gy8(x + 4, -66) == Y
+			if okCell then
+				runX = runX or x
+			elseif runX then
+				gardenWall(runX, -72, x, -68, true)
+				runX = nil
+			end
+		end
+		box("GardenCurb", -168, Y, -41, -112, Y + 0.8, -40, "px_smooth_stone", STONE, g)
+		-- the tea veranda: a low deck under a stepped pent roof, a paper wall behind, cushions and a tea table
+		local VX0, VX1 = -112, -104
+		box("VerandaDeck", VX0, Y, -66, VX1, Y + 1.6, -42, "px_dark_oak_planks", nil, g)
+		for _, pz in ipairs({ -65, -54, -43 }) do
+			box("VerandaPost", VX0, Y + 1.6, pz - 0.6, VX0 + 1.2, Y + 10.6, pz + 0.6, "px_dark_oak_log", nil, g)
+		end
+		box("VerandaWallLow", VX1 - 1, Y + 1.6, -66, VX1, Y + 3.6, -42, "px_dark_oak_planks", nil, g)
+		box("VerandaPaper", VX1 - 1, Y + 3.6, -66, VX1, Y + 9.6, -42, "px_white_wool", PAPER, g)
+		box("VerandaBeam", VX1 - 1, Y + 9.6, -66, VX1, Y + 10.6, -42, "px_dark_oak_planks", nil, g)
+		box("VerandaEave", VX0 - 2.5, Y + 10.6, -69, VX1 + 1, Y + 12, -39, "px_roof_tiles", ROOF_DARK, g)
+		box("VerandaRoof", VX0 + 0.5, Y + 12, -68, VX1 + 0.5, Y + 14.5, -40, "px_roof_tiles", ROOF_DARK, g)
+		box("VerandaRoofTop", VX0 + 4, Y + 14.5, -67, VX1, Y + 16.5, -41, "px_roof_tiles", ROOF_DARK, g)
+		for _, tz in ipairs({ -69, -42 }) do
+			box("VerandaTip", VX0 - 3, Y + 12, tz, VX0 + 0.5, Y + 13.5, tz + 3, "px_roof_tiles", ROOF_DARK, g)
+		end
+		box("TeaTable", -110, Y + 1.6, -56, -107, Y + 2.8, -52, "px_dark_oak_planks", nil, g)
+		for _, cz in ipairs({ -59, -49 }) do
+			decor(box("Cushion", -110.4, Y + 1.6, cz - 1, -107.6, Y + 2.1, cz + 1, RED_V, TORII_RED, g))
+		end
+		paperLantern(VX0 - 1, Y + 7, -54, g, Y + 10.6, true)
+	end
+	task.wait()
+
+	-- 3c. three machiya along the north of the path, fronts facing south; a stone step in front of each
+	do
+		local houses = folder("Machiya", l1)
+		local INDIGO = Color3.fromRGB(44, 54, 96)
+		for _, h in ipairs({
+			{ -68, "Чайная", INDIGO, nil },
+			{ -40, "Саке", TORII_RED, TORII_RED },
+			{ -12, "Сладости", INDIGO, nil },
+		}) do
+			local x0 = h[1]
+			machiya(x0, -60, x0 + 20, -40, Y, houses, h[2], h[3], h[4])
+			box("HouseStep", x0 + 4, Y - 0.2, -40, x0 + 16, Y + 0.1, -36, "px_smooth_stone", STONE, houses)
+		end
+	end
+	task.wait()
+
+	-- 3d. cherry trees on L1 (first), then the bamboo grove in the north-west round them
+	do
+		local trees = folder("Trees", l1)
+		for _, p in ipairs({ { -204, -44 }, { -196, -20 }, { -208, -28 }, { -150, -12 }, { -126, -12 }, { -96, -12 }, { -60, -12 }, { -30, -12 }, { 0, -12 }, { -180, -56 } }) do
+			if okSpot(p[1], p[2], Y, 1) then
+				cherry(p[1], p[2], Y, trees)
+				reserve(p[1] - 8, p[2] - 8, p[1] + 8, p[2] + 8)
+			end
+		end
+		local grove = folder("BambooGrove", l1)
+		for cz = -64, -24, 8 do
+			for cx = -216, -192, 8 do
+				if rng:NextNumber() < 0.6 and okSpot(cx, cz, Y, 1) then
+					bambooClump(cx, cz, Y, grove)
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 4. the west of L2: the path to the temple court, the cliff path, the bell, trees
+do
+	local l2 = folder("TopTerrace", hill)
+	local Y = L2_Y
+	-- 4a. the path from the arena east opening to the temple court (x 48): gravel with cobble edges, 5 blocks wide
+	layRuns("TopPath", -32, -138, 20, 5, B, Y - 0.2, Y + 0.1, function(cx, cz, _, iz)
+		if (cx - ARENA.x) ^ 2 + (cz - ARENA.z) ^ 2 < 56 ^ 2 or gy8(cx, cz) ~= Y then
+			return nil
+		end
+		if iz == 0 or iz == 4 then
+			return "px_cobblestone", STONE
+		end
+		return "px_gravel", Color3.fromRGB(214, 208, 198)
+	end, l2)
+	for i, p in ipairs({ { -8, -142 }, { 28, -142 }, { -8, -114 }, { 28, -114 } }) do
+		if gy8(p[1], p[2]) == Y then
+			stoneLantern(p[1], Y, p[2], l2, i == 1 or i == 4)
+		end
+	end
+	-- 4b. the cliff path from the west-north-west opening to an overlook over the zen garden
+	layRuns("CliffPath", -176, -160, 12, 20, B, Y - 0.2, Y + 0.1, function(cx, cz)
+		if (cx - ARENA.x) ^ 2 + (cz - ARENA.z) ^ 2 < 56.5 ^ 2 or gy8(cx, cz) ~= Y or not onIsland(cx, cz, 6) then
+			return nil
+		end
+		for i = 1, #WEST_PATH - 1 do
+			local a, b = WEST_PATH[i], WEST_PATH[i + 1]
+			if segDist(cx, cz, a[1], a[2], b[1], b[2]) < 7 then
+				return "px_gravel", Color3.fromRGB(206, 200, 190)
+			end
+		end
+		return nil
+	end, l2)
+	do
+		local ov = folder("Overlook", l2)
+		-- a red fence along the rim of L2 above the garden (found per island cell)
+		local posts, prev = {}, nil
+		for cx = -164, -140, 8 do
+			local zr = nil
+			for cz = -100, -52, 8 do
+				if gy8(cx, cz) < Y then
+					zr = cz - 4
+					break
+				end
+			end
+			if zr then
+				local fz = zr - 1.2
+				redFence(cx - 4, fz, cx + 4, fz, Y, ov, posts)
+				if prev and prev ~= fz then
+					redFence(cx - 4, prev, cx - 4, fz, Y, ov, posts)
+				end
+				prev = fz
+			else
+				prev = nil
+			end
+		end
+		box("BenchSeat", -158, Y + 1.6, -95, -150, Y + 2.4, -92.6, "px_dark_oak_planks", nil, ov)
+		for _, bx in ipairs({ -157, -151 }) do
+			box("BenchLeg", bx - 0.6, Y, -94.4, bx + 0.6, Y + 1.6, -93.2, "px_dark_oak_planks", nil, ov)
+		end
+		stoneLantern(-146, Y, -96, ov, true)
+	end
+	-- 4c. the bell tower (shōrō) north of the temple path
+	do
+		local f = folder("BellTower", l2)
+		local bx, bz = 21, -96
+		local BRONZE = Color3.fromRGB(170, 120, 62)
+		box("BellBase", bx - 8, Y, bz - 8, bx + 8, Y + 1.5, bz + 8, "px_stone_bricks", STONE, f)
+		for _, c in ipairs(CORNERS) do
+			box("BellPost", bx + c[1] * 5 - 0.8, Y + 1.5, bz + c[2] * 5 - 0.8, bx + c[1] * 5 + 0.8, Y + 14, bz + c[2] * 5 + 0.8, RED_V, TORII_RED, f)
+		end
+		box("BellBeam", bx - 6.5, Y + 13, bz - 1, bx + 6.5, Y + 14, bz + 1, "px_dark_oak_planks", nil, f)
+		box("BellBeam", bx - 1, Y + 13.1, bz - 6.5, bx + 1, Y + 13.9, bz + 6.5, "px_dark_oak_planks", nil, f)
+		squareRoof(bx, Y + 14, bz, 6, f)
+		box("BellCrown", bx - 1, Y + 11.5, bz - 1, bx + 1, Y + 13, bz + 1, "px_iron_block", BRONZE, f)
+		box("Bell", bx - 2, Y + 7, bz - 2, bx + 2, Y + 11.5, bz + 2, "px_iron_block", BRONZE, f)
+		box("BellLip", bx - 2.6, Y + 6.2, bz - 2.6, bx + 2.6, Y + 7.2, bz + 2.6, "px_iron_block", BRONZE, f)
+		decor(box("BellStriker", bx + 3, Y + 8.5, bz - 0.5, bx + 10, Y + 9.5, bz + 0.5, "px_dark_oak_log", nil, f))
+		decor(box("StrikerRope", bx + 6.3, Y + 9.5, bz - 0.15, bx + 6.7, Y + 13, bz + 0.15, nil, Color3.fromRGB(200, 180, 140), f))
+	end
+	task.wait()
+	-- 4d. cherry trees round the arena and along the top terrace
+	do
+		local trees = folder("Trees", l2)
+		for _, p in ipairs({
+			{ -40, -198 },
+			{ -4, -198 },
+			{ 24, -186 },
+			{ 40, -152 },
+			{ 42, -110 },
+			{ -2, -102 },
+			{ 8, -170 },
+			{ -58, -196 },
+			{ -150, -100 },
+			{ -176, -116 },
+			{ -168, -150 },
+			{ -24, -78 },
+			{ 0, -82 },
+			{ -128, -72 },
+		}) do
+			if okSpot(p[1], p[2], Y, 2) and (p[1] - ARENA.x) ^ 2 + (p[2] - ARENA.z) ^ 2 > 64 ^ 2 then
+				cherry(p[1], p[2], Y, trees, rng:NextInteger(3, 5) * B)
+				reserve(p[1] - 8, p[2] - 8, p[1] + 8, p[2] + 8)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 5. the cliffs: moss plates, leafy lips and vine curtains
+do
+	local greens = folder("CliffGreens", hill)
+	local VINE = Color3.fromRGB(100, 150, 72)
+	for cz = -244, -12, 8 do
+		for cx = -244, 52, 8 do
+			local near = (cx - ARENA.x) ^ 2 + (cz - ARENA.z) ^ 2 < 66 ^ 2
+			if not near and zoneOf(cx, cz) == "hill" and onIsland(cx, cz, 12) and not inStairCorridor(cx, cz) then
+				local y = groundY(cx, cz)
+				for _, d in ipairs({ { 0, 1 }, { 1, 0 }, { -1, 0 }, { 0, -1 } }) do
+					local nx, nz = cx + d[1] * 8, cz + d[2] * 8
+					local ly = groundY(nx, nz)
+					local drop = y - ly
+					if drop >= 12 and onIsland(nx, nz, 12) and not inStairCorridor(nx, nz) and zoneOf(nx, nz) ~= "temple" and rng:NextNumber() < 0.35 then
+						local fx, fz = cx + d[1] * 4, cz + d[2] * 4 -- the face plane
+						local tx, tz = math.abs(d[2]), math.abs(d[1]) -- along the face
+						-- the leafy lip on the rim
+						local lip = decor(part("CliffLip", Vector3.new(tx * 8 + math.abs(d[1]) * 2.4, 0.3, tz * 8 + math.abs(d[2]) * 2.4), at(fx - d[1] * 0.8, y + 0.15, fz - d[2] * 0.8), nil, nil, greens))
+						textured(lip, "px_hedge", VINE)
+						-- three vine strips of ragged length hanging 0.6 off the face
+						for _, off in ipairs({ -2.66, 0, 2.66 }) do
+							if rng:NextNumber() < 0.8 then
+								local len = math.min(drop - 2, rng:NextInteger(2, 7) * 2)
+								local v = decor(part("Vines", Vector3.new(tx * 2.6 + math.abs(d[1]) * 0.4, len, tz * 2.6 + math.abs(d[2]) * 0.4), at(fx + d[1] * 0.8 + tx * off, y - len / 2, fz + d[2] * 0.8 + tz * off), nil, nil, greens))
+								textured(v, "px_hedge", VINE)
+							end
+						end
+						-- a moss plate lower on the face
+						if rng:NextNumber() < 0.5 then
+							local w, h = rng:NextInteger(1, 2) * 4, rng:NextInteger(1, 2) * 4
+							local off = if w < 8 then pick({ -2, 2 }) else 0
+							local yc = ly + h / 2 + rng:NextInteger(0, math.max(0, math.floor((drop - h - 6) / 2))) * 2
+							local m = decor(part("Moss", Vector3.new(tx * w + math.abs(d[1]) * 0.3, h, tz * w + math.abs(d[2]) * 0.3), at(fx + d[1] * 0.35 + tx * off, yc, fz + d[2] * 0.35 + tz * off), nil, nil, greens))
+							textured(m, pick({ "px_mossy_cobblestone", "px_mossy_stone_bricks" }))
+						end
+					end
+				end
+			end
+		end
+	end
+end
+print(("[build-kyoto] hill: %d parts, %d point lights left"):format(count - startCount, lightsLeft))
+
+end
+task.wait()
+-- ================================================================================ kyoto/40-town.luau
+do
+-- ================================================================ kyoto: the lower town (the square, the shops, the lower town, cherry trees, the rim)
+-- The TOWN zone (zoneOf == "town": L0 z ≥ -8 outside the temple zone), as in the concept (assets/concepts/kyoto/
+-- concept-v2.webp, top panels): the cobbled square round the pink mine with small dark-wood shop houses, stone lanterns
+-- and cherry trees everywhere, petals on the ground, grey island cliffs with pink and green leaf curtains.
+--   pit fence   dark wood rails between stone posts: W x -100, E x 52, S z 164 (one block outside the pit area), N z 21.6
+--               (on the north rim band, so the way along it to the main stair foot stays 3 blocks wide); open at the
+--               four ladder shafts: x -36..-12 (N, S) and z 76..100 (W, E), each opening flanked by two stone lanterns
+--   shops       12 machiya (two storeys, open shop front, noren, counter, goods): the west row (fronts on x -120 facing
+--               east, z 52..164), the south-west row (fronts on z 180 facing north, x -94..-46), one south-east of the
+--               buyer (x 26..42), the east row across the main way (fronts on x 76 facing west, z 76..148)
+--   lanes       the main way north x 48..76 (z -8..200), the west lane x -120..-100, the south lane z 164..180, the
+--               arrival (r 16), the buyer and the zone sign stay clear; gravel paths: P1 the square → the west stair
+--               foot (z 34..42, x -178..-120, then north to z 28), P2 north-south x -150..-144 (z 42..140), the shrine
+--               approach z 68..72, the east path z 96..104 (x 76..150)
+--   lower town  the shrine (hall x -198..-174, z 58..82 facing east; torii at x -164; fox statues at x -170), a well,
+--               a vegetable plot, two cottages on P2, three in the east lowland (a thatched one, a tiled one, a kura),
+--               carts and hay, stone lanterns along the paths
+--   trees       ~40 cherry trees on free town ground (stepped pink crowns, petal carpets), a few designated in the square
+--   rim         a low stone kerb along the south and west edge with gaps at three view points (benches at the south
+--               one), leaf curtains hanging 0.6 stud off the cliff face, small trees leaning over the edge; bamboo
+--               clumps under the west cliff
+local town = folder("Town")
+local startCount = count
+local TF = {
+	fence = folder("PitFence", town),
+	shops = folder("ShopHouses", town),
+	lower = folder("LowerTown", town),
+	shrine = folder("Shrine", town),
+	paths = folder("Paths", town),
+	trees = folder("CherryTrees", town),
+	rim = folder("Rim", town),
+	bamboo = folder("Bamboo", town),
+	life = folder("Townsfolk", town),
+}
+local ST = {
+	shops = 0,
+	houses = 0,
+	trees = 0,
+	npcs = 0,
+	lights = 0,
+	skipped = 0,
+	bamboo = 0,
+	kerb = 0,
+	curtains = 0,
+}
+local TC = {
+	indigo = Color3.fromRGB(46, 58, 116),
+	white = Color3.fromRGB(240, 238, 232),
+	ridge = Color3.fromRGB(38, 36, 42),
+	glow = Color3.fromRGB(255, 196, 120),
+	gravel = Color3.fromRGB(184, 180, 170),
+	thatch = Color3.fromRGB(200, 170, 112),
+	tea = Color3.fromRGB(96, 150, 70),
+	matcha = Color3.fromRGB(150, 196, 110),
+	crate = Color3.fromRGB(215, 175, 120),
+	barrel = Color3.fromRGB(150, 110, 80),
+	bamboo = Color3.fromRGB(160, 214, 110),
+	bambooDark = Color3.fromRGB(120, 176, 84),
+	leafGreen = Color3.fromRGB(120, 170, 90),
+	foxStone = Color3.fromRGB(196, 194, 188),
+	crop = Color3.fromRGB(110, 170, 70),
+	cabbage = Color3.fromRGB(170, 210, 130),
+	carrot = Color3.fromRGB(230, 130, 40),
+	water = Color3.fromRGB(70, 130, 170),
+	skins = {
+		Color3.fromRGB(234, 200, 170),
+		Color3.fromRGB(220, 180, 150),
+		Color3.fromRGB(200, 160, 124),
+	},
+}
+
+-- ================================================================ helpers
+local U = {}
+-- a textured box in a frame cf (a world CFrame) by two local corners
+function U.lbox(name, cf, x0, y0, z0, x1, y1, z1, variant, tint, parent, isDecor)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(
+		name,
+		size,
+		cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2),
+		tint,
+		nil,
+		parent
+	)
+	if variant then
+		textured(p, variant, tint)
+	end
+	if isDecor then
+		decor(p)
+	end
+	return p
+end
+-- a frame on the ground at local (x, z) whose −Z (the front) looks along (fx, fz); the body lies toward +Z
+function U.faceCF(x, z, fx, fz, y)
+	local p = V(x, y or 0, z)
+	return CFrame.lookAt(p, p + Vector3.new(fx, 0, fz))
+end
+-- the floor-local coordinates of a point given in a frame
+function U.loc(cf, x, y, z)
+	local p = (cf * CFrame.new(x, y, z)).Position
+	return p.X - BX, p.Y - BY, p.Z - BZ
+end
+-- a warm point light while the budget lasts (≤ 24 in this part)
+function U.glow(p, range, bright)
+	if ST.lights >= 24 then
+		return nil
+	end
+	ST.lights += 1
+	return light(p, range or 26, bright or 1.2, TC.glow)
+end
+function U.petals(x0, z0, x1, z1, deep, f)
+	decor(
+		box(
+			"Petals",
+			x0,
+			0.04,
+			z0,
+			x1,
+			0.34,
+			z1,
+			"px_white_wool",
+			if deep then SAKURA_DEEP else SAKURA,
+			f
+		)
+	)
+end
+function U.gravel(x0, z0, x1, z1)
+	decor(box("GravelPath", x0, 0, z0, x1, 0.12, z1, "px_gravel", TC.gravel, TF.paths))
+end
+-- the rectangle of a building whose front centre is (x, z) facing (fx, fz): w across, d back, ef in front
+function U.rect(x, z, fx, fz, w, d, ef)
+	ef = ef or 0
+	local ax, az = x + fx * ef, z + fz * ef
+	local bx, bz = x - fx * d, z - fz * d
+	if fx ~= 0 then
+		return math.min(ax, bx), z - w / 2, math.max(ax, bx), z + w / 2
+	end
+	return x - w / 2, math.min(az, bz), x + w / 2, math.max(az, bz)
+end
+
+-- ================================================================ footprints: lanes, keep-outs, buildings
+-- kinds: "lane" (walk ways: nothing stands on them), "keep" (the arrival, the buyer, the sign), "solid" (a building
+-- or a prop on the ground), "roof" (eaves overhead: trees keep their crowns off them)
+local CL = { list = {} }
+function CL.add(x0, z0, x1, z1, kind)
+	table.insert(
+		CL.list,
+		{ math.min(x0, x1), math.min(z0, z1), math.max(x0, x1), math.max(z0, z1), kind }
+	)
+end
+function CL.hit(x0, z0, x1, z1, kinds)
+	for _, c in ipairs(CL.list) do
+		if
+			(not kinds or kinds[c[5]])
+			and x0 < c[3] - 0.01
+			and x1 > c[1] + 0.01
+			and z0 < c[4] - 0.01
+			and z1 > c[2] + 0.01
+		then
+			return true
+		end
+	end
+	return false
+end
+-- every 4 studs of the rectangle: L0 town ground on the island (pad 10), off the pit, the stairs and the pond
+function CL.ground(x0, z0, x1, z1)
+	local nx, nz = math.max(1, math.ceil((x1 - x0) / 4)), math.max(1, math.ceil((z1 - z0) / 4))
+	for i = 0, nx do
+		for j = 0, nz do
+			local x = x0 + (x1 - x0) * i / nx
+			local z = z0 + (z1 - z0) * j / nz
+			if
+				not onIsland(x, z, 10)
+				or groundY(x, z) ~= 0
+				or zoneOf(x, z) ~= "town"
+				or inPitArea(x, z, 2)
+				or inStairCorridor(x, z)
+				or inPond(x, z, 4)
+			then
+				return false
+			end
+		end
+	end
+	return true
+end
+function CL.take(x0, z0, x1, z1, kind)
+	if x1 < x0 then
+		x0, x1 = x1, x0
+	end
+	if z1 < z0 then
+		z0, z1 = z1, z0
+	end
+	if CL.hit(x0, z0, x1, z1) or not CL.ground(x0, z0, x1, z1) then
+		ST.skipped += 1
+		return false
+	end
+	CL.add(x0, z0, x1, z1, kind or "solid")
+	return true
+end
+do
+	CL.add(SPAWN.x - 16, SPAWN.z - 16, SPAWN.x + 16, SPAWN.z + 16, "keep")
+	CL.add(-4, 172, 20, 200, "keep") -- the buyer's stall, barrel and crate
+	CL.add(-42, 186, -34, 194, "keep") -- the zone sign
+	CL.add(48, -8, 76, 200, "lane") -- the main way north to the main stair foot
+	CL.add(-120, 0, -100, 180, "lane") -- the west lane between the shops and the pit fence
+	CL.add(-120, 164, 72, 180, "lane") -- the south lane
+	CL.add(-100, 12, 20, 21, "lane") -- along the north fence
+	CL.add(-178, 34, -120, 42, "lane") -- P1 to the west stair
+	CL.add(-178, 26, -166, 34, "lane")
+	CL.add(-150, 42, -144, 140, "lane") -- P2
+	CL.add(-176, 68, -150, 72, "lane") -- the shrine approach
+	CL.add(76, 92, 150, 108, "lane") -- the east path
+end
+
+-- ================================================================ block props
+local P = { posts = {} }
+-- a stone lantern (tōrō, the concept close-up): base, pillar, tray, a fire box of four posts round a paper (or lit)
+-- core, a wide cap with raised tips, a top block and a finial; ≈ 12.7 studs tall, a 1-block footprint
+function P.stoneLantern(x, z, f, lit)
+	cube("LanternBase", x, 0.75, z, 4, 1.5, 4, "px_stone_bricks", STONE, f)
+	cube("LanternPillar", x, 3.5, z, 2.4, 4, 2.4, "px_smooth_stone", STONE, f)
+	cube("LanternTray", x, 6, z, 4.4, 1, 4.4, "px_stone_bricks", STONE, f)
+	for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		cube(
+			"LanternFrame",
+			x + s[1] * 1.6,
+			8,
+			z + s[2] * 1.6,
+			0.9,
+			3,
+			0.9,
+			"px_smooth_stone",
+			STONE,
+			f
+		)
+		decor(
+			cube(
+				"LanternTip",
+				x + s[1] * 2.3,
+				10.9,
+				z + s[2] * 2.3,
+				1,
+				0.8,
+				1,
+				"px_smooth_stone",
+				STONE,
+				f
+			)
+		)
+	end
+	local core = decor(cube("LanternLight", x, 8, z, 2.4, 2.4, 2.4, "px_white_wool", PAPER, f))
+	if lit then
+		core.Material = Enum.Material.Neon
+		core.MaterialVariant = ""
+		core.Color = TC.glow
+		U.glow(core, 28, 1.3)
+	end
+	cube("LanternRoof", x, 10, z, 5.6, 1, 5.6, "px_stone_bricks", STONE, f)
+	cube("LanternTop", x, 11, z, 3, 1, 3, "px_smooth_stone", STONE, f)
+	decor(cube("LanternFinial", x, 12.1, z, 1.2, 1.2, 1.2, "px_smooth_stone", STONE, f))
+end
+-- a fence run (increasing x or z): stone posts every 3–4 blocks, two dark wood rails, a baluster in each span
+function P.fenceRun(ax, az, bx, bz, f)
+	local len = math.abs(bx - ax) + math.abs(bz - az)
+	local n = math.max(1, math.floor(len / 14 + 0.5))
+	local alongX = bx ~= ax
+	for i = 0, n do
+		local px, pz = ax + (bx - ax) * i / n, az + (bz - az) * i / n
+		local key = ("%.1f:%.1f"):format(px, pz)
+		if not P.posts[key] then
+			P.posts[key] = true
+			cube("FencePost", px, 2.3, pz, 2, 4.6, 2, "px_stone_bricks", STONE, f)
+			cube("FenceCap", px, 4.9, pz, 2.8, 0.6, 2.8, "px_smooth_stone", STONE, f)
+		end
+	end
+	for i = 1, n do
+		local x0, z0 = ax + (bx - ax) * (i - 1) / n, az + (bz - az) * (i - 1) / n
+		local x1, z1 = ax + (bx - ax) * i / n, az + (bz - az) * i / n
+		for _, h in ipairs({ 1.6, 3.4 }) do
+			if alongX then
+				box(
+					"FenceRail",
+					x0 + 1,
+					h - 0.4,
+					z0 - 0.4,
+					x1 - 1,
+					h + 0.4,
+					z0 + 0.4,
+					"px_dark_oak_planks",
+					nil,
+					f
+				)
+			else
+				box(
+					"FenceRail",
+					x0 - 0.4,
+					h - 0.4,
+					z0 + 1,
+					x0 + 0.4,
+					h + 0.4,
+					z1 - 1,
+					"px_dark_oak_planks",
+					nil,
+					f
+				)
+			end
+		end
+		cube(
+			"FenceBaluster",
+			(x0 + x1) / 2,
+			2,
+			(z0 + z1) / 2,
+			1,
+			4,
+			1,
+			"px_dark_oak_planks",
+			nil,
+			f
+		)
+	end
+end
+-- a stone fox (kitsune) on a plinth with a red bib, facing (fx, fz)
+function P.fox(x, z, fx, fz, f)
+	local cf = U.faceCF(x, z, fx, fz)
+	local L, S, C = U.lbox, "px_smooth_stone", TC.foxStone
+	L("FoxPlinth", cf, -2.4, 0, -2.4, 2.4, 3, 2.4, "px_stone_bricks", STONE, f)
+	L("FoxPlinthTop", cf, -2.8, 3, -2.8, 2.8, 3.6, 2.8, S, STONE, f)
+	L("FoxBody", cf, -1.4, 3.6, -0.6, 1.4, 6.4, 2.4, S, C, f)
+	L("FoxChest", cf, -1.1, 3.6, -1.6, 1.1, 7.8, 0.2, S, C, f)
+	L("FoxHead", cf, -1.3, 7.8, -2, 1.3, 10, 0.4, S, C, f)
+	L("FoxSnout", cf, -0.6, 8, -3.2, 0.6, 9, -2, S, C, f, true)
+	for _, sx in ipairs({ -1, 1 }) do
+		L("FoxEar", cf, sx * 0.4, 10, -1.2, sx * 1.3, 11.4, -0.4, S, C, f, true)
+	end
+	L("FoxTail", cf, -0.6, 4, 2.4, 0.6, 9.4, 3.4, S, C, f, true)
+	L("FoxBib", cf, -1.3, 6.6, -1.9, 1.3, 7.8, -1.6, "px_white_wool", TORII_RED, f, true)
+	L("FoxBib", cf, -0.7, 5.8, -1.85, 0.7, 6.6, -1.6, "px_white_wool", TORII_RED, f, true)
+end
+-- a torii over a path running along (fx, fz) at (cx, cz): posts span apart, kasagi at height h
+function P.torii(cx, cz, fx, fz, span, h, f)
+	local cf = U.faceCF(cx, cz, fx, fz)
+	local L, RED, hs = U.lbox, TORII_RED, span / 2
+	for _, sx in ipairs({ -1, 1 }) do
+		L("ToriiPost", cf, sx * hs - 1, 1.6, -1, sx * hs + 1, h, 1, "px_white_wool", RED, f)
+		L(
+			"ToriiFoot",
+			cf,
+			sx * hs - 1.3,
+			0,
+			-1.3,
+			sx * hs + 1.3,
+			1.6,
+			1.3,
+			"px_smooth_stone",
+			ROOF_DARK,
+			f
+		)
+		L(
+			"KasagiTip",
+			cf,
+			sx * (hs + 4),
+			h + 2,
+			-1.4,
+			sx * (hs + 2.6),
+			h + 2.8,
+			1.4,
+			"px_dark_oak_planks",
+			ROOF_DARK,
+			f,
+			true
+		)
+	end
+	L("Nuki", cf, -hs - 2, h - 4, -0.6, hs + 2, h - 3, 0.6, "px_white_wool", RED, f)
+	L("ToriiStrut", cf, -0.8, h - 3, -0.5, 0.8, h, 0.5, "px_white_wool", RED, f)
+	L("Kasagi", cf, -hs - 3, h, -1.2, hs + 3, h + 1.2, 1.2, "px_white_wool", RED, f)
+	L(
+		"KasagiTop",
+		cf,
+		-hs - 4,
+		h + 1.2,
+		-1.4,
+		hs + 4,
+		h + 2,
+		1.4,
+		"px_dark_oak_planks",
+		ROOF_DARK,
+		f
+	)
+end
+function P.hay(x, z, f, n)
+	local spots = { { 0, 0, 0 }, { 4, 0, 0 }, { 0, 0, 4 }, { 2, 4, 2 } }
+	for i = 1, math.min(n or 3, 4) do
+		local s = spots[i]
+		cube("Hay", x + s[1], s[2] + 2, z + s[3], B, B, B, "px_hay", nil, f)
+	end
+end
+-- a hand cart with a load of hay, yaw about y
+function P.cart(x, z, yaw, f)
+	local cf = at(x, 0, z) * CFrame.Angles(0, yaw, 0)
+	local L, W = U.lbox, "px_spruce_planks"
+	L("CartBed", cf, -4, 2.6, -2.4, 4, 3.4, 2.4, W, nil, f)
+	for _, sz in ipairs({ -1, 1 }) do
+		L("CartSide", cf, -4, 3.4, sz * 2.4, 4, 4.6, sz * 1.8, W, nil, f)
+		L("CartWheel", cf, -1.8, 0, sz * 2.4, 1.8, 3.6, sz * 3, "px_dark_oak_planks", nil, f)
+		L(
+			"CartHub",
+			cf,
+			-0.5,
+			1.3,
+			sz * 3,
+			0.5,
+			2.3,
+			sz * 3.3,
+			"px_smooth_stone",
+			ROOF_DARK,
+			f,
+			true
+		)
+		L(
+			"CartShaft",
+			cf,
+			4,
+			2.7,
+			sz * 1.6 - 0.3,
+			9,
+			3.3,
+			sz * 1.6 + 0.3,
+			"px_dark_oak_planks",
+			nil,
+			f,
+			true
+		)
+	end
+	L("CartLoad", cf, -3.6, 3.4, -1.8, 0, 6.6, 1.8, "px_hay", nil, f, true)
+	L("CartLoad", cf, 0, 3.4, -1.8, 3.4, 5.8, 1.8, "px_hay", nil, f, true)
+end
+-- a bench facing (fx, fz)
+function P.bench(x, z, fx, fz, f)
+	local cf = U.faceCF(x, z, fx, fz)
+	local L = U.lbox
+	for _, sx in ipairs({ -1, 1 }) do
+		L("BenchLeg", cf, sx * 4, 0, -1.2, sx * 2.8, 1.8, 1.2, "px_stone_bricks", STONE, f)
+	end
+	L("BenchSeat", cf, -4.4, 1.8, -1.4, 4.4, 2.4, 1.4, "px_spruce_planks", nil, f)
+	L("BenchBack", cf, -4.4, 2.4, 1, 4.4, 4.4, 1.5, "px_spruce_planks", nil, f)
+end
+
+-- ================================================================ the fence round the pit, the stone lanterns at the ladder openings
+do
+	local f = TF.fence
+	local W, E, S, N = -100, 52, 164, 21.6
+	P.fenceRun(W, N, -42, N, f)
+	P.fenceRun(-6, N, E, N, f)
+	P.fenceRun(W, S, -42, S, f)
+	P.fenceRun(-6, S, E, S, f)
+	P.fenceRun(W, N, W, 70, f)
+	P.fenceRun(W, 106, W, S, f)
+	P.fenceRun(E, N, E, 70, f)
+	P.fenceRun(E, 106, E, S, f)
+	-- two stone lanterns flank each ladder opening, the first of each pair lit
+	for _, l in ipairs({
+		{ -38, N, true },
+		{ -10, N, false },
+		{ -38, S, true },
+		{ -10, S, false },
+		{ W, 74, true },
+		{ W, 102, false },
+		{ E, 74, false },
+		{ E, 102, true },
+	}) do
+		P.stoneLantern(l[1], l[2], f, l[3])
+	end
+	-- petals drifted into the outer corners of the fence
+	for _, c in ipairs({ { W, N, -1, -1 }, { E, N, 1, -1 }, { W, S, -1, 1 }, { E, S, 1, 1 } }) do
+		local x, z = c[1] + c[3] * 1.2, c[2] + c[4] * 1.2
+		U.petals(
+			math.min(x, x + c[3] * 8),
+			math.min(z, z + c[4] * 6),
+			math.max(x, x + c[3] * 8),
+			math.max(z, z + c[4] * 6),
+			false,
+			f
+		)
+		U.petals(
+			math.min(x, x + c[3] * 4),
+			math.min(z, z + c[4] * 10),
+			math.max(x, x + c[3] * 4),
+			math.max(z, z + c[4] * 10),
+			true,
+			f
+		)
+	end
+end
+task.wait()
+
+-- ================================================================ the shop houses (machiya) and the cottages
+local H = {}
+local KINDS = {
+	sake = {
+		sign = "Саке",
+		goods = {
+			{ "px_white_wool", PAPER },
+			{ "px_spruce_planks", TC.barrel },
+			{ "px_white_wool", TC.white },
+		},
+	},
+	rice = { sign = "Рис", goods = { { "px_hay" }, { "px_white_wool", PAPER }, { "px_hay" } } },
+	tea = {
+		sign = "Чай",
+		goods = {
+			{ "px_hedge", TC.tea },
+			{ "px_planks", TC.crate },
+			{ "px_white_wool", TC.matcha },
+		},
+	},
+	lantern = {
+		sign = "Фонари",
+		goods = { { "px_white_wool", TORII_RED }, { "px_white_wool", PAPER } },
+	},
+	sweets = {
+		sign = "Сладости",
+		goods = {
+			{ "px_white_wool", SAKURA },
+			{ "px_white_wool", TC.white },
+			{ "px_white_wool", TC.matcha },
+		},
+	},
+	cloth = {
+		sign = "Ткани",
+		goods = {
+			{ "px_white_wool", TC.indigo },
+			{ "px_white_wool", TORII_RED },
+			{ "px_white_wool", SAKURA },
+		},
+	},
+}
+-- the stepped dark tile roof with the ridge along local x, raised tips at the eave corners and the ridge ends
+function H.roof(cf, hw, d, y, f, rv, rt, tips, fo)
+	local L = U.lbox
+	-- the eave runs from z -fo (over the front) to d + 2; the ridge line is its middle
+	local rc = (d + 2 - fo) / 2
+	local half = (d + 2 + fo) / 2
+	L("Roof", cf, -hw - 2, y, rc - half, hw + 2, y + 1.5, rc + half, rv, rt, f)
+	L("Roof", cf, -hw - 1, y + 1.5, rc - half + 3, hw + 1, y + 3.5, rc + half - 3, rv, rt, f)
+	L("Roof", cf, -hw, y + 3.5, rc - half + 6, hw, y + 5, rc + half - 6, rv, rt, f)
+	L(
+		"RoofRidge",
+		cf,
+		-hw - 1.5,
+		y + 5,
+		rc - 1,
+		hw + 1.5,
+		y + 6.4,
+		rc + 1,
+		if tips then rv else "px_dark_oak_planks",
+		if tips then TC.ridge else nil,
+		f
+	)
+	if tips then
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				local zz = rc + sz * half
+				L(
+					"RoofTip",
+					cf,
+					sx * (hw + 2),
+					y + 1.5,
+					zz,
+					sx * (hw + 0.4),
+					y + 2.9,
+					zz - sz * 1.6,
+					rv,
+					rt,
+					f,
+					true
+				)
+			end
+			L(
+				"RidgeTip",
+				cf,
+				sx * (hw + 1.5),
+				y + 6.4,
+				rc - 0.8,
+				sx * (hw + 0.1),
+				y + 8,
+				rc + 0.8,
+				rv,
+				TC.ridge,
+				f,
+				true
+			)
+		end
+	end
+end
+-- a two-storey shop house: front centre (x, z) facing (fx, fz), w across, d deep (studs); o = { kind, noren,
+-- balcony, npc, look }
+function H.machiya(x, z, fx, fz, w, d, o)
+	local x0, z0, x1, z1 = U.rect(x, z, fx, fz, w, d)
+	if not CL.take(x0, z0, x1, z1, "solid") then
+		return nil
+	end
+	local r0, s0, r1, s1 = U.rect(x, z, fx, fz, w + 5, d + 2.5, 5)
+	CL.add(r0, s0, r1, s1, "roof")
+	local kind = KINDS[o.kind]
+	local f = folder("Machiya_" .. o.kind, TF.shops)
+	local cf = U.faceCF(x, z, fx, fz)
+	local hw = w / 2
+	local L, DW, DT, PV, RV =
+		U.lbox, "px_dark_oak_planks", DARK_WOOD, "px_white_wool", "px_roof_tiles"
+	-- the stone plinth is the shop floor
+	L("Plinth", cf, -hw, 0, 0, hw, 1, d, "px_stone_bricks", STONE, f)
+	-- the frame: corner posts through both storeys; side walls with a dark wainscot, paper above
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, zz in ipairs({ 0, d - 2 }) do
+			L("Post", cf, sx * hw, 1, zz, sx * (hw - 2), 16, zz + 2, DW, DT, f)
+		end
+		L("Wainscot", cf, sx * hw, 1, 2, sx * (hw - 1.6), 3.5, d - 2, DW, DT, f)
+		L("WallLow", cf, sx * (hw - 0.2), 3.5, 2, sx * (hw - 1.6), 8.6, d - 2, PV, PAPER, f)
+		L("WallUp", cf, sx * (hw - 0.2), 10, 2, sx * (hw - 1.6), 16, d - 2, PV, PAPER, f)
+		L("Beam", cf, sx * hw, 8.6, 2, sx * (hw - 2), 10, d - 2, DW, DT, f)
+	end
+	L("Wainscot", cf, -hw + 2, 1, d - 1.6, hw - 2, 3.5, d, DW, DT, f)
+	L("WallLow", cf, -hw + 2, 3.5, d - 1.6, hw - 2, 8.6, d - 0.2, PV, PAPER, f)
+	L("WallUp", cf, -hw + 2, 10, d - 1.6, hw - 2, 16, d - 0.2, PV, PAPER, f)
+	-- the beam ring between the storeys, the shop ceiling, the closed eave plate on top
+	L("Beam", cf, -hw + 2, 8.6, 0, hw - 2, 10, 2, DW, DT, f)
+	L("Beam", cf, -hw + 2, 8.6, d - 2, hw - 2, 10, d, DW, DT, f)
+	L("Ceiling", cf, -hw + 2, 9, 2, hw - 2, 10, d - 2, DW, DT, f)
+	L("Eave", cf, -hw, 16, 0, hw, 17, d, DW, DT, f)
+	-- the upper front: paper behind a lattice of dark slats (mushiko windows), the name board above
+	L("WallUp", cf, -hw + 2, 10, 0.4, hw - 2, 16, 1.8, PV, PAPER, f)
+	local n = math.floor((w - 6) / 2) + 1
+	for k = 0, n - 1 do
+		local sx = -hw + 3.2 + k * (w - 6.4) / (n - 1)
+		L("Slat", cf, sx - 0.35, 11, 0, sx + 0.35, 14.4, 0.4, DW, DT, f, true)
+	end
+	L("Sill", cf, -hw + 2.6, 10.6, -0.2, hw - 2.6, 11, 0.4, DW, DT, f, true)
+	L("Lintel", cf, -hw + 2.6, 14.4, -0.2, hw - 2.6, 14.8, 0.4, DW, DT, f, true)
+	local board =
+		L("NameBoard", cf, -3.2, 14.9, -0.4, 3.2, 16, 0.4, "px_spruce_planks", nil, f, true)
+	boardText(board, kind.sign, nil, { Enum.NormalId.Front })
+	-- the main roof
+	H.roof(cf, hw, d, 17, f, RV, ROOF_DARK, true, 2)
+	-- over the shop front: a pent roof (hisashi) with raised tips, or a balcony on brackets
+	if o.balcony then
+		L("Balcony", cf, -hw, 9.6, -3.2, hw, 10.4, 0, DW, DT, f)
+		L("BalconyRail", cf, -hw, 13, -3.2, hw, 13.6, -2.4, DW, DT, f)
+		local np = math.floor(w / 4)
+		for k = 0, np do
+			local px = -hw + 0.4 + k * (w - 0.8) / np
+			L("RailPost", cf, px - 0.4, 10.4, -3.2, px + 0.4, 13, -2.4, DW, DT, f, true)
+		end
+		for _, sx in ipairs({ -1, 1 }) do
+			L("RailSide", cf, sx * hw, 10.4, -3.2, sx * (hw - 0.8), 13.6, 0, DW, DT, f)
+			L(
+				"Bracket",
+				cf,
+				sx * (hw - 1) - 0.5,
+				8,
+				-2.8,
+				sx * (hw - 1) + 0.5,
+				9.6,
+				0,
+				DW,
+				DT,
+				f,
+				true
+			)
+		end
+		L("RailCloth", cf, -hw / 2, 11.2, -3.45, hw / 2, 13.4, -3.2, PV, o.noren, f, true)
+	else
+		L("Hisashi", cf, -hw - 1, 9, -4, hw + 1, 10, -1.4, RV, ROOF_DARK, f)
+		L("Hisashi", cf, -hw - 1, 10, -1.6, hw + 1, 11, 0.6, RV, ROOF_DARK, f)
+		for _, sx in ipairs({ -1, 1 }) do
+			L(
+				"HisashiTip",
+				cf,
+				sx * (hw + 1),
+				10,
+				-4,
+				sx * (hw - 0.4),
+				11,
+				-2.6,
+				RV,
+				ROOF_DARK,
+				f,
+				true
+			)
+		end
+	end
+	-- the noren curtain over the open front (split strips)
+	local span = w - 4.8
+	local nn = math.max(2, math.floor(span / 3.4))
+	local sw = span / nn
+	for k = 0, nn - 1 do
+		local a = -hw + 2.4 + k * sw
+		L("Noren", cf, a + 0.15, 5.4, -0.3, a + sw - 0.15, 8.6, 0, PV, o.noren, f, true)
+	end
+	-- paper lanterns at the front corners, the first one lit
+	for i, sx in ipairs({ -1, 1 }) do
+		local lx = sx * (hw - 2.6)
+		local paper = L(
+			"PaperLantern",
+			cf,
+			lx - 0.9,
+			6.2,
+			-2.1,
+			lx + 0.9,
+			8.4,
+			-0.3,
+			PV,
+			if i == 1 then PAPER else TORII_RED,
+			f,
+			true
+		)
+		L("LanternCap", cf, lx - 0.6, 8.4, -1.8, lx + 0.6, 9, -0.6, DW, DT, f, true)
+		L("LanternCap", cf, lx - 0.6, 5.8, -1.8, lx + 0.6, 6.2, -0.6, DW, DT, f, true)
+		if i == 1 then
+			U.glow(paper, 22, 1)
+		end
+	end
+	-- the counter (the way in at the +x end), goods on it, a back shelf with more
+	L("Counter", cf, -hw + 2, 1, 1.6, hw - 6, 3.8, 3.6, "px_spruce_planks", nil, f)
+	L("CounterTop", cf, -hw + 1.8, 3.8, 1.4, hw - 5.8, 4.3, 3.8, DW, nil, f)
+	local gx = -hw + 3.2
+	while gx < hw - 7 do
+		local g = pick(kind.goods)
+		L("Goods", cf, gx - 0.9, 4.3, 1.7, gx + 0.9, 6.1, 3.5, g[1], g[2], f, true)
+		gx += 2.4
+	end
+	L("Shelf", cf, -hw + 2, 5.2, d - 3.4, hw - 2, 5.7, d - 1.6, "px_spruce_planks", nil, f)
+	for k = 0, 2 do
+		local g = pick(kind.goods)
+		L(
+			"ShelfGoods",
+			cf,
+			-hw + 2.6 + k * 2.6,
+			5.7,
+			d - 3.2,
+			-hw + 4.4 + k * 2.6,
+			7.5,
+			d - 1.8,
+			g[1],
+			g[2],
+			f,
+			true
+		)
+	end
+	-- what each trade keeps on the floor
+	if o.kind == "sake" then
+		for _, lx in ipairs({ -hw + 4, hw - 4 }) do
+			local bx, _, bz = U.loc(cf, lx, 0, d - 5.2)
+			barrel(bx, 1, bz, f, "px_white_wool")
+		end
+	elseif o.kind == "rice" then
+		for _, b in ipairs({ { -hw + 3.6, 1 }, { -hw + 3.6, 4 }, { hw - 3.6, 1 } }) do
+			local bx, _, bz = U.loc(cf, b[1], 0, d - 5)
+			cube("RiceBag", bx, b[2] + 1.5, bz, 3, 3, 3, "px_hay", nil, f)
+			decor(cube("RiceTie", bx, b[2] + 3.2, bz, 1.4, 0.6, 1.4, "px_hay", TC.thatch, f))
+		end
+	elseif o.kind == "tea" then
+		for _, lx in ipairs({ -hw + 3.6, hw - 3.6 }) do
+			local bx, _, bz = U.loc(cf, lx, 0, d - 4)
+			crate(bx, 1, bz, f, 3)
+		end
+	elseif o.kind == "lantern" then
+		for i, lx in ipairs({ -hw + 3.5, hw - 3.5 }) do
+			L(
+				"HangingLantern",
+				cf,
+				lx - 0.9,
+				6.2,
+				d / 2,
+				lx + 0.9,
+				8.6,
+				d / 2 + 1.8,
+				PV,
+				if i == 1 then TORII_RED else PAPER,
+				f,
+				true
+			)
+		end
+	elseif o.kind == "sweets" then
+		L("Tray", cf, hw - 5.6, 1, d - 5, hw - 2.4, 3.4, d - 2, "px_spruce_planks", nil, f)
+		L("Mochi", cf, hw - 5.2, 3.4, d - 4.6, hw - 3.8, 4.6, d - 3.2, PV, SAKURA, f, true)
+		L("Mochi", cf, hw - 4, 3.4, d - 3.6, hw - 2.8, 4.6, d - 2.4, PV, TC.white, f, true)
+	elseif o.kind == "cloth" then
+		for i, c in ipairs({ TC.indigo, TORII_RED, SAKURA }) do
+			L("ClothBolt", cf, -hw + 2.4, i, d - 5.6, -hw + 5.8, i + 1, d - 3.2, PV, c, f)
+		end
+	end
+	if o.npc then
+		npc(
+			"Shopkeeper",
+			cf * CFrame.new(-1, 4, 5.2),
+			{ shirt = o.look[1], pants = o.look[2], skin = pick(TC.skins) },
+			TF.life
+		)
+		ST.npcs += 1
+	end
+	ST.shops += 1
+	return cf
+end
+-- a one-storey house of the lower town: thatched or tiled, with a front deck (engawa) and paper doors; o.kura = a
+-- white storehouse with a dark door and a heavy tile roof
+function H.cottage(x, z, fx, fz, w, d, o)
+	local x0, z0, x1, z1 = U.rect(x, z, fx, fz, w, d, if o.kura then 0 else 3)
+	if not CL.take(x0, z0, x1, z1, "solid") then
+		return nil
+	end
+	local r0, s0, r1, s1 = U.rect(x, z, fx, fz, w + 5, d + 2.5, 4.5)
+	CL.add(r0, s0, r1, s1, "roof")
+	local f = folder(if o.kura then "Storehouse" else "Cottage", TF.lower)
+	local cf = U.faceCF(x, z, fx, fz)
+	local hw = w / 2
+	local L, DW, DT, PV = U.lbox, "px_dark_oak_planks", DARK_WOOD, "px_white_wool"
+	L("Plinth", cf, -hw, 0, 0, hw, 1, d, "px_cobblestone", STONE, f)
+	if not o.kura then
+		L("Engawa", cf, -hw + 1, 0, -3, hw - 1, 1, 0, DW, nil, f)
+	end
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, zz in ipairs({ 0, d - 2 }) do
+			L("Post", cf, sx * hw, 1, zz, sx * (hw - 2), 8.6, zz + 2, DW, DT, f)
+		end
+		L("Wainscot", cf, sx * hw, 1, 2, sx * (hw - 1.6), 3.5, d - 2, DW, DT, f)
+		L("Wall", cf, sx * (hw - 0.2), 3.5, 2, sx * (hw - 1.6), 8.6, d - 2, PV, PAPER, f)
+	end
+	L("Wainscot", cf, -hw + 2, 1, d - 1.6, hw - 2, 3.5, d, DW, DT, f)
+	L("Wall", cf, -hw + 2, 3.5, d - 1.6, hw - 2, 8.6, d - 0.2, PV, PAPER, f)
+	if o.kura then
+		for _, sx in ipairs({ -1, 1 }) do
+			L("Wall", cf, sx * (hw - 2), 1, 0.2, sx * 2, 8.6, 1.6, PV, PAPER, f)
+		end
+		L("Door", cf, -2, 1, 0.4, 2, 7, 1.4, DW, DT, f)
+		L("Wall", cf, -2, 7, 0.2, 2, 8.6, 1.6, PV, PAPER, f)
+		L("Crest", cf, -1, 6.2, -0.1, 1, 8.2, 0.2, PV, TC.indigo, f, true)
+	else
+		for _, sx in ipairs({ -1, 1 }) do
+			L("Shoji", cf, sx * (hw - 2), 1, 0.6, sx * 2, 7.4, 1.2, PV, PAPER, f)
+			L(
+				"ShojiBar",
+				cf,
+				sx * (hw / 2 + 1) - 0.3,
+				1,
+				0.4,
+				sx * (hw / 2 + 1) + 0.3,
+				7.4,
+				0.6,
+				DW,
+				DT,
+				f,
+				true
+			)
+		end
+		L("Lintel", cf, -hw + 2, 7.4, 0.2, hw - 2, 8.6, 1.6, DW, DT, f)
+	end
+	L("Eave", cf, -hw, 8.6, 0, hw, 9.6, d, DW, DT, f)
+	if o.thatch then
+		H.roof(cf, hw, d, 9.6, f, "px_hay", TC.thatch, false, 4)
+	else
+		H.roof(cf, hw, d, 9.6, f, "px_roof_tiles", ROOF_DARK, true, if o.kura then 2 else 4)
+	end
+	ST.houses += 1
+	return cf
+end
+do
+	local LOOK = {
+		{ Color3.fromRGB(46, 58, 116), Color3.fromRGB(44, 40, 46) },
+		{ Color3.fromRGB(150, 50, 46), Color3.fromRGB(60, 50, 44) },
+		{ Color3.fromRGB(90, 120, 80), Color3.fromRGB(64, 54, 46) },
+		{ Color3.fromRGB(120, 90, 130), Color3.fromRGB(46, 42, 50) },
+		{ Color3.fromRGB(176, 140, 90), Color3.fromRGB(70, 56, 44) },
+	}
+	local RED, IND = TORII_RED, TC.indigo
+	-- { front x, front z, face x, face z, width, depth, kind, noren, balcony, npc look }
+	local SHOPS = {
+		-- the west row: fronts on x -120 facing east over the west lane to the pit
+		{ -120, 60, 1, 0, 16, 12, "tea", IND },
+		{ -120, 84, 1, 0, 16, 12, "sake", RED, true, LOOK[1] },
+		{ -120, 108, 1, 0, 16, 12, "cloth", IND },
+		{ -120, 132, 1, 0, 16, 12, "sweets", RED, false, LOOK[4] },
+		{ -120, 156, 1, 0, 16, 12, "rice", IND, true },
+		-- the south-west row: fronts on z 180 facing north over the south lane
+		{ -88, 180, 0, -1, 12, 12, "lantern", RED },
+		{ -70, 180, 0, -1, 16, 12, "rice", IND, true, LOOK[3] },
+		{ -52, 180, 0, -1, 12, 12, "sake", RED },
+		-- south-east of the buyer
+		{ 34, 180, 0, -1, 16, 12, "sweets", IND, true },
+		-- the east row: fronts on x 76 facing west over the main way
+		{ 76, 84, -1, 0, 16, 12, "tea", RED, false, LOOK[5] },
+		{ 76, 116, -1, 0, 16, 12, "lantern", IND, true, LOOK[2] },
+		{ 76, 140, -1, 0, 16, 12, "cloth", RED },
+	}
+	for _, s in ipairs(SHOPS) do
+		H.machiya(
+			s[1],
+			s[2],
+			s[3],
+			s[4],
+			s[5],
+			s[6],
+			{ kind = s[7], noren = s[8], balcony = s[9], npc = s[10] ~= nil, look = s[10] }
+		)
+	end
+	task.wait()
+	-- the lower town houses: two on P2 (west), three on the east path
+	H.cottage(-154, 98, 1, 0, 12, 12, { thatch = true })
+	H.cottage(-154, 120, 1, 0, 12, 12, {})
+	H.cottage(120, 89, 0, 1, 16, 12, { thatch = true })
+	H.cottage(140, 111, 0, -1, 16, 12, {})
+	H.cottage(164, 108, 0, -1, 12, 12, { kura = true })
+end
+task.wait()
+
+-- ================================================================ the lower town: paths, the shrine, the well, the plot, carts, lanterns
+do
+	-- gravel paths (flush runs)
+	U.gravel(-178, 34, -120, 42)
+	U.gravel(-178, 28, -166, 34)
+	U.gravel(-150, 42, -144, 140)
+	U.gravel(-176, 68, -150, 72)
+	U.gravel(76, 96, 150, 104)
+	-- stone lanterns along the paths (every other one lit)
+	for i, l in ipairs({
+		{ -128, 29 },
+		{ -150, 29 },
+		{ -154, 48 },
+		{ -140, 84 },
+		{ -140, 124 },
+		{ 96, 90 },
+	}) do
+		if CL.take(l[1] - 2, l[2] - 2, l[1] + 2, l[2] + 2, "solid") then
+			P.stoneLantern(l[1], l[2], TF.lower, i % 2 == 1)
+		end
+	end
+end
+do
+	-- THE SHRINE: a red-posted hall on a stone platform facing east, a torii over the approach, two foxes, lanterns
+	local f = TF.shrine
+	if CL.take(-198, 58, -172, 82, "solid") then
+		CL.add(-202, 54, -170, 86, "roof")
+		CL.add(-172, 58, -156, 66, "solid")
+		CL.add(-172, 74, -156, 82, "solid")
+		local cf = U.faceCF(-174, 70, 1, 0)
+		local L, DW, DT, PV, RV, RED =
+			U.lbox, "px_dark_oak_planks", DARK_WOOD, "px_white_wool", "px_roof_tiles", TORII_RED
+		L("ShrineBase", cf, -12, 0, 0, 12, 2, 24, "px_stone_bricks", STONE, f)
+		L("ShrineStep", cf, -4, 0, -2, 4, 1, 0, "px_smooth_stone", STONE, f)
+		L("ShrineFloor", cf, -9, 2, 2, 9, 2.4, 20, DW, nil, f)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, zz in ipairs({ 2, 18 }) do
+				L("ShrinePost", cf, sx * 9 - 1, 2, zz, sx * 9 + 1, 10.6, zz + 2, PV, RED, f)
+			end
+			L("Wainscot", cf, sx * 9.8, 2.4, 4, sx * 8.4, 4.4, 18, DW, DT, f)
+			L("Wall", cf, sx * 9.6, 4.4, 4, sx * 8.4, 10.6, 18, PV, PAPER, f)
+			L("ShrineBeam", cf, sx * 10, 10.6, 2, sx * 8, 12, 20, PV, RED, f)
+		end
+		L("Sanctuary", cf, -8, 2.4, 18.6, 8, 10.6, 20, DW, DT, f)
+		L("ShrineBeam", cf, -8, 10.6, 1.6, 8, 12, 3.4, PV, RED, f)
+		L("ShrineBeam", cf, -8, 10.6, 18.6, 8, 12, 20.4, PV, RED, f)
+		L("Eave", cf, -10, 12, 1.6, 10, 13, 20.4, DW, DT, f)
+		-- inside: the altar with a gold mirror; at the front: the offering box, the bell rope, the straw rope with paper
+		L("Altar", cf, -4, 2.4, 15, 4, 5.4, 18, DW, nil, f)
+		L("Mirror", cf, -0.9, 5.4, 16.2, 0.9, 7.2, 16.8, "px_gold_block", nil, f, true)
+		L("Saisen", cf, -3, 2.4, 3, 3, 5, 5.4, DW, DT, f)
+		L("SaisenTop", cf, -3.2, 5, 2.8, 3.2, 5.4, 5.6, "px_spruce_planks", nil, f, true)
+		L("BellRope", cf, -0.3, 5.4, 1.6, 0.3, 9.2, 2, PV, RED, f, true)
+		L("Bell", cf, -0.9, 9, 1.2, 0.9, 10.4, 2.6, "px_gold_block", nil, f, true)
+		L("Shimenawa", cf, -7, 9.2, 0.6, 7, 10.4, 1.6, "px_hay", nil, f, true)
+		for _, sx in ipairs({ -4.5, 4.5 }) do
+			L("Shide", cf, sx - 0.4, 7.4, 0.9, sx + 0.4, 9.2, 1.2, PV, TC.white, f, true)
+		end
+		-- the roof: wide, stepped, raised tips (ridge parallel to the front)
+		L("Roof", cf, -13, 13, -4, 13, 14.5, 25, RV, ROOF_DARK, f)
+		L("Roof", cf, -12, 14.5, -1, 12, 16.5, 22, RV, ROOF_DARK, f)
+		L("Roof", cf, -11, 16.5, 3, 11, 18.5, 18, RV, ROOF_DARK, f)
+		L("Roof", cf, -10, 18.5, 7, 10, 20, 14, RV, ROOF_DARK, f)
+		L("RoofRidge", cf, -11.5, 20, 9, 11.5, 21.6, 12, RV, TC.ridge, f)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, zz in ipairs({ -4, 25 }) do
+				L(
+					"RoofTip",
+					cf,
+					sx * 13,
+					14.5,
+					zz,
+					sx * 11.2,
+					16.4,
+					zz + (if zz < 0 then 1.8 else -1.8),
+					RV,
+					ROOF_DARK,
+					f,
+					true
+				)
+			end
+			L("RidgeTip", cf, sx * 11.5, 21.6, 9.6, sx * 10, 23.4, 11.4, RV, TC.ridge, f, true)
+			L("RedPlank", cf, sx * 13, 12.6, -4, sx * 12.4, 13, 25, PV, RED, f, true)
+		end
+		-- the approach: torii, foxes facing the visitors, two lit lanterns
+		P.torii(-164, 70, 1, 0, 12, 13, f)
+		P.fox(-170, 63, 1, 0, f)
+		P.fox(-170, 77, 1, 0, f)
+		P.stoneLantern(-158, 62, f, true)
+		P.stoneLantern(-158, 78, f, true)
+		U.petals(-168, 60, -158, 66, false, f)
+		U.petals(-190, 82, -176, 88, true, f)
+		npc(
+			"Miko",
+			U.faceCF(-178, 75, 1, 0, 5),
+			{ shirt = TC.white, pants = TORII_RED, skin = TC.skins[1] },
+			TF.life
+		)
+		ST.npcs += 1
+	end
+	-- the well by P1
+	if CL.take(-172, 46, -160, 58, "solid") then
+		local x, z, wf = -166, 52, TF.lower
+		box("WellRim", x - 6, 0, z - 6, x + 6, 3, z - 2, "px_cobblestone", STONE, wf)
+		box("WellRim", x - 6, 0, z + 2, x + 6, 3, z + 6, "px_cobblestone", STONE, wf)
+		box("WellRim", x - 6, 0, z - 2, x - 2, 3, z + 2, "px_cobblestone", STONE, wf)
+		box("WellRim", x + 2, 0, z - 2, x + 6, 3, z + 2, "px_cobblestone", STONE, wf)
+		box("WellShaft", x - 2, 0, z - 2, x + 2, 1.2, z + 2, "px_mossy_cobblestone", nil, wf)
+		local water =
+			decor(box("WellWater", x - 2, 1.2, z - 2, x + 2, 1.4, z + 2, "px_water", TC.water, wf))
+		water.Transparency = 0.2
+		for _, sx in ipairs({ -1, 1 }) do
+			box(
+				"WellPost",
+				x + sx * 5 - 0.5,
+				3,
+				z - 0.5,
+				x + sx * 5 + 0.5,
+				10,
+				z + 0.5,
+				"px_dark_oak_planks",
+				nil,
+				wf
+			)
+		end
+		box("WellBeam", x - 4.5, 9.2, z - 0.4, x + 4.5, 10, z + 0.4, "px_dark_oak_planks", nil, wf)
+		box("WellRoof", x - 6.5, 10, z - 3, x + 6.5, 11, z + 3, "px_roof_tiles", ROOF_DARK, wf)
+		box("WellRoof", x - 5, 11, z - 1.5, x + 5, 12, z + 1.5, "px_roof_tiles", ROOF_DARK, wf)
+		decor(box("WellRope", x - 0.15, 6.6, z - 0.15, x + 0.15, 9.2, z + 0.15, "px_hay", nil, wf))
+		decor(
+			box(
+				"WellBucket",
+				x - 0.8,
+				5,
+				z - 0.8,
+				x + 0.8,
+				6.6,
+				z + 0.8,
+				"px_spruce_planks",
+				nil,
+				wf
+			)
+		)
+	end
+	-- the vegetable plot west of the well: dark soil rows of greens, cabbages and carrots, a fence on the path side
+	if CL.take(-200, 44, -182, 58, "solid") then
+		local pf = folder("VegetablePlot", TF.lower)
+		box("Soil", -200, 0, 44, -184, 0.4, 56, "px_dirt", nil, pf)
+		for row = 0, 2 do
+			local z = 46 + row * 4
+			for col = 0, 3 do
+				local x = -198 + col * 4
+				local kind = (row + col) % 3
+				if kind == 0 then
+					decor(cube("Cabbage", x, 1.6, z, 2.6, 2.4, 2.6, "px_hedge", TC.cabbage, pf))
+				elseif kind == 1 then
+					decor(cube("Greens", x, 1.4, z, 2, 2, 2, "px_hedge", TC.crop, pf))
+				else
+					decor(cube("Carrot", x, 0.8, z, 1.2, 0.8, 1.2, "px_white_wool", TC.carrot, pf))
+					decor(cube("CarrotTop", x, 1.8, z, 1.6, 1.2, 1.6, "px_hedge", TC.crop, pf))
+				end
+			end
+		end
+		fence(-200, 57, -184, 57, pf, 0, "px_spruce_planks")
+	end
+	-- carts and hay
+	if CL.take(-190, 86, -178, 98, "solid") then
+		P.cart(-184, 92, math.pi / 2 + 0.2, TF.lower)
+	end
+	if CL.take(-180, 102, -172, 110, "solid") then
+		P.hay(-178, 104, TF.lower, 4)
+	end
+	if CL.take(98, 120, 112, 132, "solid") then
+		P.cart(105, 126, 0.35, TF.lower)
+	end
+	if CL.take(114, 128, 122, 136, "solid") then
+		P.hay(116, 130, TF.lower, 3)
+	end
+	if CL.take(150, 124, 158, 132, "solid") then
+		P.hay(152, 126, TF.lower, 4)
+	end
+end
+task.wait()
+
+-- ================================================================ bamboo clumps under the west cliff
+do
+	for _, cx in ipairs({ -204, -142, -92, -60 }) do
+		for z0 = -16, 16, 2 do
+			local x0, x1, z1 = cx - 6, cx + 6, z0 + 12
+			if CL.ground(x0, z0, x1, z1) and not CL.hit(x0, z0, x1, z1) then
+				CL.add(x0, z0, x1, z1, "solid")
+				local f = folder("BambooClump", TF.bamboo)
+				for i = 0, 2 do
+					for j = 0, 2 do
+						if rng:NextNumber() < 0.72 or (i == 1 and j == 0) then
+							local x, z = x0 + 2 + i * 4, z0 + 2 + j * 4
+							local h = rng:NextInteger(4, 7) * B
+							local tint = if (i + j) % 2 == 0 then TC.bamboo else TC.bambooDark
+							box("Bamboo", x - 2, 0, z - 2, x + 2, h, z + 2, "px_hedge", tint, f)
+							decor(
+								box(
+									"BambooJoint",
+									x - 2.1,
+									h * 0.5 - 0.3,
+									z - 2.1,
+									x + 2.1,
+									h * 0.5 + 0.3,
+									z + 2.1,
+									"px_hedge",
+									TC.leafGreen,
+									f
+								)
+							)
+							if rng:NextNumber() < 0.5 then
+								local dx, dz = pick({ -1, 1 }) * 4, pick({ -1, 1 }) * 4
+								decor(
+									box(
+										"BambooLeaves",
+										x + dx - 2,
+										h - 4,
+										z + dz - 2,
+										x + dx + 2,
+										h,
+										z + dz + 2,
+										"px_hedge",
+										TC.leafGreen,
+										f
+									)
+								)
+							end
+						end
+					end
+				end
+				ST.bamboo += 1
+				break
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ cherry trees
+local TREES = {}
+-- a cherry tree: a log trunk (1×1 or 2×2 blocks) with a branch or two, a stepped crown (pink wool core, cherry-leaf
+-- and deep-pink edge cubes, a few hanging), a petal carpet under it. o = { trunk, h, w, log }
+function P.cherry(x, z, o)
+	local f = folder("CherryTree", TF.trees)
+	local tw, th, W = o.trunk * B, o.h * B, o.w
+	local hs = W * B / 2
+	box("Trunk", x - tw / 2, 0, z - tw / 2, x + tw / 2, th, z + tw / 2, o.log, nil, f)
+	local dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	if o.trunk == 2 then
+		local d = pick(dirs)
+		local rx, rz = x + d[1] * (tw / 2 + 2), z + d[2] * (tw / 2 + 2)
+		box("Root", rx - 2, 0, rz - 2, rx + 2, 2, rz + 2, o.log, nil, f)
+	end
+	-- branches: under a big crown one block just outside the underside (and one by the trunk lower down), under a
+	-- small crown one block beside the trunk top
+	for _ = 1, rng:NextInteger(1, 2) do
+		local d = pick(dirs)
+		local o1 = tw / 2 + 2
+		if W >= 5 then
+			local bx, bz = x + d[1] * (hs - 2), z + d[2] * (hs - 2)
+			box("Branch", bx - 2, th - 4, bz - 2, bx + 2, th, bz + 2, o.log, nil, f)
+			if th >= 12 then
+				bx, bz = x + d[1] * o1, z + d[2] * o1
+				box("Branch", bx - 2, th - 8, bz - 2, bx + 2, th - 4, bz + 2, o.log, nil, f)
+			end
+		else
+			local bx, bz = x + d[1] * o1, z + d[2] * o1
+			box("Branch", bx - 2, th - 4, bz - 2, bx + 2, th, bz + 2, o.log, nil, f)
+		end
+	end
+	-- the crown: an underside, two crossed body slabs, a top (and a cap on big crowns)
+	local cy = th - B
+	local bodyH = if W >= 5 then 2 * B else B
+	if W >= o.trunk + 3 then
+		box(
+			"Crown",
+			x - hs + 4,
+			cy,
+			z - hs + 4,
+			x + hs - 4,
+			cy + B,
+			z + hs - 4,
+			"px_cherry_leaves",
+			nil,
+			f
+		)
+	end
+	box(
+		"Crown",
+		x - hs,
+		cy + B,
+		z - hs + 4,
+		x + hs,
+		cy + B + bodyH,
+		z + hs - 4,
+		"px_white_wool",
+		SAKURA,
+		f
+	)
+	box(
+		"Crown",
+		x - hs + 4,
+		cy + B,
+		z - hs,
+		x + hs - 4,
+		cy + B + bodyH,
+		z + hs,
+		"px_white_wool",
+		SAKURA,
+		f
+	)
+	local ty = cy + B + bodyH
+	box(
+		"Crown",
+		x - hs + 4,
+		ty,
+		z - hs + 4,
+		x + hs - 4,
+		ty + B,
+		z + hs - 4,
+		"px_white_wool",
+		SAKURA,
+		f
+	)
+	if W >= 6 then
+		box(
+			"Crown",
+			x - hs + 8,
+			ty + B,
+			z - hs + 8,
+			x + hs - 8,
+			ty + 2 * B,
+			z + hs - 8,
+			"px_white_wool",
+			SAKURA_DEEP,
+			f
+		)
+	end
+	-- edge cubes stuck on the sides and the top, a few hanging below
+	for k = 1, W + 3 do
+		local d = pick(dirs)
+		local along = -hs + 2 + rng:NextInteger(1, math.max(1, W - 2)) * B
+		local ex, ez = x + d[1] * (hs + 2) + d[2] * along, z + d[2] * (hs + 2) + d[1] * along
+		local ey = cy + B + rng:NextInteger(0, bodyH / B - 1) * B
+		if k > W + 1 then
+			ex, ez, ey =
+				x + d[1] * (hs - 6) + d[2] * snap(along * 0.5),
+				z + d[2] * (hs - 6) + d[1] * snap(along * 0.5),
+				ty + B
+		end
+		local deep = rng:NextNumber() < 0.3
+		local c = cube(
+			"Blossom",
+			ex,
+			ey + 2,
+			ez,
+			B,
+			B,
+			B,
+			if deep then "px_white_wool" else "px_cherry_leaves",
+			if deep then SAKURA_DEEP else nil,
+			f
+		)
+		decor(c)
+	end
+	for _ = 1, if W >= 5 then 2 else 1 do
+		local d = pick(dirs)
+		local along = -hs + 2 + rng:NextInteger(1, math.max(1, W - 2)) * B
+		local ex, ez = x + d[1] * (hs - 2) + d[2] * along, z + d[2] * (hs - 2) + d[1] * along
+		decor(cube("BlossomHang", ex, cy + B - 2, ez, B, B, B, "px_cherry_leaves", nil, f))
+	end
+	-- the petal carpet
+	local a, b = rng:NextInteger(-1, 1) * 2, rng:NextInteger(-1, 1) * 2
+	U.petals(x - hs + 2 + a, z - hs + 4 + b, x + hs - 2 + a, z + hs - 4 + b, false, f)
+	U.petals(
+		x - hs / 2 - b,
+		z - hs / 2 + a,
+		x + hs / 2 - b,
+		z + hs / 2 + a,
+		rng:NextNumber() < 0.5,
+		f
+	)
+	ST.trees += 1
+end
+do
+	local PLAZA = { -120, -8, 76, 180 } -- the walk area between the shop fronts: trees only on designated spots
+	local NOLANE = { solid = true, roof = true, keep = true }
+	local CROWN = { solid = true, roof = true, keep = true }
+	local function params(trunk, w)
+		return {
+			trunk = trunk,
+			w = w,
+			h = rng:NextInteger(2, 4) + (if w >= 6 then 1 else 0),
+			log = pick({ "px_cherry_log", "px_cherry_log", "px_dark_oak_log" }),
+		}
+	end
+	local function fits(x, z, o, designated)
+		local hs = o.w * B / 2
+		local tw = o.trunk * B / 2 + 2
+		if zoneOf(x, z) ~= "town" or not freeGround(x, z, math.max(0, hs - 8)) then
+			return false
+		end
+		if not designated and inRect(x, z, PLAZA) then
+			return false
+		end
+		if
+			not CL.ground(x - tw, z - tw, x + tw, z + tw)
+			or CL.hit(x - tw, z - tw, x + tw, z + tw, if designated then NOLANE else nil)
+		then
+			return false
+		end
+		for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			local cx, cz = x + s[1] * hs, z + s[2] * hs
+			if
+				not onIsland(cx, cz, 10)
+				or groundY(cx, cz) ~= 0
+				or zoneOf(cx, cz) ~= "town"
+				or inPitArea(cx, cz, 0)
+			then
+				return false
+			end
+		end
+		if CL.hit(x - hs, z - hs, x + hs, z + hs, CROWN) then
+			return false
+		end
+		for _, t in ipairs(TREES) do
+			if (t[1] - x) ^ 2 + (t[2] - z) ^ 2 < ((t[3] + hs) * 0.8) ^ 2 then
+				return false
+			end
+		end
+		return true
+	end
+	local function plant(x, z, o)
+		local tw = o.trunk * B / 2
+		CL.add(x - tw, z - tw, x + tw, z + tw, "solid")
+		table.insert(TREES, { x, z, o.w * B / 2 })
+		P.cherry(x, z, o)
+	end
+	-- designated spots in the square: the north strip under the cliff, the south-west corner, behind the south row
+	for _, s in ipairs({ { -110, 8 }, { -78, 8 }, { -30, 8 }, { 2, 8 }, { -108, 174 }, { 52, 202 } }) do
+		for _, w in ipairs({ 5, 3 }) do
+			local o = params(1, w)
+			if fits(s[1], s[2], o, true) then
+				plant(s[1], s[2], o)
+				break
+			end
+		end
+	end
+	-- the rest on free town ground (west and east lowlands, the rim)
+	local tries = 0
+	while ST.trees < 40 and tries < 3000 do
+		tries += 1
+		local trunk = if rng:NextNumber() < 0.3 then 2 else 1
+		local w = if trunk == 2 then pick({ 4, 6, 6, 8 }) else pick({ 3, 5, 5, 7 })
+		local x = math.floor(rng:NextNumber(-224, 216) / B) * B + (if trunk == 1 then 2 else 0)
+		local z = math.floor(rng:NextNumber(-8, 224) / B) * B + (if trunk == 1 then 2 else 0)
+		local o = params(trunk, w)
+		if fits(x, z, o, false) then
+			plant(x, z, o)
+		end
+		if tries % 400 == 0 then
+			task.wait()
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the rim: kerb, view points, benches, leaf curtains, leaning trees
+do
+	local f = TF.rim
+	local VIEWS = { 100, 138, 166 } -- degrees from +X toward +Z (90 = south)
+	-- the outermost radius along an angle where solid things may stand (onIsland pad 10)
+	local function edgeR(deg)
+		local a = math.rad(deg)
+		local ca, sa = math.cos(a), math.sin(a)
+		local r = 230
+		while r > 180 and not onIsland(r * ca, r * sa, 10) do
+			r -= 1
+		end
+		return r, ca, sa
+	end
+	local function nearView(deg, half)
+		for _, v in ipairs(VIEWS) do
+			if math.abs(deg - v) <= half then
+				return true
+			end
+		end
+		return false
+	end
+	-- benches at the south view point, looking out
+	do
+		local r, ca, sa = edgeR(VIEWS[1])
+		local vx, vz = snap((r - 12) * ca), snap((r - 12) * sa)
+		for _, dx in ipairs({ -6, 6 }) do
+			if CL.take(vx + dx - 4.4, vz - 1.4, vx + dx + 4.4, vz + 1.6, "solid") then
+				P.bench(vx + dx, vz, 0, 1, f)
+			end
+		end
+		U.petals(vx - 10, vz + 3, vx + 2, vz + 8, false, f)
+	end
+	-- small trees leaning out over the edge (a solid foot on the island, the rest hangs over the cliff)
+	for _, deg in ipairs({ 112, 128, 152, 176 }) do
+		local r, ca, sa = edgeR(deg)
+		local bx, bz = snap((r - 4) * ca) + 2, snap((r - 4) * sa) + 2
+		if CL.take(bx - 2, bz - 2, bx + 2, bz + 2, "solid") then
+			local tf = folder("LeaningTree", f)
+			local log = pick({ "px_cherry_log", "px_dark_oak_log" })
+			local ox, oz =
+				(if math.abs(ca) > 0.5 then (if ca > 0 then 1 else -1) else 0),
+				(if math.abs(sa) > 0.5 then (if sa > 0 then 1 else -1) else 0)
+			box("Trunk", bx - 2, 0, bz - 2, bx + 2, 4, bz + 2, log, nil, tf)
+			for k = 1, 3 do
+				local x, z = bx + ox * k * 3, bz + oz * k * 3
+				decor(box("Trunk", x - 2, k * 4, z - 2, x + 2, k * 4 + 4, z + 2, log, nil, tf))
+			end
+			local cx, cz, cy = bx + ox * 12, bz + oz * 12, 14
+			decor(
+				box(
+					"Crown",
+					cx - 8,
+					cy,
+					cz - 4,
+					cx + 8,
+					cy + 4,
+					cz + 4,
+					"px_white_wool",
+					SAKURA,
+					tf
+				)
+			)
+			decor(
+				box(
+					"Crown",
+					cx - 4,
+					cy,
+					cz - 8,
+					cx + 4,
+					cy + 4,
+					cz + 8,
+					"px_white_wool",
+					SAKURA,
+					tf
+				)
+			)
+			decor(
+				box(
+					"Crown",
+					cx - 4,
+					cy + 4,
+					cz - 4,
+					cx + 4,
+					cy + 8,
+					cz + 4,
+					"px_cherry_leaves",
+					nil,
+					tf
+				)
+			)
+			decor(
+				box(
+					"CrownUnder",
+					cx - 4,
+					cy - 4,
+					cz - 4,
+					cx + 4,
+					cy,
+					cz + 4,
+					"px_cherry_leaves",
+					nil,
+					tf
+				)
+			)
+			decor(
+				box(
+					"CrownHang",
+					cx + ox * 4 - 2,
+					cy - 8,
+					cz + oz * 4 - 2,
+					cx + ox * 4 + 2,
+					cy,
+					cz + oz * 4 + 2,
+					"px_cherry_leaves",
+					nil,
+					tf
+				)
+			)
+			decor(
+				cube(
+					"Blossom",
+					cx - oz * 10,
+					cy + 2,
+					cz - ox * 10,
+					B,
+					B,
+					B,
+					"px_white_wool",
+					SAKURA_DEEP,
+					tf
+				)
+			)
+		end
+	end
+	-- the low kerb: 2-stud stone blocks on the 4-grid along the edge (merged along x), gaps at the view points
+	local cells, rows = {}, {}
+	for deg = 16, 186, 0.4 do
+		if not nearView(deg, 3.5) then
+			local r, ca, sa = edgeR(deg)
+			local x = math.floor((r - 5) * ca / B) * B + 2
+			local z = math.floor((r - 5) * sa / B) * B + 2
+			local key = x .. ":" .. z
+			if not cells[key] then
+				cells[key] = true
+				if
+					onIsland(x, z, 10)
+					and groundY(x, z) == 0
+					and zoneOf(x, z) == "town"
+					and not inStairCorridor(x, z)
+					and not inPond(x, z, 4)
+					and not CL.hit(x - 2, z - 2, x + 2, z + 2, { solid = true, keep = true })
+				then
+					rows[z] = rows[z] or {}
+					table.insert(rows[z], x)
+				end
+			end
+		end
+	end
+	for z, xs in pairs(rows) do
+		table.sort(xs)
+		local i = 1
+		while i <= #xs do
+			local j = i
+			while j < #xs and xs[j + 1] == xs[j] + B do
+				j += 1
+			end
+			box("Kerb", xs[i] - 2, 0, z - 2, xs[j] + 2, 2, z + 2, "px_stone_bricks", STONE, f)
+			ST.kerb += 1
+			i = j + 1
+		end
+	end
+	task.wait()
+	-- leaf curtains: on the outer face of the outermost island cells (8-stud grid from -248), 0.6 stud off the rock
+	local LEAVES = {
+		{ "px_cherry_leaves", nil },
+		{ "px_white_wool", SAKURA },
+		{ "px_hedge", TC.leafGreen },
+		{ "px_cherry_leaves", nil },
+	}
+	local function curtain(x0, x1, z0, z1, alongX)
+		local lv = pick(LEAVES)
+		local h1 = rng:NextInteger(2, 4) * B
+		local p = decor(box("LeafCurtain", x0, -h1, z0, x1, 0, z1, lv[1], lv[2], f))
+		p.CastShadow = false
+		if rng:NextNumber() < 0.6 then
+			local h2 = h1 + rng:NextInteger(1, 3) * B
+			local o = rng:NextInteger(0, 1) * 4
+			local q
+			if alongX then
+				q = box("LeafCurtain", x0 + o, -h2, z0, x0 + o + 4, -h1, z1, lv[1], lv[2], f)
+			else
+				q = box("LeafCurtain", x0, -h2, z0 + o, x1, -h1, z0 + o + 4, lv[1], lv[2], f)
+			end
+			decor(q).CastShadow = false
+		end
+		ST.curtains += 1
+	end
+	-- the south face (columns along x)
+	for x0 = -168, 64, 8 do
+		local cx = x0 + 4
+		for z0 = 240, 104, -8 do
+			if onIsland(cx, z0 + 4) then
+				local face = z0 + 8
+				if
+					groundY(cx, z0 + 4) == 0
+					and zoneOf(cx, z0 + 4) == "town"
+					and rng:NextNumber() < 0.55
+				then
+					curtain(x0, x0 + 8, face + 0.6, face + 1.6, true)
+				end
+				break
+			end
+		end
+	end
+	-- the west face (rows along z)
+	for z0 = -8, 160, 8 do
+		local cz = z0 + 4
+		for x0 = -248, -96, 8 do
+			if onIsland(x0 + 4, cz) then
+				if
+					groundY(x0 + 4, cz) == 0
+					and zoneOf(x0 + 4, cz) == "town"
+					and rng:NextNumber() < 0.55
+				then
+					curtain(x0 - 1.6, x0 - 0.6, z0, z0 + 8, false)
+				end
+				break
+			end
+		end
+	end
+end
+
+print(
+	("[build-kyoto] town: %d shops, %d houses, %d trees, %d bamboo, %d npcs, %d lights, %d kerb runs, %d curtains, %d skipped, %d parts"):format(
+		ST.shops,
+		ST.houses,
+		ST.trees,
+		ST.bamboo,
+		ST.npcs,
+		ST.lights,
+		ST.kerb,
+		ST.curtains,
+		ST.skipped,
+		count - startCount
+	)
+)
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-kyoto] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
