@@ -164,6 +164,9 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	lime_concrete = { base = "smooth_stone", color = Color3.fromRGB(110, 190, 40) },
 	purple_concrete = { base = "smooth_stone", color = Color3.fromRGB(130, 50, 180) },
 	red_concrete = { base = "smooth_stone", color = Color3.fromRGB(180, 40, 40) },
+	-- quartz (Замок: кварцевый блок [меню]; резной кварцевый блок [вики 26.10])
+	quartz_block = { base = "smooth_stone", color = Color3.fromRGB(240, 237, 230) },
+	chiseled_quartz_block = { base = "white_stone_bricks", color = Color3.fromRGB(240, 237, 230) },
 }
 
 local function stylePart(part: BasePart, id: string)

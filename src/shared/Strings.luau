@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_raven_knight = { -- [клиент] prison.classic.boss.raven_knight.notify.spawn
+		ru = "Небо почернело от стай воронов… Вороний рыцарь пробудился в Замке!",
+		en = "The sky turned black with flocks of ravens... the Raven Knight has awakened in the Castle!",
+		es = "El cielo se ennegreció de bandadas de cuervos... ¡el Caballero Cuervo ha despertado en el Castillo!",
+		fr = "Le ciel s'est noirci de nuées de corbeaux… le Chevalier corbeau s'est éveillé au Château !",
+	},
 	boss_spawned_forest_spirit = { -- [клиент] prison.classic.boss.forest_spirit.notify.spawn
 		ru = "Тотем пробудился… Лесной дух восстал в Лепреконовой долине!",
 		en = "The totem has awakened... the Forest Spirit has risen in Leprechaun Valley!",
