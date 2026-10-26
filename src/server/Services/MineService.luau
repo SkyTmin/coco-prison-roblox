@@ -190,6 +190,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	brown_mushroom_block = { base = "terracotta", color = Color3.fromRGB(205, 165, 135) },
 	-- Херувимы: снег [меню] (plain white, like a cloud)
 	snow = { base = "smooth_stone", color = Color3.fromRGB(246, 248, 252) },
+	-- Рай: гриб (красный) [меню] (our terracotta, scarlet)
+	red_mushroom_block = { base = "terracotta", color = Color3.fromRGB(210, 48, 44) },
 	-- Врата: гладкий песчаник [меню] (our sandstone, lighter and plain)
 	smooth_sandstone = { base = "sandstone", color = Color3.fromRGB(250, 242, 220) },
 }
