@@ -185,8 +185,9 @@ def look(cam, loc, target, ortho=None, lens=60):
         cam.data.lens = lens
 
 
-def run(here, name, materials, shape, icon, hero):
-    """Render every material plain and with the glint; icon / hero = (rotation, camera location, ortho, lens)."""
+def run(here, name, materials, shape, icon, hero, glint_phase=2.2):
+    """Render every material plain and with the glint; icon / hero = (rotation, camera location, ortho, lens);
+    glint_phase = where the bands stand in the still glint renders."""
     argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     frames_dir = argv[1] if len(argv) >= 2 and argv[0] == "frames" else None
     for mat in materials:
@@ -205,7 +206,7 @@ def run(here, name, materials, shape, icon, hero):
         set_glint(False)
         shot(os.path.join(here, "render-%s-icon.png" % mat), icon)
         shot(os.path.join(here, "render-%s-hero.png" % mat), hero)
-        set_glint(True, 2.2)
+        set_glint(True, glint_phase)
         shot(os.path.join(here, "render-%s-icon-glint.png" % mat), icon)
         shot(os.path.join(here, "render-%s-hero-glint.png" % mat), hero)
         if frames_dir:
