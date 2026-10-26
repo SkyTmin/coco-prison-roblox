@@ -2,7 +2,7 @@
 # руках»]: the body posed with the game's own numbers — the hold pose (SwingAnimations.HOLD: shoulder 14° / 4°, elbow
 # 22°, which CharacterAnimator folds into the shoulder on the block body), the grip (HeldItem.luau render: the C0 of
 # tools and of blocks) and the item models (ItemModels.luau: the extruded sprites of Config/itemvoxels.json, a 1.2-stud
-# cube for blocks) — with Roblox's CFrame maths, so the picture is what the game shows.
+# cube for blocks; on the block body tools 2.38 studs, blocks 1.05 — Minecraft's held sizes) — with Roblox's CFrame maths, so the picture is what the game shows.
 # Run: "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P assets/models/player/hold.py
 #   → render-hold-<item>-{34,side}.png; [-- grip x y z pitch] tries another tool grip (studs, degrees).
 import json
@@ -93,6 +93,10 @@ def tool_grip(size, grip=None):
 
 
 BLOCK_GRIP = CF((0, -0.62, -0.25)) * angles(0, rad(25), 0)  # R15 avatars: (0.2, −0.5, −0.9)
+# held sizes [ваниль: third-person display scales — handheld tools 0.85 of a block, blocks 0.375; a block = 16 skin
+# pixels]: tool sprite 0.85 · 16 · PX ≈ 2.38 studs (was 1.45), block 0.375 · 16 · PX ≈ 1.05 (was 1.2)
+TOOL_SIZE = 0.85 * 16 * player.PX
+BLOCK_SIZE = 0.375 * 16 * player.PX
 
 
 def tool_boxes(voxels, size):
@@ -179,14 +183,18 @@ def render(grip=None, tag="", block=None):
         player.clear_meshes()
         add(body_boxes(body, colours, ["hair_short"], cf, centre))
         if kind == "tool":
-            root = hand * tool_grip(1.45, grip)
-            add([(root * f, s, c) for f, s, c in tool_boxes(voxels[item], 1.45)])
+            size = float(os.environ.get("TOOL_SIZE", TOOL_SIZE))
+            root = hand * tool_grip(size, grip)
+            add([(root * f, s, c) for f, s, c in tool_boxes(voxels[item], size)])
         else:
             bgrip = CF(block[:3]) * angles(0, rad(block[3]), 0) if block else BLOCK_GRIP
-            add([(hand * bgrip, [1.2, 1.2, 1.2], None)], os.path.join(ROOT, "assets", "textures", "blocks", item + ".png"))
-        target = Vector((-0.5, -0.5, 2.6))
-        for view, loc, ortho in (("34", (-9, -11, 5.4), 6.2), ("side", (-14, -0.5, 2.6), 6.2)):
-            look(cam, Vector(loc), target, ortho, None)
+            bs = float(os.environ.get("BLOCK_SIZE", BLOCK_SIZE))
+            bgrip = bgrip * CF((0, 0.6 - 0.025 - bs / 2, 0)) if not block else bgrip  # the block's top stays under the fist
+            add([(hand * bgrip, [bs, bs, bs], None)], os.path.join(ROOT, "assets", "textures", "blocks", item + ".png"))
+        # the side view looks along the arm: framed further forward so the bigger tools fit
+        for view, loc, target, ortho in (("34", (-9, -11, 5.4), (-0.5, -0.5, 2.6), 6.2),
+                                         ("side", (-14, -1.3, 2.4), (-0.5, -1.3, 2.4), 6.8)):
+            look(cam, Vector(loc), Vector(target), ortho, None)
             scene.render.filepath = os.path.join(HERE, "render-hold-%s%s-%s.png" % (item, "-" + tag if tag else "", view))
             bpy.ops.render.render(write_still=True)
 

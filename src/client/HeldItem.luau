@@ -209,19 +209,35 @@ local function render(rig: Rig)
 	end
 	local level = tonumber(rawLevel) or 0
 	local tool = Config.tools[id] ~= nil
-	local spriteSize = if tool then 1.45 else 1.2
 	local variant = if id == "bow" then BowState.ModelId(rig.character) else nil
 	rig.variant = variant
-	local container, visual, cube = HeldItem.MakeVisual(id, level, nil, variant)
-	local motor = Instance.new("Motor6D")
-	motor.Name = "HeldItemGrip"
-	motor.Part0, motor.Part1 = hand, visual
 	-- our block body's fist is 0.7 × 0.35 × 0.7 studs (R15 hands ≈ 0.3): its grips put the handle end inside the fist so
 	-- the handle comes out of it, and a block hangs under the fist (assets/models/player/hold.py renders both)
 	local block = rig.character:GetAttribute("BlockBody") == true
+	-- held sizes on the block body [ваниль: third-person display scales of a block = 16 skin pixels = 2.8 studs]:
+	-- tools 0.85 → 2.38 studs, blocks 0.375 → 1.05, other items 0.55 → 1.54
+	local blockConfig = Config.block(id)
+	local sprites = (Config.textures :: any).sprites
+	local isCube = blockConfig ~= nil and not blockConfig.itemOnly and not (sprites and sprites[id])
+	local scale = if not block
+		then 1
+		elseif tool then 2.38 / 1.45
+		elseif isCube then 1.05 / 1.2
+		else 1.54 / 1.2
+	local spriteSize = (if tool then 1.45 else 1.2) * scale
+	local container, visual, cube = HeldItem.MakeVisual(id, level, scale, variant)
+	local motor = Instance.new("Motor6D")
+	motor.Name = "HeldItemGrip"
+	motor.Part0, motor.Part1 = hand, visual
 	if cube then
+		local half = 0.6 * scale
+		-- the block's top stays under the fist whatever its size (the grip was tuned for the 1.2-stud cube)
 		motor.C0 = if block
-			then CFrame.new(0, -0.62, -0.25) * CFrame.Angles(0, math.rad(25), 0)
+			then CFrame.new(0, -0.62, -0.25) * CFrame.Angles(0, math.rad(25), 0) * CFrame.new(
+				0,
+				0.6 - 0.025 - half,
+				0
+			)
 			else CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
 	elseif id == "bow" then
 		motor.C0 = CFrame.new(0, -0.15, 0) * BOW_TURN * CFrame.new(-HeldItem.BowGrip(spriteSize))
