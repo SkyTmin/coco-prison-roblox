@@ -232,11 +232,19 @@ const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tier
 write("artifacts.json", { source: "[меню, клиент]; шанс за блок [владелец], из кейса [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
-const blockArmor = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json").faces : undefined;
+const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;
+const blockArmor = blockArmorIds?.faces;
+// each face's enchant glint mask (assets/armor/block/glint-map.json: face → mask; ids.json glints: mask → id)
+const blockGlint = {};
+if (blockArmorIds?.glints) {
+	for (const [face, mask] of Object.entries(read("assets/armor/block/glint-map.json").map)) {
+		if (blockArmorIds.glints[mask]) blockGlint[face] = blockArmorIds.glints[mask];
+	}
+}
 write("armor.json", {
 	source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0); block = our own faces (assets/armor/block/ids.json)",
 	...read("assets/armor/ids.json"),
-	...(blockArmor ? { block: blockArmor } : {}),
+	...(blockArmor ? { block: blockArmor, blockGlint } : {}),
 });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
 // a ModuleScript holds at most 200 000 characters: the Blender item models get their own file

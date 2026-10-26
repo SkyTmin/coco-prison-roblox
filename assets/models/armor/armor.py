@@ -11,9 +11,13 @@
 # Run: "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P assets/models/armor/armor.py
 #   → assets/armor/block/<piece>_<material>_<key>_<face>.png (the Decal images, ×8, faces named as Roblox's: right = +X,
 #   the character's right), render-<material>-{front,34,back}.png on the body (boxes as ArmorVisual builds them),
-#   armor-sheet.png (node tiling, see the end of this file), armor.blend.
-#   Upload the PNGs (Studio upload_image) → assets/armor/block/ids.json {"faces": {name: id}} → node scripts/build-configs.mjs
-#   → Config.armor.block; until then the block body wears the old VoxeLibre faces.
+#   armor-sheet.png (node tiling), armor.blend; the enchant glint [владелец 26.10: «не забывай за зачарования эффект»]:
+#   assets/armor/block/glint/glint_<hash>.png — per face a white mask of the armor's own pixels with Minecraft-like
+#   diagonal streaks (the game tints it purple and runs a shimmer down the body; equal masks shared), glint-map.json
+#   (face image → mask), render-<material>-glint-{front,34}.png.
+#   Upload the PNGs (Studio upload_image) → assets/armor/block/ids.json {"faces": {name: id}, "glints": {mask: id}} →
+#   node scripts/build-configs.mjs → Config.armor.block / blockGlint; until then the block body wears the old VoxeLibre
+#   faces and the old glint.
 import os
 import sys
 
@@ -537,8 +541,11 @@ def save_png(path, img, scale=8):
         raw.append(0)
         for c in range(w * scale):
             v = img[r // scale][c // scale]
+            alpha = 255
+            if isinstance(v, tuple):
+                v, alpha = v
             if v:
-                raw += bytes(int(v[i:i + 2], 16) for i in (1, 3, 5)) + b"\xff"
+                raw += bytes(int(v[i:i + 2], 16) for i in (1, 3, 5)) + bytes([alpha])
             else:
                 raw += b"\x00\x00\x00\x00"
 
@@ -551,19 +558,40 @@ def save_png(path, img, scale=8):
         f.write(png)
 
 
+def glint_mask(img):
+    """The enchant glint of one face: white over the armor's pixels only, opaque on diagonal streaks, faint between."""
+    return [[(("#ffffff", 230) if (c - r) % 8 in (0, 1) else ("#ffffff", 40)) if v else None for c, v in enumerate(row)]
+            for r, row in enumerate(img)]
+
+
 def write_images():
-    os.makedirs(OUT, exist_ok=True)
-    for name in os.listdir(OUT):
-        if name.endswith(".png"):
-            os.remove(os.path.join(OUT, name))
+    import hashlib
+    import json
+
+    glint_dir = os.path.join(OUT, "glint")
+    os.makedirs(glint_dir, exist_ok=True)
+    for folder in (OUT, glint_dir):
+        for name in os.listdir(folder):
+            if name.endswith(".png"):
+                os.remove(os.path.join(folder, name))
     n = 0
+    glints = {}
     for mat in MATERIALS:
         for piece in KEYS:
             for key, faces in face_images(mat, piece).items():
                 for face, img in faces.items():
-                    save_png(os.path.join(OUT, "%s_%s_%s_%s.png" % (piece, mat, key, face)), img)
+                    name = "%s_%s_%s_%s" % (piece, mat, key, face)
+                    save_png(os.path.join(OUT, name + ".png"), img)
+                    mask = glint_mask(img)
+                    tag = "glint_" + hashlib.md5(repr(mask).encode()).hexdigest()[:8]
+                    if not os.path.exists(os.path.join(glint_dir, tag + ".png")):
+                        save_png(os.path.join(glint_dir, tag + ".png"), mask)
+                    glints[name] = tag
                     n += 1
-    print("armor faces written:", n)
+    with open(os.path.join(OUT, "glint-map.json"), "w", encoding="utf-8") as f:
+        json.dump({"_source": "assets/models/armor/armor.py: face image → its enchant glint mask (glint/<mask>.png)", "map": glints},
+                  f, ensure_ascii=False, indent=1, sort_keys=True)
+    print("armor faces written:", n, "glint masks:", len(set(glints.values())))
 
 
 # ---------------------------------------------------------------- the boxes on the body, as ArmorVisual builds them
@@ -609,7 +637,31 @@ def render():
             mats[path] = m
         return mats[path]
 
-    for mat in MATERIALS:
+    glint_map = {}
+    with open(os.path.join(OUT, "glint-map.json"), encoding="utf-8") as f:
+        glint_map = __import__("json").load(f)["map"]
+
+    def glint_material(path):
+        key = "glint:" + path
+        if key not in mats:
+            img = bpy.data.images.load(path)
+            m = bpy.data.materials.new(key)
+            m.use_nodes = True
+            nt = m.node_tree
+            tex = nt.nodes.new("ShaderNodeTexImage")
+            tex.image, tex.interpolation = img, "Closest"
+            bsdf = nt.nodes["Principled BSDF"]
+            bsdf.inputs["Base Color"].default_value = (0.55, 0.25, 1.0, 1)
+            bsdf.inputs["Emission Color"].default_value = (0.6, 0.3, 1.0, 1)
+            bsdf.inputs["Emission Strength"].default_value = 0.7
+            mul = nt.nodes.new("ShaderNodeMath")
+            mul.operation, mul.inputs[1].default_value = "MULTIPLY", 0.45
+            nt.links.new(tex.outputs["Alpha"], mul.inputs[0])
+            nt.links.new(mul.outputs[0], bsdf.inputs["Alpha"])
+            mats[key] = m
+        return mats[key]
+
+    for mat, enchanted in [(m, False) for m in MATERIALS] + [(m, True) for m in MATERIALS]:
         player.clear_meshes()
         skin, hair = looks[mat]
         player.add_boxes(player.game_boxes(body, player.check_colours(body, skin, hair), ["hair_short"]), "player")
@@ -646,11 +698,24 @@ def render():
                         me.materials.append(material(path))
                         index[path] = len(me.materials) - 1
                     f.material_index = index[path]
+                    if enchanted:
+                        gpath = os.path.join(OUT, "glint", glint_map[os.path.basename(path)[:-4]] + ".png")
+                        nrm = _normal
+                        g = bm.faces.new([bm.verts.new(tuple(a + b for a, b in zip(corner(u, v), (-nrm[0] * 0.004, nrm[2] * 0.004, nrm[1] * 0.004))))
+                                          for u, v in ((0, 0), (1, 0), (1, 1), (0, 1))])
+                        for loop, (u, v) in zip(g.loops, ((0, 1), (1, 1), (1, 0), (0, 0))):
+                            loop[uv].uv = (u, v)
+                        if gpath not in index:
+                            me.materials.append(glint_material(gpath))
+                            index[gpath] = len(me.materials) - 1
+                        g.material_index = index[gpath]
         bm.to_mesh(me)
         bm.free()
         for view, loc in (("front", (0, -20, 16 * player.PX)), ("34", (-11, -14, 16 * player.PX + 3.5)), ("back", (9, 17, 16 * player.PX + 2))):
+            if enchanted and view == "back":
+                continue
             look(cam, Vector(loc), mid, 6.6, None)
-            scene.render.filepath = os.path.join(HERE, "render-%s-%s.png" % (mat, view))
+            scene.render.filepath = os.path.join(HERE, "render-%s%s-%s.png" % (mat, "-glint" if enchanted else "", view))
             bpy.ops.render.render(write_still=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, "armor.blend"))
 

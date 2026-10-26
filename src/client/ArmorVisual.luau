@@ -27,7 +27,7 @@ local ArmorVisual = {}
 local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local started = false
-local glintDecals: { [Decal]: boolean } = {}
+local glintDecals: { [Decal]: number } = {} -- glint overlay → its phase (the box's height: the shimmer runs down)
 
 -- Minecraft armor model is 1/16 block larger than the skin box on each side; R15 limbs are ~1 stud
 -- wide, so +0.3 studs total keeps the same proportion and hides the body underneath.
@@ -150,25 +150,37 @@ local function faceTexture(piece: string, material: string, key: string, face: s
 	return faces[piece .. "_" .. material .. "_" .. key .. "_" .. face]
 end
 
--- the face images of one box: { [Roblox face]: texture } — our own on the block body once uploaded, else VoxeLibre's
+-- the face images of one box: { [Roblox face]: { texture, glint } } — our own on the block body once uploaded (each
+-- face with its own glint mask: the enchant shimmer lies only on the armor's pixels [владелец 26.10: «не забывай за
+-- зачарования эффект»]), else VoxeLibre's with the shared glint over the whole face
+type FaceImages = { texture: string, glint: string }
 local function boxTextures(
 	piece: string,
 	material: string,
 	key: string,
 	own: boolean
-): { [Enum.NormalId]: string }
-	local out = {}
-	local block = own and Config.armor and (Config.armor :: any).block
+): { [Enum.NormalId]: FaceImages }
+	local out: { [Enum.NormalId]: FaceImages } = {}
+	local armor = Config.armor :: any
+	local fallbackGlint: string = armor and armor.glint or ""
+	local block = own and armor and armor.block
 	if block then
+		local glints = armor.blockGlint or {}
 		for face, normal in pairs(OWN_FACES) do
-			out[normal] = block[piece .. "_" .. material .. "_" .. key .. "_" .. face]
+			local name = piece .. "_" .. material .. "_" .. key .. "_" .. face
+			if block[name] then
+				out[normal] = { texture = block[name], glint = glints[name] or fallbackGlint }
+			end
 		end
 		if next(out) then
 			return out
 		end
 	end
 	for face, normal in pairs(FACES) do
-		out[normal] = faceTexture(piece, material, key, face)
+		local texture = faceTexture(piece, material, key, face)
+		if texture then
+			out[normal] = { texture = texture, glint = fallbackGlint }
+		end
 	end
 	return out
 end
@@ -201,23 +213,23 @@ local function makeBox(
 	local offset = CFrame.new(0, centreY, 0)
 	part.CFrame = limb.CFrame * offset
 	local any = false
-	for normal, texture in pairs(boxTextures(piece, material, key, own)) do
+	for normal, images in pairs(boxTextures(piece, material, key, own)) do
 		local decal = Instance.new("Decal")
 		decal.Name = normal.Name
 		decal.Face = normal
-		decal.Texture = texture
+		decal.Texture = images.texture
 		decal.Parent = part
 		any = true
 		if glint then
 			local g = Instance.new("Decal")
 			g.Name = "Glint"
 			g.Face = normal
-			g.Texture = Config.armor.glint or ""
+			g.Texture = images.glint
 			g.Transparency = 0.55
 			g.Color3 = Color3.fromRGB(200, 120, 255)
 			g.ZIndex = 2
 			g.Parent = part
-			glintDecals[g] = true
+			glintDecals[g] = part.Position.Y
 		end
 	end
 	if not any then
@@ -344,7 +356,7 @@ local function render(rig: Rig)
 			end
 		end
 	end
-	if anyGlint then
+	if anyGlint and not block then
 		local glow = Instance.new("Highlight")
 		glow.Name = "EnchantGlow"
 		glow.FillColor = Color3.fromRGB(190, 110, 255)
@@ -440,9 +452,10 @@ function ArmorVisual.Start()
 	end
 	CollectionService:GetInstanceAddedSignal("ArmorMannequin"):Connect(mannequin)
 	CollectionService:GetInstanceRemovedSignal("ArmorMannequin"):Connect(clear)
-	-- enchant glint shimmer: Decals have no UV offset, so pulse the purple overlay's transparency
+	-- enchant glint shimmer: Decals have no UV offset, so the purple overlay's transparency pulses in a wave that runs
+	-- down the body (the phase is each box's height), like Minecraft's sweeping glint
 	RunService.Heartbeat:Connect(function()
-		local pulse = 0.45 + 0.25 * math.sin(os.clock() * 4)
+		local now = os.clock()
 		for _, rig in pairs(rigs) do
 			local visual = rig.visual
 			local glow = visual and visual:FindFirstChild("EnchantGlow")
@@ -450,9 +463,9 @@ function ArmorVisual.Start()
 				glow.FillTransparency = 0.65 + 0.2 * math.sin(os.clock() * 3)
 			end
 		end
-		for decal in pairs(glintDecals) do
+		for decal, phase in pairs(glintDecals) do
 			if decal.Parent then
-				decal.Transparency = pulse
+				decal.Transparency = 0.2 + 0.55 * (0.5 + 0.5 * math.sin(now * 3.5 + phase * 1.6))
 			else
 				glintDecals[decal] = nil
 			end
