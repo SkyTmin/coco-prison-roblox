@@ -186,6 +186,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	clay = { base = "smooth_stone", color = Color3.fromRGB(160, 166, 180) },
 	-- Чистилище: резной песчаник [меню] (our cut sandstone, a little warmer)
 	chiseled_sandstone = { base = "cut_sandstone", color = Color3.fromRGB(250, 238, 205) },
+	-- Эдем: гриб (коричневый) [меню] (no texture of our own yet: terracotta tinted mushroom brown)
+	brown_mushroom_block = { base = "terracotta", color = Color3.fromRGB(205, 165, 135) },
 }
 
 local function stylePart(part: BasePart, id: string)
