@@ -6,6 +6,9 @@
 -- the swing, in first and third person, with no uploaded animation assets. During the blow a light trail
 -- follows the held item (the Trail HeldItem puts on the item model).
 -- Works with both rigs: classic Motor6D joints and the AnimationConstraint joints of current avatars.
+-- Our block body (character attribute BlockBody, AvatarService) keeps its limbs rigid like Minecraft's: elbows, wrists,
+-- knees and ankles stay straight, and the right arm's swing and hold bends turn the whole arm at the shoulder instead
+-- (the same item direction, a straight arm).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -28,6 +31,17 @@ local JOINT_PARTS = {
 	Waist = "UpperTorso",
 	Neck = "Head",
 }
+-- the joints a block body never bends (the right elbow and wrist are folded into the shoulder in applyTo)
+local RIGID = {
+	RightElbow = "RightLowerArm",
+	RightWrist = "RightHand",
+	LeftElbow = "LeftLowerArm",
+	LeftWrist = "LeftHand",
+	RightKnee = "RightLowerLeg",
+	RightAnkle = "RightFoot",
+	LeftKnee = "LeftLowerLeg",
+	LeftAnkle = "LeftFoot",
+}
 local SEND_INTERVAL = 0.1
 local lastSent = 0
 
@@ -47,7 +61,7 @@ local function jointOf(character: Model, name: string): JointState?
 	if state and state.joint.Parent then
 		return state
 	end
-	local part = character:FindFirstChild(JOINT_PARTS[name])
+	local part = character:FindFirstChild(JOINT_PARTS[name] or RIGID[name])
 	local joint = part and part:FindFirstChild(name)
 	if joint and (joint:IsA("Motor6D") or joint:IsA("AnimationConstraint")) then
 		state = { joint = joint, lastSet = nil, lastBase = CFrame.identity }
@@ -116,12 +130,39 @@ local function applyTo(
 	if entry then
 		setTrail(character, p > 0.25 and p < 0.75)
 	end
+	local adds: { [string]: CFrame } = {}
 	for name in pairs(JOINT_PARTS) do
 		local hold = if pose then pose[name] elseif holding then SwingAnimations.hold[name] else nil
 		local swing = if animation and p < 1
 			then SwingAnimations.sample(animation, name, p)
 			else nil
-		local state = if hold or swing
+		if hold or swing then
+			adds[name] = (hold or CFrame.identity) * (swing or CFrame.identity)
+		end
+	end
+	local block = character:GetAttribute("BlockBody") == true
+	if block then
+		local elbow, wrist = adds.RightElbow, adds.RightWrist
+		if elbow or wrist then
+			adds.RightShoulder = (adds.RightShoulder or CFrame.identity)
+				* (elbow or CFrame.identity).Rotation
+				* (wrist or CFrame.identity).Rotation
+		end
+		adds.RightElbow, adds.RightWrist = nil, nil
+		for name in pairs(RIGID) do
+			local state = jointOf(character, name)
+			if state then
+				(state.joint :: any).Transform = CFrame.identity
+				state.lastSet = nil
+			end
+		end
+	end
+	for name in pairs(JOINT_PARTS) do
+		if block and RIGID[name] then
+			continue
+		end
+		local add = adds[name]
+		local state = if add
 			then jointOf(character, name)
 			else (joints[character] and joints[character][name])
 		if state then
@@ -130,8 +171,8 @@ local function applyTo(
 			if state.lastSet and current == state.lastSet then
 				current = state.lastBase -- the Animator did not rewrite it: never stack our rotation
 			end
-			if hold or swing then
-				local set = current * (hold or CFrame.identity) * (swing or CFrame.identity)
+			if add then
+				local set = current * add
 				state.lastBase, state.lastSet = current, set
 				joint.Transform = set
 			elseif state.lastSet then

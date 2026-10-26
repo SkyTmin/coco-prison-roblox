@@ -51,6 +51,7 @@ for _, name in ipairs({
 	Remotes.event(name)
 end
 
+local AvatarService = require(script.Services.AvatarService)
 local ProfileService = require(script.Services.ProfileService)
 local ProfessionService = require(script.Services.ProfessionService)
 local TextureService = require(script.Services.TextureService)
@@ -81,6 +82,7 @@ local NameplateService = require(script.Services.NameplateService)
 local CollisionGroups = require(script.Services.CollisionGroups)
 local LeaderboardService = require(script.Services.LeaderboardService)
 
+AvatarService.Start() -- first: the StarterCharacter must exist before anyone spawns
 HungerService.Start()
 DeathService.Start()
 ProfileService.Start()
