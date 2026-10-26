@@ -974,12 +974,14 @@ end
 
 -- ================================================================ the brightest light, the void net, the edge walls
 -- a pure white glow (the only lighting volume of this floor)
+-- (Studio 26.10: at exposure 0.3, brightness 3 and a noon sun the white tiers burned into one spot and the scarlet
+-- mine read pink — a lower morning sun gives the tiers shaded sides, the white stays the brightest of all floors)
 lightingVolume("HeavenGlow", 0, 100, 0, 720, 520, 520, {
-	Ambient = Color3.fromRGB(200, 200, 205),
-	Exposure = 0.3,
+	Ambient = Color3.fromRGB(170, 170, 178),
+	Exposure = -0.1,
 	Haze = 0.6,
-	ClockTime = 12.5,
-	Brightness = 3,
+	ClockTime = 10.6,
+	Brightness = 2.2,
 	AtmosphereColor = Color3.fromRGB(250, 248, 240),
 	AtmosphereDecay = Color3.fromRGB(235, 230, 220),
 }, core)
@@ -2522,7 +2524,8 @@ local function angel(x, z, dx, dz, parent)
 end
 -- a bird-of-paradise banner on a white pole at (x, z), the cloth facing (dx, dz); sx mirrors the bird
 local function birdBanner(x, z, dx, dz, sx, parent)
-	if not claim("BirdBanner", x - 2.5, z - 2.5, x + 2.5, z + 2.5, { edge = true }) then
+	-- the claim is the 4×4 base (Studio 26.10: a 5×5 claim at z ±12 reached 0.5 stud into the walk keep-out, all 8 skipped)
+	if not claim("BirdBanner", x - 2, z - 2, x + 2, z + 2, { edge = true }) then
 		return
 	end
 	local f = folder("BirdBanner", parent)

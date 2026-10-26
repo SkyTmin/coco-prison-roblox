@@ -156,12 +156,14 @@ end
 
 -- ================================================================ the brightest light, the void net, the edge walls
 -- a pure white glow (the only lighting volume of this floor)
+-- (Studio 26.10: at exposure 0.3, brightness 3 and a noon sun the white tiers burned into one spot and the scarlet
+-- mine read pink — a lower morning sun gives the tiers shaded sides, the white stays the brightest of all floors)
 lightingVolume("HeavenGlow", 0, 100, 0, 720, 520, 520, {
-	Ambient = Color3.fromRGB(200, 200, 205),
-	Exposure = 0.3,
+	Ambient = Color3.fromRGB(170, 170, 178),
+	Exposure = -0.1,
 	Haze = 0.6,
-	ClockTime = 12.5,
-	Brightness = 3,
+	ClockTime = 10.6,
+	Brightness = 2.2,
 	AtmosphereColor = Color3.fromRGB(250, 248, 240),
 	AtmosphereDecay = Color3.fromRGB(235, 230, 220),
 }, core)

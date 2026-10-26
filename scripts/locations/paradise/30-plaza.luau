@@ -433,7 +433,8 @@ local function angel(x, z, dx, dz, parent)
 end
 -- a bird-of-paradise banner on a white pole at (x, z), the cloth facing (dx, dz); sx mirrors the bird
 local function birdBanner(x, z, dx, dz, sx, parent)
-	if not claim("BirdBanner", x - 2.5, z - 2.5, x + 2.5, z + 2.5, { edge = true }) then
+	-- the claim is the 4×4 base (Studio 26.10: a 5×5 claim at z ±12 reached 0.5 stud into the walk keep-out, all 8 skipped)
+	if not claim("BirdBanner", x - 2, z - 2, x + 2, z + 2, { edge = true }) then
 		return
 	end
 	local f = folder("BirdBanner", parent)
