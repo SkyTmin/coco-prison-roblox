@@ -338,7 +338,7 @@ local function awning(cf, width, depth, colA, colB, parent)
 	end
 end
 -- a market stall: counter at the front (−Z of cf), four posts, a striped awning, goods on the counter and a back
--- shelf; returns the stall folder. opt: { goods = {variant, ...}, w, d, colA, colB, sign = "text" }
+-- shelf; returns the stall folder. The counter top (y 3.1) is chest-high on our block-body NPCs. opt: { goods = {variant, ...}, w, d, colA, colB, sign = "text" }
 local function stall(cf, opt, parent)
 	opt = opt or {}
 	local w, d = opt.w or 3 * B, opt.d or 2 * B
@@ -348,8 +348,8 @@ local function stall(cf, opt, parent)
 			textured(part("StallPost", Vector3.new(1, 8.5, 1), cf * CFrame.new(sx * (w / 2 - 0.5), 4.25, sz * (d / 2 - 0.5)), nil, nil, f), WOOD_DARK)
 		end
 	end
-	textured(part("Counter", Vector3.new(w - 1, 3.4, 2), cf * CFrame.new(0, 1.7, -d / 2 + 1.5), nil, nil, f), WOOD)
-	textured(part("CounterTop", Vector3.new(w - 0.6, 0.5, 2.6), cf * CFrame.new(0, 3.65, -d / 2 + 1.5), nil, nil, f), WOOD_DARK)
+	textured(part("Counter", Vector3.new(w - 1, 2.6, 2), cf * CFrame.new(0, 1.3, -d / 2 + 1.5), nil, nil, f), WOOD)
+	textured(part("CounterTop", Vector3.new(w - 0.6, 0.5, 2.6), cf * CFrame.new(0, 2.85, -d / 2 + 1.5), nil, nil, f), WOOD_DARK)
 	textured(part("BackShelf", Vector3.new(w - 1, 0.5, 1.6), cf * CFrame.new(0, 5, d / 2 - 1.2), nil, nil, f), WOOD)
 	textured(part("BackWall", Vector3.new(w - 1, 5.5, 0.5), cf * CFrame.new(0, 2.75, d / 2 - 0.5), nil, nil, f), WOOD_LIGHT, Color3.fromRGB(205, 170, 120))
 	awning(cf * CFrame.new(0, 7.6, -d / 2 - 0.4), w + 1, d + 1, opt.colA or Color3.fromRGB(200, 45, 40), opt.colB or Color3.fromRGB(240, 235, 225), f)
@@ -357,7 +357,7 @@ local function stall(cf, opt, parent)
 	for i, g in ipairs(goods) do
 		local gx = -w / 2 + 1.5 + (i - 1) * 2.2
 		if gx < w / 2 - 1 then
-			textured(decor(part("Goods", Vector3.new(1.8, 1.8, 1.8), cf * CFrame.new(gx, 4.8, -d / 2 + 1.5), nil, nil, f)), g)
+			textured(decor(part("Goods", Vector3.new(1.8, 1.8, 1.8), cf * CFrame.new(gx, 4, -d / 2 + 1.5), nil, nil, f)), g)
 			textured(decor(part("ShelfGoods", Vector3.new(1.6, 1.6, 1.2), cf * CFrame.new(gx + 0.6, 6, d / 2 - 1.2), nil, nil, f)), g)
 		end
 	end

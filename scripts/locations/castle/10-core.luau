@@ -79,7 +79,7 @@ do
 	end
 	-- quartz blocks stacked by the north ladder, ready to haul
 	for i = 0, 3 do
-		cube("QuartzStack", PIT.x - 10 + i * 4.4, 2, PIT.z - e - 6, B, B, B, "px_smooth_stone", QUARTZ, mine)
+		cube("QuartzStack", PIT.x - 10 + i * 4.4, 2, PIT.z - e - 6, B, B, B, "px_quartz_block", nil, mine)
 	end
 	cube("QuartzStack", PIT.x - 6, 6, PIT.z - e - 6, B, B, B, "px_white_stone_bricks", QUARTZ, mine)
 end
@@ -87,7 +87,7 @@ local arrive = folder("Arrival", core)
 arrival(SPAWN.x, SPAWN.z, PIT.x, PIT.z, arrive, "px_white_stone_bricks")
 do
 	local cf = at(BUYER.x, 0, BUYER.z) * CFrame.Angles(0, math.pi / 2, 0)
-	stall(cf, { w = 4 * B, d = 2 * B, colA = BANNER_BLACK, colB = WING_WHITE, goods = { "px_smooth_stone", "px_white_stone_bricks", "px_smooth_stone" }, sign = "Скупка" }, arrive)
+	stall(cf, { w = 4 * B, d = 2 * B, colA = BANNER_BLACK, colB = WING_WHITE, goods = { "px_quartz_block", "px_white_stone_bricks", "px_quartz_block" }, sign = "Скупка" }, arrive)
 	buyer(cf * CFrame.new(0, 3, 1.4), { shirt = Color3.fromRGB(45, 45, 52), pants = Color3.fromRGB(70, 70, 78) }, arrive)
 	barrel(BUYER.x + 3, 0, BUYER.z + 9, arrive)
 	crate(BUYER.x - 2, 0, BUYER.z + 10, arrive)
@@ -96,11 +96,22 @@ end
 
 -- ================================================================ the boss, the light, the void net, the edge walls
 bossSpawn("raven_knight", COURT.x, 2, COURT.z, COURT.r - 8, core)
--- an overcast grey evening over the whole castle (the only lighting volume of this floor)
+-- an overcast grey evening over the whole castle
 lightingVolume("OvercastAir", 0, 100, 20, 500, 260, 560, {
 	Ambient = Color3.fromRGB(150, 150, 162),
 	Exposure = -0.1,
 	Haze = 0.22,
+	ClockTime = 17.2,
+	Brightness = 1.5,
+	AtmosphereColor = Color3.fromRGB(170, 176, 192),
+	AtmosphereDecay = Color3.fromRGB(105, 110, 128),
+}, core)
+-- the keep hall (x 8..104, z -184..-116, floor y 4, walls to y 40): dark stone below, the overcast light barely gets in
+-- (Studio 26.10: nearly black inside) — a warmer, brighter air; the smallest volume wins on the client
+lightingVolume("KeepAir", (KEEP.x0 + KEEP.x1) / 2, 22, (KEEP.z0 + KEEP.z1 - 4) / 2, KEEP.x1 - KEEP.x0 - 16, 36, KEEP.z1 - KEEP.z0 - 4, {
+	Ambient = Color3.fromRGB(175, 165, 150),
+	Exposure = 0.45,
+	Haze = 0.04,
 	ClockTime = 17.2,
 	Brightness = 1.5,
 	AtmosphereColor = Color3.fromRGB(170, 176, 192),

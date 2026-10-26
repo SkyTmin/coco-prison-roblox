@@ -705,6 +705,14 @@
         "ColorMap": "rbxassetid://122143706233578",
         "StudsPerTile": 4
       }
+    },
+    "px_quartz_block": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://86269658302234",
+        "StudsPerTile": 4
+      }
     }
   }
 }

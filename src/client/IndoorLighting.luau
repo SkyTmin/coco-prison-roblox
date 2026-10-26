@@ -147,12 +147,16 @@ function IndoorLighting.Start()
 			task.wait(CHECK_EVERY)
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart")
+			-- the smallest volume around the player wins: a hall inside a location-wide air (Замок: KeepAir in OvercastAir)
 			local found: BasePart? = nil
+			local foundSize = math.huge
 			if root and root:IsA("BasePart") then
 				for _, volume in ipairs(CollectionService:GetTagged("IndoorLighting")) do
 					if volume:IsA("BasePart") and inside(volume, root.Position) then
-						found = volume
-						break
+						local size = volume.Size.X * volume.Size.Y * volume.Size.Z
+						if size < foundSize then
+							found, foundSize = volume, size
+						end
 					end
 				end
 			end

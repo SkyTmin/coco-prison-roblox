@@ -262,3 +262,5 @@ await recolor("yellow_wool.png", "red_wool.png", [[0, [110, 22, 18]], [0.5, [168
 // [Лепреконовая долина] yellow concrete: our smooth stone tinted yellow read as dull mustard tiles with frames (Studio
 // 26.10) — our concrete floor on a bright yellow ramp, like the cyan concrete
 await recolor("concrete_floor.png", "yellow_concrete.png", [[0, [214, 150, 14]], [0.5, [238, 178, 24]], [1, [250, 200, 52]]], 0.7);
+// Замок: the quartz mine block — a warm white of our own (the white tint over smooth stone read as grey concrete)
+await recolor("smooth_stone.png", "quartz_block.png", [[0, [200, 194, 182]], [0.5, [230, 225, 214]], [1, [248, 245, 236]]], 0.8);
