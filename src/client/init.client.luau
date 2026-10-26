@@ -3090,6 +3090,13 @@ if RunService:IsStudio() then
 		elseif action == "aim" then
 			local aim = aimAt(if typeof(arg) == "Vector2" then arg else nil)
 			return if aim then { part = aim.part, hit = aim.hit } else nil
+		elseif action == "bow" then
+			-- true starts a draw (false when there is no bow or no arrow), false lets it go
+			if arg == true then
+				return BowController.Begin()
+			end
+			BowController.Release()
+			return true
 		elseif action == "holdDig" then
 			holding = arg == true
 			if not holding then
@@ -3118,6 +3125,7 @@ if RunService:IsStudio() then
 		end
 		return nil
 	end
-	hook.Parent = player.PlayerGui
+	-- on the Player, not in PlayerGui: PlayerGui empties when the character respawns and the hook was lost
+	hook.Parent = player
 end
 print(string.format("[coco-prison] client ready (%s)", locale))
