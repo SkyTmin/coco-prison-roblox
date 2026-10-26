@@ -38,6 +38,7 @@
 | `CLASSIC-CLIENT-FINDINGS.md`, `CLASSIC-CONTENT-CATALOG.md` | Локализация клиента: 42 правила, 38 чар, 20 боссов, все семейства ключей | ~ |
 | `CLIENT-LOGIC-AUDIT.md`, `TALENT-TREE-AUDIT.md`, `FULL-DECOMPILATION-REPORT.md`, `DECOMPILER-QUALITY.md` | Декомпиляция клиента: архитектура UI, протоколы; формул сервера нет | ~ |
 | `INDEPENDENT-GAP-RESEARCH.md`, `LATEST-DISCOVERIES.md` | Патчноуты канала, что осталось неизвестным | ◇ |
+| `RESOURCEPACK-BOSSES.md` | Ресурс-пак сервера (26.10): боссы — это MythicMobs-паки; приёмы каждого босса с длительностями, миньоны, снаряды, фазы, звуки локаций, тренажёры; **HP / урон / проценты в файлах клиента нет** и как их измерить | ✓ ~ |
 | `decoded/ru_RU-classic.json` | 1837 строк локализации Classic — grep по ключам `prison.classic.*` | ~ |
 
 ## Поиск по сети — `wiki/web-research/`

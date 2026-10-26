@@ -1,0 +1,9013 @@
+{
+ "basalt/basalt_guardian.model": {
+  "anims": {
+   "pose": {
+    "len": 0,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 3.25,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "death": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   },
+   "sword_slash": {
+    "len": 1.8,
+    "loop": false,
+    "events": 0
+   },
+   "sword_spike": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   },
+   "sword_smash": {
+    "len": 3.5,
+    "loop": false,
+    "events": 0
+   },
+   "attack_1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "decoration/bookcase.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   512,
+   512
+  ],
+  "bones": 3
+ },
+ "decoration/cabinet.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   512,
+   512
+  ],
+  "bones": 9
+ },
+ "decoration/cctv.model": {
+  "anims": null,
+  "size": [
+   3,
+   2.5,
+   80,
+   80
+  ],
+  "bones": 1
+ },
+ "decoration/desk.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   512,
+   512
+  ],
+  "bones": 6
+ },
+ "decoration/lamp.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   512,
+   512
+  ],
+  "bones": 2
+ },
+ "decoration/microwave.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 3
+ },
+ "decoration/shirt_hanger.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 11
+ },
+ "decoration/sink.model": {
+  "anims": {
+   "animation.4kssec.sink.open": {
+    "len": 0.75,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "animation.4kssec.sink.close": {
+    "len": 0.75,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 6
+ },
+ "decoration/small_dresser.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 5
+ },
+ "decoration/small_table.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 3
+ },
+ "decoration/toaster.model": {
+  "anims": {
+   "idle": {
+    "len": 5.04,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   3.5,
+   1024,
+   1024
+  ],
+  "bones": 4
+ },
+ "decoration/turret.model": {
+  "anims": {
+   "idle": {
+    "len": 1.12,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   80,
+   80
+  ],
+  "bones": 18
+ },
+ "dynastybloom/axe.model": {
+  "anims": null,
+  "size": [
+   5,
+   3.5,
+   643,
+   1282
+  ],
+  "bones": 3
+ },
+ "dynastybloom/bow.model": {
+  "anims": null,
+  "size": [
+   5,
+   3.5,
+   643,
+   1282
+  ],
+  "bones": 3
+ },
+ "dynastybloom/pickaxe.model": {
+  "anims": null,
+  "size": [
+   5,
+   3.5,
+   643,
+   1282
+  ],
+  "bones": 3
+ },
+ "dynastybloom/shovel.model": {
+  "anims": null,
+  "size": [
+   5,
+   4,
+   643,
+   1282
+  ],
+  "bones": 3
+ },
+ "dynastybloom/sword.model": {
+  "anims": null,
+  "size": [
+   5,
+   3.5,
+   643,
+   1282
+  ],
+  "bones": 3
+ },
+ "enchant/rage.model": {
+  "anims": {
+   "idle1": {
+    "len": 1,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "idle2": {
+    "len": 1,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "idle3": {
+    "len": 1,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   5,
+   1024,
+   1024
+  ],
+  "bones": 8
+ },
+ "enchant/slowness.model": {
+  "anims": {
+   "idle": {
+    "len": 1.2566,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   1.5,
+   32,
+   32
+  ],
+  "bones": 21
+ },
+ "enchant/vortex.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   4.5,
+   1024,
+   1024
+  ],
+  "bones": 9
+ },
+ "ent/ent.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.0288,
+    "loop": true,
+    "events": 0
+   },
+   "rightpunch": {
+    "len": 1.5292,
+    "loop": false,
+    "events": 0
+   },
+   "leftpunch": {
+    "len": 1.5358,
+    "loop": false,
+    "events": 0
+   },
+   "stomp": {
+    "len": 2.2931,
+    "loop": false,
+    "events": 0
+   },
+   "shout": {
+    "len": 1.9355,
+    "loop": false,
+    "events": 0
+   },
+   "rise": {
+    "len": 2.4173,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3.3084,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   6,
+   6.5,
+   512,
+   512
+  ],
+  "bones": 21
+ },
+ "ent/ent_branch.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.6667,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   5,
+   5,
+   128,
+   128
+  ],
+  "bones": 1
+ },
+ "ent/ent_branch_upwards.model": {
+  "anims": {
+   "spawn": {
+    "len": 2.375,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   6,
+   128,
+   128
+  ],
+  "bones": 1
+ },
+ "ent/ent_guardian.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "rightsweep": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "leftsweep": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "arminground": {
+    "len": 3.3333,
+    "loop": false,
+    "events": 0
+   },
+   "smashground": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 4.5,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   9,
+   8,
+   256,
+   256
+  ],
+  "bones": 18
+ },
+ "ent/ent_minion.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.6667,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1.0833,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.2917,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.8333,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   2.5,
+   130,
+   130
+  ],
+  "bones": 6
+ },
+ "ent/ent_sorcerer.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 1.75,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 1.5833,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   131,
+   195
+  ],
+  "bones": 17
+ },
+ "ent/ent_warrior.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 1.75,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 1.5833,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   5,
+   3.5,
+   130,
+   195
+  ],
+  "bones": 15
+ },
+ "ent/leaf_tornado.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   130,
+   130
+  ],
+  "bones": 3
+ },
+ "fabric/security.model": {
+  "anims": {
+   "walk": {
+    "len": 0.5,
+    "loop": true,
+    "events": 0
+   },
+   "attack2": {
+    "len": 0.6875,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "attack3": {
+    "len": 0.69,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "hurt": {
+    "len": 0.3138,
+    "loop": false,
+    "events": 0
+   },
+   "death1": {
+    "len": 0.9167,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "death2": {
+    "len": 1.4583,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   6,
+   4.5,
+   64,
+   64
+  ],
+  "bones": 29
+ },
+ "forest/magic_creature_minion.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.625,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1.08333,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 1.83333,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 12
+ },
+ "forest/tree_forest_guardian.model": {
+  "anims": {
+   "idle": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "big_punch": {
+    "len": 1.08333,
+    "loop": false,
+    "events": 0
+   },
+   "attack": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "summon": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   256,
+   256
+  ],
+  "bones": 28
+ },
+ "forest_spirit/flying_skull.model": {
+  "anims": {
+   "idle": {
+    "len": 0.75,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.76,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 0.92,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.84,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 0.52,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 12
+ },
+ "forest_spirit/forest_spirit.model": {
+  "anims": {
+   "idle": {
+    "len": 5.72,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 5.72,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 4.3,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 4.95,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "attack4": {
+    "len": 4.75,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 3.25,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 11.45,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 1.9,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 28.85,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 14.68,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 25.44,
+    "loop": false,
+    "events": 0
+   },
+   "spawn_cancelled": {
+    "len": 13.2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   256,
+   1024
+  ],
+  "bones": 57
+ },
+ "forest_spirit/forest_spirit_activated_totem.model": {
+  "anims": {
+   "idle": {
+    "len": 1.76,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 7.16,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 5.68,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 27
+ },
+ "forest_spirit/forest_spirit_base.model": {
+  "anims": {
+   "idle": {
+    "len": 4.92,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.88,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.04,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   256,
+   2048
+  ],
+  "bones": 19
+ },
+ "forest_spirit/forest_spirit_projectile_1.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.36,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 1.24,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 5
+ },
+ "forest_spirit/forest_spirit_projectile_2.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.2,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 1.36,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 3
+ },
+ "forest_spirit/forest_spirit_projectile_3.model": {
+  "anims": {
+   "spawn": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 3
+ },
+ "forest_spirit/forest_spirit_projectile_4.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.2,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 1.36,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 3
+ },
+ "forest_spirit/forest_spirit_projectile_5.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 7
+ },
+ "forest_spirit/forest_spirit_projectile_6.model": {
+  "anims": {
+   "idle": {
+    "len": 3.15,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 3.15,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 6
+ },
+ "forest_spirit/forest_spirit_roots.model": {
+  "anims": {
+   "spawn": {
+    "len": 4.04,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 8
+ },
+ "forest_spirit/forest_spirit_spike.model": {
+  "anims": {
+   "spawn": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 6
+ },
+ "forest_spirit/forest_spirit_storm.model": {
+  "anims": {
+   "idle": {
+    "len": 12.96,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.4,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.2,
+    "loop": false,
+    "events": 0
+   },
+   "attack": {
+    "len": 2.12,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 19
+ },
+ "forest_spirit/forest_spirit_totem.model": {
+  "anims": {
+   "idle": {
+    "len": 0.88,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 9.48,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 31
+ },
+ "forest_spirit/lost_explorer.model": {
+  "anims": {
+   "idle": {
+    "len": 2.8,
+    "loop": false,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.48,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1.64,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 1.64,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 2.36,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.24,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.36,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.24,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   128
+  ],
+  "bones": 14
+ },
+ "forest_spirit/lost_explorer_lantern.model": {
+  "anims": {
+   "idle": {
+    "len": 0.88,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 0.44,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   128
+  ],
+  "bones": 2
+ },
+ "forest_spirit/shaman.model": {
+  "anims": {
+   "idle": {
+    "len": 2.4,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.3,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 1.24,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 2.36,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 2.08,
+    "loop": false,
+    "events": 0
+   },
+   "attack4small": {
+    "len": 4.56,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 1.28,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 1.64,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 2.92,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 2.08,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 5.16,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.52,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.25,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 35
+ },
+ "forest_spirit/shaman_roots_1.model": {
+  "anims": {
+   "spawn": {
+    "len": 3.08,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   32
+  ],
+  "bones": 4
+ },
+ "forest_spirit/small_spirit_explode.model": {
+  "anims": {
+   "spawn": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 6
+ },
+ "forest_spirit/spirit_arrow.model": {
+  "anims": {
+   "idle": {
+    "len": 1.16,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "forest_spirit/spirit_arrow_2.model": {
+  "anims": {
+   "spawn": {
+    "len": 6.44,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "forest_spirit/spirit_lightning_bolt.model": {
+  "anims": {
+   "spawn": {
+    "len": 3.16,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 9
+ },
+ "forest_spirit/spirit_projectile_2.model": {
+  "anims": {
+   "spawn": {
+    "len": 3.24,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   16,
+   32
+  ],
+  "bones": 2
+ },
+ "giant/giant_zombie.model": {
+  "anims": {
+   "idle": {
+    "len": 4.16,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5022,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1.3221,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.0039,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   5,
+   4.5,
+   128,
+   128
+  ],
+  "bones": 13
+ },
+ "gym/barbell.model": {
+  "anims": null,
+  "size": [
+   4,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 16
+ },
+ "gym/benchpress.model": {
+  "anims": null,
+  "size": [
+   7,
+   3.5,
+   256,
+   256
+  ],
+  "bones": 9
+ },
+ "gym/bike.model": {
+  "anims": null,
+  "size": [
+   5,
+   4.5,
+   256,
+   256
+  ],
+  "bones": 5
+ },
+ "gym/latpulldown.model": {
+  "anims": null,
+  "size": [
+   5,
+   5.5,
+   256,
+   256
+  ],
+  "bones": 1
+ },
+ "gym/punchingbag.model": {
+  "anims": {
+   "hurt": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   6,
+   128,
+   128
+  ],
+  "bones": 4
+ },
+ "gym/squatrack.model": {
+  "anims": null,
+  "size": [
+   6,
+   4.5,
+   256,
+   256
+  ],
+  "bones": 12
+ },
+ "gym/treadmill.model": {
+  "anims": null,
+  "size": [
+   5,
+   3.5,
+   256,
+   256
+  ],
+  "bones": 9
+ },
+ "heads/basalt_guardian.model": {
+  "anims": {
+   "idle": {
+    "len": 3.25,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   128,
+   256
+  ],
+  "bones": 5
+ },
+ "heads/ent.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   512,
+   512
+  ],
+  "bones": 5
+ },
+ "heads/forest_guardian.model": {
+  "anims": {
+   "idle": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   256
+  ],
+  "bones": 12
+ },
+ "heads/forest_spirit.model": {
+  "anims": {
+   "idle": {
+    "len": 5.72,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   1024
+  ],
+  "bones": 17
+ },
+ "heads/giant_zombie.model": {
+  "anims": {
+   "idle": {
+    "len": 4.16,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   128,
+   128
+  ],
+  "bones": 3
+ },
+ "heads/illusionist.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   295,
+   356
+  ],
+  "bones": 43
+ },
+ "heads/knight.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   256
+  ],
+  "bones": 9
+ },
+ "heads/minotaur.model": {
+  "anims": {
+   "idle": {
+    "len": 5.83333,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   128,
+   256
+  ],
+  "bones": 7
+ },
+ "heads/mole.model": {
+  "anims": {
+   "idle": {
+    "len": 2.5417,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   163,
+   259
+  ],
+  "bones": 8
+ },
+ "heads/piglin.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   512,
+   512
+  ],
+  "bones": 12
+ },
+ "heads/poseidon.model": {
+  "anims": {
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   512,
+   512
+  ],
+  "bones": 5
+ },
+ "heads/raven_knight.model": {
+  "anims": {
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   1024
+  ],
+  "bones": 13
+ },
+ "heads/reaper.model": {
+  "anims": {
+   "idle": {
+    "len": 5.24,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   256
+  ],
+  "bones": 6
+ },
+ "heads/skeleton.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   514,
+   1027
+  ],
+  "bones": 5
+ },
+ "heads/spider_queen.model": {
+  "anims": {
+   "idle": {
+    "len": 3.5294,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   128,
+   128
+  ],
+  "bones": 35
+ },
+ "heads/splinter.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   256,
+   256
+  ],
+  "bones": 6
+ },
+ "heads/the_lovers.model": {
+  "anims": {
+   "idle": {
+    "len": 3.36,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   128,
+   256
+  ],
+  "bones": 8
+ },
+ "heads/un_king.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   64,
+   256
+  ],
+  "bones": 5
+ },
+ "heads/vecna.model": {
+  "anims": {
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2,
+   64,
+   64
+  ],
+  "bones": 5
+ },
+ "illusionist/dagger.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3,
+   34,
+   67
+  ],
+  "bones": 5
+ },
+ "illusionist/illusionist.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "summonrabbits": {
+    "len": 3.35,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "attackdagger": {
+    "len": 1.3375,
+    "loop": false,
+    "events": 0
+   },
+   "attackbox": {
+    "len": 2.2,
+    "loop": false,
+    "events": 0
+   },
+   "phasecards": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "regeneration": {
+    "len": 5.9,
+    "loop": false,
+    "events": 0
+   },
+   "notactive": {
+    "len": 0.5,
+    "loop": true,
+    "events": 0
+   },
+   "active": {
+    "len": 1.8,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 8,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "animation": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   },
+   "attackcards": {
+    "len": 2.006,
+    "loop": false,
+    "events": 0
+   },
+   "hurt": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1.0045,
+    "loop": false,
+    "events": 0
+   },
+   "stub": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   6,
+   8,
+   295,
+   356
+  ],
+  "bones": 145
+ },
+ "illusionist/rabbit.model": {
+  "anims": {
+   "idle": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.8,
+    "loop": true,
+    "events": 0
+   },
+   "explosion": {
+    "len": 3.5,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3.5,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   3.5,
+   84,
+   146
+  ],
+  "bones": 24
+ },
+ "knight/knight.model": {
+  "anims": {
+   "idle3": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "startcombat": {
+    "len": 1.5,
+    "loop": false,
+    "events": 1
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.7501,
+    "loop": true,
+    "events": 0
+   },
+   "run": {
+    "len": 0.65,
+    "loop": true,
+    "events": 0
+   },
+   "bulwarkinstinct": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0
+   },
+   "c1": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "c2": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "c3": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "c4": {
+    "len": 0.95,
+    "loop": false,
+    "events": 0
+   },
+   "c5": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "berserkerleap": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "relentlesswhirlwindspin": {
+    "len": 0.25,
+    "loop": true,
+    "events": 0
+   },
+   "relentlesswhirlwindpierce": {
+    "len": 0.6977,
+    "loop": false,
+    "events": 0
+   },
+   "bloodboundbarrier": {
+    "len": 0.8,
+    "loop": true,
+    "events": 0
+   },
+   "viciousstrike": {
+    "len": 4.75,
+    "loop": false,
+    "events": 0
+   },
+   "strikeoffury1": {
+    "len": 2.9,
+    "loop": false,
+    "events": 0
+   },
+   "strikeoffury2": {
+    "len": 2.75,
+    "loop": false,
+    "events": 0
+   },
+   "dashfront": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "dashleft": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "dashright": {
+    "len": 0.65,
+    "loop": false,
+    "events": 0
+   },
+   "dashback": {
+    "len": 0.8,
+    "loop": false,
+    "events": 0
+   },
+   "flinch": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3.85,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "hurt": {
+    "len": 0.7501,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   4.5,
+   256,
+   256
+  ],
+  "bones": 27
+ },
+ "knight/vfx_explosion.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "smallfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "mediumfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "bigfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "hugefireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   1.5,
+   64,
+   64
+  ],
+  "bones": 149
+ },
+ "lovers/big_arrow.model": {
+  "anims": {
+   "idle": {
+    "len": 1.68,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 2
+ },
+ "lovers/ghost_spear.model": {
+  "anims": {
+   "idle": {
+    "len": 0.76,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 2
+ },
+ "lovers/ghost_spear2.model": {
+  "anims": {
+   "spawn": {
+    "len": 2.04,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 2
+ },
+ "lovers/kusarigama.model": {
+  "anims": {
+   "idle": {
+    "len": 2.04,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 4
+ },
+ "lovers/rain_arrow.model": {
+  "anims": {
+   "spawn": {
+    "len": 5.04,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "lovers/samurai_armor_dequip.model": {
+  "anims": {
+   "spawn": {
+    "len": 5.4,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 16
+ },
+ "lovers/shuriken.model": {
+  "anims": {
+   "idle": {
+    "len": 0.96,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   16,
+   64
+  ],
+  "bones": 2
+ },
+ "lovers/the_lovers_ghost.model": {
+  "anims": {
+   "idle": {
+    "len": 3.36,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 3.36,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 3.68,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 2.92,
+    "loop": false,
+    "events": 0
+   },
+   "attack4": {
+    "len": 2.32,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 6.76,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 2.24,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 4.56,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 3.24,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 43
+ },
+ "lovers/the_lovers_phase_1.model": {
+  "anims": {
+   "idle": {
+    "len": 3.36,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2.32,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 3.6,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 4.84,
+    "loop": false,
+    "events": 0
+   },
+   "attack4": {
+    "len": 2.08,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 3.48,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 4.72,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 2.8,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 2.8,
+    "loop": false,
+    "events": 0
+   },
+   "attack9": {
+    "len": 1.52,
+    "loop": false,
+    "events": 0
+   },
+   "attack10": {
+    "len": 2.48,
+    "loop": false,
+    "events": 0
+   },
+   "taunt": {
+    "len": 3.36,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 0.28,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 10.12,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 33
+ },
+ "lovers/the_lovers_phase_2.model": {
+  "anims": {
+   "idle": {
+    "len": 3.36,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2.32,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 5.36,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 4.84,
+    "loop": false,
+    "events": 0
+   },
+   "attack4": {
+    "len": 2.24,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 7.24,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 5.44,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 2.8,
+    "loop": false,
+    "events": 0
+   },
+   "attack9": {
+    "len": 1.52,
+    "loop": false,
+    "events": 0
+   },
+   "attack10": {
+    "len": 3.72,
+    "loop": false,
+    "events": 0
+   },
+   "attack11": {
+    "len": 2.32,
+    "loop": false,
+    "events": 0
+   },
+   "taunt": {
+    "len": 3.36,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 19.28,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 6.44,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 75
+ },
+ "lovers/the_lovers_phase_3.model": {
+  "anims": {
+   "idle": {
+    "len": 13.52,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.56,
+    "loop": true,
+    "events": 0
+   },
+   "taunt": {
+    "len": 3.36,
+    "loop": false,
+    "events": 0
+   },
+   "damage": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   },
+   "attack1": {
+    "len": 2.32,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 2.04,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 1.96,
+    "loop": false,
+    "events": 0
+   },
+   "attack4": {
+    "len": 2.88,
+    "loop": false,
+    "events": 0
+   },
+   "attack5": {
+    "len": 2.4,
+    "loop": false,
+    "events": 0
+   },
+   "attack6": {
+    "len": 1.16,
+    "loop": false,
+    "events": 0
+   },
+   "attack7": {
+    "len": 4.48,
+    "loop": false,
+    "events": 0
+   },
+   "attack8": {
+    "len": 4.48,
+    "loop": false,
+    "events": 0
+   },
+   "attack9": {
+    "len": 1.88,
+    "loop": false,
+    "events": 0
+   },
+   "attack10": {
+    "len": 2.88,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 10,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 26.92,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 76
+ },
+ "lovers/the_lovers_slash2.model": {
+  "anims": {
+   "idle": {
+    "len": 3.32,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 0.72,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "lovers/the_lovers_slash3.model": {
+  "anims": {
+   "idle": {
+    "len": 2.48,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 1.08,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   64
+  ],
+  "bones": 2
+ },
+ "lovers/the_lover_slash1.model": {
+  "anims": {
+   "spawn": {
+    "len": 3.24,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 0.8,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "minotaur/ground_with_roots.model": {
+  "anims": {
+   "fly": {
+    "len": 3.95833,
+    "loop": true,
+    "events": 0
+   },
+   "death": {
+    "len": 0.16667,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   64
+  ],
+  "bones": 2
+ },
+ "minotaur/minotaur.model": {
+  "anims": {
+   "idle": {
+    "len": 5.83333,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.08333,
+    "loop": true,
+    "events": 0
+   },
+   "run": {
+    "len": 0.66667,
+    "loop": true,
+    "events": 0
+   },
+   "minotaur_rush": {
+    "len": 4.125,
+    "loop": false,
+    "events": 0
+   },
+   "double_attack": {
+    "len": 1.66667,
+    "loop": false,
+    "events": 0
+   },
+   "attack_horns": {
+    "len": 1.125,
+    "loop": false,
+    "events": 0
+   },
+   "impact": {
+    "len": 1.16667,
+    "loop": false,
+    "events": 0
+   },
+   "throws_the_ground": {
+    "len": 3.58333,
+    "loop": false,
+    "events": 0
+   },
+   "hurt_1": {
+    "len": 0.375,
+    "loop": false,
+    "events": 0
+   },
+   "hurt_2": {
+    "len": 0.375,
+    "loop": false,
+    "events": 0
+   },
+   "stun": {
+    "len": 3.79167,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 12.95833,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "minotaur/sleeping_minotaur.model": {
+  "anims": {
+   "idle": {
+    "len": 8.58333,
+    "loop": true,
+    "events": 0
+   },
+   "awakening": {
+    "len": 9.83333,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 30
+ },
+ "mole/moon_glow.model": {
+  "anims": {
+   "idle3": {
+    "len": 2.5417,
+    "loop": true,
+    "events": 0
+   },
+   "idle2": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "idle": {
+    "len": 2.5417,
+    "loop": true,
+    "events": 0
+   },
+   "walk2": {
+    "len": 1.9583,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2.5833,
+    "loop": true,
+    "events": 0
+   },
+   "strafe": {
+    "len": 1.9167,
+    "loop": true,
+    "events": 0
+   },
+   "hurt5": {
+    "len": 0.25,
+    "loop": false,
+    "events": 0
+   },
+   "hurt2": {
+    "len": 0.25,
+    "loop": false,
+    "events": 0
+   },
+   "hurt3": {
+    "len": 0.25,
+    "loop": false,
+    "events": 0
+   },
+   "hurt4": {
+    "len": 0.25,
+    "loop": false,
+    "events": 0
+   },
+   "talking": {
+    "len": 4.7083,
+    "loop": false,
+    "events": 0
+   },
+   "simpleleave": {
+    "len": 1.7083,
+    "loop": false,
+    "events": 0
+   },
+   "wrongitem": {
+    "len": 4.25,
+    "loop": false,
+    "events": 0
+   },
+   "rightitem": {
+    "len": 8.9167,
+    "loop": "hold_on_last_frame",
+    "events": 2
+   },
+   "stun": {
+    "len": 0.75,
+    "loop": false,
+    "events": 0
+   },
+   "idle5": {
+    "len": 1.5833,
+    "loop": true,
+    "events": 0
+   },
+   "midnight": {
+    "len": 2.125,
+    "loop": false,
+    "events": 0
+   },
+   "attack3": {
+    "len": 0.75,
+    "loop": false,
+    "events": 2
+   },
+   "attack4": {
+    "len": 0.75,
+    "loop": false,
+    "events": 2
+   },
+   "startshoot": {
+    "len": 2.5417,
+    "loop": false,
+    "events": 0
+   },
+   "descendshot": {
+    "len": 1.2083,
+    "loop": false,
+    "events": 2
+   },
+   "descendend": {
+    "len": 0.4583,
+    "loop": false,
+    "events": 0
+   },
+   "shadowlight": {
+    "len": 1.5417,
+    "loop": false,
+    "events": 2
+   },
+   "moonssight": {
+    "len": 1.5833,
+    "loop": false,
+    "events": 0
+   },
+   "meteorrain": {
+    "len": 1.9167,
+    "loop": false,
+    "events": 2
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "hurt": {
+    "len": 2.5833,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 0.8611,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   26,
+   9,
+   163,
+   259
+  ],
+  "bones": 42
+ },
+ "mole/vfx_soul_explosion.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "smallfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "mediumfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "bigfireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "hugefireexplosion": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   6,
+   3.5,
+   64,
+   64
+  ],
+  "bones": 149
+ },
+ "mole/vfx_soul_impact.model": {
+  "anims": {
+   "ground": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "groundfront": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   3.5,
+   32,
+   32
+  ],
+  "bones": 47
+ },
+ "mole/vfx_soul_meteor.model": {
+  "anims": {
+   "crash": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   1501,
+   753.5,
+   256,
+   256
+  ],
+  "bones": 15
+ },
+ "mole/vfx_soul_rain.model": {
+  "anims": {
+   "rain": {
+    "len": 4.025,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16.5,
+   32,
+   32
+  ],
+  "bones": 43
+ },
+ "moon/axe.model": {
+  "anims": null,
+  "size": [
+   4,
+   4,
+   64,
+   64
+  ],
+  "bones": 1
+ },
+ "moon/bow.model": {
+  "anims": null,
+  "size": [
+   6,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 3
+ },
+ "moon/pickaxe.model": {
+  "anims": null,
+  "size": [
+   5,
+   4,
+   64,
+   64
+  ],
+  "bones": 1
+ },
+ "moon/shovel.model": {
+  "anims": null,
+  "size": [
+   5,
+   4,
+   64,
+   64
+  ],
+  "bones": 1
+ },
+ "moon/sword.model": {
+  "anims": null,
+  "size": [
+   5,
+   4,
+   64,
+   64
+  ],
+  "bones": 1
+ },
+ "newyear/axe.model": {
+  "anims": null,
+  "size": [
+   2,
+   2.5,
+   66,
+   99
+  ],
+  "bones": 3
+ },
+ "newyear/bow.model": {
+  "anims": null,
+  "size": [
+   3,
+   3.5,
+   50,
+   83
+  ],
+  "bones": 1
+ },
+ "newyear/pickaxe.model": {
+  "anims": null,
+  "size": [
+   3,
+   2.5,
+   16,
+   16
+  ],
+  "bones": 3
+ },
+ "newyear/shovel.model": {
+  "anims": null,
+  "size": [
+   2,
+   2.5,
+   16,
+   16
+  ],
+  "bones": 3
+ },
+ "newyear/sword.model": {
+  "anims": null,
+  "size": [
+   2,
+   3.5,
+   66,
+   99
+  ],
+  "bones": 3
+ },
+ "npc/decoration/beggar.model": {
+  "anims": {
+   "idle": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cough",
+     "rattle"
+    ]
+   },
+   "see": {
+    "len": 7.45,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "rattle",
+     "rattle",
+     "rattle",
+     "rattle",
+     "rattle"
+    ]
+   },
+   "interact": {
+    "len": 2.2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coins"
+    ]
+   }
+  },
+  "size": [
+   3,
+   2.5,
+   64,
+   96
+  ],
+  "bones": 16
+ },
+ "npc/decoration/guard.model": {
+  "anims": {
+   "idle": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth",
+     "sigh"
+    ]
+   },
+   "idle2": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "keys"
+    ]
+   },
+   "idle3": {
+    "len": 1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth"
+    ]
+   },
+   "wave": {
+    "len": 2.1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth"
+    ]
+   },
+   "interact": {
+    "len": 2.3,
+    "loop": true,
+    "events": 0
+   },
+   "salute": {
+    "len": 1.9,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "boot1",
+     "cloth"
+    ]
+   },
+   "salute2": {
+    "len": 3.4,
+    "loop": true,
+    "events": 0
+   },
+   "sleep.stand": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   },
+   "wake": {
+    "len": 3.3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "step1",
+     "step2",
+     "step3",
+     "step1",
+     "step2",
+     "keys",
+     "step3",
+     "step1",
+     "step2",
+     "step3",
+     "step2"
+    ]
+   },
+   "march": {
+    "len": 1.3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "boot1",
+     "boot2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   128,
+   192
+  ],
+  "bones": 25
+ },
+ "npc/decoration/musician.model": {
+  "anims": {
+   "play1": {
+    "len": 9.7,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "harmonica"
+    ]
+   },
+   "play2": {
+    "len": 9.7,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "harmonica"
+    ]
+   },
+   "play3": {
+    "len": 19.4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "harmonica",
+     "harmonica"
+    ]
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   64,
+   96
+  ],
+  "bones": 16
+ },
+ "npc/decoration/police_1.model": {
+  "anims": {
+   "idle": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio",
+     "cloth"
+    ]
+   },
+   "idle2": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth",
+     "radio"
+    ]
+   },
+   "idle3": {
+    "len": 1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio"
+    ]
+   },
+   "wave": {
+    "len": 2.1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth"
+    ]
+   },
+   "interact": {
+    "len": 2.3,
+    "loop": true,
+    "events": 0
+   },
+   "salute": {
+    "len": 1.9,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "boot1",
+     "cloth"
+    ]
+   },
+   "salute2": {
+    "len": 3.4,
+    "loop": true,
+    "events": 0
+   },
+   "sleep.stand": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   },
+   "wake": {
+    "len": 3.3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "step1",
+     "step2",
+     "step3",
+     "step1",
+     "step2",
+     "keys",
+     "step3",
+     "step1",
+     "step2",
+     "step3",
+     "step2"
+    ]
+   },
+   "march": {
+    "len": 1.3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "boot1",
+     "boot2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   128,
+   192
+  ],
+  "bones": 26
+ },
+ "npc/decoration/police_2.model": {
+  "anims": {
+   "idle": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio",
+     "cloth"
+    ]
+   },
+   "idle2": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth",
+     "radio"
+    ]
+   },
+   "idle3": {
+    "len": 1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio"
+    ]
+   },
+   "wave": {
+    "len": 2.1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth"
+    ]
+   },
+   "interact": {
+    "len": 2.3,
+    "loop": true,
+    "events": 0
+   },
+   "salute": {
+    "len": 1.9,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "boot1",
+     "cloth"
+    ]
+   },
+   "salute2": {
+    "len": 3.4,
+    "loop": true,
+    "events": 0
+   },
+   "sleep.stand": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   },
+   "wake": {
+    "len": 3.3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "step1",
+     "step2",
+     "step3",
+     "step1",
+     "step2",
+     "keys",
+     "step3",
+     "step1",
+     "step2",
+     "step3",
+     "step2"
+    ]
+   },
+   "march": {
+    "len": 1.3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "boot1",
+     "boot2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   128,
+   192
+  ],
+  "bones": 26
+ },
+ "npc/decoration/police_3.model": {
+  "anims": {
+   "idle": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio",
+     "cloth"
+    ]
+   },
+   "idle2": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth",
+     "radio"
+    ]
+   },
+   "idle3": {
+    "len": 1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "radio"
+    ]
+   },
+   "wave": {
+    "len": 2.1,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "cloth"
+    ]
+   },
+   "interact": {
+    "len": 2.3,
+    "loop": true,
+    "events": 0
+   },
+   "salute": {
+    "len": 1.9,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "boot1",
+     "cloth"
+    ]
+   },
+   "salute2": {
+    "len": 3.4,
+    "loop": true,
+    "events": 0
+   },
+   "sleep.stand": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   },
+   "wake": {
+    "len": 3.3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "step1",
+     "step2",
+     "step3",
+     "step1",
+     "step2",
+     "keys",
+     "step3",
+     "step1",
+     "step2",
+     "step3",
+     "step2"
+    ]
+   },
+   "march": {
+    "len": 1.3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "keys",
+     "boot1",
+     "boot2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   128,
+   192
+  ],
+  "bones": 26
+ },
+ "npc/decoration/reader.model": {
+  "anims": {
+   "sit1": {
+    "len": 6,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "pageflip",
+     "sigh"
+    ]
+   },
+   "sit2": {
+    "len": 6,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "pageflip",
+     "sigh"
+    ]
+   },
+   "sit3": {
+    "len": 17.75,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "pageflip",
+     "pageflip",
+     "pageflip",
+     "sigh"
+    ]
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   64,
+   96
+  ],
+  "bones": 19
+ },
+ "npc/decoration/sweeper.model": {
+  "anims": {
+   "idle": {
+    "len": 36.3,
+    "loop": true,
+    "events": 47,
+    "sound": [
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sigh",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sigh",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3",
+     "sweep1",
+     "sweep2",
+     "sweep3"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   64,
+   96
+  ],
+  "bones": 16
+ },
+ "npc/decoration/tavern_talker.model": {
+  "anims": {
+   "talk1": {
+    "len": 9.35,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "murmur",
+     "murmur",
+     "murmur"
+    ]
+   },
+   "talk2": {
+    "len": 9.7,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "murmur",
+     "murmur",
+     "murmur"
+    ]
+   },
+   "laughing1": {
+    "len": 7.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "tavern"
+    ]
+   },
+   "laughing2": {
+    "len": 8.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "tavern"
+    ]
+   },
+   "angry1": {
+    "len": 10,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "grunt",
+     "thump",
+     "thump"
+    ]
+   },
+   "angry2": {
+    "len": 10,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "grunt",
+     "thump",
+     "thump"
+    ]
+   },
+   "music1": {
+    "len": 9.75,
+    "loop": true,
+    "events": 0
+   },
+   "music2": {
+    "len": 7,
+    "loop": true,
+    "events": 0
+   },
+   "puke": {
+    "len": 25.55,
+    "loop": true,
+    "events": 15
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   64,
+   96
+  ],
+  "bones": 16
+ },
+ "npc/decoration/wanderer_1.model": {
+  "anims": {
+   "idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "cough"
+    ]
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "step1",
+     "step2"
+    ]
+   },
+   "idle.night": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "cough"
+    ]
+   },
+   "walk.night": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "step1",
+     "step2"
+    ]
+   },
+   "idle.stick": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "cough"
+    ]
+   },
+   "walk.stick": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "step1",
+     "step2"
+    ]
+   },
+   "idle.default": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "sigh",
+     "cough"
+    ]
+   },
+   "walk.default": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "step1",
+     "step2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 21
+ },
+ "npc/decoration/wanderer_2.model": {
+  "anims": {
+   "idle": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "saddle"
+    ]
+   },
+   "walk": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "hoof1",
+     "hoof2"
+    ]
+   },
+   "idle.night": {
+    "len": 9,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "saddle",
+     "saddle"
+    ]
+   },
+   "walk.night": {
+    "len": 10.5,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2",
+     "hoof1",
+     "hoof2"
+    ]
+   },
+   "trot.night": {
+    "len": 0.65,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "hoof1",
+     "hoof2"
+    ]
+   },
+   "trot": {
+    "len": 0.6,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "hoof1",
+     "hoof2"
+    ]
+   }
+  },
+  "size": [
+   4,
+   4.5,
+   80,
+   128
+  ],
+  "bones": 26
+ },
+ "npc/jobs.model": {
+  "anims": {
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "npc/librarian.model": {
+  "anims": {
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   3.5,
+   99,
+   131
+  ],
+  "bones": 13
+ },
+ "npc/npc_top.model": {
+  "anims": {
+   "blink": {
+    "len": 3.25,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   },
+   "wave": {
+    "len": 1.0833,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 13
+ },
+ "npc/wiki.model": {
+  "anims": {
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 10
+ },
+ "other/vfx_aftershock.model": {
+  "anims": {
+   "spawn": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   2.5,
+   64,
+   64
+  ],
+  "bones": 8
+ },
+ "other/vfx_meteor.model": {
+  "anims": {
+   "crash": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   1450,
+   725.5,
+   256,
+   256
+  ],
+  "bones": 15
+ },
+ "other/vfx_rain.model": {
+  "anims": {
+   "rain": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   16,
+   16.5,
+   32,
+   32
+  ],
+  "bones": 43
+ },
+ "pigeons/flock_fly.model": {
+  "anims": {
+   "idle": {
+    "len": 71.70833,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "flap",
+     "flap",
+     "flap",
+     "flap",
+     "flap",
+     "flap",
+     "flap",
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   128
+  ],
+  "bones": 133
+ },
+ "pigeons/flock_ground.model": {
+  "anims": {
+   "idle": {
+    "len": 12,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coo2",
+     "coo3",
+     "coo1"
+    ]
+   },
+   "fly": {
+    "len": 7.20833,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "takeoff",
+     "flap",
+     "flap"
+    ]
+   },
+   "land": {
+    "len": 12,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "flap",
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   128
+  ],
+  "bones": 132
+ },
+ "pigeons/pigeon_1.model": {
+  "anims": {
+   "idle": {
+    "len": 12,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coo1",
+     "coo3"
+    ]
+   },
+   "fly": {
+    "len": 3.45833,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "takeoff",
+     "flap"
+    ]
+   },
+   "land": {
+    "len": 11.66667,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   128
+  ],
+  "bones": 12
+ },
+ "pigeons/pigeon_2.model": {
+  "anims": {
+   "idle": {
+    "len": 12,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coo2",
+     "coo1"
+    ]
+   },
+   "fly": {
+    "len": 3.45833,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "takeoff",
+     "flap"
+    ]
+   },
+   "land": {
+    "len": 5,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   32
+  ],
+  "bones": 12
+ },
+ "pigeons/pigeon_3.model": {
+  "anims": {
+   "idle": {
+    "len": 12,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coo3",
+     "coo2"
+    ]
+   },
+   "fly": {
+    "len": 3.45833,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "takeoff",
+     "flap"
+    ]
+   },
+   "land": {
+    "len": 5,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   32
+  ],
+  "bones": 12
+ },
+ "pigeons/pigeon_4.model": {
+  "anims": {
+   "idle": {
+    "len": 12,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "coo1",
+     "coo2"
+    ]
+   },
+   "fly": {
+    "len": 3.45833,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "takeoff",
+     "flap"
+    ]
+   },
+   "land": {
+    "len": 5,
+    "loop": "hold_on_last_frame",
+    "events": 0,
+    "sound": [
+     "flap"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   32
+  ],
+  "bones": 12
+ },
+ "piglin/piglin_glutten_minion.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.5,
+    "loop": true,
+    "events": 1
+   },
+   "death": {
+    "len": 2,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "spawn": {
+    "len": 1,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "hurt": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "atk1": {
+    "len": 0.6667,
+    "loop": false,
+    "events": 0
+   },
+   "atk2": {
+    "len": 0.75,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   4,
+   64,
+   64
+  ],
+  "bones": 12
+ },
+ "piglin/piglin_glutton.model": {
+  "anims": {
+   "walk": {
+    "len": 2,
+    "loop": true,
+    "events": 1
+   },
+   "spawn": {
+    "len": 5.6667,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 5,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "charge": {
+    "len": 10.0059,
+    "loop": false,
+    "events": 0
+   },
+   "verticalatk": {
+    "len": 3.0246,
+    "loop": false,
+    "events": 0
+   },
+   "horizontalatk": {
+    "len": 3.0303,
+    "loop": false,
+    "events": 0
+   },
+   "healing": {
+    "len": 7.0813,
+    "loop": false,
+    "events": 0
+   },
+   "spinslam": {
+    "len": 5,
+    "loop": false,
+    "events": 0
+   },
+   "footstomp": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "upchuck": {
+    "len": 6.0095,
+    "loop": false,
+    "events": 0
+   },
+   "bodyslam": {
+    "len": 5,
+    "loop": false,
+    "events": 0
+   },
+   "summoningchant": {
+    "len": 4.0064,
+    "loop": false,
+    "events": 0
+   },
+   "hurt": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 8.4167,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   15,
+   7.5,
+   512,
+   512
+  ],
+  "bones": 69
+ },
+ "poseidon/mso_poseidon.model": {
+  "anims": {
+   "run": {
+    "len": 1.2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_sitting": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "idle": {
+    "len": 2.5,
+    "loop": true,
+    "events": 0
+   },
+   "swing": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "swing_2": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "wave_clash": {
+    "len": 1.3,
+    "loop": false,
+    "events": 0
+   },
+   "epicenter": {
+    "len": 1.7,
+    "loop": false,
+    "events": 0
+   },
+   "stab": {
+    "len": 1.3,
+    "loop": false,
+    "events": 0
+   },
+   "swim_idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "swim": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "torpedo": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "swim_attack": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "kneel": {
+    "len": 0,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   3.2,
+   2.4000000000000004,
+   512,
+   512
+  ],
+  "bones": 22
+ },
+ "prison_npc/inmate_axe_desert_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_desert_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_eerie_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_eerie_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_end_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_end_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_heaven_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_heaven_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_japan_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_japan_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_nether_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_nether_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_sea_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_sea_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_snow_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_snow_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_v1.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_v2.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_v3.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_axe_v4.model": {
+  "anims": {
+   "chop_axe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_chop_1",
+     "npc_chop_creak_1",
+     "npc_chop_2",
+     "npc_chop_creak_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_basketball_v1.model": {
+  "anims": {
+   "idle_basketball": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_ball_1",
+     "npc_ball_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_basketball_v2.model": {
+  "anims": {
+   "idle_basketball": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_ball_1",
+     "npc_ball_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_basketball_v3.model": {
+  "anims": {
+   "idle_basketball": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_ball_1",
+     "npc_ball_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_benchpress_v1.model": {
+  "anims": {
+   "idle_benchpress": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_benchpress": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort",
+     "npc_metal_clank"
+    ]
+   },
+   "idle_dumbbell": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_dumbbell": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "prison_npc/inmate_benchpress_v2.model": {
+  "anims": {
+   "idle_benchpress": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_benchpress": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort",
+     "npc_metal_clank"
+    ]
+   },
+   "idle_dumbbell": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_dumbbell": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "prison_npc/inmate_benchpress_v3.model": {
+  "anims": {
+   "idle_benchpress": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_benchpress": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort",
+     "npc_metal_clank"
+    ]
+   },
+   "idle_dumbbell": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_dumbbell": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "prison_npc/inmate_benchpress_v4.model": {
+  "anims": {
+   "idle_benchpress": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_benchpress": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort",
+     "npc_metal_clank"
+    ]
+   },
+   "idle_dumbbell": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "pump_dumbbell": {
+    "len": 2,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_effort"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 14
+ },
+ "prison_npc/inmate_bench_v1.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_bench_v2.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_bench_v3.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_bench_v4.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_bench_v5.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_bench_v6.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_pickaxe_castle_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_castle_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_cave_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_cave_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_desert_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_desert_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_eerie_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_eerie_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_end_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_end_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_heaven_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_heaven_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_nether_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_nether_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_sea_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_sea_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_snow_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_snow_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_v1.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_v2.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_v3.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_pickaxe_v4.model": {
+  "anims": {
+   "idle_pickaxe": {
+    "len": 3,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1",
+     "npc_pick_hit_2",
+     "npc_pick_rubble_2"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_seat_v1.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_seat_v2.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_seat_v3.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_seat_v4.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_seat_v5.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_seat_v6.model": {
+  "anims": {
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "read_idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_page_turn"
+    ]
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 15
+ },
+ "prison_npc/inmate_shears_cave_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_cave_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_desert_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_desert_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_eerie_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_eerie_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_end_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_end_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_heaven_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_cloth_1",
+     "npc_leaves_cloth_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_heaven_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_cloth_1",
+     "npc_leaves_cloth_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_japan_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_japan_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_nether_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_nether_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_sea_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_sea_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_v1.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_v2.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_v3.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shears_v4.model": {
+  "anims": {
+   "trim_shears": {
+    "len": 2,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_snip",
+     "npc_leaves_1",
+     "npc_leaves_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_cave_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_cave_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_desert_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_desert_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_eerie_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_eerie_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_end_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_end_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_heaven_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_cloth_1",
+     "npc_toss_cloth_1",
+     "npc_dig_cloth_2",
+     "npc_toss_cloth_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_heaven_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_cloth_1",
+     "npc_toss_cloth_1",
+     "npc_dig_cloth_2",
+     "npc_toss_cloth_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_japan_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_japan_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_nether_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_nether_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_sea_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_sea_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_sand_1",
+     "npc_toss_1",
+     "npc_dig_sand_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_snow_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_snow_1",
+     "npc_toss_snow_1",
+     "npc_dig_snow_2",
+     "npc_toss_snow_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_snow_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_snow_1",
+     "npc_toss_snow_1",
+     "npc_dig_snow_2",
+     "npc_toss_snow_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_v1.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_v2.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_v3.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_shovel_v4.model": {
+  "anims": {
+   "dig_shovel": {
+    "len": 4.8,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_dig_1",
+     "npc_toss_1",
+     "npc_dig_2",
+     "npc_toss_2"
+    ]
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   256
+  ],
+  "bones": 13
+ },
+ "prison_npc/inmate_v1.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/inmate_v2.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/inmate_v3.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/inmate_v4.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/inmate_v5.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/inmate_v6.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "fidget": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 11
+ },
+ "prison_npc/officer_v1.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/officer_v2.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/officer_v3.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/officer_v4.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/officer_v5.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/officer_v6.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "idle_binoculars": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "fidget_binoculars": {
+    "len": 5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b"
+    ]
+   },
+   "fidget1": {
+    "len": 1.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth"
+    ]
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_step_1",
+     "npc_step_2",
+     "npc_step_3",
+     "npc_step_4"
+    ]
+   },
+   "fidget2": {
+    "len": 6.5,
+    "loop": false,
+    "events": 0,
+    "sound": [
+     "npc_cloth",
+     "npc_cloth_b",
+     "npc_cloth"
+    ]
+   },
+   "sit_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 13
+ },
+ "prison_npc/prop_basketballhoop.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 2
+ },
+ "prison_npc/prop_bench.model": {
+  "anims": {
+   "prop_idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   64
+  ],
+  "bones": 4
+ },
+ "prison_npc/prop_benchpress.model": {
+  "anims": {
+   "idle_prop": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   64
+  ],
+  "bones": 3
+ },
+ "prison_npc/prop_command_board.model": {
+  "anims": {
+   "idle": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   9,
+   256,
+   512
+  ],
+  "bones": 2
+ },
+ "prison_npc/prop_teleport_board.model": {
+  "anims": {
+   "idle": {
+    "len": 1.6,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   8,
+   256,
+   256
+  ],
+  "bones": 3
+ },
+ "rat/rat.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.48,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.6154,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   6,
+   2.5,
+   128,
+   128
+  ],
+  "bones": 17
+ },
+ "raven/crowaxe.model": {
+  "anims": {
+   "updown": {
+    "len": 2.3,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 2.3,
+    "loop": false,
+    "events": 0
+   },
+   "sideattack": {
+    "len": 3.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 3
+ },
+ "raven/crowfog.model": {
+  "anims": {
+   "idle": {
+    "len": 2.55,
+    "loop": true,
+    "events": 0
+   },
+   "death": {
+    "len": 2.55,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   256
+  ],
+  "bones": 12
+ },
+ "raven/crowreaper.model": {
+  "anims": {
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "basicattack": {
+    "len": 1.75,
+    "loop": false,
+    "events": 0
+   },
+   "chargeattack": {
+    "len": 2.55,
+    "loop": false,
+    "events": 0
+   },
+   "fogcombo": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   },
+   "summonaxe": {
+    "len": 2.04167,
+    "loop": false,
+    "events": 0
+   },
+   "spikesattack": {
+    "len": 2.75,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 10.83333,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   256,
+   1024
+  ],
+  "bones": 82
+ },
+ "raven/crowspike.model": {
+  "anims": {
+   "spawn": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 2.16667,
+    "loop": true,
+    "events": 0
+   },
+   "remove": {
+    "len": 6.66667,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   512
+  ],
+  "bones": 22
+ },
+ "raven/crowswarm.model": {
+  "anims": {
+   "spawn": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   128
+  ],
+  "bones": 410
+ },
+ "raven/reaperspikes.model": {
+  "anims": {
+   "spawn": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   128,
+   128
+  ],
+  "bones": 137
+ },
+ "raven/thecrowknight.model": {
+  "anims": {
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "explosion": {
+    "len": 6,
+    "loop": false,
+    "events": 0
+   },
+   "simplecombo": {
+    "len": 1.9,
+    "loop": false,
+    "events": 0
+   },
+   "simplecombo2": {
+    "len": 1.9,
+    "loop": false,
+    "events": 0
+   },
+   "fastcombo": {
+    "len": 4.35,
+    "loop": false,
+    "events": 0
+   },
+   "comboflyattack": {
+    "len": 4.25,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 10.83333,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   256,
+   1024
+  ],
+  "bones": 108
+ },
+ "reaper/circle.model": {
+  "anims": {
+   "spawn2": {
+    "len": 6,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   6.5,
+   48,
+   48
+  ],
+  "bones": 6
+ },
+ "reaper/reaper.model": {
+  "anims": {
+   "circlespin": {
+    "len": 10,
+    "loop": true,
+    "events": 0
+   },
+   "idle3": {
+    "len": 3.24,
+    "loop": true,
+    "events": 0
+   },
+   "idle": {
+    "len": 5.24,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 3.28,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 0.7273,
+    "loop": false,
+    "events": 0
+   },
+   "attack2": {
+    "len": 0.6993,
+    "loop": false,
+    "events": 0
+   },
+   "soul1": {
+    "len": 4.92,
+    "loop": false,
+    "events": 0
+   },
+   "circleattack": {
+    "len": 1.0526,
+    "loop": false,
+    "events": 0
+   },
+   "groundattack": {
+    "len": 1.6941,
+    "loop": false,
+    "events": 0
+   },
+   "teleportinto": {
+    "len": 1.1271,
+    "loop": false,
+    "events": 0
+   },
+   "teleportout": {
+    "len": 0.7333,
+    "loop": false,
+    "events": 0
+   },
+   "explosion": {
+    "len": 2.06,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 4.28,
+    "loop": false,
+    "events": 0
+   },
+   "spawn": {
+    "len": 5.6,
+    "loop": false,
+    "events": 0
+   },
+   "hurt": {
+    "len": 3.28,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   6.5,
+   256,
+   256
+  ],
+  "bones": 40
+ },
+ "skeleton/poison.model": {
+  "anims": {
+   "spawn": {
+    "len": 5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   2.5,
+   64,
+   64
+  ],
+  "bones": 16
+ },
+ "skeleton/skeleton.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "atkrswipe": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "atklswipe": {
+    "len": 1.25,
+    "loop": false,
+    "events": 0
+   },
+   "sklroar": {
+    "len": 5,
+    "loop": false,
+    "events": 0
+   },
+   "sklrstomp": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "skllstomp": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "sklpoisonbreath": {
+    "len": 3.5088,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 5.008,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   8,
+   514,
+   1027
+  ],
+  "bones": 19
+ },
+ "skeleton/skeleton_minion.model": {
+  "anims": {
+   "idle": {
+    "len": 3.0075,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.5038,
+    "loop": true,
+    "events": 2
+   },
+   "atk": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2.5,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   },
+   "spawn": {
+    "len": 3,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   3.5,
+   64,
+   64
+  ],
+  "bones": 8
+ },
+ "skeleton/trap.model": {
+  "anims": {
+   "spawn": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   3,
+   64,
+   64
+  ],
+  "bones": 9
+ },
+ "spider/hunstman_spider.model": {
+  "anims": {
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "walk2": {
+    "len": 1.75,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.6039,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 3.5294,
+    "loop": true,
+    "events": 0
+   },
+   "hurt": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   10,
+   4,
+   128,
+   128
+  ],
+  "bones": 34
+ },
+ "spider/spider.model": {
+  "anims": {
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.2,
+    "loop": true,
+    "events": 0
+   },
+   "fangattack": {
+    "len": 1.45,
+    "loop": false,
+    "events": 0
+   },
+   "webattack": {
+    "len": 1.85,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 6.25,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   4,
+   2.5,
+   64,
+   64
+  ],
+  "bones": 62
+ },
+ "spider/spider_web.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "spawn": {
+    "len": 0.7,
+    "loop": false,
+    "events": 0
+   },
+   "despawn": {
+    "len": 0.7,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   1.5,
+   144,
+   144
+  ],
+  "bones": 12
+ },
+ "splinter/splinter.model": {
+  "anims": {
+   "idle": {
+    "len": 2,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "shoot": {
+    "len": 2.25,
+    "loop": false,
+    "events": 0
+   },
+   "swoop": {
+    "len": 1.1,
+    "loop": false,
+    "events": 0
+   },
+   "potion": {
+    "len": 1.55,
+    "loop": false,
+    "events": 0
+   },
+   "summon": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   3.5,
+   256,
+   256
+  ],
+  "bones": 24
+ },
+ "splinter/splinter_bottle.model": {
+  "anims": {
+   "idle": {
+    "len": 0.6,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.6,
+    "loop": true,
+    "events": 0
+   },
+   "death": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   64,
+   64
+  ],
+  "bones": 1
+ },
+ "splinter/splinter_spider.model": {
+  "anims": {
+   "idle": {
+    "len": 1.5,
+    "loop": true,
+    "events": 0
+   },
+   "projectile": {
+    "len": 0.85,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 1.35,
+    "loop": false,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.4,
+    "loop": true,
+    "events": 0
+   },
+   "tapping": {
+    "len": 0.4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   2.5,
+   128,
+   128
+  ],
+  "bones": 10
+ },
+ "splinter/strike_of_fury.model": {
+  "anims": {
+   "idle": {
+    "len": 3.6,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   7,
+   7,
+   512,
+   512
+  ],
+  "bones": 56
+ },
+ "strangerthings/pa_clock.model": {
+  "anims": {
+   "spawn": {
+    "len": 0.7,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 3,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   128,
+   128
+  ],
+  "bones": 5
+ },
+ "strangerthings/pa_clock_vecna.model": {
+  "anims": {
+   "animation.paclockvecna.look3": {
+    "len": 2.4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   128,
+   128
+  ],
+  "bones": 5
+ },
+ "strangerthings/pa_demobet.model": {
+  "anims": {
+   "attack": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "walk": {
+    "len": 5,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   128,
+   128
+  ],
+  "bones": 12
+ },
+ "strangerthings/pa_demogorgonn.model": {
+  "anims": {
+   "run": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0
+   },
+   "attack4": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   128,
+   128
+  ],
+  "bones": 76
+ },
+ "strangerthings/pa_demo_dog.model": {
+  "anims": {
+   "attack1": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   128,
+   128
+  ],
+  "bones": 24
+ },
+ "strangerthings/pa_meat_monster.model": {
+  "anims": null,
+  "size": [
+   14,
+   16,
+   256,
+   256
+  ],
+  "bones": 38
+ },
+ "strangerthings/pa_portal.model": {
+  "anims": {
+   "idle": {
+    "len": 15,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   16,
+   16,
+   256,
+   256
+  ],
+  "bones": 56
+ },
+ "strangerthings/pa_vecna1.model": {
+  "anims": {
+   "flower": {
+    "len": null,
+    "loop": true,
+    "events": 0
+   },
+   "attack1": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "walk": {
+    "len": 1.25,
+    "loop": true,
+    "events": 0
+   },
+   "idle": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "attack2": {
+    "len": 4,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 4.7,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   14,
+   16,
+   64,
+   64
+  ],
+  "bones": 39
+ },
+ "tyan/model_cristalix_grl.model": {
+  "anims": {
+   "idle": {
+    "len": 1.9167,
+    "loop": true,
+    "events": 0,
+    "sound": [
+     "npc_pick_hit_1",
+     "npc_pick_rubble_1"
+    ]
+   }
+  },
+  "size": [
+   5,
+   3.5,
+   128,
+   128
+  ],
+  "bones": 89
+ },
+ "unking/ghoul.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.6,
+    "loop": false,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.5,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   128
+  ],
+  "bones": 17
+ },
+ "unking/skull.model": {
+  "anims": {
+   "walk": {
+    "len": 1.7,
+    "loop": true,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 6
+ },
+ "unking/undead_king.model": {
+  "anims": {
+   "idle": {
+    "len": 1,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 1,
+    "loop": false,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.7,
+    "loop": false,
+    "events": 0
+   },
+   "skill1": {
+    "len": 2.5,
+    "loop": false,
+    "events": 0
+   },
+   "skill2": {
+    "len": 2,
+    "loop": false,
+    "events": 0
+   },
+   "skill3": {
+    "len": 0.7,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 3,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   64,
+   256
+  ],
+  "bones": 35
+ },
+ "unking/undead_king_sword.model": {
+  "anims": {
+   "attack": {
+    "len": 8,
+    "loop": false,
+    "events": 0
+   }
+  },
+  "size": [
+   8,
+   6,
+   32,
+   64
+  ],
+  "bones": 5
+ },
+ "valentine/axe.model": {
+  "anims": null,
+  "size": [
+   3,
+   3.5,
+   451,
+   1538
+  ],
+  "bones": 9
+ },
+ "valentine/bow.model": {
+  "anims": null,
+  "size": [
+   3,
+   4,
+   44,
+   44
+  ],
+  "bones": 6
+ },
+ "valentine/pickaxe.model": {
+  "anims": null,
+  "size": [
+   3,
+   2.5,
+   36,
+   36
+  ],
+  "bones": 3
+ },
+ "valentine/shovel.model": {
+  "anims": null,
+  "size": [
+   3,
+   3.5,
+   36,
+   36
+  ],
+  "bones": 4
+ },
+ "valentine/sword.model": {
+  "anims": null,
+  "size": [
+   3,
+   3.5,
+   38,
+   38
+  ],
+  "bones": 5
+ },
+ "zombie/zombie2.model": {
+  "anims": {
+   "idle": {
+    "len": 0.75,
+    "loop": true,
+    "events": 0
+   },
+   "walkold": {
+    "len": 0.72,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.6,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.6018,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 1.25,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   2,
+   3.5,
+   64,
+   64
+  ],
+  "bones": 14
+ },
+ "zombie/zombie3.model": {
+  "anims": {
+   "idle": {
+    "len": 8,
+    "loop": true,
+    "events": 0
+   },
+   "walkold": {
+    "len": 4,
+    "loop": true,
+    "events": 0
+   },
+   "walk": {
+    "len": 0.9538,
+    "loop": true,
+    "events": 0
+   },
+   "attack": {
+    "len": 0.6107,
+    "loop": false,
+    "events": 0
+   },
+   "death": {
+    "len": 1.45,
+    "loop": "hold_on_last_frame",
+    "events": 0
+   }
+  },
+  "size": [
+   3,
+   3.5,
+   64,
+   64
+  ],
+  "bones": 14
+ }
+}
