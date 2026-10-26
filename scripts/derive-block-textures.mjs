@@ -264,3 +264,34 @@ await recolor("yellow_wool.png", "red_wool.png", [[0, [110, 22, 18]], [0.5, [168
 await recolor("concrete_floor.png", "yellow_concrete.png", [[0, [214, 150, 14]], [0.5, [238, 178, 24]], [1, [250, 200, 52]]], 0.7);
 // Замок: the quartz mine block — a warm white of our own (the white tint over smooth stone read as grey concrete)
 await recolor("smooth_stone.png", "quartz_block.png", [[0, [200, 194, 182]], [0.5, [230, 225, 214]], [1, [248, 245, 236]]], 0.8);
+// Киото / Ферма: the tinted wool and hay read flat or wrong on the floors checked in Studio (red wool, yellow concrete,
+// quartz) — our own ramps from the start: pink and green wool on our yellow wool's pattern, the pumpkin drawn
+await recolor("yellow_wool.png", "pink_wool.png", [[0, [186, 88, 128]], [0.5, [230, 138, 174]], [1, [248, 188, 212]]]);
+await recolor("yellow_wool.png", "green_wool.png", [[0, [50, 74, 18]], [0.5, [82, 110, 30]], [1, [112, 142, 48]]]);
+// the pumpkin: our hay read as diagonal straw — 16×16 texels of vertical ribs (a groove every 4 columns, a lit crest
+// between), a seeded ±noise per texel, scaled up pixel-sharp like the other blocks
+{
+	const N = 16;
+	const S = 19; // 304 px
+	let seed = 20261026;
+	const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+	const rib = [[150, 70, 10], [206, 116, 22], [232, 148, 40], [214, 126, 28]];
+	const data = Buffer.alloc(N * S * N * S * 4);
+	for (let y = 0; y < N; y++) {
+		for (let x = 0; x < N; x++) {
+			const k = 0.9 + rnd() * 0.2 - (y === 0 || y === N - 1 ? 0.08 : 0);
+			const c = rib[x % 4].map((v) => Math.max(0, Math.min(255, Math.round(v * k))));
+			for (let yy = 0; yy < S; yy++) {
+				for (let xx = 0; xx < S; xx++) {
+					const i = ((y * S + yy) * N * S + x * S + xx) * 4;
+					data[i] = c[0];
+					data[i + 1] = c[1];
+					data[i + 2] = c[2];
+					data[i + 3] = 255;
+				}
+			}
+		}
+	}
+	await sharp(data, { raw: { width: N * S, height: N * S, channels: 4 } }).png().toFile(path.join(dir, "pumpkin.png"));
+	console.log("wrote pumpkin.png");
+}

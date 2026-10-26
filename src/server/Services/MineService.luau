@@ -176,8 +176,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	-- Ферма: тыква, зелёная шерсть [меню] (the melon has its own texture)
 	pumpkin = { base = "hay", color = Color3.fromRGB(240, 140, 40) },
 	green_wool = { base = "white_wool", color = Color3.fromRGB(96, 140, 40) },
-	-- Амбар: светильник Джека [меню] — the pumpkin tint, brighter (an own lit-face texture later)
-	jack_o_lantern = { base = "hay", color = Color3.fromRGB(255, 170, 60) },
+	-- Амбар: светильник Джека [меню] — our pumpkin, warmer (an own lit-face texture later)
+	jack_o_lantern = { base = "pumpkin", color = Color3.fromRGB(255, 226, 170) },
 	-- Врата края: пурпурный цемент [меню]
 	magenta_concrete = { base = "smooth_stone", color = Color3.fromRGB(196, 64, 186) },
 	-- Древо: белый цемент [меню]

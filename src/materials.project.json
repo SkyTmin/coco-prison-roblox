@@ -713,6 +713,30 @@
         "ColorMap": "rbxassetid://86269658302234",
         "StudsPerTile": 4
       }
+    },
+    "px_pink_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://108523271753200",
+        "StudsPerTile": 4
+      }
+    },
+    "px_green_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://95459638561316",
+        "StudsPerTile": 4
+      }
+    },
+    "px_pumpkin": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://89231630874271",
+        "StudsPerTile": 4
+      }
     }
   }
 }
