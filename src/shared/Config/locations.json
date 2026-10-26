@@ -586,9 +586,9 @@
       "miniMine": null,
       "mine": {
         "size": [
-          40,
-          16,
-          40
+          32,
+          12,
+          32
         ],
         "resetSeconds": 480,
         "warnSeconds": 15,
