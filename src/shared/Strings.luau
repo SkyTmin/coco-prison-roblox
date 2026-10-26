@@ -481,6 +481,27 @@ local STRINGS: { [string]: Entry } = {
 		es = "Salud: %.1f / %.1f",
 		fr = "Santé : %.1f / %.1f",
 	},
+	inv_backpack = { ru = "Рюкзак", en = "Backpack", es = "Mochila", fr = "Sac" },
+	inv_hotbar = {
+		ru = "Панель быстрого доступа",
+		en = "Hotbar",
+		es = "Barra rápida",
+		fr = "Barre rapide",
+	},
+	inv_health = { ru = "Здоровье", en = "Health", es = "Salud", fr = "Santé" },
+	inv_armor = { ru = "Броня", en = "Armor", es = "Armadura", fr = "Armure" },
+	inv_protection = {
+		ru = "Урон по вам",
+		en = "Damage taken",
+		es = "Daño recibido",
+		fr = "Dégâts subis",
+	},
+	armor_tooltip = {
+		ru = "Броня: %d / 20",
+		en = "Armor: %d / 20",
+		es = "Armadura: %d / 20",
+		fr = "Armure : %d / 20",
+	},
 	hunger_tooltip = {
 		ru = "Сытость: %.1f / %.1f",
 		en = "Hunger: %.1f / %.1f",

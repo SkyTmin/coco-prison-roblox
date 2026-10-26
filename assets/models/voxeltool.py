@@ -7,6 +7,10 @@
 # Outputs next to the tool file: render-<material>-{icon,hero,icon-glint,hero-glint}.png and <name>.blend (the last
 # material); with `-- frames <dir>`, GLINT_FRAMES icon frames of the glint per material (glint-<material>-NN.png) for
 # the GIF (ffmpeg hstack of the four materials).
+# The game: `-- export` writes every material's model into assets/icons/models3d.json (<name>_<material>, read by
+# ItemModels.luau in the hand); `-- icons <dir>` renders the inventory icons on a transparent background
+# (<dir>/<name>_<material>.png, the icon view).
+import json
 import math
 import os
 import random
@@ -17,6 +21,7 @@ import bpy
 from mathutils import Euler, Vector
 
 PX = 0.25  # studs per voxel: 1/16 of a 4-stud tool
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 GLINT_FRAMES = 24
 
 
@@ -220,10 +225,35 @@ def look(cam, loc, target, ortho=None, lens=60):
         cam.data.lens = lens
 
 
+def export_items(name, materials, shape, icon):
+    """The hand models: each material's boxes as <name>_<material>, with `tilt` = the icon's turn in the item plane
+    (degrees, + = the top to the right) so the tool lies across the item square like a Minecraft sprite. A tool drawn
+    the other way round (the pickaxe: its icon turns −45°, the handle to the lower right) is mirrored first, so every
+    tool's handle ends at the lower left, where the hand holds a sprite (HeldItem)."""
+    turn = math.degrees(icon[0][1])
+    path = os.path.join(ROOT, "assets", "icons", "models3d.json")
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    for mat in materials:
+        vox = shape(mat)
+        if turn < 0:
+            vox = {(-x - 1, y, z): col for (x, y, z), col in vox.items()}
+        entry = export_boxes(vox)
+        entry["tilt"] = round(abs(turn), 3)
+        data["items"]["%s_%s" % (name, mat)] = entry
+        print("exported", name, mat, len(entry["b"]) // 7, "boxes")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+
+
 def run(here, name, materials, shape, icon, hero, glint_phase=2.2):
     """Render every material plain and with the glint; icon / hero = (rotation, camera location, ortho, lens);
     glint_phase = where the bands stand in the still glint renders."""
     argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    if argv and argv[0] == "export":
+        export_items(name, materials, shape, icon)
+        return
+    icons_dir = argv[1] if len(argv) >= 2 and argv[0] == "icons" else None
     frames_dir = argv[1] if len(argv) >= 2 and argv[0] == "frames" else None
     for mat in materials:
         vox = shape(mat)
@@ -239,6 +269,10 @@ def run(here, name, materials, shape, icon, hero, glint_phase=2.2):
             bpy.ops.render.render(write_still=True)
 
         set_glint(False)
+        if icons_dir:
+            scene.render.film_transparent = True
+            shot(os.path.join(icons_dir, "%s_%s.png" % (name, mat)), icon, 512)
+            continue
         shot(os.path.join(here, "render-%s-icon.png" % mat), icon)
         shot(os.path.join(here, "render-%s-hero.png" % mat), hero)
         set_glint(True, glint_phase)
@@ -249,4 +283,6 @@ def run(here, name, materials, shape, icon, hero, glint_phase=2.2):
                 set_glint(True, 2 * math.pi * f / GLINT_FRAMES)
                 shot(os.path.join(frames_dir, "glint-%s-%02d.png" % (mat, f)), icon, 360)
         print("voxels", mat, len(vox))
+    if icons_dir:
+        return  # the .blend stays as the plain run left it
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(here, "%s.blend" % name))

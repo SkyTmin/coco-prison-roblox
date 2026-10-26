@@ -1135,15 +1135,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 	setInvulnerable(boss, 1.8)
 	act(boss, "roar", 1.8)
 	publish(boss)
-	for _, player in ipairs(Players:GetPlayers()) do
-		-- a boss may have its own announcement [клиент: giant_zombie.notify.spawn]
-		local key = "boss_spawned_" .. boss.id
-		if Strings.has(key) then
-			toast(player, key)
-		else
-			toast(player, "boss_spawned", bossName(boss, player))
-		end
-	end
+	-- no spawn announcement to everyone [владелец 27.10: «выключи уведомление о появлении боссов. Их не должно быть»]:
+	-- the arena's countdown board (BossHud) shows when a boss is up
 end
 
 local function think(boss: Boss)

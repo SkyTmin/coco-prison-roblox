@@ -172,9 +172,9 @@ local function boxTextures(
 				out[normal] = { texture = block[name], glint = glints[name] or fallbackGlint }
 			end
 		end
-		if next(out) then
-			return out
-		end
+		-- our set has no face here (only chainmail has lower sleeves): no box, never VoxeLibre's with the
+		-- shared glint over the bare skin
+		return out
 	end
 	for face, normal in pairs(FACES) do
 		local texture = faceTexture(piece, material, key, face)

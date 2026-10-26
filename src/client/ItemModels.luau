@@ -6,8 +6,11 @@
 --
 -- Model frame: the sprite lies in the Y–Z plane of the root part (thickness along X, like the old
 -- decal plane): image up = +Y, image right = +Z. Root part = sprite bounds, invisible.
--- Blender voxel models (Config.itemModels: the bow and its pull stages, the arrow — assets/models/*/<item>.py
--- -- export) come first and use the same frame; their boxes are real 3D voxels (the bow's grip is three deep).
+-- Blender voxel models (Config.itemModels: the bow and its pull stages, the arrow, the shears, and our pickaxes, axes,
+-- shovels and swords per material as <id>_<material> — assets/models/*/<item>.py -- export) come first and use the
+-- same frame; their boxes are real 3D voxels (the bow's grip is three deep). The tools are modelled upright and carry
+-- a `tilt`: turned by it in the item plane they lie across the item square like a Minecraft sprite, the handle end at
+-- the lower left where the hand holds a sprite (HeldItem); the square is the tilted model's bounds.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
@@ -20,7 +23,7 @@ store.Parent = ReplicatedStorage
 
 export type Voxels = { w: number, h: number, p: { string }, r: { number }, mirror: boolean? }
 -- size = {x, y, z} voxels (x = image right, z = image up, y = depth); b = flat {x, y, z, w, d, h, paletteIndex, …}
-export type Model3d = { size: { number }, p: { string }, b: { number } }
+export type Model3d = { size: { number }, p: { string }, b: { number }, tilt: number? }
 
 local function hexColor(hex: string): Color3
 	local r = tonumber(string.sub(hex, 1, 2), 16) or 0
@@ -44,9 +47,19 @@ function ItemModels.voxelsFor(id: string, level: number?): Voxels?
 	return items[id]
 end
 
-function ItemModels.modelFor(id: string): Model3d?
+-- the Blender model of an item: "<id>_<material>" for tools by level first, then the exact id
+function ItemModels.modelFor(id: string, level: number?): Model3d?
 	local models = Config.itemModels and Config.itemModels.items
-	return if models then models[id] else nil
+	if not models then
+		return nil
+	end
+	if level and Config.tools[id] then
+		local keyed = models[id .. "_" .. Config.materialForLevel(level)]
+		if keyed then
+			return keyed
+		end
+	end
+	return models[id]
 end
 
 local function part(root: BasePart, size: Vector3, offset: CFrame, color: Color3): Part
@@ -68,28 +81,50 @@ local function part(root: BasePart, size: Vector3, offset: CFrame, color: Color3
 	return p
 end
 
-local function build3d(key: string, m: Model3d, pixel: number): Model
+-- `size` = the item square's side in studs
+local function build3d(key: string, m: Model3d, size: number): Model
 	local model = Instance.new("Model")
 	model.Name = "Item_" .. key
 	local sx, sy, sz = m.size[1], m.size[2], m.size[3]
+	local b = m.b
+	local turn = CFrame.Angles(math.rad(m.tilt or 0), 0, 0)
+	-- the voxel frame's centre, then (tilted) the item square round the boxes' turned corners, in voxels
+	local mid = Vector3.new(sy / 2, sz / 2, sx / 2)
+	local pixel = size / sz
+	local centre = Vector3.zero
+	local side = Vector3.new(sy, sz, sx)
+	if m.tilt then
+		local low, high = Vector3.one * math.huge, -Vector3.one * math.huge
+		for i = 1, #b, 7 do
+			for _, corner in ipairs({ { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } }) do
+				local at = turn
+					* (
+						Vector3.new(0, b[i + 2] + corner[2] * b[i + 5], b[i] + corner[1] * b[i + 3])
+						- Vector3.new(0, mid.Y, mid.Z)
+					)
+				low, high = low:Min(at), high:Max(at)
+			end
+		end
+		local span = math.max(high.Y - low.Y, high.Z - low.Z)
+		centre = Vector3.new(0, (low.Y + high.Y) / 2, (low.Z + high.Z) / 2)
+		pixel = size / span
+		side = Vector3.new(sy, span, span)
+	end
 	local root = Instance.new("Part")
 	root.Name = "Root"
-	root.Size = Vector3.new(sy * pixel, sz * pixel, sx * pixel)
+	root.Size = side * pixel
 	root.Transparency = 1
 	root.Massless = true
 	root.CanCollide, root.CanTouch, root.CanQuery = false, false, false
 	root.Anchored = false
 	root.Parent = model
 	model.PrimaryPart = root
-	local b = m.b
 	for i = 1, #b, 7 do
 		local x, y, z, w, d, h, pi =
 			b[i], b[i + 1], b[i + 2], b[i + 3], b[i + 4], b[i + 5], b[i + 6]
-		local offset = CFrame.new(
-			(y + d / 2 - sy / 2) * pixel,
-			(z + h / 2 - sz / 2) * pixel,
-			(x + w / 2 - sx / 2) * pixel
-		)
+		local offset = CFrame.new(-centre * pixel)
+			* turn
+			* CFrame.new((Vector3.new(y + d / 2, z + h / 2, x + w / 2) - mid) * pixel)
 		part(root, Vector3.new(d * pixel, h * pixel, w * pixel), offset, hexColor(m.p[pi + 1])).Parent =
 			model
 	end
@@ -143,12 +178,17 @@ end
 
 -- Returns a fresh clone (or nil when the item has no sprite). `size` = sprite height in studs.
 function ItemModels.get(id: string, level: number?, size: number): Model?
-	local m = ItemModels.modelFor(id)
+	local m = ItemModels.modelFor(id, level)
 	if m then
-		local key = string.format("3d:%s:%.2f", id, size)
+		local key = string.format(
+			"3d:%s:%s:%.2f",
+			id,
+			tostring(if level and Config.tools[id] then Config.materialForLevel(level) else "-"),
+			size
+		)
 		local cached = cache[key]
 		if not cached then
-			cached = build3d(key, m, size / m.size[3])
+			cached = build3d(key, m, size)
 			cached.Parent = store
 			cache[key] = cached
 		end

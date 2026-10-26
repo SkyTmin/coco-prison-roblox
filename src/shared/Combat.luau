@@ -49,6 +49,19 @@ end
 -- Damage after the victim's armor, Java formulas [ваниль, владелец 22.10]: armor points and toughness of
 -- the worn pieces, then Protection (4 % per level of every piece, at most 20 levels = 80 %).
 local ARMOR_SLOTS = { helmet = 1, chestplate = 2, leggings = 3, boots = 4 }
+-- the worn armor's points [ваниль], 0 … 20: the HUD's armor row shows them as half chestplates
+function Combat.armorPoints(armor: { [string]: any }?): number
+	local points = 0
+	for part, slot in pairs(ARMOR_SLOTS) do
+		local piece = armor and armor[part]
+		if piece then
+			local material = Config.materialForLevel(piece.level or 1)
+			points += (Config.vanilla.armorPoints[material] and Config.vanilla.armorPoints[material][slot]) or 0
+		end
+	end
+	return points
+end
+
 function Combat.armorReduce(damage: number, armor: { [string]: any }?): number
 	if not armor then
 		return damage

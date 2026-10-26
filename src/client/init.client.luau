@@ -188,16 +188,19 @@ end
 -- [владелец 21.10] no hygiene / sleep / toilet bars: NeedsService sends a message when a need runs out
 -- and the effect icon (EffectsHud) shows while it lasts
 
--- Bottom-left, at most 60 % of the width so it never runs under the right-hand panels.
+-- Bottom-left beside the hotbar (wrapped into lines), clear of the armor row and the meters over the hotbar.
 local hints = Ui.label(
 	gui,
 	T("keys_hint"),
-	UDim2.new(0.6, 0, 0, 36),
-	UDim2.new(0, 10, 1, -138),
+	UDim2.new(0.5, -270, 0, 0),
+	UDim2.new(0, 10, 1, -10),
 	13,
 	Ui.colors.muted
 )
+hints.AnchorPoint = Vector2.new(0, 1)
+hints.AutomaticSize = Enum.AutomaticSize.Y
 hints.TextXAlignment = Enum.TextXAlignment.Left
+hints.TextYAlignment = Enum.TextYAlignment.Bottom
 hints.TextWrapped = true
 
 local languageButton = Ui.button(
@@ -299,12 +302,12 @@ survivalHud.Name = "SurvivalHud"
 survivalHud.BackgroundTransparency = 1
 -- [владелец 21.10] like Minecraft: hearts start at the hotbar's left edge, food ends at its right edge
 survivalHud.AnchorPoint = Vector2.new(0, 1)
-survivalHud.Position = UDim2.fromOffset(6, -4)
+survivalHud.Position = UDim2.fromOffset(6, -14) -- the experience bar runs under it
 survivalHud.Size = UDim2.new(1, -12, 0, 24)
 survivalHud.Parent = hotbar
 local survivalScale = Instance.new("UIScale")
 survivalScale.Parent = survivalHud
-type SurvivalMeter = { fills: { Frame }, tooltip: TextLabel }
+type SurvivalMeter = { group: Frame, fills: { Frame }, tooltip: TextLabel }
 local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): SurvivalMeter
 	local group = Instance.new("Frame")
 	group.BackgroundTransparency = 1
@@ -322,6 +325,54 @@ local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): 
 			heart.TextXAlignment = Enum.TextXAlignment.Center
 			heart.TextStrokeTransparency = 0
 			heart.ZIndex = zIndex
+			return
+		end
+		if glyph == "armor" then
+			-- our own 9×9 pixel chestplate (2 px a pixel), light from the upper left
+			local rows = {
+				"KKK...KKK",
+				"K12KKK21K",
+				"K1122222K",
+				"KK12222KK",
+				".K12222K.",
+				".K12222K.",
+				".K22223K.",
+				".K22333K.",
+				".KKKKKKK.",
+			}
+			local shades = if filled
+				then {
+					K = Color3.fromRGB(30, 30, 30),
+					["1"] = Color3.fromRGB(236, 236, 236),
+					["2"] = Color3.fromRGB(190, 190, 196),
+					["3"] = Color3.fromRGB(140, 140, 148),
+				}
+				else {
+					K = Color3.fromRGB(30, 30, 30),
+					["1"] = Color3.fromRGB(70, 70, 74),
+					["2"] = Color3.fromRGB(58, 58, 62),
+					["3"] = Color3.fromRGB(50, 50, 54),
+				}
+			for y, row in ipairs(rows) do
+				local x = 1
+				while x <= #row do
+					local ch = string.sub(row, x, x)
+					local run = 1
+					while string.sub(row, x + run, x + run) == ch do
+						run += 1
+					end
+					if ch ~= "." then
+						local px = Instance.new("Frame")
+						px.BorderSizePixel = 0
+						px.BackgroundColor3 = shades[ch]
+						px.Position = UDim2.fromOffset((x - 1) * 2, 3 + (y - 1) * 2)
+						px.Size = UDim2.fromOffset(run * 2, 2)
+						px.ZIndex = zIndex
+						px.Parent = parent
+					end
+					x += run
+				end
+			end
 			return
 		end
 		-- Frame drumsticks avoid platform-dependent colour emoji and clip cleanly at half hunger.
@@ -393,10 +444,49 @@ local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): 
 		end
 		fills[i] = clip
 	end
-	return { fills = fills, tooltip = tooltip }
+	return { group = group, fills = fills, tooltip = tooltip }
 end
 local hearts = buildMeter(false, "♥", Color3.fromRGB(235, 55, 55))
 local drumsticks = buildMeter(true, "🍗", Color3.fromRGB(225, 150, 65))
+-- Minecraft's armor row over the hearts [владелец 27.10: «иконки брони как в майне»], hidden without armor
+local armorMeter = buildMeter(false, "armor", Color3.new())
+armorMeter.group.Position = UDim2.fromOffset(0, -22)
+
+-- Minecraft's experience bar between the meters and the hotbar [владелец 27.10]: the number is the player's level, the
+-- green fill how close the next level is (the blocks since the last level and the money it costs, the lower of the two)
+local XP_GREEN = Color3.fromRGB(128, 255, 32)
+local xpBar = Instance.new("Frame")
+xpBar.Name = "ExperienceBar"
+xpBar.AnchorPoint = Vector2.new(0, 1)
+xpBar.Position = UDim2.fromOffset(6, -4)
+xpBar.Size = UDim2.new(1, -12, 0, 7)
+xpBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+xpBar.BorderSizePixel = 0
+xpBar.Parent = hotbar
+local xpTrack = Instance.new("Frame")
+xpTrack.Position = UDim2.fromOffset(1, 1)
+xpTrack.Size = UDim2.new(1, -2, 1, -2)
+xpTrack.BackgroundColor3 = Color3.fromRGB(46, 58, 30)
+xpTrack.BorderSizePixel = 0
+xpTrack.Parent = xpBar
+local xpFill = Instance.new("Frame")
+xpFill.Size = UDim2.fromScale(0, 1)
+xpFill.BackgroundColor3 = XP_GREEN
+xpFill.BorderSizePixel = 0
+xpFill.Parent = xpTrack
+local xpShine = Instance.new("Frame") -- the lighter top pixel row of the fill
+xpShine.Size = UDim2.new(1, 0, 0, 1)
+xpShine.BackgroundColor3 = Color3.fromRGB(200, 255, 140)
+xpShine.BorderSizePixel = 0
+xpShine.Parent = xpFill
+local xpLevel =
+	Ui.label(hotbar, "", UDim2.fromOffset(60, 18), UDim2.new(0.5, 0, 0, -8), 18, XP_GREEN)
+xpLevel.AnchorPoint = Vector2.new(0.5, 1)
+xpLevel.TextXAlignment = Enum.TextXAlignment.Center
+xpLevel.Font = Enum.Font.SourceSansBold
+xpLevel.TextStrokeTransparency = 0
+xpLevel.TextStrokeColor3 = Color3.new(0, 0, 0)
+xpLevel.ZIndex = 3
 
 -- Above the meters, bottom to top (all inside the hotbar so they share its scale): combo, the held
 -- item's name, the hint of a harmful effect.
@@ -409,13 +499,13 @@ local function hudLine(y: number, size: number, color: Color3): TextLabel
 	return label
 end
 -- [владелец 21.10] combo above the hearts and food; resets after 30 s without digging (server)
-local combo = hudLine(-38, 14, Ui.colors.muted)
+local combo = hudLine(-72, 14, Ui.colors.muted)
 local comboMultiplier: number? = nil
 local comboBlocks = 0
 local comboAt = 0 -- os.clock() of the last dug block
 -- [владелец 21.10] combo timer: a bar under the combo text, full after every block, draining over the
 -- idle time (rules.combo.breakAfterIdleSeconds = 30 s) — empty means the combo resets
-local comboBar = Ui.inset(hotbar, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -31))
+local comboBar = Ui.inset(hotbar, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -65))
 comboBar.AnchorPoint = Vector2.new(0.5, 1)
 comboBar.Visible = false
 local comboFill = Instance.new("Frame")
@@ -449,6 +539,21 @@ local function fillMeter(meter: SurvivalMeter, value: number)
 		fill.Size = UDim2.fromScale(math.clamp(halves - (i - 1) * 2, 0, 2) / 2, 1)
 	end
 end
+-- 0 … 1: how close the next level is — the blocks since the last level and the money it costs, the lower of the two
+local function levelProgress(): number
+	if not profile then
+		return 0
+	end
+	local nextRule = Config.levelRule(profile.level + 1)
+	if not nextRule then
+		return 1
+	end
+	local lastRule = Config.levelRule(profile.level)
+	local from = if lastRule then lastRule.blocks else 0
+	local blocks = (profile.blocksTotal - from) / math.max(1, nextRule.blocks - from)
+	local money = profile.coins / math.max(1, nextRule.money)
+	return math.clamp(math.min(blocks, money), 0, 1)
+end
 local function renderSurvival()
 	local humanoid = trackedHumanoid
 	local health = if humanoid then humanoid.Health else 0
@@ -458,6 +563,12 @@ local function renderSurvival()
 	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
 	fillMeter(drumsticks, hunger / Config.rules.survival.hunger.max * 20)
 	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
+	local points = Combat.armorPoints(if profile then profile.armor else nil)
+	armorMeter.group.Visible = points > 0
+	fillMeter(armorMeter, points)
+	armorMeter.tooltip.Text = T("armor_tooltip", points)
+	xpLevel.Text = tostring(if profile then profile.level else 1)
+	xpFill.Size = UDim2.fromScale(levelProgress(), 1)
 end
 local function watchHealth(character: Model)
 	for _, connection in ipairs(healthConnections) do
@@ -598,12 +709,12 @@ local function renderHotbar()
 end
 
 -- Minecraft: the name of the newly selected item shows above the hotbar for 2 s, then fades
-local heldName = hudLine(-58, 17, Ui.colors.white)
+local heldName = hudLine(-92, 17, Ui.colors.white)
 heldName.Visible = false
 local heldNameToken = 0
 
 -- [владелец 21.10] while a need's effect lasts, its hint (where to go / what to use) stays on screen
-local effectHint = hudLine(-84, 14, Color3.fromRGB(255, 225, 120))
+local effectHint = hudLine(-118, 14, Color3.fromRGB(255, 225, 120))
 effectHint.TextWrapped = true
 effectHint.BackgroundColor3 = Ui.colors.panel
 effectHint.BackgroundTransparency = 0.35
@@ -685,15 +796,20 @@ local function closeWindow()
 	UserInputService.ModalEnabled = false
 end
 
--- Inventory [E] in the look of the original: the vanilla Minecraft survival inventory GUI
--- (176×166 GUI px at scale 2): four armour slots, the player preview, the decorative 2×2 "Создание"
--- grid, the 9×3 inventory and the hotbar. Armour is equipped by dragging a piece onto its slot (or a
--- double tap / shift-click), taken off by dragging it back; profile updates repaint slots in place.
+-- Inventory [E] in our own dark style [владелец 27.10: the vanilla grey copy «выглядит не профессионально … поищи
+-- менюшки в интернете»; the layout of RPG inventory screens — equipment, the character, stats; the bag below]: cards
+-- for the four armour slots, the player full height (turning slowly) and the stats the armour gives, then the 9×3 bag
+-- and the hotbar row with its keys. Armour is equipped by dragging a piece onto its slot (or a double tap /
+-- shift-click), taken off by dragging it back; profile updates repaint slots in place.
+local INV_SLOT = 44
+local INV_GAP = 4
 local function buildInventory(): Frame
-	local MC = Ui.MC
-	local win, raw =
-		createWindow(gui, T("inventory"), UDim2.fromOffset(176 * MC, 166 * MC), closeWindow)
-	local content = Ui.toMc(win, raw)
+	local gridWidth = 9 * INV_SLOT + 8 * INV_GAP
+	local pad = 16
+	local innerWidth = gridWidth + 2 * pad
+	local win, content =
+		createWindow(gui, T("inventory"), UDim2.fromOffset(innerWidth + 12, 512), closeWindow)
+	win.BackgroundTransparency = 0 -- the HUD under it never shows through the slots
 	local views: { { index: number, name: TextLabel, count: TextLabel, image: ImageLabel } } = {}
 	local armorViews: { { part: string, name: TextLabel, count: TextLabel, image: ImageLabel } } =
 		{}
@@ -702,8 +818,9 @@ local function buildInventory(): Frame
 		local armor = if profile then profile.armor[part] else nil
 		renderSlot(name, count, image, armor or { id = part, level = 1, count = 1 })
 		name.Visible = false
-		image.ImageColor3 = if armor then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
-		image.ImageTransparency = if armor then 0 else 0.55
+		-- an empty slot shows the piece's outline faintly
+		image.ImageColor3 = if armor then Color3.new(1, 1, 1) else Color3.fromRGB(120, 124, 140)
+		image.ImageTransparency = if armor then 0 else 0.7
 	end
 	local function stackAt(address: DragDrop.Address): Types.ItemStack?
 		if not profile then
@@ -745,55 +862,77 @@ local function buildInventory(): Frame
 	end, function(from, count)
 		Remotes.event("DropItem"):FireServer(from.index, count)
 	end)
-	local function slotAt(index: number, x: number, y: number)
-		local f, name, count, image = Ui.mcSlot(content)
-		f.Position = UDim2.fromOffset(x * MC, y * MC)
+	local function slotAt(index: number, x: number, y: number): Frame
+		local f, name, count, image = Ui.invSlot(content, INV_SLOT)
+		f.Position = UDim2.fromOffset(x, y)
 		renderSlot(name, count, image, if profile then profile.inventory[index] else nil)
 		table.insert(views, { index = index, name = name, count = count, image = image })
 		drag.Bind(f, { container = "inv", index = index })
+		return f
 	end
-	-- [ваниль] armour column at (8, 8), inventory at (8, 84), hotbar at (8, 142)
+	local function caption(text: string, x: number, y: number)
+		local l = Ui.label(content, text, UDim2.fromOffset(300, 16), UDim2.fromOffset(x, y), 12)
+		l.TextColor3 = Ui.colors.muted
+	end
+
+	-- top: equipment | character | stats, as tall as the four armour slots
+	local topHeight = 4 * INV_SLOT + 3 * 8 + 2 * 10
+	local equipment =
+		Ui.card(content, UDim2.fromOffset(INV_SLOT + 20, topHeight), UDim2.fromOffset(pad, 4))
 	for i, part in ipairs(ARMOR_PARTS) do
-		local f, name, count, image = Ui.mcSlot(content)
-		f.Position = UDim2.fromOffset(8 * MC, (8 + (i - 1) * 18) * MC)
+		local f, name, count, image = Ui.invSlot(equipment, INV_SLOT)
+		f.Position = UDim2.fromOffset(10, 10 + (i - 1) * (INV_SLOT + 8))
 		renderArmor(part, name, count, image)
 		table.insert(armorViews, { part = part, name = name, count = count, image = image })
 		drag.Bind(f, { container = "armor", index = i })
 	end
-	for r = 0, 2 do
-		for col = 0, 8 do
-			slotAt(10 + r * 9 + col, 8 + col * 18, 84 + r * 18)
-		end
-	end
-	for col = 0, 8 do
-		slotAt(col + 1, 8 + col * 18, 142)
-	end
-	-- player preview [ваниль] (26, 8) 49×70
+	local statsWidth = 150
+	local previewX = pad + INV_SLOT + 20 + 8
+	local previewWidth = innerWidth - pad - statsWidth - 8 - previewX
+	local stage =
+		Ui.card(content, UDim2.fromOffset(previewWidth, topHeight), UDim2.fromOffset(previewX, 4))
+	stage.ClipsDescendants = true
+	stage.BackgroundColor3 = Color3.fromRGB(44, 52, 74)
+	local backdrop = Instance.new("UIGradient") -- a soft spotlight from above
+	backdrop.Rotation = 90
+	backdrop.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(110, 110, 130))
+	backdrop.Parent = stage
+	local floor = Instance.new("Frame") -- the shadow the player stands on
+	floor.AnchorPoint = Vector2.new(0.5, 0.5)
+	floor.Position = UDim2.new(0.5, 0, 1, -16)
+	floor.Size = UDim2.fromOffset(84, 14)
+	floor.BackgroundColor3 = Color3.new(0, 0, 0)
+	floor.BackgroundTransparency = 0.6
+	floor.BorderSizePixel = 0
+	floor.Parent = stage
+	local floorCorner = Instance.new("UICorner")
+	floorCorner.CornerRadius = UDim.new(0.5, 0)
+	floorCorner.Parent = floor
 	local preview = Instance.new("ViewportFrame")
-	preview.Size = UDim2.fromOffset(49 * MC, 70 * MC)
-	preview.Position = UDim2.fromOffset(26 * MC, 8 * MC)
-	preview.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	preview.BorderSizePixel = 0
-	preview.Ambient = Color3.fromRGB(200, 200, 200)
-	preview.LightColor = Color3.fromRGB(255, 255, 255)
-	preview.Parent = content
-	Ui.bevel(preview, MC, Ui.colors.mcSlotDark, Ui.colors.mcLight)
+	preview.Size = UDim2.fromScale(1, 1)
+	preview.BackgroundTransparency = 1
+	preview.Ambient = Color3.fromRGB(190, 190, 200)
+	preview.LightColor = Color3.fromRGB(255, 250, 240)
+	preview.LightDirection = Vector3.new(-0.5, -1, -0.6)
+	preview.Parent = stage
 	local previewCamera = Instance.new("Camera")
 	previewCamera.Parent = preview
 	preview.CurrentCamera = previewCamera
 	local world = Instance.new("WorldModel")
 	world.Parent = preview
+	local clone: Model? = nil
 	local function renderPreview()
 		world:ClearAllChildren()
+		clone = nil
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if not character or not root or not root:IsA("BasePart") then
 			return
 		end
 		character.Archivable = true
-		local clone = character:Clone()
+		local copy = character:Clone()
 		character.Archivable = false
-		for _, d in ipairs(clone:GetDescendants()) do
+		for _, d in ipairs(copy:GetDescendants()) do
 			if
 				d:IsA("Script")
 				or d:IsA("LocalScript")
@@ -803,40 +942,112 @@ local function buildInventory(): Frame
 				d:Destroy()
 			end
 		end
-		local cloneRoot = clone:FindFirstChild("HumanoidRootPart") :: BasePart
-		clone:PivotTo(CFrame.new(0, 0, 0))
-		clone.Parent = world
+		copy:PivotTo(CFrame.new(0, 0, 0))
+		copy.Parent = world
+		clone = copy
+		-- full height: the camera backs off until the whole body (head to feet) fits with a small margin
+		local box, size = copy:GetBoundingBox()
+		local fov = 30
+		local half = math.tan(math.rad(fov) / 2)
+		local fit = math.max(size.Y / 2, size.X / 2 * topHeight / previewWidth) * 1.1
+		local centre = box.Position
+		previewCamera.FieldOfView = fov
 		previewCamera.CFrame = CFrame.lookAt(
-			cloneRoot.Position + Vector3.new(0, 0.3, -8.5),
-			cloneRoot.Position + Vector3.new(0, 0.3, 0)
+			centre + Vector3.new(0, size.Y * 0.06, -(fit / half + size.Z / 2)),
+			centre
 		)
-		previewCamera.FieldOfView = 36
 	end
 	renderPreview()
-	-- decorative crafting area of the vanilla GUI [ваниль] (97, 8) label, 2×2 grid at (98, 18), result at (154, 28)
-	Ui.mcText(
+	-- the player turns a little from side to side, like on a display stand
+	local sway = RunService.RenderStepped:Connect(function()
+		if clone and clone.Parent then
+			clone:PivotTo(CFrame.Angles(0, math.rad(25) * math.sin(os.clock() * 0.8), 0))
+		end
+	end)
+	win.Destroying:Once(function()
+		sway:Disconnect()
+	end)
+
+	local stats = Ui.card(
 		content,
-		T("crafting"),
-		UDim2.fromOffset(60 * MC, 10 * MC),
-		UDim2.fromOffset(97 * MC, 7 * MC)
+		UDim2.fromOffset(statsWidth, topHeight),
+		UDim2.fromOffset(innerWidth - pad - statsWidth, 4)
 	)
-	for i = 0, 3 do
-		local f = Ui.mcSlot(content)
-		f.Position = UDim2.fromOffset((98 + (i % 2) * 18) * MC, (18 + math.floor(i / 2) * 18) * MC)
+	local nameLabel =
+		Ui.label(stats, player.DisplayName, UDim2.new(1, -20, 0, 20), UDim2.fromOffset(10, 8), 15)
+	nameLabel.Font = Enum.Font.SourceSansBold
+	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	local function statLine(y: number, color: Color3): (TextLabel, TextLabel)
+		local key = Ui.label(
+			stats,
+			"",
+			UDim2.new(1, -20, 0, 14),
+			UDim2.fromOffset(10, y),
+			12,
+			Ui.colors.muted
+		)
+		local value =
+			Ui.label(stats, "", UDim2.new(1, -20, 0, 18), UDim2.fromOffset(10, y + 14), 15, color)
+		value.Font = Enum.Font.SourceSansBold
+		return key, value
 	end
-	local arrow = Ui.mcText(
-		content,
-		"➜",
-		UDim2.fromOffset(18 * MC, 18 * MC),
-		UDim2.fromOffset(133 * MC, 28 * MC),
-		11 * MC
-	)
-	arrow.TextXAlignment = Enum.TextXAlignment.Center
-	arrow.TextColor3 = Ui.colors.mcSlot
-	local result = Ui.mcSlot(content, 26 * MC)
-	result.Position = UDim2.fromOffset(150 * MC, 24 * MC)
-	local shield = Ui.mcSlot(content)
-	shield.Position = UDim2.fromOffset(77 * MC, 62 * MC)
+	local levelKey, levelValue = statLine(36, Color3.fromRGB(128, 255, 32))
+	local levelBar = Instance.new("Frame")
+	levelBar.Position = UDim2.fromOffset(10, 70)
+	levelBar.Size = UDim2.new(1, -20, 0, 5)
+	levelBar.BackgroundColor3 = Color3.fromRGB(46, 58, 30)
+	levelBar.BorderSizePixel = 0
+	levelBar.Parent = stats
+	local levelFill = Instance.new("Frame")
+	levelFill.BackgroundColor3 = Color3.fromRGB(128, 255, 32)
+	levelFill.BorderSizePixel = 0
+	levelFill.Size = UDim2.fromScale(0, 1)
+	levelFill.Parent = levelBar
+	local healthKey, healthValue = statLine(84, Color3.fromRGB(255, 95, 95))
+	local armorKey, armorValue = statLine(122, Color3.fromRGB(205, 215, 235))
+	local protectKey, protectValue = statLine(160, Color3.fromRGB(120, 200, 255))
+	local function renderStats()
+		levelKey.Text = T("level")
+		healthKey.Text = T("inv_health")
+		armorKey.Text = T("inv_armor")
+		protectKey.Text = T("inv_protection")
+		levelValue.Text = tostring(if profile then profile.level else 1)
+		levelFill.Size = UDim2.fromScale(levelProgress(), 1)
+		local humanoid = trackedHumanoid
+		healthValue.Text = if humanoid
+			then string.format("%d / %d", math.ceil(humanoid.Health), humanoid.MaxHealth)
+			else "—"
+		local armor = if profile then profile.armor else nil
+		armorValue.Text = string.format("%d / 20", Combat.armorPoints(armor))
+		-- how much of a 10-damage blow gets through the armour
+		protectValue.Text = string.format(
+			"−%d%%",
+			math.floor((1 - Combat.armorReduce(10, armor) / 10) * 100 + 0.5)
+		)
+	end
+	renderStats()
+
+	-- the bag and the hotbar
+	local bagY = 4 + topHeight + 14
+	caption(T("inv_backpack"), pad, bagY)
+	for r = 0, 2 do
+		for col = 0, 8 do
+			slotAt(
+				10 + r * 9 + col,
+				pad + col * (INV_SLOT + INV_GAP),
+				bagY + 18 + r * (INV_SLOT + INV_GAP)
+			)
+		end
+	end
+	local barY = bagY + 18 + 3 * (INV_SLOT + INV_GAP) + 10
+	caption(T("inv_hotbar"), pad, barY)
+	for col = 0, 8 do
+		local f = slotAt(col + 1, pad + col * (INV_SLOT + INV_GAP), barY + 18)
+		local key =
+			Ui.label(f, tostring(col + 1), UDim2.fromOffset(12, 12), UDim2.fromOffset(4, 2), 10)
+		key.TextColor3 = Ui.colors.muted
+		key.ZIndex = 5
+	end
 	refreshInventory = function()
 		for _, view in ipairs(views) do
 			renderSlot(
@@ -850,6 +1061,7 @@ local function buildInventory(): Frame
 			renderArmor(view.part, view.name, view.count, view.image)
 		end
 		renderPreview()
+		renderStats()
 	end
 	return win
 end
@@ -3075,6 +3287,16 @@ if RunService:IsStudio() then
 		if action == "attack" then
 			attack()
 			return CombatFeel.Target()
+		elseif action == "swingAt" then
+			HeldItem.DebugHold(tonumber(arg) or 0.2, 30)
+			return true
+		elseif action == "swingPose" then
+			-- a blow frozen `arg` seconds in (the hitstop holds it), for first-person screenshots
+			attack()
+			task.wait(tonumber(arg) or 0.1)
+			HeldItem.Hitstop(8)
+			local kind, progress = HeldItem.SwingState()
+			return kind .. " " .. tostring(progress)
 		elseif action == "toggleCamera" then
 			toggleFirstPerson()
 			return firstPerson

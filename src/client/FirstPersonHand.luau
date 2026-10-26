@@ -45,6 +45,13 @@ local MC_TO_MODEL = CFrame.fromMatrix(
 	Vector3.new(0, 1, 0),
 	Vector3.new(1, 0, 0)
 )
+-- the held-item display [ваниль item/handheld and the bow: firstperson_righthand rotation (0, −90, 25), translation
+-- (1.13, 3.2, 1.13) px, scale 0.68] and the turn into our model frame
+local function mcDisplay(k: number): CFrame
+	return CFrame.new(1.13 / 16 * k, 3.2 / 16 * k, 1.13 / 16 * k)
+		* CFrame.Angles(0, math.rad(-90), math.rad(25))
+		* MC_TO_MODEL
+end
 local function mcBow(k: number, drawnSeconds: number?, blend: number): CFrame
 	local function at(x: number, y: number, z: number): CFrame
 		return CFrame.new(x * k, y * k, z * k)
@@ -67,10 +74,7 @@ local function mcBow(k: number, drawnSeconds: number?, blend: number): CFrame
 			* CFrame.Angles(0, math.rad(-45), 0)
 		pose = arm:Lerp(draw, blend * blend * (3 - 2 * blend))
 	end
-	return pose
-		* at(1.13 / 16, 3.2 / 16, 1.13 / 16)
-		* CFrame.Angles(0, math.rad(-90), math.rad(25))
-		* MC_TO_MODEL
+	return pose * mcDisplay(k)
 end
 
 -- Zoom from the camera focus, not the distance to the head: the head bobs with the walk animation
@@ -180,6 +184,11 @@ function FirstPersonHand.Start()
 			-- and down; the cuts sweep across the screen (right→left, then back); the stab and the punch thrust
 			-- forward. Wind-up before the blow, like the third-person keyframes.
 			local kind, progress = HeldItem.SwingState()
+			-- the sword strikes in view like the pickaxe [владелец 27.10: «удар от первого лица у меча сделай как у
+			-- кирки»]: its combo's cuts and stab stay in third person (CharacterAnimator) and in the hitboxes
+			if itemId == "sword" then
+				kind = "slam"
+			end
 			local swingOffset = CFrame.identity
 			local swingShift = CFrame.identity -- moves the whole hand in camera space
 			if progress then
@@ -252,6 +261,34 @@ function FirstPersonHand.Start()
 					* pose.Rotation
 				item:PivotTo(target * itemPart.CFrame:ToObjectSpace(item:GetPivot()))
 				arm.Transparency = 1
+				return
+			end
+			if item and itemPart and not itemIsCube and item:IsA("Model") then
+				-- tools and other items [владелец 27.10, Java screenshots]: Minecraft's hold like the bow's — along the
+				-- right edge, the head nearest at the upper right, the handle out of the bottom
+				local k = itemPart.Size.Y / 0.68
+				local pose = CFrame.new(0.56 * k, -0.52 * k, -0.72 * k) * mcDisplay(k)
+				local depth = math.tan(math.rad(35)) / math.tan(math.rad(camera.FieldOfView) / 2)
+				local rest = CFrame.new(pose.X, pose.Y, pose.Z * depth)
+				local shift, turn = CFrame.identity, CFrame.identity
+				if progress then
+					-- the blow from the rest pose itself [владелец 27.10: «3 скрин правильно стоит кирка, и бить она должна
+					-- примерно также, такой же позиции»]: the item chops in its own plane round the hand on the handle, the
+					-- head's point forward and down, and the hand dips; Minecraft's fast-in √p curve. Turning the item
+					-- towards the crosshair showed it end on (the plane runs along the view), so it stays at the right.
+					-- [владелец 27.10: «сделай замах побольше и быстрее как в майне»] the blow lands in the first 80 % of
+					-- the cycle and rests after it
+					local q = math.min(progress / 0.8, 1)
+					local f1 = math.sin(math.sqrt(q) * math.pi)
+					shift = CFrame.new(-0.06 * k * f1, -0.12 * k * f1, 0.04 * k * f1)
+					-- model x is the sprite's thickness: the turn stays in the item plane
+					local grip = Vector3.new(0, -0.35, -0.35) * itemPart.Size.Y
+					turn = CFrame.new(grip)
+						* CFrame.Angles(math.rad(-50 * f1), 0, 0)
+						* CFrame.new(-grip)
+				end
+				local target = camera.CFrame * bobOffset * shift * rest * pose.Rotation * turn
+				item:PivotTo(target * itemPart.CFrame:ToObjectSpace(item:GetPivot()))
 				return
 			end
 			if item and itemPart then

@@ -71,7 +71,9 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    into `assets/sounds/build/*.ogg` + `manifest.json`; the OWNER uploads them with
    `scripts/upload-audio.mjs` (Open Cloud API key) → ids in `assets/sounds/ids.json` → `build-configs`.
    Until then `files[*].fallback` (trimmed Roblox-library clips) plays. Own pixel icons (keys, trainer
-   badges, touch menu) come from `scripts/draw-icons.mjs` → `upload_image`. Artifact pictures:
+   badges, touch menu) come from `scripts/draw-icons.mjs` → `upload_image`. Armor icons: `scripts/armor-icons.mjs`
+   (own sprites, also the held 3D item via `assets/icons/voxels.json`); tool icons and 3D models: Blender
+   `assets/models/<tool>.py -- icons <dir>` / `-- export` (voxeltool.py) → `assets/icons/tools`, `itemmodels.json`. Artifact pictures:
    `assets/artifacts/artifact-*.png` → `upload_image` (serve PNGs over a local http server; serve-repo
    only serves .luau/.json) → `assets/artifacts/ids.json` (picture name → id) → `build-configs`.
    Windows: `fitWindow` keeps every window below Roblox's top bar (`GuiService:GetGuiInset()`).

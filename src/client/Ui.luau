@@ -244,6 +244,49 @@ function Ui.slot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, 
 	return f, name, count, image
 end
 
+-- Inventory slot in our own dark style [владелец 27.10: the vanilla grey inventory looked unprofessional]: a rounded
+-- inset lit softly from the top, lighter under the mouse (DragDrop recolours the stroke for the picked-up stack)
+local INV_SLOT = Color3.fromRGB(38, 40, 50)
+local INV_SLOT_HOVER = Color3.fromRGB(58, 62, 80)
+function Ui.invSlot(parent: Instance, size: number): (Frame, TextLabel, TextLabel, ImageLabel)
+	local f = Instance.new("Frame")
+	f.Size = UDim2.fromOffset(size, size)
+	f.BackgroundColor3 = INV_SLOT
+	f.BorderSizePixel = 0
+	corner(f, 5)
+	stroke(f, Ui.colors.border, 1)
+	local light = Instance.new("UIGradient")
+	light.Rotation = 90
+	light.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(165, 165, 180))
+	light.Parent = f
+	f.Parent = parent
+	local image = slotImage(f, 0.78)
+	local name, count = slotLabels(f, image, 13, true)
+	f.MouseEnter:Connect(function()
+		f.BackgroundColor3 = INV_SLOT_HOVER
+	end)
+	f.MouseLeave:Connect(function()
+		f.BackgroundColor3 = INV_SLOT
+	end)
+	return f, name, count, image
+end
+
+-- A card inside a window: a slightly lighter rounded block that groups related things.
+function Ui.card(parent: Instance, size: UDim2, position: UDim2): Frame
+	local f = Ui.panel(parent, size, position)
+	f.BackgroundColor3 = Color3.fromRGB(26, 28, 36)
+	f.BackgroundTransparency = 0
+	local c = f:FindFirstChildOfClass("UICorner")
+	if c then
+		c.CornerRadius = UDim.new(0, 6)
+	end
+	local s = f:FindFirstChildOfClass("UIStroke")
+	if s then
+		s.Color = Color3.fromRGB(52, 54, 66)
+	end
+	return f
+end
+
 -- ---------------------------------------------------------------- vanilla Minecraft GUI look
 local function bevel(parent: Instance, thickness: number, light: Color3, dark: Color3)
 	local function edge(name: string, size: UDim2, position: UDim2, color: Color3)
