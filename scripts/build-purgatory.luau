@@ -918,6 +918,4108 @@ print(("[build-purgatory] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ purgatory/20-bay.luau
+do
+-- ================================================================ purgatory: the BAY (the zigzag stair, the relief wall, round the pit)
+-- Zone: x -92..92 (cells -96..96), z ≥ -8 at y 0 (the cells of z -16..-8 are already the terrace) and MAIN_UP.
+-- THE ZIGZAG (Bom Jesus), mirrored east/west in three bands of 12 against the bay wall (its face is at z -8):
+--   R1 z 16..28: the low flights from x ±16 out to ±32, y 0 → 12 (the foot between them: x -12..12, the pool)
+--   L1 x ±32..44, z 4..28 (y 12): the side landings with a fountain; the FLANKS x ±12..44, z -8..4 (y 12) with a relief
+--   R2 z 4..16: the middle flights from x ±32 back in to ±12, y 12 → 24
+--   C2 x -12..12, z 4..20 (y 24): the central landing with two basins; its front face carries the 7th relief
+--   F3 x -6..6, z 12 → -8, y 24 → 40 between two stepped water channels (x ±6..10) onto the L5 terrace
+--   MAIN_UP x -8..8 (kerbs to ±10), z -16 → -32, y 40 → 48: the summit plaza edge is z -32 for |x| ≤ 24
+do
+	local bayF = folder("Bay")
+	local CUT, SANDV = "px_cut_sandstone", "px_sandstone"
+	local RELIEF = Color3.fromRGB(206, 170, 120) -- the darker sandstone of the carved figures
+	local GLASS = Color3.fromRGB(225, 240, 245)
+	local ROPE = Color3.fromRGB(120, 95, 60)
+	local partsAtStart = count
+	local skipped = 0
+
+	-- a box along a flight: `a` runs along `axis` ("x" or "z"), `c` across it
+	local function abox(axis, name, a0, a1, c0, c1, y0, y1, var, tint, parent)
+		if axis == "x" then
+			return box(name, a0, y0, c0, a1, y1, c1, var, tint, parent)
+		end
+		return box(name, c0, y0, a0, c1, y1, a1, var, tint, parent)
+	end
+	-- water: our pixel water, translucent, no collision
+	local function water(x0, y0, z0, x1, y1, z1, parent)
+		local p = decor(box("Water", x0, y0, z0, x1, y1, z1, "px_water", WATER, parent))
+		p.Transparency = 0.25
+		p.CastShadow = false
+		return p
+	end
+	-- a brazier: a stone brick block, a bowl (blackstone, soul soil for the blue fire), the flame blocks
+	local function brazier(x, y, z, soul, lit, parent, noBase)
+		local bf = folder(if soul then "SoulBrazier" else "Brazier", parent)
+		local col = if soul then SOUL_FIRE else FIRE
+		local top = y
+		if not noBase then
+			box("BrazierBase", x - 2, y, z - 2, x + 2, y + 3, z + 2, "px_stone_bricks", nil, bf)
+			top = y + 3
+		end
+		box(
+			"BrazierBowl",
+			x - 2.4,
+			top,
+			z - 2.4,
+			x + 2.4,
+			top + 1.4,
+			z + 2.4,
+			if soul then "px_soul_soil" else "px_blackstone",
+			nil,
+			bf
+		)
+		local fl = decor(
+			part(
+				"BrazierFire",
+				Vector3.new(3, 2.2, 3),
+				at(x, top + 2.3, z),
+				col,
+				Enum.Material.Neon,
+				bf
+			)
+		)
+		fl.Transparency = 0.15
+		fl.CastShadow = false
+		local tip = decor(
+			part(
+				"BrazierFlame",
+				Vector3.new(1.6, 1.6, 1.6),
+				at(x - 0.3, top + 3.9, z + 0.3),
+				col,
+				Enum.Material.Neon,
+				bf
+			)
+		)
+		tip.Transparency = 0.3
+		tip.CastShadow = false
+		if lit then
+			light(fl, 30, 1.4, col)
+			emitter(fl, {
+				Rate = 6,
+				Lifetime = NumberRange.new(0.4, 0.8),
+				Speed = NumberRange.new(2, 3.5),
+				Size = NumberSequence.new(1, 0.1),
+				Color = ColorSequence.new(col),
+				LightEmission = 1,
+				SpreadAngle = Vector2.new(12, 12),
+			})
+		end
+		return bf
+	end
+	-- a flight: kit stairs (cut sandstone) + a stepped sandstone fill under it (4-stud chunks, down to `base`) +
+	-- balustrades `rails` = { {c0, c1, base}, ... } beside it, each chunk one step above the flight, posts and gaps in turn
+	local function flight(name, axis, c, s0, s1, y0, rise, w, base, rails, parent)
+		local f = folder(name, parent)
+		stairs(name, c, s0, s1, y0, rise, w, CUT, f, if axis == "x" then "x" else nil)
+		for _, p in ipairs(f:GetChildren()) do
+			if p:IsA("Part") then
+				p.Color = SAND_PALE
+			end
+		end
+		local run = math.abs(s1 - s0)
+		local dir = if s1 > s0 then 1 else -1
+		local n = math.max(1, math.floor(run / 2))
+		local stepD, r = run / n, rise / n
+		local d0, j = 0, 0
+		while d0 < run - 0.01 do
+			local d1 = math.min(d0 + B, run)
+			local lowTop = y0 + (math.floor(d0 / stepD + 1e-6) + 1) * r
+			local highTop = y0 + math.ceil(d1 / stepD - 1e-6) * r
+			local a0, a1 = s0 + dir * d0, s0 + dir * d1
+			if lowTop - 0.5 > base + 0.2 then
+				abox(
+					axis,
+					name .. "Fill",
+					a0,
+					a1,
+					c - w / 2,
+					c + w / 2,
+					base,
+					lowTop - 0.5,
+					SANDV,
+					SAND,
+					f
+				)
+			end
+			for _, rl in ipairs(rails or {}) do
+				abox(
+					axis,
+					name .. "Rail",
+					a0,
+					a1,
+					rl[1],
+					rl[2],
+					rl[3],
+					highTop + (if j % 2 == 0 then 3 else 1.8),
+					CUT,
+					SAND,
+					f
+				)
+			end
+			d0, j = d1, j + 1
+		end
+		return f
+	end
+	-- a flat balustrade (posts and lower gaps in turn) along `axis` from a0 to a1 over a floor at floorY (the first
+	-- post at a0, so mirrored rails match)
+	local function flatRail(name, axis, a0, a1, c0, c1, base, floorY, parent)
+		local dir = if a1 > a0 then 1 else -1
+		local d, run, j = 0, math.abs(a1 - a0), 0
+		while d < run - 0.01 do
+			local e = math.min(d + B, run)
+			local top = floorY + (if j % 2 == 0 then 3 else 1.8)
+			abox(axis, name, a0 + dir * d, a0 + dir * e, c0, c1, base, top, CUT, SAND, parent)
+			d, j = e, j + 1
+		end
+	end
+
+	-- a soul: a pale translucent blocky figure (no collision); cf at its feet, looking along its -Z
+	-- pose: "stand", "bow" (head down, waiting), "carry" (a block in the arms), "pull" (arms back), "kneel", "sit"
+	local soulsF = folder("Souls", bayF)
+	local function soul(cf, pose, parent)
+		parent = parent or soulsF
+		local function sp(name, sx, sy, sz, ox, oy, oz)
+			local p = decor(
+				part(
+					name,
+					Vector3.new(sx, sy, sz),
+					cf * CFrame.new(ox, oy, oz),
+					SOUL,
+					Enum.Material.SmoothPlastic,
+					parent
+				)
+			)
+			p.Transparency = 0.5
+			p.CastShadow = false
+			return p
+		end
+		if pose == "sit" then
+			sp("SoulThighs", 1.8, 0.9, 2, 0, 0.45, -0.9)
+			sp("SoulShins", 1.8, 2.4, 0.9, 0, -1.1, -1.9)
+			sp("SoulTorso", 2, 2.4, 1, 0, 2.1, 0.1)
+			sp("SoulHead", 1.5, 1.5, 1.5, 0, 4.05, 0)
+			sp("SoulArm", 0.7, 2, 0.7, -1.35, 1.9, -0.3)
+			sp("SoulArm", 0.7, 2, 0.7, 1.35, 1.9, -0.3)
+			return
+		end
+		if pose == "kneel" then
+			sp("SoulThighs", 1.8, 1.4, 1, 0, 1.5, 0)
+			sp("SoulShins", 1.8, 0.8, 2, 0, 0.4, 0.6)
+			sp("SoulTorso", 2, 2.4, 1, 0, 3.4, -0.1)
+			sp("SoulHead", 1.5, 1.5, 1.5, 0, 5.35, -0.3)
+			sp("SoulArm", 0.7, 0.7, 2, -1.3, 3.2, -1.1)
+			sp("SoulArm", 0.7, 0.7, 2, 1.3, 3.2, -1.1)
+			return
+		end
+		sp("SoulLegs", 1.8, 2.6, 0.9, 0, 1.3, 0)
+		sp("SoulTorso", 2, 2.4, 1, 0, 3.8, 0)
+		sp(
+			"SoulHead",
+			1.5,
+			1.5,
+			1.5,
+			0,
+			if pose == "bow" then 5.55 else 5.75,
+			if pose == "bow" then -0.35 else 0
+		)
+		if pose == "carry" then
+			sp("SoulArm", 0.7, 0.7, 1.8, -1.3, 4.3, -0.9)
+			sp("SoulArm", 0.7, 0.7, 1.8, 1.3, 4.3, -0.9)
+			local blk = decor(
+				part(
+					"CarriedBlock",
+					Vector3.new(2.4, 2.4, 2.4),
+					cf * CFrame.new(0, 4.5, -2.1),
+					nil,
+					nil,
+					parent
+				)
+			)
+			textured(blk, CUT, SAND)
+		elseif pose == "pull" then
+			sp("SoulArm", 0.7, 0.7, 1.8, -1.3, 3.6, 0.9)
+			sp("SoulArm", 0.7, 0.7, 1.8, 1.3, 3.6, 0.9)
+		else
+			sp("SoulArm", 0.7, 2.3, 0.7, -1.35, 3.75, 0)
+			sp("SoulArm", 0.7, 2.3, 0.7, 1.35, 3.75, 0)
+		end
+	end
+	local function sAt(x, y, z, yaw)
+		return at(x, y, z) * CFrame.Angles(0, yaw or 0, 0)
+	end
+	-- props on the bay floor only where the core built y 0 and nothing else is
+	local function okGround(x, z, pad)
+		if cellY(x, z) == 0 and freeGround(x, z, pad) then
+			return true
+		end
+		skipped += 1
+		return false
+	end
+
+	-- ================================================================ 1. the zigzag stair with fountains
+	do
+		local zz = folder("Zigzag", bayF)
+		-- C2, the central landing (y 24), its cornice and front balustrade
+		box("CentralLanding", -12, 0, 4, 12, 24, 20, SANDV, SAND, zz)
+		box("CentralCornice", -12.4, 22, 19.8, 12.4, 24.2, 20.6, CUT, SAND_PALE, zz)
+		flatRail("FrontRail", "x", -8, 8, 18, 20, 23, 24, zz)
+		-- the foot pool before C2 (fed by two spouts in its face)
+		box("PoolFloor", -11, 0, 20, 11, 0.2, 24, CUT, SAND, zz)
+		box("PoolRim", -12, 0, 24, 12, 1.6, 25, CUT, SAND_PALE, zz)
+		water(-11, 0.2, 20.6, 11, 1.2, 24, zz)
+		-- F3: the top flight between the channels, onto the L5 terrace
+		flight("FlightTop", "z", 0, 12, -8, 24, 16, 12, 0, nil, zz)
+		for _, s in ipairs({ -1, 1 }) do
+			-- F1 (out, y 0 → 12) and F2 (back in, y 12 → 24); F2's stringer walls stand in F1's band and on the flank
+			flight("FlightLow", "x", 22, s * 16, s * 32, 0, 12, 12, 0, { { 28, 30, 0 } }, zz)
+			flight(
+				"FlightMid",
+				"x",
+				10,
+				s * 32,
+				s * 12,
+				12,
+				12,
+				12,
+				0,
+				{ { 16, 18, 0 }, { 2, 4, 0 } },
+				zz
+			)
+			-- L1 (the side landing) and the flank in front of the wall, both y 12
+			box("SideLanding", s * 32, 0, 4, s * 44, 12, 28, SANDV, SAND, zz)
+			box("Flank", s * 12, 0, -8, s * 44, 12, 4, SANDV, SAND, zz)
+			flatRail("LandingRail", "x", s * 32, s * 46, 28, 30, 0, 12, zz)
+			flatRail("LandingRail", "z", -8, 28, s * 44, s * 46, 0, 12, zz)
+			-- the fountain on L1: a basin, a column with a bowl and a spout of water
+			do
+				local fx, fz = s * 40, 16
+				box("FountainRim", fx - 4, 12, fz - 4, fx + 4, 14, fz - 3, CUT, SAND_PALE, zz)
+				box("FountainRim", fx - 4, 12, fz + 3, fx + 4, 14, fz + 4, CUT, SAND_PALE, zz)
+				box("FountainRim", fx - 4, 12, fz - 3, fx - 3, 14, fz + 3, CUT, SAND_PALE, zz)
+				box("FountainRim", fx + 3, 12, fz - 3, fx + 4, 14, fz + 3, CUT, SAND_PALE, zz)
+				water(fx - 3, 12, fz - 3, fx + 3, 13.4, fz + 3, zz)
+				box("FountainColumn", fx - 1, 12, fz - 1, fx + 1, 16, fz + 1, CUT, SAND, zz)
+				box(
+					"FountainBowl",
+					fx - 1.8,
+					16,
+					fz - 1.8,
+					fx + 1.8,
+					17,
+					fz + 1.8,
+					CUT,
+					SAND_PALE,
+					zz
+				)
+				water(fx - 1.4, 16.6, fz - 1.4, fx + 1.4, 17.2, fz + 1.4, zz)
+				water(fx - 2.2, 13.2, fz - 0.4, fx - 1.8, 16.8, fz + 0.4, zz)
+				water(fx + 1.8, 13.2, fz - 0.4, fx + 2.2, 16.8, fz + 0.4, zz)
+			end
+			-- the water channel beside F3: two stepped strips with small falls, from a spout block at the wall down
+			-- into a basin on C2
+			local tops = { 32, 35.2 } -- the lower step top of F3 beside each channel chunk (z 4..0, z 0..-4)
+			for c = 0, 1 do
+				local za, zb = 4 - 4 * c, -4 * c
+				local lt = tops[c + 1]
+				box("ChannelBed", s * 6, 0, zb, s * 10, lt - 1.5, za, CUT, SAND, zz)
+				water(s * 6.2, lt - 1.5, zb, s * 9.8, lt - 0.6, za, zz)
+				local below = if c == 0 then 25.6 else tops[1] - 0.6
+				water(s * 6.2, below, za - 0.4, s * 9.8, lt - 0.6, za + 0.3, zz)
+			end
+			box("ChannelSource", s * 6, 0, -8, s * 10, 44, -4, CUT, SAND, zz)
+			decor(
+				box(
+					"SourceMask",
+					s * 6.6,
+					38.6,
+					-4,
+					s * 9.4,
+					42.4,
+					-3.4,
+					"px_cut_red_sandstone",
+					nil,
+					zz
+				)
+			)
+			box("SourceSpout", s * 7.2, 38, -4, s * 8.8, 38.8, -2.6, CUT, SAND_PALE, zz)
+			water(s * 7.3, tops[2] - 0.6, -3.4, s * 8.7, 38.2, -2.7, zz)
+			brazier(s * 8.4, 44, -6, true, true, zz, true)
+			for _, rr in ipairs({ { 4, 0, 36.6 }, { 0, -4, 38.6 }, { -4, -8, 43 } }) do
+				box("ChannelRail", s * 10, 0, rr[2], s * 12, rr[3], rr[1], CUT, SAND, zz)
+			end
+			-- the basin on C2 that the channel falls into, and the spout in C2's face down into the foot pool
+			box("BasinRim", s * 6, 24, 7, s * 12, 26, 8, CUT, SAND_PALE, zz)
+			box("BasinRim", s * 11, 24, 4, s * 12, 26, 7, CUT, SAND_PALE, zz)
+			water(s * 6, 24, 4, s * 11, 25.6, 7, zz)
+			box("PoolRim", s * 11, 0, 20, s * 12, 1.6, 24, CUT, SAND_PALE, zz)
+			box("FaceSpout", s * 9, 17, 20, s * 11, 19, 21.6, CUT, SAND_PALE, zz)
+			water(s * 9.4, 1, 21, s * 10.6, 17.4, 21.6, zz)
+			-- braziers on the landing corners (fire and soul fire)
+			brazier(s * 10, 24, 18, false, true, zz)
+			brazier(s * 42, 12, 26, false, true, zz)
+			brazier(s * 42, 12, 6, true, true, zz)
+			brazier(s * 16, 12, -6, true, true, zz)
+			brazier(s * 42, 12, -6, false, false, zz)
+			-- decorated pots on L1 and the flank
+			do
+				local c = Color3.fromRGB(205, 120, 80)
+				for _, pz in ipairs({ 26, -2 }) do
+					local px = s * 38
+					box(
+						"Pot",
+						px - 1.5,
+						12,
+						pz - 1.5,
+						px + 1.5,
+						15,
+						pz + 1.5,
+						"px_terracotta",
+						c,
+						zz
+					)
+					box(
+						"PotRim",
+						px - 1.2,
+						15,
+						pz - 1.2,
+						px + 1.2,
+						15.8,
+						pz + 1.2,
+						"px_terracotta",
+						c,
+						zz
+					)
+					decor(
+						box(
+							"PotBand",
+							px - 1.55,
+							13.2,
+							pz - 1.55,
+							px + 1.55,
+							13.8,
+							pz + 1.55,
+							"px_terracotta",
+							Color3.fromRGB(120, 60, 40),
+							zz
+						)
+					)
+				end
+			end
+			-- the obelisks with red banners flanking the foot
+			do
+				local ox, oz = s * 10, 30
+				box(
+					"ObeliskBase",
+					ox - 2.4,
+					0,
+					oz - 2.4,
+					ox + 2.4,
+					4,
+					oz + 2.4,
+					"px_stone_bricks",
+					nil,
+					zz
+				)
+				box("ObeliskShaft", ox - 2, 4, oz - 2, ox + 2, 24, oz + 2, CUT, SAND_PALE, zz)
+				box(
+					"ObeliskTip",
+					ox - 1.4,
+					24,
+					oz - 1.4,
+					ox + 1.4,
+					26,
+					oz + 1.4,
+					CUT,
+					SAND_PALE,
+					zz
+				)
+				box(
+					"ObeliskGold",
+					ox - 0.8,
+					26,
+					oz - 0.8,
+					ox + 0.8,
+					27.4,
+					oz + 0.8,
+					"px_gold_block",
+					nil,
+					zz
+				)
+				for _, d in ipairs({ -1, 1 }) do
+					decor(
+						box(
+							"ObeliskBanner",
+							ox - 1.4,
+							8,
+							oz + d * 2,
+							ox + 1.4,
+							20,
+							oz + d * 2.2,
+							"px_white_wool",
+							BANNER_RED,
+							zz
+						)
+					)
+					decor(
+						box(
+							"ObeliskBanner",
+							ox + d * 2,
+							8,
+							oz - 1.4,
+							ox + d * 2.2,
+							20,
+							oz + 1.4,
+							"px_white_wool",
+							BANNER_RED,
+							zz
+						)
+					)
+					decor(
+						box(
+							"ObeliskMotif",
+							ox - 0.6,
+							15.6,
+							oz + d * 2.2,
+							ox + 0.6,
+							16.8,
+							oz + d * 2.3,
+							"px_gold_block",
+							nil,
+							zz
+						)
+					)
+				end
+			end
+			-- MAIN_UP's foot: braziers on the terrace either side of the walking line
+			brazier(s * 8.4, 40, -10, false, true, zz)
+			-- unlit lanterns on the balustrade posts (the glow without a light: the PointLight budget is small)
+			for _, lp in ipairs({
+				{ s * 11, 37.35, 2 },
+				{ s * 34, 15.75, 29 },
+				{ s * 18, 6.75, 29 },
+			}) do
+				local lf = folder("Lantern", zz)
+				lantern(V(lp[1], lp[2], lp[3]), lf)
+				for _, d in ipairs(lf:GetDescendants()) do
+					if d:IsA("PointLight") then
+						d:Destroy()
+					end
+				end
+			end
+			-- a red banner on the wall above each flank's soul brazier
+			banner(at(s * 16, 29, -7.7), BANNER_RED, zz, GOLD, 3, 8)
+		end
+		-- MAIN_UP: one flight from the L5 terrace (y 40) to the summit plaza (y 48, its edge at z -32), with kerbs
+		flight("MainUp", "z", 0, -16, -32, 40, 8, 16, 40, { { -10, -8, 40 }, { 8, 10, 40 } }, zz)
+		-- a few souls on the way up, looking at the water
+		soul(sAt(-2, 24, 16, 0.4), "stand")
+		soul(sAt(3, 24, 15, -0.3), "bow")
+		soul(sAt(34, 12, 22, -math.pi / 2), "stand")
+		soul(sAt(-26, 12, -2, 0), "bow")
+	end
+	task.wait()
+
+	-- ================================================================ 2. the relief wall: 7 slabs, one per sin
+	do
+		local rf = folder("Reliefs", bayF)
+		local G, W, R, I = "px_gold_block", "px_white_wool", "px_white_wool", "px_iron_block"
+		-- the figures in panel units: u -6..6 across the field, v 2..18 up; { u0, v0, u1, v1, proud, variant, tint }
+		local LEGS = { { -2, 2.4, -0.3, 7.6 }, { 0.3, 2.4, 2, 7.6 } }
+		local BODY = { { -2.2, 7.6, 2.2, 12.4 }, { -1.4, 12.6, 1.4, 15.4 } }
+		local function with(list, extra)
+			local out = table.clone(list)
+			for _, e in ipairs(extra) do
+				table.insert(out, e)
+			end
+			return out
+		end
+		local STD = with(LEGS, BODY)
+		local ART = {
+			-- pride: a robed figure with a cape, arms akimbo, a golden crown
+			Pride = with(BODY, {
+				{ -3.2, 4, 3.2, 12.4, 0.4, nil, Color3.fromRGB(190, 150, 100) },
+				{ -2.6, 2.2, 2.6, 7.8 },
+				{ -3.6, 9.6, -2.2, 12.2 },
+				{ 2.2, 9.6, 3.6, 12.2 },
+				{ -3.2, 8.6, -2.2, 9.6 },
+				{ 2.2, 8.6, 3.2, 9.6 },
+				{ -1.6, 15.4, 1.6, 16.2, 1.1, G },
+				{ -1.6, 16.2, -1, 17, 1.1, G },
+				{ -0.3, 16.2, 0.3, 17.2, 1.1, G },
+				{ 1, 16.2, 1.6, 17, 1.1, G },
+			}),
+			-- envy: a figure reaching up toward a great green eye
+			Envy = with(STD, {
+				{ -3.4, 8, -2.2, 12.2 },
+				{ 2.2, 10.4, 3.4, 12.2 },
+				{ 2.6, 12.2, 3.6, 13.8 },
+				{ 1.6, 14.4, 5.6, 16.2, 1, W, Color3.fromRGB(245, 240, 230) },
+				{ 2.4, 16.2, 4.8, 16.8 },
+				{ 2.4, 13.8, 4.8, 14.4 },
+				{ 3, 14.6, 4.2, 16, 1.2, W, Color3.fromRGB(60, 150, 70) },
+				{ 3.4, 15, 3.8, 15.6, 1.3, W, Color3.fromRGB(30, 40, 30) },
+			}),
+			-- wrath: a sword raised high
+			Wrath = with(STD, {
+				{ -3.4, 8, -2.2, 12.2 },
+				{ 2.2, 11, 3.4, 15.6 },
+				{ 2.5, 15.6, 3.1, 17.8, 1.1, I },
+				{ 1.7, 15.2, 3.9, 15.6, 1.1, I },
+				{ -2.6, 14.6, -1.4, 15.8 },
+				{ 1.4, 14.6, 2.6, 15.8 },
+			}),
+			-- sloth: lying on a ledge, three blocks of sleep rising
+			Sloth = {
+				{ -6, 2, 6, 3, 1, CUT, SAND_PALE },
+				{ -5.6, 3, -1, 4.6 },
+				{ -1, 3, 3, 5.4 },
+				{ 3, 3, 5.4, 5.8 },
+				{ -0.6, 5.4, 2.4, 6.2 },
+				{ 1, 8, 2, 9, 0.6 },
+				{ 2.6, 10, 3.8, 11.2, 0.6 },
+				{ 4.2, 12.4, 5.8, 14, 0.6 },
+			},
+			-- greed: a money bag in the arms, gold coins piled at the feet
+			Greed = with(STD, {
+				{ -3.4, 9, -2.2, 12.2 },
+				{ 2.2, 9, 3.4, 12.2 },
+				{ -1.8, 8.4, 1.8, 11, 1.2, "px_brown_wool" },
+				{ -0.6, 11, 0.6, 11.6, 1.2, "px_brown_wool" },
+				{ -5.4, 2, -2.6, 3.2, 1, G },
+				{ -5, 3.2, -3, 4.2, 1, G },
+				{ 2.6, 2, 5.4, 3.2, 1, G },
+				{ 3, 3.2, 5, 4.2, 1, G },
+				{ 4.4, 6, 5.2, 6.8, 1, G },
+				{ -5.2, 7.2, -4.4, 8, 1, G },
+			}),
+			-- gluttony: a great belly, a golden goblet raised
+			Gluttony = with(LEGS, {
+				{ -3, 7.4, 3, 12.4 },
+				{ -2.2, 8, 2.2, 11.2, 1.4 },
+				{ -1.4, 12.6, 1.4, 15.4 },
+				{ -4.2, 8, -3, 12 },
+				{ 3, 10.4, 4.2, 13.6 },
+				{ 3.3, 13.6, 5.1, 14, 1.1, G },
+				{ 3.9, 14, 4.5, 14.8, 1.1, G },
+				{ 3.2, 14.8, 5.2, 16.6, 1.1, G },
+				{ 3.4, 16.2, 5, 16.7, 1.2, R, BANNER_RED },
+			}),
+			-- lust: a figure reaching for a red heart
+			Lust = {
+				{ -4.5, 2.4, -2.8, 7.6 },
+				{ -2.2, 2.4, -0.5, 7.6 },
+				{ -4.7, 7.6, -0.3, 12.4 },
+				{ -3.9, 12.6, -1.1, 15.4 },
+				{ -5.8, 8, -4.7, 12.2 },
+				{ -0.3, 11, 1.6, 12 },
+				{ 1.4, 12, 3.2, 13, 1.2, R, BANNER_RED },
+				{ 3.8, 12, 5.6, 13, 1.2, R, BANNER_RED },
+				{ 1, 11, 6, 12, 1.2, R, BANNER_RED },
+				{ 1.6, 10, 5.4, 11, 1.2, R, BANNER_RED },
+				{ 2.4, 9, 4.6, 10, 1.2, R, BANNER_RED },
+				{ 3.1, 8.3, 3.9, 9, 1.2, R, BANNER_RED },
+			},
+		}
+		local NAMES = {
+			Pride = "Гордыня",
+			Envy = "Зависть",
+			Wrath = "Гнев",
+			Sloth = "Уныние",
+			Greed = "Алчность",
+			Gluttony = "Чревоугодие",
+			Lust = "Сладострастие",
+		}
+		-- a slab 4×5 blocks on a wall face at z = zf (it grows toward +Z), its bottom at y0, on a plinth below
+		local function relief(cx, y0, zf, sin)
+			local f = folder("Relief" .. sin, rf)
+			local function rb(name, u0, v0, u1, v1, d0, d1, var, tint)
+				return box(name, cx + u0, y0 + v0, zf + d0, cx + u1, y0 + v1, zf + d1, var, tint, f)
+			end
+			rb("ReliefPlinth", -9, -2, 9, 0, 0, 2.6, CUT, SAND)
+			rb("ReliefPanel", -8, 0, 8, 20, 0, 1, SANDV, SAND_PALE)
+			rb("ReliefFrame", -8, 0, -6, 20, 0, 2, CUT, SAND)
+			rb("ReliefFrame", 6, 0, 8, 20, 0, 2, CUT, SAND)
+			rb("ReliefFrame", -6, 0, 6, 2, 0, 2, CUT, SAND)
+			rb("ReliefFrame", -6, 18, 6, 20, 0, 2, CUT, SAND)
+			rb("ReliefCornice", -9, 20, 9, 21, 0, 2.6, CUT, SAND_PALE)
+			for _, e in ipairs(ART[sin]) do
+				decor(
+					rb(
+						"ReliefFigure",
+						e[1],
+						e[2],
+						e[3],
+						e[4],
+						0.9,
+						1 + (e[5] or 0.8),
+						e[6] or SANDV,
+						e[7] or (if e[6] then nil else RELIEF)
+					)
+				)
+			end
+			local plaque = decor(rb("ReliefPlaque", -4, 0.2, 4, 1.8, 1.9, 2.3, CUT, SAND_PALE))
+			boardText(plaque, NAMES[sin], Color3.fromRGB(90, 60, 30), { Enum.NormalId.Back })
+		end
+		-- the outer wall (24..32 high) either side of the zigzag, the flanks of the zigzag, the face of C2
+		relief(-82, 2, -8, "Pride")
+		relief(-62, 2, -8, "Envy")
+		relief(-28, 14, -8, "Wrath")
+		relief(0, 2, 20, "Sloth")
+		relief(28, 14, -8, "Greed")
+		relief(62, 2, -8, "Gluttony")
+		relief(82, 2, -8, "Lust")
+		for _, s in ipairs({ -1, 1 }) do
+			brazier(s * 72, 0, -2, s > 0, true, rf)
+			brazier(s * 50, 0, -5, true, false, rf)
+			brazier(s * 93.6, 0, -5, false, false, rf)
+			-- red banners hanging on the wall between the slabs
+			banner(at(s * 72, 16, -7.7), BANNER_RED, rf, GOLD, 3, 8)
+			banner(at(s * 50, 18, -7.7), BANNER_RED, rf, GOLD, 4, 10)
+		end
+	end
+	task.wait()
+
+	-- ================================================================ 3. round the pit: the fence, the stones, the souls
+	do
+		local pf = folder("PitSurround", bayF)
+		-- the fence 1 block outside the rim, open at the four ladder shafts (the south opening wider: the arrival)
+		local fz0, fz1, fx = 36, 184, 74
+		fence(-fx, fz0, -12, fz0, pf)
+		fence(12, fz0, fx, fz0, pf)
+		fence(-fx, fz1, -28, fz1, pf)
+		fence(28, fz1, fx, fz1, pf)
+		for _, s in ipairs({ -1, 1 }) do
+			fence(s * fx, fz0, s * fx, 98, pf)
+			fence(s * fx, 122, s * fx, fz1, pf)
+		end
+		-- blocks of chiseled sandstone lying about: whole, half-cut, notched, stacked
+		local function pile(cx, cz, n)
+			local spots = {
+				{ -4, -4 },
+				{ 0, -4 },
+				{ 4, -4 },
+				{ -4, 0 },
+				{ 0, 0 },
+				{ 4, 0 },
+				{ -4, 4 },
+				{ 0, 4 },
+				{ 4, 4 },
+			}
+			for i = #spots, 2, -1 do
+				local j = rng:NextInteger(1, i)
+				spots[i], spots[j] = spots[j], spots[i]
+			end
+			for i = 1, math.min(n, #spots) do
+				local x, z = cx + spots[i][1], cz + spots[i][2]
+				if okGround(x, z, -2) then
+					local kind = rng:NextInteger(1, 5)
+					local var = if rng:NextNumber() < 0.75 then CUT else SANDV
+					if kind == 1 then
+						box("StoneHalf", x - 2, 0, z - 2, x + 2, 2, z + 2, var, SAND, pf)
+					elseif kind == 2 then
+						box("StoneNotched", x - 2, 0, z - 2, x + 2, 4, z, var, SAND, pf)
+						box("StoneNotched", x - 2, 0, z, x + 2, 2, z + 2, var, SAND, pf)
+					elseif kind == 3 then
+						box("Stone", x - 2, 0, z - 2, x + 2, 4, z + 2, var, SAND, pf)
+						box("Stone", x - 2, 4, z - 2, x + 2, 8, z + 2, CUT, SAND_PALE, pf)
+					else
+						box("Stone", x - 2, 0, z - 2, x + 2, 4, z + 2, var, SAND, pf)
+					end
+				end
+			end
+		end
+		pile(-86, 44, 6)
+		pile(-84, 140, 5)
+		pile(84, 140, 5)
+		pile(86, 82, 4)
+		-- the west side: two souls chiseling at the pile, four carrying blocks up from the west ladder
+		soul(sAt(-80, 0, 40, math.pi / 2), "kneel")
+		soul(sAt(-80, 0, 49, math.pi / 2), "kneel")
+		for k = 0, 3 do
+			soul(sAt(-81 - (k % 2), 0, 62 + 8 * k, 0), "carry")
+		end
+		-- the east side: four souls carrying blocks south toward the arrival, one chiseling
+		for k = 0, 3 do
+			soul(sAt(81 + (k % 2), 0, 166 + 5.5 * k, math.pi), "carry")
+		end
+		soul(sAt(77, 0, 140, -math.pi / 2), "kneel")
+		-- a sled with blocks, two souls pulling it north toward the derrick
+		do
+			local sx, sz = 86, 68
+			if okGround(sx, sz, 0) then
+				local sl = folder("Sled", pf)
+				box(
+					"SledRunner",
+					sx - 3,
+					0,
+					sz - 6,
+					sx - 2,
+					0.8,
+					sz + 6,
+					"px_dark_oak_planks",
+					nil,
+					sl
+				)
+				box(
+					"SledRunner",
+					sx + 2,
+					0,
+					sz - 6,
+					sx + 3,
+					0.8,
+					sz + 6,
+					"px_dark_oak_planks",
+					nil,
+					sl
+				)
+				box(
+					"SledCurl",
+					sx - 3,
+					0.8,
+					sz - 6.8,
+					sx + 3,
+					1.6,
+					sz - 6,
+					"px_dark_oak_planks",
+					nil,
+					sl
+				)
+				box(
+					"SledDeck",
+					sx - 3,
+					0.8,
+					sz - 5,
+					sx + 3,
+					1.6,
+					sz + 5,
+					"px_spruce_planks",
+					nil,
+					sl
+				)
+				box("SledStone", sx - 2.8, 1.6, sz - 4.6, sx + 0.2, 4.6, sz - 1.6, CUT, SAND, sl)
+				box("SledStone", sx - 0.2, 1.6, sz + 0.4, sx + 2.8, 4.6, sz + 3.4, CUT, SAND, sl)
+				box("SledStone", sx - 2.6, 1.6, sz + 0.6, sx - 0.4, 3.8, sz + 4.6, SANDV, SAND, sl)
+				box("SledStone", sx - 1, 4.6, sz + 0.6, sx + 2, 7.6, sz + 3.6, CUT, SAND_PALE, sl)
+				for _, px in ipairs({ -2.5, 2.5 }) do
+					soul(sAt(sx + px, 0, sz - 12, 0), "pull")
+					decor(
+						beam(
+							"SledRope",
+							V(sx + px * 0.8, 1.2, sz - 6.4),
+							V(sx + px * 1.04, 3.6, sz - 11.2),
+							0.25,
+							ROPE,
+							sl,
+							Enum.Material.Fabric
+						)
+					)
+				end
+			end
+		end
+		-- a derrick of dark oak swinging a block over the pit, a soul at the winch
+		do
+			local dx, dz = 84, 42
+			local df = folder("Derrick", pf)
+			box("DerrickBase", dx - 4, 0, dz - 4, dx + 4, 2, dz + 4, CUT, SAND, df)
+			box("DerrickMast", dx - 1, 2, dz - 1, dx + 1, 28, dz + 1, "px_dark_oak_log", nil, df)
+			for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+				textured(
+					beam(
+						"DerrickBrace",
+						V(dx + c[1] * 3.4, 2, dz + c[2] * 3.4),
+						V(dx + c[1] * 0.6, 12, dz + c[2] * 0.6),
+						0.9,
+						nil,
+						df
+					),
+					"px_dark_oak_planks"
+				)
+			end
+			local tip = V(58, 25, 54)
+			decor(
+				textured(
+					beam("DerrickBoom", V(dx, 21, dz), tip, 1.4, nil, df),
+					"px_dark_oak_planks"
+				)
+			)
+			decor(
+				beam(
+					"DerrickStay",
+					V(dx, 28, dz),
+					tip + Vector3.new(0, 0.6, 0),
+					0.3,
+					ROPE,
+					df,
+					Enum.Material.Fabric
+				)
+			)
+			decor(
+				beam(
+					"DerrickGuy",
+					V(dx, 27.6, dz),
+					V(dx + 8, 0.5, dz - 12),
+					0.3,
+					ROPE,
+					df,
+					Enum.Material.Fabric
+				)
+			)
+			box("GuyStake", dx + 7, 0, dz - 13, dx + 9, 1.2, dz - 11, "px_dark_oak_planks", nil, df)
+			local ropeLen = tip.Y - BY - 8.2
+			decor(
+				part(
+					"DerrickRope",
+					Vector3.new(0.3, ropeLen, 0.3),
+					CFrame.new(tip.X, tip.Y - ropeLen / 2, tip.Z),
+					ROPE,
+					Enum.Material.Fabric,
+					df
+				)
+			)
+			local hung = decor(part("HungBlock", Vector3.new(B, B, B), at(58, 6, 54), nil, nil, df))
+			textured(hung, CUT, SAND)
+			decor(
+				part(
+					"HungSling",
+					Vector3.new(B + 0.2, 0.4, 0.6),
+					at(58, 8.1, 54),
+					ROPE,
+					Enum.Material.Fabric,
+					df
+				)
+			)
+			crate(dx + 5, 0, dz + 7, df)
+			soul(sAt(dx + 1, 0, dz + 8, -math.pi / 2), "pull")
+		end
+		-- braziers at the pit's north corners
+		brazier(-84, 0, 32, false, true, pf)
+		brazier(84, 0, 32, true, true, pf)
+	end
+	task.wait()
+
+	-- ================================================================ 4. hourglasses, cypresses, bushes, pots, benches
+	do
+		local gf = folder("Garden", bayF)
+		-- a giant hourglass (s = 1: 3×3 blocks, 6 high): dark oak plates and posts, glass bulbs, sand, gold caps
+		local GLASS_L = {
+			{ 2.6, 6, 8 },
+			{ 6, 9, 6 },
+			{ 9, 11, 4 },
+			{ 11, 13, 2 },
+			{ 13, 15, 4 },
+			{ 15, 18, 6 },
+			{ 18, 21.4, 8 },
+		}
+		local SAND_L = {
+			{ 2.6, 5, 7.4 },
+			{ 5, 7, 5.4 },
+			{ 7, 8.2, 3.4 },
+			{ 13, 15, 3.4 },
+			{ 15, 16.4, 5.4 },
+			{ 8.2, 13, 0.5 },
+		}
+		local function hourglass(x, z, s)
+			local f = folder("Hourglass", gf)
+			local function hb(name, w, y0, y1, var, tint)
+				return box(
+					name,
+					x - w * s / 2,
+					y0 * s,
+					z - w * s / 2,
+					x + w * s / 2,
+					y1 * s,
+					z + w * s / 2,
+					var,
+					tint,
+					f
+				)
+			end
+			hb("HourglassBase", 12, 0, 2, "px_dark_oak_planks")
+			hb("HourglassRing", 8.4, 2, 2.6, "px_gold_block")
+			hb("HourglassRing", 8.4, 21.4, 22, "px_gold_block")
+			hb("HourglassTop", 12, 22, 24, "px_dark_oak_planks")
+			hb("HourglassCap", 8, 24, 25.2, "px_gold_block")
+			hb("HourglassKnob", 2.4, 25.2, 26.8, "px_gold_block")
+			for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+				local px, pz = x + c[1] * 5 * s, z + c[2] * 5 * s
+				box(
+					"HourglassPost",
+					px - s,
+					2 * s,
+					pz - s,
+					px + s,
+					22 * s,
+					pz + s,
+					"px_dark_oak_log",
+					nil,
+					f
+				)
+			end
+			for _, l in ipairs(GLASS_L) do
+				local g = hb("HourglassGlass", l[3], l[1], l[2])
+				g.Material = Enum.Material.Glass
+				g.Color = GLASS
+				g.Transparency = 0.4
+			end
+			for _, l in ipairs(SAND_L) do
+				decor(hb("HourglassSand", l[3], l[1], l[2], "px_sand", SAND))
+			end
+		end
+		for _, h in ipairs({ { -84, 156, 1 }, { 84, 156, 1 }, { -54, 198, 0.5 } }) do
+			if okGround(h[1], h[2], 6 * h[3]) then
+				hourglass(h[1], h[2], h[3])
+			else
+				warn(
+					("[build-purgatory] bay: no room for the hourglass at (%d, %d)"):format(
+						h[1],
+						h[2]
+					)
+				)
+			end
+		end
+		-- cypresses: a narrow stepped column of hedge on a log, a few loose leaf blocks
+		local function cypress(x, z, h)
+			local f = folder("Cypress", gf)
+			box("CypressTrunk", x - 2, 0, z - 2, x + 2, 4, z + 2, "px_oak_log", nil, f)
+			box("CypressLeaves", x - 4, 3, z - 4, x + 4, h - 8, z + 4, "px_hedge", CYPRESS, f)
+			box("CypressLeaves", x - 2, h - 8, z - 2, x + 2, h, z + 2, "px_hedge", CYPRESS, f)
+			for k = 1, 3 do
+				local sx = if rng:NextNumber() < 0.5 then -1 else 1
+				local alongX = rng:NextNumber() < 0.5
+				local y = 6
+					+ rng:NextInteger(0, math.max(0, math.floor((h - 18) / 4))) * 4
+					+ (k - 1) * 2
+				local ox, oz = if alongX then sx * 4 else 0, if alongX then 0 else sx * 4
+				decor(
+					box(
+						"CypressLeaf",
+						x + ox - 2,
+						y,
+						z + oz - 2,
+						x + ox + 2,
+						y + 4,
+						z + oz + 2,
+						"px_hedge",
+						CYPRESS,
+						f
+					)
+				)
+			end
+		end
+		for _, c in ipairs({
+			{ -88, 22 },
+			{ 88, 22 },
+			{ -60, 26 },
+			{ 60, 26 },
+			{ -90, 92 },
+			{ 90, 92 },
+			{ -90, 128 },
+			{ 90, 128 },
+			{ -66, 192 },
+			{ 66, 190 },
+		}) do
+			if okGround(c[1], c[2], 0) then
+				cypress(c[1], c[2], 20 + rng:NextInteger(0, 2) * 4)
+			end
+		end
+		-- dead orange bushes: a few twigs from one point
+		local function deadBush(x, y, z)
+			local base = V(x, y, z)
+			local a0 = rng:NextNumber() * math.pi * 2
+			for i = 1, 4 do
+				local a = a0 + i * 1.57 + rng:NextNumber() * 0.6
+				local len = 1.6 + rng:NextNumber() * 1.6
+				local tip = base
+					+ Vector3.new(math.cos(a) * len * 0.7, len, math.sin(a) * len * 0.7)
+				decor(beam("DeadBush", base, tip, 0.4, DEAD_BUSH, gf, Enum.Material.Wood))
+				local fork = tip
+					+ Vector3.new(math.cos(a + 0.8) * 0.8, 0.9, math.sin(a + 0.8) * 0.8)
+				decor(beam("DeadBush", tip, fork, 0.3, DEAD_BUSH, gf, Enum.Material.Wood))
+			end
+		end
+		for _, b in ipairs({
+			{ -78, 30 },
+			{ 78, 30 },
+			{ -92, 60 },
+			{ 92, 62 },
+			{ -80, 128 },
+			{ 79, 126 },
+			{ -92, 172 },
+			{ 92, 172 },
+			{ -58, 186 },
+			{ 46, 188 },
+			{ -70, 6 },
+			{ 70, 6 },
+			{ -54, 22 },
+			{ 54, 22 },
+		}) do
+			if okGround(b[1], b[2], -2) then
+				deadBush(b[1], 0, b[2])
+			end
+		end
+		-- decorated pots (terracotta with a dark band; some hold a dead bush)
+		local POT_C = {
+			Color3.fromRGB(205, 120, 80),
+			Color3.fromRGB(190, 100, 70),
+			Color3.fromRGB(215, 150, 100),
+		}
+		for _, p in ipairs({
+			{ -74, 14 },
+			{ 74, 14 },
+			{ -56, 4 },
+			{ 56, 4 },
+			{ -92, 80 },
+			{ 92, 112 },
+			{ -60, 200 },
+			{ 30, 194 },
+			{ -48, 190 },
+		}) do
+			local x, z = p[1], p[2]
+			if okGround(x, z, -2) then
+				local c = pick(POT_C)
+				box("Pot", x - 1.5, 0, z - 1.5, x + 1.5, 3, z + 1.5, "px_terracotta", c, gf)
+				box("PotNeck", x - 1, 3, z - 1, x + 1, 3.6, z + 1, "px_terracotta", c, gf)
+				box("PotRim", x - 1.3, 3.6, z - 1.3, x + 1.3, 4, z + 1.3, "px_terracotta", c, gf)
+				decor(
+					box(
+						"PotBand",
+						x - 1.55,
+						1.2,
+						z - 1.55,
+						x + 1.55,
+						1.8,
+						z + 1.55,
+						"px_terracotta",
+						Color3.fromRGB(120, 60, 40),
+						gf
+					)
+				)
+				if rng:NextNumber() < 0.5 then
+					deadBush(x, 4, z)
+				end
+			end
+		end
+		-- benches for the waiting souls (dark oak), souls sitting on them
+		local function bench(x, z, yaw, sitters)
+			if not okGround(x, z, 0) then
+				return
+			end
+			local f = folder("Bench", gf)
+			local cf = sAt(x, 0, z, yaw)
+			textured(
+				part("BenchSeat", Vector3.new(8, 0.8, 3), cf * CFrame.new(0, 2.2, 0), nil, nil, f),
+				"px_dark_oak_planks"
+			)
+			for _, sx in ipairs({ -3.2, 3.2 }) do
+				textured(
+					part(
+						"BenchLeg",
+						Vector3.new(1, 1.8, 2.6),
+						cf * CFrame.new(sx, 0.9, 0),
+						nil,
+						nil,
+						f
+					),
+					"px_dark_oak_planks"
+				)
+			end
+			textured(
+				part(
+					"BenchBack",
+					Vector3.new(8, 2.2, 0.6),
+					cf * CFrame.new(0, 3.7, 1.3),
+					nil,
+					nil,
+					f
+				),
+				"px_dark_oak_planks"
+			)
+			for i = 1, sitters do
+				soul(
+					cf * CFrame.new(-2.4 + (i - 1) * (4.8 / math.max(1, sitters - 1)), 2.6, -0.2),
+					"sit"
+				)
+			end
+		end
+		bench(-64, 12, 0, 2) -- before the reliefs of pride and envy
+		bench(64, 12, 0, 2) -- before gluttony and lust
+		bench(40, 194, 0, 2) -- by the arrival, looking at the pit
+		-- the queue of souls waiting at the foot of the zigzag (east of the foot, along the fence walk)
+		for k = 0, 5 do
+			soul(sAt(18 + 5 * k, 0, 32.5 + (k % 2) * 0.6, math.pi / 2), "bow")
+		end
+		soul(sAt(-20, 0, 32.5, -math.pi / 2), "bow")
+		soul(sAt(-25, 0, 33, -math.pi / 2), "bow")
+		-- a lantern pillar either side of the way from the arrival to the pit
+		for _, s in ipairs({ -1, 1 }) do
+			local x, z = s * 20, 190
+			if okGround(x, z, 0) then
+				local f = folder("LanternPillar", gf)
+				box(
+					"PillarBase",
+					x - 2.4,
+					0,
+					z - 2.4,
+					x + 2.4,
+					2,
+					z + 2.4,
+					"px_stone_bricks",
+					nil,
+					f
+				)
+				box("PillarShaft", x - 2, 2, z - 2, x + 2, 14, z + 2, CUT, SAND_PALE, f)
+				box("PillarCap", x - 2.6, 14, z - 2.6, x + 2.6, 15, z + 2.6, CUT, SAND, f)
+				lantern(V(x, 15.9, z), f)
+				banner(at(x, 8, z - 2.2), BANNER_RED, f, GOLD, 3, 7)
+				banner(at(x, 8, z + 2.2), BANNER_RED, f, GOLD, 3, 7)
+			end
+		end
+	end
+	print(
+		("[build-purgatory] bay: %d parts, %d props skipped"):format(count - partsAtStart, skipped)
+	)
+end
+
+end
+task.wait()
+-- ================================================================================ purgatory/30-mount.luau
+do
+-- ================================================================ purgatory: the MOUNTAIN — terraces L3..L6 and the summit
+-- The MOUNT part (zoneOf == "mount": d < 138 from PEAK outside the bay):
+--   ring stairs   16 wide at the east (x = +r), west (x = -r) and north (z = -80 - r) crossing of the rings 138, 110,
+--                 84, 50 where both terraces are on the island: 4 steps rising 8 from the lower terrace to the upper,
+--                 the flight on the lower cell right against the edge (found by scanning cellY), sandstone cheek walls
+--                 stepping down, a lantern post on the top landing
+--   edges         every terrace edge of the zone (a drop of 8, or the island rim): a cut sandstone kerb 1 block high
+--                 with gaps, open at the stairs and at MAIN_UP; the same kerb along the top of the bay wall (open
+--                 x -56..56 where the zigzag lands and MAIN_UP starts); sandstone fences on some straight runs; stepped
+--                 overhangs (decor) under some edges
+--   terraces      L5 (y 40): the band of braziers and soul braziers round the summit's foot, between them cypresses,
+--                 obelisks with red banners, benches with pots, soul queues, an hourglass, an arch niche with a soul
+--                 altar; L4 (y 32): the same mix with the second hourglass; L3 (y 24): cypresses, queues, benches,
+--                 braziers, pots — all against the inner wall, a walkway of ≥ 3 blocks kept along the outer side
+--   SUMMIT        L6 (y 48, d < 50): a red / white checkered floor laid flush, a walkway x -12..12 from MAIN_UP (z -34)
+--                 to the dais; the dais x -20..20, z -112..-88 (6 high) with three steps (z -88..-76) and a gate; on it
+--                 the great angel (0, -102), ~12 blocks tall, wings 8 blocks each side, a gold halo and hair, hands
+--                 folded, facing south; 4 obelisks, soul braziers, cypresses, rows of kneeling souls, an arch over the
+--                 east stair top and a ruined arch over the west one
+local mountF = folder("Mountain")
+local startCount = count
+local lightsLeft = 25 -- PointLights this part may add
+local WHITE = Color3.fromRGB(248, 246, 240)
+local GLASS = Color3.fromRGB(215, 235, 240)
+local CORNERS4 = { { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }
+local DAIS_Y = SUMMIT_Y + 6 -- the angel's dais
+local ANGEL = { x = 0, z = -102 }
+-- rects { x0, z0, x1, z1 } the props keep off: the zigzag top and MAIN_UP foot on L5, the summit walkway, the dais
+local RES = { { -60, -36, 60, -6 }, { -14, -96, 14, -28 }, { -22, -114, 22, -74 } }
+-- rects the kerbs and overhangs leave open: MAIN_UP's arrival on the summit, the zigzag's landing on the bay wall top
+-- (x -52..52 at z -10, MAIN_UP's foot inside it); the ring stairs add theirs
+local NOKERB = { { -14, -44, 14, -24 }, { -56, -20, 56, -4 } }
+local EDGE = {} -- the terrace edge cells ("cx:cz"), never built on
+local placed = {} -- { x, z, r } props already standing
+local built = { stairs = {}, hourglass = 0, braziers = 0, souls = 0 }
+
+local function inAny(list, x, z, pad)
+	for _, r in ipairs(list) do
+		if inRect(x, z, r, pad) then
+			return true
+		end
+	end
+	return false
+end
+local function cellKey(x, z)
+	local s = CELL.size
+	return (CELL.x0 + math.floor((x - CELL.x0) / s) * s + s / 2)
+		.. ":"
+		.. (CELL.z0 + math.floor((z - CELL.z0) / s) * s + s / 2)
+end
+local function lit(p, range, bright, color)
+	if lightsLeft > 0 then
+		lightsLeft -= 1
+		light(p, range, bright, color)
+	end
+end
+-- a textured part in a frame cf by size and local centre
+local function lp(cf, name, sx, sy, sz, x, y, z, variant, tint, parent)
+	local p = part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), tint, nil, parent)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+
+-- ================================================================ block props
+-- a translucent soul: a blocky human, standing or kneeling, looking from (x, z) toward (tx, tz)
+local function soulFigure(x, y, z, tx, tz, kneel, parent)
+	local cf = CFrame.lookAt(V(x, y, z), V(tx, y, tz))
+	local function sp(name, sx, sy, sz, ox, oy, oz)
+		local p = decor(
+			part(
+				name,
+				Vector3.new(sx, sy, sz),
+				cf * CFrame.new(ox, oy, oz),
+				SOUL,
+				Enum.Material.SmoothPlastic,
+				parent
+			)
+		)
+		p.Transparency = 0.5
+		p.CastShadow = false
+	end
+	if kneel then
+		sp("SoulLegs", 2, 1, 2.6, 0, 0.5, 0.5)
+		sp("SoulBody", 2, 2.4, 1, 0, 2.2, 0)
+		sp("SoulHands", 1.6, 0.8, 1, 0, 2.6, -1)
+		sp("SoulHead", 1.6, 1.6, 1.6, 0, 4.2, 0)
+	else
+		sp("SoulLegs", 2, 2.8, 1, 0, 1.4, 0)
+		sp("SoulBody", 2, 2.4, 1, 0, 4, 0)
+		sp("SoulArm", 0.8, 2.4, 0.9, -1.4, 4, 0)
+		sp("SoulArm", 0.8, 2.4, 0.9, 1.4, 4, 0)
+		sp("SoulHead", 1.6, 1.6, 1.6, 0, 6, 0)
+	end
+	built.souls += 1
+end
+-- a brazier: a stone brick pedestal, a campfire of crossed logs, a flame of fire or blue soul fire
+local function brazier(x, y, z, soul, parent, wantLight)
+	local f = folder(if soul then "SoulBrazier" else "Brazier", parent)
+	cube("BrazierBase", x, y + 1.5, z, 4, 3, 4, "px_stone_bricks", nil, f)
+	cube("BrazierRim", x, y + 3.4, z, 4.4, 0.8, 4.4, "px_smooth_stone", nil, f)
+	decor(
+		cube(
+			"BrazierBed",
+			x,
+			y + 3.95,
+			z,
+			3.4,
+			0.3,
+			3.4,
+			if soul then "px_soul_soil" else "px_coal_block",
+			nil,
+			f
+		)
+	)
+	for _, yaw in ipairs({ math.pi / 4, -math.pi / 4 }) do
+		local log = part(
+			"BrazierLog",
+			Vector3.new(3.6, 0.8, 1),
+			at(x, y + 4.4, z) * CFrame.Angles(0, yaw, 0),
+			nil,
+			nil,
+			f
+		)
+		textured(decor(log), "px_dark_oak_log")
+	end
+	local col = if soul then SOUL_FIRE else FIRE
+	local flame = decor(
+		part(
+			"Flame",
+			Vector3.new(2, 2, 2),
+			at(x, y + 5.6, z) * CFrame.Angles(0, math.pi / 4, 0),
+			col,
+			Enum.Material.Neon,
+			f
+		)
+	)
+	flame.Transparency = 0.15
+	flame.CastShadow = false
+	local tip = decor(
+		part(
+			"FlameTip",
+			Vector3.new(1, 1.4, 1),
+			at(x, y + 7.2, z),
+			col:Lerp(Color3.new(1, 1, 1), 0.35),
+			Enum.Material.Neon,
+			f
+		)
+	)
+	tip.Transparency = 0.2
+	tip.CastShadow = false
+	if wantLight then
+		lit(flame, 24, 1.3, col)
+	end
+	built.braziers += 1
+	return f
+end
+-- an obelisk: a stepped base, a cut sandstone shaft 6 blocks tall with a red banner on each face, a gold tip
+local function obelisk(x, y, z, parent)
+	local f = folder("Obelisk", parent)
+	cube("ObeliskBase", x, y + 2, z, 12, 4, 12, "px_cut_sandstone", SAND_PALE, f)
+	cube("ObeliskPlinth", x, y + 5, z, 10, 2, 10, "px_sandstone", SAND_PALE, f)
+	cube("ObeliskShaft", x, y + 18, z, 8, 24, 8, "px_cut_sandstone", SAND_PALE, f)
+	cube("ObeliskCap", x, y + 31, z, 6, 2, 6, "px_sandstone", SAND_PALE, f)
+	cube("ObeliskSpire", x, y + 34, z, 4, 4, 4, "px_cut_sandstone", SAND_PALE, f)
+	cube("ObeliskTip", x, y + 37, z, 2, 2, 2, "px_gold_block", nil, f)
+	for k = 0, 3 do
+		banner(
+			at(x, y + 18, z) * CFrame.Angles(0, k * math.pi / 2, 0) * CFrame.new(0, 0, 4.15),
+			BANNER_RED,
+			f,
+			GOLD,
+			4,
+			14
+		)
+	end
+	return f
+end
+-- a cypress: a log core, a tall narrow column of hedge leaves, a narrower top, two leaf lumps (stepped)
+local function cypress(x, y, z, parent)
+	local f = folder("Cypress", parent)
+	local h = rng:NextInteger(3, 5) * B
+	cube("CypressTrunk", x, y + 3, z, 4, 6, 4, "px_oak_log", nil, f)
+	cube("CypressLeaves", x, y + 4 + (8 + h) / 2, z, 8, 8 + h, 8, "px_hedge", CYPRESS, f)
+	decor(cube("CypressTop", x, y + 16 + h, z, 4, 8, 4, "px_hedge", CYPRESS, f))
+	local sides = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }
+	local first = rng:NextInteger(1, 4)
+	for k = 0, 1 do
+		local s = sides[(first + k * 2 - 1) % 4 + 1]
+		decor(
+			cube(
+				"CypressLump",
+				x + s[1] * 6,
+				y + 10 + k * 4,
+				z + s[2] * 6,
+				4,
+				8,
+				4,
+				"px_hedge",
+				CYPRESS,
+				f
+			)
+		)
+	end
+	return f
+end
+-- a dead orange bush: a tuft of bare twigs
+local function deadBush(x, y, z, parent)
+	local f = folder("DeadBush", parent)
+	local base = at(x, y, z) * CFrame.Angles(0, rng:NextNumber() * math.pi, 0)
+	for i = 0, 3 do
+		local cf = base
+			* CFrame.Angles(0, i * math.pi / 2, 0)
+			* CFrame.Angles(math.rad(30), 0, 0)
+			* CFrame.new(0, 1.4, 0)
+		decor(part("DeadTwig", Vector3.new(0.5, 2.8, 0.5), cf, DEAD_BUSH, Enum.Material.Wood, f))
+	end
+	decor(
+		part(
+			"DeadTwig",
+			Vector3.new(0.5, 2.4, 0.5),
+			base * CFrame.new(0, 1.2, 0),
+			DEAD_BUSH,
+			Enum.Material.Wood,
+			f
+		)
+	)
+	return f
+end
+-- a decorated pot (terracotta, a darker neck) with a dead bush or a little hedge
+local function pot(x, y, z, parent, plant)
+	local f = folder("Pot", parent)
+	cube("PotBody", x, y + 1.6, z, 3.2, 3.2, 3.2, "px_terracotta", nil, f)
+	cube("PotNeck", x, y + 3.6, z, 2.2, 0.8, 2.2, "px_terracotta", Color3.fromRGB(190, 150, 130), f)
+	if plant == "bush" then
+		deadBush(x, y + 4, z, f)
+	elseif plant == "hedge" then
+		decor(cube("PotPlant", x, y + 5, z, 2.4, 2.4, 2.4, "px_hedge", CYPRESS, f))
+	end
+	return f
+end
+-- a sandstone arch in frame cf (ground centre; local X across, the front faces -Z): pillars at ±half, a corbel step
+-- inside each, a lintel with a gold keystone and a crown; red banners on the pillar fronts; ruined = the right half
+-- broken (a short pillar, half a lintel, fallen blocks)
+local function arch(cf, half, ht, parent, ruined)
+	local f = folder(if ruined then "RuinedArch" else "Arch", parent)
+	for _, sx in ipairs({ -1, 1 }) do
+		local px = sx * half
+		local broken = ruined and sx == 1
+		local shaftH = if broken then ht - 10 else ht - 2
+		lp(cf, "ArchBase", 6, 2, 6, px, 1, 0, "px_cut_sandstone", SAND_PALE, f)
+		lp(cf, "ArchPillar", 4, shaftH, 4, px, 2 + shaftH / 2, 0, "px_sandstone", SAND, f)
+		if not broken then
+			lp(cf, "ArchCorbel", 4, 4, 4, px - sx * 4, ht - 2, 0, "px_cut_sandstone", SAND_PALE, f)
+			banner(cf * CFrame.new(px, ht * 0.55, -2.15), BANNER_RED, f, GOLD, 4, ht * 0.45)
+		end
+	end
+	if ruined then
+		lp(cf, "ArchLintel", half + 4, 4, 4, -half / 2, ht + 2, 0, "px_cut_sandstone", SAND_PALE, f)
+		lp(cf, "ArchFallen", 4, 4, 4, half + 5, 2, -4, "px_cut_sandstone", SAND_PALE, f).CFrame *= CFrame.Angles(
+			0,
+			0.4,
+			0
+		)
+		lp(cf, "ArchFallen", 4, 4, 4, half + 2, 2, 6, "px_sandstone", SAND, f).CFrame *= CFrame.Angles(
+			0,
+			-0.3,
+			0
+		)
+		decor(lp(cf, "ArchRubble", 4, 2, 4, half + 6, 5, -3, "px_sandstone", SAND, f))
+	else
+		lp(cf, "ArchLintel", 2 * half + 4, 4, 4, 0, ht + 2, 0, "px_cut_sandstone", SAND_PALE, f)
+		lp(cf, "ArchCrown", 2 * half - 4, 4, 4, 0, ht + 6, 0, "px_sandstone", SAND_PALE, f)
+		decor(lp(cf, "ArchKey", 4, 3.6, 4.4, 0, ht + 2, 0, "px_gold_block", nil, f))
+	end
+	return f
+end
+-- a giant hourglass: a dark oak frame (3×3 blocks, 6 tall), stepped glass bulbs, sand, gold caps
+local function hourglass(x, y, z, parent)
+	local f = folder("Hourglass", parent)
+	cube("HourglassBase", x, y + 1, z, 12, 2, 12, "px_dark_oak_planks", nil, f)
+	cube("HourglassTop", x, y + 23, z, 12, 2, 12, "px_dark_oak_planks", nil, f)
+	for _, c in ipairs(CORNERS4) do
+		cube(
+			"HourglassPost",
+			x + c[1] * 5,
+			y + 12,
+			z + c[2] * 5,
+			2,
+			20,
+			2,
+			"px_dark_oak_log",
+			nil,
+			f
+		)
+	end
+	cube("HourglassCap", x, y + 2.5, z, 8, 1, 8, "px_gold_block", nil, f)
+	cube("HourglassCap", x, y + 21.5, z, 8, 1, 8, "px_gold_block", nil, f)
+	cube("HourglassFinial", x, y + 25, z, 4, 2, 4, "px_gold_block", nil, f)
+	for _, g in ipairs({
+		{ 8, 5, 5.5 },
+		{ 6, 3, 9.5 },
+		{ 2, 2, 12 },
+		{ 6, 3, 14.5 },
+		{ 8, 5, 18.5 },
+	}) do
+		local p = part(
+			"HourglassGlass",
+			Vector3.new(g[1], g[2], g[1]),
+			at(x, y + g[3], z),
+			GLASS,
+			Enum.Material.Glass,
+			f
+		)
+		p.Transparency = 0.4
+		p.CastShadow = false
+	end
+	cube("HourglassSand", x, y + 5.05, z, 7, 3.9, 7, "px_sand", nil, f)
+	decor(cube("HourglassSand", x, y + 7.75, z, 4, 1.5, 4, "px_sand", nil, f))
+	decor(cube("HourglassSand", x, y + 17.25, z, 7, 2.5, 7, "px_sand", nil, f))
+	decor(cube("HourglassStream", x, y + 12.25, z, 0.6, 7.5, 0.6, "px_sand", nil, f))
+	return f
+end
+-- a bench of dark oak with a pot at each end and a red banner on a post behind (cf: -Z = the view)
+local function bench(cf, parent)
+	local f = folder("Bench", parent)
+	lp(cf, "BenchSeat", 12, 1, 4, 0, 2.5, 0, "px_dark_oak_planks", nil, f)
+	for _, sx in ipairs({ -1, 1 }) do
+		lp(cf, "BenchLeg", 2, 2, 3, sx * 4.5, 1, 0, "px_dark_oak_log", nil, f)
+		local p = (cf * CFrame.new(sx * 9, 0, 0)).Position
+		pot(p.X - BX, p.Y - BY, p.Z - BZ, f, if sx < 0 then "hedge" else "bush")
+	end
+	lp(cf, "BannerPost", 1, 12, 1, 0, 6, 3, "px_dark_oak_planks", nil, f)
+	banner(cf * CFrame.new(0, 8, 2.3), BANNER_RED, f, GOLD, 4, 6)
+	return f
+end
+
+-- ================================================================ the fixed ring stairs (the mountain is climbable)
+do
+	local stairF = folder("RingStairs", mountF)
+	for _, r in ipairs(STAIR_RINGS) do
+		for _, d in ipairs({ { 1, 0, "East" }, { -1, 0, "West" }, { 0, -1, "North" } }) do
+			local ux, uz = d[1], d[2]
+			local sx, sz = -uz, ux -- across the flight
+			local function pt(t, s)
+				return PEAK.x + ux * t + sx * s, PEAK.z + uz * t + sz * s
+			end
+			local function cy(t, s)
+				local x, z = pt(t, s)
+				return cellY(x, z)
+			end
+			-- the edge: the distance t where both rows of the 16-wide flight step down by STEP_Y going outward
+			local edge
+			for t = r - 20, r + 20 do
+				local yi, yo = cy(t - 0.5, -4), cy(t + 0.5, -4)
+				if
+					yi
+					and yo
+					and yi - yo == STEP_Y
+					and cy(t - 0.5, 4) == yi
+					and cy(t + 0.5, 4) == yo
+				then
+					edge = t
+					break
+				end
+			end
+			local ok = edge ~= nil
+			local yl, yu
+			if ok then
+				yl, yu = cy(edge + 4, -4), cy(edge - 4, -4)
+				-- the landing below (the flight's cell and one more), the top landing (two cells of the same ground)
+				for _, s in ipairs({ -4, 4 }) do
+					ok = ok and cy(edge + 4, s) == yl and cy(edge + 12, s) == yl
+					ok = ok and cy(edge - 4, s) == yu and cy(edge - 12, s) == yu
+				end
+				local lx, lz = pt(edge + 12, 0)
+				ok = ok and not inBay(lx, lz, 8)
+			end
+			if ok then
+				local f = folder(("RingStair%d%s"):format(r, d[3]), stairF)
+				local ex, ez = pt(edge, 0)
+				if ux ~= 0 then
+					stairs(
+						"RingStair",
+						PEAK.z,
+						ex + ux * 8,
+						ex,
+						yl,
+						STEP_Y,
+						STAIR_W,
+						"px_cut_sandstone",
+						f,
+						"x"
+					)
+				else
+					stairs(
+						"RingStair",
+						PEAK.x,
+						ez + uz * 8,
+						ez,
+						yl,
+						STEP_Y,
+						STAIR_W,
+						"px_cut_sandstone",
+						f
+					)
+				end
+				local function boxTS(name, t0, t1, s0, s1, y0, y1, variant, tint)
+					local xa, za = pt(t0, s0)
+					local xb, zb = pt(t1, s1)
+					return box(name, xa, y0, za, xb, y1, zb, variant, tint, f)
+				end
+				-- the cheek walls: a cap block over the top edge, a full wall beside the upper steps, a low one below
+				for _, s in ipairs({ -1, 1 }) do
+					boxTS(
+						"StairCheek",
+						edge - 4,
+						edge + 4,
+						s * 8,
+						s * 12,
+						yl,
+						yu,
+						"px_sandstone",
+						SAND
+					)
+					boxTS(
+						"StairCheekCap",
+						edge - 4,
+						edge + 4,
+						s * 8,
+						s * 12,
+						yu,
+						yu + B,
+						"px_cut_sandstone",
+						SAND_PALE
+					)
+					boxTS(
+						"StairCheek",
+						edge + 4,
+						edge + 8,
+						s * 8,
+						s * 12,
+						yl,
+						yl + B,
+						"px_sandstone",
+						SAND
+					)
+				end
+				-- a lantern post on the cap at the top landing
+				local px, pz = pt(edge - 2, 10)
+				textured(
+					part("LanternPost", Vector3.new(1, 4, 1), at(px, yu + B + 2, pz), nil, nil, f),
+					"px_dark_oak_planks"
+				)
+				lightsLeft -= 1
+				lantern(V(px, yu + B + 4.75, pz), f)
+				-- keep the props off both landings, open the kerb over the flight
+				local function rect(t0, t1, s0, s1)
+					local xa, za = pt(t0, s0)
+					local xb, zb = pt(t1, s1)
+					return { math.min(xa, xb), math.min(za, zb), math.max(xa, xb), math.max(za, zb) }
+				end
+				table.insert(RES, rect(edge - 16, edge + 20, -16, 16))
+				table.insert(NOKERB, rect(edge - 8, edge + 8, -12, 12))
+				table.insert(
+					built.stairs,
+					("%s r%d edge (%d, %d) y %d→%d"):format(d[3], r, ex, ez, yl, yu)
+				)
+			end
+		end
+	end
+	print(
+		("[build-purgatory] mount: ring stairs %d — %s"):format(
+			#built.stairs,
+			table.concat(built.stairs, "; ")
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ the terrace edges: kerbs, fences, overhangs
+do
+	local edgeF = folder("TerraceEdges", mountF)
+	local D4 = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local units, unitList = {}, {}
+	local lines, lineKeys = {}, {}
+	local function addUnit(ux, uz, y)
+		local k = ux .. ":" .. uz
+		if not units[k] then
+			units[k] = { x = ux, z = uz, y = y }
+			table.insert(unitList, units[k])
+		end
+		return units[k]
+	end
+	for cz = CELL.z0 + 4, 60, 8 do
+		for cx = -140, 140, 8 do
+			local y = cellY(cx, cz)
+			if y and zoneOf(cx, cz) == "mount" then
+				for di, d in ipairs(D4) do
+					local nx, nz = cx + d[1] * 8, cz + d[2] * 8
+					local ny = cellY(nx, nz)
+					local drop = ny == y - STEP_Y and zoneOf(nx, nz) ~= "bay"
+					-- the top of the bay wall (a 24..40 drop to the bay floor): a kerb too, no fence or overhang
+					local bayTop = ny == 0 and inBay(nx, nz) and y > 0
+					if drop or bayTop or ny == nil then
+						EDGE[cellKey(cx, cz)] = true
+						local a, b
+						if d[1] ~= 0 then
+							local ux = if d[1] > 0 then cx else cx - 4
+							a, b = addUnit(ux, cz - 4, y), addUnit(ux, cz, y)
+						else
+							local uz = if d[2] > 0 then cz else cz - 4
+							a, b = addUnit(cx - 4, uz, y), addUnit(cx, uz, y)
+						end
+						if bayTop then -- no gaps over the deep drop
+							a.solid, b.solid = true, true
+						end
+						local face = if d[1] ~= 0 then cx + d[1] * 4 else cz + d[2] * 4
+						local key = di .. ":" .. face .. ":" .. y
+						if not lines[key] then
+							lines[key] = { d = d, face = face, y = y, cells = {} }
+							table.insert(lineKeys, key)
+						end
+						table.insert(
+							lines[key].cells,
+							{ along = if d[1] ~= 0 then cz else cx, a = a, b = b, drop = drop }
+						)
+					end
+				end
+			end
+		end
+	end
+	-- straight runs of edge cells along each face line
+	local runs = {}
+	for _, key in ipairs(lineKeys) do
+		local L = lines[key]
+		table.sort(L.cells, function(p, q)
+			return p.along < q.along
+		end)
+		local cur
+		for _, c in ipairs(L.cells) do
+			if cur and c.along == cur.cells[#cur.cells].along + 8 and c.drop == cur.drop then
+				table.insert(cur.cells, c)
+			else
+				cur = { d = L.d, face = L.face, y = L.y, drop = c.drop, cells = { c } }
+				table.insert(runs, cur)
+			end
+		end
+	end
+	local nFence, nOver = 0, 0
+	for _, run in ipairs(runs) do
+		local d, F, y = run.d, run.face, run.y
+		local a0, a1 = run.cells[1].along - 4, run.cells[#run.cells].along + 4
+		-- a point on the face at `along`, `out` studs outward
+		local function fp(along, out)
+			if d[1] ~= 0 then
+				return F + d[1] * out, along
+			end
+			return along, F + d[2] * out
+		end
+		local open = false
+		for a = a0, a1, 4 do
+			local x, z = fp(a, -2)
+			if inAny(NOKERB, x, z, 2) then
+				open = true
+			end
+		end
+		local mx, mz = fp((a0 + a1) / 2, 0)
+		local fenced = run.drop and not open and #run.cells >= 2 and n2(mx, mz, 5.5, 0.045) > 0.18
+		for _, c in ipairs(run.cells) do
+			for _, u in ipairs({ c.a, c.b }) do
+				if fenced then
+					u.fence = true
+				else
+					u.kerb = true
+				end
+			end
+		end
+		if fenced then
+			-- shorten the fence where a kerb of the next face holds the corner unit
+			local s0, s1 = a0 + 2, a1 - 2
+			if run.cells[1].a.kerb or run.cells[1].b.kerb then
+				s0 += 4
+			end
+			local last = run.cells[#run.cells]
+			if last.a.kerb or last.b.kerb then
+				s1 -= 4
+			end
+			if s1 > s0 then
+				local ax, az = fp(s0, -2)
+				local bx, bz = fp(s1, -2)
+				fence(ax, az, bx, bz, edgeF, y, "px_sandstone")
+				nFence += 1
+			end
+		end
+		-- stepped overhangs under the edge (decor), z-facing ones 0.1 lower so corners never fight
+		if run.drop and not open and n2(mx, mz, 8.8, 0.05) > 0.05 then
+			local lo = if d[1] ~= 0 then 0 else 0.1
+			local xa, za = fp(a0, 0)
+			local xb, zb = fp(a1, 2)
+			decor(
+				box(
+					"Overhang",
+					xa,
+					y - 2 - lo,
+					za,
+					xb,
+					y - lo,
+					zb,
+					"px_cut_sandstone",
+					SAND_PALE,
+					edgeF
+				)
+			)
+			xb, zb = fp(a1, 1)
+			decor(
+				box("Overhang", xa, y - 4 - lo, za, xb, y - 2 - lo, zb, "px_sandstone", SAND, edgeF)
+			)
+			nOver += 1
+		end
+	end
+	-- the kerb: the marked units minus the openings and a gap every few blocks, merged into runs
+	local K, final = {}, {}
+	for _, u in ipairs(unitList) do
+		local gap = not u.solid and ((u.x / 4) * 7 + (u.z / 4) * 11) % 9 == 0
+		if u.kerb and not gap and not inAny(NOKERB, u.x + 2, u.z + 2) then
+			K[u.x .. ":" .. u.z] = u
+			table.insert(final, u)
+		end
+	end
+	table.sort(final, function(p, q)
+		if p.z ~= q.z then
+			return p.z < q.z
+		end
+		return p.x < q.x
+	end)
+	local used, nKerb = {}, 0
+	for _, u in ipairs(final) do
+		if not used[u.x .. ":" .. u.z] then
+			local function free(x, z)
+				local k = x .. ":" .. z
+				return K[k] ~= nil and not used[k] and K[k].y == u.y
+			end
+			local nx, nz = 1, 1
+			while free(u.x + nx * 4, u.z) do
+				nx += 1
+			end
+			while free(u.x, u.z + nz * 4) do
+				nz += 1
+			end
+			if nx >= nz then
+				nz = 1
+			else
+				nx = 1
+			end
+			for i = 0, nx - 1 do
+				for j = 0, nz - 1 do
+					used[(u.x + i * 4) .. ":" .. (u.z + j * 4)] = true
+				end
+			end
+			box(
+				"Kerb",
+				u.x,
+				u.y,
+				u.z,
+				u.x + nx * 4,
+				u.y + B,
+				u.z + nz * 4,
+				"px_cut_sandstone",
+				SAND_PALE,
+				edgeF
+			)
+			nKerb += 1
+		end
+	end
+	print(
+		("[build-purgatory] mount: edges %d runs, kerb %d boxes, fences %d, overhangs %d"):format(
+			#runs,
+			nKerb,
+			nFence,
+			nOver
+		)
+	)
+end
+task.wait()
+
+-- props: a free spot of half-size h on one terrace, off the stairs, the edges and other props, with a walkway of
+-- `walk` studs kept on its outer side; returns the ground y
+local function spot(x, z, h, walk)
+	if zoneOf(x, z) ~= "mount" or inBay(x, z, h + 12) then
+		return nil
+	end
+	if not freeGround(x, z, math.max(0, h - 4)) or inAny(RES, x, z, h + 1) then
+		return nil
+	end
+	local y = cellY(x, z)
+	if EDGE[cellKey(x, z)] then
+		return nil
+	end
+	for _, c in ipairs(CORNERS4) do
+		local qx, qz = x + c[1] * (h - 0.5), z + c[2] * (h - 0.5)
+		if cellY(qx, qz) ~= y or EDGE[cellKey(qx, qz)] or zoneOf(qx, qz) ~= "mount" then
+			return nil
+		end
+	end
+	local d = peakDist(x, z)
+	if d > 1 then
+		local ox, oz = (x - PEAK.x) / d, (z - PEAK.z) / d
+		for _, k in ipairs({ h + 4, h + walk }) do
+			local qx, qz = x + ox * k, z + oz * k
+			if cellY(qx, qz) ~= y or (k < h + walk and EDGE[cellKey(qx, qz)]) then
+				return nil
+			end
+		end
+	end
+	for _, p in ipairs(placed) do
+		if (x - p[1]) ^ 2 + (z - p[2]) ^ 2 < (h + p[3] + 2) ^ 2 then
+			return nil
+		end
+	end
+	return y
+end
+local function claim(x, z, r)
+	table.insert(placed, { x, z, r })
+end
+
+-- ================================================================ the SUMMIT: floor, dais, gate, the great angel
+do
+	local summitF = folder("Summit", mountF)
+	-- a flat summit spot: every corner on the plaza, off the edge cells
+	local function flat(x, z, h)
+		for _, c in ipairs({ { 0, 0 }, table.unpack(CORNERS4) }) do
+			local qx, qz = x + c[1] * h, z + c[2] * h
+			if cellY(qx, qz) ~= SUMMIT_Y or zoneOf(qx, qz) ~= "mount" or EDGE[cellKey(qx, qz)] then
+				return false
+			end
+		end
+		return true
+	end
+	-- the checkered floor laid flush: 1-block squares of red sandstone / cut sandstone, a cut sandstone walkway with
+	-- red borders from MAIN_UP to the steps; equal neighbours along x merge
+	do
+		local f = folder("SummitFloor", summitF)
+		local function blockAt(bx, bz)
+			if cellY(bx, bz) ~= SUMMIT_Y or zoneOf(bx, bz) ~= "mount" then
+				return nil
+			end
+			local ax = math.abs(bx)
+			if (ax < 20 and bz > -112 and bz < -88) or (ax < 16 and bz > -88 and bz < -76) then
+				return nil -- under the dais and the steps
+			end
+			if bz > -76 and ax < 8 then
+				return "px_cut_sandstone"
+			elseif bz > -76 and ax < 12 then
+				return "px_cut_red_sandstone"
+			end
+			return if (math.floor(bx / 4) + math.floor(bz / 4)) % 2 == 0
+				then "px_red_sandstone"
+				else "px_cut_sandstone"
+		end
+		local n = 0
+		for bz = -134, -26, 4 do
+			local runX, runV
+			local function flush(xEnd)
+				if runX then
+					box(
+						"SummitFloor",
+						runX,
+						SUMMIT_Y,
+						bz - 2,
+						xEnd,
+						SUMMIT_Y + 0.1,
+						bz + 2,
+						runV,
+						nil,
+						f
+					)
+					n += 1
+				end
+				runX = nil
+			end
+			for bx = -54, 54, 4 do
+				local v = blockAt(bx, bz)
+				if v ~= runV then
+					flush(bx - 2)
+					if v then
+						runX = bx - 2
+					end
+					runV = v
+				end
+			end
+			flush(56)
+		end
+		print(("[build-purgatory] mount: summit floor %d runs"):format(n))
+	end
+	task.wait()
+	-- the dais with three steps and a gate
+	do
+		local f = folder("Dais", summitF)
+		box("Dais", -20, SUMMIT_Y, -112, 20, DAIS_Y - 2, -88, "px_cut_sandstone", SAND_PALE, f)
+		box("DaisCourse", -20, DAIS_Y - 2, -112, 20, DAIS_Y, -88, "px_smooth_stone", WHITE, f)
+		box("DaisCarpet", -8, DAIS_Y, -94, 8, DAIS_Y + 0.1, -88, "px_cut_red_sandstone", nil, f)
+		for i = 1, 3 do
+			local z1 = -76 - (i - 1) * 4
+			box(
+				"DaisStep",
+				-16,
+				SUMMIT_Y,
+				z1 - 4,
+				16,
+				SUMMIT_Y + i * 1.5,
+				z1,
+				"px_smooth_stone",
+				WHITE,
+				f
+			)
+		end
+		local ramp = Instance.new("WedgePart")
+		ramp.Name = "DaisRamp"
+		ramp.Anchored = true
+		ramp.Transparency = 1
+		ramp.Size = Vector3.new(32, DAIS_Y - SUMMIT_Y, 12)
+		ramp.CFrame = at(0, (SUMMIT_Y + DAIS_Y) / 2, -82) * CFrame.Angles(0, math.pi, 0)
+		ramp.Parent = f
+		-- the gate on the dais front: two pillars, a lintel with a gold block, a crest, red banners
+		for _, sx in ipairs({ -1, 1 }) do
+			box(
+				"GatePillar",
+				sx * 16,
+				DAIS_Y,
+				-92,
+				sx * 20,
+				DAIS_Y + 16,
+				-88,
+				"px_cut_sandstone",
+				SAND_PALE,
+				f
+			)
+			box(
+				"GatePillarBase",
+				sx * 15,
+				DAIS_Y,
+				-93,
+				sx * 21,
+				DAIS_Y + 2,
+				-87,
+				"px_sandstone",
+				SAND_PALE,
+				f
+			)
+			banner(at(sx * 18, DAIS_Y + 9, -86.85), BANNER_RED, f, GOLD, 4, 9)
+		end
+		box(
+			"GateLintel",
+			-21,
+			DAIS_Y + 16,
+			-93,
+			21,
+			DAIS_Y + 20,
+			-87,
+			"px_cut_sandstone",
+			SAND_PALE,
+			f
+		)
+		box("GateCrest", -10, DAIS_Y + 20, -92, 10, DAIS_Y + 23, -88, "px_sandstone", SAND_PALE, f)
+		decor(
+			box(
+				"GateGold",
+				-2,
+				DAIS_Y + 16.2,
+				-87.2,
+				2,
+				DAIS_Y + 19.8,
+				-86.8,
+				"px_gold_block",
+				nil,
+				f
+			)
+		)
+		-- soul braziers flanking the angel on the dais
+		for _, sx in ipairs({ -1, 1 }) do
+			brazier(sx * 16, DAIS_Y, -100, true, f, true)
+		end
+	end
+	task.wait()
+	-- the great angel: robe stepping out at the base, folded hands, gold hair and halo, wide stepped wings
+	do
+		local f = folder("Angel", summitF)
+		local AX, AZ, Y0 = ANGEL.x, ANGEL.z, DAIS_Y
+		local P, S, G = "px_white_stone_bricks", "px_smooth_stone", "px_gold_block"
+		local function bx(name, x0, y0, z0, x1, y1, z1, v, tint, isDecor)
+			local p = box(name, AX + x0, Y0 + y0, AZ + z0, AX + x1, Y0 + y1, AZ + z1, v, tint, f)
+			if isDecor then
+				decor(p)
+			end
+			return p
+		end
+		bx("AngelPlinth", -12, 0, -8, 12, 3, 8, "px_cut_sandstone", SAND_PALE)
+		bx("AngelTrim", -12.2, 2, -8.2, 12.2, 2.6, 8.2, G, nil, true)
+		bx("AngelHem", -10, 3, -6, 10, 8, 6, P, nil)
+		bx("AngelRobe", -8, 8, -5, 8, 22, 5, P, nil)
+		bx("AngelFold", -3, 8, 5, 3, 20, 6, S, WHITE)
+		bx("AngelTorso", -7, 22, -4, 7, 34, 4, P, nil)
+		bx("AngelBelt", -8.3, 21, -5.3, 8.3, 23, 5.3, G, nil, true)
+		for _, sx in ipairs({ -1, 1 }) do
+			bx("AngelSleeve", sx * 7, 22, -4, sx * 11, 34, 4, P, nil)
+			bx("AngelCuff", sx * 7, 20, -4.5, sx * 12, 24, 4.5, S, WHITE)
+		end
+		bx("AngelForearms", -7, 24, 4, 7, 28, 7, S, WHITE)
+		bx("AngelHands", -2, 26, 5, 2, 33, 8, S, WHITE)
+		bx("AngelShoulders", -11, 34, -4, 11, 36, 4, S, WHITE)
+		bx("AngelNeck", -2, 36, -2, 2, 38, 2, S, WHITE)
+		bx("AngelHead", -4, 38, -4, 4, 46, 4, S, WHITE)
+		bx("AngelHair", -5, 31, -5, 5, 47, -1, G, nil)
+		for _, sx in ipairs({ -1, 1 }) do
+			bx("AngelHairSide", sx * 4, 36, -1, sx * 5.5, 46, 2, G, nil, true)
+		end
+		bx("AngelHairTop", -5, 46, -5, 5, 48, 3, G, nil)
+		-- the halo: a ring of gold blocks behind the head (a 5×5 square without its corners)
+		for i = -2, 2 do
+			for j = -2, 2 do
+				local ring = math.max(math.abs(i), math.abs(j)) == 2
+					and not (math.abs(i) == 2 and math.abs(j) == 2)
+				if ring then
+					bx(
+						"AngelHalo",
+						i * 4 - 2,
+						48 + j * 4 - 2,
+						-6.5,
+						i * 4 + 2,
+						48 + j * 4 + 2,
+						-5.5,
+						G,
+						nil,
+						true
+					)
+				end
+			end
+		end
+		-- the wings: 8 columns a side rising outward, each in three feather rows, hanging tips under every other
+		local COLS = {
+			{ 20, 38 },
+			{ 18, 42 },
+			{ 18, 46 },
+			{ 20, 50 },
+			{ 24, 54 },
+			{ 30, 56 },
+			{ 36, 58 },
+			{ 42, 58 },
+		}
+		for _, sx in ipairs({ -1, 1 }) do
+			for i, c in ipairs(COLS) do
+				local xa, xb = sx * (6 + (i - 1) * 4), sx * (6 + i * 4)
+				local lo, hi = c[1], c[2]
+				local m1 = lo + math.floor((hi - lo) / 3 / 2 + 0.5) * 2
+				local m2 = lo + math.floor((hi - lo) * 2 / 3 / 2 + 0.5) * 2
+				bx("WingFeathers", xa, lo, -10, xb, m1, -7, P, nil)
+				bx("WingFeathers", xa, m1, -10, xb, m2, -7, S, WHITE)
+				bx("WingCoverts", xa, m2, -10, xb, hi, -7, P, nil)
+				if i % 2 == 1 then
+					local ia, ib = xa + sx * 0.5, xb - sx * 0.5
+					bx("WingTip", ia, lo - 6, -9.5, ib, lo, -7.5, S, WHITE, true)
+				end
+			end
+		end
+	end
+	task.wait()
+	-- obelisks, soul braziers, cypresses, the arches over the side stairs, kneeling souls, dead bushes
+	do
+		local f = folder("SummitProps", summitF)
+		-- nothing standing within r (+2) of (x, z)
+		local function vacant(x, z, r)
+			for _, p in ipairs(placed) do
+				if (x - p[1]) ^ 2 + (z - p[2]) ^ 2 < (r + p[3] + 2) ^ 2 then
+					return false
+				end
+			end
+			return true
+		end
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, p in ipairs({ { 30, -104 }, { 22, -54 } }) do
+				local x, z = sx * p[1], p[2]
+				if flat(x, z, 5.5) then
+					obelisk(x, SUMMIT_Y, z, f)
+					claim(x, z, 6)
+				end
+			end
+			for _, p in ipairs({ { 18, -42 }, { 14, -122 } }) do
+				local x, z = sx * p[1], p[2]
+				if flat(x, z, 1.5) and vacant(x, z, 2) and not inAny(NOKERB, x, z, 2) then
+					brazier(x, SUMMIT_Y, z, true, f, p[2] > -60)
+					claim(x, z, 2)
+				end
+			end
+			for _, p in ipairs({ { 38, -100 }, { 34, -58 }, { 26, -118 }, { 40, -62 } }) do
+				local x, z = sx * p[1], p[2]
+				if
+					flat(x, z, 3.5)
+					and vacant(x, z, 4)
+					and not inAny(RES, x, z, 4)
+					and not inAny(NOKERB, x, z, 4)
+				then
+					cypress(x, SUMMIT_Y, z, f)
+					claim(x, z, 4)
+				end
+			end
+			-- the arch over the east stair top, the ruined one over the west
+			local ax = sx * 36
+			if flat(ax, -92, 2) and flat(ax, -68, 2) then
+				arch(
+					at(ax, SUMMIT_Y, -80) * CFrame.Angles(0, sx * math.pi / 2, 0),
+					12,
+					16,
+					f,
+					sx < 0
+				)
+			end
+			-- rows of kneeling souls facing the angel, both sides of the walkway
+			for _, z in ipairs({ -64, -70, -76 }) do
+				for _, x in ipairs({ 18, 22, 26 }) do
+					if flat(sx * x, z, 1.5) then
+						soulFigure(sx * x, SUMMIT_Y + 0.1, z, ANGEL.x, ANGEL.z, true, f)
+					end
+				end
+			end
+		end
+		local nb = 0
+		for _ = 1, 40 do
+			if nb >= 10 then
+				break
+			end
+			local a, d = rng:NextNumber() * math.pi * 2, rng:NextNumber() * 44
+			local x, z = PEAK.x + math.cos(a) * d, PEAK.z + math.sin(a) * d
+			if flat(x, z, 1.5) and not inAny(RES, x, z, 3) and not inAny(NOKERB, x, z, 3) then
+				if vacant(x, z, 2) then
+					deadBush(x, SUMMIT_Y + 0.1, z, f)
+					claim(x, z, 1)
+					nb += 1
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ life on the terraces L5, L4, L3
+do
+	local lifeF = folder("Terraces", mountF)
+	-- the arc a prop takes along the ring and its half size across it
+	local SIZE = {
+		fire = { 2, 4 },
+		soul = { 2, 4 },
+		cypress = { 4, 8 },
+		obelisk = { 6, 12 },
+		hourglass = { 6, 12 },
+		queue = { 2, 30 },
+		bench = { 3, 22 },
+		arch = { 3, 22 },
+		pots = { 3, 10 },
+		bush = { 2, 4 },
+	}
+	local TERRACES = {
+		{
+			lvl = 5,
+			rin = 50,
+			items = {
+				"fire",
+				"cypress",
+				"soul",
+				"queue",
+				"fire",
+				"obelisk",
+				"soul",
+				"bench",
+				"fire",
+				"hourglass",
+				"soul",
+				"cypress",
+				"fire",
+				"arch",
+				"soul",
+				"queue",
+				"fire",
+				"pots",
+				"soul",
+				"obelisk",
+			},
+		},
+		{
+			lvl = 4,
+			rin = 84,
+			items = {
+				"queue",
+				"cypress",
+				"fire",
+				"obelisk",
+				"bench",
+				"soul",
+				"cypress",
+				"hourglass",
+				"pots",
+				"arch",
+				"bush",
+				"queue",
+				"cypress",
+				"soul",
+				"obelisk",
+				"bench",
+				"fire",
+				"cypress",
+				"bush",
+			},
+		},
+		{
+			lvl = 3,
+			rin = 110,
+			items = {
+				"cypress",
+				"queue",
+				"fire",
+				"pots",
+				"cypress",
+				"bench",
+				"soul",
+				"bush",
+				"cypress",
+				"queue",
+				"bush",
+				"pots",
+			},
+		},
+	}
+	local counts = {}
+	-- try one prop at angle a on terrace T; returns true when built
+	local function tryItem(kind, a, T, yT)
+		if kind == "hourglass" and built.hourglass >= 2 then
+			return false
+		end
+		local h = SIZE[kind][1]
+		local ca, sa = math.cos(a), math.sin(a)
+		local tx, tz = -sa, ca -- along the ring
+		for k = 0, 3 do
+			local d = T.rin + h + 1 + k * 3
+			local x, z = PEAK.x + ca * d, PEAK.z + sa * d
+			local y = spot(x, z, h, 12)
+			if y == yT then
+				-- the frame facing outward (-Z looks away from the summit), local X along the ring
+				local cf = CFrame.lookAt(V(x, y, z), V(x + ca, y, z + sa))
+				if kind == "fire" or kind == "soul" then
+					local soul = kind == "soul"
+					brazier(x, y, z, soul, lifeF, built.braziers % 3 == 0)
+					claim(x, z, h)
+				elseif kind == "cypress" then
+					cypress(x, y, z, lifeF)
+					claim(x, z, h)
+				elseif kind == "obelisk" then
+					obelisk(x, y, z, lifeF)
+					claim(x, z, h)
+				elseif kind == "hourglass" then
+					hourglass(x, y, z, lifeF)
+					claim(x, z, h)
+					built.hourglass += 1
+				elseif kind == "bush" then
+					deadBush(x, y, z, lifeF)
+					claim(x, z, h)
+				elseif kind == "pots" then
+					local n = rng:NextInteger(2, 3)
+					for i = 1, n do
+						local o = (i - (n + 1) / 2) * 3.6
+						pot(
+							x + tx * o,
+							y,
+							z + tz * o,
+							lifeF,
+							if i == 2 then "bush" elseif i == 1 then "hedge" else nil
+						)
+					end
+					claim(x, z, h + 2)
+				elseif kind == "bench" or kind == "arch" then
+					local ends = if kind == "bench" then 9 else 8
+					if
+						spot(x + tx * ends, z + tz * ends, h, 12) ~= y
+						or spot(x - tx * ends, z - tz * ends, h, 12) ~= y
+					then
+						return false
+					end
+					if kind == "bench" then
+						bench(cf, lifeF)
+					else
+						arch(cf, 8, 14, lifeF, false)
+						brazier(x, y, z, true, lifeF, false)
+					end
+					claim(x, z, 11)
+				elseif kind == "queue" then
+					-- a row of souls along the ring, all facing the summit
+					local n = rng:NextInteger(4, 8)
+					local ok = {}
+					for i = 1, n do
+						local o = (i - (n + 1) / 2) * 4
+						local qx, qz = x + tx * o, z + tz * o
+						if spot(qx, qz, 2, 12) ~= y then
+							break
+						end
+						table.insert(ok, { qx, qz })
+					end
+					if #ok < 4 then
+						return false
+					end
+					for _, q in ipairs(ok) do
+						soulFigure(q[1], y, q[2], PEAK.x, PEAK.z, false, lifeF)
+						claim(q[1], q[2], 1.5)
+					end
+				end
+				counts[kind] = (counts[kind] or 0) + 1
+				return true
+			end
+		end
+		return false
+	end
+	for _, T in ipairs(TERRACES) do
+		local yT = T.lvl * STEP_Y
+		local rm = T.rin + 8
+		local circ = 2 * math.pi * rm
+		local a0 = rng:NextNumber() * math.pi * 2
+		local s, idx, misses = 0, 1, 0
+		while s < circ do
+			local kind = T.items[idx]
+			if tryItem(kind, a0 + s / rm, T, yT) then
+				s += SIZE[kind][2] + 6
+				idx = idx % #T.items + 1
+				misses = 0
+			else
+				s += 4
+				misses += 1
+				if misses > 8 then -- this one does not fit here: try the next kind
+					idx = idx % #T.items + 1
+					misses = 0
+				end
+			end
+		end
+		task.wait()
+	end
+	-- a few more dead bushes in the gaps
+	for _, T in ipairs(TERRACES) do
+		local n = 0
+		for _ = 1, 60 do
+			if n >= 8 then
+				break
+			end
+			local a = rng:NextNumber() * math.pi * 2
+			local d = T.rin + 3 + rng:NextNumber() * 6
+			local x, z = PEAK.x + math.cos(a) * d, PEAK.z + math.sin(a) * d
+			local y = spot(x, z, 2, 12)
+			if y == T.lvl * STEP_Y then
+				deadBush(x, y, z, lifeF)
+				claim(x, z, 1)
+				n += 1
+			end
+		end
+	end
+	local parts = {}
+	for k, v in pairs(counts) do
+		table.insert(parts, k .. " " .. v)
+	end
+	table.sort(parts)
+	print(
+		("[build-purgatory] mount: terraces — %s; hourglasses %d"):format(
+			table.concat(parts, ", "),
+			built.hourglass
+		)
+	)
+end
+
+print(
+	("[build-purgatory] mount: %d parts, %d souls, %d braziers, lights left %d"):format(
+		count - startCount,
+		built.souls,
+		built.braziers,
+		lightsLeft
+	)
+)
+
+end
+task.wait()
+-- ================================================================================ purgatory/40-rim.luau
+do
+-- ================================================================ purgatory: the foot of the mountain (RIM part)
+-- Zone: zoneOf(x, z) == "rim" (d ≥ 138 from PEAK outside the bay: the outer terraces L0 y 0, L1 y 8, L2 y 16),
+-- under the island and the sky round it. Blocky: full 4-stud blocks, flat px_* textures, light only from the stair
+-- lanterns, the arch lanterns and the braziers (≤ 20 PointLights).
+-- 1. STAIRS between L0, L1 and L2 (16 wide, rising 8, kit `stairs` on an invisible ramp), found at build time by
+--    scanning cellY across the edge (planStair): per side (east +x / west −x, mirrored)
+--      A  L0→L1 at x ±112 (fallback ±120, ±128) climbing north across ring 200 at z ≈ 88: from the bay's south-east /
+--         south-west corner (the bay floor is flush with L0 there) — a sandstone arch with red banners frames its foot
+--      B  L0→L1 at z 16 (fallback 24, 8, 0) climbing toward the peak across ring 200 at x ≈ ±176
+--      C  L1→L2 at x ±120 (fallback ±128, ±136) climbing north across ring 168 at z ≈ 40
+--      D  L1→L2 at z -56 (fallback -64, -48, -72) climbing toward the peak across ring 168 at x ≈ ±168; on L2 the
+--         walk goes on north to the fixed ring-138 stairs (x ±138, z -80, built by the mount part)
+--    each: cut sandstone steps, a landing filled up to the upper terrace where the edge is ragged, stepped sandstone
+--    cheek walls and a lantern post at the top.
+-- 2. EDGES: cut sandstone kerbs (1 block, on the outer half of the upper cell) with gaps along the L1/L2 edges, some
+--    dark oak fences, cut sandstone cornices under the edge (decor); a low red sandstone parapet with gaps along the
+--    island's outer rim in places. Open at every stair and at the ring-138 landings.
+-- 3. THE FOOT (freeGround only, ≥ 2 blocks of walkway along each terrace): cypresses, dead orange bushes, decorated
+--    pots, benches with waiting souls, queues of souls, obelisks with red banners, fire and soul fire braziers, two
+--    brazier altars, giant hourglasses, the souls' market (a red-and-white stall with pots and sandstone, no buyer),
+--    scattered sandstone blocks.
+-- 4. UNDER THE ISLAND: red sandstone stalactites with dark terracotta tips under the core's 8-stud columns (core's
+--    rockDepth replicated), more at the rim; dark terracotta bands along the bottom of the cliff faces. decor().
+-- 5. THE SKY: floating sandstone islets (stepped cones, props on top), 24+ studs off the island; sunset clouds under
+--    the island and round it. Everything floating is decor.
+local rimF = folder("Foot")
+local R = { lights = 0, stairs = {}, taken = {}, c0 = count, placed = {} }
+local PAL = {
+	DARK = Color3.fromRGB(176, 140, 150), -- a tint over px_terracotta: the darker purple-brown bands
+	GLASS = Color3.fromRGB(225, 240, 245),
+	CLOUD = Color3.fromRGB(255, 214, 190),
+	POT = Color3.fromRGB(236, 200, 180),
+	WOOD = Color3.fromRGB(235, 225, 215),
+}
+local MAX_LIGHTS = 20
+
+-- the core's rock depth under a cell (replicated from 10-core: it is local there)
+local function rockDepth(x, z)
+	local rr = math.clamp(math.sqrt((x - ISLAND.x) ^ 2 + (z - ISLAND.z) ^ 2) / ISLAND.r, 0, 1)
+	local d = 20 + (1 - rr) ^ 1.2 * 150 + levelAt(x, z) * STEP_Y
+	if rr > 0.82 then
+		d += (n2(x, z, 7.7, 0.09) + 0.5) * 28
+	end
+	return math.max(8, math.floor(d / 16 + 0.5) * 16)
+end
+-- the bottom of the island column under a point (nil off the island)
+local function colBottom(x, z)
+	local s = CELL.size
+	local cx = CELL.x0 + math.floor((x - CELL.x0) / s) * s + s / 2
+	local cz = CELL.z0 + math.floor((z - CELL.z0) / s) * s + s / 2
+	local gy = groundY(cx, cz)
+	if gy == nil then
+		return nil
+	end
+	return gy - B - math.floor(rockDepth(cx, cz) / B + 0.5) * B
+end
+local function addLight(p, range, bright, color)
+	if R.lights < MAX_LIGHTS then
+		R.lights += 1
+		light(p, range, bright, color)
+	end
+end
+-- a kit lantern in its own folder; its light is dropped once the budget is spent
+local function lamp(pos, f, soul, hangTop)
+	local lf = folder("Lantern", f)
+	lantern(pos, lf, soul, hangTop)
+	if R.lights >= MAX_LIGHTS then
+		for _, d in ipairs(lf:GetDescendants()) do
+			if d:IsA("PointLight") then
+				d:Destroy()
+			end
+		end
+	else
+		R.lights += 1
+	end
+	return lf
+end
+local function floatAll(f)
+	for _, d in ipairs(f:GetDescendants()) do
+		if d:IsA("BasePart") then
+			decor(d)
+		end
+	end
+end
+local function nearStair(x, z, pad)
+	for _, r in ipairs(R.stairs) do
+		if x >= r[1] - pad and x <= r[3] + pad and z >= r[2] - pad and z <= r[4] + pad then
+			return true
+		end
+	end
+	return false
+end
+-- facing out from the mountain (a prop's front is its −Z), snapped to 90°
+local function yawOut(x, z)
+	local a = math.atan2(-(x - PEAK.x), -(z - PEAK.z))
+	return math.floor(a / (math.pi / 2) + 0.5) * (math.pi / 2)
+end
+
+-- ================================================================ block props (y = the ground under them)
+-- a waiting soul: a blocky translucent figure; cf at the feet (standing) or on the seat (sitting), facing −Z
+local function soulFig(cf, f, sit)
+	local sf = folder("Soul", f)
+	local function sp(name, size, off)
+		local p = decor(part(name, size, cf * off, SOUL, Enum.Material.SmoothPlastic, sf))
+		p.Transparency = 0.5
+		p.CastShadow = false
+	end
+	local base = 2.6
+	if sit then
+		sp("SoulThighs", Vector3.new(1.8, 0.9, 2.2), CFrame.new(0, 0.45, -0.8))
+		sp("SoulShins", Vector3.new(1.8, 2.2, 0.9), CFrame.new(0, -1.1, -1.45))
+		base = 0.9
+	else
+		sp("SoulLegs", Vector3.new(1.8, 2.6, 0.9), CFrame.new(0, 1.3, 0))
+	end
+	sp("SoulTorso", Vector3.new(2, 2.4, 1), CFrame.new(0, base + 1.2, 0))
+	sp("SoulHead", Vector3.new(1.6, 1.6, 1.6), CFrame.new(0, base + 3.2, 0))
+	for _, sx in ipairs({ -1.45, 1.45 }) do
+		sp(
+			"SoulArm",
+			Vector3.new(0.85, 2.3, 0.9),
+			CFrame.new(sx, base + 1.25, if sit then -0.2 else 0)
+		)
+	end
+	return sf
+end
+-- a cypress: a dark oak log core under a narrow column of hedge blocks (decor leaves)
+local function cypress(x, y, z, f, tall)
+	local cf = folder("Cypress", f)
+	textured(
+		part("CypressTrunk", Vector3.new(B, 8, B), at(x, y + 4, z), nil, nil, cf),
+		"px_dark_oak_log"
+	)
+	local h = (if tall then 4 else 3) * B
+	decor(
+		box("CypressLeaves", x - 6, y + 4, z - 6, x + 6, y + 4 + h, z + 6, "px_hedge", CYPRESS, cf)
+	)
+	local y1 = y + 4 + h
+	decor(box("CypressLeaves", x - 6, y1, z - 2, x + 6, y1 + B, z + 2, "px_hedge", CYPRESS, cf))
+	decor(box("CypressLeaves", x - 2, y1, z - 6, x + 2, y1 + B, z - 2, "px_hedge", CYPRESS, cf))
+	decor(box("CypressLeaves", x - 2, y1, z + 2, x + 2, y1 + B, z + 6, "px_hedge", CYPRESS, cf))
+	decor(
+		box(
+			"CypressTip",
+			x - 2,
+			y1 + B,
+			z - 2,
+			x + 2,
+			y1 + B * (if tall then 3 else 2),
+			z + 2,
+			"px_hedge",
+			CYPRESS,
+			cf
+		)
+	)
+	return cf
+end
+-- a dead orange bush: a block-sized fan of bare twigs
+local function deadBush(x, y, z, f)
+	local bf = folder("DeadBush", f)
+	local a0 = rng:NextNumber(0, math.pi)
+	for i = 1, 4 do
+		local a = a0 + i * math.pi / 2 + rng:NextNumber(-0.35, 0.35)
+		local r = rng:NextNumber(1.1, 1.8)
+		local top = V(x + math.cos(a) * r, y + rng:NextNumber(2.4, 3.8), z + math.sin(a) * r)
+		decor(beam("DeadBushTwig", V(x, y, z), top, 0.5, DEAD_BUSH, bf, Enum.Material.Wood))
+	end
+	decor(
+		part(
+			"DeadBushStub",
+			Vector3.new(0.7, 1.6, 0.7),
+			at(x, y + 0.8, z),
+			DEAD_BUSH,
+			Enum.Material.Wood,
+			bf
+		)
+	)
+	return bf
+end
+-- a decorated pot (terracotta with a pale band), sometimes with a plant
+local function pot(x, y, z, f, plant)
+	local pf = folder("Pot", f)
+	cube("Pot", x, y + 1.6, z, 3.2, 3.2, 3.2, "px_terracotta", PAL.POT, pf)
+	decor(cube("PotBand", x, y + 2.1, z, 3.4, 0.8, 3.4, "px_terracotta_pale", nil, pf))
+	decor(cube("PotRim", x, y + 3.5, z, 2.4, 0.6, 2.4, "px_terracotta", PAL.POT, pf))
+	if plant == 1 then
+		decor(cube("PotPlant", x, y + 4.8, z, 2.4, 2, 2.4, "px_hedge", CYPRESS, pf))
+	elseif plant == 2 then
+		deadBush(x, y + 3.8, z, pf)
+	end
+	return pf
+end
+-- a brazier: a cut sandstone pedestal, a stone bowl and a blocky flame (fire or blue soul fire)
+local function brazier(x, y, z, f, soul, lit)
+	local bf = folder(if soul then "SoulBrazier" else "Brazier", f)
+	local col = if soul then SOUL_FIRE else FIRE
+	cube("BrazierBase", x, y + 2, z, B, B, B, "px_cut_sandstone", SAND, bf)
+	cube(
+		"BrazierBowl",
+		x,
+		y + B + 1,
+		z,
+		5,
+		2,
+		5,
+		if soul then "px_soul_soil" else "px_blackstone",
+		nil,
+		bf
+	)
+	local fl = decor(
+		part(
+			"BrazierFire",
+			Vector3.new(3, 2.4, 3),
+			at(x, y + B + 3.2, z),
+			col,
+			Enum.Material.Neon,
+			bf
+		)
+	)
+	fl.Transparency = 0.15
+	fl.CastShadow = false
+	local tip = decor(
+		part(
+			"BrazierFlame",
+			Vector3.new(1.5, 1.5, 1.5),
+			at(x + 0.4, y + B + 5, z - 0.3),
+			col,
+			Enum.Material.Neon,
+			bf
+		)
+	)
+	tip.Transparency = 0.3
+	tip.CastShadow = false
+	if lit then
+		addLight(fl, 28, 1.4, col)
+	end
+	return bf
+end
+-- a brazier altar (the concept's panel): a stone brick block with fire, soul fires on the front corners
+local function altar(x, y, z, yaw, f)
+	local af = folder("BrazierAltar", f)
+	local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+	textured(
+		part("AltarStep", Vector3.new(16, B, 12), cf * CFrame.new(0, 2, 0), nil, nil, af),
+		"px_stone_bricks"
+	)
+	textured(
+		part("AltarBlock", Vector3.new(8, B, 8), cf * CFrame.new(0, 6, 1), nil, nil, af),
+		"px_stone_bricks"
+	)
+	textured(
+		part("AltarBowl", Vector3.new(6, 1.6, 6), cf * CFrame.new(0, 8.8, 1), nil, nil, af),
+		"px_blackstone"
+	)
+	local fl = decor(
+		part(
+			"AltarFire",
+			Vector3.new(4, 3.2, 4),
+			cf * CFrame.new(0, 11.2, 1),
+			FIRE,
+			Enum.Material.Neon,
+			af
+		)
+	)
+	fl.Transparency = 0.15
+	fl.CastShadow = false
+	addLight(fl, 34, 1.6, FIRE)
+	for _, sx in ipairs({ -6, 6 }) do
+		textured(
+			part(
+				"AltarSoulBowl",
+				Vector3.new(3, 1, 3),
+				cf * CFrame.new(sx, B + 0.5, -4),
+				nil,
+				nil,
+				af
+			),
+			"px_soul_soil"
+		)
+		local s = decor(
+			part(
+				"AltarSoulFire",
+				Vector3.new(2.2, 2.2, 2.2),
+				cf * CFrame.new(sx, B + 2.1, -4),
+				SOUL_FIRE,
+				Enum.Material.Neon,
+				af
+			)
+		)
+		s.Transparency = 0.2
+		s.CastShadow = false
+	end
+	for _, sx in ipairs({ -7, 7 }) do
+		local p = (cf * CFrame.new(sx, 0, 4)).Position
+		deadBush(p.X - BX, y, p.Z - BZ, af)
+	end
+	return af
+end
+-- a giant hourglass: dark oak frame, two stepped glass bulbs, sand, gold caps; hw = half width, h = height
+local function hourglass(x, y, z, f, hw, h)
+	local hf = folder("Hourglass", f)
+	box("HourglassBase", x - hw, y, z - hw, x + hw, y + 2, z + hw, "px_dark_oak_planks", nil, hf)
+	box(
+		"HourglassTop",
+		x - hw,
+		y + h - 2,
+		z - hw,
+		x + hw,
+		y + h,
+		z + hw,
+		"px_dark_oak_planks",
+		nil,
+		hf
+	)
+	decor(
+		box(
+			"HourglassCap",
+			x - hw + 1,
+			y + 2,
+			z - hw + 1,
+			x + hw - 1,
+			y + 2.6,
+			z + hw - 1,
+			"px_gold_block",
+			nil,
+			hf
+		)
+	)
+	decor(
+		box(
+			"HourglassCap",
+			x - hw + 1,
+			y + h - 2.6,
+			z - hw + 1,
+			x + hw - 1,
+			y + h - 2,
+			z + hw - 1,
+			"px_gold_block",
+			nil,
+			hf
+		)
+	)
+	decor(
+		box(
+			"HourglassFinial",
+			x - 1.5,
+			y + h,
+			z - 1.5,
+			x + 1.5,
+			y + h + 2,
+			z + 1.5,
+			"px_gold_block",
+			nil,
+			hf
+		)
+	)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -1, 1 }) do
+			local px, pz = x + sx * (hw - 1.1), z + sz * (hw - 1.1)
+			box(
+				"HourglassPost",
+				px - 0.9,
+				y + 2,
+				pz - 0.9,
+				px + 0.9,
+				y + h - 2,
+				pz + 0.9,
+				"px_dark_oak_log",
+				nil,
+				hf
+			)
+		end
+	end
+	local g = hw - 2.6
+	local y0, y1, mid = y + 2.6, y + h - 2.6, y + h / 2
+	local q = (y1 - y0) / 2
+	local function glass(name, half, ya, yb)
+		local p =
+			decor(box(name, x - half, ya, z - half, x + half, yb, z + half, nil, PAL.GLASS, hf))
+		p.Material = Enum.Material.Glass
+		p.Transparency = 0.4
+		p.CastShadow = false
+	end
+	glass("HourglassBulb", g, y0, mid - q * 0.4)
+	glass("HourglassBulb", g * 0.55, mid - q * 0.4, mid - 1)
+	glass("HourglassNeck", 1.1, mid - 1, mid + 1)
+	glass("HourglassBulb", g * 0.55, mid + 1, mid + q * 0.4)
+	glass("HourglassBulb", g, mid + q * 0.4, y1)
+	-- the sand: a pile below, the rest above the neck and the thin stream between
+	local pileTop = y0 + q * 0.4
+	decor(
+		box(
+			"HourglassSand",
+			x - g + 0.3,
+			y0,
+			z - g + 0.3,
+			x + g - 0.3,
+			pileTop,
+			z + g - 0.3,
+			"px_sand",
+			nil,
+			hf
+		)
+	)
+	decor(
+		box(
+			"HourglassSand",
+			x - g * 0.4,
+			pileTop,
+			z - g * 0.4,
+			x + g * 0.4,
+			pileTop + 1.6,
+			z + g * 0.4,
+			"px_sand",
+			nil,
+			hf
+		)
+	)
+	local a = g * 0.55 - 0.3
+	decor(
+		box("HourglassSand", x - a, mid + 1, z - a, x + a, mid + q * 0.4, z + a, "px_sand", nil, hf)
+	)
+	decor(
+		box(
+			"HourglassStream",
+			x - 0.3,
+			pileTop + 1.6,
+			z - 0.3,
+			x + 0.3,
+			mid + 1,
+			z + 0.3,
+			"px_sand",
+			nil,
+			hf
+		)
+	)
+	return hf
+end
+-- an obelisk with red banners on its faces
+local function obelisk(x, y, z, f, nb)
+	local of = folder("Obelisk", f)
+	box("ObeliskBase", x - 6, y, z - 6, x + 6, y + B, z + 6, "px_cut_sandstone", SAND, of)
+	box("ObeliskShaft", x - 4, y + B, z - 4, x + 4, y + 28, z + 4, "px_sandstone", SAND_PALE, of)
+	box("ObeliskCollar", x - 5, y + 28, z - 5, x + 5, y + 30, z + 5, "px_cut_sandstone", SAND, of)
+	box("ObeliskCap", x - 3, y + 30, z - 3, x + 3, y + 33, z + 3, "px_cut_sandstone", SAND_PALE, of)
+	decor(
+		box(
+			"ObeliskTip",
+			x - 1.2,
+			y + 33,
+			z - 1.2,
+			x + 1.2,
+			y + 35.4,
+			z + 1.2,
+			"px_gold_block",
+			nil,
+			of
+		)
+	)
+	local faces = {
+		CFrame.new(0, 0, -4.15),
+		CFrame.new(0, 0, 4.15),
+		CFrame.new(-4.15, 0, 0) * CFrame.Angles(0, math.pi / 2, 0),
+		CFrame.new(4.15, 0, 0) * CFrame.Angles(0, math.pi / 2, 0),
+	}
+	for i = 1, nb or 2 do
+		banner(at(x, y + 17, z) * faces[i], BANNER_RED, of, GOLD, B, 12)
+	end
+	return of
+end
+-- a bench (front −Z) with waiting souls on it and pots at the ends
+local function bench(x, y, z, yaw, f, souls)
+	local bf = folder("Bench", f)
+	local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+	for _, sx in ipairs({ -3.4, 3.4 }) do
+		textured(
+			part("BenchLeg", Vector3.new(1.2, 2, 2.6), cf * CFrame.new(sx, 1, 0), nil, nil, bf),
+			"px_dark_oak_planks"
+		)
+	end
+	textured(
+		part("BenchSeat", Vector3.new(8, 0.6, 3), cf * CFrame.new(0, 2.3, 0), nil, nil, bf),
+		"px_spruce_planks",
+		PAL.WOOD
+	)
+	textured(
+		part("BenchBack", Vector3.new(8, 2, 0.6), cf * CFrame.new(0, 3.6, 1.2), nil, nil, bf),
+		"px_spruce_planks",
+		PAL.WOOD
+	)
+	local spots = { -2, 2 }
+	for i = 1, souls or 0 do
+		soulFig(cf * CFrame.new(spots[i], 2.6, -0.1), bf, true)
+	end
+	return bf, cf
+end
+-- a broken sandstone arch (a whole pillar, a snapped one, half a lintel, a red banner); alongX: the span axis
+local function brokenArch(x, y, z, f, alongX)
+	local af = folder("BrokenArch", f)
+	local function ab(name, u0, y0, u1, y1, v, tint)
+		if alongX then
+			return box(name, x + u0, y + y0, z - 2, x + u1, y + y1, z + 2, v, tint, af)
+		end
+		return box(name, x - 2, y + y0, z + u0, x + 2, y + y1, z + u1, v, tint, af)
+	end
+	ab("ArchPillar", -8, 0, -4, 16, "px_cut_sandstone", SAND)
+	ab("ArchPillar", 4, 0, 8, rng:NextInteger(1, 2) * B, "px_cut_sandstone", SAND)
+	ab("ArchLintel", -8, 16, 0, 20, "px_sandstone", SAND)
+	local bcf = if alongX
+		then at(x - 6, y + 10, z - 2.15)
+		else at(x - 2.15, y + 10, z - 6) * CFrame.Angles(0, math.pi / 2, 0)
+	banner(bcf, BANNER_RED, af, GOLD)
+	return af
+end
+-- free ground for a prop of the foot: rim zone, freeGround, off the stairs, apart from the other props
+local function spotOk(x, z, pad, rad)
+	if zoneOf(x, z) ~= "rim" or not freeGround(x, z, pad) or nearStair(x, z, 10 + pad) then
+		return false
+	end
+	for _, t in ipairs(R.taken) do
+		if (x - t[1]) ^ 2 + (z - t[2]) ^ 2 < (rad + t[3]) ^ 2 then
+			return false
+		end
+	end
+	return true
+end
+
+-- ================================================================ 1. the stairs between L0, L1 and L2
+do
+	local stairF = folder("Stairs", rimF)
+	-- plan one stair across the edge of ring `ring` from level lowL: axis "x" (u = x, l = z) or "z" (u = z, l = x),
+	-- climbing toward s (±1 along u), centred on the lateral line c (a multiple of 8: two cells wide). Scans the
+	-- two cell strips from 24 studs outside the edge inward for the first upper cell; the stair's top meets the
+	-- outermost edge, the deeper strip gets a landing filled up to the upper terrace.
+	local function planStair(axis, s, c, lowL, ring)
+		local lowY = lowL * STEP_Y
+		local upY = lowY + STEP_Y
+		local function XZ(u, l)
+			if axis == "x" then
+				return u, l
+			end
+			return l, u
+		end
+		local function Y(u, l)
+			local x, z = XZ(u, l)
+			return cellY(x, z)
+		end
+		local off = c - (if axis == "x" then PEAK.z else PEAK.x)
+		if math.abs(off) >= ring then
+			return nil
+		end
+		local ue = (if axis == "x" then PEAK.x else PEAK.z) - s * math.sqrt(ring * ring - off * off)
+		local u0 = math.floor((ue - s * 24) / 8) * 8 + 4
+		local e = {}
+		for i, l in ipairs({ c - 4, c + 4 }) do
+			local u = u0
+			for k = 0, 8 do
+				local cy = Y(u, l)
+				if cy == upY then
+					if k == 0 then
+						return nil
+					end
+					e[i] = u - s * 4
+					break
+				elseif cy ~= lowY then
+					return nil
+				end
+				u += s * 8
+			end
+			if not e[i] then
+				return nil
+			end
+		end
+		if math.abs(e[1] - e[2]) > 16 then
+			return nil
+		end
+		local t = if s < 0 then math.max(e[1], e[2]) else math.min(e[1], e[2])
+		local deep = if s < 0 then math.min(e[1], e[2]) else math.max(e[1], e[2])
+		for _, du in ipairs({ 4, 12, 20, 26 }) do
+			for _, l in ipairs({ c - 4, c + 4 }) do
+				if Y(t - s * du, l) ~= lowY then
+					return nil
+				end
+			end
+			for _, l in ipairs({ c - 10, c + 10 }) do
+				local x, z = XZ(t - s * du, l)
+				if Y(t - s * du, l) == nil or not onIsland(x, z, 2) then
+					return nil
+				end
+			end
+		end
+		for _, du in ipairs({ -4, 0, 8, 16, 24, 28 }) do
+			for _, l in ipairs({ c - 12, c, c + 12 }) do
+				local x, z = XZ(t - s * du, l)
+				if zoneOf(x, z) ~= "rim" or onRingStair(x, z, 4) then
+					return nil
+				end
+			end
+		end
+		for _, l in ipairs({ c - 12, c + 12 }) do
+			local x, z = XZ(t - s * 28, l)
+			if not onIsland(x, z, 4) then
+				return nil
+			end
+		end
+		local ax, az = XZ(t - s * 28, c - 12)
+		local bx, bz = XZ(deep, c + 12)
+		local rect = { math.min(ax, bx), math.min(az, bz), math.max(ax, bx), math.max(az, bz) }
+		for _, r in ipairs(R.stairs) do
+			if
+				rect[1] <= r[3] + 8
+				and rect[3] >= r[1] - 8
+				and rect[2] <= r[4] + 8
+				and rect[4] >= r[2] - 8
+			then
+				return nil
+			end
+		end
+		return {
+			axis = axis,
+			s = s,
+			c = c,
+			t = t,
+			e = e,
+			lowY = lowY,
+			upY = upY,
+			rect = rect,
+			XZ = XZ,
+		}
+	end
+	local function buildStair(p, name, withArch)
+		local f = folder("Stair" .. name, stairF)
+		local s, c, t, lowY, upY, XZ = p.s, p.c, p.t, p.lowY, p.upY, p.XZ
+		local function bx(nm, u0, y0, l0, u1, y1, l1, v, tint)
+			local x0, z0 = XZ(u0, l0)
+			local x1, z1 = XZ(u1, l1)
+			return box(nm, x0, y0, z0, x1, y1, z1, v, tint, f)
+		end
+		stairs(name, c, t - s * 16, t, lowY, STEP_Y, STAIR_W, "px_cut_sandstone", f, p.axis)
+		-- the landing filled up to the upper terrace in front of the deeper strip
+		for i, l in ipairs({ c - 4, c + 4 }) do
+			if p.e[i] ~= t then
+				bx("StairLanding", t, lowY, l - 4, p.e[i], upY, l + 4, "px_cut_sandstone", SAND)
+			end
+		end
+		-- stepped cheek walls (1 block wide, 4..8 studs above the steps) and a lantern post on the top end
+		for _, sg in ipairs({ -1, 1 }) do
+			local l0, l1 = c + sg * 8, c + sg * 12
+			bx(
+				"StairCheek",
+				t - s * 16,
+				lowY - B,
+				l0,
+				t - s * 8,
+				lowY + 8,
+				l1,
+				"px_cut_sandstone",
+				SAND
+			)
+			bx("StairCheek", t - s * 8, lowY - B, l0, t, lowY + 12, l1, "px_sandstone", SAND)
+		end
+		local px, pz = XZ(t - s * 2, c + 10)
+		textured(
+			part("LanternPost", Vector3.new(1, 3, 1), at(px, upY + 5.5, pz), nil, nil, f),
+			"px_dark_oak_log"
+		)
+		lamp(V(px, upY + 7.8, pz), f)
+		if withArch then
+			-- a sandstone arch with red banners over the foot of the stair (the concept's small panel)
+			local a0, a1 = t - s * 24, t - s * 28
+			local ok = true
+			for _, sg in ipairs({ -1, 1 }) do
+				local x, z = XZ((a0 + a1) / 2, c + sg * 10)
+				if cellY(x, z) ~= lowY then
+					ok = false
+				end
+			end
+			if ok then
+				for _, sg in ipairs({ -1, 1 }) do
+					bx(
+						"ArchPillar",
+						a0,
+						lowY,
+						c + sg * 8,
+						a1,
+						lowY + 16,
+						c + sg * 12,
+						"px_cut_sandstone",
+						SAND
+					)
+					bx(
+						"ArchCapital",
+						a0 + s,
+						lowY + 14,
+						c + sg * 7,
+						a1 - s,
+						lowY + 16,
+						c + sg * 13,
+						"px_sandstone",
+						SAND
+					)
+					for _, side in ipairs({ a0, a1 }) do
+						local off = if side == a1 then -s * 0.15 else s * 0.15
+						local x, z = XZ(side + off, c + sg * 10)
+						local cf = at(x, lowY + 8, z)
+						if p.axis == "x" then
+							cf *= CFrame.Angles(0, math.pi / 2, 0)
+						end
+						banner(cf, BANNER_RED, f, GOLD)
+					end
+				end
+				bx(
+					"ArchLintel",
+					a0,
+					lowY + 16,
+					c - 12,
+					a1,
+					lowY + 20,
+					c + 12,
+					"px_cut_sandstone",
+					SAND
+				)
+				bx("ArchTop", a0, lowY + 20, c - 8, a1, lowY + 24, c + 8, "px_sandstone", SAND)
+				bx(
+					"ArchKey",
+					a0,
+					lowY + 24,
+					c - 2,
+					a1,
+					lowY + 28,
+					c + 2,
+					"px_cut_sandstone",
+					SAND_PALE
+				)
+				local lx, lz = XZ((a0 + a1) / 2, c)
+				lamp(V(lx, lowY + 12.5, lz), f, false, lowY + 16)
+			end
+		end
+		table.insert(R.stairs, p.rect)
+		table.insert(R.placed, ("%s(%s %d,%d)"):format(name, p.axis, p.c, p.t))
+	end
+	-- the candidates per side (east = +1; the west mirrors x): name, axis, s (east), lateral lines (east), lowL,
+	-- ring, arch at the foot
+	local CAND = {
+		{ "A", "z", -1, { 112, 120, 128 }, 0, 200, true },
+		{ "B", "x", -1, { 16, 24, 8, 0 }, 0, 200, false },
+		{ "C", "z", -1, { 120, 128, 136 }, 1, 168, false },
+		{ "D", "x", -1, { -56, -64, -48, -72 }, 1, 168, false },
+	}
+	for _, side in ipairs({ 1, -1 }) do
+		for _, cd in ipairs(CAND) do
+			local axis = cd[2]
+			local s = if axis == "x" then cd[3] * side else cd[3]
+			local done = false
+			for _, cc in ipairs(cd[4]) do
+				local c = if axis == "z" then cc * side else cc
+				local p = planStair(axis, s, c, cd[5], cd[6])
+				if p then
+					buildStair(p, cd[1] .. (if side > 0 then "E" else "W"), cd[7])
+					done = true
+					break
+				end
+			end
+			if not done then
+				warn(("[build-purgatory] rim: no place for stair %s side %d"):format(cd[1], side))
+			end
+		end
+	end
+	print(("[build-purgatory] rim: stairs %s"):format(table.concat(R.placed, " ")))
+end
+task.wait()
+
+-- ================================================================ 2. terrace edges and the outer parapet
+do
+	local edgeF = folder("Edges", rimF)
+	local C = CELL.size
+	local DIRS = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } } -- sides 1 −x, 2 +x, 3 −z, 4 +z
+	local kerbs, fences, cornices, parapets = 0, 0, 0, 0
+	-- the kerb blocks on the outer quarters of a cell, merged: rows (along x) first, then columns
+	local function quarters(cx, cz, y, q, v, tint)
+		local used = { { false, false }, { false, false } }
+		local x0, z0 = cx - 4, cz - 4
+		for qz = 0, 1 do
+			if q[1][qz + 1] and q[2][qz + 1] then
+				box("Kerb", x0, y, z0 + qz * 4, x0 + 8, y + B, z0 + qz * 4 + 4, v, tint, edgeF)
+				used[1][qz + 1], used[2][qz + 1] = true, true
+				kerbs += 1
+			end
+		end
+		for qx = 0, 1 do
+			local a, b = q[qx + 1][1] and not used[qx + 1][1], q[qx + 1][2] and not used[qx + 1][2]
+			if a and b then
+				box("Kerb", x0 + qx * 4, y, z0, x0 + qx * 4 + 4, y + B, z0 + 8, v, tint, edgeF)
+				kerbs += 1
+			else
+				for qz = 0, 1 do
+					if (qz == 0 and a) or (qz == 1 and b) then
+						box(
+							"Kerb",
+							x0 + qx * 4,
+							y,
+							z0 + qz * 4,
+							x0 + qx * 4 + 4,
+							y + B,
+							z0 + qz * 4 + 4,
+							v,
+							tint,
+							edgeF
+						)
+						kerbs += 1
+					end
+				end
+			end
+		end
+	end
+	local function markSide(q, side)
+		if side == 1 then
+			q[1][1], q[1][2] = true, true
+		elseif side == 2 then
+			q[2][1], q[2][2] = true, true
+		elseif side == 3 then
+			q[1][1], q[2][1] = true, true
+		else
+			q[1][2], q[2][2] = true, true
+		end
+	end
+	for z = CELL.z0, 240 - C, C do
+		for x = CELL.x0, 232 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			local y = cellY(cx, cz)
+			if
+				y
+				and zoneOf(cx, cz) == "rim"
+				and not nearStair(cx, cz, 8)
+				and not onRingStair(cx, cz, 6)
+			then
+				local edgeSides, rimSides = {}, {}
+				for i, d in ipairs(DIRS) do
+					local nx, nz = cx + d[1] * C, cz + d[2] * C
+					local ny = cellY(nx, nz)
+					if ny == nil then
+						table.insert(rimSides, i)
+					elseif ny == y - STEP_Y and zoneOf(nx, nz) == "rim" then
+						table.insert(edgeSides, i)
+					end
+				end
+				local q = { { false, false }, { false, false } }
+				local any, kerbV, kerbT = false, "px_cut_sandstone", SAND
+				-- the terrace edge: kerb, fence or a gap (noise runs), a cornice under it
+				if #edgeSides > 0 then
+					local n = n2(cx, cz, 5.1, 0.035)
+					local style = if n > 0.16 or rng:NextNumber() < 0.12
+						then "gap"
+						elseif n < -0.18 and #edgeSides == 1 then "fence"
+						else "kerb"
+					for _, side in ipairs(edgeSides) do
+						if style == "kerb" then
+							markSide(q, side)
+							any = true
+						elseif style == "fence" then
+							local d = DIRS[side]
+							local lx, lz = cx + d[1] * 3, cz + d[2] * 3
+							if d[1] ~= 0 then
+								fence(lx, cz - 3.4, lx, cz + 3.4, edgeF, y)
+							else
+								fence(cx - 3.4, lz, cx + 3.4, lz, edgeF, y)
+							end
+							fences += 1
+						end
+					end
+					if #edgeSides == 1 and rng:NextNumber() < 0.6 then
+						local d = DIRS[edgeSides[1]]
+						if d[1] ~= 0 then
+							local fx = cx + d[1] * 4
+							decor(
+								box(
+									"Cornice",
+									fx,
+									y - 2,
+									cz - 4,
+									fx + d[1] * 1.5,
+									y,
+									cz + 4,
+									"px_cut_sandstone",
+									SAND,
+									edgeF
+								)
+							)
+						else
+							local fz = cz + d[2] * 4
+							decor(
+								box(
+									"Cornice",
+									cx - 4,
+									y - 2,
+									fz,
+									cx + 4,
+									y,
+									fz + d[2] * 1.5,
+									"px_cut_sandstone",
+									SAND,
+									edgeF
+								)
+							)
+						end
+						cornices += 1
+					end
+				end
+				-- the island's outer rim: a low parapet in places
+				if #rimSides > 0 and n2(cx, cz, 9.3, 0.02) > -0.08 and rng:NextNumber() > 0.2 then
+					for _, side in ipairs(rimSides) do
+						markSide(q, side)
+					end
+					if not any and y <= STEP_Y then
+						kerbV, kerbT = "px_cut_red_sandstone", RED_SAND
+					end
+					any = true
+					parapets += 1
+				end
+				if any then
+					quarters(cx, cz, y, q, kerbV, kerbT)
+				end
+			end
+		end
+		if z % 64 == 0 then
+			task.wait()
+		end
+	end
+	print(
+		("[build-purgatory] rim: kerb blocks %d, fences %d, cornices %d, parapet cells %d"):format(
+			kerbs,
+			fences,
+			cornices,
+			parapets
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 3. the foot: props on the free ground
+do
+	local footF = folder("Props", rimF)
+	local c0 = count
+	local made = {}
+	local function sample(x0, x1, z0, z1)
+		return math.floor(rng:NextNumber(x0, x1) / B) * B + 2,
+			math.floor(rng:NextNumber(z0, z1) / B) * B + 2
+	end
+	-- n props of one kind: fn(x, y, z) on free spots (pad: the freeGround pad, rad: the spacing radius)
+	local function scatter(kind, n, pad, rad, fn, area)
+		area = area or { CELL.x0, 232, CELL.z0, 240 }
+		local k = 0
+		for i = 1, n * 60 do
+			if k >= n then
+				break
+			end
+			local x, z = sample(area[1], area[2], area[3], area[4])
+			if spotOk(x, z, pad, rad) then
+				fn(x, cellY(x, z), z)
+				table.insert(R.taken, { x, z, rad })
+				k += 1
+			end
+			if i % 200 == 0 then
+				task.wait()
+			end
+		end
+		made[kind] = k
+	end
+	-- the souls' market: a second red-and-white stall with pots and sandstone, no buyer, souls in front
+	do
+		local mf = folder("SoulsMarket", footF)
+		local ok = false
+		for _, area in ipairs({
+			{ -210, -100, 60, 200 },
+			{ 100, 210, 60, 200 },
+			{ CELL.x0, 232, CELL.z0, 240 },
+		}) do
+			for _ = 1, 300 do
+				local x, z = sample(area[1], area[2], area[3], area[4])
+				if spotOk(x, z, 12, 18) then
+					local y = cellY(x, z)
+					local yaw = yawOut(x, z) + math.pi
+					local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+					stall(cf, {
+						w = 4 * B,
+						d = 2 * B,
+						colA = Color3.fromRGB(200, 45, 40),
+						colB = Color3.fromRGB(240, 236, 226),
+						goods = {
+							"px_terracotta",
+							"px_sandstone",
+							"px_terracotta_pale",
+							"px_cut_sandstone",
+						},
+					}, mf)
+					local function rel(dx, dz)
+						local p = (cf * CFrame.new(dx, 0, dz)).Position
+						return p.X - BX, p.Z - BZ
+					end
+					local px, pz = rel(-10, 2)
+					pot(px, y, pz, mf, 1)
+					px, pz = rel(-10, -2)
+					pot(px, y, pz, mf, 0)
+					px, pz = rel(10, 0)
+					barrel(px, y, pz, mf, "px_sand")
+					px, pz = rel(10, 4.5)
+					crate(px, y, pz, mf)
+					px, pz = rel(-9, 6)
+					box(
+						"MarketBlock",
+						px - 2,
+						y,
+						pz - 2,
+						px + 2,
+						y + B,
+						pz + 2,
+						"px_sandstone",
+						SAND,
+						mf
+					)
+					box(
+						"MarketBlock",
+						px - 2,
+						y + B,
+						pz - 2,
+						px + 2,
+						y + 2 * B,
+						pz + 2,
+						"px_cut_sandstone",
+						SAND,
+						mf
+					)
+					-- souls queueing at the counter (nobody behind it)
+					for i, d in ipairs({ { 0, -8 }, { 1, -12 }, { -1, -16 } }) do
+						soulFig(
+							cf * CFrame.new(d[1] * 1.5, 0, d[2]) * CFrame.Angles(0, math.pi, 0),
+							mf,
+							false
+						)
+						if i == 3 then
+							local p = (cf * CFrame.new(5, 0, -10)).Position
+							pot(p.X - BX, y, p.Z - BZ, mf, 2)
+						end
+					end
+					table.insert(R.taken, { x, z, 18 })
+					ok = true
+					break
+				end
+			end
+			if ok then
+				break
+			end
+		end
+		made.market = if ok then 1 else 0
+	end
+	-- two brazier altars, the giant hourglasses, the obelisks
+	scatter("altar", 2, 10, 12, function(x, y, z)
+		altar(x, y, z, yawOut(x, z), footF)
+	end)
+	scatter("hourglass", 2, 12, 16, function(x, y, z)
+		hourglass(x, y, z, footF, 8, 32)
+	end)
+	scatter("obelisk", 8, 8, 12, function(x, y, z)
+		obelisk(x, y, z, footF, rng:NextInteger(2, 4))
+	end)
+	-- fire braziers in pairs along the terraces, a few soul braziers
+	scatter("brazier", 10, 6, 10, function(x, y, z)
+		brazier(x, y, z, footF, false, true)
+	end)
+	scatter("soulBrazier", 5, 6, 10, function(x, y, z)
+		brazier(x, y, z, footF, true, true)
+	end)
+	-- benches with souls, pots at the ends, sometimes a banner pole behind
+	scatter("bench", 9, 8, 10, function(x, y, z)
+		local _, cf = bench(x, y, z, yawOut(x, z), footF, rng:NextInteger(0, 2))
+		if rng:NextNumber() < 0.7 then
+			local p = (cf * CFrame.new(6, 0, 0)).Position
+			pot(p.X - BX, y, p.Z - BZ, footF, rng:NextInteger(0, 2))
+		end
+		if rng:NextNumber() < 0.4 then
+			local p = (cf * CFrame.new(-6, 0, 0)).Position
+			pot(p.X - BX, y, p.Z - BZ, footF, 1)
+		end
+		if rng:NextNumber() < 0.5 then
+			textured(
+				part(
+					"BannerPost",
+					Vector3.new(1, 12, 1),
+					cf * CFrame.new(0, 6, 3.2),
+					nil,
+					nil,
+					footF
+				),
+				"px_dark_oak_log"
+			)
+			banner(cf * CFrame.new(0, 7, 2.6), BANNER_RED, footF, GOLD)
+		end
+	end)
+	-- queues of souls waiting, facing the mountain
+	scatter("queue", 6, 8, 10, function(x, y, z)
+		local yaw = yawOut(x, z) + math.pi
+		local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+		for i = 0, rng:NextInteger(2, 3) do
+			soulFig(cf * CFrame.new(rng:NextNumber(-0.4, 0.4), 0, -4 + i * 3), footF, false)
+		end
+	end)
+	scatter("cypress", 34, 6, 7, function(x, y, z)
+		cypress(x, y, z, footF, rng:NextNumber() < 0.4)
+	end)
+	scatter("bush", 30, 4, 4, function(x, y, z)
+		deadBush(x, y, z, footF)
+	end)
+	scatter("pot", 18, 4, 4, function(x, y, z)
+		pot(x, y, z, footF, rng:NextInteger(0, 2))
+		if rng:NextNumber() < 0.5 then
+			pot(x + 4, y, z + rng:NextInteger(-1, 1), footF, 0)
+		end
+	end)
+	-- scattered sandstone blocks
+	scatter("blocks", 22, 4, 5, function(x, y, z)
+		local v = pick({ "px_sandstone", "px_cut_sandstone", "px_red_sandstone", "px_sandstone" })
+		local t = if v == "px_red_sandstone" then RED_SAND else SAND
+		box("LooseBlock", x - 2, y, z - 2, x + 2, y + B, z + 2, v, t, footF)
+		if rng:NextNumber() < 0.45 then
+			local o = pick({ { 4, 0 }, { -4, 0 }, { 0, 4 }, { 0, -4 } })
+			local dx, dz = o[1], o[2]
+			box("LooseBlock", x - 2 + dx, y, z - 2 + dz, x + 2 + dx, y + B, z + 2 + dz, v, t, footF)
+			if rng:NextNumber() < 0.5 then
+				box(
+					"LooseBlock",
+					x - 2,
+					y + B,
+					z - 2,
+					x + 2,
+					y + 2 * B,
+					z + 2,
+					"px_cut_sandstone",
+					SAND,
+					footF
+				)
+			end
+		end
+	end)
+	local parts = {}
+	for k, v in pairs(made) do
+		table.insert(parts, k .. " " .. v)
+	end
+	table.sort(parts)
+	print(
+		("[build-purgatory] rim: foot %s; %d parts"):format(table.concat(parts, ", "), count - c0)
+	)
+end
+task.wait()
+
+-- ================================================================ 4. under the island: stalactites and cliff bands
+do
+	local hang = folder("Stalactites", rimF)
+	local c0 = count
+	local C = CELL.size
+	local cols = 0
+	local DIRS4 = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	-- one hanging column s studs square, top at `top`, len long: red sandstone with a dark terracotta tip
+	local function column(x0, z0, s, top, len)
+		if len >= 3 * B then
+			local dark = rng:NextInteger(1, 2) * B
+			decor(
+				box(
+					"Stalactite",
+					x0,
+					top - len + dark,
+					z0,
+					x0 + s,
+					top,
+					z0 + s,
+					"px_red_sandstone",
+					RED_SAND,
+					hang
+				)
+			)
+			decor(
+				box(
+					"StalactiteTip",
+					x0,
+					top - len,
+					z0,
+					x0 + s,
+					top - len + dark,
+					z0 + s,
+					"px_terracotta",
+					PAL.DARK,
+					hang
+				)
+			)
+		else
+			local dark = rng:NextNumber() < 0.4
+			decor(
+				box(
+					"Stalactite",
+					x0,
+					top - len,
+					z0,
+					x0 + s,
+					top,
+					z0 + s,
+					if dark then "px_terracotta" else "px_red_sandstone",
+					if dark then PAL.DARK else RED_SAND,
+					hang
+				)
+			)
+		end
+		cols += 1
+	end
+	for z = CELL.z0, 240 - C, C do
+		for x = CELL.x0, 232 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			local gy = groundY(cx, cz)
+			if gy ~= nil and count - c0 < 720 then
+				local bottom = gy - B - math.floor(rockDepth(cx, cz) / B + 0.5) * B
+				local outX, outZ, rim = 0, 0, false
+				for _, d in ipairs(DIRS4) do
+					if groundY(cx + d[1] * C, cz + d[2] * C) == nil then
+						rim = true
+						outX += d[1]
+						outZ += d[2]
+					end
+				end
+				if rng:NextNumber() < (if rim then 0.55 else 0.1) then
+					if not rim and rng:NextNumber() < 0.45 then
+						-- a fat 2×2 column with a 1×1 tip under one quarter
+						local len = rng:NextInteger(2, 6) * B
+						column(x, z, 2 * B, bottom + 2, len + 2)
+						if rng:NextNumber() < 0.7 then
+							column(
+								x + rng:NextInteger(0, 1) * B,
+								z + rng:NextInteger(0, 1) * B,
+								B,
+								bottom - len,
+								rng:NextInteger(1, 4) * B
+							)
+						end
+					else
+						local qx = if outX > 0
+							then 1
+							elseif outX < 0 then 0
+							else rng:NextInteger(0, 1)
+						local qz = if outZ > 0
+							then 1
+							elseif outZ < 0 then 0
+							else rng:NextInteger(0, 1)
+						local len = if rim then rng:NextInteger(3, 12) else rng:NextInteger(2, 7)
+						column(x + qx * B, z + qz * B, B, bottom + 2, len * B + 2)
+						if rim and len > 4 and rng:NextNumber() < 0.35 then
+							local q2x, q2z = 1 - qx, qz
+							if outX == 0 then
+								q2x, q2z = qx, 1 - qz
+							end
+							column(
+								x + q2x * B,
+								z + q2z * B,
+								B,
+								bottom + 2,
+								rng:NextInteger(2, len - 2) * B + 2
+							)
+						end
+					end
+				end
+			end
+		end
+		if z % 64 == 0 then
+			task.wait()
+		end
+	end
+	-- the darker band along the bottom of the cliff faces (rim columns), merged along straight runs
+	local bands = 0
+	local function bandPass(alongX)
+		for a = (if alongX then CELL.z0 else CELL.x0), (if alongX then 240 else 232) - C, C do
+			local ac = a + C / 2
+			for _, sg in ipairs({ -1, 1 }) do
+				local runStart, runBottom = nil, nil
+				local function flush(endB)
+					if runStart and runBottom then
+						local face = ac + sg * 4
+						if alongX then
+							decor(
+								box(
+									"CliffBand",
+									runStart,
+									runBottom - 0.5,
+									face - 0.5,
+									endB,
+									runBottom + 8,
+									face + 0.5,
+									"px_terracotta",
+									PAL.DARK,
+									hang
+								)
+							)
+						else
+							decor(
+								box(
+									"CliffBand",
+									face - 0.5,
+									runBottom - 0.5,
+									runStart,
+									face + 0.5,
+									runBottom + 8,
+									endB,
+									"px_terracotta",
+									PAL.DARK,
+									hang
+								)
+							)
+						end
+						bands += 1
+					end
+					runStart = nil
+				end
+				local b0, b1 = (if alongX then CELL.x0 else CELL.z0), (if alongX then 232 else 240)
+				for b = b0, b1 - C, C do
+					local bc = b + C / 2
+					local cx, cz, nx, nz
+					if alongX then
+						cx, cz, nx, nz = bc, ac, bc, ac + sg * C
+					else
+						cx, cz, nx, nz = ac, bc, ac + sg * C, bc
+					end
+					local gy = groundY(cx, cz)
+					local bottom = nil
+					if gy ~= nil and groundY(nx, nz) == nil then
+						local d = math.floor(rockDepth(cx, cz) / B + 0.5) * B
+						if d > 24 then
+							bottom = gy - B - d
+						end
+					end
+					if not (bottom and runStart and bottom == runBottom) then
+						flush(b)
+						if bottom then
+							runStart, runBottom = b, bottom
+						end
+					end
+				end
+				flush(b1)
+			end
+		end
+	end
+	bandPass(true)
+	task.wait()
+	bandPass(false)
+	print(
+		("[build-purgatory] rim: stalactites %d, cliff bands %d, %d parts"):format(
+			cols,
+			bands,
+			count - c0
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 5. the sky: floating islets and sunset clouds
+do
+	local fly = folder("FloatingIslets", rimF)
+	local c0 = count
+	local taken = {} -- { x, z, half, y0, y1 }
+	-- far enough from the island (24+ studs horizontally) and from the other islets
+	local function findSpot(half, down, up, yMin, yMax)
+		for attempt = 1, 400 do
+			if attempt % 100 == 0 then
+				task.wait()
+			end
+			local x, z = rng:NextNumber(-380, 380), rng:NextNumber(-360, 380)
+			local y = rng:NextNumber(yMin, yMax)
+			local dc = math.sqrt((x - ISLAND.x) ^ 2 + (z - ISLAND.z) ^ 2)
+			local ok = dc > ISLAND.r + 9 + 24 + half * 1.42
+			if ok then
+				for _, t in ipairs(taken) do
+					local dh = math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2)
+					if dh < t[3] + half + 12 and y + up + 8 > t[4] and y - down - 8 < t[5] then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				table.insert(taken, { x, z, half, y - down, y + up })
+				return x, y, z
+			end
+		end
+		return nil
+	end
+	-- one islet: top w × d blocks, (x, y, z) = the centre of its top surface
+	local function islet(x, y, z, w, d, layers)
+		local cf = folder("Islet", fly)
+		local hx, hz = w * B / 2, d * B / 2
+		local red = rng:NextNumber() < 0.4
+		box(
+			"IsletTop",
+			x - hx,
+			y - B,
+			z - hz,
+			x + hx,
+			y,
+			z + hz,
+			if red then "px_red_sand" else "px_sand",
+			nil,
+			cf
+		)
+		local function sideBox(name, side, a, len, top, v, t)
+			local ax0, az0
+			if side == 1 then
+				ax0, az0 = x - hx, z - hz + a * B
+			elseif side == 2 then
+				ax0, az0 = x + hx - B, z - hz + a * B
+			elseif side == 3 then
+				ax0, az0 = x - hx + a * B, z - hz
+			else
+				ax0, az0 = x - hx + a * B, z + hz - B
+			end
+			box(name, ax0, top - len, az0, ax0 + B, top, az0 + B, v, t, cf)
+		end
+		-- a ragged nub on one top edge
+		if rng:NextNumber() < 0.5 then
+			local side = rng:NextInteger(1, 4)
+			local along = if side <= 2 then d else w
+			local a = rng:NextInteger(0, along - 1)
+			local ox = if side == 1 then -B elseif side == 2 then B else 0
+			local oz = if side == 3 then -B elseif side == 4 then B else 0
+			local ax0, az0
+			if side <= 2 then
+				ax0, az0 = (if side == 1 then x - hx else x + hx - B) + ox, z - hz + a * B
+			else
+				ax0, az0 = x - hx + a * B, (if side == 3 then z - hz else z + hz - B) + oz
+			end
+			box(
+				"IsletTop",
+				ax0,
+				y - B,
+				az0,
+				ax0 + B,
+				y,
+				az0 + B,
+				if red then "px_red_sand" else "px_sand",
+				nil,
+				cf
+			)
+		end
+		-- the stepped layers: sandstone above, red sandstone below, a dark terracotta tip
+		local yTop, total = y - B, B
+		local ix0, ix1, iz0, iz1 = 0, w, 0, d
+		for k = 1, layers do
+			local f01 = 1 - k / (layers + 1)
+			local lw = math.min(math.max(1, math.floor(w * f01 + 0.5)), ix1 - ix0)
+			local ld = math.min(math.max(1, math.floor(d * f01 + 0.5)), iz1 - iz0)
+			local sx = math.clamp(
+				ix0 + math.floor((ix1 - ix0 - lw) / 2 + rng:NextNumber(-0.5, 0.99)),
+				ix0,
+				ix1 - lw
+			)
+			local sz = math.clamp(
+				iz0 + math.floor((iz1 - iz0 - ld) / 2 + rng:NextNumber(-0.5, 0.99)),
+				iz0,
+				iz1 - ld
+			)
+			local hgt = if w >= 5 and rng:NextNumber() < 0.5 then 2 * B else B
+			local v, t = "px_sandstone", SAND
+			if red or k > layers * 0.4 then
+				v, t = "px_red_sandstone", RED_SAND
+			end
+			if k == layers and layers >= 3 then
+				v, t = "px_terracotta", PAL.DARK
+			end
+			box(
+				"IsletRock",
+				x - hx + sx * B,
+				yTop - hgt,
+				z - hz + sz * B,
+				x - hx + (sx + lw) * B,
+				yTop,
+				z - hz + (sz + ld) * B,
+				v,
+				t,
+				cf
+			)
+			ix0, ix1, iz0, iz1 = sx, sx + lw, sz, sz + ld
+			yTop -= hgt
+			total += hgt
+		end
+		local tip = rng:NextInteger(1, 2) * B
+		local px = ix0 + rng:NextInteger(0, ix1 - ix0 - 1)
+		local pz = iz0 + rng:NextInteger(0, iz1 - iz0 - 1)
+		box(
+			"IsletTip",
+			x - hx + px * B,
+			yTop - tip,
+			z - hz + pz * B,
+			x - hx + (px + 1) * B,
+			yTop,
+			z - hz + (pz + 1) * B,
+			"px_terracotta",
+			PAL.DARK,
+			cf
+		)
+		-- a fringe of short columns under the outer ring of the top
+		for side = 1, 4 do
+			local along = if side <= 2 then d else w
+			local used = {}
+			for _ = 1, math.clamp(math.floor(along / 3 + rng:NextNumber(0, 1.2)), 0, 2) do
+				local a = rng:NextInteger(0, along - 1)
+				if not used[a] then
+					used[a] = true
+					local len = rng:NextInteger(1, math.max(2, math.floor(total / B))) * B
+					sideBox("IsletStalactite", side, a, len, y - B, "px_red_sandstone", RED_SAND)
+				end
+			end
+		end
+		-- a prop on top
+		local bx = x - hx + (math.floor(w / 2) + 0.5) * B
+		local bz = z - hz + (math.floor(d / 2) + 0.5) * B
+		local r = rng:NextNumber()
+		if math.min(w, d) >= 5 and r < 0.3 then
+			brokenArch(bx, y, bz, cf, w >= d)
+		elseif math.min(w, d) >= 5 and r < 0.5 then
+			hourglass(bx, y, bz, cf, 6, 24)
+		elseif r < 0.7 then
+			cypress(bx, y, bz, cf, rng:NextNumber() < 0.3)
+		elseif r < 0.85 then
+			brazier(bx, y, bz, cf, rng:NextNumber() < 0.4, false)
+			soulFig(at(bx + 4, y, bz) * CFrame.Angles(0, math.pi / 2, 0), cf, false)
+		elseif math.min(w, d) >= 2 then
+			soulFig(at(bx, y, bz) * CFrame.Angles(0, rng:NextNumber(0, 2 * math.pi), 0), cf, false)
+			deadBush(bx - 3, y, bz + 2, cf)
+		end
+		floatAll(cf)
+	end
+	local made = 0
+	for i = 1, 34 do
+		if made >= 20 then
+			break
+		end
+		local big = i <= 3
+		local w = if big then rng:NextInteger(7, 9) else rng:NextInteger(2, 6)
+		local d = math.clamp(w + rng:NextInteger(-1, 1), 2, 9)
+		local layers = math.clamp(math.floor(math.max(w, d) / 2) + rng:NextInteger(1, 2), 2, 6)
+		local half = math.max(w, d) * B / 2 + B
+		local down = B * (layers * 2 + 3)
+		local yMin, yMax = -60, 100
+		if not big and rng:NextNumber() < 0.6 then
+			yMin, yMax = -30, 50
+		end
+		local x, y, z = findSpot(half, down, 36, yMin, yMax)
+		if x then
+			islet(snap(x) + (w % 2) * 2, snap(y), snap(z) + (d % 2) * 2, w, d, layers)
+			made += 1
+		end
+		if i % 4 == 0 then
+			task.wait()
+		end
+	end
+	local isletParts = count - c0
+	-- sunset clouds: flat stacked wool slabs under the island (clear of its rock) and a few round it
+	local cloudF = folder("Clouds", rimF)
+	local clouds = 0
+	local function cloudBox(x0, y0, z0, x1, y1, z1)
+		local p = decor(box("Cloud", x0, y0, z0, x1, y1, z1, "px_white_wool", PAL.CLOUD, cloudF))
+		p.CastShadow = false
+		p.Transparency = 0.15
+	end
+	local function clearUnder(x, z, sx, sz, yTop)
+		for _, o in ipairs({
+			{ 0, 0 },
+			{ -1, -1 },
+			{ 1, -1 },
+			{ -1, 1 },
+			{ 1, 1 },
+			{ 0, -1 },
+			{ 0, 1 },
+			{ -1, 0 },
+			{ 1, 0 },
+		}) do
+			local b = colBottom(x + o[1] * sx / 2, z + o[2] * sz / 2)
+			if b and b < yTop + 12 then
+				return false
+			end
+		end
+		return true
+	end
+	local under0 = 0
+	for i = 1, 70 do
+		if clouds >= 10 then
+			break
+		end
+		local under = under0 < 6 and i <= 50
+		local x, z, y
+		if under then
+			local a, r = rng:NextNumber(0, 2 * math.pi), rng:NextNumber(110, 230)
+			x, z, y =
+				ISLAND.x + math.cos(a) * r, ISLAND.z + math.sin(a) * r, rng:NextNumber(-160, -80)
+		else
+			local a, r = rng:NextNumber(0, 2 * math.pi), rng:NextNumber(290, 380)
+			x, z, y =
+				ISLAND.x + math.cos(a) * r, ISLAND.z + math.sin(a) * r, rng:NextNumber(-70, 20)
+		end
+		x, z, y = snap(x), snap(z), snap(y)
+		local sx, sz = rng:NextInteger(10, 18) * B, rng:NextInteger(6, 10) * B
+		if not under or clearUnder(x, z, sx, sz, y + 12) then
+			cloudBox(x - sx / 2, y, z - sz / 2, x + sx / 2, y + 2 * B, z + sz / 2)
+			local ox, oz = rng:NextInteger(-2, 2) * B, rng:NextInteger(-1, 1) * B
+			cloudBox(
+				x - sx / 4 + ox,
+				y + 2 * B,
+				z - sz / 4 + oz,
+				x + sx / 4 + ox,
+				y + 3 * B,
+				z + sz / 4 + oz
+			)
+			if rng:NextNumber() < 0.6 then
+				local sgn = if rng:NextNumber() < 0.5 then -1 else 1
+				cloudBox(
+					x + sgn * sx / 2,
+					y + B * 0.5,
+					z - sz / 4,
+					x + sgn * (sx / 2 + 4 * B),
+					y + 1.5 * B,
+					z + sz / 4
+				)
+			end
+			clouds += 1
+			if under then
+				under0 += 1
+			end
+		end
+	end
+	print(
+		("[build-purgatory] rim: islets %d (%d parts), clouds %d; rim total %d parts, %d lights"):format(
+			made,
+			isletParts,
+			clouds,
+			count - R.c0,
+			R.lights
+		)
+	)
+end
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-purgatory] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
