@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_ent = { -- [клиент] prison.classic.boss.ent.notify.spawn
+		ru = "Лес умолк… Грут поднялся из глубин корней.",
+		en = "The forest fell silent... Groot has risen from the depths of the roots.",
+		es = "El bosque enmudeció... Groot se ha alzado desde lo profundo de las raíces.",
+		fr = "La forêt s'est tue… Groot s'est levé des profondeurs des racines.",
+	},
 	boss_spawned_the_lovers = { -- [клиент] prison.classic.boss.the_lovers.notify.spawn
 		ru = "Лепестки сакуры кружатся над Киото... Самурай вышел на бой!",
 		en = "Cherry petals swirl over Kyoto... the Samurai has come out to fight!",

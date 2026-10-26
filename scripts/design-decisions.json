@@ -539,6 +539,14 @@
         32
       ],
       "_size": "[решение 26.10] 32×12×32 — шахта на нижней площади у лестницы к храму (scripts/locations/kyoto, scripts/build-kyoto.luau); состав из меню (mine-shares: розовая шерсть 90 %, морской фонарь 10 %); шот-шахта [вики 26.10] пока не сделана"
+    },
+    "farm": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 26.10] 32×12×32 — яма урожая посреди грядок (scripts/locations/farm, scripts/build-farm.luau); состав из меню (mine-shares: арбуз 46 %, тыква 46 %, зелёная шерсть 9 %)"
     }
   },
   "pvpFromLevel": 9,
@@ -1754,6 +1762,74 @@
           ]
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о красную колонну оглушение 3 с). Настоящие приёмы из ресурс-пака «The Lovers»: 3 фазы со сбросом доспеха, дождь стрел, большая стрела, призрачные копья, кусаригама, сюрикены, разрезы, призрак возлюбленной (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+      }
+    },
+    "ent": {
+      "hp": 15000,
+      "damage": 18,
+      "respawnSeconds": 5700,
+      "name": "Грут",
+      "nameEn": "Groot",
+      "locationId": "farm",
+      "unlockLevel": 31,
+      "_source": "[клиент] имя «Грут» (Ent King), объявление «Лес умолк… Грут поднялся из глубин корней.»; [меню] 0–15000 $, древние звёзды 11–17, лунная сталь; hp 15000 / урон 18 / респаун 95 мин [решение] по шкале боссов, в справочнике респаун 5 ч 30 мин [вики 26.10]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            120,
+            180,
+            70
+          ],
+          "blade": [
+            150,
+            110,
+            60
+          ],
+          "spikes": [
+            90,
+            64,
+            40
+          ],
+          "glow": [
+            160,
+            220,
+            90
+          ]
+        },
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старое дерево-колонну оглушение 3 с). Настоящие приёмы из ресурс-пака Ent King: удары, топот, крик, ветви из земли (Twisted Branch, Branch Wave), листовой шторм, древесные миньоны — воин, колдун, страж (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       }
     }
   },
