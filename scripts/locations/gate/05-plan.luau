@@ -5,9 +5,14 @@ local PIT_HALF = PIT.size * B / 2 -- 64
 local SPAWN = { x = 0, z = 162 }
 local BUYER = { x = -34, z = 166 }
 local ROAD = { -12, -70, 12, -2 } -- the golden road (the square part)
-local STAIR = { -20, -118, 20, -70 } -- the great stair y 0 → 24 (the gate part)
+local STAIR = { -20, -120, 20, -70 } -- the great stair y 0 → 24 (the gate part)
+-- { x0, z0, x1, z1 } flights along the terrace front, from the outer end (y 0) in to y 24
+local SIDE_STAIRS = {
+	{ -112, -120, -64, -108 },
+	{ 64, -120, 112, -108 },
+}
 local TERRACE_Y = 24
-local TERRACE = { -120, -230, 120, -118 } -- the raised terrace (the core lifts its ground)
+local TERRACE = { -120, -230, 120, -120 } -- the raised terrace (the core lifts its ground; its face is at z -120)
 local GATE = { x = 0, z = -160, half = 24, wall = 112, top = 100 } -- the arch, the jasper wall x -112..112, z -164..-156
 local SUMMIT = { x = 0, z = -140, y = TERRACE_Y } -- the top of the steps at the open gates
 local BEAM = { x = 0, z = -196 }
@@ -32,8 +37,8 @@ local WALKS = { -- { x0, z0, x1, z1 } main walkways kept clear of props
 	{ 76, 52, 166, 68 }, -- east to the bridge A
 	{ -160, -128, -120, -112 }, -- west to the bridge B (round the terrace's foot)
 	{ 120, -128, 160, -112 },
-	{ -150, -70, -120, -112 }, -- along the terrace's foot from the square to the bridges B
-	{ 120, -70, 150, -112 },
+	{ -150, -112, -120, -70 }, -- along the terrace's foot from the square to the bridges B
+	{ 120, -112, 150, -70 },
 }
 
 local function inRect(x, z, r, pad)
@@ -76,6 +81,11 @@ end
 local function onPath(x, z, pad)
 	for _, w in ipairs(WALKS) do
 		if inRect(x, z, w, pad) then
+			return true
+		end
+	end
+	for _, s in ipairs(SIDE_STAIRS) do
+		if inRect(x, z, s, pad) then
 			return true
 		end
 	end

@@ -20,8 +20,9 @@
 --   mine          32×12×32 blocks, hole x -64..64, z 6..134 (centre 0, 70)
 --   arrival       (0, 0, 162) facing north to the pit; the buyer's stall west of it at (-34, 166)
 --   ROAD          the golden road x -12..12 from the pit's north side (z -2) to the great stair (z -70), y 0
---   STAIR         x -20..20, z -118..-70, y 0 → 24 (the great stair to the gates)
---   TERRACE       |x| ≤ 120, z ≤ -118 at y 24 (the SUMMIT: the top of the steps at the gates)
+--   STAIR         x -20..20, z -120..-70, y 0 → 24 (the great stair to the gates); SIDE_STAIRS along the terrace
+--                 front (z -120..-108) at x ±64..±112, climbing inward
+--   TERRACE       |x| ≤ 120, z ≤ -120 at y 24 (the SUMMIT: the top of the steps at the gates)
 --   GATE          the arch x -24..24 in the jasper wall x -112..112, z -164..-156, up to ≈ y 100; beyond it light
 --                 (z -164..-230) and the beacon beam at (0, -196); the guardian angels at x ±48, z -140
 --   islets        WEST_A (-240, 60) r 40, EAST_A (240, 60) r 40, WEST_B (-216, -120) r 32, EAST_B (216, -120) r 32,
