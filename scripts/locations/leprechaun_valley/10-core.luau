@@ -16,7 +16,7 @@ local function groundTop(x, z)
 	if fd > FORT.moatOut and fd <= FORT.bankOut then
 		-- the earth banks of the fairy fort: a double ring (8 high in the middle, 4 at the sides), cut at the gates
 		for _, g in ipairs(FORT_GATES) do
-			if math.sqrt((x - g.x) ^ 2 + (z - g.z) ^ 2) < 14 then
+			if math.sqrt((x - g.x) ^ 2 + (z - g.z) ^ 2) < 20 then
 				return "px_dirt", PATH_T, 0
 			end
 		end

@@ -842,9 +842,16 @@ local function charge(boss: Boss, target: Vector3)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	local arena = boss.spawn.Parent
-	params.FilterDescendantsInstances = if arena then { arena } else {}
+	-- the arena folder plus every part tagged Pillar (the new floors build their pillars in their own part folders,
+	-- scripts/locations/kit.luau pillarTag); a tagged part counts as a pillar whatever its name
+	local include: { Instance } = if arena then { arena } else {}
+	for _, p in ipairs(CollectionService:GetTagged("Pillar")) do
+		table.insert(include, p)
+	end
+	params.FilterDescendantsInstances = include
 	local hit = workspace:Raycast(root.Position, dir * cfg.maxDistance, params)
-	local obstacle = if hit and hit.Instance.Name:match("^Pillar")
+	local obstacle = if hit
+			and (hit.Instance.Name:match("^Pillar") or hit.Instance:HasTag("Pillar"))
 		then "pillar"
 		elseif hit and hit.Instance.Name == "ArenaWall" then "wall"
 		else nil
