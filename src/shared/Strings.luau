@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_forest_guardian = { -- [клиент] prison.classic.boss.forest_guardian.notify.spawn
+		ru = "Корни земли пробудились — Древесный хранитель вышел на защиту леса!",
+		en = "The roots of the earth have awakened — the Forest Guardian has come out to defend the forest!",
+		es = "Las raíces de la tierra han despertado: ¡el Guardián del Bosque ha salido a defender el bosque!",
+		fr = "Les racines de la terre se sont éveillées — le Gardien de la forêt est sorti défendre la forêt !",
+	},
 	boss_spawned_ent = { -- [клиент] prison.classic.boss.ent.notify.spawn
 		ru = "Лес умолк… Грут поднялся из глубин корней.",
 		en = "The forest fell silent... Groot has risen from the depths of the roots.",

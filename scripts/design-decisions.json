@@ -547,6 +547,14 @@
         32
       ],
       "_size": "[решение 26.10] 32×12×32 — яма урожая посреди грядок (scripts/locations/farm, scripts/build-farm.luau); состав из меню (mine-shares: арбуз 46 %, тыква 46 %, зелёная шерсть 9 %)"
+    },
+    "barn": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 26.10] 32×12×32 — яма светильников Джека перед заброшенным амбаром (scripts/locations/barn, scripts/build-barn.luau); состав из меню (mine-shares: светильник Джека 100 %); шот-шахта [вики 26.10] пока не сделана"
     }
   },
   "pvpFromLevel": 9,
@@ -1830,6 +1838,74 @@
           ]
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старое дерево-колонну оглушение 3 с). Настоящие приёмы из ресурс-пака Ent King: удары, топот, крик, ветви из земли (Twisted Branch, Branch Wave), листовой шторм, древесные миньоны — воин, колдун, страж (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+      }
+    },
+    "forest_guardian": {
+      "hp": 16000,
+      "damage": 19,
+      "respawnSeconds": 6000,
+      "name": "Древесный хранитель",
+      "nameEn": "Forest Guardian",
+      "locationId": "barn",
+      "unlockLevel": 33,
+      "_source": "[клиент] имя «Древесный хранитель», объявление «Корни земли пробудились — Древесный хранитель вышел на защиту леса!»; [меню] 0–17300 $, древние звёзды 11–18, порошок 1–50 %, огненный осколок; hp 16000 / урон 19 / респаун 100 мин [решение] по шкале боссов, в справочнике респаун 12 ч [вики 26.10]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            230,
+            130,
+            40
+          ],
+          "blade": [
+            255,
+            170,
+            60
+          ],
+          "spikes": [
+            100,
+            70,
+            44
+          ],
+          "glow": [
+            255,
+            150,
+            50
+          ]
+        },
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старый силос оглушение 3 с). Настоящие приёмы из ресурс-пака: удар, большой удар, призыв созданий — «пока его создания живы, никакое оружие не способно ранить хранителя» (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       }
     }
   },

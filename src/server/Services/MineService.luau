@@ -174,6 +174,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	-- Ферма: тыква, зелёная шерсть [меню] (the melon has its own texture)
 	pumpkin = { base = "hay", color = Color3.fromRGB(240, 140, 40) },
 	green_wool = { base = "white_wool", color = Color3.fromRGB(96, 140, 40) },
+	-- Амбар: светильник Джека [меню] — the pumpkin tint, brighter (an own lit-face texture later)
+	jack_o_lantern = { base = "hay", color = Color3.fromRGB(255, 170, 60) },
 }
 
 local function stylePart(part: BasePart, id: string)
