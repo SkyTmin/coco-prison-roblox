@@ -2448,7 +2448,7 @@ local function claim(name, x0, z0, x1, z1, opt)
 	if not opt.force then
 		local function refuse()
 			if not opt.quiet then
-				table.insert(S.skipped, name)
+				table.insert(S.skipped, ("%s@%d,%d"):format(name, math.floor((x0 + x1) / 2), math.floor((z0 + z1) / 2)))
 			end
 			return false
 		end
@@ -3349,7 +3349,8 @@ task.wait()
 do
 	for _, s in ipairs({ -1, 1 }) do
 		fountain(s * 114, 98, 12, { { 12, 6 }, { 8, 10 }, { 4, 14 } }, F.fountains)
-		fountain(s * 108, 0, 10, { { 8, 5.5 }, { 4, 9.5 } }, F.fountains)
+		-- (Studio 26.10: at x 108 its 0.2-stud claim margin touched the walkway ring (x ≤ 98) and both were skipped)
+		fountain(s * 109, 0, 10, { { 8, 5.5 }, { 4, 9.5 } }, F.fountains)
 	end
 end
 task.wait()

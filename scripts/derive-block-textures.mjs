@@ -397,3 +397,6 @@ async function mushroom(dst, base, spot, seed) {
 await mushroom("brown_mushroom_block.png", [[132, 96, 66], [148, 108, 76], [160, 120, 86], [140, 102, 72]], [200, 166, 128], 20261028);
 await mushroom("red_mushroom_block.png", [[176, 34, 32], [196, 44, 40], [212, 56, 48], [188, 40, 36]], [238, 228, 216], 20261041);
 await recolor("sand.png", "snow.png", [[0, [200, 208, 220]], [0.5, [226, 232, 240]], [1, [244, 248, 252]]], 1.6);
+// Врата: smooth sandstone — the soft mottle of our sand, warmer and a step darker than the pearl-and-sand paving
+// round the pit (the lightened sandstone mine melted into the square, Studio 26.10)
+await recolor("sand.png", "smooth_sandstone.png", [[0, [192, 158, 104]], [0.5, [218, 188, 134]], [1, [234, 210, 160]]], 1.6);

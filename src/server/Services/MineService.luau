@@ -192,7 +192,7 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	snow = { base = "smooth_stone", color = Color3.fromRGB(246, 248, 252) },
 	-- Рай: гриб (красный) [меню] (a fallback: its own drawn texture now)
 	red_mushroom_block = { base = "terracotta", color = Color3.fromRGB(210, 48, 44) },
-	-- Врата: гладкий песчаник [меню] (our sandstone, lighter and plain)
+	-- Врата: гладкий песчаник [меню] (a fallback: its own texture now, warmer than the paving)
 	smooth_sandstone = { base = "sandstone", color = Color3.fromRGB(250, 242, 220) },
 }
 

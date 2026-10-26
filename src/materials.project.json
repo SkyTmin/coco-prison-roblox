@@ -801,6 +801,14 @@
         "ColorMap": "rbxassetid://85928942171420",
         "StudsPerTile": 4
       }
+    },
+    "px_smooth_sandstone": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://115406280890511",
+        "StudsPerTile": 4
+      }
     }
   }
 }

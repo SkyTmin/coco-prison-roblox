@@ -101,7 +101,8 @@
     "clay": "rbxassetid://81508797868543",
     "brown_mushroom_block": "rbxassetid://99033986360887",
     "red_mushroom_block": "rbxassetid://133331364216990",
-    "snow": "rbxassetid://85928942171420"
+    "snow": "rbxassetid://85928942171420",
+    "smooth_sandstone": "rbxassetid://115406280890511"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",
