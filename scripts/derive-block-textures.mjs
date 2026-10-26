@@ -256,3 +256,6 @@ await recolor("grass_top.png", "chorus.png", [[0, [70, 50, 80]], [0.5, [110, 84,
 }
 await recolor("oak_log_side.png", "dark_oak_log.png", [[0, [30, 20, 12]], [0.5, [56, 40, 26]], [1, [90, 68, 46]]]);
 await recolor("grass_top.png", "forest_floor.png", [[0, [26, 34, 20]], [0.5, [44, 56, 32]], [1, [70, 84, 50]]]);
+// [Рынок] red wool: our white wool is nearly flat, tinted red it blurred into a carpet in the game (Studio 26.10) —
+// the higher-contrast pattern of our yellow wool on a red ramp instead
+await recolor("yellow_wool.png", "red_wool.png", [[0, [110, 22, 18]], [0.5, [168, 36, 30]], [1, [214, 64, 54]]]);

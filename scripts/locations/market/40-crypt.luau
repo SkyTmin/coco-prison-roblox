@@ -17,7 +17,9 @@ local CX, CZ = CRYPT.x, CRYPT.z
 local FLOOR, VAULT = CRYPT.floor, CRYPT.vault -- -48, -8
 local GAL = -32 -- the gallery top
 local BONE = Color3.fromRGB(232, 224, 200)
-local DARK = Color3.fromRGB(128, 132, 142) -- over blackstone: dark grey, never black
+-- over blackstone, lifted [Studio 26.10: at 128 the arena floor, the walls and the pillars read black in the dark
+-- crypt]: the texture keeps its own dark grey
+local DARK = Color3.fromRGB(205, 210, 222)
 local CSTONE = CRYPT_STONE:Lerp(Color3.new(1, 1, 1), 0.25) -- the crypt's stone bricks (the plan's CRYPT_STONE, lifted)
 local ROCK_T = Color3.fromRGB(135, 132, 128)
 local function cdist(x, z)
@@ -369,7 +371,7 @@ do
 	for _, pl in ipairs(PILLARS) do
 		local x, z, top = pl[1], pl[2], pl[3]
 		box("PillarBase", x - 8, FLOOR, z - 8, x + 8, FLOOR + 2, z + 8, "px_blackstone_bricks", DARK, f)
-		local shaft = box("Pillar", x - 6, FLOOR + 2, z - 6, x + 6, top - 4, z + 6, "px_blackstone_bricks", Color3.fromRGB(110, 114, 124), f)
+		local shaft = box("Pillar", x - 6, FLOOR + 2, z - 6, x + 6, top - 4, z + 6, "px_blackstone_bricks", Color3.fromRGB(185, 190, 202), f)
 		pillarTag(shaft)
 		box("PillarBand", x - 7, -32, z - 7, x + 7, -30, z + 7, "px_basalt", Color3.fromRGB(112, 120, 128), f)
 		box("PillarCapital", x - 7.5, top - 4, z - 7.5, x + 7.5, top, z + 7.5, "px_stone_bricks", CSTONE, f)

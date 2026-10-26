@@ -340,7 +340,7 @@ def shard():
         "pouch": "#7a5634", "gem": "#6ad8e8", "pants": "#4a3a2e", "boot": "#2e241c", "boot_hi": "#4a3a2c",
         "sole": "#1a140e", "band": "#c03030", "band_dark": "#8a2020",
     }
-    return o, [], colours, [], []
+    return o, [], colours, ["vest", "pants"], []
 
 
 def trainer():
@@ -539,9 +539,18 @@ def cultist():
     return o, extras, colours, [], []
 
 
+def prisoner():
+    """Заключённый (декор локаций): the player's own orange jumpsuit from player.py."""
+    o = player.paint_base()
+    for face, pixels in player.hair_layer("buzz")["head"].items():
+        for (c, r), role in pixels.items():
+            o["head"][face][r][c] = role
+    return o, [], dict(player.FIXED), [], []
+
+
 COSTUMES = {
     "buyer": buyer, "miner": miner, "cook": cook, "star": star, "shard": shard,
-    "trainer": trainer, "clerk": clerk, "guard": guard, "gatekeeper": gatekeeper, "cultist": cultist,
+    "trainer": trainer, "clerk": clerk, "guard": guard, "gatekeeper": gatekeeper, "cultist": cultist, "prisoner": prisoner,
 }
 # roles every costume shares unless it sets its own (the face of player.py; skin and hair are varied per NPC)
 COMMON = {"eye_white": "#f4f4f4", "ink": "#2b2b2b", "pants_dark": None, "shirt_dark": None, "denim_dark": None}
@@ -643,7 +652,7 @@ def costume_boxes(body, costume, colours):
 
 SAMPLES = {  # skin, hair per costume for the renders (the game picks them per NPC)
     "buyer": (1, 1), "miner": (2, 0), "cook": (0, 2), "star": (1, 4), "shard": (3, 5),
-    "trainer": (3, 0), "clerk": (0, 1), "guard": (2, 5), "gatekeeper": (0, 4), "cultist": (1, 0),
+    "trainer": (3, 0), "clerk": (0, 1), "guard": (2, 5), "gatekeeper": (0, 4), "cultist": (1, 0), "prisoner": (2, 1),
 }
 
 

@@ -202,6 +202,14 @@
         "StudsPerTile": 4
       }
     },
+    "px_red_wool": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://95029767492837",
+        "StudsPerTile": 4
+      }
+    },
     "px_brown_wool": {
       "$className": "MaterialVariant",
       "$properties": {

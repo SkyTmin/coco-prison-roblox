@@ -37,23 +37,42 @@ local COSTUMES: { [string]: string } = {
 	Guard = "guard",
 	Gatekeeper = "gatekeeper",
 	Cultist = "cultist",
+	-- the people of the locations (scripts/locations/market/30-bazaar.luau)
+	Trader = "buyer",
+	Shopkeeper = "buyer",
+	TavernKeeper = "buyer",
+	Smith = "buyer",
+	Cook = "cook",
+	Lookout = "shard",
+	Smuggler = "shard",
+	Prisoner = "prisoner",
 }
+
+local function colourOf(model: Model, name: string): Color3?
+	local part = model:FindFirstChild(name)
+	return if part and part:IsA("BasePart") then part.Color else nil
+end
 
 local function costumeOf(model: Model): string?
 	local attribute = model:GetAttribute("Costume")
 	if typeof(attribute) == "string" and Npcs.costumes[attribute] then
 		return attribute
 	end
+	if model.Name == "CardPlayer" then
+		-- the card players: a prisoner in orange or a smuggler
+		local torso = colourOf(model, "UpperTorso")
+		return if torso
+				and torso.R > 0.7
+				and torso.R > torso.G
+				and torso.G > torso.B
+			then "prisoner"
+			else "shard"
+	end
 	if COSTUMES[model.Name] then
 		return COSTUMES[model.Name]
 	end
 	-- every other block buyer (Buyer_<faction>, SnowBuyer, SeaBuyer, EndBuyer…)
 	return if string.find(model.Name, "Buyer", 1, true) then "buyer" else nil
-end
-
-local function colourOf(model: Model, name: string): Color3?
-	local part = model:FindFirstChild(name)
-	return if part and part:IsA("BasePart") then part.Color else nil
 end
 
 -- the palette index nearest to a colour (the rig's skin → our skin tone with its shade and lips)
@@ -92,8 +111,8 @@ local function coloursOf(model: Model, costume: any, origin: Vector3): BlockBody
 		colours.brow = colours.hair_dark
 	end
 	colours.brow = colours.brow or colours.hair_dark
-	-- the block buyers keep their location's shirt and trousers
-	local from = { shirt = "UpperTorso", pants = "LeftUpperLeg" }
+	-- the block buyers keep their location's shirt and trousers, the smugglers their vest
+	local from = { shirt = "UpperTorso", vest = "UpperTorso", pants = "LeftUpperLeg" }
 	for _, role in ipairs(costume.vary) do
 		local colour = from[role] and colourOf(model, from[role])
 		if colour then

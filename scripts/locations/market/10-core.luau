@@ -132,9 +132,10 @@ bossSpawn("un_king", CRYPT.x, CRYPT.floor + 2, CRYPT.z, CRYPT.r - 8, core)
 -- ================================================================ lighting, the void net, the edge walls
 -- the crypt and both tunnels are dark (soul lanterns light them); the market above keeps the outdoor daylight
 lightingVolume("CryptAir", 120, CRYPT.floor + 20, CRYPT.z, 200, 52, 160, {
-	Ambient = Color3.fromRGB(60, 96, 104),
-	Exposure = -0.1,
-	Haze = 0.28,
+	-- [Studio 26.10] brighter than the first try (60, 96, 104 / −0.1 / haze 0.28): the boss arena read black
+	Ambient = Color3.fromRGB(110, 150, 160),
+	Exposure = 0.35,
+	Haze = 0.12,
 	ClockTime = 0,
 	Brightness = 0.4,
 	AtmosphereColor = Color3.fromRGB(60, 120, 125),
