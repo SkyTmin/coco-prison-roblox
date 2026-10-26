@@ -167,6 +167,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	-- quartz (Замок: кварцевый блок [меню]; резной кварцевый блок [вики 26.10])
 	quartz_block = { base = "smooth_stone", color = Color3.fromRGB(240, 237, 230) },
 	chiseled_quartz_block = { base = "white_stone_bricks", color = Color3.fromRGB(240, 237, 230) },
+	-- leaves (Изнанка: листья мрачного дуба [меню]): our clipped hedge texture darkened to dark oak green
+	dark_oak_leaves = { base = "hedge", color = Color3.fromRGB(150, 170, 130) },
 }
 
 local function stylePart(part: BasePart, id: string)

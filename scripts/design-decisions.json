@@ -523,6 +523,14 @@
         32
       ],
       "_size": "[решение 26.10] 32×12×32 — разрытая дворцовая площадь во внешнем дворе у ворот (scripts/locations/castle, scripts/build-castle.luau); состав из меню (mine-shares: кварцевый блок 100 %); шот-шахта [вики 26.10] пока не сделана"
+    },
+    "inside_out": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 26.10] 32×12×32 — шахта на городской площади мёртвого пригорода (scripts/locations/inside_out, scripts/build-inside-out.luau); состав из меню (mine-shares: листья мрачного дуба 100 %, ножницы); шот-шахта [вики 26.10] пока не сделана"
     }
   },
   "pvpFromLevel": 9,
@@ -1602,6 +1610,74 @@
           ]
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о кварцевую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: стаи воронов, чёрный туман, шипы из земли, призванный летающий топор, вторая форма «Вороний жнец» (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+      }
+    },
+    "vecna": {
+      "hp": 13000,
+      "damage": 16,
+      "respawnSeconds": 5100,
+      "name": "Векна",
+      "nameEn": "Vecna",
+      "locationId": "inside_out",
+      "unlockLevel": 27,
+      "_source": "[клиент] имя «Векна», объявление «Земля вздрогнула... Векна уже рядом!»; [меню] 0–6400 $, древние звёзды 7–12, порошок 1–25 %; hp 13000 / урон 16 / респаун 85 мин [решение] по шкале боссов, в справочнике респаун 4 ч [вики 26.10]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            220,
+            60,
+            50
+          ],
+          "blade": [
+            255,
+            70,
+            50
+          ],
+          "spikes": [
+            90,
+            14,
+            22
+          ],
+          "glow": [
+            255,
+            60,
+            40
+          ]
+        },
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о сломанный фонарный столб оглушение 3 с). Настоящие приёмы из ресурс-пака (Stranger Things): атаки щупальцами, «цветок», часы Векны (отсчёт проклятия), порталы, миньоны демогоргон / демопёс / демолетучка (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       }
     }
   },

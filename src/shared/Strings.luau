@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_vecna = { -- [клиент] prison.classic.boss.vecna.notify.spawn
+		ru = "Земля вздрогнула... Векна уже рядом!",
+		en = "The ground shook... Vecna is close!",
+		es = "La tierra tembló... ¡Vecna está cerca!",
+		fr = "La terre a tremblé… Vecna est tout près !",
+	},
 	boss_spawned_raven_knight = { -- [клиент] prison.classic.boss.raven_knight.notify.spawn
 		ru = "Небо почернело от стай воронов… Вороний рыцарь пробудился в Замке!",
 		en = "The sky turned black with flocks of ravens... the Raven Knight has awakened in the Castle!",
