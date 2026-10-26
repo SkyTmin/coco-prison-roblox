@@ -184,6 +184,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	white_concrete = { base = "smooth_stone", color = Color3.fromRGB(236, 238, 238) },
 	-- Церковь: глина [меню] (blue-grey, as in vanilla)
 	clay = { base = "smooth_stone", color = Color3.fromRGB(160, 166, 180) },
+	-- Чистилище: резной песчаник [меню] (our cut sandstone, a little warmer)
+	chiseled_sandstone = { base = "cut_sandstone", color = Color3.fromRGB(250, 238, 205) },
 }
 
 local function stylePart(part: BasePart, id: string)
