@@ -1,8 +1,8 @@
 # Our swords [владелец 26.10: «теперь меч давай также»] — voxel models in the same style as the pickaxes
-# (assets/models/wooden_pickaxe/pickaxe.py): one voxel = 0.25 studs, the sword ≈ 5.75 studs from pommel to tip, not a
+# (assets/models/wooden_pickaxe/pickaxe.py): one voxel = 0.25 studs, the sword ≈ 6.5 studs from pommel to tip, not a
 # copy of any Minecraft sprite. One shape for every material (the game's tiers: wood, stone, iron, diamond —
-# tools.json swordDamage): a knob pommel, a wrapped grip, a crossguard with upturned tips, a 4-px blade with light
-# edges, a dark fuller by the guard and a narrowing point. Each material has its own details: plank seams on wood,
+# tools.json swordDamage): a knob pommel, a wrapped grip, a crossguard with upturned tips, a thin 2-px blade with a
+# light edge, a dark fuller by the guard and a slanted point. Each material has its own details: plank seams on wood,
 # chipped speckled stone, polished iron with a riveted dark-iron guard and a leather grip, faceted diamond with a gold
 # guard and a gem.
 # Pipeline and the enchant glint: assets/models/voxeltool.py.
@@ -68,8 +68,8 @@ MATERIALS = {
     },
 }
 
-BLADE_Z = (7, 20)  # the blade from the guard to the point
-FULLER_Z = (8, 12)
+BLADE_Z = (7, 22)  # the blade from the guard to the point [владелец 26.10: «сделай его тоньше и чуть длиннее»]
+FULLER_Z = (8, 10)
 
 
 # ---------------------------------------------------------------- the shape
@@ -97,52 +97,51 @@ def shape(mat):
         for x in (-1, 0):
             for y in (-1, 0):
                 put(x, y, z, grip_dark if z in (0, 3) else grip[(x + y + z) % 2])
-    # the crossguard: a 10-px bar with upturned tips round a 4×4 block
+    # the crossguard: an 8-px bar with upturned tips round a 4×4 block
     for z in (5, 6):
-        for x in range(-5, 5):
+        for x in range(-4, 4):
             for y in ((-2, -1, 0, 1) if -2 <= x <= 1 else (-1, 0)):
                 put(x, y, z, guard[0] if z == 6 else guard[1])
-    for x in (-5, 4):
+    for x in (-4, 3):
         for y in (-1, 0):
             put(x, y, 7, guard_dark)
     if "jewel" in pal:
         for y in (-2, 1):
             for x in (-1, 0):
                 put(x, y, 5 + (x + 1), pal["jewel"])  # set diagonally in the front and back faces
-    # the blade
+    # the blade: 2 px wide, the lit edge on one column, the body on the other, a dark fuller by the guard and a
+    # slanted point
     body = pal["body"]
     z0, z1 = BLADE_Z
     for z in range(z0, z1 + 1):
-        narrow = z >= z1 - 2  # the point: two px wide
-        for x in ((-1, 0) if narrow else (-2, -1, 0, 1)):
+        for x in ((-1,) if z == z1 else (-1, 0)):
             for y in (-1, 0):
-                if z == z1:
+                if z >= z1 - 1:
                     col = pal["tip"]
-                elif x in (-2, 1) or (narrow and z == z1 - 1):
+                elif x == -1:
                     col = pal["edge"]
                 elif FULLER_Z[0] <= z <= FULLER_Z[1]:
                     col = pal["fuller"]
                 else:
-                    col = body[(x + y + z) % len(body)]
+                    col = body[(y + z) % len(body)]
                 put(x, y, z, col)
     if mat == "wood":
-        for z in (14, 17):
+        for z in (13, 18):
             for y in (-1, 0):
-                put(-1, y, z, pal["fuller"])  # plank seams, staggered
-                put(0, y, z - 1, pal["fuller"])
+                put(0, y, z, pal["fuller"])  # plank seams
     if mat == "diamond":
-        for z, x in ((13, -1), (14, 0), (16, -1), (17, 0)):
+        for z, x in ((12, 0), (16, 0), (19, 0)):
             for y in (-1, 0):
                 put(x, y, z, pal["facet"])  # slanted facet lines
     if mat == "stone":
         for key, col in list(vox.items()):
             if col in body and rng.random() < 0.3:
                 vox[key] = pal["fleck"][rng.randrange(2)]
-        for p in ((-2, -1, 11), (1, -1, 15), (1, 0, 9), (-2, 0, 16)):
+        for p in ((-1, -1, 11), (0, 0, 15), (-1, 0, 18)):
             vox.pop(p, None)  # chips in the edges
     return vox
 
 
-ICON = ((0, math.radians(45), 0), (0, -30, 0), 6.6, 60)  # flat front, the point to the upper right like an item sprite
-HERO = ((math.radians(10), math.radians(35), math.radians(-30)), (-3.2, -8.2, 2.2), None, 50)
+ICON = ((0, math.radians(45), 0), (0, -30, 0), 7.0, 60)  # flat front, the point to the upper right like an item sprite
+HERO = ((math.radians(10), math.radians(35), math.radians(-30)), (-3.4, -8.8, 2.3), None, 50)
 run(HERE, "sword", MATERIALS, shape, ICON, HERO)
