@@ -1,6 +1,6 @@
 -- ================================================================ edge_gate: the plan shared by every part
 local MAIN = { x = 0, z = 74, rx = 160, rz = 150 } -- an ellipse
-local ARENA_ISLE = { x = 0, z = -170, r = 72, y = 16 }
+local ARENA_ISLE = { x = 0, z = -170, r = 78, y = 16 } -- room for the gate and the rim towers
 local WEST = { x = -228, z = 40, r = 56 }
 local EAST = { x = 210, z = -28, r = 56 }
 local PIT = { x = 0, z = 72, size = 32, depth = 12 }

@@ -25,7 +25,7 @@
 --                x -12..12 from the ring to the grand stair, WEST z 30..46 to the west bridge, EAST z -36..-20 to the
 --                east bridge
 --   grand stair  x -12..12, z -76 → -104, y 0 → 16, over the gap between the main and the arena island
---   arena island centre (0, -170), r ≈ 72, ground y 16; the arena (obsidian) r 52 at the centre; the GATE arch
+--   arena island centre (0, -170), r ≈ 78, ground y 16; the arena (obsidian) r 52 at the centre; the GATE arch
 --                behind it at x -28..28, z -240..-226 (hero, ~ 25 blocks tall); towers on the rim
 --   west island  centre (-228, 40), r ≈ 56, y 0 (the chorus plantation); bridge x -180..-124, z 30..46
 --   east island  centre (210, -28), r ≈ 56, y 0 (the dragon head, crystal spires); bridge x 84..170, z -36..-20
@@ -580,12 +580,19 @@ end
 -- -> studs of rock below the ground block. The column is: ground (1 block, the top variant), rock (24 studs,
 -- opt.rockTop) and below that opt.rockLow down to the depth. opt.voids = { {x0, x1, z0, z1, y0, y1} or
 -- {cx, cz, r, y0, y1, circle = true} }: carved out of the column (crypts, tunnels, holes) — the parts that live
--- there are built by the location itself. Equal neighbouring cells along x are merged into one run.
+-- there are built by the location itself. opt.pit = PIT ({x, z, size, depth}): the mine hole is carved out too (half a
+-- cell wider, under the pit walls) so the mine blocks are not buried in rock. Equal neighbouring cells along x are
+-- merged into one run.
 local function island(opt, parent)
 	local f = folder("Island", parent)
 	local C = opt.cell or 8
 	local x0, x1, z0, z1 = opt.x0, opt.x1, opt.z0, opt.z1
-	local voids = opt.voids or {}
+	local voids = table.clone(opt.voids or {})
+	if opt.pit then
+		local p = opt.pit
+		local e = p.size * B / 2 + C / 2
+		table.insert(voids, { p.x - e, p.x + e, p.z - e, p.z + e, -p.depth * B, 2 * B })
+	end
 	local runs = 0
 	-- the column segments of one cell: { {ya, yb, layer}, ... } with layer 1 ground, 2 rock, 3 low rock
 	local function column(cx, cz)
@@ -675,7 +682,7 @@ end
 -- ================================================================================ edge_gate/05-plan.luau
 -- ================================================================ edge_gate: the plan shared by every part
 local MAIN = { x = 0, z = 74, rx = 160, rz = 150 } -- an ellipse
-local ARENA_ISLE = { x = 0, z = -170, r = 72, y = 16 }
+local ARENA_ISLE = { x = 0, z = -170, r = 78, y = 16 } -- room for the gate and the rim towers
 local WEST = { x = -228, z = 40, r = 56 }
 local EAST = { x = 210, z = -28, r = 56 }
 local PIT = { x = 0, z = 72, size = 32, depth = 12 }
@@ -845,9 +852,10 @@ local function rockDepth(x, z)
 	return math.max(8, math.floor(d / 16 + 0.5) * 16)
 end
 local _, islandRuns = island({
+	pit = PIT, -- the mine hole stays open
 	x0 = -296,
 	x1 = 280,
-	z0 = -256,
+	z0 = -264,
 	z1 = 240,
 	cell = 8,
 	shape = function(x, z)
@@ -915,6 +923,3908 @@ do
 	edgeWalls({ { -8, -268, 616, 4 }, { -8, 252, 616, 4 }, { -312, -8, 4, 520 }, { 296, -8, 4, 520 } }, core)
 end
 print(("[build-edge-gate] core: island runs %d"):format(islandRuns))
+
+end
+task.wait()
+-- ================================================================================ edge_gate/20-gate.luau
+do
+-- ================================================================ edge_gate: the grand stair, the arena, the gate, the towers
+-- GATE part (zoneOf == "gate": z < -72, |x| < 120). The grand end stone stair climbs north over the void from the
+-- main island (z -76, y 0) to the arena island (z -104, y 16): end stone brick steps on a stepped purpur underside,
+-- purpur side walls with end rods. The arena (ARENA r 52, y 16) on the obsidian: flush glowing magenta runes — the soul
+-- circle in the centre (a 2×2 core, a ring r 9.5..12.5, a compass star), a dashed inner ring r 22..25.5, the big ring
+-- r 34..38 with 16 glyphs at r 39..47, a dim outer ring r 48..52 and blackstone cracks; four obsidian pillars on the
+-- diagonals at r ≈ 31 (3×3 base, 2×2 shaft 6 blocks, 3×3 capital, a magenta crystal crown; base, shaft, band and
+-- capital tagged Pillar). The rim: an end stone brick parapet ring r 54..58 with openings 6 blocks wide at E, S
+-- (the stair landing) and W, and the north sector left to the gate; purpur posts with white candles; a reaper’s
+-- scythe (decor) stuck in the floor just inside, west of the south opening. The gate (hero) at the north rim: a
+-- pointed obsidian arch x -28..28, ~26 blocks tall (apex pinnacle tip at y ≈ 125), a purpur pillar / end stone brick inner frame, stepped
+-- pinnacles and spikes, a shimmering violet portal film with specks, motes and a soft light, on a purpur plinth with
+-- two steps; its z is fitted to the island ground (GATE z0 -240 is shifted south while the back corners would
+-- overhang the void). Six obsidian towers with magenta crystal crowns and gold-edged magenta banners and four crystal
+-- spires (black → magenta) stand on the rim, fitted inward until they sit on island ground.
+-- Light only from crystals, end rods, candles and the portal: ≤ 25 PointLights.
+local gate = folder("Gate")
+local startCount = count
+local GY = ARENA_ISLE.y -- 16
+local WAX = Color3.fromRGB(238, 230, 208)
+local FLAME = Color3.fromRGB(255, 196, 120)
+local ROD = Color3.fromRGB(244, 240, 232)
+local DIM = Color3.fromRGB(150, 40, 150)
+local DEEP_MAGENTA = Color3.fromRGB(110, 30, 100)
+local GOLD = Color3.fromRGB(255, 214, 110)
+local OPEN_DEG = { 0, 90, 180 } -- the arena openings: angle from +X toward +Z (90 = south, the stair)
+local OPEN_HALF = 12 -- half the clear width of an opening (6 blocks)
+
+-- the PointLight budget of this part
+local lights = 0
+local function glow(p, range, brightness, color)
+	if lights >= 25 then
+		return nil
+	end
+	lights += 1
+	return light(p, range, brightness, color)
+end
+-- a Neon box by two corners
+local function neon(name, x0, y0, z0, x1, y1, z1, color, parent)
+	local p = box(name, x0, y0, z0, x1, y1, z1, nil, color, parent)
+	p.Material = Enum.Material.Neon
+	return p
+end
+-- a decor part in a frame cf (local centre, size)
+local function fbox(cf, name, sx, sy, sz, lx, ly, lz, variant, color, parent, material)
+	local p =
+		part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(lx, ly, lz), color, material, parent)
+	if variant then
+		textured(p, variant, color)
+	end
+	return decor(p)
+end
+-- a white candle (Minecraft style: a cream stick, a black wick, a small flame) standing at local (x, y, z)
+local function candle(x, y, z, h, parent, lit)
+	decor(
+		part(
+			"Candle",
+			Vector3.new(0.9, h, 0.9),
+			at(x, y + h / 2, z),
+			WAX,
+			Enum.Material.SmoothPlastic,
+			parent
+		)
+	)
+	decor(
+		part(
+			"Wick",
+			Vector3.new(0.15, 0.3, 0.15),
+			at(x, y + h + 0.15, z),
+			Color3.fromRGB(30, 26, 26),
+			nil,
+			parent
+		)
+	)
+	local f = decor(
+		part(
+			"Flame",
+			Vector3.new(0.35, 0.6, 0.35),
+			at(x, y + h + 0.55, z),
+			FLAME,
+			Enum.Material.Neon,
+			parent
+		)
+	)
+	if lit then
+		glow(f, 22, 1.1, Color3.fromRGB(255, 226, 180))
+	end
+	return f
+end
+-- a little cluster of candles on a top surface at height y
+local function candles(x, y, z, parent, lit)
+	candle(x - 0.8, y, z - 0.6, 2.2, parent, lit)
+	candle(x + 0.9, y, z + 0.2, 1.5, parent, false)
+	if rng:NextNumber() < 0.6 then
+		candle(x - 0.4, y, z + 1.1, 1.1, parent, false)
+	end
+end
+-- an end rod standing on a surface at height y: a white base, a thin white rod, a glowing tip
+local function endRod(x, y, z, parent, lit)
+	decor(
+		part(
+			"EndRodBase",
+			Vector3.new(1.4, 0.5, 1.4),
+			at(x, y + 0.25, z),
+			ROD,
+			Enum.Material.SmoothPlastic,
+			parent
+		)
+	)
+	decor(
+		part(
+			"EndRod",
+			Vector3.new(0.5, 3, 0.5),
+			at(x, y + 2, z),
+			ROD,
+			Enum.Material.SmoothPlastic,
+			parent
+		)
+	)
+	local tip = decor(
+		part(
+			"EndRodTip",
+			Vector3.new(0.7, 0.7, 0.7),
+			at(x, y + 3.75, z),
+			Color3.fromRGB(255, 250, 240),
+			Enum.Material.Neon,
+			parent
+		)
+	)
+	if lit then
+		glow(tip, 26, 1, Color3.fromRGB(240, 225, 255))
+	end
+	return tip
+end
+-- is there arena island ground under (x, z)? (the same 8-stud cell test the core builds the island with)
+local function ground(x, z)
+	return isleOf(math.floor(x / 8) * 8 + 4, math.floor(z / 8) * 8 + 4) == "arena"
+end
+-- the distance of (dx, dz) (from the arena centre) to the nearest opening axis, on the outward side of that axis
+local function openingPerp(dx, dz)
+	local best = math.huge
+	for _, deg in ipairs(OPEN_DEG) do
+		local a = math.rad(deg)
+		local ux, uz = math.cos(a), math.sin(a)
+		if dx * ux + dz * uz > 0 then
+			best = math.min(best, math.abs(-dx * uz + dz * ux))
+		end
+	end
+	return best
+end
+-- footprints taken on the rim { x0, z0, x1, z1 } (the parapet and the posts keep out of them)
+local taken = {}
+local function isTaken(x, z, pad)
+	for _, t in ipairs(taken) do
+		if x > t[1] - pad and x < t[3] + pad and z > t[2] - pad and z < t[4] + pad then
+			return true
+		end
+	end
+	return false
+end
+-- a rim spot at angle deg (from +X toward +Z): radius r0 down to rMin until a footprint of half size h sits on
+-- island ground; centres snapped to a block centre
+local function rimSpot(deg, r0, rMin, h)
+	local a = math.rad(deg)
+	local bx, bz
+	for r = r0, rMin, -1 do
+		local x = ARENA.x + math.floor(math.cos(a) * r / B) * B + 2
+		local z = ARENA.z + math.floor(math.sin(a) * r / B) * B + 2
+		bx, bz = x, z
+		local ok = true
+		for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			if not ground(x + c[1] * (h - 0.5), z + c[2] * (h - 0.5)) then
+				ok = false
+				break
+			end
+		end
+		if ok then
+			return x, z, true
+		end
+	end
+	return bx, bz, false
+end
+-- a stepped crystal cluster (Neon) on a dark socket, base at (x, y, z); s = scale
+local function crystalCrown(x, y, z, s, parent, lit)
+	box("CrystalSocket", x - 3, y, z - 3, x + 3, y + 1.5, z + 3, "px_obsidian", nil, parent)
+	local yb = y + 1.5
+	local core =
+		decor(neon("Crystal", x - 1.5, yb, z - 1.5, x + 1.5, yb + 10 * s, z + 1.5, CRYSTAL, parent))
+	decor(
+		neon(
+			"CrystalTip",
+			x - 0.75,
+			yb + 10 * s,
+			z - 0.75,
+			x + 0.75,
+			yb + 10 * s + 3 * s,
+			z + 0.75,
+			CRYSTAL,
+			parent
+		)
+	)
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		if rng:NextNumber() < 0.85 then
+			local h = rng:NextNumber(4, 7) * s
+			local cx, cz = x + c[1] * 1.9, z + c[2] * 1.9
+			decor(neon("CrystalShard", cx - 1, yb, cz - 1, cx + 1, yb + h, cz + 1, MAGENTA, parent))
+			if rng:NextNumber() < 0.5 then
+				decor(
+					neon(
+						"CrystalShardTip",
+						cx - 0.5,
+						yb + h,
+						cz - 0.5,
+						cx + 0.5,
+						yb + h + 1.5 * s,
+						cz + 0.5,
+						CRYSTAL,
+						parent
+					)
+				)
+			end
+		end
+	end
+	if lit then
+		glow(core, 34, 1.4, CRYSTAL)
+	end
+	return core
+end
+
+-- where the gate stands: its back (GATE z0 = -240) moves south while the plinth's back edge would overhang the void
+local gb = -230
+for cand = GATE.z0, -230, 2 do
+	local ok = true
+	for _, x in ipairs({ -31.5, -23.5, -15.5, -7.5, 0.5, 8.5, 16.5, 24.5, 31.5 }) do
+		if not ground(x, cand + 0.5) then
+			ok = false
+			break
+		end
+	end
+	if ok then
+		gb = cand
+		break
+	end
+end
+
+-- ================================================================ 1. the grand stair (z -76, y 0 → z -104, y 16)
+do
+	local stair = folder("GrandStair", gate)
+	local x0, x1 = GRAND_STAIR.x0, GRAND_STAIR.x1
+	local z0, z1 = GRAND_STAIR.z0, GRAND_STAIR.z1
+	stairs("GrandStair", (x0 + x1) / 2, z0, z1, 0, GY, x1 - x0, "px_end_stone_bricks", stair)
+	local function stairY(z)
+		return GY * (z0 - z) / (z0 - z1)
+	end
+	-- the stepped purpur underside over the void (the main island ends at z -80): a body, a keel, a dangling heart
+	local segs = { { -80, -83, -8 }, { -83, -90, -8 }, { -90, -97, -4 }, { -97, -104, 0 } }
+	for i, s in ipairs(segs) do
+		local top = stairY(s[1]) - 2
+		box("StairUnderside", x0, s[3], s[2], x1, top, s[1], "px_purpur", PURPUR, stair)
+		box("StairKeel", x0 + 4, s[3] - 4, s[2], x1 - 4, s[3], s[1], "px_purpur", PURPUR, stair)
+		if i == 2 or i == 3 then
+			box(
+				"StairKeelTip",
+				x0 + 8,
+				s[3] - 8,
+				s[2] + 1,
+				x1 - 8,
+				s[3] - 4,
+				s[1] - 1,
+				"px_purpur",
+				Color3.fromRGB(190, 150, 190),
+				stair
+			)
+		end
+	end
+	-- purpur side walls 1 block thick, rising 1 block per 7 studs (4 segments), end rods on top
+	for k = 0, 3 do
+		local za, zb = z0 - 7 * k, z0 - 7 * (k + 1)
+		local bottom = if k == 0 then -8 else segs[k + 1][3]
+		local top = B * (k + 1) + B
+		for _, side in ipairs({ -1, 1 }) do
+			local wx0, wx1 = if side < 0 then x0 - 4.4 else x1, if side < 0 then x0 else x1 + 4.4
+			box("StairWall", wx0, bottom, zb, wx1, top, za, "px_purpur", PURPUR, stair)
+			box(
+				"StairWallCap",
+				wx0 - 0.2,
+				top,
+				zb,
+				wx1 + 0.2,
+				top + 0.6,
+				za,
+				"px_end_stone_bricks",
+				nil,
+				stair
+			)
+			endRod((wx0 + wx1) / 2, top + 0.6, (za + zb) / 2, stair, k == 1)
+		end
+	end
+	-- purpur end posts with end rods at the foot (on the main island edge) and at the landing (on the arena island)
+	for _, side in ipairs({ -1, 1 }) do
+		local px = side * 14.4
+		cube("StairPost", px, 4, -74.4, 4.4, 8, 4.4, "px_purpur_pillar", nil, stair)
+		endRod(px, 8, -74.4, stair, false)
+		cube("StairPost", px, GY + 4, -106.4, 4.4, 8, 4.4, "px_purpur_pillar", nil, stair)
+		endRod(px, GY + 8, -106.4, stair, false)
+	end
+end
+task.wait()
+
+-- ================================================================ 2. the arena: runes, pillars, the rim
+do
+	local arena = folder("Arena", gate)
+	local CELLS = 13 -- cells of 4 studs each way from the centre (r 52)
+	local PILLAR_C = 22 -- pillar centres at (±22, ±22) from the centre: r ≈ 31
+	local function inPillarBase(dx, dz)
+		return math.abs(math.abs(dx) - PILLAR_C) < 6 and math.abs(math.abs(dz) - PILLAR_C) < 6
+	end
+	local function inGateFoot(x, z)
+		return x > -32 and x < 32 and z > gb and z < gb + 16
+	end
+	-- cracks: random walks of blackstone cells out from the soul circle
+	local cracks = {}
+	for _ = 1, 7 do
+		local a = rng:NextNumber(0, 2 * math.pi)
+		local r = 13
+		while r < 33 do
+			local dx, dz = math.cos(a) * r, math.sin(a) * r
+			cracks[math.floor(dx / B) .. "," .. math.floor(dz / B)] = true
+			a += rng:NextNumber(-0.22, 0.22)
+			r += rng:NextNumber(3, 4.5)
+		end
+	end
+	-- the floor pattern of the cell centred at (dx, dz): "rune", "dim", "crack" or nil (the bare obsidian)
+	local function rune(dx, dz, ix, iz)
+		local rr = math.sqrt(dx * dx + dz * dz)
+		if rr >= 52 or inPillarBase(dx, dz) then
+			return nil
+		end
+		local ax, az = math.abs(dx), math.abs(dz)
+		local th = math.atan2(dz, dx)
+		-- the soul circle: a core, a ring, a compass star
+		if rr < 3 or (rr >= 9.5 and rr < 12.5) then
+			return "rune"
+		end
+		if rr >= 12.5 and rr < 20 and math.min(ax, az) < 3 then
+			return "rune"
+		end
+		if rr >= 12.5 and rr < 17 and math.abs(ax - az) < 1 then
+			return "rune"
+		end
+		-- the dashed inner ring
+		if rr >= 22 and rr < 25.5 and math.floor((th + math.pi) / (math.pi / 24)) % 4 ~= 0 then
+			return "dim"
+		end
+		-- the big ring and its 16 glyphs (between the pillars' diagonals)
+		if rr >= 34 and rr < 38 then
+			return "rune"
+		end
+		if rr >= 39 and rr < 47 then
+			local step = math.pi / 8
+			local k = math.floor((th - step / 2) / step + 0.5)
+			local tc = k * step + step / 2
+			local v = rr * math.sin(th - tc)
+			local u = rr * math.cos(th - tc) - 43
+			local g = k % 3
+			if g == 0 and math.abs(v) < 3 and math.abs(u) < 4 then
+				return "rune"
+			elseif
+				g == 1
+				and ((math.abs(v) < 3 and math.abs(u) < 4) or (u > 0 and u < 4 and math.abs(v) < 7))
+			then
+				return "rune"
+			elseif g == 2 then
+				local m = math.abs(u) + math.abs(v)
+				if m > 3 and m < 7 then
+					return "rune"
+				end
+			end
+		end
+		if rr >= 48 then
+			return "dim"
+		end
+		if cracks[ix .. "," .. iz] then
+			return "crack"
+		end
+		return nil
+	end
+	-- lay the pattern flush (y 15.8 .. 16.1) in runs along x
+	local runes = folder("Runes", arena)
+	for iz = -CELLS, CELLS - 1 do
+		local z0 = ARENA.z + iz * B
+		local runX, runKey = nil, nil
+		local function flush(xEnd)
+			if runX then
+				if runKey == "crack" then
+					box(
+						"Crack",
+						runX,
+						GY - 0.2,
+						z0,
+						xEnd,
+						GY + 0.1,
+						z0 + B,
+						"px_blackstone",
+						Color3.fromRGB(120, 105, 130),
+						runes
+					)
+				else
+					local p = neon(
+						"Rune",
+						runX,
+						GY - 0.2,
+						z0,
+						xEnd,
+						GY + 0.1,
+						z0 + B,
+						if runKey == "rune" then MAGENTA else DIM,
+						runes
+					)
+					p.CastShadow = false
+				end
+			end
+			runX = nil
+		end
+		for ix = -CELLS, CELLS - 1 do
+			local x = ARENA.x + ix * B
+			local key = nil
+			if not inGateFoot(x + 2, z0 + 2) then
+				key = rune(ix * B + 2, iz * B + 2, ix, iz)
+			end
+			if key ~= runKey then
+				flush(x)
+				if key then
+					runX = x
+				end
+				runKey = key
+			end
+		end
+		flush(ARENA.x + CELLS * B)
+	end
+	-- one magenta light over the soul circle
+	glow(
+		neon(
+			"SoulCore",
+			ARENA.x - 1,
+			GY + 0.1,
+			ARENA.z - 1,
+			ARENA.x + 1,
+			GY + 0.2,
+			ARENA.z + 1,
+			CRYSTAL,
+			runes
+		),
+		40,
+		1.2,
+		MAGENTA
+	)
+	task.wait()
+
+	-- four obsidian pillars on the diagonals (the boss charge stuns on them)
+	for _, s in ipairs({ { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }) do
+		local pf = folder("Pillar", arena)
+		local px, pz = ARENA.x + s[1] * PILLAR_C, ARENA.z + s[2] * PILLAR_C
+		pillarTag(
+			box("PillarBase", px - 6, GY, pz - 6, px + 6, GY + B, pz + 6, "px_obsidian", nil, pf)
+		)
+		pillarTag(
+			box(
+				"PillarShaft",
+				px - 4,
+				GY + B,
+				pz - 4,
+				px + 4,
+				GY + 7 * B,
+				pz + 4,
+				"px_obsidian",
+				nil,
+				pf
+			)
+		)
+		pillarTag(
+			box(
+				"PillarBand",
+				px - 4.3,
+				GY + 3 * B,
+				pz - 4.3,
+				px + 4.3,
+				GY + 3 * B + 1.2,
+				pz + 4.3,
+				"px_purpur",
+				PURPUR,
+				pf
+			)
+		)
+		pillarTag(
+			box(
+				"PillarCapital",
+				px - 6,
+				GY + 7 * B,
+				pz - 6,
+				px + 6,
+				GY + 8 * B,
+				pz + 6,
+				"px_obsidian",
+				nil,
+				pf
+			)
+		)
+		-- glowing rune strips on the two faces toward the centre
+		local fx, fz = px - s[1] * 4.15, pz - s[2] * 4.15
+		decor(
+			neon(
+				"PillarRune",
+				fx - 0.15,
+				GY + B + 3,
+				pz - 0.4,
+				fx + 0.15,
+				GY + 3 * B - 1,
+				pz + 0.4,
+				MAGENTA,
+				pf
+			)
+		)
+		decor(
+			neon(
+				"PillarRune",
+				px - 0.4,
+				GY + 3 * B + 3,
+				fz - 0.15,
+				px + 0.4,
+				GY + 7 * B - 3,
+				fz + 0.15,
+				MAGENTA,
+				pf
+			)
+		)
+		crystalCrown(px, GY + 8 * B, pz, 0.8, pf, true)
+	end
+	task.wait()
+
+	-- the scythe: a reaper’s scythe stuck in the floor inside the parapet, west of the south opening (decor)
+	do
+		local sf = folder("Scythe", arena)
+		local sx, sz = -22, -122
+		local cf = at(sx, GY, sz)
+		local handle = Color3.fromRGB(70, 52, 48)
+		for i = 0, 6 do
+			fbox(
+				cf,
+				"ScytheHandle",
+				1.3,
+				3.6,
+				1.3,
+				i * 0.9,
+				1.2 + i * 3.2,
+				0,
+				"px_dark_oak_planks",
+				handle,
+				sf
+			)
+		end
+		fbox(
+			cf,
+			"ScytheCollar",
+			2.2,
+			1.8,
+			2.2,
+			5.6,
+			22.4,
+			0,
+			"px_iron_block",
+			Color3.fromRGB(110, 110, 120),
+			sf
+		)
+		for k = 0, 8 do
+			local t = k / 8
+			local bx = 5.2 - 13 * t
+			local by = 22.6 + 2.2 * math.sin(math.pi * t) - 5 * t * t
+			local h = 2.4 - 1.5 * t
+			fbox(
+				cf,
+				"ScytheBlade",
+				2.2,
+				h,
+				0.5,
+				bx,
+				by,
+				0,
+				"px_iron_block",
+				Color3.fromRGB(170, 172, 186),
+				sf
+			)
+			fbox(
+				cf,
+				"ScytheEdge",
+				2.2,
+				0.4,
+				0.6,
+				bx,
+				by - h / 2 - 0.1,
+				0,
+				nil,
+				Color3.fromRGB(225, 225, 235),
+				sf,
+				Enum.Material.SmoothPlastic
+			)
+		end
+		-- cracked ground round the blade's handle
+		box(
+			"ScytheCrack",
+			sx - 4,
+			GY - 0.2,
+			sz - 2,
+			sx + 4,
+			GY + 0.16,
+			sz + 2,
+			"px_blackstone",
+			Color3.fromRGB(150, 140, 150),
+			sf
+		)
+	end
+end
+task.wait()
+
+-- ================================================================ 3. the gate (hero) at the north rim
+do
+	local g = folder("TheGate", gate)
+	local A, R = 12, 20 -- the opening half-width, the inner arch radius (centres at x = ±(R - A))
+	local C = A - R
+	local YF = GY + B -- the gate floor (the plinth top)
+	local YS = YF + 44 -- the spring line of the arch
+	local zw0, zw1 = gb + 2, gb + 10 -- the obsidian wall
+	local zf0, zf1 = gb + 1, gb + 11 -- the inner frame and the pinnacle columns (proud of the wall)
+	-- the foundation and the plinth, the steps up from the arena floor
+	box(
+		"GateFoundation",
+		-32.5,
+		GY - 3 * B,
+		gb - 0.5,
+		32.5,
+		GY,
+		gb + 12.5,
+		"px_end_stone_bricks",
+		nil,
+		g
+	)
+	box(
+		"GateFoundationLow",
+		-24.5,
+		GY - 7 * B,
+		gb + 2,
+		24.5,
+		GY - 3 * B,
+		gb + 10,
+		"px_purpur",
+		PURPUR,
+		g
+	)
+	box("GatePlinth", -32, GY, gb, 32, YF, gb + 12, "px_purpur", PURPUR, g)
+	stairs("GateStep", 0, gb + 16, gb + 12, GY, B, 32, "px_end_stone_bricks", g)
+	-- the arch rows: inner (opening), frame and outer half-widths per 4-stud row above the spring line
+	local function hw(rad, tm)
+		if tm >= rad then
+			return nil
+		end
+		local v = snap(C + math.sqrt(rad * rad - tm * tm))
+		return if v > 0 then v else nil
+	end
+	local rows = {}
+	for j = 0, 9 do
+		local tm = 4 * j + 2
+		local xo = hw(R + 16, tm)
+		if not xo then
+			break
+		end
+		rows[j] = { xi = hw(R, tm), xf = hw(R + 4, tm), xo = math.min(xo, 20) }
+	end
+	-- the piers: the purpur pillar frame, the obsidian pier, the pinnacle column (2×2) up to y 92
+	for _, sd in ipairs({ -1, 1 }) do
+		local function bx(name, a, y0, b, y1, z0, z1, variant, tint)
+			return box(
+				name,
+				math.min(sd * a, sd * b),
+				y0,
+				z0,
+				math.max(sd * a, sd * b),
+				y1,
+				z1,
+				variant,
+				tint,
+				g
+			)
+		end
+		bx("GateFrame", A, YF, A + 4, YS, zf0, zf1, "px_purpur_pillar", nil)
+		bx("GateImpost", A - 1, YS - B, A + 5, YS, gb, gb + 12, "px_end_stone_bricks", nil)
+		bx("GatePier", A + 4, YF, 20, YS, zw0, zw1, "px_obsidian", nil)
+		bx("GateColumn", 20, YF, 28, YF + 72, zf0, zf1, "px_obsidian", nil)
+		bx("GateColumnFoot", 19, YF, 29, YF + B, gb, gb + 12, "px_blackstone_bricks", nil)
+		-- the column's stepped pinnacle with corner spikes and a magenta tip
+		local cx, ytop = sd * 24, YF + 72
+		box("GatePinnacle", cx - 3, ytop, gb + 3, cx + 3, ytop + B, gb + 9, "px_obsidian", nil, g)
+		box(
+			"GatePinnacle",
+			cx - 2,
+			ytop + B,
+			gb + 4,
+			cx + 2,
+			ytop + 3 * B,
+			gb + 8,
+			"px_obsidian",
+			nil,
+			g
+		)
+		box(
+			"GatePinnacle",
+			cx - 1,
+			ytop + 3 * B,
+			gb + 5,
+			cx + 1,
+			ytop + 3 * B + 6,
+			gb + 7,
+			"px_obsidian",
+			nil,
+			g
+		)
+		decor(
+			neon(
+				"GatePinnacleTip",
+				cx - 0.5,
+				ytop + 3 * B + 6,
+				gb + 5.5,
+				cx + 0.5,
+				ytop + 3 * B + 10,
+				gb + 6.5,
+				CRYSTAL,
+				g
+			)
+		)
+		for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			local sx, sz = cx + c[1] * 3, gb + 6 + c[2] * 4
+			box("GateSpike", sx - 1, ytop, sz - 1, sx + 1, ytop + 5, sz + 1, "px_obsidian", nil, g)
+			box(
+				"GateSpikeTip",
+				sx - 0.4,
+				ytop + 5,
+				sz - 0.4,
+				sx + 0.4,
+				ytop + 7,
+				sz + 0.4,
+				"px_obsidian",
+				nil,
+				g
+			)
+		end
+		-- a magenta crystal set in the column's face, purpur end rod posts on the plinth corners
+		decor(neon("GateColumnGem", cx - 1, YF + 52, zf1, cx + 1, YF + 56, zf1 + 0.6, MAGENTA, g))
+		cube("GatePlinthPost", sd * 30.5, YF + 3, gb + 10, 3, 6, 3, "px_purpur_pillar", nil, g)
+		endRod(sd * 30.5, YF + 6, gb + 10, g, false)
+	end
+	-- the arch above the spring line, row by row (frame voussoirs alternate purpur and end stone bricks)
+	for j = 0, #rows do
+		local r = rows[j]
+		local y0, y1 = YS + 4 * j, YS + 4 * j + 4
+		local fv = if j % 2 == 0 and j ~= 4 then "px_purpur" else "px_end_stone_bricks"
+		if r.xf then
+			if r.xi then
+				box(
+					"GateArchFrame",
+					r.xi,
+					y0,
+					zf0,
+					r.xf,
+					y1,
+					zf1,
+					fv,
+					if fv == "px_purpur" then PURPUR else nil,
+					g
+				)
+				box(
+					"GateArchFrame",
+					-r.xf,
+					y0,
+					zf0,
+					-r.xi,
+					y1,
+					zf1,
+					fv,
+					if fv == "px_purpur" then PURPUR else nil,
+					g
+				)
+			else
+				box("GateKeystone", -r.xf, y0, zf0, r.xf, y1, zf1, fv, nil, g)
+			end
+			if r.xo > r.xf then
+				box("GateArch", r.xf, y0, zw0, r.xo, y1, zw1, "px_obsidian", nil, g)
+				box("GateArch", -r.xo, y0, zw0, -r.xf, y1, zw1, "px_obsidian", nil, g)
+			end
+		else
+			box("GateArch", -r.xo, y0, zw0, r.xo, y1, zw1, "px_obsidian", nil, g)
+		end
+		-- spikes on the step corners of the extrados
+		local nxt = rows[j + 1]
+		if j >= 5 and nxt and nxt.xo < r.xo then
+			local sx = (r.xo + math.max(nxt.xo, r.xo - 8)) / 2
+			for _, sd in ipairs({ -1, 1 }) do
+				box(
+					"GateSpike",
+					sd * sx - 1.5,
+					y1,
+					gb + 4.5,
+					sd * sx + 1.5,
+					y1 + 4,
+					gb + 7.5,
+					"px_obsidian",
+					nil,
+					g
+				)
+				box(
+					"GateSpikeTip",
+					sd * sx - 0.6,
+					y1 + 4,
+					gb + 5.4,
+					sd * sx + 0.6,
+					y1 + 7,
+					gb + 6.6,
+					"px_obsidian",
+					nil,
+					g
+				)
+			end
+		end
+	end
+	-- the crown pinnacle over the apex
+	local yApex = YS + 4 * (#rows + 1)
+	box("GateCrown", -4, yApex, zw0, 4, yApex + 2 * B, zw1, "px_obsidian", nil, g)
+	box("GateCrown", -2, yApex + 2 * B, gb + 4, 2, yApex + 4 * B, gb + 8, "px_obsidian", nil, g)
+	box("GateCrown", -1, yApex + 4 * B, gb + 5, 1, yApex + 4 * B + 6, gb + 7, "px_obsidian", nil, g)
+	decor(
+		neon(
+			"GateCrownTip",
+			-0.6,
+			yApex + 4 * B + 6,
+			gb + 5.4,
+			0.6,
+			yApex + 4 * B + 10,
+			gb + 6.6,
+			CRYSTAL,
+			g
+		)
+	)
+	-- the keystone gem
+	glow(
+		decor(neon("GateGem", -1.5, YS + 17, zf1, 1.5, YS + 20, zf1 + 0.8, CRYSTAL, g)),
+		30,
+		1.2,
+		CRYSTAL
+	)
+	task.wait()
+
+	-- the portal film: layered translucent violet sheets in the opening, a pixel nebula, specks, motes, a soft light
+	local film = folder("PortalFilm", g)
+	local rects = { { -A, YF, A, YS + 8 }, { -8, YS + 8, 8, YS + 16 } }
+	for _, rc in ipairs(rects) do
+		local back = box(
+			"PortalBack",
+			rc[1],
+			rc[2],
+			gb + 5.4,
+			rc[3],
+			rc[4],
+			gb + 5.8,
+			nil,
+			Color3.fromRGB(16, 6, 28),
+			film
+		)
+		back.Material = Enum.Material.Glass
+		back.Transparency = 0.2
+		back.CanQuery = false
+		local mid = decor(
+			neon("PortalVeil", rc[1], rc[2], gb + 6, rc[3], rc[4], gb + 6.2, VOID_VIOLET, film)
+		)
+		mid.Transparency = 0.35
+		mid.CastShadow = false
+		local front = decor(
+			neon(
+				"PortalVeil",
+				rc[1],
+				rc[2],
+				gb + 6.9,
+				rc[3],
+				rc[4],
+				gb + 7,
+				Color3.fromRGB(40, 10, 70),
+				film
+			)
+		)
+		front.Transparency = 0.4
+		front.CastShadow = false
+		if rc[2] == YF then
+			glow(mid, 40, 1.3, Color3.fromRGB(150, 70, 230))
+			emitter(mid, {
+				Texture = "rbxasset://textures/particles/sparkles_main.dds",
+				Color = ColorSequence.new(
+					Color3.fromRGB(190, 120, 255),
+					Color3.fromRGB(240, 120, 230)
+				),
+				LightEmission = 1,
+				Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.5),
+					NumberSequenceKeypoint.new(1, 0),
+				}),
+				Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 1),
+					NumberSequenceKeypoint.new(0.2, 0.2),
+					NumberSequenceKeypoint.new(1, 1),
+				}),
+				Lifetime = NumberRange.new(4, 7),
+				Rate = 6,
+				Speed = NumberRange.new(0.4, 1.4),
+				SpreadAngle = Vector2.new(40, 40),
+				EmissionDirection = Enum.NormalId.Back,
+				RotSpeed = NumberRange.new(-30, 30),
+			})
+		else
+			glow(mid, 30, 0.9, Color3.fromRGB(150, 70, 230))
+		end
+	end
+	-- a pixel nebula in 4-stud cells (violet and magenta wisps), merged along x
+	for y = YF, YS + 12, B do
+		local half = if y < YS + 8 then A else 8
+		local runX, runKey = nil, nil
+		local function flush(xEnd)
+			if runX then
+				local p = decor(
+					neon(
+						"PortalWisp",
+						runX,
+						y,
+						gb + 6.4,
+						xEnd,
+						y + B,
+						gb + 6.6,
+						if runKey == 1
+							then Color3.fromRGB(110, 45, 180)
+							else Color3.fromRGB(170, 60, 190),
+						film
+					)
+				)
+				p.Transparency = if runKey == 1 then 0.5 else 0.6
+				p.CastShadow = false
+			end
+			runX = nil
+		end
+		for x = -half, half - B, B do
+			local n = n2(x * 1.7, y * 1.3, 9.1, 0.06)
+			local key = if n > 0.18 then 1 elseif n < -0.3 then 2 else nil
+			if key ~= runKey then
+				flush(x)
+				if key then
+					runX = x
+				end
+				runKey = key
+			end
+		end
+		flush(half)
+	end
+	-- small light specks (the only place with tiny bits: stars in the film)
+	for _ = 1, 44 do
+		local y = rng:NextNumber(YF + 1, YS + 15)
+		local half = if y < YS + 8 then A - 1 else 7
+		local s = rng:NextNumber(0.25, 0.5)
+		local sp = decor(
+			part(
+				"PortalSpeck",
+				Vector3.new(s, s, 0.12),
+				at(rng:NextNumber(-half, half), y, gb + 6.75),
+				if rng:NextNumber() < 0.7 then Color3.fromRGB(245, 230, 255) else CRYSTAL,
+				Enum.Material.Neon,
+				film
+			)
+		)
+		sp.CastShadow = false
+	end
+	-- a glowing threshold line
+	decor(
+		neon(
+			"PortalThreshold",
+			-A,
+			YF,
+			gb + 7.2,
+			A,
+			YF + 0.15,
+			gb + 8,
+			Color3.fromRGB(150, 70, 230),
+			film
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 4. towers, crystal spires, the parapet and the rim posts
+do
+	local rim = folder("Rim", gate)
+	-- the gate and its steps are taken too
+	table.insert(taken, { -33, gb - 1, 33, gb + 17 })
+	-- an obsidian tower (3×3 → 2×2 blocks, H blocks tall) with a crystal crown and a gold-edged magenta banner
+	local function tower(x, z, H)
+		local tf = folder("Tower", rim)
+		local h1 = math.floor(H * 0.6)
+		local y1 = GY + h1 * B
+		local yt = GY + H * B
+		box("TowerBase", x - 6, GY, z - 6, x + 6, y1, z + 6, "px_obsidian", nil, tf)
+		box("TowerCornice", x - 7, y1, z - 7, x + 7, y1 + 2, z + 7, "px_blackstone_bricks", nil, tf)
+		box("TowerShaft", x - 4, y1 + 2, z - 4, x + 4, yt, z + 4, "px_obsidian", nil, tf)
+		box("TowerCap", x - 5, yt, z - 5, x + 5, yt + 2, z + 5, "px_blackstone_bricks", nil, tf)
+		for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			cube(
+				"TowerMerlon",
+				x + c[1] * 4,
+				yt + 3.5,
+				z + c[2] * 4,
+				2,
+				3,
+				2,
+				"px_obsidian",
+				nil,
+				tf
+			)
+		end
+		crystalCrown(x, yt + 2, z, 1, tf, true)
+		-- the face toward the arena: a banner on the base, a magenta slit on the shaft
+		local ux, uz = ARENA.x - x, ARENA.z - z
+		local nx, nz = 0, 0
+		if math.abs(ux) > math.abs(uz) then
+			nx = if ux > 0 then 1 else -1
+		else
+			nz = if uz > 0 then 1 else -1
+		end
+		local len = math.min(22, (y1 - GY) - 3)
+		local by = y1 - 1 - len / 2
+		local fp = V(x + nx * 6, by, z + nz * 6)
+		local cf = CFrame.lookAt(fp, fp + Vector3.new(nx, 0, nz))
+		fbox(cf, "Banner", 4.4, len, 0.3, 0, 0, -0.35, "px_white_wool", MAGENTA, tf)
+		fbox(cf, "BannerEdge", 0.6, len, 0.4, -2.5, 0, -0.4, "px_gold_block", GOLD, tf)
+		fbox(cf, "BannerEdge", 0.6, len, 0.4, 2.5, 0, -0.4, "px_gold_block", GOLD, tf)
+		fbox(cf, "BannerRod", 6.2, 0.8, 0.8, 0, len / 2 + 0.4, -0.5, "px_gold_block", GOLD, tf)
+		fbox(cf, "BannerHem", 5.6, 0.8, 0.45, 0, -len / 2 + 0.4, -0.42, "px_gold_block", GOLD, tf)
+		local emblem =
+			fbox(cf, "BannerEmblem", 2, 2, 0.5, 0, len / 2 - 5, -0.5, "px_gold_block", GOLD, tf)
+		emblem.CFrame = emblem.CFrame * CFrame.Angles(0, 0, math.rad(45))
+		fbox(cf, "BannerEmblemCore", 0.9, 0.9, 0.6, 0, len / 2 - 5, -0.55, "px_obsidian", nil, tf)
+		local sp = V(x + nx * 4, (y1 + yt) / 2, z + nz * 4)
+		local scf = CFrame.lookAt(sp, sp + Vector3.new(nx, 0, nz))
+		fbox(scf, "TowerSlit", 1, 6, 0.3, 0, 0, -0.1, nil, MAGENTA, tf, Enum.Material.Neon)
+		table.insert(taken, { x - 7, z - 7, x + 7, z + 7 })
+	end
+	-- a crystal spire: black columns at the base turning deep magenta, magenta, then a bright tip
+	local function spire(x, z, lit)
+		local sf = folder("CrystalSpire", rim)
+		local function column(cx, cz, half, hBlocks)
+			local hb = math.max(1, hBlocks - 3)
+			local y1 = GY + hb * B
+			box(
+				"SpireBlack",
+				cx - half,
+				GY,
+				cz - half,
+				cx + half,
+				y1,
+				cz + half,
+				"px_obsidian",
+				nil,
+				sf
+			)
+			local y2 = y1 + B
+			decor(
+				neon(
+					"SpireDeep",
+					cx - half,
+					y1,
+					cz - half,
+					cx + half,
+					y2,
+					cz + half,
+					DEEP_MAGENTA,
+					sf
+				)
+			)
+			local y3 = GY + hBlocks * B
+			local mid = decor(
+				neon(
+					"SpireMagenta",
+					cx - half,
+					y2,
+					cz - half,
+					cx + half,
+					y3,
+					cz + half,
+					MAGENTA,
+					sf
+				)
+			)
+			decor(
+				neon(
+					"SpireTip",
+					cx - half / 2,
+					y3,
+					cz - half / 2,
+					cx + half / 2,
+					y3 + half * 1.5,
+					cz + half / 2,
+					CRYSTAL,
+					sf
+				)
+			)
+			return mid
+		end
+		local core = column(x, z, 4, rng:NextInteger(8, 10))
+		if lit then
+			glow(core, 30, 1.1, MAGENTA)
+		end
+		for _, o in ipairs({ { -6, -2 }, { 6, 2 }, { -2, 6 }, { 2, -6 } }) do
+			if rng:NextNumber() < 0.8 then
+				column(x + o[1], z + o[2], 2, rng:NextInteger(4, 6))
+			end
+		end
+		table.insert(taken, { x - 8, z - 8, x + 8, z + 8 })
+	end
+	local placed = {}
+	for _, t in ipairs({
+		{ 232, 16 },
+		{ 308, 16 },
+		{ 42, 13 },
+		{ 138, 13 },
+		{ 64, 11 },
+		{ 116, 11 },
+	}) do
+		local x, z, ok = rimSpot(t[1], 61, 58, 6)
+		tower(x, z, t[2])
+		table.insert(
+			placed,
+			("tower %d° (%d, %d)%s"):format(t[1], x, z, if ok then "" else " EDGE")
+		)
+	end
+	task.wait()
+	for i, deg in ipairs({ 340, 200, 20, 160 }) do
+		local x, z, ok = rimSpot(deg, 62, 58, 7)
+		if not isTaken(x, z, 7) then
+			spire(x, z, i <= 2)
+			table.insert(
+				placed,
+				("spire %d° (%d, %d)%s"):format(deg, x, z, if ok then "" else " EDGE")
+			)
+		end
+	end
+	task.wait()
+
+	-- the parapet ring r 54..58: end stone bricks with a purpur coping, cut at the openings, the gate and the towers
+	local CELLS = 15
+	local wallCells = {}
+	for iz = -CELLS, CELLS - 1 do
+		local z0 = ARENA.z + iz * B
+		local runX = nil
+		local function flush(xEnd)
+			if runX then
+				box("Parapet", runX, GY, z0, xEnd, GY + B, z0 + B, "px_end_stone_bricks", nil, rim)
+				box(
+					"ParapetCoping",
+					runX,
+					GY + B,
+					z0,
+					xEnd,
+					GY + B + 1,
+					z0 + B,
+					"px_purpur",
+					PURPUR,
+					rim
+				)
+			end
+			runX = nil
+		end
+		for ix = -CELLS, CELLS - 1 do
+			local dx, dz = ix * B + 2, iz * B + 2
+			local rr = math.sqrt(dx * dx + dz * dz)
+			local x, z = ARENA.x + dx, ARENA.z + dz
+			if
+				rr >= 54
+				and rr < 58
+				and openingPerp(dx, dz) >= OPEN_HALF
+				and not isTaken(x, z, 1)
+				and ground(x, z)
+			then
+				wallCells[ix .. "," .. iz] = true
+				runX = runX or ARENA.x + ix * B
+			else
+				flush(ARENA.x + ix * B)
+			end
+		end
+		flush(ARENA.x + CELLS * B)
+	end
+	-- tall purpur posts with candles flanking each opening (one lit candle per post)
+	for _, deg in ipairs(OPEN_DEG) do
+		local a = math.rad(deg)
+		local ux, uz = math.cos(a), math.sin(a)
+		for _, sd in ipairs({ -1, 1 }) do
+			local px = ARENA.x + math.floor((ux * 55 - uz * 14 * sd) / B) * B + 2
+			local pz = ARENA.z + math.floor((uz * 55 + ux * 14 * sd) / B) * B + 2
+			cube("OpeningPost", px, GY + 6, pz, 4.4, 12, 4.4, "px_purpur_pillar", nil, rim)
+			cube("OpeningPostCap", px, GY + 12.5, pz, 5, 1, 5, "px_purpur", PURPUR, rim)
+			candles(px, GY + 13, pz, rim, true)
+		end
+	end
+	-- purpur posts with candles along the parapet every 15°
+	local used = {}
+	for k = 0, 23 do
+		local a = math.rad(k * 15 + 7.5)
+		local ix, iz = math.floor(math.cos(a) * 55.8 / B), math.floor(math.sin(a) * 55.8 / B)
+		local key = ix .. "," .. iz
+		local dx, dz = ix * B + 2, iz * B + 2
+		if wallCells[key] and not used[key] and openingPerp(dx, dz) >= OPEN_HALF + 6 then
+			used[key] = true
+			local cx, cz = ARENA.x + dx, ARENA.z + dz
+			cube("RimPost", cx, GY + 4, cz, 4.4, 8, 4.4, "px_purpur_pillar", nil, rim)
+			cube("RimPostCap", cx, GY + 8.4, cz, 4.8, 0.8, 4.8, "px_purpur", PURPUR, rim)
+			candles(cx, GY + 8.8, cz, rim, false)
+		end
+	end
+	print(("[build-edge-gate] gate: back z %d; %s"):format(gb, table.concat(placed, ", ")))
+end
+
+print(("[build-edge-gate] gate part: %d parts, %d lights"):format(count - startCount, lights))
+
+end
+task.wait()
+-- ================================================================================ edge_gate/30-main.luau
+do
+-- ================================================================ edge_gate: the main island (the MAIN part)
+-- The concept (assets/concepts/edge_gate/concept-v2.webp): a purpur fence with candles round the pit, end rods at its
+-- corners; railless purpur bridges to the west and east islands; dark-wood huts with purpur trim, magenta banners and
+-- lanterns, a shulker-box market with chests and barrels, a lore hut with the dragon egg by the north path; crystal
+-- spires of black glass stepping up into magenta tips (a tall one by the west path); a purpur arch with a hanging
+-- crystal over the east path; a ring of 10 obsidian pillars round a small plaza east of the pit; chorus bushes, end
+-- stone boulders, purpur debris, end rods along the paths, candles. Every prop claims its footprint: in the MAIN zone,
+-- 10 studs inside the island edge, off the paths, the pit area, the arrival, the buyer, the zone sign, the grand stair
+-- corridor and the bridge decks, and off everything placed before it.
+local mainF = folder("MainIsland")
+local F = {
+	fence = folder("PitFence", mainF),
+	bridges = folder("Bridges", mainF),
+	huts = folder("Huts", mainF),
+	market = folder("ShulkerMarket", mainF),
+	spires = folder("CrystalSpires", mainF),
+	ring = folder("ObsidianRing", mainF),
+	rods = folder("EndRods", mainF),
+	nature = folder("ChorusAndStones", mainF),
+}
+local S = { lights = 0, skipped = 0, huts = 0, spires = 0, bushes = 0, rods = 0 }
+local MAX_LIGHTS = 25
+local COL = {
+	glass = Color3.fromRGB(34, 28, 42),
+	wax = Color3.fromRGB(240, 236, 226),
+	flame = Color3.fromRGB(255, 214, 140),
+	rod = Color3.fromRGB(236, 232, 240),
+	rodTip = Color3.fromRGB(255, 240, 255),
+	rodLight = Color3.fromRGB(235, 215, 255),
+	shulkers = {
+		Color3.new(1, 1, 1), -- purpur as drawn
+		Color3.fromRGB(215, 180, 225),
+		Color3.fromRGB(255, 160, 235), -- magenta
+		Color3.fromRGB(120, 100, 135), -- dark
+	},
+	head = Color3.fromRGB(226, 222, 170),
+	eye = Color3.fromRGB(30, 24, 36),
+	chest = Color3.fromRGB(150, 105, 65),
+	chestLid = Color3.fromRGB(125, 88, 55),
+	iron = Color3.fromRGB(60, 60, 66),
+	egg = Color3.fromRGB(18, 12, 26),
+	speck = Color3.fromRGB(150, 60, 200),
+	dark = Color3.fromRGB(40, 32, 52),
+	roof = Color3.fromRGB(150, 130, 140),
+	trim = Color3.fromRGB(200, 170, 205),
+	stone = Color3.fromRGB(214, 212, 180),
+	knob = Color3.fromRGB(255, 230, 255),
+}
+-- keep-outs besides the paths and the pit: the buyer's stall with its crate and barrel, the zone sign, the grand stair
+-- corridor, both bridge decks
+local KEEP = {
+	{ 20, 154, 48, 182 },
+	{ -22, 166, -6, 182 },
+	{ -16, -84, 16, -60 },
+	{ 84, -38, 170, -18 },
+	{ -180, 28, -124, 48 },
+}
+local claims = {}
+
+-- a box by two corners in the frame `cf` (world CFrame); look = px_* name or an Enum.Material
+local function lbox(name, cf, x0, y0, z0, x1, y1, z1, look, tint, parent, isDecor)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(
+		name,
+		size,
+		cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2),
+		tint,
+		nil,
+		parent
+	)
+	if type(look) == "string" then
+		textured(p, look, tint)
+	elseif look then
+		p.Material = look
+	end
+	if isDecor then
+		decor(p)
+	end
+	return p
+end
+-- a frame on the ground at local (x, z) whose −Z (the front) looks along (fx, fz)
+local function faceCF(x, z, fx, fz, y)
+	local p = V(x, y or 0, z)
+	return CFrame.lookAt(p, p + Vector3.new(fx, 0, fz))
+end
+-- a point light, but never more than MAX_LIGHTS in this part
+local function glow(p, range, brightness, color)
+	if S.lights >= MAX_LIGHTS then
+		return nil
+	end
+	S.lights += 1
+	return light(p, range, brightness, color)
+end
+
+-- ================================================================ footprints
+local function blocked(x, z, isPad)
+	if zoneOf(x, z) ~= "main" or isleOf(x, z, isPad) ~= "main" then
+		return true
+	end
+	if onPath(x, z, 2) or inPitArea(x, z, 4) then
+		return true
+	end
+	if (x - SPAWN.x) ^ 2 + (z - SPAWN.z) ^ 2 <= 22 * 22 then
+		return true
+	end
+	for _, k in ipairs(KEEP) do
+		if inRect(x, z, k) then
+			return true
+		end
+	end
+	return false
+end
+local function clearArea(x0, z0, x1, z1, isPad)
+	isPad = isPad or 10
+	local nx, nz = math.max(1, math.ceil((x1 - x0) / 4)), math.max(1, math.ceil((z1 - z0) / 4))
+	for i = 0, nx do
+		for j = 0, nz do
+			if blocked(x0 + (x1 - x0) * i / nx, z0 + (z1 - z0) * j / nz, isPad) then
+				return false
+			end
+		end
+	end
+	for _, c in ipairs(claims) do
+		if x0 < c[3] - 0.01 and x1 > c[1] + 0.01 and z0 < c[4] - 0.01 and z1 > c[2] + 0.01 then
+			return false
+		end
+	end
+	return true
+end
+local function take(x0, z0, x1, z1, isPad)
+	if not clearArea(x0, z0, x1, z1, isPad) then
+		return false
+	end
+	table.insert(claims, { x0, z0, x1, z1 })
+	return true
+end
+-- claim a footprint (half sizes hx, hz) at (cx, cz) or a little nudge from it; returns the centre or nil
+local NUDGE = {
+	{ 0, 0 },
+	{ 4, 0 },
+	{ -4, 0 },
+	{ 0, 4 },
+	{ 0, -4 },
+	{ 4, 4 },
+	{ -4, -4 },
+	{ 4, -4 },
+	{ -4, 4 },
+	{ 8, 0 },
+	{ -8, 0 },
+	{ 0, 8 },
+	{ 0, -8 },
+}
+local function claimNear(cx, cz, hx, hz, isPad)
+	for _, n in ipairs(NUDGE) do
+		local x, z = cx + n[1], cz + n[2]
+		if take(x - hx, z - hz, x + hx, z + hz, isPad) then
+			return x, z
+		end
+	end
+	S.skipped += 1
+	return nil
+end
+
+-- ================================================================ block props (concept close-ups)
+local P = {}
+-- white candles (1–3) standing on y
+function P.candles(x, y, z, f, n)
+	local spots = { { 0, 0, 1.8 }, { 1.2, 0.7, 1.2 }, { -0.9, 1.1, 1.5 } }
+	for i = 1, math.min(n or 1, 3) do
+		local s = spots[i]
+		decor(cube("Candle", x + s[1], y + s[3] / 2, z + s[2], 0.8, s[3], 0.8, nil, COL.wax, f))
+		local fl = decor(
+			cube(
+				"CandleFlame",
+				x + s[1],
+				y + s[3] + 0.3,
+				z + s[2],
+				0.3,
+				0.6,
+				0.3,
+				nil,
+				COL.flame,
+				f
+			)
+		)
+		fl.Material = Enum.Material.Neon
+	end
+end
+-- an end rod: a thin white rod on a small base with a glowing tip
+function P.rod(x, y, z, f, lit, h)
+	h = h or 5
+	decor(cube("EndRodBase", x, y + 0.3, z, 1.6, 0.6, 1.6, nil, COL.rod, f))
+	decor(cube("EndRod", x, y + 0.6 + h / 2, z, 0.6, h, 0.6, nil, COL.rod, f))
+	local tip = decor(cube("EndRodTip", x, y + 0.6 + h + 0.4, z, 0.9, 0.8, 0.9, nil, COL.rodTip, f))
+	tip.Material = Enum.Material.Neon
+	if lit then
+		glow(tip, 22, 0.9, COL.rodLight)
+	end
+	return tip
+end
+-- a chest on the ground frame cf (front = −Z)
+function P.chest(cf, f)
+	lbox("Chest", cf, -1.8, 0, -1.8, 1.8, 2.6, 1.8, "px_spruce_planks", COL.chest, f)
+	lbox("ChestLid", cf, -1.9, 2.6, -1.9, 1.9, 3.6, 1.9, "px_spruce_planks", COL.chestLid, f)
+	lbox(
+		"ChestLatch",
+		cf,
+		-0.4,
+		2.1,
+		-2.05,
+		0.4,
+		3.1,
+		-1.85,
+		Enum.Material.Metal,
+		COL.iron,
+		f,
+		true
+	)
+end
+-- a shulker box (one block): a purpur shell with a lid line; an open one shows a pale head peeking out
+function P.shulker(cf, tint, open, f)
+	lbox("Shulker", cf, -2, 0, -2, 2, 2.6, 2, "px_purpur", tint, f)
+	if open then
+		lbox("ShulkerLid", cf, -2.1, 3.8, -2.1, 2.1, 5.2, 2.1, "px_purpur", tint, f, true)
+		lbox(
+			"ShulkerHead",
+			cf,
+			-1.2,
+			2.6,
+			-1.2,
+			1.2,
+			4.4,
+			1.2,
+			Enum.Material.SmoothPlastic,
+			COL.head,
+			f,
+			true
+		)
+		for _, ex in ipairs({ -0.55, 0.55 }) do
+			lbox(
+				"ShulkerEye",
+				cf,
+				ex - 0.25,
+				3,
+				-1.3,
+				ex + 0.25,
+				3.5,
+				-1.2,
+				Enum.Material.SmoothPlastic,
+				COL.eye,
+				f,
+				true
+			)
+		end
+	else
+		lbox("ShulkerLid", cf, -2.1, 2.6, -2.1, 2.1, 4, 2.1, "px_purpur", tint, f)
+		lbox(
+			"ShulkerSeam",
+			cf,
+			-2.15,
+			2.5,
+			-2.15,
+			2.15,
+			2.75,
+			2.15,
+			Enum.Material.SmoothPlastic,
+			COL.dark,
+			f,
+			true
+		)
+	end
+end
+-- a stack of shulker boxes at local (x, z): `n` high, the top one open or not
+function P.shulkers(x, z, n, openTop, f)
+	local yaw = rng:NextInteger(0, 3) * math.pi / 2
+	for k = 1, n do
+		local cf = at(x, (k - 1) * B, z) * CFrame.Angles(0, yaw, 0)
+		P.shulker(cf, pick(COL.shulkers), openTop and k == n, f)
+	end
+end
+function P.glass(f, x0, y0, z0, x1, y1, z1)
+	local p = box("BlackGlass", x0, y0, z0, x1, y1, z1, nil, COL.glass, f)
+	p.Material = Enum.Material.Glass
+	p.Reflectance = 0.05
+	return p
+end
+function P.neon(f, x0, y0, z0, x1, y1, z1, col, isDecor)
+	local p = box("Crystal", x0, y0, z0, x1, y1, z1, nil, col, f)
+	p.Material = Enum.Material.Neon
+	if isDecor then
+		decor(p)
+	end
+	return p
+end
+-- a crystal spire of h blocks: a black glass skirt, a glass core into a magenta band and a crystal tip, satellite
+-- columns round it (glass with a glowing block on top); opt: big, small, lit, banner = "S" | "E" | "W" | "N"
+function P.spire(x, z, h, opt)
+	local f = folder("CrystalSpire", F.spires)
+	local y = 0
+	if opt.big then
+		P.glass(f, x - 10, 0, z - 10, x + 10, 4, z + 10)
+		P.glass(f, x - 6, 4, z - 6, x + 6, 8, z + 6)
+		y = 8
+	elseif not opt.small then
+		P.glass(f, x - 6, 0, z - 6, x + 6, 4, z + 6)
+		y = 4
+	end
+	local cw = if opt.small then 2 else 4
+	local top = h * B
+	local glassTop = math.max(y + B, math.floor(h / 2) * B)
+	P.glass(f, x - cw, y, z - cw, x + cw, glassTop, z + cw)
+	P.neon(f, x - cw, glassTop, z - cw, x + cw, glassTop + B, z + cw, MAGENTA)
+	local tip = P.neon(f, x - 2, glassTop + B, z - 2, x + 2, top, z + 2, CRYSTAL)
+	P.neon(f, x - 1, top, z - 1, x + 1, top + 2, z + 1, CRYSTAL, true)
+	if opt.lit then
+		glow(tip, 30, 1.2, CRYSTAL)
+	end
+	-- satellite columns (tops never flush with the skirt)
+	local sats = if opt.big
+		then { { 8, -4 }, { -8, 4 }, { 4, 8 }, { -4, -8 }, { 8, 8 }, { -8, -8 } }
+		elseif opt.small then { { 4, 0 }, { -2, 4 } }
+		else { { 6, -2 }, { -6, 2 }, { 2, 6 }, { -2, -6 } }
+	local minH = if opt.small then 2 else 3
+	for _, s in ipairs(sats) do
+		local hs = rng:NextInteger(minH, math.max(minH, math.floor(h * 0.6)))
+		local sx, sz = x + s[1], z + s[2]
+		P.glass(f, sx - 2, 0, sz - 2, sx + 2, (hs - 1) * B, sz + 2)
+		P.neon(
+			f,
+			sx - 2,
+			(hs - 1) * B,
+			sz - 2,
+			sx + 2,
+			hs * B,
+			sz + 2,
+			if rng:NextNumber() < 0.5 then MAGENTA else CRYSTAL
+		)
+	end
+	if opt.banner then
+		local side = ({ S = { 0, 1 }, N = { 0, -1 }, E = { 1, 0 }, W = { -1, 0 } })[opt.banner]
+		local d = cw + 0.3
+		-- shifted half a core sideways, off the satellite column on that side
+		local px, pz = if opt.big then 0 else -side[2] * 2, if opt.big then 0 else side[1] * 2
+		local cf = at(x + side[1] * d + px, glassTop - 4, z + side[2] * d + pz)
+			* CFrame.Angles(0, if side[1] ~= 0 then math.pi / 2 else 0, 0)
+		banner(cf, MAGENTA, f, OBSIDIAN)
+	end
+	S.spires += 1
+	return f
+end
+-- a chorus bush: a stalk of chorus blocks with one or two side branches and pale knobs on top
+function P.chorus(x, z, f)
+	local g = folder("ChorusBush", f)
+	local hgt = rng:NextInteger(2, 4)
+	box("ChorusStalk", x - 2, 0, z - 2, x + 2, hgt * B, z + 2, "px_chorus", nil, g)
+	cube("ChorusKnob", x, hgt * B + 1.5, z, 3, 3, 3, "px_purpur", COL.knob, g)
+	local dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local first = rng:NextInteger(1, 4)
+	for k = 0, rng:NextInteger(0, 1) do
+		local d = dirs[(first + k * 2 - 1) % 4 + 1] -- opposite sides
+		local lvl = rng:NextInteger(1, math.max(1, hgt - 1))
+		local up = rng:NextInteger(1, 2)
+		local bx, bz = x + d[1] * B, z + d[2] * B
+		box(
+			"ChorusBranch",
+			bx - 2,
+			lvl * B - B,
+			bz - 2,
+			bx + 2,
+			(lvl + up) * B,
+			bz + 2,
+			"px_chorus",
+			nil,
+			g
+		)
+		decor(
+			cube(
+				"ChorusKnob",
+				bx,
+				(lvl + up) * B + 1.2,
+				bz,
+				2.4,
+				2.4,
+				2.4,
+				"px_purpur",
+				COL.knob,
+				g
+			)
+		)
+	end
+	-- the branch stands on a block of its own from lvl − 1, so it reads as a bent stalk
+	return g
+end
+-- an end stone boulder: a sunk block with a smaller one on top and one leaning on its side
+function P.boulder(x, z, f)
+	local g = folder("Boulder", f)
+	box("EndStone", x - 4, -1, z - 4, x + 4, 3, z + 4, "px_end_stone", COL.stone, g)
+	local ox, oz = pick({ -2, 2 }), pick({ -2, 2 })
+	box("EndStone", x + ox - 2, 3, z + oz - 2, x + ox + 2, 7, z + oz + 2, "px_end_stone", nil, g)
+	local sx = pick({ -1, 1 })
+	box("EndStone", x + sx * 4, -1, z - 2, x + sx * 8, 2, z + 2, "px_end_stone", COL.stone, g)
+end
+-- purpur debris: a fallen purpur block half sunk, sometimes a second one on it
+function P.debris(x, z, f)
+	box(
+		"PurpurDebris",
+		x - 2,
+		-1.5,
+		z - 2,
+		x + 2,
+		2.5,
+		z + 2,
+		pick({ "px_purpur", "px_purpur", "px_purpur_pillar" }),
+		nil,
+		f
+	)
+	if rng:NextNumber() < 0.35 then
+		box("PurpurDebris", x - 2, 2.5, z - 2, x + 2, 4.5, z + 2, "px_purpur", COL.trim, f)
+	end
+end
+-- a 2×2-block obsidian pillar hb blocks tall; broken = a jagged stub and a fallen block toward (rx, rz)
+function P.pillar(x, z, hb, broken, crystal, rx, rz)
+	local f = folder("ObsidianPillar", F.ring)
+	local top = hb * B
+	box("Obsidian", x - 4, -2, z - 4, x + 4, top, z + 4, "px_obsidian", nil, f)
+	if broken then
+		local sx, sz = pick({ -1, 1 }), pick({ -1, 1 })
+		box(
+			"ObsidianStub",
+			x + math.min(0, sx * 4),
+			top,
+			z + math.min(0, sz * 4),
+			x + math.max(0, sx * 4),
+			top + B,
+			z + math.max(0, sz * 4),
+			"px_obsidian",
+			nil,
+			f
+		)
+		box("ObsidianRubble", rx - 2, -1.5, rz - 2, rx + 2, 2.5, rz + 2, "px_obsidian", nil, f)
+	else
+		box(
+			"ObsidianCap",
+			x - 3,
+			top,
+			z - 3,
+			x + 3,
+			top + 1,
+			z + 3,
+			"px_obsidian",
+			Color3.fromRGB(190, 170, 210),
+			f
+		)
+		if crystal then
+			P.neon(f, x - 1.2, top + 1, z - 1.2, x + 1.2, top + 3.4, z + 1.2, CRYSTAL, true)
+		end
+	end
+end
+-- a dark-wood hut (front = the door, toward (fx, fz)): end stone base, dark oak log corners, dark oak plank walls,
+-- a purpur trim band (also the ceiling), black glass windows in purpur frames, a stepped roof with a purpur cap, a
+-- magenta banner and a lantern at the front, a chest and a barrel inside; returns the folder and the frame
+function P.hut(cx, cz, fx, fz, opt)
+	local w, d, dw = opt.w, opt.d, opt.door or B
+	local hw, hd = w / 2, d / 2
+	local WALL = 12
+	local f = folder(opt.name or "Hut", F.huts)
+	local cf = faceCF(cx, cz, fx, fz)
+	lbox("HutBase", cf, -hw - 1, -2, -hd - 1, hw + 1, 1, hd + 1, "px_end_stone_bricks", nil, f)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -1, 1 }) do
+			lbox(
+				"HutPost",
+				cf,
+				sx * hw,
+				1,
+				sz * hd,
+				sx * (hw - 2),
+				WALL + 1,
+				sz * (hd - 2),
+				"px_dark_oak_log",
+				nil,
+				f
+			)
+		end
+		lbox(
+			"HutWall",
+			cf,
+			sx * hw,
+			1,
+			-hd + 2,
+			sx * (hw - 1),
+			WALL + 1,
+			hd - 2,
+			"px_dark_oak_planks",
+			nil,
+			f
+		)
+		-- a black glass window in a purpur frame on each side wall
+		lbox(
+			"HutWindowFrame",
+			cf,
+			sx * (hw - 0.2),
+			4.5,
+			-3,
+			sx * (hw + 0.3),
+			9.5,
+			3,
+			"px_purpur",
+			nil,
+			f,
+			true
+		)
+		lbox(
+			"HutWindow",
+			cf,
+			sx * (hw - 0.4),
+			5.5,
+			-2,
+			sx * (hw + 0.4),
+			8.5,
+			2,
+			Enum.Material.Glass,
+			COL.glass,
+			f,
+			true
+		)
+	end
+	lbox("HutWall", cf, -hw + 2, 1, hd - 1, hw - 2, WALL + 1, hd, "px_dark_oak_planks", nil, f)
+	lbox("HutWall", cf, -hw + 2, 1, -hd, -dw / 2, WALL + 1, -hd + 1, "px_dark_oak_planks", nil, f)
+	lbox("HutWall", cf, dw / 2, 1, -hd, hw - 2, WALL + 1, -hd + 1, "px_dark_oak_planks", nil, f)
+	lbox("HutLintel", cf, -dw / 2, 9, -hd, dw / 2, WALL + 1, -hd + 1, "px_dark_oak_planks", nil, f)
+	lbox(
+		"HutTrim",
+		cf,
+		-hw - 0.3,
+		WALL - 1,
+		-hd - 0.3,
+		hw + 0.3,
+		WALL + 1,
+		hd + 0.3,
+		"px_purpur",
+		nil,
+		f
+	)
+	-- the stepped roof
+	local y, lw, ld = WALL + 1, w + 4, d + 4
+	while lw >= 4 and ld >= 4 do
+		lbox(
+			"HutRoof",
+			cf,
+			-lw / 2,
+			y,
+			-ld / 2,
+			lw / 2,
+			y + 2,
+			ld / 2,
+			"px_dark_oak_planks",
+			COL.roof,
+			f
+		)
+		y += 2
+		lw -= 6
+		ld -= 6
+	end
+	lbox("HutCap", cf, -2, y, -2, 2, y + 2, 2, "px_purpur_pillar", nil, f)
+	-- the banner on the left of the door, the lantern on the right
+	local side = hw - 2 - dw / 2
+	local bw = math.min(B, side - 0.4)
+	if bw >= 1.5 then
+		banner(cf * CFrame.new(-(dw / 2 + side / 2), 6.2, -hd - 0.35), MAGENTA, f, COL.dark, bw, 7)
+	end
+	local lf = folder("Lantern", f)
+	lantern((cf * CFrame.new(dw / 2 + side / 2, 9, -hd - 1.8)).Position, lf, false, BY + WALL + 1)
+	S.lights += 1
+	if S.lights > MAX_LIGHTS then
+		for _, l in ipairs(lf:GetDescendants()) do
+			if l:IsA("PointLight") then
+				l:Destroy()
+			end
+		end
+	end
+	if not opt.lore then
+		P.chest(cf * CFrame.new(hw - 4, 1, hd - 3.5), f)
+		local bp = (cf * CFrame.new(-hw + 4, 0, hd - 3.5)).Position
+		barrel(bp.X - BX, 1, bp.Z - BZ, f, opt.goods)
+	end
+	S.huts += 1
+	return f, cf
+end
+
+-- ================================================================ the fence round the pit
+-- purpur pillar posts every 3 blocks with a white candle on each, two purpur rails, on the ring path's inner edge
+-- (x ±74, z −2 and z 146); open at the ladder shafts (north x −12..12, west / east z 60..84) and wider in the south
+-- (x −24..24, ≥ 31 studs from the arrival); the corner posts are taller and carry end rods
+do
+	local corners = { { -74, -2 }, { 74, -2 }, { -74, 146 }, { 74, 146 } }
+	local runs = {
+		{ -74, -2, -14, -2 },
+		{ 14, -2, 74, -2 },
+		{ -74, 146, -26, 146 },
+		{ 26, 146, 74, 146 },
+		{ -74, -2, -74, 58 },
+		{ -74, 86, -74, 146 },
+		{ 74, -2, 74, 58 },
+		{ 74, 86, 74, 146 },
+	}
+	local function isCorner(x, z)
+		for _, c in ipairs(corners) do
+			if math.abs(c[1] - x) < 0.5 and math.abs(c[2] - z) < 0.5 then
+				return true
+			end
+		end
+		return false
+	end
+	for _, r in ipairs(runs) do
+		local ax, az, bx, bz = r[1], r[2], r[3], r[4]
+		local len = math.abs(bx - ax) + math.abs(bz - az)
+		local n = math.max(1, math.floor(len / 12 + 0.5))
+		for i = 0, n do
+			local x, z = ax + (bx - ax) * i / n, az + (bz - az) * i / n
+			if not isCorner(x, z) then
+				box("FencePost", x - 2, 0, z - 2, x + 2, 8, z + 2, "px_purpur_pillar", nil, F.fence)
+				P.candles(x, 8, z, F.fence, 1)
+			end
+		end
+		for _, rl in ipairs({ { 5, 7, 1 }, { 1.5, 3, 0.8 } }) do
+			if az == bz then
+				box(
+					"FenceRail",
+					math.min(ax, bx),
+					rl[1],
+					az - rl[3],
+					math.max(ax, bx),
+					rl[2],
+					az + rl[3],
+					"px_purpur",
+					nil,
+					F.fence
+				)
+			else
+				box(
+					"FenceRail",
+					ax - rl[3],
+					rl[1],
+					math.min(az, bz),
+					ax + rl[3],
+					rl[2],
+					math.max(az, bz),
+					"px_purpur",
+					nil,
+					F.fence
+				)
+			end
+		end
+	end
+	for _, c in ipairs(corners) do
+		box(
+			"FenceCorner",
+			c[1] - 2,
+			0,
+			c[2] - 2,
+			c[1] + 2,
+			12,
+			c[2] + 2,
+			"px_purpur_pillar",
+			nil,
+			F.fence
+		)
+		box(
+			"FenceCornerCap",
+			c[1] - 2.5,
+			12,
+			c[2] - 2.5,
+			c[1] + 2.5,
+			13,
+			c[2] + 2.5,
+			"px_purpur",
+			nil,
+			F.fence
+		)
+		P.rod(c[1], 13, c[2], F.fence, true, 6)
+	end
+	-- a low end stone brick kerb with gaps on the south rim, clear of the south ladder approach
+	for _, k in ipairs({ { -64, -52 }, { -48, -36 }, { 36, 48 }, { 52, 64 } }) do
+		box("RimKerb", k[1], 0.4, 138, k[2], 1.6, 140, "px_end_stone_bricks", nil, F.fence)
+	end
+end
+task.wait()
+
+-- ================================================================ the bridges
+-- railless purpur decks (one block, top at y 0.1) over each BRIDGES rectangle, a purpur-pillar band every 4th block;
+-- under the gap: slab trims along both edges, a cross beam and a purpur pillar hanging down as a stalactite; end rod
+-- posts beside the deck where it leaves each island (the gap measured along the deck's centre line)
+do
+	for bi, b in ipairs(BRIDGES) do
+		local x0, z0, x1, z1 = b[1], b[2], b[3], b[4]
+		local zm = (z0 + z1) / 2
+		local f = folder(if bi == 1 then "WestBridge" else "EastBridge", F.bridges)
+		local segs, xi, k = {}, x0, 0
+		while xi < x1 - 0.01 do
+			local xe = math.min(xi + B, x1)
+			local v = if k % 4 == 2 then "px_purpur_pillar" else "px_purpur"
+			local last = segs[#segs]
+			if last and last[3] == v then
+				last[2] = xe
+			else
+				table.insert(segs, { xi, xe, v })
+			end
+			xi = xe
+			k += 1
+		end
+		for _, s in ipairs(segs) do
+			box("BridgeDeck", s[1], 0.1 - B, z0, s[2], 0.1, z1, s[3], nil, f)
+		end
+		-- the gap (the longest run of void along the centre line)
+		local ga, gb, best, runA = nil, nil, -1, nil
+		for xs = x0, x1, 2 do
+			if isleOf(xs, zm) == nil then
+				runA = runA or xs
+				if xs - runA > best then
+					best, ga, gb = xs - runA, runA, xs
+				end
+			else
+				runA = nil
+			end
+		end
+		if not ga then
+			ga, gb = (x0 + x1) / 2 - 4, (x0 + x1) / 2 + 4
+		end
+		local under = 0.1 - B
+		for _, e in ipairs({ { z0 - 1, z0 + 2 }, { z1 - 2, z1 + 1 } }) do
+			box(
+				"BridgeTrim",
+				ga - 4,
+				under - 2,
+				e[1],
+				gb + 4,
+				under,
+				e[2],
+				"px_purpur",
+				COL.trim,
+				f
+			)
+		end
+		local mx = snap((ga + gb) / 2)
+		box("BridgeBeam", mx - 2, under - 4, z0 - 0.5, mx + 2, under, z1 + 0.5, "px_purpur", nil, f)
+		box(
+			"BridgePillar",
+			mx - 4,
+			-20,
+			zm - 4,
+			mx + 4,
+			under - 4,
+			zm + 4,
+			"px_purpur_pillar",
+			nil,
+			f
+		)
+		box("BridgePillar", mx - 2, -34, zm - 2, mx + 2, -20, zm + 2, "px_purpur_pillar", nil, f)
+		box("BridgeStalactite", mx - 1, -42, zm - 1, mx + 1, -34, zm + 1, "px_purpur", COL.trim, f)
+		-- end rod posts on the island lips at both ends of the gap, both sides of the deck
+		for gi, g in ipairs({ { ga - 6, -1 }, { gb + 6, 1 } }) do
+			for si, zs in ipairs({ z0 - 2, z1 + 2 }) do
+				local gx = g[1]
+				for _ = 1, 4 do
+					if isleOf(gx, zs) ~= nil then
+						break
+					end
+					gx += g[2] * 4
+				end
+				box("BridgePost", gx - 2, -2, zs - 2, gx + 2, 4, zs + 2, "px_purpur_pillar", nil, f)
+				P.rod(gx, 4, zs, f, si == gi, 5)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the purpur arch over the east path
+-- two purpur pillars beside the deck at x 96 (z −40..−36 and −20..−16), a lintel at y 16..20 with a stepped crown,
+-- brackets under it, a magenta crystal hanging on a chain over the path, banners toward the ring
+do
+	local f = folder("EastArch", mainF)
+	local ax = 96
+	for _, zc in ipairs({ -38, -18 }) do
+		box("ArchPillar", ax - 2, -4, zc - 2, ax + 2, 16, zc + 2, "px_purpur_pillar", nil, f)
+		banner(at(ax - 2.3, 9, zc) * CFrame.Angles(0, math.pi / 2, 0), MAGENTA, f, OBSIDIAN, 3, 7)
+	end
+	box("ArchLintel", ax - 2, 16, -40, ax + 2, 20, -16, "px_purpur", nil, f)
+	box("ArchBracket", ax - 2, 12, -36, ax + 2, 16, -32, "px_purpur", nil, f)
+	box("ArchBracket", ax - 2, 12, -24, ax + 2, 16, -20, "px_purpur", nil, f)
+	box("ArchCrown", ax - 2, 20, -34, ax + 2, 24, -22, "px_purpur_pillar", nil, f)
+	box("ArchCrown", ax - 2, 24, -30, ax + 2, 28, -26, "px_purpur", nil, f)
+	decor(cube("ArchChain", ax, 14.25, -28, 0.3, 3.5, 0.3, nil, COL.iron, f)).Material =
+		Enum.Material.Metal
+	local crystal = P.neon(f, ax - 1, 9.5, -29, ax + 1, 12.5, -27, CRYSTAL, true)
+	P.neon(f, ax - 0.5, 8, -28.5, ax + 0.5, 9.5, -27.5, MAGENTA, true)
+	glow(crystal, 26, 1.1, CRYSTAL)
+	table.insert(claims, { 93, -41, 99, -15 })
+end
+
+-- ================================================================ huts and stalls
+do
+	local HUTS = {
+		-- the lore hut by the north path (west side), its wide door toward the path: the dragon egg inside
+		{
+			name = "LoreHut",
+			x = -36,
+			z = -44,
+			fx = 1,
+			fz = 0,
+			w = 16,
+			d = 16,
+			door = 8,
+			lore = true,
+		},
+		{
+			name = "ShulkerHut",
+			x = 38,
+			z = -44,
+			fx = -1,
+			fz = 0,
+			w = 16,
+			d = 12,
+			goods = "px_purpur",
+		},
+		{
+			name = "WestHutNorth",
+			x = -110,
+			z = 6,
+			fx = 1,
+			fz = 0,
+			w = 16,
+			d = 12,
+			goods = "px_chorus",
+		},
+		{
+			name = "WestHutMiddle",
+			x = -114,
+			z = 96,
+			fx = 1,
+			fz = 0,
+			w = 16,
+			d = 12,
+			goods = "px_end_stone",
+		},
+		{ name = "WestHutSouth", x = -110, z = 134, fx = 1, fz = 0, w = 12, d = 12 },
+		{
+			name = "EastHut",
+			x = 114,
+			z = 22,
+			fx = -1,
+			fz = 0,
+			w = 16,
+			d = 12,
+			goods = "px_obsidian",
+		},
+	}
+	for _, h in ipairs(HUTS) do
+		local hx, hz
+		if h.fx ~= 0 then
+			hx, hz = h.d / 2 + 3, h.w / 2 + 3
+		else
+			hx, hz = h.w / 2 + 3, h.d / 2 + 3
+		end
+		local x, z = claimNear(h.x, h.z, hx, hz, 10)
+		if x then
+			local f, cf = P.hut(x, z, h.fx, h.fz, h)
+			if h.lore then
+				-- the dragon egg: a black block with purple speckles on a purpur pillar pedestal, candles round it
+				local hd = h.d / 2
+				local ecf = cf * CFrame.new(0, 1, hd - 5)
+				lbox("EggPedestal", ecf, -2, 0, -2, 2, 4, 2, "px_purpur_pillar", nil, f)
+				lbox(
+					"DragonEgg",
+					ecf,
+					-1.5,
+					4,
+					-1.5,
+					1.5,
+					7,
+					1.5,
+					Enum.Material.SmoothPlastic,
+					COL.egg,
+					f
+				)
+				lbox(
+					"DragonEggTop",
+					ecf,
+					-1,
+					7,
+					-1,
+					1,
+					8,
+					1,
+					Enum.Material.SmoothPlastic,
+					COL.egg,
+					f
+				)
+				for _, s in ipairs({
+					{ -0.6, 5, -1 },
+					{ 0.7, 6.2, -1 },
+					{ 0.2, 7.4, -1 },
+					{ -0.7, 5.6, 1 },
+					{ 0.6, 4.6, 1 },
+				}) do
+					local zz = s[3] * 1.55
+					lbox(
+						"EggSpeck",
+						ecf,
+						s[1] - 0.3,
+						s[2] - 0.3,
+						zz - 0.05,
+						s[1] + 0.3,
+						s[2] + 0.3,
+						zz + 0.05,
+						Enum.Material.Neon,
+						COL.speck,
+						f,
+						true
+					)
+				end
+				for _, s in ipairs({ { -1.55, 5.4, 0.4 }, { 1.55, 6.4, -0.5 } }) do
+					lbox(
+						"EggSpeck",
+						ecf,
+						s[1] - 0.05,
+						s[2] - 0.3,
+						s[3] - 0.3,
+						s[1] + 0.05,
+						s[2] + 0.3,
+						s[3] + 0.3,
+						Enum.Material.Neon,
+						COL.speck,
+						f,
+						true
+					)
+				end
+				for _, c in ipairs({ { -3.5, -3 }, { 3.5, -3 }, { -3.5, 2.5 }, { 3.5, 2.5 } }) do
+					local p = (ecf * CFrame.new(c[1], 0, c[2])).Position
+					P.candles(p.X - BX, 1, p.Z - BZ, f, 2)
+				end
+				local board = lbox(
+					"LoreBoard",
+					cf,
+					-3.5,
+					8.6,
+					hd - 1.4,
+					3.5,
+					10.4,
+					hd - 1.1,
+					"px_spruce_planks",
+					nil,
+					f
+				)
+				boardText(
+					board,
+					"Яйцо дракона",
+					Color3.fromRGB(235, 200, 245),
+					{ Enum.NormalId.Front }
+				)
+				P.chest(
+					cf * CFrame.new(h.w / 2 - 3, 1, -hd + 4) * CFrame.Angles(0, -math.pi / 2, 0),
+					f
+				)
+				P.shulker(cf * CFrame.new(-h.w / 2 + 3, 1, -hd + 4), COL.shulkers[4], false, f)
+			end
+		end
+	end
+
+	-- stalls: a shulker stall in the west strip, a chest stall in the east strip (both toward the ring path)
+	for _, s in ipairs({
+		{
+			x = -110,
+			z = 116,
+			fx = 1,
+			sign = "Шалкеры",
+			goods = { "px_purpur", "px_chorus", "px_purpur_pillar", "px_end_stone" },
+		},
+		{
+			x = 112,
+			z = 46,
+			fx = -1,
+			sign = "Сундуки",
+			goods = { "px_dark_oak_planks", "px_purpur", "px_iron_block" },
+		},
+	}) do
+		local x, z = claimNear(s.x, s.z, 6, 8, 10)
+		if x then
+			stall(faceCF(x, z, s.fx, 0), {
+				w = 3 * B,
+				d = 2 * B,
+				colA = MAGENTA,
+				colB = COL.dark,
+				goods = s.goods,
+				sign = s.sign,
+			}, F.market)
+		end
+	end
+
+	-- the shulker market: stacks of shulker boxes (x, z, high, open top), chests, barrels and crates
+	local SHULKERS = {
+		-- north-east, round the shulker hut
+		{ 22, -28, 2, true },
+		{ 28, -28, 1, false },
+		{ 34, -28, 2, false },
+		{ 40, -28, 1, true },
+		{ 46, -28, 1, false },
+		{ 52, -28, 2, false },
+		{ 21, -40, 1, false },
+		{ 21, -46, 2, true },
+		{ 21, -52, 1, false },
+		-- west, between the north hut and the west path
+		{ -100, 22, 2, false },
+		{ -106, 21, 1, true },
+		{ -112, 22, 1, false },
+		{ -118, 21, 2, true },
+		{ -124, 6, 1, false },
+		-- east, by the east hut
+		{ 104, 6, 1, true },
+		{ 110, 6, 2, false },
+		-- west south, by the stall
+		{ -100, 128, 1, false },
+		{ -100, 140, 2, true },
+	}
+	for _, s in ipairs(SHULKERS) do
+		local x, z = claimNear(s[1], s[2], 2.5, 2.5, 10)
+		if x then
+			P.shulkers(x, z, s[3], s[4], F.market)
+		end
+	end
+	for _, c in ipairs({
+		{ 27, -36, math.pi / 2 },
+		{ -98, 2, -math.pi / 2 },
+		{ 126, 36, math.pi / 2 },
+		{ -98, 100, -math.pi / 2 },
+	}) do
+		local x, z = claimNear(c[1], c[2], 2.5, 2.5, 10)
+		if x then
+			P.chest(at(x, 0, z) * CFrame.Angles(0, c[3], 0), F.market)
+		end
+	end
+	for _, c in ipairs({
+		{ 26, -52 },
+		{ -98, -8 },
+		{ 102, 34 },
+		{ -100, 110 },
+		{ -100, 120 },
+		{ 60, -34 },
+	}) do
+		local x, z = claimNear(c[1], c[2], 2.5, 2.5, 10)
+		if x then
+			barrel(
+				x,
+				0,
+				z,
+				F.market,
+				if rng:NextNumber() < 0.65 then pick({ "px_chorus", "px_purpur" }) else nil
+			)
+		end
+	end
+	for _, c in ipairs({ { 102, 40 }, { -98, -14 }, { 32, -58 } }) do
+		local x, z = claimNear(c[1], c[2], 2.5, 2.5, 10)
+		if x then
+			crate(x, 0, z, F.market)
+			if rng:NextNumber() < 0.5 then
+				crate(x, B, z, F.market, 3, rng:NextNumber() * 0.4)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ crystal spires
+do
+	local SPIRES = {
+		{ -118, 64, 12, { big = true, lit = true, banner = "E" } }, -- the landmark by the west path
+		{ -70, -32, 7, { lit = true, banner = "S" } }, -- north-west
+		{ 66, -32, 6, { lit = true } }, -- north-east
+		{ 132, 64, 8, { lit = true, banner = "W" } }, -- east
+		{ 104, 148, 6, { lit = true } }, -- south-east
+		{ -40, 198, 5, { small = true } }, -- the south lawn
+		{ 44, 198, 4, { small = true } },
+		{ -104, 154, 5, { small = true } }, -- south-west
+	}
+	for _, s in ipairs(SPIRES) do
+		local o = s[4]
+		local half = if o.big then 13 elseif o.small then 7 else 9
+		local x, z = claimNear(s[1], s[2], half, half, 10)
+		if x then
+			P.spire(x, z, s[3], o)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the ring of 10 obsidian pillars
+-- 2×2-block pillars 3–7 blocks tall (some broken, two with a small crystal) round a little end stone brick plaza
+-- with an obsidian altar and a crystal, east of the pit's south half (centre (117, 100), radius 18); decor, untagged
+do
+	local cx, cz = claimNear(117, 100, 22, 22, 4)
+	if cx then
+		box(
+			"RingPlaza",
+			cx - 12,
+			0,
+			cz - 8,
+			cx + 12,
+			0.2,
+			cz + 8,
+			"px_end_stone_bricks",
+			nil,
+			F.ring
+		)
+		box(
+			"RingPlaza",
+			cx - 8,
+			0,
+			cz - 12,
+			cx + 8,
+			0.2,
+			cz - 8,
+			"px_end_stone_bricks",
+			nil,
+			F.ring
+		)
+		box(
+			"RingPlaza",
+			cx - 8,
+			0,
+			cz + 8,
+			cx + 8,
+			0.2,
+			cz + 12,
+			"px_end_stone_bricks",
+			nil,
+			F.ring
+		)
+		box("RingAltar", cx - 2, 0, cz - 2, cx + 2, 4, cz + 2, "px_obsidian", nil, F.ring)
+		local c = P.neon(F.ring, cx - 1.2, 4, cz - 1.2, cx + 1.2, 6.4, cz + 1.2, CRYSTAL, true)
+		glow(c, 24, 1, CRYSTAL)
+		for _, o in ipairs({ { -4, -4 }, { 4, 4 } }) do
+			P.candles(cx + o[1], 0.2, cz + o[2], F.ring, 3)
+		end
+		local HEIGHTS = { 5, 3, 7, 4, 6, 3, 5, 7, 4, 6 }
+		local BROKEN = { [2] = true, [4] = true, [6] = true, [9] = true }
+		local CRYST = { [3] = true, [8] = true }
+		for i = 1, 10 do
+			local a = math.rad((i - 1) * 36 + 18)
+			local px, pz =
+				cx + math.floor(18 * math.cos(a) + 0.5), cz + math.floor(18 * math.sin(a) + 0.5)
+			local rx, rz =
+				cx + math.floor(11 * math.cos(a + 0.15) + 0.5),
+				cz + math.floor(11 * math.sin(a + 0.15) + 0.5)
+			P.pillar(px, pz, HEIGHTS[i], BROKEN[i], CRYST[i], rx, rz)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ end rods along the paths (every ~24 studs)
+do
+	local RODS = {}
+	for _, z in ipairs({ -12, 12, 60, 84, 108, 132, 156, 180 }) do
+		table.insert(RODS, { -97, z, z == 108 })
+		table.insert(RODS, { 97, z, false })
+	end
+	table.insert(RODS, { 97, 36, false })
+	for _, x in ipairs({ -84, -60, -36, 36, 60 }) do
+		table.insert(RODS, { x, -25, false })
+	end
+	for _, x in ipairs({ -64, -24, 0, 24, 64 }) do
+		table.insert(RODS, { x, 192, x == -64 or x == 64 })
+	end
+	for _, r in ipairs({
+		{ -17, -54 },
+		{ 17, -54 },
+		{ -17, -30 },
+		{ 17, -30 },
+		{ -100, 26 },
+		{ -116, 26 },
+		{ -100, 50 },
+		{ -116, 50 },
+	}) do
+		table.insert(RODS, { r[1], r[2], false })
+	end
+	for _, r in ipairs(RODS) do
+		if take(r[1] - 1, r[2] - 1, r[1] + 1, r[2] + 1, 6) then
+			P.rod(r[1], 0, r[2], F.rods, r[3], 5)
+			S.rods += 1
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ chorus bushes, boulders, purpur debris, candles
+do
+	local function scatter(n, half, tries, fn)
+		local placed = 0
+		for _ = 1, tries do
+			if placed >= n then
+				break
+			end
+			local x, z = rng:NextInteger(-38, 38) * B, rng:NextInteger(-18, 54) * B
+			if take(x - half, z - half, x + half, z + half, 10) then
+				fn(x, z)
+				placed += 1
+			end
+		end
+		return placed
+	end
+	S.bushes = scatter(40, 6, 1200, function(x, z)
+		P.chorus(x, z, F.nature)
+	end)
+	scatter(12, 6, 500, function(x, z)
+		P.boulder(x, z, F.nature)
+	end)
+	scatter(18, 2.5, 500, function(x, z)
+		P.debris(x, z, F.nature)
+	end)
+	scatter(16, 1.5, 500, function(x, z)
+		P.candles(x, 0, z, F.nature, rng:NextInteger(1, 3))
+	end)
+end
+
+print(
+	("[build-edge-gate] main: huts %d, spires %d, bushes %d, rods %d, lights %d, skipped %d"):format(
+		S.huts,
+		S.spires,
+		S.bushes,
+		S.rods,
+		S.lights,
+		S.skipped
+	)
+)
+
+end
+task.wait()
+-- ================================================================================ edge_gate/40-isles.luau
+do
+-- ================================================================ edge_gate: the isles
+-- 1. The west island WEST (-228, 40): the chorus plantation like a vineyard. The main walkway (end stone bricks, 5
+--    blocks) z 28..48 from the bridge landing (x -180) west to a purpur gazebo with a crystal at (-258, 38); rows of
+--    chorus plants run north (from z 56) and south (from z 20) of it at x -246 + 12k (every 3 blocks), paved aisles
+--    between them, purpur trellis posts with lines, baskets of chorus fruit, end rods along the walkway; a gardener's
+--    shed (dark oak + purpur) in the north-west at ~(-244, 74).
+-- 2. The east island EAST (210, -28): a stepped end stone mound x 184..236, z -52..-4 and on it a blocky dragon head
+--    (black blocks, magenta Neon eyes, open jaw, horns) facing west down the bridge; snout x 192, skull x 212..232,
+--    neck to x 240; a tall obsidian obelisk north of it at ~(232, -60); crystal spires, shulker boxes, chorus plants
+--    and a broken end gateway frame on the free ground. The walkway z -40..-16 from the bridge (x 172) to the mound.
+-- 3. Purpur stalactites under every island (core's 8-stud cells, from the bottom of each column) and end stone lumps
+--    on the rim faces; none under the grand stair and the bridge landings.
+-- 4. Floating end stone islets round the cluster (stepped cones, purpur fringe, a prop on top), 24+ studs off every
+--    island and out of the stair and bridge corridors; a few big far ones.
+-- 5. Slow violet motes over the void. Everything floating is decor.
+local isles = folder("Isles")
+local startCount = count
+local ROCK_TOP_T = Color3.fromRGB(214, 212, 180) -- core's rockTopTint
+local ROCK_LOW_T = Color3.fromRGB(190, 160, 190) -- core's rockLowTint
+local FLOWER = Color3.fromRGB(215, 178, 228) -- the chorus flower (white wool tinted lilac)
+local FRUIT = Color3.fromRGB(170, 110, 190)
+local CANDLE_WAX = Color3.fromRGB(240, 234, 222)
+local FLAME = Color3.fromRGB(255, 200, 120)
+local ROD_WHITE = Color3.fromRGB(245, 236, 250)
+local SHELL = Color3.fromRGB(170, 112, 176) -- shulker shell over px_purpur
+local lightsLeft = 19 -- PointLights of this part (≤ 20)
+local function glow(p, range, brightness, color)
+	if lightsLeft > 0 then
+		lightsLeft -= 1
+		light(p, range, brightness, color)
+	end
+end
+-- core's rockDepth (10-core is wrapped in its own do … end, so it is replicated here)
+local function rockDepth(x, z)
+	local isle = isleOf(x, z)
+	local rr, deep
+	if isle == "main" then
+		rr = math.sqrt(((x - MAIN.x) / MAIN.rx) ^ 2 + ((z - MAIN.z) / MAIN.rz) ^ 2)
+		deep = 120
+	else
+		local c = if isle == "arena" then ARENA_ISLE elseif isle == "west" then WEST else EAST
+		rr = math.sqrt((x - c.x) ^ 2 + (z - c.z) ^ 2) / c.r
+		deep = if isle == "arena" then 96 else 64
+	end
+	rr = math.clamp(rr, 0, 1)
+	local d = 12 + (1 - rr) ^ 1.3 * deep
+	if rr > 0.82 then
+		d += (n2(x, z, 7.7, 0.09) + 0.5) * 20
+	end
+	return math.max(8, math.floor(d / 16 + 0.5) * 16)
+end
+-- does a square of `half` round (x, z) overlap any rect { x0, z0, x1, z1 }?
+local function rectHit(x, z, half, rects)
+	for _, r in ipairs(rects) do
+		if x + half > r[1] and x - half < r[3] and z + half > r[2] and z - half < r[4] then
+			return true
+		end
+	end
+	return false
+end
+-- end stone brick paving laid over the island top (a thin decor slab), merged into runs along x (or z)
+local function pave(x0, z0, x1, z1, isle, pad, alongZ, avoid, f)
+	local function ok(cx, cz)
+		return isleOf(cx, cz, pad) == isle and not (avoid and rectHit(cx, cz, 0, avoid))
+	end
+	for a = (if alongZ then x0 else z0), (if alongZ then x1 else z1) - B, B do
+		local run = nil
+		local b0, b1 = if alongZ then z0 else x0, if alongZ then z1 else x1
+		for b = b0, b1, B do
+			local good = b < b1 and (if alongZ then ok(a + 2, b + 2) else ok(b + 2, a + 2))
+			if good and run == nil then
+				run = b
+			elseif not good and run ~= nil then
+				if alongZ then
+					decor(box("Walk", a, -0.3, run, a + B, 0.12, b, "px_end_stone_bricks", nil, f))
+				else
+					decor(box("Walk", run, -0.3, a, b, 0.12, a + B, "px_end_stone_bricks", nil, f))
+				end
+				run = nil
+			end
+		end
+	end
+end
+-- move a footprint (x ± hx, z ± hz) toward the island centre until its corners are on that island (pad studs in)
+local function fitIsle(c, name, x, z, hx, hz, pad)
+	for _ = 1, 24 do
+		if
+			isleOf(x - hx, z - hz, pad) == name
+			and isleOf(x + hx, z - hz, pad) == name
+			and isleOf(x - hx, z + hz, pad) == name
+			and isleOf(x + hx, z + hz, pad) == name
+		then
+			return x, z
+		end
+		local dx, dz = c.x - x, c.z - z
+		local len = math.max(1, math.sqrt(dx * dx + dz * dz))
+		x, z = x + snap(dx / len * B), z + snap(dz / len * B)
+	end
+	warn("[build-edge-gate] isles: no fit on", name, x, z)
+	return x, z
+end
+-- a random free spot on an island for a prop `half` wide; the spot is added to `rects`
+local function landSpot(c, name, half, rects)
+	for _ = 1, 300 do
+		local a = rng:NextNumber(0, 2 * math.pi)
+		local rr = rng:NextNumber(0, c.r - 8)
+		local x, z = snap(c.x + math.cos(a) * rr), snap(c.z + math.sin(a) * rr)
+		if
+			isleOf(x - half, z - half, 8) == name
+			and isleOf(x + half, z - half, 8) == name
+			and isleOf(x - half, z + half, 8) == name
+			and isleOf(x + half, z + half, 8) == name
+			and not rectHit(x, z, half, rects)
+		then
+			table.insert(rects, { x - half - 4, z - half - 4, x + half + 4, z + half + 4 })
+			return x, z
+		end
+	end
+	return nil
+end
+
+-- ================================================================ block props shared by the islands and the islets
+local DIRS = { { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } }
+-- a chorus plant: a knobby purple stalk h blocks tall, side branches (a knob, an elbow block, a stem up) with pale
+-- flower blocks on every tip; branches mostly along z (or x); only the main stalk can be solid
+local function chorusPlant(x, y, z, h, f, solid, alongX)
+	local pf = folder("ChorusPlant", f)
+	local stalk = cube("ChorusStalk", x, y + h * B / 2, z, 2.8, h * B, 2.8, "px_chorus", nil, pf)
+	if not solid then
+		decor(stalk)
+	end
+	decor(cube("ChorusFlower", x, y + h * B + B / 2, z, B, B, B, "px_white_wool", FLOWER, pf))
+	local used = {}
+	for k = 2, h - 1 do
+		if rng:NextNumber() < 0.6 then
+			local di = if rng:NextNumber() < 0.75
+				then rng:NextInteger(1, 2)
+				else rng:NextInteger(3, 4)
+			if alongX then
+				di = (di + 1) % 4 + 1
+			end
+			if not used[di] then
+				used[di] = true
+				local d = DIRS[di]
+				local by = y + (k - 0.5) * B
+				local ex, ez = x + d[1] * B, z + d[2] * B
+				local up = rng:NextInteger(1, math.max(1, h - k))
+				decor(cube("ChorusKnob", x, by, z, B, B, B, "px_chorus", nil, pf))
+				decor(cube("ChorusKnob", ex, by, ez, B, B, B, "px_chorus", nil, pf))
+				decor(
+					cube(
+						"ChorusStem",
+						ex,
+						by + B / 2 + up * B / 2,
+						ez,
+						2.8,
+						up * B,
+						2.8,
+						"px_chorus",
+						nil,
+						pf
+					)
+				)
+				decor(
+					cube(
+						"ChorusFlower",
+						ex,
+						by + B / 2 + up * B + B / 2,
+						ez,
+						B,
+						B,
+						B,
+						"px_white_wool",
+						FLOWER,
+						pf
+					)
+				)
+			end
+		end
+	end
+	return pf
+end
+-- a basket of chorus fruit (1 block)
+local function basket(x, y, z, f, solid)
+	local b =
+		cube("Basket", x, y + 1.5, z, B, 3, B, "px_spruce_planks", Color3.fromRGB(150, 110, 80), f)
+	if not solid then
+		decor(b)
+	end
+	decor(
+		box(
+			"BasketRim",
+			x - 2.1,
+			y + 2.6,
+			z - 2.1,
+			x + 2.1,
+			y + 3.2,
+			z + 2.1,
+			"px_dark_oak_planks",
+			nil,
+			f
+		)
+	)
+	decor(
+		box(
+			"ChorusFruit",
+			x - 1.7,
+			y + 3,
+			z - 1.7,
+			x + 1.7,
+			y + 3.6,
+			z + 1.7,
+			"px_chorus",
+			FRUIT,
+			f
+		)
+	)
+	decor(
+		cube(
+			"ChorusFruit",
+			x + rng:NextNumber(-0.8, 0.8),
+			y + 4.1,
+			z + rng:NextNumber(-0.8, 0.8),
+			1.5,
+			1.2,
+			1.5,
+			"px_chorus",
+			FRUIT,
+			f
+		)
+	)
+	return b
+end
+-- a shulker box: shell base + lid (open = the lid raised, the pale head inside)
+local function shulker(x, y, z, f, open, solid)
+	local sf = folder("Shulker", f)
+	local base = cube("ShulkerBase", x, y + 1.25, z, B, 2.5, B, "px_purpur", SHELL, sf)
+	if not solid then
+		decor(base)
+	end
+	if open then
+		decor(
+			cube(
+				"ShulkerHead",
+				x,
+				y + 3,
+				z,
+				2.4,
+				2.4,
+				2.4,
+				"px_end_stone",
+				Color3.fromRGB(232, 236, 170),
+				sf
+			)
+		)
+		decor(cube("ShulkerLid", x, y + 4.95, z, B, 1.5, B, "px_purpur", SHELL, sf))
+	else
+		decor(cube("ShulkerLid", x, y + 3.25, z, B, 1.5, B, "px_purpur", SHELL, sf))
+		decor(
+			part(
+				"ShulkerSeam",
+				Vector3.new(B + 0.1, 0.3, B + 0.1),
+				at(x, y + 2.5, z),
+				Color3.fromRGB(80, 50, 90),
+				nil,
+				sf
+			)
+		)
+	end
+	return sf
+end
+local function candle(x, y, z, f, h)
+	h = h or 3
+	decor(cube("Candle", x, y + h / 2, z, 1.6, h, 1.6, "px_white_wool", CANDLE_WAX, f))
+	local fl = decor(
+		part(
+			"CandleFlame",
+			Vector3.new(0.6, 0.9, 0.6),
+			at(x, y + h + 0.5, z),
+			FLAME,
+			Enum.Material.Neon,
+			f
+		)
+	)
+	fl.CastShadow = false
+end
+local function endRod(x, y, z, f, lit)
+	decor(cube("EndRodBase", x, y + 0.5, z, 2, 1, 2, "px_purpur", nil, f))
+	local rod = decor(
+		part(
+			"EndRod",
+			Vector3.new(0.8, 5, 0.8),
+			at(x, y + 3.5, z),
+			ROD_WHITE,
+			Enum.Material.Neon,
+			f
+		)
+	)
+	rod.CastShadow = false
+	decor(
+		part(
+			"EndRodCap",
+			Vector3.new(1.4, 0.5, 1.4),
+			at(x, y + 6.25, z),
+			Color3.fromRGB(230, 220, 236),
+			nil,
+			f
+		)
+	)
+	if lit then
+		glow(rod, 22, 1, Color3.fromRGB(235, 215, 255))
+	end
+end
+-- a crystal spire: a black 3×3 base, a ring of black columns (some crowned with magenta), a black core turning into a
+-- tall magenta crystal; 12 studs wide
+local function crystalSpire(x, y, z, f, big, solid)
+	local sf = folder("CrystalSpire", f)
+	local function solidity(p)
+		if not solid then
+			decor(p)
+		end
+		return p
+	end
+	solidity(box("SpireBase", x - 6, y, z - 6, x + 6, y + B, z + 6, "px_blackstone", nil, sf))
+	for i = -1, 1 do
+		for j = -1, 1 do
+			if i ~= 0 or j ~= 0 then
+				local diag = i ~= 0 and j ~= 0
+				local hgt = if diag
+					then rng:NextInteger(0, 2)
+					else rng:NextInteger(1, if big then 4 else 3)
+				local cx, cz = x + i * B, z + j * B
+				local yTop = y + B + hgt * B
+				if hgt > 0 then
+					solidity(
+						box(
+							"SpireBlack",
+							cx - 2,
+							y + B,
+							cz - 2,
+							cx + 2,
+							yTop,
+							cz + 2,
+							pick({ "px_obsidian", "px_blackstone" }),
+							nil,
+							sf
+						)
+					)
+				end
+				if rng:NextNumber() < 0.45 then
+					local s = decor(
+						box(
+							"SpireShard",
+							cx - 1.5,
+							yTop,
+							cz - 1.5,
+							cx + 1.5,
+							yTop + rng:NextInteger(1, 2) * B,
+							cz + 1.5,
+							nil,
+							MAGENTA,
+							sf
+						)
+					)
+					s.Material = Enum.Material.Neon
+				end
+			end
+		end
+	end
+	local blackH = if big then 3 else 2
+	local crystalH = rng:NextInteger(3, 4) + (if big then 2 else 0)
+	solidity(
+		box(
+			"SpireCore",
+			x - 2,
+			y + B,
+			z - 2,
+			x + 2,
+			y + B + blackH * B,
+			z + 2,
+			"px_obsidian",
+			nil,
+			sf
+		)
+	)
+	local yc = y + B + blackH * B
+	local cr = solidity(
+		box("SpireCrystal", x - 2, yc, z - 2, x + 2, yc + crystalH * B, z + 2, nil, CRYSTAL, sf)
+	)
+	cr.Material = Enum.Material.Neon
+	local tip = decor(
+		box(
+			"SpireTip",
+			x - 1,
+			yc + crystalH * B,
+			z - 1,
+			x + 1,
+			yc + crystalH * B + B,
+			z + 1,
+			nil,
+			CRYSTAL,
+			sf
+		)
+	)
+	tip.Material = Enum.Material.Neon
+	return cr
+end
+
+-- ================================================================ 1. the west island: the chorus plantation
+do
+	local west = folder("ChorusPlantation", isles)
+	local c0 = count
+	local blocked = {} -- footprints the rows keep off
+	-- the purpur gazebo at the west end of the walkway (5×5 blocks, open sides), a crystal on a pedestal inside
+	local gx, gz = fitIsle(WEST, "west", -258, 38, 10, 10, 4)
+	do
+		local gf = folder("Gazebo", west)
+		box(
+			"GazeboFloor",
+			gx - 10,
+			-0.2,
+			gz - 10,
+			gx + 10,
+			0.4,
+			gz + 10,
+			"px_end_stone_bricks",
+			Color3.fromRGB(226, 220, 200),
+			gf
+		)
+		for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			local px, pz = gx + s[1] * 8, gz + s[2] * 8
+			box(
+				"GazeboPillar",
+				px - 2,
+				0.4,
+				pz - 2,
+				px + 2,
+				12,
+				pz + 2,
+				"px_purpur_pillar",
+				nil,
+				gf
+			)
+			candle(px - s[1] * 3.5, 0.4, pz - s[2] * 3.5, gf, 2.5)
+		end
+		box("GazeboRoof", gx - 12, 12, gz - 12, gx + 12, 16, gz + 12, "px_purpur", nil, gf)
+		box(
+			"GazeboRoof",
+			gx - 8,
+			16,
+			gz - 8,
+			gx + 8,
+			20,
+			gz + 8,
+			"px_purpur",
+			Color3.fromRGB(220, 200, 222),
+			gf
+		)
+		box("GazeboRoof", gx - 4, 20, gz - 4, gx + 4, 24, gz + 4, "px_purpur_pillar", nil, gf)
+		endRod(gx, 24, gz, gf, false)
+		box("CrystalPedestal", gx - 2, 0.4, gz - 2, gx + 2, 4, gz + 2, "px_purpur_pillar", nil, gf)
+		local cr = decor(
+			box("GazeboCrystal", gx - 1.5, 4, gz - 1.5, gx + 1.5, 9.5, gz + 1.5, nil, CRYSTAL, gf)
+		)
+		cr.Material = Enum.Material.Neon
+		for _, o in ipairs({ { 1.8, 0.6 }, { -1.6, -1 } }) do
+			local s = decor(
+				box(
+					"GazeboShard",
+					gx + o[1] - 0.6,
+					4,
+					gz + o[2] - 0.6,
+					gx + o[1] + 0.6,
+					6.5,
+					gz + o[2] + 0.6,
+					nil,
+					MAGENTA,
+					gf
+				)
+			)
+			s.Material = Enum.Material.Neon
+		end
+		glow(cr, 30, 1.2, CRYSTAL)
+		table.insert(blocked, { gx - 12, gz - 12, gx + 12, gz + 12 })
+	end
+	-- the gardener's shed: purpur pillar corners, dark oak walls, a stepped purpur roof, the door south to the walkway
+	local sx, sz = fitIsle(WEST, "west", -244, 74, 10, 8, 6)
+	do
+		local sf = folder("Shed", west)
+		box("ShedFloor", sx - 10, -0.2, sz - 8, sx + 10, 0.3, sz + 8, "px_dark_oak_planks", nil, sf)
+		for _, s in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			local px, pz = sx + s[1] * 8, sz + s[2] * 6
+			box("ShedCorner", px - 2, 0, pz - 2, px + 2, 12, pz + 2, "px_purpur_pillar", nil, sf)
+		end
+		box("ShedWall", sx - 6, 0, sz + 4, sx + 6, 12, sz + 8, "px_dark_oak_planks", nil, sf) -- north
+		box("ShedWall", sx - 10, 0, sz - 4, sx - 6, 12, sz + 4, "px_dark_oak_planks", nil, sf) -- west
+		box("ShedWall", sx + 6, 0, sz - 4, sx + 10, 12, sz + 4, "px_dark_oak_planks", nil, sf) -- east
+		box("ShedWall", sx - 6, 0, sz - 8, sx - 2, 12, sz - 4, "px_dark_oak_planks", nil, sf) -- south, the door gap
+		box("ShedWall", sx + 2, 0, sz - 8, sx + 6, 12, sz - 4, "px_dark_oak_planks", nil, sf)
+		box("ShedLintel", sx - 2, 8, sz - 8, sx + 2, 12, sz - 4, "px_purpur", nil, sf)
+		-- dark windows with purpur sills on the side walls
+		for _, s in ipairs({ -1, 1 }) do
+			decor(
+				box(
+					"ShedWindow",
+					sx + s * 10 - 0.2,
+					5,
+					sz - 2,
+					sx + s * 10 + 0.2,
+					8,
+					sz + 2,
+					nil,
+					Color3.fromRGB(34, 24, 44),
+					sf
+				)
+			)
+			decor(
+				box(
+					"ShedSill",
+					sx + s * 10 - 0.6,
+					4.4,
+					sz - 2.4,
+					sx + s * 10 + 0.6,
+					5,
+					sz + 2.4,
+					"px_purpur",
+					nil,
+					sf
+				)
+			)
+		end
+		box("ShedRoof", sx - 12, 12, sz - 10, sx + 12, 16, sz + 10, "px_purpur", nil, sf)
+		box(
+			"ShedRoof",
+			sx - 8,
+			16,
+			sz - 6,
+			sx + 8,
+			20,
+			sz + 6,
+			"px_purpur",
+			Color3.fromRGB(214, 194, 216),
+			sf
+		)
+		box("ShedRoof", sx - 4, 20, sz - 2, sx + 4, 22, sz + 2, "px_purpur_pillar", nil, sf)
+		-- a lantern under the eave by the door (its PointLight counts in this part's budget)
+		local lp = V(sx + 4, 9, sz - 9.5)
+		lantern(lp, sf, false, BY + 12)
+		lightsLeft -= 1
+		barrel(sx + 4, 0.3, sz + 1, sf, "px_chorus")
+		basket(sx - 4, 0.3, sz + 1, sf, true)
+		crate(sx - 4, 0.3, sz - 2, sf, 3)
+		-- the harvest outside: baskets and a shulker by the door
+		basket(sx - 7, 0, sz - 11, sf, true)
+		basket(sx - 3.5, 0, sz - 12, sf, true)
+		shulker(sx + 7, 0, sz - 11, sf, false, true)
+		table.insert(blocked, { sx - 14, sz - 15, sx + 14, sz + 12 })
+	end
+	task.wait()
+	-- the walkway from the bridge into the plantation and the strips beside it (rows start 2 blocks off)
+	pave(-252, 20, -180, 56, "west", 0, false, nil, west)
+	-- end rods along the walkway at every row head (3 of them lit)
+	for k = 0, 5 do
+		local xk = -246 + 12 * k
+		for _, rz in ipairs({ 52, 24 }) do
+			if isleOf(xk, rz, 6) == "west" and not rectHit(xk, rz, 1, blocked) then
+				endRod(
+					xk,
+					0,
+					rz,
+					west,
+					(k == 1 and rz == 52) or (k == 3 and rz == 24) or (k == 5 and rz == 52)
+				)
+			end
+		end
+	end
+	-- the rows: a plant every 2 blocks along z, trellis posts at the ends (and mid row) with two lines, now and then
+	-- a basket of fruit in a plant's place; paved aisles between the rows
+	local plants, baskets = 0, 0
+	for k = 0, 5 do
+		local xk = -246 + 12 * k
+		for _, side in ipairs({ 1, -1 }) do
+			local zs = {}
+			local zc = if side > 0 then 60 else 16
+			while
+				#zs < 8
+				and isleOf(xk, zc + side * 4, 10) == "west"
+				and not rectHit(xk, zc, 4, blocked)
+			do
+				table.insert(zs, zc)
+				zc += side * 8
+			end
+			local n = #zs
+			if n > 0 then
+				local rf = folder("ChorusRow", west)
+				local zA, zB = zs[1] - side * 4, zs[n] + side * 4
+				local posts = { zA, zB }
+				if n >= 3 then
+					table.insert(posts, zs[2] + side * 4)
+				end
+				for _, pz in ipairs(posts) do
+					decor(
+						box(
+							"TrellisPost",
+							xk - 0.6,
+							0,
+							pz - 0.6,
+							xk + 0.6,
+							9,
+							pz + 0.6,
+							"px_purpur_pillar",
+							nil,
+							rf
+						)
+					)
+				end
+				for _, h in ipairs({ 5, 8 }) do
+					decor(
+						part(
+							"TrellisLine",
+							Vector3.new(0.2, 0.2, math.abs(zB - zA)),
+							at(xk, h, (zA + zB) / 2),
+							Color3.fromRGB(222, 212, 230),
+							nil,
+							rf
+						)
+					)
+				end
+				for _, z in ipairs(zs) do
+					if rng:NextNumber() < 0.12 then
+						basket(xk, 0, z, rf, true)
+						baskets += 1
+					else
+						chorusPlant(xk, 0, z, rng:NextInteger(3, 6), rf, true, false)
+						plants += 1
+					end
+				end
+			end
+		end
+		task.wait()
+	end
+	for k = -1, 5 do
+		local ax = -246 + 12 * k + 2
+		pave(ax, 56, ax + 8, 104, "west", 6, true, blocked, west)
+		pave(ax, -40, ax + 8, 20, "west", 6, true, blocked, west)
+	end
+	print(
+		("[build-edge-gate] isles: plantation %d plants, %d baskets, gazebo (%d, %d), shed (%d, %d), %d parts"):format(
+			plants,
+			baskets,
+			gx,
+			gz,
+			sx,
+			sz,
+			count - c0
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 2. the east island: the dragon head statue
+do
+	local east = folder("DragonIsle", isles)
+	local c0 = count
+	-- the walkway from the bridge (x 172) to the mound
+	pave(172, -40, 184, -16, "east", 0, false, nil, east)
+	-- the mound: two stepped end stone tiers with cut corners
+	local mf = folder("Mound", east)
+	for _, t in ipairs({
+		{ 188, 0, -52, 232, 4, -4 },
+		{ 184, 0, -48, 188, 4, -8 },
+		{ 232, 0, -48, 236, 4, -8 },
+		{ 192, 4, -48, 228, 8, -8 },
+		{ 188, 4, -44, 192, 8, -12 },
+		{ 228, 4, -44, 232, 8, -12 },
+	}) do
+		box("Mound", t[1], t[2], t[3], t[4], t[5], t[6], "px_end_stone", ROCK_TOP_T, mf)
+	end
+	-- the head: black blocks, the snout west (x 192) toward the bridge, the jaw open
+	local df = folder("DragonHead", east)
+	local function hb(name, x0, y0, z0, x1, y1, z1, v, solid, tint)
+		local p = box(name, x0, y0, z0, x1, y1, z1, v, tint, df)
+		if not solid then
+			decor(p)
+		end
+		return p
+	end
+	hb("Skull", 212, 8, -44, 232, 32, -12, "px_blackstone", true)
+	hb("Neck", 232, 0, -36, 240, 24, -20, "px_blackstone", true)
+	hb("LowerJaw", 192, 8, -36, 212, 12, -20, "px_obsidian", true)
+	hb("UpperSnout", 192, 20, -38, 212, 28, -18, "px_obsidian", true)
+	hb("SnoutRidge", 200, 28, -32, 212, 32, -24, "px_blackstone", true)
+	hb("Nostril", 194, 28, -35, 198, 30, -31, "px_blackstone", false)
+	hb("Nostril", 194, 28, -25, 198, 30, -21, "px_blackstone", false)
+	hb("Brow", 208, 28, -45, 216, 32, -38, "px_obsidian", false)
+	hb("Brow", 208, 28, -18, 216, 32, -11, "px_obsidian", false)
+	local mouth =
+		hb("MouthDark", 211, 12, -36, 212, 20, -20, nil, false, Color3.fromRGB(36, 12, 48))
+	mouth.Material = Enum.Material.SmoothPlastic
+	-- the glowing eyes wrap the front corners of the skull
+	for _, e in ipairs({ { -44.4, -40 }, { -16, -11.6 } }) do
+		local eye = hb("DragonEye", 211.6, 24, e[1], 216, 28, e[2], nil, false, MAGENTA)
+		eye.Material = Enum.Material.Neon
+		glow(eye, 18, 1, MAGENTA)
+	end
+	-- teeth down from the snout and up from the jaw
+	local TOOTH = Color3.fromRGB(226, 222, 206)
+	for _, zt in ipairs({ -36, -22 }) do
+		for _, xt in ipairs({ 194, 202, 208 }) do
+			hb("Tooth", xt, 17, zt, xt + 2, 20, zt + 2, "px_white_wool", false, TOOTH)
+		end
+		for _, xt in ipairs({ 197, 205 }) do
+			hb("Tooth", xt, 12, zt, xt + 2, 15, zt + 2, "px_white_wool", false, TOOTH)
+		end
+	end
+	-- horns sweeping back, spikes down the ridge, frills on the cheeks
+	for _, hz in ipairs({ -42, -18 }) do
+		hb(
+			"Horn",
+			220,
+			32,
+			hz,
+			224,
+			40,
+			hz + 4,
+			"px_blackstone",
+			false,
+			Color3.fromRGB(150, 140, 160)
+		)
+		hb(
+			"Horn",
+			224,
+			38,
+			hz,
+			228,
+			46,
+			hz + 4,
+			"px_blackstone",
+			false,
+			Color3.fromRGB(150, 140, 160)
+		)
+		hb("Horn", 228, 44, hz, 232, 52, hz + 4, "px_obsidian", false)
+	end
+	hb("Spike", 216, 32, -30, 220, 36, -26, "px_obsidian", false)
+	hb("Spike", 226, 32, -30, 230, 36, -26, "px_obsidian", false)
+	hb("Spike", 234, 24, -30, 238, 28, -26, "px_obsidian", false)
+	hb("Frill", 220, 22, -46, 228, 30, -44, "px_obsidian", false)
+	hb("Frill", 220, 22, -12, 228, 30, -10, "px_obsidian", false)
+	-- candles on the mound steps in front of the jaw
+	for _, cp in ipairs({
+		{ 186, 4, -44 },
+		{ 186, 4, -12 },
+		{ 190, 8, -41 },
+		{ 190, 8, -15 },
+		{ 234, 4, -46 },
+		{ 234, 4, -10 },
+	}) do
+		candle(cp[1], cp[2], cp[3], df, rng:NextInteger(2, 4))
+	end
+	-- the obelisk north of the head
+	local ox, oz = fitIsle(EAST, "east", 232, -60, 6, 6, 4)
+	do
+		local of = folder("Obelisk", east)
+		box("ObeliskPlinth", ox - 6, 0, oz - 6, ox + 6, 4, oz + 6, "px_end_stone_bricks", nil, of)
+		box("ObeliskShaft", ox - 4, 4, oz - 4, ox + 4, 52, oz + 4, "px_obsidian", nil, of)
+		box("ObeliskBand", ox - 4.4, 44, oz - 4.4, ox + 4.4, 48, oz + 4.4, "px_blackstone", nil, of)
+		box("ObeliskTop", ox - 2, 52, oz - 2, ox + 2, 68, oz + 2, "px_obsidian", nil, of)
+		decor(box("ObeliskTip", ox - 1, 68, oz - 1, ox + 1, 72, oz + 1, "px_obsidian", nil, of))
+		-- two magenta glyphs on the west face
+		for _, gy in ipairs({ 22, 34 }) do
+			local g = decor(
+				box(
+					"ObeliskGlyph",
+					ox - 4.3,
+					gy,
+					oz - 1,
+					ox - 3.9,
+					gy + 2,
+					oz + 1,
+					nil,
+					MAGENTA,
+					of
+				)
+			)
+			g.Material = Enum.Material.Neon
+		end
+	end
+	task.wait()
+	-- props on the free ground: crystal spires, a broken end gateway, shulker boxes, chorus plants
+	local rects = {
+		{ 150, -44, 188, -12 }, -- the bridge landing and the walkway
+		{ 180, -56, 242, 0 }, -- the mound and the head
+		{ ox - 8, oz - 8, ox + 8, oz + 8 },
+	}
+	local spires, shulkers, chorus = 0, 0, 0
+	for i = 1, 4 do
+		local x, z = landSpot(EAST, "east", 8, rects)
+		if x then
+			glow(crystalSpire(x, 0, z, east, i == 1, true), 30, 1.2, CRYSTAL)
+			spires += 1
+		end
+	end
+	do
+		local x, z = landSpot(EAST, "east", 12, rects)
+		if x then
+			local gf = folder("BrokenGateway", east)
+			local alongX = rng:NextNumber() < 0.5
+			local DARK = Color3.fromRGB(64, 60, 70)
+			-- u runs across the frame, w through it
+			local function gb(name, u0, y0, w0, u1, y1, w1, solid)
+				local p
+				if alongX then
+					p = box(name, x + u0, y0, z + w0, x + u1, y1, z + w1, "px_blackstone", DARK, gf)
+				else
+					p = box(name, x + w0, y0, z + u0, x + w1, y1, z + u1, "px_blackstone", DARK, gf)
+				end
+				if not solid then
+					decor(p)
+				end
+				return p
+			end
+			gb("GatewayFrame", -10, 0, -2, -6, 20, 2, true)
+			gb("GatewayFrame", 6, 0, -2, 10, 12, 2, true)
+			gb("GatewayFrame", -6, 16, -2, 2, 20, 2, true)
+			gb("GatewayFrame", -6, 0, -2, 6, 4, 2, true)
+			gb("GatewayRubble", 10, 0, 3, 14, 4, 7, true)
+			gb("GatewayRubble", -2, 0, -9, 2, 4, -5, true)
+			local film = gb("GatewayFilm", -6, 12, -0.2, -2, 16, 0.2, false)
+			film.Material = Enum.Material.Neon
+			film.Color = VOID_VIOLET
+			film.MaterialVariant = ""
+			film.Transparency = 0.25
+		end
+	end
+	for _ = 1, 6 do
+		local x, z = landSpot(EAST, "east", 3, rects)
+		if x then
+			shulker(x, 0, z, east, rng:NextNumber() < 0.4, true)
+			shulkers += 1
+		end
+	end
+	for _ = 1, 5 do
+		local x, z = landSpot(EAST, "east", 4, rects)
+		if x then
+			chorusPlant(x, 0, z, rng:NextInteger(3, 5), east, true, rng:NextNumber() < 0.5)
+			chorus += 1
+		end
+	end
+	print(
+		("[build-edge-gate] isles: dragon isle, obelisk (%d, %d), spires %d, shulkers %d, chorus %d, %d parts"):format(
+			ox,
+			oz,
+			spires,
+			shulkers,
+			chorus,
+			count - c0
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 3. purpur stalactites under every island
+do
+	local hang = folder("Stalactites", isles)
+	local c0 = count
+	local C = 8
+	local cols, lumps = 0, 0
+	local DIRS4 = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local PALE = Color3.fromRGB(236, 218, 236)
+	local function skip(cx, cz)
+		if cx >= -24 and cx <= 24 and cz >= -110 and cz <= -70 then
+			return true -- the grand stair
+		end
+		for _, b in ipairs(BRIDGES) do
+			if inRect(cx, cz, b, 16) then
+				return true
+			end
+		end
+		return false
+	end
+	-- one column s studs square, its top at `top`, `len` long
+	local function column(x0, z0, s, top, len)
+		local v, t = "px_purpur_pillar", nil
+		local r = rng:NextNumber()
+		if r < 0.35 then
+			v, t = "px_purpur", ROCK_LOW_T
+		elseif r < 0.6 then
+			t = PALE
+		end
+		decor(box("Stalactite", x0, top - len, z0, x0 + s, top, z0 + s, v, t, hang))
+		cols += 1
+	end
+	for z = -264, 240 - C, C do
+		for x = -296, 280 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			local gy = groundY(cx, cz)
+			if gy ~= nil and not skip(cx, cz) and count - c0 < 1300 then
+				local bottom = gy - B - rockDepth(cx, cz)
+				local outX, outZ, rim = 0, 0, false
+				for _, d in ipairs(DIRS4) do
+					if groundY(cx + d[1] * C, cz + d[2] * C) == nil then
+						rim = true
+						outX += d[1]
+						outZ += d[2]
+						-- an end stone lump on the rim face, just under the ground block
+						if rng:NextNumber() < 0.12 then
+							local top = gy - B - rng:NextInteger(0, 1) * B
+							local h = rng:NextInteger(1, 2) * B
+							local a = rng:NextInteger(0, 1) * B
+							if d[1] ~= 0 then
+								local face = cx + d[1] * 4
+								decor(
+									box(
+										"RimLump",
+										face,
+										top - h,
+										z + a,
+										face + d[1] * B,
+										top,
+										z + a + B,
+										"px_end_stone",
+										ROCK_TOP_T,
+										hang
+									)
+								)
+							else
+								local face = cz + d[2] * 4
+								decor(
+									box(
+										"RimLump",
+										x + a,
+										top - h,
+										face,
+										x + a + B,
+										top,
+										face + d[2] * B,
+										"px_end_stone",
+										ROCK_TOP_T,
+										hang
+									)
+								)
+							end
+							lumps += 1
+						end
+					end
+				end
+				if rng:NextNumber() < (if rim then 0.7 else 0.22) then
+					if not rim and rng:NextNumber() < 0.4 then
+						-- a fat 2×2 column with a 1×1 tip under one quarter
+						local len = rng:NextInteger(2, 7) * B
+						column(x, z, 2 * B, bottom + 2, len + 2)
+						if rng:NextNumber() < 0.7 then
+							column(
+								x + rng:NextInteger(0, 1) * B,
+								z + rng:NextInteger(0, 1) * B,
+								B,
+								bottom - len,
+								rng:NextInteger(1, 3) * B
+							)
+						end
+					else
+						-- 1×1 columns, on the outer quarter of a rim cell
+						local qx = if outX > 0
+							then 1
+							elseif outX < 0 then 0
+							else rng:NextInteger(0, 1)
+						local qz = if outZ > 0
+							then 1
+							elseif outZ < 0 then 0
+							else rng:NextInteger(0, 1)
+						local len = if rim then rng:NextInteger(3, 10) else rng:NextInteger(2, 6)
+						column(x + qx * B, z + qz * B, B, bottom + 2, len * B + 2)
+						if rim and len > 3 and rng:NextNumber() < 0.35 then
+							local q2x, q2z = 1 - qx, qz
+							if outX == 0 then
+								q2x, q2z = qx, 1 - qz
+							end
+							column(
+								x + q2x * B,
+								z + q2z * B,
+								B,
+								bottom + 2,
+								rng:NextInteger(1, len - 2) * B + 2
+							)
+						end
+					end
+				end
+			end
+		end
+		if z % 64 == 0 then
+			task.wait()
+		end
+	end
+	print(
+		("[build-edge-gate] isles: stalactites %d, rim lumps %d, %d parts"):format(
+			cols,
+			lumps,
+			count - c0
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 4. floating end stone islets
+do
+	local fly = folder("FloatingIslets", isles)
+	local c0 = count
+	-- the walkable ways through the void: x0, x1, z0, z1, y0, y1
+	local CORRIDORS = { { -24, 24, -110, -70, -20, 40 } }
+	for _, b in ipairs(BRIDGES) do
+		table.insert(CORRIDORS, { b[1] - 16, b[3] + 16, b[2] - 16, b[4] + 16, -20, 20 })
+	end
+	local function inCorridor(x0, x1, z0, z1, y0, y1)
+		for _, c in ipairs(CORRIDORS) do
+			if
+				x1 >= c[1]
+				and x0 <= c[2]
+				and z1 >= c[3]
+				and z0 <= c[4]
+				and y1 >= c[5]
+				and y0 <= c[6]
+			then
+				return true
+			end
+		end
+		return false
+	end
+	-- no island cell within `half` + 24 studs (horizontally) of (x, z)
+	local function clearOfIslands(x, z, half)
+		if groundY(x, z) ~= nil then
+			return false
+		end
+		local e = half + 24
+		local n = math.max(1, math.ceil(2 * e / 8))
+		for i = 0, n do
+			for j = 0, n do
+				if groundY(x - e + 2 * e * i / n, z - e + 2 * e * j / n) ~= nil then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	local taken = {} -- { x, z, half, y0, y1 }
+	local function findSpot(half, down, up, yMin, yMax, far)
+		for attempt = 1, 400 do
+			if attempt % 100 == 0 then
+				task.wait()
+			end
+			local x, z = rng:NextNumber(-420, 400), rng:NextNumber(-380, 360)
+			local y = rng:NextNumber(yMin, yMax)
+			local ok = (not far or x < -320 or x > 300 or z < -290 or z > 270)
+				and not inCorridor(x - half, x + half, z - half, z + half, y - down, y + up)
+				and clearOfIslands(x, z, half)
+			if ok then
+				for _, t in ipairs(taken) do
+					local dh = math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2)
+					if dh < t[3] + half + 10 and y + up + 8 > t[4] and y - down - 8 < t[5] then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				table.insert(taken, { x, z, half, y - down, y + up })
+				return x, y, z
+			end
+		end
+		return nil
+	end
+	local isletLights = 0
+	-- the props on an islet top (x, y, z: a block centre on the top surface)
+	local function crystal(x, y, z, f)
+		decor(cube("CrystalBase", x, y + 2, z, B, B, B, "px_blackstone", nil, f))
+		local h = rng:NextInteger(2, 3) * B
+		local c = decor(
+			box(
+				"IsletCrystal",
+				x - 1.3,
+				y + B,
+				z - 1.3,
+				x + 1.3,
+				y + B + h,
+				z + 1.3,
+				nil,
+				CRYSTAL,
+				f
+			)
+		)
+		c.Material = Enum.Material.Neon
+		local s = decor(
+			box(
+				"IsletShard",
+				x + 1.3,
+				y + B,
+				z - 0.6,
+				x + 2.5,
+				y + B + h * 0.5,
+				z + 0.6,
+				nil,
+				MAGENTA,
+				f
+			)
+		)
+		s.Material = Enum.Material.Neon
+		if isletLights < 4 then
+			isletLights += 1
+			glow(c, 24, 1, CRYSTAL)
+		end
+	end
+	local function candles(x, y, z, f)
+		for i = 1, rng:NextInteger(2, 3) do
+			candle(x + (i - 2) * 2.2, y, z + rng:NextNumber(-1.5, 1.5), f, rng:NextInteger(2, 4))
+		end
+	end
+	local function bush(x, y, z, f)
+		chorusPlant(x, y, z, rng:NextInteger(2, 4), f, false, rng:NextNumber() < 0.5)
+	end
+	local function box2(x, y, z, f)
+		shulker(x, y, z, f, rng:NextNumber() < 0.5, false)
+	end
+	-- a broken purpur arch (needs a top 4+ blocks wide): one whole pillar, one snapped, half a lintel, a crystal
+	local function brokenArch(x, y, z, f, alongX)
+		local af = folder("BrokenArch", f)
+		local function ab(name, u0, y0, u1, y1, v, tint)
+			if alongX then
+				return decor(box(name, x + u0, y + y0, z - 2, x + u1, y + y1, z + 2, v, tint, af))
+			end
+			return decor(box(name, x - 2, y + y0, z + u0, x + 2, y + y1, z + u1, v, tint, af))
+		end
+		ab("ArchPillar", -8, 0, -4, 16, "px_purpur_pillar")
+		ab("ArchPillar", 4, 0, 8, rng:NextInteger(1, 2) * B, "px_purpur_pillar")
+		ab("ArchLintel", -8, 16, 0, 20, "px_purpur")
+		local c = ab("ArchCrystal", -3.2, 11, -1.8, 16, nil, MAGENTA)
+		c.Material = Enum.Material.Neon
+	end
+	local PROPS = { bush, bush, crystal, box2, candles }
+	-- one islet: top w × d blocks, (x, y, z) = the centre of its top surface
+	local function islet(x, y, z, w, d, layers, f)
+		local cf = folder("Islet", f)
+		local hx, hz = w * B / 2, d * B / 2
+		decor(box("IsletTop", x - hx, y - B, z - hz, x + hx, y, z + hz, "px_end_stone", nil, cf))
+		-- a ragged nub on one top edge
+		if rng:NextNumber() < 0.5 then
+			local side = rng:NextInteger(1, 4)
+			local along = if side <= 2 then d else w
+			local a = rng:NextInteger(0, math.max(0, along - 2)) * B
+			local len = math.min(2, along) * B
+			if side == 1 then
+				decor(
+					box(
+						"IsletTop",
+						x - hx - B,
+						y - B,
+						z - hz + a,
+						x - hx,
+						y,
+						z - hz + a + len,
+						"px_end_stone",
+						nil,
+						cf
+					)
+				)
+			elseif side == 2 then
+				decor(
+					box(
+						"IsletTop",
+						x + hx,
+						y - B,
+						z - hz + a,
+						x + hx + B,
+						y,
+						z - hz + a + len,
+						"px_end_stone",
+						nil,
+						cf
+					)
+				)
+			elseif side == 3 then
+				decor(
+					box(
+						"IsletTop",
+						x - hx + a,
+						y - B,
+						z - hz - B,
+						x - hx + a + len,
+						y,
+						z - hz,
+						"px_end_stone",
+						nil,
+						cf
+					)
+				)
+			else
+				decor(
+					box(
+						"IsletTop",
+						x - hx + a,
+						y - B,
+						z + hz,
+						x - hx + a + len,
+						y,
+						z + hz + B,
+						"px_end_stone",
+						nil,
+						cf
+					)
+				)
+			end
+		end
+		-- the stepped layers: end stone above, purpur below, shrinking on the block grid
+		local heights, total = {}, B
+		for k = 1, layers do
+			heights[k] = if w >= 6 and rng:NextNumber() < 0.5 then 2 * B else B
+			total += heights[k]
+		end
+		local tipLen = rng:NextInteger(1, 2) * B
+		total += tipLen
+		local yTop = y - B
+		local ix0, ix1, iz0, iz1 = 0, w, 0, d
+		for k = 1, layers do
+			local f01 = 1 - k / (layers + 1)
+			local lw = math.min(math.max(1, math.floor(w * f01 + 0.5)), ix1 - ix0)
+			local ld = math.min(math.max(1, math.floor(d * f01 + 0.5)), iz1 - iz0)
+			local sx = math.clamp(
+				ix0 + math.floor((ix1 - ix0 - lw) / 2 + rng:NextNumber(-0.5, 0.99)),
+				ix0,
+				ix1 - lw
+			)
+			local sz = math.clamp(
+				iz0 + math.floor((iz1 - iz0 - ld) / 2 + rng:NextNumber(-0.5, 0.99)),
+				iz0,
+				iz1 - ld
+			)
+			local v, t = "px_end_stone", ROCK_TOP_T
+			if y - yTop >= math.max(8, total * 0.4) then
+				v, t = "px_purpur", ROCK_LOW_T
+			end
+			local yb = yTop - heights[k]
+			decor(
+				box(
+					"IsletRock",
+					x - hx + sx * B,
+					yb,
+					z - hz + sz * B,
+					x - hx + (sx + lw) * B,
+					yTop,
+					z - hz + (sz + ld) * B,
+					v,
+					t,
+					cf
+				)
+			)
+			ix0, ix1, iz0, iz1 = sx, sx + lw, sz, sz + ld
+			yTop = yb
+		end
+		local px = ix0 + rng:NextInteger(0, ix1 - ix0 - 1)
+		local pz = iz0 + rng:NextInteger(0, iz1 - iz0 - 1)
+		decor(
+			box(
+				"IsletTip",
+				x - hx + px * B,
+				yTop - tipLen,
+				z - hz + pz * B,
+				x - hx + (px + 1) * B,
+				yTop,
+				z - hz + (pz + 1) * B,
+				"px_purpur_pillar",
+				nil,
+				cf
+			)
+		)
+		-- the purpur fringe: columns hanging from the outer ring of the top, all round
+		for side = 1, 4 do
+			local along = if side <= 2 then d else w
+			local nv = math.clamp(math.floor(along / 2 + rng:NextNumber(0, 1.5)), 1, 4)
+			local used = {}
+			for _ = 1, nv do
+				local a = rng:NextInteger(0, along - 1)
+				if not used[a] then
+					used[a] = true
+					local len = rng:NextInteger(1, math.max(2, math.floor(total / B) + 1)) * B
+					local v = if rng:NextNumber() < 0.6 then "px_purpur_pillar" else "px_purpur"
+					local t = if v == "px_purpur" then ROCK_LOW_T else nil
+					local top = y - B
+					local ab = a * B
+					if side == 1 then
+						decor(
+							box(
+								"IsletStalactite",
+								x - hx,
+								top - len,
+								z - hz + ab,
+								x - hx + B,
+								top,
+								z - hz + ab + B,
+								v,
+								t,
+								cf
+							)
+						)
+					elseif side == 2 then
+						decor(
+							box(
+								"IsletStalactite",
+								x + hx - B,
+								top - len,
+								z - hz + ab,
+								x + hx,
+								top,
+								z - hz + ab + B,
+								v,
+								t,
+								cf
+							)
+						)
+					elseif side == 3 then
+						decor(
+							box(
+								"IsletStalactite",
+								x - hx + ab,
+								top - len,
+								z - hz,
+								x - hx + ab + B,
+								top,
+								z - hz + B,
+								v,
+								t,
+								cf
+							)
+						)
+					else
+						decor(
+							box(
+								"IsletStalactite",
+								x - hx + ab,
+								top - len,
+								z + hz - B,
+								x - hx + ab + B,
+								top,
+								z + hz,
+								v,
+								t,
+								cf
+							)
+						)
+					end
+				end
+			end
+		end
+		-- a prop on top (a broken arch on the wide ones)
+		local bx = x - hx + (math.floor(w / 2) + 0.5) * B
+		local bz = z - hz + (math.floor(d / 2) + 0.5) * B
+		if math.min(w, d) >= 5 and rng:NextNumber() < 0.45 then
+			brokenArch(bx, y, bz, cf, w >= d)
+		elseif math.min(w, d) >= 2 and rng:NextNumber() < 0.75 then
+			pick(PROPS)(bx, y, bz, cf)
+		end
+		return total
+	end
+
+	local made, big = 0, 0
+	for i = 1, 44 do
+		local isBig = i <= 4
+		local w = if isBig then rng:NextInteger(8, 10) else rng:NextInteger(2, 6)
+		local d = math.clamp(w + rng:NextInteger(-1, 1), 2, 10)
+		local layers = math.clamp(math.floor(math.max(w, d) / 2) + rng:NextInteger(1, 2), 3, 6)
+		local half = math.max(w, d) * B / 2 + B + 2
+		local down = B * (layers * (if w >= 6 then 2 else 1) + 3)
+		local yMin, yMax = -60, 120
+		if not isBig and rng:NextNumber() < 0.6 then
+			yMin, yMax = -30, 60 -- most of them near the eye line of the islands
+		end
+		local x, y, z = findSpot(half, down, 24, yMin, yMax, isBig)
+		if x then
+			islet(snap(x) + (w % 2) * 2, snap(y), snap(z) + (d % 2) * 2, w, d, layers, fly)
+			made += 1
+			if isBig then
+				big += 1
+			end
+		end
+		if i % 6 == 0 then
+			task.wait()
+		end
+	end
+	print(("[build-edge-gate] isles: islets %d (big %d), %d parts"):format(made, big, count - c0))
+end
+task.wait()
+
+-- ================================================================ 5. slow violet motes over the void between islands
+do
+	local motes = folder("VoidMotes", isles)
+	for _, m in ipairs({ { -196, -64 }, { 186, 64 }, { -150, -130 } }) do
+		local src =
+			decor(part("VoidMotes", Vector3.new(70, 1, 70), at(m[1], -40, m[2]), nil, nil, motes))
+		src.Transparency = 1
+		src.CastShadow = false
+		emitter(src, {
+			Rate = 3,
+			Lifetime = NumberRange.new(14, 20),
+			Speed = NumberRange.new(1.5, 3),
+			SpreadAngle = Vector2.new(20, 20),
+			EmissionDirection = Enum.NormalId.Top,
+			Size = NumberSequence.new(0.4),
+			Color = ColorSequence.new(Color3.fromRGB(190, 120, 255)),
+			LightEmission = 1,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.15, 0.3),
+				NumberSequenceKeypoint.new(0.85, 0.4),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		})
+	end
+end
+print(
+	("[build-edge-gate] isles: %d parts in all, %d lights left"):format(
+		count - startCount,
+		lightsLeft
+	)
+)
 
 end
 task.wait()

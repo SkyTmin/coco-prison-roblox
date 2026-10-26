@@ -41,9 +41,10 @@ local function rockDepth(x, z)
 	return math.max(8, math.floor(d / 16 + 0.5) * 16)
 end
 local _, islandRuns = island({
+	pit = PIT, -- the mine hole stays open
 	x0 = -296,
 	x1 = 280,
-	z0 = -256,
+	z0 = -264,
 	z1 = 240,
 	cell = 8,
 	shape = function(x, z)

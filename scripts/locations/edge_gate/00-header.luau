@@ -24,7 +24,7 @@
 --                x -12..12 from the ring to the grand stair, WEST z 30..46 to the west bridge, EAST z -36..-20 to the
 --                east bridge
 --   grand stair  x -12..12, z -76 → -104, y 0 → 16, over the gap between the main and the arena island
---   arena island centre (0, -170), r ≈ 72, ground y 16; the arena (obsidian) r 52 at the centre; the GATE arch
+--   arena island centre (0, -170), r ≈ 78, ground y 16; the arena (obsidian) r 52 at the centre; the GATE arch
 --                behind it at x -28..28, z -240..-226 (hero, ~ 25 blocks tall); towers on the rim
 --   west island  centre (-228, 40), r ≈ 56, y 0 (the chorus plantation); bridge x -180..-124, z 30..46
 --   east island  centre (210, -28), r ≈ 56, y 0 (the dragon head, crystal spires); bridge x 84..170, z -36..-20
