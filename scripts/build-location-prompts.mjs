@@ -40,6 +40,15 @@ const md = [
 ].join("\n");
 fs.writeFileSync(path.join(dir, "location-concept-prompts.md"), md);
 
+// style references: our own screenshots the owner picked as «наш стиль» (Подножье горы, Пустотная крепость)
+const refs = [
+	["style-ref-mountain-foot.jpg", "Подножье горы"],
+	["style-ref-end-castle.jpg", "Пустотная крепость"],
+].map(([file, label]) => ({
+	label,
+	src: "data:image/jpeg;base64," + fs.readFileSync(path.join(ROOT, "assets", "screenshots", file)).toString("base64"),
+}));
+
 // phone page
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const cards = locs
@@ -81,6 +90,10 @@ h1 { font: 800 clamp(22px, 6vw, 34px)/1.1 var(--display); margin: 0; text-wrap: 
 .lead { color: var(--muted); margin: 0; max-width: 62ch; }
 .how { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
 .how b { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+.refs { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.refs figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.refs img { display: block; width: 100%; height: auto; }
+.refs figcaption { padding: 6px 10px; font-size: 13px; color: var(--muted); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
 .card-head { display: flex; gap: 12px; align-items: center; }
 .lvl { flex: none; width: 44px; height: 44px; display: grid; place-items: center; background: var(--lvl); color: var(--lvl-ink);
@@ -103,9 +116,13 @@ pre { white-space: pre-wrap; word-break: break-word; font: 12.5px/1.5 var(--mono
   <p class="lead">По одному на каждый следующий этаж. Каждый промпт полный: в нём уже есть стиль, масштаб, шахта, старт, арена и раскладка листа 2×2.</p>
   <div class="how">
     <b>Как пользоваться</b>
-    <span>1. Нажми «Скопировать промпт» и вставь в генератор картинок (ChatGPT и т. п.).</span>
-    <span>2. Сохрани картинку и пришли мне вместе с названием локации.</span>
-    <span>3. Если лимит маленький — сначала Рынок, Лепреконовая долина и Замок: они следующие.</span>
+    <span>1. Сохрани один из скриншотов ниже (долгое нажатие на картинку). Это образец нашего стиля.</span>
+    <span>2. Нажми «Скопировать промпт», вставь в генератор картинок (ChatGPT и т. п.) и прикрепи сохранённый скриншот к тому же сообщению.</span>
+    <span>3. Сохрани результат и пришли мне вместе с названием локации.</span>
+    <span>4. Если лимит маленький — сначала Рынок, Лепреконовая долина и Замок: они следующие.</span>
+  </div>
+  <div class="refs">
+${refs.map((r) => `    <figure><img src="${r.src}" alt="Скриншот нашей игры: ${esc(r.label)}" loading="lazy"><figcaption>Образец стиля: ${esc(r.label)}</figcaption></figure>`).join("\n")}
   </div>
 ${cards}
 </div>
