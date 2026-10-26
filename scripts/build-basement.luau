@@ -22,6 +22,8 @@
 --      board), the rat's nest, heaps of rubbish [меню: «выросшая в мраке подземелий и гор мусора»], a rat
 --      at each of the four diagonals, a zombie at each of the four sides.
 -- Both mines reset every 30 s [меню Prison+]. No way out: players come and go by teleport.
+-- On top [владелец 26.10]: the PvP / treasury pass at the end (the ore cave glitters, gallery, gate, notice board,
+-- remains of fights, cover); see "PvP and the treasury".
 -- A separate zone at X = 1500 so StreamingEnabled loads it only for players who are there.
 -- Run in Studio (Edit) via scripts/studio-loader.luau after build-textures. Idempotent: replaces
 -- Workspace.Basement. Arrival: LocationSpawn, LocationId "basement".
@@ -763,24 +765,27 @@ local function pit(m, id, label)
 	}) do
 		bedrock(part("PitRim", r[1], r[2], STONE))
 	end
-	-- a log fence round the pit: posts every 8 studs, two rails, gaps where the trail meets it (south, north)
+	-- a log fence round the pit: posts every 8 studs, two rails, gaps where the trail meets it (south, north). The
+	-- ore mine gets a heavy stone-and-iron railing instead (the PvP / treasury pass at the end of the file).
 	local edge = w / 2 + 2 * B
 	local function post(x, z)
 		textured(part("FencePost", Vector3.new(0.8, 3.4, 0.8), at(x, 1.7, z), WOOD, nil, props), "px_oak_log")
 	end
-	for _, sz in ipairs({ -1, 1 }) do
-		for _, sx in ipairs({ -1, 1 }) do
-			local len = edge - 6
-			textured(part("FenceRail", Vector3.new(len, 0.4, 0.3), at(sx * (6 + len / 2), 2.6, mz + sz * edge), WOOD, nil, props), "px_planks")
-			textured(part("FenceRail", Vector3.new(len, 0.4, 0.3), at(sx * (6 + len / 2), 1.4, mz + sz * edge), WOOD, nil, props), "px_planks")
-			for x = 6, edge, 8 do
-				post(sx * x, mz + sz * edge)
+	if id ~= "basement_ore" then
+		for _, sz in ipairs({ -1, 1 }) do
+			for _, sx in ipairs({ -1, 1 }) do
+				local len = edge - 6
+				textured(part("FenceRail", Vector3.new(len, 0.4, 0.3), at(sx * (6 + len / 2), 2.6, mz + sz * edge), WOOD, nil, props), "px_planks")
+				textured(part("FenceRail", Vector3.new(len, 0.4, 0.3), at(sx * (6 + len / 2), 1.4, mz + sz * edge), WOOD, nil, props), "px_planks")
+				for x = 6, edge, 8 do
+					post(sx * x, mz + sz * edge)
+				end
 			end
-		end
-		textured(part("FenceRail", Vector3.new(0.3, 0.4, 2 * edge), at(sz * edge, 2.6, mz), WOOD, nil, props), "px_planks")
-		textured(part("FenceRail", Vector3.new(0.3, 0.4, 2 * edge), at(sz * edge, 1.4, mz), WOOD, nil, props), "px_planks")
-		for z = -edge, edge, 8 do
-			post(sz * edge, mz + z)
+			textured(part("FenceRail", Vector3.new(0.3, 0.4, 2 * edge), at(sz * edge, 2.6, mz), WOOD, nil, props), "px_planks")
+			textured(part("FenceRail", Vector3.new(0.3, 0.4, 2 * edge), at(sz * edge, 1.4, mz), WOOD, nil, props), "px_planks")
+			for z = -edge, edge, 8 do
+				post(sz * edge, mz + z)
+			end
 		end
 	end
 	local anchor = part("MineAnchor_" .. id, Vector3.new(w, 0.2, w), at(0, -0.1, mz), DARK)
@@ -1939,6 +1944,1770 @@ for _, th in ipairs({ 45, 135, 225, 315 }) do
 end
 for _, d in ipairs({ { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 } }) do
 	mobSpawn("zombie", d[1] * 50, LAIR.cz + d[2] * 64, 4)
+end
+
+-- ================================================================ PvP and the treasury
+-- [владелец 26.10: «подвал — одно из первых знакомств игрока с ПВП и аля ценным лутом в шахте; сделай пизже,
+-- концепция остаётся»] A pass on top of the approved cellar: nothing above is moved. The ore cave becomes the
+-- treasury: ore blocks glittering in its rock (glints, a few sparkles, cool and gold glows), a heavy railing round
+-- the pit (dark stone posts, gold caps, iron bars and chains), a raised timber gallery along the west wall (a
+-- vantage point and cover), carts on a short track, chests spilling ore, gold heaps, an assay table by the buyer,
+-- a castle gate with a raised portcullis where tunnel 2 opens into it. The route reads as a PvP zone: a notice
+-- board in the arrival hall, remains of fallen prisoners, tally marks, overturned crates, cover in both mine caves.
+-- Solid props stand only on open floor cells, off the trail, the pits, the buyers' approach and the mobs' wander
+-- circles (+6 studs). Every section is its own function (its locals stay out of the chunk's 200).
+do
+	local up = folder("PvpTreasury")
+	local function deco(name, size, cf, color, material)
+		return decor(part(name, size, cf, color, material, up))
+	end
+	local function solid(name, size, cf, color, material)
+		return part(name, size, cf, color, material, up)
+	end
+	local CAVE1, CAVE2 = { cave1 = true }, { cave2 = true }
+	local ROUTE = { tunnel1 = true, tunnel2 = true, tunnel3 = true, cave1 = true, cave2 = true }
+	local PAPER = Color3.fromRGB(232, 220, 190)
+	local TREASURE =
+		{ "px_gold_block", "px_gold_block", "px_diamond_block", "px_lapis_block", "px_iron_block" }
+	local SHINE = {
+		px_gold_block = Color3.fromRGB(255, 214, 90),
+		px_gold_ore = Color3.fromRGB(255, 214, 90),
+		px_lapis_block = Color3.fromRGB(80, 130, 255),
+		px_diamond_block = Color3.fromRGB(110, 245, 255),
+		px_iron_block = Color3.fromRGB(235, 235, 245),
+		px_iron_ore = Color3.fromRGB(240, 215, 190),
+	}
+
+	-- rectangles { x0, x1, z0, z1 } (zone coordinates) that new solid props keep out of
+	local blocked = {}
+	local function keep(x, z, hx, hz)
+		hz = hz or hx
+		table.insert(blocked, { x - hx, x + hx, z - hz, z + hz })
+	end
+	for _, id in ipairs({ "tunnel1", "tunnel2" }) do -- the rats: wander 7 + 6
+		for _, t in ipairs({ 0.45, 0.8 }) do
+			local x, z = linePoint(SHAPE[id].pts, t)
+			keep(x, z, 13)
+		end
+	end
+	for _, side in ipairs({ -1, 1 }) do -- the zombies of mine 1: wander 3 + 6
+		keep(side * (M1.hole + 8), M1.cz, 9)
+	end
+	-- what already stands: ore and rubble piles, carts, braziers, armour stands and weapon racks
+	for _, p in ipairs({
+		{ -M2.hole - 10, M2.cz - 12, 4 },
+		{ -M1.hole - 10, M1.cz + 14, 4 },
+		{ M1.hole + 12, M1.cz - 16, 4 },
+		{ -M2.hole - 14, M2.cz + 10, 2.8 },
+		{ M1.hole + 13, M1.cz + 14, 2.8 },
+	}) do
+		keep(p[1], p[2], p[3])
+	end
+	for _, m in ipairs({ M1, M2 }) do
+		local e = m.hole + 3
+		for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+			keep(c[1] * e, m.cz + c[2] * e, 2.5)
+		end
+		for _, side in ipairs({ -1, 1 }) do
+			local face = wallFace(0, m.cz - m.hole + 6, side)
+			if face then
+				keep(face - side * 2.5, m.cz - m.hole + 6, 3.5)
+			end
+		end
+	end
+	keep(M2.hole + 5.25, M2.cz, 7.25, 6) -- x 30 … 44.5: the ore buyer, his counter and the way to it
+
+	-- the floor height when a rectangle stands on open floor cells of `shapes` (off the trail and the pits, `head`
+	-- studs under the vault, one floor level) clear of `blocked`; nil otherwise
+	local function free(x, z, hx, hz, shapes, head)
+		local f = nil
+		local nx, nz = math.max(1, math.ceil(hx)), math.max(1, math.ceil(hz))
+		for i = 0, nx do
+			for j = 0, nz do
+				local c = cellAtPos(
+					x - hx + 0.05 + (2 * hx - 0.1) * i / nx,
+					z - hz + 0.05 + (2 * hz - 0.1) * j / nz
+				)
+				if not c or not shapes[c.shape] or c.hole or c.path or c.ceil - c.floor < head then
+					return nil
+				end
+				if f and c.floor ~= f then
+					return nil
+				end
+				f = c.floor
+			end
+		end
+		for _, r in ipairs(blocked) do
+			if x + hx > r[1] and x - hx < r[2] and z + hz > r[3] and z - hz < r[4] then
+				return nil
+			end
+		end
+		return f
+	end
+	-- the first free spot at or near (x, z) (steps of 2 up to 6 studs away); it is then blocked for the others
+	local NEAR = {
+		{ 0, 0 },
+		{ 1, 0 },
+		{ -1, 0 },
+		{ 0, 1 },
+		{ 0, -1 },
+		{ 1, 1 },
+		{ -1, 1 },
+		{ 1, -1 },
+		{ -1, -1 },
+	}
+	local function place(x, z, hx, hz, shapes, head)
+		for r = 0, 6, 2 do
+			for _, d in ipairs(NEAR) do
+				if r > 0 or (d[1] == 0 and d[2] == 0) then
+					local px, pz = x + d[1] * r, z + d[2] * r
+					local f = free(px, pz, hx, hz, shapes, head)
+					if f then
+						keep(px, pz, hx + 0.5, hz + 0.5)
+						return px, pz, f
+					end
+				end
+			end
+		end
+		return nil
+	end
+
+	-- ---------------------------------------------------------------- small builders
+	local function boardText(target, text, color)
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = Enum.NormalId.Front
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 40
+		gui.MaxDistance = 90
+		gui.LightInfluence = 0.3
+		gui.Parent = target
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(0.92, 0.84)
+		label.Position = UDim2.fromScale(0.04, 0.08)
+		label.BackgroundTransparency = 1
+		label.TextColor3 = color
+		label.TextStrokeTransparency = 0.6
+		label.TextScaled = true
+		label.TextWrapped = true
+		label.Font = Enum.Font.Code
+		label.Text = text
+		label.Parent = gui
+	end
+	-- a Minecraft lantern (iron frame, glowing core); `range` adds a light
+	local function lantern(pos, range)
+		local iron = Color3.fromRGB(45, 45, 50)
+		deco(
+			"LanternBase",
+			Vector3.new(1.2, 0.25, 1.2),
+			CFrame.new(pos - Vector3.new(0, 0.62, 0)),
+			iron,
+			Enum.Material.Metal
+		)
+		deco(
+			"LanternTop",
+			Vector3.new(1.2, 0.25, 1.2),
+			CFrame.new(pos + Vector3.new(0, 0.62, 0)),
+			iron,
+			Enum.Material.Metal
+		)
+		deco(
+			"LanternCap",
+			Vector3.new(0.6, 0.35, 0.6),
+			CFrame.new(pos + Vector3.new(0, 0.9, 0)),
+			iron,
+			Enum.Material.Metal
+		)
+		local core = deco(
+			"LanternGlow",
+			Vector3.new(0.85, 1, 0.85),
+			CFrame.new(pos),
+			TORCH,
+			Enum.Material.Neon
+		)
+		if range then
+			light(core, range, 0.8, TORCH)
+		end
+		return core
+	end
+	-- tools: cf = the middle of the handle, its local Y along the handle
+	local function pickaxe(cf, head)
+		deco(
+			"PickHandle",
+			Vector3.new(0.25, 2.6, 0.25),
+			cf,
+			Color3.fromRGB(110, 78, 46),
+			Enum.Material.Wood
+		)
+		deco(
+			"PickHead",
+			Vector3.new(2.2, 0.35, 0.35),
+			cf * CFrame.new(0, 1.3, 0),
+			head or STEEL,
+			Enum.Material.Metal
+		)
+	end
+	local function shovel(cf)
+		deco(
+			"ShovelHandle",
+			Vector3.new(0.25, 2.6, 0.25),
+			cf,
+			Color3.fromRGB(110, 78, 46),
+			Enum.Material.Wood
+		)
+		deco(
+			"ShovelBlade",
+			Vector3.new(0.9, 1, 0.15),
+			cf * CFrame.new(0, -1.7, 0),
+			STEEL,
+			Enum.Material.Metal
+		)
+	end
+	-- a rack of mining tools; cf on the floor, −Z = its front
+	local function toolRack(cf)
+		for _, x in ipairs({ -1.7, 1.7 }) do
+			solid(
+				"ToolRackPost",
+				Vector3.new(0.35, 3.4, 0.35),
+				cf * CFrame.new(x, 1.7, 0),
+				WOOD,
+				Enum.Material.Wood
+			)
+		end
+		solid(
+			"ToolRackRail",
+			Vector3.new(3.8, 0.3, 0.35),
+			cf * CFrame.new(0, 3.1, 0),
+			WOOD,
+			Enum.Material.Wood
+		)
+		local heads = { STEEL, GOLD, Color3.fromRGB(90, 225, 230) }
+		for k = -1, 1 do
+			pickaxe(
+				cf * CFrame.new(k * 1.05 - 0.3, 1.75, -0.3) * CFrame.Angles(-0.1, 0, 0),
+				heads[k + 2]
+			)
+		end
+		shovel(cf * CFrame.new(1.3, 2.15, -0.45) * CFrame.Angles(-0.2, 0, 0.05))
+	end
+	-- an open chest of treasure spilling on to the floor; its front faces (tx, tz)
+	local function chest(x, f, z, tx, tz)
+		local base = CFrame.lookAt(Vector3.new(BX + x, f, BZ + z), Vector3.new(BX + tx, f, BZ + tz))
+		textured(
+			solid("TreasureChest", Vector3.new(3.4, 2, 2.2), base * CFrame.new(0, 1, 0)),
+			"px_spruce_planks"
+		)
+		for _, bx in ipairs({ -1.15, 1.15 }) do
+			deco(
+				"ChestBand",
+				Vector3.new(0.3, 2.1, 2.3),
+				base * CFrame.new(bx, 1, 0),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		deco(
+			"ChestLock",
+			Vector3.new(0.5, 0.6, 0.2),
+			base * CFrame.new(0, 1.6, -1.15),
+			GOLD,
+			Enum.Material.Metal
+		)
+		local lid = base
+			* CFrame.new(0, 2, 1.1)
+			* CFrame.Angles(1.9, 0, 0)
+			* CFrame.new(0, 0.17, -1.1)
+		textured(deco("ChestLid", Vector3.new(3.4, 0.35, 2.2), lid, WOOD), "px_spruce_planks")
+		deco(
+			"ChestGold",
+			Vector3.new(3, 0.3, 1.9),
+			base * CFrame.new(0, 1.9, 0),
+			GOLD,
+			Enum.Material.Metal
+		)
+		for _ = 1, 5 do
+			local s = rng:NextNumber(0.7, 1)
+			local cf = base
+				* CFrame.new(rng:NextNumber(-1.2, 1.2), 2 + s * 0.3, rng:NextNumber(-0.6, 0.6))
+				* CFrame.Angles(
+					rng:NextNumber(-0.4, 0.4),
+					rng:NextNumber(0, 6.28),
+					rng:NextNumber(-0.4, 0.4)
+				)
+			textured(
+				deco("ChestOre", Vector3.new(s, s, s), cf, STONE),
+				TREASURE[rng:NextInteger(1, #TREASURE)]
+			)
+		end
+		for _ = 1, 5 do
+			local s = rng:NextNumber(0.6, 1.1)
+			local cf = base
+				* CFrame.new(rng:NextNumber(-1.8, 1.8), s / 2 - 0.05, -1.6 - rng:NextNumber(0, 2))
+				* CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 6.28), 0)
+			textured(
+				deco("SpiltOre", Vector3.new(s, s, s), cf, STONE),
+				TREASURE[rng:NextInteger(1, #TREASURE)]
+			)
+		end
+		for _ = 1, 8 do
+			local cf = base
+				* CFrame.new(rng:NextNumber(-2, 2), 0.12, -1.4 - rng:NextNumber(0, 2.6))
+				* CFrame.Angles(0, rng:NextNumber(0, 6.28), 0)
+			deco("Nugget", Vector3.new(0.35, 0.25, 0.35), cf, GOLD, Enum.Material.Metal)
+		end
+	end
+	-- a heap of gold nuggets round a gold block
+	local function goldHeap(x, f, z, n)
+		textured(
+			deco(
+				"HeapCore",
+				Vector3.new(1.4, 0.7, 1.4),
+				at(x, f + 0.35, z) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0),
+				STONE
+			),
+			"px_gold_block"
+		)
+		for _ = 1, n do
+			local r, a, s =
+				rng:NextNumber(0, 1.6), rng:NextNumber(0, 6.28), rng:NextNumber(0.35, 0.6)
+			local cf = at(
+				x + math.cos(a) * r,
+				f + s * 0.35 + math.max(0, 1.2 - r) * 0.5,
+				z + math.sin(a) * r
+			) * CFrame.Angles(0, a, rng:NextNumber(-0.3, 0.3))
+			deco("GoldHeap", Vector3.new(s, s * 0.7, s), cf, GOLD, Enum.Material.Metal)
+		end
+	end
+
+	-- ---------------------------------------------------------------- the railing round the ore pit
+	-- replaces its log fence (pit() skips it for basement_ore): dark stone posts on cobble feet with gold caps, two
+	-- iron bars and a chain sagging between the caps; open north and south (|x| < 6) like the fence was
+	local function railing()
+		local mz, edge = M2.cz, M2.w / 2 + 2 * B
+		local POST = Color3.fromRGB(96, 94, 102)
+		local posts = {}
+		for _, s in ipairs({ -1, 1 }) do
+			for _, x in ipairs({ 6, 12.5, 19, 25.5 }) do
+				table.insert(posts, { s * x, mz - edge })
+				table.insert(posts, { s * x, mz + edge })
+			end
+		end
+		for k = -4, 4 do
+			table.insert(posts, { -edge, mz + k * 8 })
+			table.insert(posts, { edge, mz + k * 8 })
+		end
+		for _, p in ipairs(posts) do
+			textured(
+				solid("RailFoot", Vector3.new(2, 0.8, 2), at(p[1], 0.4, p[2]), POST),
+				"px_cobblestone",
+				POST
+			)
+			textured(
+				solid("RailPost", Vector3.new(1.4, 3.6, 1.4), at(p[1], 2.6, p[2]), POST),
+				"px_stone_bricks",
+				POST
+			)
+			textured(
+				solid("RailCap", Vector3.new(1.9, 0.6, 1.9), at(p[1], 4.7, p[2])),
+				"px_gold_block"
+			)
+		end
+		local function span(ax, az, bx, bz)
+			local a, b = at(ax, 0, az).Position, at(bx, 0, bz).Position
+			local dir = b - a
+			local len = dir.Magnitude - 1.4
+			local mx, mzz = (ax + bx) / 2, (az + bz) / 2
+			local out = if math.abs(math.abs(mx) - edge) < 0.5
+				then Vector3.new(math.sign(mx), 0, 0)
+				else Vector3.new(0, 0, math.sign(mzz - mz))
+			for _, y in ipairs({ 1.8, 3.5 }) do
+				local mid = (a + b) / 2 + Vector3.new(0, y, 0)
+				solid(
+					"RailBar",
+					Vector3.new(0.35, 0.35, len),
+					CFrame.lookAt(mid, mid + dir),
+					IRON,
+					Enum.Material.Metal
+				)
+			end
+			for k = 1, 4 do
+				local t = k / 5
+				local pos = a:Lerp(b, t)
+					+ out * 0.55
+					+ Vector3.new(0, 4.3 - math.sin(t * math.pi) * 1.2, 0)
+				local cf = CFrame.lookAt(pos, pos + dir) * CFrame.Angles(0, 0, k % 2 * math.pi / 2)
+				deco("RailChain", Vector3.new(0.18, 0.4, 0.75), cf, IRON, Enum.Material.Metal)
+			end
+		end
+		local xs = { 6, 12.5, 19, 25.5, edge }
+		for _, s in ipairs({ -1, 1 }) do
+			for _, zs in ipairs({ mz - edge, mz + edge }) do
+				for i = 1, #xs - 1 do
+					span(s * xs[i], zs, s * xs[i + 1], zs)
+				end
+			end
+			for k = -4, 3 do
+				span(s * edge, mz + k * 8, s * edge, mz + k * 8 + 8)
+			end
+		end
+	end
+
+	-- ---------------------------------------------------------------- the timber gallery along the west wall
+	-- a deck 2 blocks up (beams 8 … 9, planks to 9.6: 8 studs clear under it) on oak posts, railed, two ladders on
+	-- the pit side, lanterns, crates of ore, a chest, a tool rack and a winch with its boom out over the pit rim. It
+	-- stands on the longest run of rows where both cells (x −46, −42) are open floor off the trail with ≥ 8 studs
+	-- over the deck, and never where a wall torch would poke into it.
+	local avoid = {} -- zone boxes { x0, x1, y0, y1, z0, z1 } the wall ore keeps out of
+	local function gallery()
+		local X_OUT, X_IN, DECK = -48, -42.5, 9.6
+		local clash = {}
+		for _, dz in ipairs({ -24, 0, 24 }) do
+			local face = wallFace(0, M2.cz + dz, -1)
+			if face and face + 2 > X_OUT then
+				table.insert(clash, M2.cz + dz)
+			end
+		end
+		local function ok(zc)
+			for _, tz in ipairs(clash) do
+				if math.abs(zc - tz) < 4 then
+					return false
+				end
+			end
+			for _, x in ipairs({ -46, -42 }) do
+				local c = cellAtPos(x, zc)
+				if
+					not c
+					or c.shape ~= "cave2"
+					or c.hole
+					or c.path
+					or c.floor ~= 0
+					or c.ceil < DECK + 8
+				then
+					return false
+				end
+			end
+			return true
+		end
+		local bestA, bestN, runA, runN = nil, 0, nil, 0
+		for zc = M2.cz + 38, M2.cz - 38, -4 do -- row centres, south → north
+			if ok(zc) then
+				runA = if runN == 0 then zc else runA
+				runN += 1
+				if runN > bestN then
+					bestA, bestN = runA, runN
+				end
+			else
+				runN = 0
+			end
+		end
+		if bestN < 5 then
+			warn("[build-basement] the ore cave has no room for the gallery")
+			return
+		end
+		local zS, zN = bestA + 2, bestA - 4 * bestN + 2 -- the deck's south and north ends
+		local len, zm = zS - zN, (zS + zN) / 2
+		local function clear(x, z, h)
+			for _, r in ipairs(blocked) do
+				if x + h > r[1] and x - h < r[2] and z + h > r[3] and z - h < r[4] then
+					return false
+				end
+			end
+			return true
+		end
+		-- the ladders (invisible trusses + a ladder plate like the pits), one near each end, clear of old props
+		local ladders = {}
+		for _, e in ipairs({ { zS - 2.5, -1 }, { zN + 2.5, 1 } }) do
+			for k = 0, 4 do
+				local zl = e[1] + e[2] * k * 2
+				if clear(X_IN + 1, zl, 1.2) then
+					table.insert(ladders, zl)
+					break
+				end
+			end
+		end
+		local ladderTexture = textures and textures.textures and textures.textures.ladder
+		for _, zl in ipairs(ladders) do
+			local truss = Instance.new("TrussPart")
+			truss.Name = "GalleryLadder"
+			truss.Size = Vector3.new(2, 10, 2)
+			truss.CFrame = at(X_IN + 1, 5, zl)
+			truss.Anchored = true
+			truss.Transparency = 1
+			truss.Parent = up
+			local plate =
+				deco("GalleryLadderFace", Vector3.new(0.2, 10, 2), at(X_IN + 2.05, 5, zl), WOOD)
+			plate.Transparency = 1
+			if ladderTexture then
+				local t = Instance.new("Texture")
+				t.Texture = ladderTexture
+				t.Face = Enum.NormalId.Right
+				t.StudsPerTileU, t.StudsPerTileV = 2, 2
+				t.Parent = plate
+			end
+			for _, dz in ipairs({ -1.05, 1.05 }) do
+				deco(
+					"GalleryLadderRail",
+					Vector3.new(0.3, 10.4, 0.3),
+					at(X_IN + 2.05, 5.2, zl + dz),
+					WOOD,
+					Enum.Material.Wood
+				)
+			end
+		end
+		-- posts (skipped where an old prop stands), knee braces, beams, the deck
+		local n = math.max(2, math.floor(len / 7 + 0.5)) + 1
+		for i = 0, n - 1 do
+			local z0 = zS - 0.6 - (len - 1.2) * i / (n - 1)
+			for _, x in ipairs({ X_OUT + 0.6, X_IN - 0.6 }) do
+				local zp = nil
+				for _, dz in ipairs({ 0, -1.5, 1.5, -3, 3 }) do
+					if
+						not zp
+						and z0 + dz <= zS - 0.6
+						and z0 + dz >= zN + 0.6
+						and clear(x, z0 + dz, 0.7)
+					then
+						zp = z0 + dz
+					end
+				end
+				if zp then
+					textured(solid("GalleryPost", Vector3.new(1, 8, 1), at(x, 4, zp)), "px_oak_log")
+					for _, s in ipairs({ -1, 1 }) do
+						local p0, p1 = at(x, 6.2, zp).Position, at(x, 8, zp + s * 1.8).Position
+						if zp + s * 1.8 < zS and zp + s * 1.8 > zN then
+							textured(
+								deco(
+									"GalleryBrace",
+									Vector3.new(0.5, 0.5, (p1 - p0).Magnitude + 0.4),
+									CFrame.lookAt((p0 + p1) / 2, p1),
+									WOOD
+								),
+								"px_oak_log"
+							)
+						end
+					end
+				end
+			end
+		end
+		for _, x in ipairs({ X_OUT + 0.6, X_IN - 0.6 }) do
+			textured(solid("GalleryBeam", Vector3.new(1, 1, len), at(x, 8.5, zm)), "px_oak_log")
+		end
+		local k = 0
+		for z = zS, zN + 1, -2 do
+			k += 1
+			local z1 = math.max(zN, z - 2)
+			local plank = solid(
+				"GalleryDeck",
+				Vector3.new(X_IN - X_OUT, 0.6, z - z1),
+				at((X_OUT + X_IN) / 2, DECK - 0.3, (z + z1) / 2)
+			)
+			textured(plank, if k % 2 == 0 then "px_spruce_planks" else "px_planks")
+		end
+		-- railings: round the deck, open at the ladders
+		local function railLine(ax, az, bx, bz)
+			local a, b = at(ax, DECK, az).Position, at(bx, DECK, bz).Position
+			local d = (b - a).Magnitude
+			if d < 0.8 then
+				return
+			end
+			local m = math.max(1, math.ceil(d / 4))
+			for i = 0, m do
+				solid(
+					"GalleryRailPost",
+					Vector3.new(0.45, 3.2, 0.45),
+					CFrame.new(a:Lerp(b, i / m) + Vector3.new(0, 1.6, 0)),
+					WOOD,
+					Enum.Material.Wood
+				)
+			end
+			for _, y in ipairs({ 1.5, 3.05 }) do
+				local mid = (a + b) / 2 + Vector3.new(0, y, 0)
+				solid(
+					"GalleryRail",
+					Vector3.new(0.35, 0.35, d),
+					CFrame.lookAt(mid, mid + (b - a)),
+					WOOD,
+					Enum.Material.Wood
+				)
+			end
+		end
+		local xi, xo = X_IN - 0.25, X_OUT + 0.25
+		railLine(xo, zS - 0.25, xo, zN + 0.25)
+		railLine(xo + 0.45, zS - 0.25, xi - 0.45, zS - 0.25)
+		railLine(xo + 0.45, zN + 0.25, xi - 0.45, zN + 0.25)
+		local zTop = zS - 0.25
+		table.sort(ladders, function(p, q)
+			return p > q
+		end)
+		for _, zl in ipairs(ladders) do
+			railLine(xi, zTop, xi, zl + 1.4)
+			zTop = zl - 1.4
+		end
+		railLine(xi, zTop, xi, zN + 0.25)
+		-- lanterns on hooks over the inner rail (the middle one lit)
+		local zW = zS - math.max(6, len * 0.15)
+		for _, z in ipairs({ zS - len * 0.22, zm, zN + len * 0.22 }) do
+			local room = math.abs(z - zW) > 3
+			for _, zl in ipairs(ladders) do
+				room = room and math.abs(z - zl) > 2
+			end
+			if room then
+				deco(
+					"LanternArm",
+					Vector3.new(1.2, 0.2, 0.2),
+					at(xi + 0.55, DECK + 3.35, z),
+					IRON,
+					Enum.Material.Metal
+				)
+				lantern(at(xi + 1.05, DECK + 2.3, z).Position, if z == zm then 18 else nil)
+			end
+		end
+		-- crates of ore against the outer rail, an open chest, gold, a tool rack
+		for _, c in ipairs({
+			{ zS - math.max(10, len * 0.3), 2.4 },
+			{ zS - math.max(10, len * 0.3) - 2.7, 2 },
+			{ zN + len * 0.13, 2.2 },
+		}) do
+			crate(X_OUT + 1.9, DECK, c[1], c[2])
+			for _ = 1, 3 do
+				local s = rng:NextNumber(0.6, 0.9)
+				local cf = at(
+					X_OUT + 1.9 + rng:NextNumber(-0.5, 0.5),
+					DECK + c[2] + s * 0.35,
+					c[1] + rng:NextNumber(-0.5, 0.5)
+				) * CFrame.Angles(0, rng:NextNumber(0, 6.28), rng:NextNumber(-0.3, 0.3))
+				textured(
+					deco("CrateOre", Vector3.new(s, s, s), cf, STONE),
+					TREASURE[rng:NextInteger(1, #TREASURE)]
+				)
+			end
+		end
+		goldHeap(X_IN - 1.4, DECK, zm - 6, 10)
+		if len >= 28 then -- room for a chest and a tool rack too
+			chest(X_OUT + 1.7, DECK, zm - 2, 0, zm - 2)
+			toolRack(
+				CFrame.lookAt(
+					at(X_OUT + 0.9, DECK, zN + len * 0.25).Position,
+					at(0, DECK, zN + len * 0.25).Position
+				)
+			)
+		end
+		-- the winch: an A-frame on the deck, a boom out over the pit rim, a pulley, the rope and a bucket of ore
+		local apex = at(X_IN - 0.3, DECK + 5.6, zW).Position
+		for _, s in ipairs({ -1.8, 1.8 }) do
+			local foot = at(X_IN - 1.2, DECK, zW + s).Position
+			textured(
+				deco(
+					"WinchLeg",
+					Vector3.new(0.7, 0.7, (apex - foot).Magnitude + 0.3),
+					CFrame.lookAt((foot + apex) / 2, apex),
+					WOOD
+				),
+				"px_oak_log"
+			)
+		end
+		local tip = at(-27, DECK + 5.6, zW).Position
+		textured(
+			deco(
+				"WinchBoom",
+				Vector3.new(0.8, 0.8, (tip - apex).Magnitude + 0.8),
+				CFrame.lookAt((apex + tip) / 2, tip),
+				WOOD
+			),
+			"px_oak_log"
+		)
+		local wheel = deco(
+			"Pulley",
+			Vector3.new(0.4, 1.6, 1.6),
+			CFrame.new(tip - Vector3.new(0, 0.9, 0)) * CFrame.Angles(0, math.pi / 2, 0),
+			IRON,
+			Enum.Material.Metal
+		)
+		wheel.Shape = Enum.PartType.Cylinder
+		local ropeTop, ropeEnd =
+			tip + Vector3.new(0.75, -0.9, 0), at(-26.25, DECK - 1.2, zW).Position
+		deco(
+			"WinchRope",
+			Vector3.new(0.15, (ropeTop - ropeEnd).Magnitude, 0.15),
+			CFrame.new((ropeTop + ropeEnd) / 2),
+			Color3.fromRGB(150, 120, 80),
+			Enum.Material.Fabric
+		)
+		deco(
+			"WinchBucket",
+			Vector3.new(1.4, 1.2, 1.4),
+			CFrame.new(ropeEnd - Vector3.new(0, 0.6, 0)),
+			IRON,
+			Enum.Material.Metal
+		)
+		textured(
+			deco(
+				"WinchLoad",
+				Vector3.new(1.2, 0.4, 1.2),
+				CFrame.new(ropeEnd + Vector3.new(0, 0.05, 0)),
+				STONE
+			),
+			"px_gold_block"
+		)
+		local drum = deco(
+			"WinchDrum",
+			Vector3.new(2.6, 1.2, 1.2),
+			at(X_IN - 2.6, DECK + 1.2, zW) * CFrame.Angles(0, math.pi / 2, 0),
+			WOOD
+		)
+		drum.Shape = Enum.PartType.Cylinder
+		textured(drum, "px_oak_log")
+		for _, s in ipairs({ -1.5, 1.5 }) do
+			deco(
+				"WinchTrestle",
+				Vector3.new(0.4, 1.4, 0.4),
+				at(X_IN - 2.6, DECK + 0.7, zW + s),
+				WOOD,
+				Enum.Material.Wood
+			)
+		end
+		deco(
+			"WinchCrank",
+			Vector3.new(0.25, 0.25, 1.2),
+			at(X_IN - 2.6, DECK + 1.6, zW + 2.1) * CFrame.Angles(0.6, 0, 0),
+			IRON,
+			Enum.Material.Metal
+		)
+		local dTop = at(X_IN - 2.6, DECK + 1.8, zW).Position
+		deco(
+			"WinchRope",
+			Vector3.new(0.15, 0.15, (apex - dTop).Magnitude),
+			CFrame.lookAt((apex + dTop) / 2, apex),
+			Color3.fromRGB(150, 120, 80),
+			Enum.Material.Fabric
+		)
+		-- the other solid props keep off it; the wall ore keeps out of its volume
+		keep((X_OUT + X_IN + 2) / 2, zm, (X_IN + 2 - X_OUT) / 2, len / 2)
+		table.insert(avoid, { X_OUT - 1.3, X_IN + 2.6, 7.2, DECK + 6.5, zN - 0.5, zS + 0.5 })
+	end
+
+	-- ---------------------------------------------------------------- treasure on the floor of the ore cave
+	local function treasures()
+		-- ore carts on a short track south of the buyer's stall
+		local tx, tz = place(45, M2.cz + 17, 2.2, 6.5, CAVE2, 7)
+		if tx then
+			for _, s in ipairs({ -0.75, 0.75 }) do
+				deco(
+					"TrackRail",
+					Vector3.new(0.25, 0.2, 13),
+					at(tx + s, 0.1, tz),
+					IRON,
+					Enum.Material.Metal
+				)
+			end
+			for i = 0, 8 do
+				textured(
+					deco(
+						"TrackSleeper",
+						Vector3.new(2.4, 0.2, 0.6),
+						at(tx, 0.05, tz - 6 + i * 1.5),
+						WOOD
+					),
+					"px_spruce_planks"
+				)
+			end
+			textured(
+				solid("TrackStop", Vector3.new(2.6, 1.2, 0.8), at(tx, 0.6, tz - 6.2), WOOD),
+				"px_oak_log"
+			)
+			for i, load in ipairs({ "px_diamond_block", "px_gold_block" }) do
+				local z = tz + (if i == 1 then -2.8 else 2.8)
+				minecart(tx, z, 0, load)
+				for _ = 1, 3 do
+					local s = rng:NextNumber(0.7, 1)
+					local cf = at(
+						tx + rng:NextNumber(-0.7, 0.7),
+						3 + s * 0.3,
+						z + rng:NextNumber(-1, 1)
+					) * CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 6.28), 0)
+					textured(
+						deco("CartOre", Vector3.new(s, s, s), cf, STONE),
+						if rng:NextNumber() < 0.5
+							then load
+							else TREASURE[rng:NextInteger(1, #TREASURE)]
+					)
+				end
+			end
+		end
+		-- the assay table by the buyer: scales with ore in the pans, a ledger, coins, a candle
+		local ax, az, af = place(46.5, M2.cz + 8.5, 1.5, 2.1, CAVE2, 7)
+		if ax then
+			textured(
+				solid("AssayTable", Vector3.new(2.6, 0.35, 4), at(ax, af + 2.6, az), WOOD),
+				"px_dark_oak_planks"
+			)
+			for _, d in ipairs({
+				{ -1.05, -1.75 },
+				{ 1.05, -1.75 },
+				{ -1.05, 1.75 },
+				{ 1.05, 1.75 },
+			}) do
+				solid(
+					"AssayLeg",
+					Vector3.new(0.35, 2.43, 0.35),
+					at(ax + d[1], af + 1.21, az + d[2]),
+					WOOD,
+					Enum.Material.Wood
+				)
+			end
+			deco(
+				"ScaleFoot",
+				Vector3.new(0.8, 0.2, 0.8),
+				at(ax, af + 2.88, az - 0.6),
+				IRON,
+				Enum.Material.Metal
+			)
+			deco(
+				"ScalePost",
+				Vector3.new(0.15, 1.6, 0.15),
+				at(ax, af + 3.75, az - 0.6),
+				GOLD,
+				Enum.Material.Metal
+			)
+			deco(
+				"ScaleBeam",
+				Vector3.new(0.12, 0.12, 2.3),
+				at(ax, af + 4.5, az - 0.6) * CFrame.Angles(0.12, 0, 0),
+				GOLD,
+				Enum.Material.Metal
+			)
+			for _, s in ipairs({ -1, 1 }) do
+				local pz, py = az - 0.6 + s * 1.05, af + 3.25 - s * 0.13
+				deco(
+					"ScaleString",
+					Vector3.new(0.05, 1.25, 0.05),
+					at(ax, py + 0.62, pz),
+					IRON,
+					Enum.Material.Metal
+				)
+				local pan = deco(
+					"ScalePan",
+					Vector3.new(0.12, 1, 1),
+					at(ax, py, pz) * CFrame.Angles(0, 0, math.pi / 2),
+					GOLD,
+					Enum.Material.Metal
+				)
+				pan.Shape = Enum.PartType.Cylinder
+				textured(
+					deco("ScaleOre", Vector3.new(0.4, 0.4, 0.4), at(ax, py + 0.26, pz), STONE),
+					if s < 0 then "px_diamond_block" else "px_lapis_block"
+				)
+			end
+			deco(
+				"Ledger",
+				Vector3.new(1.1, 0.2, 0.8),
+				at(ax - 0.3, af + 2.88, az + 1.1) * CFrame.Angles(0, 0.2, 0),
+				Color3.fromRGB(110, 40, 35),
+				Enum.Material.Fabric
+			)
+			deco(
+				"LedgerPage",
+				Vector3.new(1, 0.05, 0.7),
+				at(ax - 0.3, af + 3, az + 1.1) * CFrame.Angles(0, 0.2, 0),
+				PAPER
+			)
+			for i = 0, 2 do
+				local coins = deco(
+					"CoinStack",
+					Vector3.new(0.3 + i * 0.15, 0.45, 0.45),
+					at(ax + 0.6, af + 2.93 + i * 0.075, az + 0.2 + i * 0.5)
+						* CFrame.Angles(0, 0, math.pi / 2),
+					GOLD,
+					Enum.Material.Metal
+				)
+				coins.Shape = Enum.PartType.Cylinder
+			end
+			deco(
+				"Candle",
+				Vector3.new(0.3, 0.7, 0.3),
+				at(ax + 0.8, af + 3.13, az + 1.5),
+				Color3.fromRGB(238, 228, 200)
+			)
+			local flame = deco(
+				"CandleFlame",
+				Vector3.new(0.2, 0.35, 0.2),
+				at(ax + 0.8, af + 3.65, az + 1.5),
+				TORCH,
+				Enum.Material.Neon
+			)
+			light(flame, 10, 0.6, TORCH)
+			pickaxe(at(ax, af + 1.25, az + 2.45) * CFrame.Angles(-0.2, 0, 0), GOLD)
+			goldHeap(ax + 0.2, af, az + 0.2, 6) -- the nuggets the buyer weighed, swept under the table
+		end
+		-- open chests: by the tunnel mouth and by the collapsed shaft
+		for _, c in ipairs({
+			{ -17, M2.cz + 45, 1.8, 1.2, -17, M2.cz },
+			{ 42.5, M2.cz - 8, 1.2, 1.8, 0, M2.cz - 8 },
+		}) do
+			local x, z, f = place(c[1], c[2], c[3], c[4], CAVE2, 6)
+			if x then
+				chest(x, f, z, x + (c[5] - c[1]), z + (c[6] - c[2]))
+			end
+		end
+		-- gold heaps in the corners (decor: only off the trail)
+		for _, h in ipairs({ { -16, M2.cz - 42 }, { 46, M2.cz - 3 } }) do
+			local c = cellAtPos(h[1], h[2])
+			if c and (c.shape == "cave2" or c.shape == "shaft") and not c.path and not c.hole then
+				goldHeap(h[1], c.floor, h[2], 12)
+			end
+		end
+	end
+
+	-- ---------------------------------------------------------------- the gate of the ore mine (tunnel 2)
+	-- stone jambs on the real wall faces, a lintel wall up to the vault, the raised portcullis hanging in it (decor,
+	-- its spikes stay ≥ 8.6 above the floor), the sign «Рудная шахта», a red «PvP» on each jamb, a lantern
+	local function gate()
+		local gx, gz = linePoint(SHAPE.tunnel2.pts, 0.8)
+		gz = 4 * math.floor(gz / 4) + 2 -- a row centre: the jambs stand on one row of cells
+		local left, right = wallFace(gx, gz, -1), wallFace(gx, gz, 1)
+		if not left or not right or right - left < 14 then
+			return
+		end
+		local function ceilAt(x)
+			local c = cellAtPos(x, gz)
+			return if c then c.ceil else 12
+		end
+		local J = 3
+		local o0, o1 = left + J, right - J -- the opening
+		local lb = 11 -- the lintel's underside
+		for x = left + 2, right - 2, 4 do
+			if ceilAt(x) < lb + 1 then
+				lb = 10
+			end
+		end
+		local GATE_T = Color3.fromRGB(170, 164, 158)
+		for _, s in ipairs({ { left, o0, 1 }, { o1, right, -1 } }) do
+			local x0, x1, inward = s[1], s[2], s[3]
+			local xe = if inward > 0 then x1 else x0 -- the jamb's face to the opening
+			local xc = (x0 + x1) / 2
+			box(
+				"GateFoot",
+				math.min(x0, xe + inward * 0.5),
+				0,
+				gz - 2.2,
+				math.max(x1, xe + inward * 0.5),
+				1.6,
+				gz + 2.2,
+				"px_mossy_cobblestone",
+				GATE_T,
+				up
+			)
+			box(
+				"GateJamb",
+				x0,
+				1.6,
+				gz - 1.8,
+				x1,
+				ceilAt(xc),
+				gz + 1.8,
+				"px_stone_bricks",
+				GATE_T,
+				up
+			)
+			for y = 2.6, lb - 2.5, 3 do -- quoins: smooth blocks standing out of the jamb's edge
+				box(
+					"GateQuoin",
+					math.min(xe - inward * 1.2, xe + inward * 0.3),
+					y,
+					gz - 1.95,
+					math.max(xe - inward * 1.2, xe + inward * 0.3),
+					y + 1.5,
+					gz + 1.95,
+					"px_smooth_stone",
+					nil,
+					up
+				)
+			end
+			box(
+				"GateCorbel",
+				math.min(xe, xe + inward * 1.5),
+				lb - 1.4,
+				gz - 1.6,
+				math.max(xe, xe + inward * 1.5),
+				lb,
+				gz + 1.6,
+				"px_smooth_stone",
+				nil,
+				up
+			)
+			for _, y in ipairs({ 3.4, 8.2 }) do
+				deco(
+					"GateBand",
+					Vector3.new(J - 1.4, 0.35, 0.15),
+					at(xc - inward * 0.6, y, gz + 1.88),
+					IRON,
+					Enum.Material.Metal
+				)
+			end
+			-- the red warning at eye level
+			local plaque = deco(
+				"GatePvp",
+				Vector3.new(2.4, 1.3, 0.2),
+				CFrame.lookAt(at(xc, 5.6, gz + 2.05).Position, at(xc, 5.6, gz + 9).Position),
+				Color3.fromRGB(45, 30, 26),
+				Enum.Material.Wood
+			)
+			boardText(plaque, "PvP", Color3.fromRGB(255, 55, 45))
+			-- a lantern on a bracket (only the west one lit)
+			deco(
+				"GateBracket",
+				Vector3.new(0.3, 0.3, 1.2),
+				at(xc, 9.4, gz + 2.4),
+				IRON,
+				Enum.Material.Metal
+			)
+			lantern(at(xc, 8.5, gz + 2.9).Position, if inward > 0 then 18 else nil)
+		end
+		-- the lintel: 2-stud blocks from its underside to the vault, a keystone in the middle
+		local mid = (o0 + o1) / 2
+		local x, k = o0, 0
+		while x < o1 - 0.01 do
+			local x2 = math.min(o1, x + 2)
+			local xm = (x + x2) / 2
+			local isKey = math.abs(xm - mid) < 1.01
+			k += 1
+			if isKey then
+				box(
+					"GateKeystone",
+					x,
+					lb - 0.6,
+					gz - 2,
+					x2,
+					math.max(ceilAt(x + 0.01), ceilAt(x2 - 0.01)),
+					gz + 2,
+					"px_smooth_stone",
+					nil,
+					up
+				)
+			else
+				box(
+					"GateLintel",
+					x,
+					lb,
+					gz - 1.6,
+					x2,
+					math.max(ceilAt(x + 0.01), ceilAt(x2 - 0.01)),
+					gz + 1.6,
+					"px_stone_bricks",
+					if k % 2 == 0 then GATE_T else Color3.fromRGB(150, 145, 140),
+					up
+				)
+			end
+			x = x2
+		end
+		-- the portcullis, raised: its lower edge and spikes show under the lintel
+		local pb = math.max(lb - 1.8, 8.9)
+		for _, y in ipairs({ pb + 0.35, lb - 0.25 }) do
+			deco(
+				"PortcullisBar",
+				Vector3.new(o1 - o0 - 0.6, 0.3, 0.3),
+				at(mid, y, gz),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		for bx = o0 + 0.6, o1 - 0.6, 1.4 do
+			deco(
+				"PortcullisRod",
+				Vector3.new(0.3, lb + 0.8 - pb, 0.3),
+				at(bx, (pb + lb + 0.8) / 2, gz),
+				IRON,
+				Enum.Material.Metal
+			)
+			deco(
+				"PortcullisSpike",
+				Vector3.new(0.3, 0.3, 0.3),
+				at(bx, pb - 0.05, gz) * CFrame.Angles(0, 0, math.pi / 4),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		-- the sign over the opening, facing whoever comes from cave 1
+		local by = math.min(lb + 1.5, ceilAt(mid) - 1.3)
+		local board = deco(
+			"GateSign",
+			Vector3.new(math.min(11, o1 - o0 - 4), 2.2, 0.3),
+			CFrame.lookAt(at(mid, by, gz + 2.2).Position, at(mid, by, gz + 10).Position),
+			WOOD
+		)
+		textured(board, "px_dark_oak_planks")
+		boardText(board, "Рудная шахта", Color3.fromRGB(255, 205, 90))
+		keep((left + right) / 2, gz, (right - left) / 2, 2.5)
+	end
+
+	-- ---------------------------------------------------------------- cover to fight round in both mine caves
+	local function pillar(x, f, z, s)
+		local base = at(x, f, z)
+			* CFrame.Angles(0, if s < 1 then 0 else rng:NextNumber(-0.3, 0.3), 0)
+		textured(
+			solid("PillarBase", Vector3.new(4.2, 1, 4.2) * s, base * CFrame.new(0, 0.5 * s, 0)),
+			"px_stone_bricks",
+			Color3.fromRGB(170, 166, 160)
+		)
+		local y = s
+		for i, h in ipairs({ 2.6, 2.2, 1.6 }) do
+			local cf = base
+				* CFrame.new(
+					rng:NextNumber(-0.15, 0.15),
+					y + h * s / 2,
+					rng:NextNumber(-0.15, 0.15)
+				)
+				* CFrame.Angles(0, rng:NextNumber(-0.12, 0.12), if i == 3 then 0.14 else 0)
+			local v = if rng:NextNumber() < 0.35 then "px_mossy_stone_bricks" else "px_stone_bricks"
+			textured(
+				solid("PillarDrum", Vector3.new(3.2, h, 3.2) * s, cf, STONE),
+				v,
+				Color3.fromRGB(196, 192, 186)
+			)
+			y += h * s
+		end
+		for _ = 1, 6 do -- the broken top lies round its foot
+			local r = rng:NextNumber(0.6, 1.1)
+			local cf = base
+				* CFrame.new(rng:NextNumber(-2.4, 2.4) * s, r / 2, rng:NextNumber(-2.4, 2.4) * s)
+				* CFrame.Angles(rng:NextNumber(-0.4, 0.4), rng:NextNumber(0, 6.28), 0)
+			textured(
+				deco("PillarRubble", Vector3.new(r, r, r), cf, STONE),
+				if rng:NextNumber() < 0.5 then "px_stone_bricks" else "px_cobblestone"
+			)
+		end
+	end
+	local function outcrop(x, f, z, s)
+		local vs =
+			{ "px_stone", "px_cobblestone", "px_mossy_cobblestone", "px_stone", "px_coal_ore" }
+		local yaw = if s < 1 then 0 else rng:NextNumber(-0.4, 0.4)
+		-- { dx, dz, size, height, y0 }
+		for _, b in ipairs({
+			{ 0, 0, 3.4, 3, 0 },
+			{ 1.1, 0.6, 2.4, 2.4, 0 },
+			{ -1.1, -0.5, 2.6, 2.2, 0 },
+			{ 0.2, 0.1, 2.4, 2, 2.6 },
+			{ -0.5, 0.6, 1.6, 1.4, 4.2 },
+		}) do
+			local cf = at(x, f, z)
+				* CFrame.Angles(0, yaw, 0)
+				* CFrame.new(b[1] * s, (b[5] + b[4] / 2) * s, b[2] * s)
+				* CFrame.Angles(
+					rng:NextNumber(-0.1, 0.1),
+					rng:NextNumber(-0.4, 0.4),
+					rng:NextNumber(-0.1, 0.1)
+				)
+			textured(
+				solid("Outcrop", Vector3.new(b[3], b[4], b[3] * 0.9) * s, cf, STONE),
+				vs[rng:NextInteger(1, #vs)],
+				WALL_TINT
+			)
+		end
+	end
+	local function crateStack(x, f, z, small)
+		if small then
+			crate(x - 0.9, f, z, 2.2)
+			crate(x + 1.2, f, z + 0.1, 1.8)
+			crate(x - 0.8, f + 2.2, z + 0.1, 1.8)
+		else
+			crate(x - 1, f, z - 0.5, 3)
+			crate(x + 1.6, f, z + 0.9, 2.6)
+			crate(x - 0.8, f + 3, z - 0.4, 2.4)
+		end
+	end
+	-- a cart lying on its side, its load spilt; yaw 0 = long side along z
+	local function toppledCart(x, f, z, yaw, load)
+		local base = at(x, f, z) * CFrame.Angles(0, yaw, 0)
+		local body = base * CFrame.new(0, 1.5, 0) * CFrame.Angles(0, 0, math.pi / 2)
+		solid(
+			"ToppledCart",
+			Vector3.new(3, 0.4, 3.6),
+			body * CFrame.new(0, -0.8, 0),
+			IRON,
+			Enum.Material.Metal
+		)
+		for _, sx in ipairs({ -1.4, 1.4 }) do
+			solid(
+				"ToppledCartSide",
+				Vector3.new(0.3, 1.6, 3.6),
+				body * CFrame.new(sx, 0, 0),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		for _, sz in ipairs({ -1.7, 1.7 }) do
+			solid(
+				"ToppledCartEnd",
+				Vector3.new(3, 1.6, 0.3),
+				body * CFrame.new(0, 0, sz),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		for _, wx in ipairs({ -1.2, 1.2 }) do
+			for _, wz in ipairs({ -1.2, 1.2 }) do
+				local wheel = deco(
+					"ToppledWheel",
+					Vector3.new(0.3, 1, 1),
+					body * CFrame.new(wx, -1.2, wz) * CFrame.Angles(0, 0, math.pi / 2),
+					DARK,
+					Enum.Material.Metal
+				)
+				wheel.Shape = Enum.PartType.Cylinder
+			end
+		end
+		for _ = 1, 7 do
+			local s = rng:NextNumber(0.6, 1.1)
+			local cf = base
+				* CFrame.new(-1.8 - rng:NextNumber(0, 1.8), s / 2 - 0.05, rng:NextNumber(-1.6, 1.6))
+				* CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 6.28), 0)
+			textured(
+				deco("SpiltLoad", Vector3.new(s, s, s), cf, STONE),
+				if rng:NextNumber() < 0.6 then load else "px_cobblestone"
+			)
+		end
+	end
+	local function cover()
+		-- { kind, x, z, hx, hz, shapes, head }
+		for _, c in ipairs({
+			{ "pillar", -54, M1.cz + 22, 2.7, 2.7, CAVE1, 9 },
+			{ "crates", -54, M1.cz - 16, 3.2, 2.6, CAVE1, 8 },
+			{ "outcrop", 54, M1.cz + 24, 2.9, 2.9, CAVE1, 8 },
+			{ "cart", -57.5, M1.cz + 14, 1.6, 2, CAVE1, 6 },
+			{ "pillar", -24, M2.cz - 42, 1.8, 1.8, CAVE2, 8 },
+			{ "outcrop", 20, M2.cz - 42, 2, 1.8, CAVE2, 7 },
+			{ "crates", -24, M2.cz + 42, 2.5, 1.8, CAVE2, 6 },
+			{ "cart", 20, M2.cz + 42, 2, 1.6, CAVE2, 6 },
+		}) do
+			local x, z, f = place(c[2], c[3], c[4], c[5], c[6], c[7])
+			if x then
+				local small = c[6] == CAVE2
+				if c[1] == "pillar" then
+					pillar(x, f, z, if small then 0.8 else 1)
+				elseif c[1] == "outcrop" then
+					outcrop(x, f, z, if small then 0.75 else 1)
+				elseif c[1] == "crates" then
+					crateStack(x, f, z, small)
+				else
+					toppledCart(
+						x,
+						f,
+						z,
+						if c[4] > c[5] then math.pi / 2 else 0,
+						if small then "px_lapis_block" else "px_gravel"
+					)
+				end
+			end
+		end
+	end
+
+	-- ---------------------------------------------------------------- the notice board in the arrival hall
+	-- on the east wall between the two pilasters by the exit arch (the buyer stands at the west wall): nailed
+	-- papers, crossed swords and a skull over it, a lantern; the hall's torch on the next pilaster lights it too
+	local function hallBoard()
+		local wx, zc, yc = HALL.x1, -8, 5.6
+		local function onWall(off, y, dz)
+			local p = at(wx - off, y, zc + dz).Position
+			return CFrame.lookAt(p, p - Vector3.new(1, 0, 0))
+		end
+		textured(
+			solid("NoticeBoard", Vector3.new(4.6, 5, 0.4), onWall(0.2, yc, 0)),
+			"px_spruce_planks"
+		)
+		for _, f in ipairs({
+			{ 0, 2.6, 5.2, 0.4 },
+			{ 0, -2.6, 5.2, 0.4 },
+			{ 2.4, 0, 0.4, 5.6 },
+			{ -2.4, 0, 0.4, 5.6 },
+		}) do
+			textured(
+				deco("NoticeFrame", Vector3.new(f[3], f[4], 0.5), onWall(0.3, yc + f[2], f[1])),
+				"px_dark_oak_planks"
+			)
+		end
+		local title =
+			deco("NoticeTitle", Vector3.new(4, 1.3, 0.05), onWall(0.43, yc + 1.55, 0), PAPER)
+		boardText(title, "ПОДВАЛ — PvP-ЗОНА", Color3.fromRGB(190, 25, 20))
+		local rules = deco(
+			"NoticeRules",
+			Vector3.new(3.6, 1.8, 0.05),
+			onWall(0.43, yc - 0.25, -0.15) * CFrame.Angles(0, 0, 0.02),
+			PAPER
+		)
+		boardText(
+			rules,
+			"При смерти всё из рюкзака выпадает. Броня и инструменты остаются.",
+			Color3.fromRGB(45, 32, 25)
+		)
+		local nails = { { 0, yc + 2.1 }, { -0.15, yc + 0.55 } }
+		for _, d in ipairs({ { -1.4, -1.9 }, { 0.1, -2 }, { 1.5, -1.85 } }) do
+			local tint = PAPER:Lerp(Color3.fromRGB(170, 150, 110), rng:NextNumber(0, 0.5))
+			deco(
+				"NoticeScrap",
+				Vector3.new(1.1, 1, 0.04),
+				onWall(0.42, yc + d[2], d[1]) * CFrame.Angles(0, 0, rng:NextNumber(-0.15, 0.15)),
+				tint
+			)
+			table.insert(nails, { d[1], yc + d[2] + 0.4 })
+		end
+		for _, nl in ipairs(nails) do
+			deco(
+				"Nail",
+				Vector3.new(0.15, 0.15, 0.12),
+				onWall(0.47, nl[2], nl[1]),
+				IRON,
+				Enum.Material.Metal
+			)
+		end
+		-- two swords crossed behind a skull over the board
+		local sy = yc + 5.2
+		for _, a in ipairs({ 0.7, -0.7 }) do
+			local cf = onWall(0.35, sy, 0) * CFrame.Angles(0, 0, a)
+			deco(
+				"BoardBlade",
+				Vector3.new(0.35, 4.2, 0.12),
+				cf * CFrame.new(0, 0.7, 0),
+				STEEL,
+				Enum.Material.Metal
+			)
+			deco(
+				"BoardGuard",
+				Vector3.new(1.5, 0.25, 0.2),
+				cf * CFrame.new(0, -1.45, 0),
+				GOLD,
+				Enum.Material.Metal
+			)
+			deco(
+				"BoardGrip",
+				Vector3.new(0.25, 1, 0.2),
+				cf * CFrame.new(0, -2.05, 0),
+				Color3.fromRGB(70, 45, 30),
+				Enum.Material.Wood
+			)
+			deco(
+				"BoardPommel",
+				Vector3.new(0.4, 0.4, 0.25),
+				cf * CFrame.new(0, -2.65, 0),
+				GOLD,
+				Enum.Material.Metal
+			)
+		end
+		local skull = deco(
+			"BoardSkull",
+			Vector3.new(1.2, 1.1, 1),
+			onWall(0.9, sy, 0),
+			Color3.fromRGB(226, 220, 198)
+		)
+		for _, s in ipairs({ -0.27, 0.27 }) do
+			deco(
+				"Eye",
+				Vector3.new(0.32, 0.32, 0.05),
+				skull.CFrame * CFrame.new(s, 0.1, -0.51),
+				Color3.fromRGB(25, 22, 20)
+			)
+		end
+		deco(
+			"Jaw",
+			Vector3.new(0.8, 0.3, 0.8),
+			skull.CFrame * CFrame.new(0, -0.65, -0.05),
+			Color3.fromRGB(215, 208, 186)
+		)
+		-- the lantern on an iron arm under the swords
+		deco(
+			"BoardArm",
+			Vector3.new(0.25, 0.25, 1.4),
+			onWall(0.9, yc + 4, 0),
+			IRON,
+			Enum.Material.Metal
+		)
+		lantern(onWall(1.5, yc + 3.1, 0).Position, 14)
+	end
+
+	-- ---------------------------------------------------------------- the ore in the treasury's rock
+	-- clusters of ore blocks set into every few faces of the rock round cave 2 (mostly inside the rock, standing out
+	-- 0.25 … 0.75), tiny glints on them, a few sparkles; four soft coloured lights from the richest walls
+	local function oreWalls()
+		local ORE = {
+			"px_gold_block",
+			"px_gold_block",
+			"px_lapis_block",
+			"px_lapis_block",
+			"px_iron_block",
+			"px_diamond_block",
+			"px_gold_ore",
+			"px_iron_ore",
+		}
+		local skip = {} -- { x, z, radius } the wall torches (built above), banners and shields
+		for _, dz in ipairs({ -24, 0, 24 }) do
+			for _, dir in ipairs({ -1, 1 }) do
+				local face = wallFace(0, M2.cz + dz, dir)
+				if face then
+					table.insert(skip, { face, M2.cz + dz, 2.6 })
+				end
+			end
+		end
+		for _, p in ipairs(placed) do
+			table.insert(skip, { p.X - BX, p.Z - BZ, 3.6 })
+		end
+		local function skipped(pos, s)
+			for _, k in ipairs(skip) do
+				if (pos.X - k[1]) ^ 2 + (pos.Z - k[2]) ^ 2 < k[3] ^ 2 then
+					return true
+				end
+			end
+			for _, a in ipairs(avoid) do
+				if
+					pos.X + s / 2 > a[1]
+					and pos.X - s / 2 < a[2]
+					and pos.Y + s / 2 > a[3]
+					and pos.Y - s / 2 < a[4]
+					and pos.Z + s / 2 > a[5]
+					and pos.Z - s / 2 < a[6]
+				then
+					return true
+				end
+			end
+			return false
+		end
+		local clusters = {}
+		for iz = 0, NZ - 1 do
+			for ix = 0, NX - 1 do
+				local c = cellAt(ix, iz)
+				if c and c.shape == "cave2" and not c.hole then
+					for _, d in ipairs(DIRS) do
+						if not cellAt(ix + d[1], iz + d[2]) and rng:NextNumber() < 0.62 then
+							local inward = Vector3.new(-d[1], 0, d[2])
+							local along = Vector3.new(d[2], 0, d[1])
+							local face = Vector3.new(c.x + d[1] * C / 2, 0, c.z - d[2] * C / 2)
+							local y0, y1 = c.floor + 3.4, math.min(c.ceil - 3.2, c.floor + 16)
+							if y1 > y0 + 2 then
+								local v = ORE[rng:NextInteger(1, #ORE)]
+								local cy, cl =
+									rng:NextNumber(y0 + 0.6, y1 - 0.6), rng:NextNumber(-0.8, 0.8)
+								local built = 0
+								for _ = 1, rng:NextInteger(3, 6) do
+									local s = ({ 1, 1.5, 2, 2 })[rng:NextInteger(1, 4)]
+									local lat = math.clamp(
+										cl + rng:NextNumber(-1.5, 1.5),
+										-(2 - s / 2),
+										2 - s / 2
+									)
+									local y = math.clamp(
+										cy + rng:NextNumber(-1.4, 1.4),
+										y0 + s / 2,
+										y1 - s / 2
+									)
+									local out = rng:NextNumber(0.25, 0.75)
+									local pos = face
+										+ along * lat
+										+ Vector3.new(0, y, 0)
+										+ inward * (out - s / 2)
+									if not skipped(pos, s) then
+										local variant = if rng:NextNumber() < 0.7
+											then v
+											else ORE[rng:NextInteger(1, #ORE)]
+										textured(
+											deco(
+												"WallOre",
+												Vector3.new(s, s, s),
+												at(pos.X, pos.Y, pos.Z),
+												STONE
+											),
+											variant
+										)
+										built += 1
+										if rng:NextNumber() < 0.55 then
+											local g = pos
+												+ inward * (s / 2 + 0.03)
+												+ along * rng:NextNumber(-s / 2 + 0.2, s / 2 - 0.2)
+												+ Vector3.new(
+													0,
+													rng:NextNumber(-s / 2 + 0.2, s / 2 - 0.2),
+													0
+												)
+											local gs = rng:NextNumber(0.2, 0.32)
+											deco(
+												"Glint",
+												Vector3.new(gs, gs, gs),
+												at(g.X, g.Y, g.Z),
+												SHINE[variant],
+												Enum.Material.Neon
+											)
+										end
+									end
+								end
+								if built > 0 then
+									table.insert(clusters, {
+										pos = face
+											+ Vector3.new(0, cy, 0)
+											+ along * cl
+											+ inward * 1.2,
+										inward = inward,
+										v = v,
+									})
+								end
+							end
+						end
+					end
+				end
+			end
+			if iz % 6 == 0 then
+				task.wait()
+			end
+		end
+		if #clusters == 0 then
+			return
+		end
+		-- sparkles drifting off five walls round the cave
+		for i = 1, 5 do
+			local cl = clusters[math.max(1, math.floor(i * #clusters / 6))]
+			local p = cl.pos - cl.inward * 0.9
+			local e = deco(
+				"Sparkles",
+				Vector3.new(3, 3, 0.5),
+				CFrame.lookAt(at(p.X, p.Y, p.Z).Position, at(p.X, p.Y, p.Z).Position + cl.inward),
+				STONE
+			)
+			e.Transparency = 1
+			local fx = Instance.new("ParticleEmitter")
+			fx.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			fx.Color = ColorSequence.new(SHINE[cl.v] or SHINE.px_gold_block)
+			fx.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(0.5, 0.3),
+				NumberSequenceKeypoint.new(1, 0),
+			})
+			fx.Rate = 2.5
+			fx.Lifetime = NumberRange.new(0.6, 1.2)
+			fx.Speed = NumberRange.new(0)
+			fx.LightEmission = 1
+			fx.Parent = e
+		end
+		-- four soft glows from the nearest ore: cool on the west and north, gold on the east and by the entrance
+		for _, g in ipairs({
+			{ -52, M2.cz - 10, Color3.fromRGB(90, 220, 255) },
+			{ -24, M2.cz - 44, Color3.fromRGB(90, 130, 255) },
+			{ 50, M2.cz + 14, Color3.fromRGB(255, 200, 90) },
+			{ -24, M2.cz + 44, Color3.fromRGB(255, 190, 80) },
+		}) do
+			local best, bd = nil, math.huge
+			for _, cl in ipairs(clusters) do
+				local d = (cl.pos.X - g[1]) ^ 2 + (cl.pos.Z - g[2]) ^ 2
+				if d < bd then
+					best, bd = cl, d
+				end
+			end
+			local glow = deco(
+				"OreGlow",
+				Vector3.new(0.5, 0.5, 0.5),
+				at(best.pos.X, best.pos.Y, best.pos.Z),
+				STONE
+			)
+			glow.Transparency = 1
+			light(glow, 22, 0.55, g[3])
+		end
+	end
+
+	-- ---------------------------------------------------------------- signs of past fights along the route
+	-- sparse, by the walls, never on the trail: remains of fallen prisoners (bones and a dropped pickaxe, a dented
+	-- helmet or a broken sword stuck in the floor), tally marks scratched into the wall, overturned crates
+	local function fights()
+		local spots, perShape = {}, {}
+		local left = { remains = 7, tally = 6, crate = 4 }
+		local KINDS = { "remains", "tally", "crate" }
+		local turn = 0
+		local function far(x, z)
+			for _, s in ipairs(spots) do
+				if (s[1] - x) ^ 2 + (s[2] - z) ^ 2 < 22 ^ 2 then
+					return false
+				end
+			end
+			return true
+		end
+		local function remains(x, f, z)
+			bones(x, f, z, 4)
+			local base = at(x, f, z) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0)
+			local r = rng:NextInteger(1, 3)
+			if r == 1 then
+				pickaxe(base * CFrame.new(1.4, 0.2, 0.6) * CFrame.Angles(math.pi / 2, 0, 0), STEEL)
+			elseif r == 2 then
+				local h = base * CFrame.new(-1.2, 0.45, 0.8) * CFrame.Angles(0.3, 0, 0.5)
+				deco("Helmet", Vector3.new(1.2, 0.9, 1.3), h, STEEL, Enum.Material.Metal)
+				deco(
+					"HelmetRim",
+					Vector3.new(1.4, 0.15, 1.5),
+					h * CFrame.new(0, -0.4, 0),
+					STEEL,
+					Enum.Material.Metal
+				)
+				deco(
+					"HelmetSlit",
+					Vector3.new(0.8, 0.1, 0.05),
+					h * CFrame.new(0, 0.05, -0.66),
+					Color3.fromRGB(25, 25, 28)
+				)
+			else
+				local sw = base * CFrame.new(0.8, 0, -1) * CFrame.Angles(0.25, 0, -0.2)
+				deco(
+					"BrokenBlade",
+					Vector3.new(0.35, 1.6, 0.12),
+					sw * CFrame.new(0, 0.5, 0),
+					STEEL,
+					Enum.Material.Metal
+				)
+				deco(
+					"SwordGuard",
+					Vector3.new(1.3, 0.22, 0.25),
+					sw * CFrame.new(0, 1.35, 0),
+					IRON,
+					Enum.Material.Metal
+				)
+				deco(
+					"SwordGrip",
+					Vector3.new(0.22, 0.9, 0.22),
+					sw * CFrame.new(0, 1.9, 0),
+					Color3.fromRGB(70, 45, 30),
+					Enum.Material.Wood
+				)
+				deco(
+					"SwordPommel",
+					Vector3.new(0.35, 0.35, 0.35),
+					sw * CFrame.new(0, 2.45, 0),
+					IRON,
+					Enum.Material.Metal
+				)
+				deco(
+					"BladeShard",
+					Vector3.new(0.3, 1, 0.1),
+					base * CFrame.new(-0.6, 0.06, 1.2) * CFrame.Angles(math.pi / 2, 0.6, 0),
+					STEEL,
+					Enum.Material.Metal
+				)
+			end
+			deco(
+				"Rag",
+				Vector3.new(1.6, 0.08, 1.2),
+				base * CFrame.new(0.2, 0.05, 1.5) * CFrame.Angles(0, 0.5, 0),
+				Color3.fromRGB(150, 130, 95),
+				Enum.Material.Fabric
+			)
+		end
+		local function tally(c, ix, iz)
+			for _, d in ipairs(DIRS) do
+				if not cellAt(ix + d[1], iz + d[2]) then
+					local inward = Vector3.new(-d[1], 0, d[2])
+					local along = Vector3.new(d[2], 0, d[1])
+					local origin = at(c.x + d[1] * C / 2, c.floor + 5.2, c.z - d[2] * C / 2).Position
+						+ inward * 0.06
+					for g = 0, rng:NextInteger(1, 2) do -- groups of five
+						local o = origin + along * (g * 1.8 - 1.4)
+						for i = 0, 3 do
+							local p = o + along * (i * 0.32)
+							deco(
+								"Tally",
+								Vector3.new(0.12, 1.3, 0.05),
+								CFrame.lookAt(p, p + inward)
+									* CFrame.Angles(0, 0, rng:NextNumber(-0.08, 0.08)),
+								Color3.fromRGB(38, 36, 34)
+							)
+						end
+						local p = o + along * 0.48
+						deco(
+							"Tally",
+							Vector3.new(0.12, 1.75, 0.05),
+							CFrame.lookAt(p, p + inward) * CFrame.Angles(0, 0, 1),
+							Color3.fromRGB(38, 36, 34)
+						)
+					end
+					return true
+				end
+			end
+			return false
+		end
+		local function overturned(x, f, z)
+			local base = at(x, f, z) * CFrame.Angles(0, rng:NextNumber(0, 6.28), 0)
+			textured(
+				solid(
+					"OverturnedCrate",
+					Vector3.new(2.6, 2.6, 2.6),
+					base * CFrame.new(0, 1.05, 0) * CFrame.Angles(math.pi / 2 + 0.35, 0, 0.1),
+					WOOD
+				),
+				"px_planks"
+			)
+			for i = 1, 2 do
+				textured(
+					deco(
+						"LoosePlank",
+						Vector3.new(2.4, 0.2, 0.7),
+						base * CFrame.new(1.8, 0.1, -0.8 + i * 0.9) * CFrame.Angles(0, 0.3 * i, 0),
+						WOOD
+					),
+					"px_planks"
+				)
+			end
+			textured(
+				deco(
+					"SpiltCoal",
+					Vector3.new(0.9, 0.9, 0.9),
+					base * CFrame.new(-1.6, 0.4, 0.5) * CFrame.Angles(0.3, 0.7, 0),
+					STONE
+				),
+				"px_coal_ore"
+			)
+		end
+		for iz = 0, NZ - 1 do
+			for ix = 0, NX - 1 do
+				local c = cellAt(ix, iz)
+				if
+					c
+					and ROUTE[c.shape]
+					and c.edge <= 2
+					and not c.path
+					and not c.hole
+					and c.z < -24
+					and (perShape[c.shape] or 0) < 3
+					and far(c.x, c.z)
+					and rng:NextNumber() < 0.07
+				then
+					turn = turn % 3 + 1
+					local kind = KINDS[turn]
+					local done = false
+					if left[kind] > 0 then
+						if kind == "remains" then
+							remains(c.x, c.floor, c.z)
+							done = true
+						elseif kind == "tally" then
+							done = c.edge == 1 and tally(c, ix, iz)
+						else
+							local f = free(c.x, c.z, 1.9, 1.9, ROUTE, 6)
+							if f then
+								keep(c.x, c.z, 2.4)
+								overturned(c.x, f, c.z)
+								done = true
+							end
+						end
+					end
+					if done then
+						left[kind] -= 1
+						perShape[c.shape] = (perShape[c.shape] or 0) + 1
+						table.insert(spots, { c.x, c.z })
+					end
+				end
+			end
+			if iz % 10 == 0 then
+				task.wait()
+			end
+		end
+	end
+
+	railing()
+	gallery()
+	treasures()
+	gate()
+	cover()
+	hallBoard()
+	oreWalls()
+	fights()
 end
 
 print(("[build-basement] built: %d parts"):format(#root:GetDescendants()))
