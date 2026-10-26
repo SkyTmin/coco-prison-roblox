@@ -69,6 +69,7 @@ end
 -- (cells are all rendered now; exposure tests were removed with the exposed-only rendering)
 
 local COLORS: { [string]: Color3 } = {
+	black_glass = Color3.fromRGB(34, 28, 42),
 	dirt = Color3.fromRGB(121, 85, 58),
 	sand = Color3.fromRGB(219, 207, 163),
 	gravel = Color3.fromRGB(131, 127, 126),
@@ -127,6 +128,7 @@ end
 local MATERIALS: { [string]: Enum.Material } = {
 	ice = Enum.Material.Ice,
 	packed_ice = Enum.Material.Glacier,
+	black_glass = Enum.Material.Glass, -- Врата края: чёрное стекло [меню] (no texture: dark glossy glass)
 }
 
 -- [владелец 23.10: «паутина как в майнкрафте, и персонаж застревает»] a cobweb cell is an invisible box with no
@@ -176,6 +178,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	green_wool = { base = "white_wool", color = Color3.fromRGB(96, 140, 40) },
 	-- Амбар: светильник Джека [меню] — the pumpkin tint, brighter (an own lit-face texture later)
 	jack_o_lantern = { base = "hay", color = Color3.fromRGB(255, 170, 60) },
+	-- Врата края: пурпурный цемент [меню]
+	magenta_concrete = { base = "smooth_stone", color = Color3.fromRGB(196, 64, 186) },
 }
 
 local function stylePart(part: BasePart, id: string)

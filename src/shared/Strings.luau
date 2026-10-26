@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_reaper = { -- [клиент] prison.classic.boss.reaper.notify.spawn
+		ru = "Холод смерти коснулся земли... Жнец пришёл за вашими душами!",
+		en = "The cold of death touched the earth... the Reaper has come for your souls!",
+		es = "El frío de la muerte tocó la tierra... ¡la Parca ha venido por vuestras almas!",
+		fr = "Le froid de la mort a touché la terre… la Faucheuse est venue pour vos âmes !",
+	},
 	boss_spawned_forest_guardian = { -- [клиент] prison.classic.boss.forest_guardian.notify.spawn
 		ru = "Корни земли пробудились — Древесный хранитель вышел на защиту леса!",
 		en = "The roots of the earth have awakened — the Forest Guardian has come out to defend the forest!",
