@@ -2289,7 +2289,9 @@ do
 
 	-- ---------------------------------------------------------------- the railing round the ore pit
 	-- replaces its log fence (pit() skips it for basement_ore): dark stone posts on cobble feet with gold caps, two
-	-- iron bars and a chain sagging between the caps; open north and south (|x| < 6) like the fence was
+	-- iron bars and a chain sagging between the caps; open north and south (|x| < 6) like the fence was, and east and
+	-- west across the middle (|z - mz| < 8): the buyer and the gallery stand outside the ring, and its corners leave
+	-- only ≈ 1 stud to the rock and the braziers (Studio 26.10: neither could be reached on foot)
 	local function railing()
 		local mz, edge = M2.cz, M2.w / 2 + 2 * B
 		local POST = Color3.fromRGB(96, 94, 102)
@@ -2301,8 +2303,10 @@ do
 			end
 		end
 		for k = -4, 4 do
-			table.insert(posts, { -edge, mz + k * 8 })
-			table.insert(posts, { edge, mz + k * 8 })
+			if k ~= 0 then
+				table.insert(posts, { -edge, mz + k * 8 })
+				table.insert(posts, { edge, mz + k * 8 })
+			end
 		end
 		for _, p in ipairs(posts) do
 			textured(
@@ -2315,9 +2319,11 @@ do
 				"px_stone_bricks",
 				POST
 			)
+			-- a darker gold: by the braziers the plain gold caps burned into yellow blobs (Studio 26.10)
 			textured(
 				solid("RailCap", Vector3.new(1.9, 0.6, 1.9), at(p[1], 4.7, p[2])),
-				"px_gold_block"
+				"px_gold_block",
+				Color3.fromRGB(205, 170, 96)
 			)
 		end
 		local function span(ax, az, bx, bz)
@@ -2355,7 +2361,9 @@ do
 				end
 			end
 			for k = -4, 3 do
-				span(s * edge, mz + k * 8, s * edge, mz + k * 8 + 8)
+				if k ~= -1 and k ~= 0 then
+					span(s * edge, mz + k * 8, s * edge, mz + k * 8 + 8)
+				end
 			end
 		end
 	end
