@@ -36,6 +36,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "Dispara flechas del inventario",
 		fr = "Tire les flèches de l'inventaire",
 	},
+	tip_shears = {
+		ru = "Быстро режет паутину, листву и шерсть",
+		en = "Quickly cuts cobwebs, leaves and wool",
+		es = "Corta rápido telarañas, hojas y lana",
+		fr = "Coupe vite les toiles, les feuilles et la laine",
+	},
 	bow_no_arrows = {
 		ru = "Нет стрел",
 		en = "No arrows",
@@ -2161,6 +2167,9 @@ local COUNTERS: { [string]: { [string]: string } } = {
 	["Оружейник"] = { en = "Armorer", es = "Armero", fr = "Armurier" },
 	["Дерево"] = { en = "Wood", es = "Madera", fr = "Bois" },
 	["Арбуз"] = { en = "Melon", es = "Sandía", fr = "Pastèque" },
+	["Белая шерсть"] = { en = "White wool", es = "Lana blanca", fr = "Laine blanche" },
+	["Паутина"] = { en = "Cobweb", es = "Telaraña", fr = "Toile d'araignée" },
+	["Убийства"] = { en = "Kills", es = "Bajas", fr = "Éliminations" },
 }
 local LOCATIONS: { [string]: { [string]: string } } = {
 	["Тюрьма"] = { en = "Prison", es = "Prisión", fr = "Prison" },

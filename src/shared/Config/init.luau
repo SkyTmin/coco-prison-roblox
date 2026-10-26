@@ -262,6 +262,19 @@ end
 -- [владелец 20.10] digging by hand / with the wrong tool is always allowed and the block still drops;
 -- it just takes the vanilla "wrong tool" time (pickaxe blocks: /100, e.g. stone by hand 7.5 s).
 local TICK = 0.05
+-- [ваниль] the shears' dig speed on a block (cobweb, *_leaves, *_wool), nil when shears do not help
+function Config.shearsSpeed(blockId: string): number?
+	local speeds = Config.vanilla.shearsSpeed
+	if blockId == "cobweb" then
+		return speeds.cobweb
+	elseif string.sub(blockId, -7) == "_leaves" then
+		return speeds.leaves
+	elseif string.sub(blockId, -5) == "_wool" then
+		return speeds.wool
+	end
+	return nil
+end
+
 function Config.breakTime(block: Block, toolId: string?, toolLevel: number, haste: number?): number?
 	if block.itemOnly then
 		return nil
@@ -272,7 +285,17 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number, hast
 	end
 	local speed = Config.vanilla.toolSpeed.hand
 	local canHarvest = true
-	if block.tool ~= "any" then
+	local shears = Config.shearsSpeed(block.id)
+	if toolId == "shears" and shears and toolLevel >= 1 then
+		-- shears: their own speed per block kind, Efficiency on top [ваниль]
+		speed = shears
+		local enchant = Config.enchantForLevel("shears", toolLevel)
+		if enchant > 0 then
+			speed += enchant * enchant + 1
+		end
+	elseif toolId == "sword" and block.id == "cobweb" then
+		speed = Config.vanilla.swordCobwebSpeed -- [ваниль] a sword cuts cobwebs fast
+	elseif block.tool ~= "any" then
 		if toolId == block.tool and toolLevel >= 1 then
 			local material = Config.materialForLevel(toolLevel)
 			speed = Config.vanilla.toolSpeed[material]

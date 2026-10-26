@@ -360,7 +360,7 @@
       "dropCount": null,
       "sellable": true,
       "itemOnly": false,
-      "upgradeCounter": null
+      "upgradeCounter": "Белая шерсть"
     },
     "cobweb": {
       "id": "cobweb",
@@ -373,7 +373,7 @@
       "dropCount": null,
       "sellable": true,
       "itemOnly": false,
-      "upgradeCounter": null
+      "upgradeCounter": "Паутина"
     },
     "ice": {
       "id": "ice",

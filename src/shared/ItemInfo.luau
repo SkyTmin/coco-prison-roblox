@@ -159,6 +159,11 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 		if id == "bow" then
 			-- a Minecraft bow shows no attack lines: the damage depends on the draw [ваниль]
 			add(t("tip_bow_arrows"), GRAY)
+		elseif id == "shears" then
+			add(t("tip_shears"), GRAY)
+			local speeds = vanilla.shearsSpeed
+			local bonus = if enchant > 0 then enchant * enchant + 1 else 0
+			add(" " .. t("tip_mining_speed", number(speeds.cobweb + bonus, locale)), DARK_GREEN)
 		elseif slot then
 			add(t("tip_on_body"), GRAY)
 			local points = vanilla.armorPoints[material] and vanilla.armorPoints[material][slot]

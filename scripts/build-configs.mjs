@@ -22,6 +22,7 @@ const armorWiki = read("wiki/client-audit/content-analysis/armor-and-axe-recover
 const bossWiki = read("wiki/client-audit/content-analysis/boss-menu-recovery.json");
 const sharesWiki = read("wiki/in-game-wiki/mine-shares.json");
 const bowWiki = read("wiki/in-game-wiki/bow-upgrades.json");
+const shearsWiki = read("wiki/in-game-wiki/shears-upgrades.json");
 
 // ---------------------------------------------------------------- levels
 const levels = levelsWiki.levels.map((l) => ({
@@ -44,6 +45,7 @@ const counterByBlock = {
 	sand: "Песок", gravel: "Гравий", dirt: "Земля", oak_log: "Дерево", melon: "Арбуз",
 	stone: "Камень", cobblestone: "Камень", coal_ore: "Каменный уголь", coal: "Каменный уголь",
 	iron_ore: "Железная руда", gold_ore: "Золотая руда",
+	white_wool: "Белая шерсть", cobweb: "Паутина", // the shears' requirements [меню 26.10, SHEARS-UPGRADES.md]
 };
 const blocks = {};
 const locations = [];
@@ -151,6 +153,13 @@ tools.bow = {
 	noMaterial: true,
 	upgrades: bowWiki.transitions.map((t) => ({ from: t.from, to: t.to, cost: t.cost, requirements: t.requirements, enchantAfter: t.power[1], flameAfter: t.flame[1], materialAfter: "wood" })),
 };
+// The shears [меню 26.10, SHEARS-UPGRADES.md]: 1 → 6, Efficiency I–V, no material; bought for 4 000 $.
+tools.shears = {
+	buyPrice: decisions.toolShop.shears,
+	enchant: "efficiency",
+	noMaterial: true,
+	upgrades: shearsWiki.upgrades.map((u) => ({ from: u.from, to: u.to, cost: u.cost, requirements: u.requirements, enchantAfter: u.enchantAfter, materialAfter: "wood" })),
+};
 // Sword upgrades beyond 12 need Оружейник from the sword table (field "Оружейник" is inside requirements already as a counter name).
 write("tools.json", {
 	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
@@ -171,6 +180,10 @@ write("tools.json", {
 		// draw, the sprite's last stage from 0.9); a shot below 0.1 is not fired; speed 3 blocks/tick × f, gravity 0.05
 		// blocks/tick², drag 0.99 a tick; damage ceil(speed × (2 + Power 0.5·lvl + 0.5)), crit (full draw) + random up to
 		// damage/2 + 2; Flame: 5 s of fire; walking at sneak speed while drawing; a stuck arrow despawns after 60 s
+		// [ваниль] minecraft.wiki Shears: dig speed 15 on cobwebs and leaves, 5 on wool (Efficiency adds level² + 1); a sword
+		// cuts cobwebs at 15 too
+		shearsSpeed: { cobweb: 15, leaves: 15, wool: 5 },
+		swordCobwebSpeed: 15,
 		bow: { drawSeconds: 1, pullStages: [0, 0.65, 0.9], minPower: 0.1, speedBlocksPerTick: 3, baseDamage: 2, gravity: 0.05, drag: 0.99, drawWalkMultiplier: 0.3, flameSeconds: 5, flameDamagePerSecond: 1, stuckSeconds: 60, pickupBlocks: 1.5, maxFlightSeconds: 6 },
 	},
 	tools,

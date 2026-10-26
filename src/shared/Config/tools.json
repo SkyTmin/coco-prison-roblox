@@ -90,6 +90,12 @@
     },
     "protectionPerLevelPerPiece": 0.04,
     "maxEpf": 20,
+    "shearsSpeed": {
+      "cobweb": 15,
+      "leaves": 15,
+      "wool": 5
+    },
+    "swordCobwebSpeed": 15,
     "bow": {
       "drawSeconds": 1,
       "pullStages": [
@@ -1413,6 +1419,68 @@
           },
           "enchantAfter": 3,
           "flameAfter": 1,
+          "materialAfter": "wood"
+        }
+      ]
+    },
+    "shears": {
+      "buyPrice": 4000,
+      "enchant": "efficiency",
+      "noMaterial": true,
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 3750,
+          "requirements": {
+            "Белая шерсть": 600,
+            "Паутина": 300
+          },
+          "enchantAfter": 1,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 6000,
+          "requirements": {
+            "Белая шерсть": 1200,
+            "Паутина": 600
+          },
+          "enchantAfter": 2,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 7500,
+          "requirements": {
+            "Белая шерсть": 2400,
+            "Паутина": 1200
+          },
+          "enchantAfter": 3,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 9000,
+          "requirements": {
+            "Белая шерсть": 4800,
+            "Паутина": 2400
+          },
+          "enchantAfter": 4,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "cost": 11200,
+          "requirements": {
+            "Белая шерсть": 9550,
+            "Паутина": 4750
+          },
+          "enchantAfter": 5,
           "materialAfter": "wood"
         }
       ]
