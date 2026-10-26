@@ -186,11 +186,11 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	clay = { base = "smooth_stone", color = Color3.fromRGB(160, 166, 180) },
 	-- Чистилище: резной песчаник [меню] (our cut sandstone, a little warmer)
 	chiseled_sandstone = { base = "cut_sandstone", color = Color3.fromRGB(250, 238, 205) },
-	-- Эдем: гриб (коричневый) [меню] (no texture of our own yet: terracotta tinted mushroom brown)
+	-- Эдем: гриб (коричневый) [меню] (a fallback: it has its own drawn texture now, TextureService wins)
 	brown_mushroom_block = { base = "terracotta", color = Color3.fromRGB(205, 165, 135) },
-	-- Херувимы: снег [меню] (plain white, like a cloud)
+	-- Херувимы: снег [меню] (a fallback: its own texture now)
 	snow = { base = "smooth_stone", color = Color3.fromRGB(246, 248, 252) },
-	-- Рай: гриб (красный) [меню] (our terracotta, scarlet)
+	-- Рай: гриб (красный) [меню] (a fallback: its own drawn texture now)
 	red_mushroom_block = { base = "terracotta", color = Color3.fromRGB(210, 48, 44) },
 	-- Врата: гладкий песчаник [меню] (our sandstone, lighter and plain)
 	smooth_sandstone = { base = "sandstone", color = Color3.fromRGB(250, 242, 220) },

@@ -14,8 +14,9 @@
     "edge_gate": "rbxassetid://118742032275660",
     "tree": "rbxassetid://124886016615339",
     "church": "rbxassetid://121887124451850",
-    "purgatory": "rbxassetid://130579377197497"
+    "purgatory": "rbxassetid://130579377197497",
+    "eden": "rbxassetid://76596590940266"
   },
-  "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base, market, leprechaun_valley, castle, inside_out, kyoto, farm, barn, edge_gate, tree, church, purgatory (26.10): Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
+  "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base, market, leprechaun_valley, castle, inside_out, kyoto, farm, barn, edge_gate, tree, church, purgatory, eden (26.10): Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
   "_removed": "[владелец 22.10: «другие превью у шахт удали»] the Codex art previews of mountain_foot, underworld, pyramid, basement removed (the menu draws its block diorama) until top-down shots of their built maps exist"
 }

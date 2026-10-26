@@ -359,3 +359,41 @@ await recolor("concrete_floor.png", "white_concrete.png", [[0, [176, 180, 184]],
 // Церковь: clay — the soft mottle of our sand on a blue-grey ramp (the tinted smooth stone read as a flat grey
 // sheet at noon, Studio 26.10)
 await recolor("sand.png", "clay.png", [[0, [118, 124, 140]], [0.5, [152, 158, 174]], [1, [180, 186, 200]]], 1.6);
+// Эдем / Рай: mushroom blocks — 16×16 texels of cap colour with a seeded ±noise and scattered spots (1-texel dots and
+// small plus-shaped clusters), drawn by us; Херувимы: snow — the soft mottle of our sand on a cold white ramp
+// (the tinted terracotta and smooth stone read as flat sheets, Studio 26.10)
+async function mushroom(dst, base, spot, seed) {
+	const N = 16;
+	const S = 19;
+	const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+	const tex = [];
+	for (let y = 0; y < N; y++) {
+		tex.push([]);
+		for (let x = 0; x < N; x++) tex[y].push(base[Math.floor(rnd() * base.length)].map((v) => v * (0.94 + rnd() * 0.12)));
+	}
+	for (let n = 0; n < 9; n++) {
+		const cx = Math.floor(rnd() * N), cy = Math.floor(rnd() * N);
+		const cells = rnd() < 0.5 ? [[0, 0]] : [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+		for (const [dx, dy] of cells) tex[(cy + dy + N) % N][(cx + dx + N) % N] = spot.map((v) => v * (0.95 + rnd() * 0.08));
+	}
+	const data = Buffer.alloc(N * S * N * S * 4);
+	for (let y = 0; y < N; y++) {
+		for (let x = 0; x < N; x++) {
+			const c = tex[y][x].map(clamp);
+			for (let yy = 0; yy < S; yy++) {
+				for (let xx = 0; xx < S; xx++) {
+					const i = ((y * S + yy) * N * S + x * S + xx) * 4;
+					data[i] = c[0];
+					data[i + 1] = c[1];
+					data[i + 2] = c[2];
+					data[i + 3] = 255;
+				}
+			}
+		}
+	}
+	await sharp(data, { raw: { width: N * S, height: N * S, channels: 4 } }).png().toFile(path.join(dir, dst));
+	console.log("wrote", dst);
+}
+await mushroom("brown_mushroom_block.png", [[132, 96, 66], [148, 108, 76], [160, 120, 86], [140, 102, 72]], [200, 166, 128], 20261028);
+await mushroom("red_mushroom_block.png", [[176, 34, 32], [196, 44, 40], [212, 56, 48], [188, 40, 36]], [238, 228, 216], 20261041);
+await recolor("sand.png", "snow.png", [[0, [200, 208, 220]], [0.5, [226, 232, 240]], [1, [244, 248, 252]]], 1.6);
