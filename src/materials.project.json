@@ -769,6 +769,14 @@
         "ColorMap": "rbxassetid://101182138664192",
         "StudsPerTile": 4
       }
+    },
+    "px_clay": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://81508797868543",
+        "StudsPerTile": 4
+      }
     }
   }
 }

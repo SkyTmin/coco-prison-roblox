@@ -356,3 +356,6 @@ await recolor("concrete_floor.png", "magenta_concrete.png", [[0, [150, 40, 140]]
 // (Studio 26.10: the Древо morning sun is bright — a near-white ramp read as one flat white sheet; greyer stops and a
 // steep gamma spread the speckle of the floor so the blocks show)
 await recolor("concrete_floor.png", "white_concrete.png", [[0, [176, 180, 184]], [0.55, [214, 217, 220]], [1, [238, 240, 242]]], 3);
+// Церковь: clay — the soft mottle of our sand on a blue-grey ramp (the tinted smooth stone read as a flat grey
+// sheet at noon, Studio 26.10)
+await recolor("sand.png", "clay.png", [[0, [118, 124, 140]], [0.5, [152, 158, 174]], [1, [180, 186, 200]]], 1.6);
