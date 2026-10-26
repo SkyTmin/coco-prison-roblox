@@ -135,7 +135,7 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			t(
 				if slot
 					then "tip_kind_armor"
-					elseif id == "sword" then "tip_kind_weapon"
+					elseif id == "sword" or id == "bow" then "tip_kind_weapon"
 					else "tip_kind_tool"
 			),
 			DARK_GRAY,
@@ -143,6 +143,10 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 		)
 		if enchant > 0 and tool.enchant then
 			add(t("enchant_" .. tool.enchant) .. " " .. roman(enchant), GRAY)
+		end
+		local flame = Config.flameForLevel(id, level)
+		if flame > 0 then
+			add(t("enchant_flame") .. " " .. roman(flame), GRAY)
 		end
 		for _, book in ipairs(books) do
 			add(ItemInfo.bookName(book.id, book.level, locale), LIGHT_PURPLE)
@@ -152,7 +156,10 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			end
 		end
 		add("")
-		if slot then
+		if id == "bow" then
+			-- a Minecraft bow shows no attack lines: the damage depends on the draw [ваниль]
+			add(t("tip_bow_arrows"), GRAY)
+		elseif slot then
 			add(t("tip_on_body"), GRAY)
 			local points = vanilla.armorPoints[material] and vanilla.armorPoints[material][slot]
 			if points then

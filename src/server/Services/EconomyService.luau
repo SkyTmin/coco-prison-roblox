@@ -200,7 +200,7 @@ local function upgrade(player: Player, target: any)
 		table.insert(missing, Strings.money(units(up.cost)) .. " $")
 	end
 	for counter, needed in pairs(up.requirements) do
-		local have = if counter == "Оружейник" then 0 else (profile.counters[counter] or 0)
+		local have = Config.requirementHave(profile, counter)
 		if needed and have < needed then
 			table.insert(
 				missing,

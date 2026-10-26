@@ -150,6 +150,32 @@ local function migrate(data: any): Profile
 		end
 		profile.artifacts[tier] = state
 	end
+	-- Tools never stack; old profiles may hold "bow ×N" from before the bow was a tool [владелец 26.10]:
+	-- split such stacks into free slots of the same container (the ender chest holds what does not fit).
+	local chestSlots = Config.rules.survival.enderChest.slots :: number
+	local function split(
+		container: { [number]: Types.ItemStack },
+		size: number,
+		spill: { [number]: Types.ItemStack }?
+	)
+		for slot = 1, size do
+			local stack = container[slot]
+			if stack and Config.tools[stack.id] and (stack.count or 1) > 1 then
+				local extra = stack.count - 1
+				stack.count = 1
+				for _, target in ipairs({ container, spill or container }) do
+					for free = 1, if target == container then size else chestSlots do
+						if extra > 0 and not target[free] then
+							target[free] = { id = stack.id, count = 1, level = stack.level }
+							extra -= 1
+						end
+					end
+				end
+			end
+		end
+	end
+	split(profile.inventory, 36, profile.enderChest)
+	split(profile.enderChest, chestSlots)
 	-- v3 remains compatible. Seed absent chain counters once, without paying legacy progress.
 	local seeds: { [string]: number } = { pickaxe = 0, shovel = 0, axe = 0, sword = 0 }
 	local seen: { [string]: boolean } = {}

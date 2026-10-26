@@ -26,6 +26,7 @@ Config.textures = load("textures")
 Config.previews = load("previews")
 Config.icons = load("icons")
 Config.itemVoxels = load("itemvoxels")
+Config.itemModels = load("itemmodels")
 Config.armor = load("armor")
 Config.effects = load("effects")
 Config.achievementsCfg = load("achievements")
@@ -67,6 +68,7 @@ export type Upgrade = {
 	cost: number,
 	requirements: { [string]: number },
 	enchantAfter: number,
+	flameAfter: number?, -- the bow's Горящая стрела (Flame) after the upgrade [меню 26.10]
 	materialAfter: string,
 }
 
@@ -148,6 +150,41 @@ function Config.upgrade(itemId: string, fromLevel: number): Upgrade?
 		end
 	end
 	return nil
+end
+
+-- Requirement counters that are not dug-block counters live in the stats [меню 26.10, BOW-UPGRADES.md]: «Крысы» is the
+-- right panel's number (rats with the «Мобы» multiplier), «Убийства» player kills. Never spent.
+local STAT_COUNTERS = {
+	["Крысы"] = "ratsTotal",
+	["Зомби"] = "zombiesTotal",
+	["Летучие мыши"] = "batsTotal",
+	["Убийства"] = "kills",
+}
+function Config.requirementHave(profile: any, counter: string): number
+	if counter == "Оружейник" then
+		return 0 -- the skill tree's Оружейник is not in the game yet
+	end
+	local stat = STAT_COUNTERS[counter]
+	if stat then
+		local stats = profile.stats or {}
+		local value = stats[stat] or (if stat == "ratsTotal" then stats.rats else nil) or 0
+		return math.floor(value)
+	end
+	return (profile.counters and profile.counters[counter]) or 0
+end
+
+-- The bow's Flame level at an item level (0 or 1)
+function Config.flameForLevel(itemId: string, level: number): number
+	local tool = Config.tools[itemId]
+	local flame = 0
+	if tool then
+		for _, up in ipairs(tool.upgrades) do
+			if up.to <= level and up.flameAfter then
+				flame = up.flameAfter
+			end
+		end
+	end
+	return flame
 end
 
 -- Material tier index for an item level: wood 0, stone 1, iron 2, diamond 3.

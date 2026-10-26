@@ -489,7 +489,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 				elseif item == "leather_armor_piece" then
 					item, level = ARMOR[random:NextInteger(1, #ARMOR)], 1
 				elseif item == "wooden_sword_or_bow" then
-					item, level = "sword", 1
+					item, level = if random:NextInteger(1, 2) == 1 then "sword" else "bow", 1
 				elseif item == "rare_wooden_pickaxe_silk_touch" then
 					item, level = "pickaxe", 1
 				end

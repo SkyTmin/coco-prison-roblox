@@ -89,7 +89,26 @@
       "diamond": 2
     },
     "protectionPerLevelPerPiece": 0.04,
-    "maxEpf": 20
+    "maxEpf": 20,
+    "bow": {
+      "drawSeconds": 1,
+      "pullStages": [
+        0,
+        0.65,
+        0.9
+      ],
+      "minPower": 0.1,
+      "speedBlocksPerTick": 3,
+      "baseDamage": 2,
+      "gravity": 0.05,
+      "drag": 0.99,
+      "drawWalkMultiplier": 0.3,
+      "flameSeconds": 5,
+      "flameDamagePerSecond": 1,
+      "stuckSeconds": 60,
+      "pickupBlocks": 1.5,
+      "maxFlightSeconds": 6
+    }
   },
   "tools": {
     "pickaxe": {
@@ -1340,6 +1359,61 @@
           },
           "enchantAfter": 3,
           "materialAfter": "diamond"
+        }
+      ]
+    },
+    "bow": {
+      "buyPrice": null,
+      "enchant": "power",
+      "noMaterial": true,
+      "upgrades": [
+        {
+          "from": 1,
+          "to": 2,
+          "cost": 45,
+          "requirements": {
+            "Убийства": 2,
+            "Крысы": 2
+          },
+          "enchantAfter": 1,
+          "flameAfter": 0,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "cost": 100,
+          "requirements": {
+            "Убийства": 7,
+            "Крысы": 7
+          },
+          "enchantAfter": 2,
+          "flameAfter": 0,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "cost": 500,
+          "requirements": {
+            "Убийства": 15,
+            "Крысы": 15
+          },
+          "enchantAfter": 3,
+          "flameAfter": 0,
+          "materialAfter": "wood"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "cost": 1330,
+          "requirements": {
+            "Убийства": 55,
+            "Крысы": 40
+          },
+          "enchantAfter": 3,
+          "flameAfter": 1,
+          "materialAfter": "wood"
         }
       ]
     }

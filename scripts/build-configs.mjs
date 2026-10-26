@@ -21,6 +21,7 @@ const otherWiki = read("wiki/client-audit/content-analysis/other-upgrades-recove
 const armorWiki = read("wiki/client-audit/content-analysis/armor-and-axe-recovery.json");
 const bossWiki = read("wiki/client-audit/content-analysis/boss-menu-recovery.json");
 const sharesWiki = read("wiki/in-game-wiki/mine-shares.json");
+const bowWiki = read("wiki/in-game-wiki/bow-upgrades.json");
 
 // ---------------------------------------------------------------- levels
 const levels = levelsWiki.levels.map((l) => ({
@@ -142,6 +143,14 @@ for (const [id, item] of Object.entries(armorWiki.items)) {
 		})),
 	};
 }
+// The bow [меню 26.10, BOW-UPGRADES.md]: no material (always «Лук»), Power by level, Flame I at level 5; being a tool it
+// never stacks (InventoryService.isStackable).
+tools.bow = {
+	buyPrice: null,
+	enchant: "power",
+	noMaterial: true,
+	upgrades: bowWiki.transitions.map((t) => ({ from: t.from, to: t.to, cost: t.cost, requirements: t.requirements, enchantAfter: t.power[1], flameAfter: t.flame[1], materialAfter: "wood" })),
+};
 // Sword upgrades beyond 12 need Оружейник from the sword table (field "Оружейник" is inside requirements already as a counter name).
 write("tools.json", {
 	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
@@ -158,6 +167,11 @@ write("tools.json", {
 		armorToughness: { wood: 0, stone: 0, iron: 0, diamond: 2 },
 		protectionPerLevelPerPiece: 0.04,
 		maxEpf: 20,
+		// [ваниль] minecraft.wiki Bow / Arrow (Java = Bedrock): power f = t/20 s, f = (f² + 2f)/3 capped at 1 (full at 1 s of
+		// draw, the sprite's last stage from 0.9); a shot below 0.1 is not fired; speed 3 blocks/tick × f, gravity 0.05
+		// blocks/tick², drag 0.99 a tick; damage ceil(speed × (2 + Power 0.5·lvl + 0.5)), crit (full draw) + random up to
+		// damage/2 + 2; Flame: 5 s of fire; walking at sneak speed while drawing; a stuck arrow despawns after 60 s
+		bow: { drawSeconds: 1, pullStages: [0, 0.65, 0.9], minPower: 0.1, speedBlocksPerTick: 3, baseDamage: 2, gravity: 0.05, drag: 0.99, drawWalkMultiplier: 0.3, flameSeconds: 5, flameDamagePerSecond: 1, stuckSeconds: 60, pickupBlocks: 1.5, maxFlightSeconds: 6 },
 	},
 	tools,
 });
@@ -206,6 +220,8 @@ write("artifacts.json", { source: "[меню, клиент]; шанс за бл�
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("armor.json", { source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)", ...read("assets/armor/ids.json") });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
+// a ModuleScript holds at most 200 000 characters: the Blender item models get their own file
+write("itemmodels.json", { source: "assets/icons/models3d.json — Blender voxel item models (assets/models/*/<item>.py -- export)", ...read("assets/icons/models3d.json") });
 write("icons.json", { source: "assets/icons/ids.json — Codex image gen + Studio upload; lookup: <id>_<material>, then <id>, then block texture", ...read("assets/icons/ids.json") });
 write("textures.json", { source: "assets/textures/ids.json — Codex image gen + Studio upload", ...read("assets/textures/ids.json") });
 write("previews.json", { source: "assets/previews/ids.json — Codex image gen + Studio upload; пусто = процедурная диорама", ...read("assets/previews/ids.json") });

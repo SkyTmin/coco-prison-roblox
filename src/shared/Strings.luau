@@ -23,6 +23,25 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Efficacité",
 	},
 	enchant_sharpness = { ru = "Острота", en = "Sharpness", es = "Filo", fr = "Tranchant" },
+	enchant_power = { ru = "Сила", en = "Power", es = "Poder", fr = "Puissance" },
+	enchant_flame = {
+		ru = "Горящая стрела",
+		en = "Flame",
+		es = "Fuego",
+		fr = "Flamme",
+	},
+	tip_bow_arrows = {
+		ru = "Стреляет стрелами из инвентаря",
+		en = "Shoots arrows from the inventory",
+		es = "Dispara flechas del inventario",
+		fr = "Tire les flèches de l'inventaire",
+	},
+	bow_no_arrows = {
+		ru = "Нет стрел",
+		en = "No arrows",
+		es = "Sin flechas",
+		fr = "Pas de flèches",
+	},
 	enchant_protection = {
 		ru = "Защита",
 		en = "Protection",
@@ -2297,7 +2316,7 @@ function Strings.itemName(id: string, level: number?, locale: string?): string
 	if id == "ancient_book" and level then
 		return base .. " " .. tostring(level)
 	end
-	if Config.tools[id] and level then
+	if Config.tools[id] and level and not Config.tools[id].noMaterial then
 		local material = Strings.t("mat_" .. Config.materialForLevel(level), loc)
 		if loc == "es" or loc == "fr" then
 			return base .. " " .. utf8lower(material) -- "Pala de madera", "Pelle en bois"
@@ -2362,7 +2381,7 @@ local MATERIAL_WORDS: { [string]: { tool: { [string]: string }, armor: { [string
 }
 function Strings.itemFullName(id: string, level: number?, locale: string?): string
 	local loc = locale or Config.defaultLocale
-	if not (Config.tools[id] and level) then
+	if not (Config.tools[id] and level) or Config.tools[id].noMaterial then
 		return Strings.itemName(id, level, loc)
 	end
 	local material = Config.materialForLevel(level :: number)

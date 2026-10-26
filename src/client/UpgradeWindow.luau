@@ -33,7 +33,11 @@ local function maxLevel(itemId: string): number
 end
 
 local function enchantName(itemId: string, locale: string): string
-	local key = if ARMOR[itemId] then "enchant_protection" else "enchant_efficiency"
+	local tool = Config.tools[itemId]
+	local key = if tool and tool.enchant
+		then "enchant_" .. tool.enchant
+		elseif ARMOR[itemId] then "enchant_protection"
+		else "enchant_efficiency"
 	return Strings.t(key, locale)
 end
 
@@ -256,6 +260,20 @@ function UpgradeWindow.build(
 					)
 				)
 			end
+			local flameBefore = Config.flameForLevel(id, viewLevel)
+			if (up.flameAfter or flameBefore) ~= flameBefore then
+				table.insert(
+					lines,
+					string.format(
+						'<font color="%s">%s</font>  %d → <font color="%s">%d</font>',
+						Ui.hex(Ui.colors.level),
+						Strings.t("enchant_flame", locale),
+						flameBefore,
+						Ui.hex(Ui.colors.money),
+						up.flameAfter :: number
+					)
+				)
+			end
 			upsCount.Text = tostring(#lines)
 			for i, label in ipairs(upsLines) do
 				label.Text = lines[i] or ""
@@ -265,7 +283,7 @@ function UpgradeWindow.build(
 			for counter, needed in pairs(up.requirements) do
 				i += 1
 				total += 1
-				local have = if p then (p.counters[counter] or 0) else 0
+				local have = if p then Config.requirementHave(p, counter) else 0
 				local ok = have >= needed
 				if ok then
 					met += 1

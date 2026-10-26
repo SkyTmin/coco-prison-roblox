@@ -1,0 +1,14 @@
+{
+  "source": "5 снимков владельца 26.10, меню «Улучшение предмета» (J) [меню 26.10]; BOW-UPGRADES.md",
+  "maxLevel": 5,
+  "counters": {
+    "Убийства": "stats.kills — убийства игроков",
+    "Крысы": "stats.ratsTotal — крысы с множителем «Мобы» (как в правой панели)"
+  },
+  "transitions": [
+    { "from": 1, "to": 2, "cost": 45, "requirements": { "Убийства": 2, "Крысы": 2 }, "power": [0, 1], "flame": [0, 0] },
+    { "from": 2, "to": 3, "cost": 100, "requirements": { "Убийства": 7, "Крысы": 7 }, "power": [1, 2], "flame": [0, 0] },
+    { "from": 3, "to": 4, "cost": 500, "requirements": { "Убийства": 15, "Крысы": 15 }, "power": [2, 3], "flame": [0, 0] },
+    { "from": 4, "to": 5, "cost": 1330, "requirements": { "Убийства": 55, "Крысы": 40 }, "power": [3, 3], "flame": [0, 1] }
+  ]
+}
