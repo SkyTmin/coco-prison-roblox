@@ -411,6 +411,39 @@ function MineService.get(id: string): Mine?
 	return mines[id]
 end
 
+-- Lamps must not reach a mine's blocks. Below the top graphics level Roblox lights by a 4-stud voxel
+-- grid that matches our blocks and rebuilds as the camera moves, so lamp light on a mine shows as
+-- single blocks flashing between lit and unlit (Studio 27.10, every mine with lamps at its rim).
+local function keepLampsOff(mine: Mine)
+	local sx, sy, sz = mine.size[1], mine.size[2], mine.size[3]
+	local top = mine.origin.Y + BLOCK / 2
+	local low = Vector3.new(mine.origin.X - BLOCK / 2, top - sy * BLOCK, mine.origin.Z - BLOCK / 2)
+	local high = Vector3.new(low.X + sx * BLOCK, top, low.Z + sz * BLOCK)
+	for _, instance in ipairs(workspace:GetDescendants()) do
+		if not instance:IsA("Light") or not instance.Enabled then
+			continue
+		end
+		local holder = instance.Parent
+		local at = if holder and holder:IsA("BasePart")
+			then holder.Position
+			elseif holder and holder:IsA("Attachment") then holder.WorldPosition
+			else nil
+		if not at then
+			continue
+		end
+		-- Range lives on PointLight, SpotLight and SurfaceLight, not on Light
+		local light = instance :: PointLight
+		local gap = (at:Max(low):Min(high) - at).Magnitude
+		if gap < light.Range then
+			if gap - 1 < 4 then
+				light.Enabled = false
+			else
+				light.Range = gap - 1
+			end
+		end
+	end
+end
+
 local function register(anchor: Instance)
 	if not anchor:IsA("BasePart") then
 		return
@@ -462,6 +495,7 @@ local function register(anchor: Instance)
 	anchor.CanCollide = false
 	anchor.CanQuery = false
 	anchor.CanTouch = false
+	keepLampsOff(mine)
 	task.spawn(rebuild, mine)
 end
 

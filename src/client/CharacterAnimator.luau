@@ -8,7 +8,10 @@
 -- Works with both rigs: classic Motor6D joints and the AnimationConstraint joints of current avatars.
 -- Our block body (character attribute BlockBody, AvatarService) keeps its limbs rigid like Minecraft's: elbows, wrists,
 -- knees and ankles stay straight, and the right arm's swing and hold bends turn the whole arm at the shoulder instead
--- (the same item direction, a straight arm).
+-- (the same item direction, a straight arm). Its whole stance is ours, not the Roblox Animate idle/walk (which
+-- splayed the stiff legs and swung the hips): Minecraft's biped model [ваниль ModelBiped / LivingEntity] —
+-- legs straight together, arms breathing a little, arms and legs swinging against each other when walking,
+-- the riding pose when seated.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -30,6 +33,9 @@ local JOINT_PARTS = {
 	LeftShoulder = "LeftUpperArm",
 	Waist = "UpperTorso",
 	Neck = "Head",
+	RightHip = "RightUpperLeg",
+	LeftHip = "LeftUpperLeg",
+	Root = "LowerTorso",
 }
 -- the joints a block body never bends (the right elbow and wrist are folded into the shoulder in applyTo)
 local RIGID = {
@@ -44,6 +50,11 @@ local RIGID = {
 }
 local SEND_INTERVAL = 0.1
 local lastSent = 0
+-- [ваниль] limbSwingAmount = min(blocks a tick × 4, 1): walking 4.3 blocks/s → 0.86; a block is 4 studs here,
+-- so studs/s ÷ 20 (WalkSpeed 16 → 0.8)
+local SWING_STUDS = 20
+type Walk = { swing: number, amount: number }
+local walks: { [Model]: Walk } = {}
 
 local function jointOf(character: Model, name: string): JointState?
 	local cache = joints[character]
@@ -54,6 +65,7 @@ local function jointOf(character: Model, name: string): JointState?
 			if not character:IsDescendantOf(workspace) then
 				joints[character] = nil
 				playing[character] = nil
+				walks[character] = nil
 			end
 		end)
 	end
@@ -118,12 +130,69 @@ local function bowPose(pitch: number): { [string]: CFrame }
 	}
 end
 
+local function rx(a: number): CFrame
+	return CFrame.Angles(a, 0, 0)
+end
+
+-- The block body's own stance [ваниль ModelBiped.setupAnim]. Minecraft's x rotations are negated (its +x swings a
+-- limb back, ours forward); the per-tick lerp and swing run on dt × 20 ticks.
+local function stance(
+	character: Model,
+	dt: number,
+	now: number,
+	holding: boolean,
+	bow: boolean
+): { [string]: CFrame }
+	local walk = walks[character]
+	if not walk then
+		walk = { swing = 0, amount = 0 }
+		walks[character] = walk
+	end
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local speed = 0
+	if root and root:IsA("BasePart") then
+		local v = root.AssemblyLinearVelocity
+		speed = Vector3.new(v.X, 0, v.Z).Magnitude
+	end
+	local ticks = dt * 20
+	walk.amount += (math.min(speed / SWING_STUDS, 1) - walk.amount) * (1 - 0.6 ^ ticks)
+	walk.swing += walk.amount * ticks
+	local phase, amount = walk.swing * 0.6662, walk.amount
+	local pose: { [string]: CFrame } = {}
+	if humanoid and humanoid.Sit then
+		-- riding: legs forward and apart, arms raised a little
+		pose.RightHip = CFrame.Angles(1.4137, math.rad(18), 0)
+		pose.LeftHip = CFrame.Angles(1.4137, math.rad(-18), 0)
+		pose.RightShoulder, pose.LeftShoulder = rx(0.6283), rx(0.6283)
+	else
+		pose.RightHip = rx(-math.cos(phase) * 1.4 * amount)
+		pose.LeftHip = rx(-math.cos(phase + math.pi) * 1.4 * amount)
+		-- the main hand swings half as far while it holds something
+		local right = -math.cos(phase + math.pi) * amount * (if holding then 0.5 else 1)
+		pose.RightShoulder, pose.LeftShoulder = rx(right), rx(-math.cos(phase) * amount)
+	end
+	if bow then
+		-- the bow pose sets both arms itself
+		pose.RightShoulder, pose.LeftShoulder = nil, nil
+	else
+		-- breathing: the arms drift out and back a little (age in ticks)
+		local age = now * 20
+		local out = math.cos(age * 0.09) * 0.05 + 0.05
+		local sway = math.sin(age * 0.067) * 0.05
+		pose.RightShoulder = (pose.RightShoulder or CFrame.identity) * CFrame.Angles(-sway, 0, out)
+		pose.LeftShoulder = (pose.LeftShoulder or CFrame.identity) * CFrame.Angles(sway, 0, -out)
+	end
+	return pose
+end
+
 local function applyTo(
 	character: Model,
 	holding: boolean,
 	entry: Playing?,
 	now: number,
-	pose: { [string]: CFrame }?
+	pose: { [string]: CFrame }?,
+	dt: number
 )
 	local animation = entry and SwingAnimations.animations[entry.kind]
 	local p = if entry and animation then (now - entry.startedAt) / entry.duration else 1
@@ -142,13 +211,25 @@ local function applyTo(
 	end
 	local block = character:GetAttribute("BlockBody") == true
 	if block then
-		local elbow, wrist = adds.RightElbow, adds.RightWrist
-		if elbow or wrist then
-			adds.RightShoulder = (adds.RightShoulder or CFrame.identity)
-				* (elbow or CFrame.identity).Rotation
-				* (wrist or CFrame.identity).Rotation
+		-- the stance replaces whatever the Roblox Animator wrote; holds and swings go on top of it
+		local base = stance(character, dt, now, holding, pose ~= nil)
+		for name in pairs(JOINT_PARTS) do
+			if RIGID[name] then
+				continue
+			end
+			local state = jointOf(character, name)
+			if state then
+				local add = adds[name]
+				local set = (base[name] or CFrame.identity) * (add or CFrame.identity)
+				if name == "RightShoulder" and (adds.RightElbow or adds.RightWrist) then
+					set = set
+						* (adds.RightElbow or CFrame.identity).Rotation
+						* (adds.RightWrist or CFrame.identity).Rotation
+				end
+				(state.joint :: any).Transform = set
+				state.lastSet = nil
+			end
 		end
-		adds.RightElbow, adds.RightWrist = nil, nil
 		for name in pairs(RIGID) do
 			local state = jointOf(character, name)
 			if state then
@@ -158,8 +239,8 @@ local function applyTo(
 		end
 	end
 	for name in pairs(JOINT_PARTS) do
-		if block and RIGID[name] then
-			continue
+		if block then
+			break
 		end
 		local add = adds[name]
 		local state = if add
@@ -187,7 +268,7 @@ local function applyTo(
 	end
 end
 
-local function apply()
+local function apply(dt: number)
 	local now = os.clock()
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character
@@ -207,7 +288,8 @@ local function apply()
 				typeof(held) == "string" and held ~= "",
 				playing[character],
 				now,
-				pose
+				pose,
+				math.min(dt, 0.1)
 			)
 		end
 	end
