@@ -58,7 +58,7 @@
           16,
           40
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 240,
         "warnSeconds": 15,
         "shares": {
           "stone": 0.81,
@@ -93,7 +93,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 420,
         "warnSeconds": 15,
         "shares": {
           "red_sand": 0.91,
@@ -124,7 +124,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 840,
         "warnSeconds": 15,
         "shares": {
           "netherite": 0.75,
@@ -157,7 +157,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 960,
         "warnSeconds": 15,
         "shares": {
           "sandstone": 0.61,
@@ -186,7 +186,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2400,
         "warnSeconds": 15,
         "shares": {
           "wisteria_leaves": 0.7,
@@ -215,7 +215,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2880,
         "warnSeconds": 15,
         "shares": {
           "cyan_concrete": 0.7,
@@ -245,7 +245,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 3300,
         "warnSeconds": 15,
         "shares": {
           "end_stone_bricks": 0.5,
@@ -274,7 +274,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 4200,
         "warnSeconds": 15,
         "shares": {
           "white_wool": 0.9,
@@ -303,7 +303,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "ice": 0.5,
@@ -332,7 +332,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "red_wool": 1
@@ -361,7 +361,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "yellow_concrete": 1
@@ -392,7 +392,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "quartz_block": 1
@@ -420,7 +420,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "dark_oak_leaves": 1
@@ -447,7 +447,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 2760,
         "warnSeconds": 15,
         "shares": {
           "pink_wool": 0.9,
@@ -476,7 +476,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 7800,
         "warnSeconds": 15,
         "shares": {
           "melon": 0.46,
@@ -507,7 +507,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 7800,
         "warnSeconds": 15,
         "shares": {
           "jack_o_lantern": 1
@@ -534,7 +534,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "magenta_concrete": 0.91,
@@ -563,7 +563,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "white_concrete": 1
@@ -590,7 +590,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "clay": 1
@@ -617,7 +617,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "chiseled_sandstone": 1
@@ -644,7 +644,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "brown_mushroom_block": 1
@@ -671,7 +671,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "snow": 1
@@ -698,7 +698,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "smooth_sandstone": 1
@@ -725,7 +725,7 @@
           12,
           32
         ],
-        "resetSeconds": 480,
+        "resetSeconds": 18000,
         "warnSeconds": 15,
         "shares": {
           "red_mushroom_block": 1

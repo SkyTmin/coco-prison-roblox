@@ -93,7 +93,7 @@
       "shard": null,
       "hp": 17000,
       "damage": 20,
-      "respawnSeconds": 6300
+      "respawnSeconds": 43200
     },
     {
       "id": "forest_guardian",
@@ -181,7 +181,7 @@
       "shard": null,
       "hp": 16000,
       "damage": 19,
-      "respawnSeconds": 6000
+      "respawnSeconds": 43200
     },
     {
       "id": "the_lovers",
@@ -269,7 +269,7 @@
       "shard": null,
       "hp": 14000,
       "damage": 17,
-      "respawnSeconds": 5400
+      "respawnSeconds": 28800
     },
     {
       "id": "knight",
@@ -357,7 +357,7 @@
       "shard": null,
       "hp": 3500,
       "damage": 8,
-      "respawnSeconds": 2700
+      "respawnSeconds": 6300
     },
     {
       "id": "basalt_guardian",
@@ -577,7 +577,7 @@
       "shard": null,
       "hp": 1500,
       "damage": 6,
-      "respawnSeconds": 1800
+      "respawnSeconds": 1080
     },
     {
       "id": "skeleton",
@@ -665,7 +665,7 @@
       "shard": null,
       "hp": 2500,
       "damage": 7,
-      "respawnSeconds": 2400
+      "respawnSeconds": 2700
     },
     {
       "id": "illusionist",
@@ -753,7 +753,7 @@
       "shard": null,
       "hp": 6000,
       "damage": 10,
-      "respawnSeconds": 3300
+      "respawnSeconds": 10800
     },
     {
       "id": "vecna",
@@ -841,7 +841,7 @@
       "shard": null,
       "hp": 13000,
       "damage": 16,
-      "respawnSeconds": 5100
+      "respawnSeconds": 14400
     },
     {
       "id": "poseidon",
@@ -929,7 +929,7 @@
       "shard": null,
       "hp": 4500,
       "damage": 9,
-      "respawnSeconds": 3000
+      "respawnSeconds": 7200
     },
     {
       "id": "spider_queen",
@@ -1017,7 +1017,7 @@
       "shard": null,
       "hp": 7500,
       "damage": 11,
-      "respawnSeconds": 3600
+      "respawnSeconds": 14400
     },
     {
       "id": "forest_spirit",
@@ -1096,7 +1096,7 @@
       "shard": null,
       "hp": 11000,
       "damage": 14,
-      "respawnSeconds": 4500
+      "respawnSeconds": 18000
     },
     {
       "id": "ent",
@@ -1175,7 +1175,7 @@
       "shard": null,
       "hp": 15000,
       "damage": 18,
-      "respawnSeconds": 5700
+      "respawnSeconds": 19800
     },
     {
       "id": "mole",
@@ -1263,7 +1263,7 @@
       "shard": null,
       "hp": 9000,
       "damage": 12,
-      "respawnSeconds": 3900
+      "respawnSeconds": 21600
     },
     {
       "id": "raven_knight",
@@ -1351,7 +1351,7 @@
       "shard": null,
       "hp": 12000,
       "damage": 15,
-      "respawnSeconds": 4800
+      "respawnSeconds": 21600
     },
     {
       "id": "un_king",
@@ -1439,7 +1439,7 @@
       "shard": null,
       "hp": 10000,
       "damage": 13,
-      "respawnSeconds": 4200
+      "respawnSeconds": 21600
     },
     {
       "id": "splinter",
@@ -1600,7 +1600,7 @@
       "shard": null,
       "hp": 300,
       "damage": 5,
-      "respawnSeconds": 1200
+      "respawnSeconds": 600
     }
   ]
 }

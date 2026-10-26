@@ -22,6 +22,9 @@ end
 
 local function clock(seconds: number): string
 	seconds = math.max(0, math.floor(seconds))
+	if seconds >= 3600 then -- bosses wait up to 12 h [вики 26.10]
+		return string.format("%d:%02d:%02d", seconds // 3600, seconds // 60 % 60, seconds % 60)
+	end
 	return string.format("%d:%02d", seconds // 60, seconds % 60)
 end
 
