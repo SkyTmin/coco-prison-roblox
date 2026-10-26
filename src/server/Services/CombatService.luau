@@ -12,6 +12,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
 local Combat = require(Shared.Combat)
+local Types = require(Shared.Types)
 
 local CombatService = {}
 local lastCombat: { [Player]: number } = {}
@@ -111,7 +112,7 @@ end
 -- [ваниль, Better Combat]. Every target inside the arc is hit; the combo picks the attack of the set.
 local combos: { [Player]: Combat.ComboState } = {}
 
-local function targetBox(model: Model): (CFrame, Vector3)
+function CombatService.targetBox(model: Model): (CFrame, Vector3)
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local root = model:FindFirstChild("HumanoidRootPart")
 	if humanoid and root and root:IsA("BasePart") and Players:GetPlayerFromCharacter(model) then
@@ -187,7 +188,7 @@ local function insideArc(
 end
 
 -- Minecraft crit particles: a burst of little stars at the target
-local function critBurst(at: Vector3)
+function CombatService.critBurst(at: Vector3)
 	local p = Instance.new("Part")
 	p.Name = "CritBurst"
 	p.Anchored = true
@@ -209,6 +210,64 @@ local function critBurst(at: Vector3)
 	p.Parent = workspace
 	stars:Emit(18)
 	game:GetService("Debris"):AddItem(p, 1)
+end
+
+-- One validated blow (a melee arc or an arrow) from `player` to `model`: PvP only where both players' locations
+-- allow it and never between players of one faction; a casting boss is invulnerable; mobs and bosses remember the
+-- attacker (LastHitBy → MobService / BossService rewards). Knockback along `look`; the attacker gets HitConfirm.
+-- Returns the outcome: "killed" | "hit" | "blocked" | "ally" | "nopvp".
+function CombatService.HitModel(
+	player: Player,
+	profile: Types.Profile,
+	model: Model,
+	damage: number,
+	crit: boolean,
+	look: Vector3
+): string
+	local target = model:FindFirstChildOfClass("Humanoid")
+	if not target or target.Health <= 0 then
+		return "blocked"
+	end
+	local confirm = Remotes.event("HitConfirm")
+	local victim = Players:GetPlayerFromCharacter(model)
+	if victim then
+		-- PvP only where the location allows it (both players there) [вики]
+		local mine = Config.location(profile.location)
+		local theirs = ProfileService.Get(victim)
+		local other = theirs and Config.location(theirs.location)
+		-- players of one faction do not fight [сеть, патч 2022; клиент: удар без урона]
+		local sameFaction = theirs ~= nil
+			and profile.faction ~= nil
+			and theirs.faction == profile.faction
+		if mine and mine.pvp and other and other.pvp and not sameFaction then
+			local before = target.Health
+			CombatService.ApplyDamage(target, damage, "player", player)
+			HurtService.Knockback(model, look)
+			local dealt = before - target.Health
+			local result = if target.Health <= 0
+				then "killed"
+				elseif dealt > 0 then "hit"
+				else "blocked"
+			confirm:FireClient(player, model, dealt, crit, result)
+			return result
+		end
+		local result = if sameFaction then "ally" else "nopvp"
+		confirm:FireClient(player, model, 0, false, result)
+		return result
+	elseif model:GetAttribute("Shielded") == true or model:FindFirstChildOfClass("ForceField") then
+		-- a boss casting is invulnerable: no damage, no shove, and the attacker is told so
+		confirm:FireClient(player, model, 0, false, "blocked")
+		return "blocked"
+	end
+	target:SetAttribute("LastHitBy", player.UserId)
+	target:SetAttribute("LastHitAt", os.clock())
+	local before = target.Health
+	target:TakeDamage(damage)
+	HurtService.Knockback(model, look)
+	local dealt = before - target.Health
+	local result = if target.Health <= 0 then "killed" else "hit"
+	confirm:FireClient(player, model, dealt, crit, result)
+	return result
 end
 
 local function onAttack(player: Player, direction: any, falling: any, hint: any)
@@ -260,7 +319,7 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 		if typeof(hint) == "Instance" and hint:IsA("Model") and hint:IsDescendantOf(workspace) then
 			local th = hint:FindFirstChildOfClass("Humanoid")
 			if th and th.Health > 0 and hint ~= character then
-				local hcf, hsize = targetBox(hint)
+				local hcf, hsize = CombatService.targetBox(hint)
 				local toCentre = hcf.Position - eye
 				if
 					(closestPoint(hcf, hsize, eye) - eye).Magnitude <= range + 3
@@ -270,7 +329,6 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 				end
 			end
 		end
-		local confirm = Remotes.event("HitConfirm")
 		local candidates: { Model } = {}
 		for _, other in ipairs(Players:GetPlayers()) do
 			if other ~= player and other.Character then
@@ -287,67 +345,19 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 		for _, model in ipairs(candidates) do
 			local target = model:FindFirstChildOfClass("Humanoid")
 			if target and target.Health > 0 then
-				local cf, size = targetBox(model)
+				local cf, size = CombatService.targetBox(model)
 				if insideArc(attack, eye, look, cf, size, range) then
-					local damage = baseDamage * attack.damage
 					if crit then
-						critBurst(cf.Position)
+						CombatService.critBurst(cf.Position)
 					end
-					local victim = Players:GetPlayerFromCharacter(model)
-					if victim then
-						-- PvP only where the location allows it (both players there) [вики]
-						local mine = Config.location(profile.location)
-						local theirs = ProfileService.Get(victim)
-						local other = theirs and Config.location(theirs.location)
-						-- players of one faction do not fight [сеть, патч 2022; клиент: удар без урона]
-						local sameFaction = theirs ~= nil
-							and profile.faction ~= nil
-							and theirs.faction == profile.faction
-						if mine and mine.pvp and other and other.pvp and not sameFaction then
-							local before = target.Health
-							CombatService.ApplyDamage(target, damage, "player", player)
-							HurtService.Knockback(model, look)
-							local dealt = before - target.Health
-							confirm:FireClient(
-								player,
-								model,
-								dealt,
-								crit,
-								if target.Health <= 0
-									then "killed"
-									elseif dealt > 0 then "hit"
-									else "blocked"
-							)
-						else
-							confirm:FireClient(
-								player,
-								model,
-								0,
-								false,
-								if sameFaction then "ally" else "nopvp"
-							)
-						end
-					elseif
-						model:GetAttribute("Shielded") == true
-						or model:FindFirstChildOfClass("ForceField")
-					then
-						-- a boss casting is invulnerable: no damage, no shove, and the attacker is told so
-						confirm:FireClient(player, model, 0, false, "blocked")
-					else
-						target:SetAttribute("LastHitBy", player.UserId)
-						target:SetAttribute("LastHitAt", os.clock())
-						local before = target.Health
-						target:TakeDamage(damage)
-						HurtService.Knockback(model, look)
-						local dealt = before - target.Health
-						confirm:FireClient(
-							player,
-							model,
-							dealt,
-							crit,
-							if target.Health <= 0 then "killed" else "hit"
-						)
-					end
+					CombatService.HitModel(
+						player,
+						profile,
+						model,
+						baseDamage * attack.damage,
+						crit,
+						look
+					)
 				end
 			end
 		end

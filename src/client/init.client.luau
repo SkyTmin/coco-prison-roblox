@@ -41,6 +41,7 @@ local FactionWindow = require(script.FactionWindow)
 local CombatFeel = require(script.CombatFeel)
 local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
+local BowController = require(script.BowController)
 local ArmorVisual = require(script.ArmorVisual)
 local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
@@ -107,7 +108,7 @@ end
 -- [владелец 22.10: «кнопку 3 лица кинь в меню»] no camera button on the HUD: the view switches from the
 -- touch menu (Touch_camera) or with V / F5 like Minecraft
 local function renderCameraButton()
-	crosshair.Visible = firstPerson or isMobile()
+	crosshair.Visible = firstPerson or isMobile() or BowController.Drawing()
 end
 local THIRD_PERSON_ZOOM = 12
 local function toggleFirstPerson()
@@ -2353,6 +2354,31 @@ ContextActionService:BindAction(
 	Enum.KeyCode.ButtonR2
 )
 
+-- The bow [владелец 26.10]: hold the right mouse button (gamepad L2) to draw, let go to shoot (BowController); the
+-- left button still digs and hits (with a bow in hand a blow is a bare-hand punch, as in Minecraft)
+BowController.Start(function()
+	return profile
+end, function()
+	return currentWindowKind ~= nil
+end, renderCameraButton)
+UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
+	if
+		not processed
+		and (input.UserInputType == Enum.UserInputType.MouseButton2 or input.KeyCode == Enum.KeyCode.ButtonL2)
+		and BowController.InHand()
+	then
+		BowController.Begin()
+	end
+end)
+UserInputService.InputEnded:Connect(function(input: InputObject)
+	if
+		input.UserInputType == Enum.UserInputType.MouseButton2
+		or input.KeyCode == Enum.KeyCode.ButtonL2
+	then
+		BowController.Release()
+	end
+end)
+
 -- Touch, Minecraft Bedrock "split controls" style [владелец 21.10]: the crosshair is always on; a
 -- finger held on the RIGHT half of the screen breaks the block under the crosshair (and keeps
 -- breaking the next ones while held — the same loop as the PC mouse button), while moving that
@@ -2367,6 +2393,9 @@ local touchAim: Aim? = nil -- the block under the crosshair when the finger land
 local DIG_HOLD = 0.12 -- s the finger must rest before digging starts [владелец 21.10]
 local DRAG_SLOP = 14 -- px of movement that makes a touch a camera drag
 local EAT_HOLD = 0.6 -- s, like Bedrock's hold-to-use
+-- [владелец 26.10, Bedrock] with a bow in hand a resting finger draws instead of digging (after DIG_HOLD); once
+-- drawing, moving the finger aims (the camera turns) and lifting it shoots; a tap is still a blow
+local touchBow = false
 local function isFood(): boolean
 	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
 	local food = Config.rules.survival and Config.rules.survival.food
@@ -2412,8 +2441,9 @@ UserInputService.TouchStarted:Connect(function(input: InputObject, processed: bo
 	touchStart = Vector2.new(input.Position.X, input.Position.Y)
 	-- [владелец 21.10] digging starts only when the finger rests DIG_HOLD on a block (Heartbeat below);
 	-- a finger that moves turns the camera only — no swings, no dig sounds while looking around
-	local aim = aimAt()
+	local aim = if BowController.InHand() then nil else aimAt()
 	touchAim = if aim and not pending[aim.part] then aim else nil
+	touchBow = false
 	holding = false
 end)
 UserInputService.TouchMoved:Connect(function(input: InputObject)
@@ -2435,7 +2465,10 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 		local wasDigging = holding
 		cancelDigInput()
 		touchAim = nil
-		if tapped and not touchDragged and not wasDigging and not touchAte then
+		if touchBow then
+			touchBow = false
+			BowController.Release()
+		elseif tapped and not touchDragged and not wasDigging and not touchAte then
 			-- a short tap = a swing, like Minecraft's attack tap; also on a block too short to start digging
 			attack()
 		end
@@ -2458,6 +2491,17 @@ RunService.Heartbeat:Connect(function()
 			startDig(aim)
 		end
 	end
+	-- a finger resting with the bow in hand starts the draw (once per touch)
+	if
+		activeTouch
+		and not touchBow
+		and not touchDragged
+		and BowController.InHand()
+		and os.clock() - touchHeldSince >= DIG_HOLD
+	then
+		touchBow = true
+		BowController.Begin()
+	end
 	-- hold with food and nothing under the crosshair → eat once per hold
 	if
 		activeTouch
@@ -2470,7 +2514,11 @@ RunService.Heartbeat:Connect(function()
 		Remotes.event("UseConsumable"):FireServer(profile and profile.selectedSlot or 1)
 	end
 end)
-UserInputService.WindowFocusReleased:Connect(cancelDigInput)
+UserInputService.WindowFocusReleased:Connect(function()
+	cancelDigInput()
+	touchBow = false
+	BowController.Cancel()
+end)
 player.CharacterRemoving:Connect(cancelDigInput)
 
 -- Touch HUD: icon buttons only (no letters). Menus in a 2-column grid at the top-left so every

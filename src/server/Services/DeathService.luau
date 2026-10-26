@@ -14,7 +14,8 @@ local ItemDropService = require(script.Parent.ItemDropService)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 
-local KEPT_TOOLS = { pickaxe = true, shovel = true, axe = true, sword = true, shears = true, bow = true }
+local KEPT_TOOLS =
+	{ pickaxe = true, shovel = true, axe = true, sword = true, shears = true, bow = true }
 local ARMOR = { helmet = true, chestplate = true, leggings = true, boots = true }
 local rules = Config.rules.survival.death
 local DeathService = {}

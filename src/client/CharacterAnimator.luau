@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Remotes = require(Shared.Remotes)
 local SwingAnimations = require(Shared.SwingAnimations)
+local BowState = require(script.Parent:WaitForChild("BowState"))
 
 local CharacterAnimator = {}
 
@@ -91,14 +92,32 @@ function CharacterAnimator.PlayLocal(kind: string, duration: number)
 	end
 end
 
-local function applyTo(character: Model, holding: boolean, entry: Playing?, now: number)
+-- Drawing a bow, Minecraft's bow-and-arrow arm pose [ваниль]: both arms raised level to the front, the bow arm
+-- (right, the main hand) straight, the pulling arm (left) turned in towards it; our own arms also follow the camera's
+-- pitch (aiming up or down). Shoulder +x raises the arm forward, +z moves it to the right (the R15 measurements of
+-- SwingAnimations).
+local function bowPose(pitch: number): { [string]: CFrame }
+	return {
+		RightShoulder = CFrame.Angles(math.rad(90) + pitch, 0, math.rad(-4)),
+		RightElbow = CFrame.identity,
+		LeftShoulder = CFrame.Angles(math.rad(90) + pitch, 0, math.rad(30)),
+	}
+end
+
+local function applyTo(
+	character: Model,
+	holding: boolean,
+	entry: Playing?,
+	now: number,
+	pose: { [string]: CFrame }?
+)
 	local animation = entry and SwingAnimations.animations[entry.kind]
 	local p = if entry and animation then (now - entry.startedAt) / entry.duration else 1
 	if entry then
 		setTrail(character, p > 0.25 and p < 0.75)
 	end
 	for name in pairs(JOINT_PARTS) do
-		local hold = if holding then SwingAnimations.hold[name] else nil
+		local hold = if pose then pose[name] elseif holding then SwingAnimations.hold[name] else nil
 		local swing = if animation and p < 1
 			then SwingAnimations.sample(animation, name, p)
 			else nil
@@ -133,7 +152,22 @@ local function apply()
 		local character = player.Character
 		if character then
 			local held = character:GetAttribute("HeldItem")
-			applyTo(character, typeof(held) == "string" and held ~= "", playing[character], now)
+			local pose: { [string]: CFrame }? = nil
+			if BowState.DrawStart(character) then
+				local pitch = 0
+				local camera = workspace.CurrentCamera
+				if player == Players.LocalPlayer and camera then
+					pitch = math.asin(math.clamp(camera.CFrame.LookVector.Y, -1, 1))
+				end
+				pose = bowPose(pitch)
+			end
+			applyTo(
+				character,
+				typeof(held) == "string" and held ~= "",
+				playing[character],
+				now,
+				pose
+			)
 		end
 	end
 end

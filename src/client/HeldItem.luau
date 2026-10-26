@@ -8,8 +8,14 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
 local CharacterAnimator = require(script.Parent:WaitForChild("CharacterAnimator"))
+local BowState = require(script.Parent:WaitForChild("BowState"))
 
-type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Instance? }
+type Rig = {
+	character: Model,
+	connections: { RBXScriptConnection },
+	visual: Instance?,
+	variant: string?,
+}
 local HeldItem = {}
 local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
@@ -72,6 +78,17 @@ function HeldItem.Attack(kind: string, duration: number)
 	CharacterAnimator.PlayLocal(kind, duration)
 end
 
+-- The bow's grip in its model (assets/models/bow/bow.py: the middle of the limb arc, upper left of the 16×16 item):
+-- sprite px (3.6, 3.6) from the top left → model space (depth, up, right) in pixels from the centre
+local BOW_GRIP_PX = Vector3.new(0, 8 - 3.6, 3.6 - 8)
+function HeldItem.BowGrip(size: number): Vector3
+	return BOW_GRIP_PX * (size / 16)
+end
+-- the bow in the hand [ваниль, Minecraft's bow-and-arrow pose]: the string upright and the arrow pointing forward
+-- along the arm raised by CharacterAnimator (hand −Y forward, hand −Z up); the model's arrow points to the item's
+-- upper left, (0, 1, −1), its string runs from the lower left to the upper right, (0, 1, 1): a −135° turn round X
+local BOW_TURN = CFrame.Angles(math.rad(-135), 0, 0)
+
 local function rightHand(character: Model): BasePart?
 	local hand = character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm")
 	return if hand and hand:IsA("BasePart") then hand else nil
@@ -82,7 +99,8 @@ end
 function HeldItem.MakeVisual(
 	id: string,
 	level: number,
-	spriteScale: number?
+	spriteScale: number?,
+	variant: string? -- the model to show instead of the item's own (the bow's pull stages)
 ): (Instance, BasePart, boolean)
 	local icon = Config.iconFor(id, if level > 0 then level else nil)
 	local block = Config.block(id)
@@ -111,7 +129,7 @@ function HeldItem.MakeVisual(
 		end
 		visual, container = p, p
 	else
-		local model = ItemModels.get(id, if level > 0 then level else nil, spriteSize)
+		local model = ItemModels.get(variant or id, if level > 0 then level else nil, spriteSize)
 		if not model then
 			-- no sprite data: fall back to a flat icon plane
 			local p = Instance.new("Part")
@@ -149,7 +167,7 @@ function HeldItem.MakeVisual(
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
 	visual.Massless = true
 	visual.CastShadow = false
-	if tool and not cube then
+	if tool and not cube and id ~= "bow" then
 		-- the weapon trail of a blow (CharacterAnimator turns it on): from the grip to the head of the item
 		local a0 = Instance.new("Attachment")
 		a0.Name = "TrailBase"
@@ -192,12 +210,16 @@ local function render(rig: Rig)
 	local level = tonumber(rawLevel) or 0
 	local tool = Config.tools[id] ~= nil
 	local spriteSize = if tool then 1.45 else 1.2
-	local container, visual, cube = HeldItem.MakeVisual(id, level)
+	local variant = if id == "bow" then BowState.ModelId(rig.character) else nil
+	rig.variant = variant
+	local container, visual, cube = HeldItem.MakeVisual(id, level, nil, variant)
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
 	if cube then
 		motor.C0 = CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
+	elseif id == "bow" then
+		motor.C0 = CFrame.new(0, -0.15, 0) * BOW_TURN * CFrame.new(-HeldItem.BowGrip(spriteSize))
 	else
 		local size = spriteSize
 		-- Tuned on the live character (21.10): sprite model has image-right = +Z, so yaw it 180° to
@@ -306,6 +328,12 @@ function HeldItem.Start()
 			if glow and glow:IsA("Highlight") then
 				glow.FillTransparency = fill
 				glow.OutlineTransparency = 0.3 + 0.4 * (0.5 + 0.5 * math.sin(os.clock() * 5))
+			end
+		end
+		-- the bow's pull stages: a new model when the stage changes
+		for _, rig in pairs(rigs) do
+			if rig.variant and BowState.ModelId(rig.character) ~= rig.variant then
+				render(rig)
 			end
 		end
 		for px, base in pairs(enchantedParts) do

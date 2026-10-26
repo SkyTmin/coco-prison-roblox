@@ -10,6 +10,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local HeldItem = require(script.Parent.HeldItem)
+local BowState = require(script.Parent.BowState)
 
 local FirstPersonHand = {}
 
@@ -25,6 +26,12 @@ local REST = CFrame.new(1.15, -0.72, -1.0) * CFrame.Angles(math.rad(8), math.rad
 local SWING_SCALE = 1.0 / 0.72
 
 local started = false
+
+-- The bow in view like Minecraft's first person: the item faces the camera at the lower right with its arrow pointing
+-- to the upper left, at the crosshair; while drawing it comes up towards the centre and shakes a little at full draw.
+local BOW_REST = CFrame.new(0.78, -0.62, -1.15)
+local BOW_DRAWN = CFrame.new(0.5, -0.36, -1.05)
+local BOW_FACE = CFrame.Angles(0, math.rad(90), 0) -- image right → camera right
 
 -- Zoom from the camera focus, not the distance to the head: the head bobs with the walk animation
 -- (0.6..1.3 studs from the camera), which hid the hand every other frame while walking.
@@ -66,8 +73,11 @@ function FirstPersonHand.Start()
 	local itemIsCube = false
 	local bob = 0
 
-	local function setItem(attribute: any)
-		local key = if typeof(attribute) == "string" then attribute else ""
+	local itemId: string? = nil
+	local function setItem(attribute: any, variant: string?)
+		local key = (if typeof(attribute) == "string" then attribute else "")
+			.. "|"
+			.. (variant or "")
 		if key == itemKey then
 			return
 		end
@@ -76,12 +86,13 @@ function FirstPersonHand.Start()
 			item:Destroy()
 			item, itemPart = nil, nil
 		end
-		local id, rawLevel = string.match(key, "^([^:]+):(%d+)$")
+		local id, rawLevel = string.match(key, "^([^:]+):(%d+)|")
+		itemId = id
 		if not id then
 			return
 		end
 		local container, primary, cube =
-			HeldItem.MakeVisual(id, tonumber(rawLevel) or 0, SPRITE_SCALE)
+			HeldItem.MakeVisual(id, tonumber(rawLevel) or 0, SPRITE_SCALE, variant)
 		for _, part in ipairs(container:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch =
@@ -115,7 +126,9 @@ function FirstPersonHand.Start()
 			end
 			model.Parent = camera
 			arm.Color = skinColor(character)
-			setItem(character:GetAttribute("HeldItem"))
+			local held = character:GetAttribute("HeldItem")
+			local isBow = typeof(held) == "string" and string.sub(held, 1, 4) == "bow:"
+			setItem(held, if isBow then BowState.ModelId(character) else nil)
 			arm.Transparency = if item then 1 else 0
 			-- walking bob (Minecraft view bobbing, small) and the swing
 			local speed =
@@ -183,6 +196,19 @@ function FirstPersonHand.Start()
 			local handFrame = camera.CFrame * swingShift * REST * bobOffset * swingOffset
 			-- the arm comes from below the screen edge towards the hand point
 			arm.CFrame = handFrame * CFrame.new(0, -0.05, ARM_SIZE.Z / 2 - 0.05)
+			if item and itemPart and itemId == "bow" and item:IsA("Model") then
+				local drawn = BowState.Drawn(character)
+				local pull = if BowState.DrawStart(character)
+					then math.clamp(drawn / 0.4, 0, 1)
+					else 0
+				local shake = if BowState.Power(drawn) >= 1 and pull > 0
+					then CFrame.new(0, math.sin(os.clock() * 40) * 0.006, 0)
+					else CFrame.identity
+				local place = BOW_REST:Lerp(BOW_DRAWN, pull * pull * (3 - 2 * pull))
+				item:PivotTo(camera.CFrame * bobOffset * place * shake * BOW_FACE)
+				arm.Transparency = 1
+				return
+			end
 			if item and itemPart then
 				local grip = if itemIsCube
 					then CFrame.new(-0.05 * GRIP_SCALE, 0.18 * GRIP_SCALE, -0.12 * GRIP_SCALE)

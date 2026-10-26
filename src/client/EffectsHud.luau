@@ -17,6 +17,7 @@ local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
 local Remotes = require(Shared.Remotes)
 local Ui = require(script.Parent.Ui)
+local BowState = require(script.Parent.BowState)
 
 local BOX = 40
 local GAP = 4
@@ -224,7 +225,9 @@ function EffectsHud.start(
 			nausea = math.clamp(nausea + (if level("Nausea") > 0 then dt / 3 else -dt / 1.5), 0, 1)
 			local speed = (1 - Effects.SLOWNESS_PER_LEVEL * level("Slowness"))
 				* (1 + Effects.SPEED_PER_LEVEL * level("Speed"))
-			local target = (math.max(0, speed) + 1) / 2
+			-- [ваниль] drawing a bow zooms in: FOV × (1 − 0.15 · f), f = (t / 1 s)², at most 1
+			local drawn = math.min(BowState.Drawn(character) / Config.vanilla.bow.drawSeconds, 1)
+			local target = (math.max(0, speed) + 1) / 2 * (1 - 0.15 * drawn * drawn)
 			fovFactor += (target - fovFactor) * math.min(1, dt * 6)
 			local hurtAge = os.clock() - hurtAt
 			local hurt = if hurtAge < HURT_SECONDS then 1 - hurtAge / HURT_SECONDS else 0
