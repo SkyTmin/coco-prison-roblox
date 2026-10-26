@@ -1,5 +1,5 @@
 {
-  "source": "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)",
+  "source": "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0); block = our own faces (assets/armor/block/ids.json)",
   "_source": "assets/armor/*.png — face crops of VoxeLibre / Pixel Perfection armor layers (CC BY-SA 4.0), upscaled ×8, uploaded via Studio MCP upload_image 21.10.2026. Key: <piece>_<material>_<limb>_<face>; material keys wood=leather, stone=chain",
   "glint": "rbxassetid://85751773097355",
   "faces": {

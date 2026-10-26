@@ -5,12 +5,13 @@
 -- assets/armor/ids.json). Enchanted pieces (level with an enchant > 0) get a purple glint overlay.
 -- The server owns the `Armor` attribute ("helmet:<level>,chestplate:<level>,...").
 -- Our block body (character attribute BlockBody, AvatarService) wears our own armor [владелец 26.10: «броню сделаем по
--- телу»; «броню также делаем новую в блендер: кожаная, кольчужная, железная и алмазная»]: assets/models/armor/armor.py
--- → Shared.Models.armor. It sits as Minecraft's: each box wraps a whole limb grown by 1 px on every side (leggings ½ px,
--- the inner layer, so the chestplate and the boots cover them) and covers rows r0..r1 of it; its faces are thin plates
--- (a shell sunk under the grown surface, details standing on it), transparent where the body shows. The limbs never
--- bend (CharacterAnimator), so a box may run past its part onto the next one (the lower arm's over the hand, the boots
--- up the shin). R15 avatars (showcase mannequins) keep the old textured per-part boxes.
+-- телу»; «броню делаем новую в блендер: кожаная, кольчужная, железная и алмазная»; «бери пример с майна»]
+-- (assets/models/armor/armor.py → assets/armor/block/*.png → Config.armor.block, faces named as Roblox's). It sits as
+-- Minecraft's: each box wraps a whole limb grown by 1 px on every side (leggings ½ px, the inner layer, so the
+-- chestplate and the boots cover them) and covers rows r0..r1 of it. The limbs never bend (CharacterAnimator), so a box
+-- may run past its part onto the next one (the lower arm's over the hand, the boots up the shin). Until our faces are
+-- uploaded the block body wears the VoxeLibre ones on the same boxes. R15 avatars (showcase mannequins) keep the old
+-- per-part boxes.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -18,9 +19,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
-local BlockFaces = require(Shared.BlockFaces)
 local Body = require(Shared.Models.player) :: any
-local Armor = require(Shared.Models.armor) :: any
 
 type Rig = { character: Model, connections: { RBXScriptConnection }, visual: Model? }
 
@@ -75,11 +74,73 @@ for _, boxes in pairs(BOXES) do
 		limbNames[box.limb] = true
 	end
 end
-for _, boxes in pairs(Armor.boxes) do
+-- the block body's boxes (assets/models/armor/armor.py BOXES): the part, the rows a0..a1 of the limb it holds, the
+-- limb (length × width × depth px), the texture key, the rows r0..r1 the box covers, the growth per side in px
+type BlockBox = {
+	part: string,
+	a0: number,
+	a1: number,
+	length: number,
+	width: number,
+	depth: number,
+	key: string,
+	r0: number,
+	r1: number,
+	grow: number,
+}
+local function blockBox(
+	part: string,
+	a0: number,
+	a1: number,
+	key: string,
+	r0: number,
+	r1: number,
+	grow: number
+): BlockBox
+	local head, body = key == "head", key == "torsoupper" or key == "torsolower" or key == "torso"
+	return {
+		part = part,
+		a0 = a0,
+		a1 = a1,
+		length = if head then 8 else 12,
+		width = if head or body then 8 else 4,
+		depth = if head then 8 else 4,
+		key = key,
+		r0 = r0,
+		r1 = r1,
+		grow = grow,
+	}
+end
+local BLOCK_BOXES: { [string]: { BlockBox } } = {
+	helmet = { blockBox("Head", 0, 8, "head", 0, 8, 1) },
+	chestplate = {
+		blockBox("UpperTorso", 0, 8, "torsoupper", 0, 8, 1),
+		blockBox("LowerTorso", 8, 12, "torsolower", 8, 12, 1),
+	},
+	leggings = { blockBox("LowerTorso", 8, 12, "torso", 6, 12, 0.5) },
+	boots = {},
+}
+for _, side in ipairs({ "Right", "Left" }) do
+	table.insert(BLOCK_BOXES.chestplate, blockBox(side .. "UpperArm", 0, 6, "upperarm", 0, 6, 1))
+	table.insert(BLOCK_BOXES.chestplate, blockBox(side .. "LowerArm", 6, 10, "lowerarm", 6, 12, 1))
+	table.insert(BLOCK_BOXES.leggings, blockBox(side .. "UpperLeg", 0, 6, "upperleg", 0, 6, 0.5))
+	table.insert(BLOCK_BOXES.leggings, blockBox(side .. "LowerLeg", 6, 10, "lowerleg", 6, 12, 0.5))
+	table.insert(BLOCK_BOXES.boots, blockBox(side .. "Foot", 10, 12, "foot", 9, 12, 1))
+end
+for _, boxes in pairs(BLOCK_BOXES) do
 	for _, box in ipairs(boxes) do
-		limbNames[box[1]] = true
+		limbNames[box.part] = true
 	end
 end
+-- our faces are named as Roblox's (right = +X, the character's right)
+local OWN_FACES: { [string]: Enum.NormalId } = {
+	front = Enum.NormalId.Front,
+	back = Enum.NormalId.Back,
+	right = Enum.NormalId.Right,
+	left = Enum.NormalId.Left,
+	top = Enum.NormalId.Top,
+	bottom = Enum.NormalId.Bottom,
+}
 
 local function faceTexture(piece: string, material: string, key: string, face: string): string?
 	local faces = Config.armor and Config.armor.faces
@@ -87,6 +148,29 @@ local function faceTexture(piece: string, material: string, key: string, face: s
 		return nil
 	end
 	return faces[piece .. "_" .. material .. "_" .. key .. "_" .. face]
+end
+
+-- the face images of one box: { [Roblox face]: texture } — our own on the block body once uploaded, else VoxeLibre's
+local function boxTextures(
+	piece: string,
+	material: string,
+	key: string,
+	own: boolean
+): { [Enum.NormalId]: string }
+	local out = {}
+	local block = own and Config.armor and (Config.armor :: any).block
+	if block then
+		for face, normal in pairs(OWN_FACES) do
+			out[normal] = block[piece .. "_" .. material .. "_" .. key .. "_" .. face]
+		end
+		if next(out) then
+			return out
+		end
+	end
+	for face, normal in pairs(FACES) do
+		out[normal] = faceTexture(piece, material, key, face)
+	end
+	return out
 end
 
 local function enchanted(id: string, level: number): boolean
@@ -103,7 +187,8 @@ local function makeBox(
 	key: string,
 	size: Vector3,
 	centreY: number,
-	glint: boolean
+	glint: boolean,
+	own: boolean
 )
 	local part = Instance.new("Part")
 	part.Name = piece .. "_" .. limb.Name
@@ -116,26 +201,23 @@ local function makeBox(
 	local offset = CFrame.new(0, centreY, 0)
 	part.CFrame = limb.CFrame * offset
 	local any = false
-	for face, normal in pairs(FACES) do
-		local texture = faceTexture(piece, material, key, face)
-		if texture then
-			local decal = Instance.new("Decal")
-			decal.Name = face
-			decal.Face = normal
-			decal.Texture = texture
-			decal.Parent = part
-			any = true
-			if glint then
-				local g = Instance.new("Decal")
-				g.Name = "Glint"
-				g.Face = normal
-				g.Texture = Config.armor.glint or ""
-				g.Transparency = 0.55
-				g.Color3 = Color3.fromRGB(200, 120, 255)
-				g.ZIndex = 2
-				g.Parent = part
-				glintDecals[g] = true
-			end
+	for normal, texture in pairs(boxTextures(piece, material, key, own)) do
+		local decal = Instance.new("Decal")
+		decal.Name = normal.Name
+		decal.Face = normal
+		decal.Texture = texture
+		decal.Parent = part
+		any = true
+		if glint then
+			local g = Instance.new("Decal")
+			g.Name = "Glint"
+			g.Face = normal
+			g.Texture = Config.armor.glint or ""
+			g.Transparency = 0.55
+			g.Color3 = Color3.fromRGB(200, 120, 255)
+			g.ZIndex = 2
+			g.Parent = part
+			glintDecals[g] = true
 		end
 	end
 	if not any then
@@ -164,73 +246,25 @@ local function buildBox(
 	local height = fullY * (box.y1 - box.y0)
 	local centreY = fullY / 2 - fullY * (box.y0 + box.y1) / 2 -- limb-space Y of the slice centre
 	local size = Vector3.new(limb.Size.X + pad, height, limb.Size.Z + pad)
-	makeBox(parent, limb, piece, material, box.key, size, centreY, glint)
+	makeBox(parent, limb, piece, material, box.key, size, centreY, glint, false)
 end
 
--- a block body's armor piece: per box [part, a0, a1, length, width, depth, r0, r1, grow] (px: the part holds rows
--- a0..a1 of a limb length × width × depth, the box is rows r0..r1 of that limb grown by `grow` a side) the plates of
--- its faces, [u0, v0, u1, v1, hex, layer] fractions of the face
-local function buildBlockArmor(parent: Model, character: Model, piece: string, material: string)
-	local set = Armor.sets[material] and Armor.sets[material][piece]
-	if not set then
-		return
-	end
+-- a block body's box: the limb grown by `grow` px a side, rows r0..r1 of it; the part holds rows a0..a1
+local function buildBlockBox(
+	parent: Model,
+	limb: BasePart,
+	piece: string,
+	material: string,
+	box: BlockBox,
+	glint: boolean
+)
 	local px: number = Body.px
-	local thick: number, lift: number = Armor.thick, Armor.lift
-	for i, box in ipairs(Armor.boxes[piece]) do
-		local limb = character:FindFirstChild(box[1])
-		local faces = set[i]
-		if not limb or not limb:IsA("BasePart") or not faces then
-			continue
-		end
-		local a0, a1, length, width, depth, r0, r1, grow = table.unpack(box, 2, 9)
-		local grown = length + 2 * grow
-		local top = (a0 + a1) / 2 + grow -- the grown limb's top, px above the part's centre
-		local y0 = top - grown * r0 / length
-		local y1 = top - grown * r1 / length
-		local size = Vector3.new(width + 2 * grow, y0 - y1, depth + 2 * grow) * px
-		local centre = limb.CFrame * CFrame.new(0, (y0 + y1) / 2 * px, 0)
-		local half = size / 2
-		for face, rects in pairs(faces) do
-			local f = BlockFaces[face]
-			local alongRight = math.abs(f.right:Dot(size))
-			local alongDown = math.abs(f.down:Dot(size))
-			local origin = f.tl * half
-			for _, rect in ipairs(rects) do
-				local u0, v0, u1, v1, colour, layer =
-					rect[1], rect[2], rect[3], rect[4], rect[5], rect[6]
-				local plate = Instance.new("Part")
-				plate.Name = piece
-				plate.Size = Vector3.new(
-					math.abs(f.right.X) * (u1 - u0) * alongRight
-						+ math.abs(f.down.X) * (v1 - v0) * alongDown
-						+ math.abs(f.normal.X) * thick,
-					math.abs(f.right.Y) * (u1 - u0) * alongRight
-						+ math.abs(f.down.Y) * (v1 - v0) * alongDown
-						+ math.abs(f.normal.Y) * thick,
-					math.abs(f.right.Z) * (u1 - u0) * alongRight
-						+ math.abs(f.down.Z) * (v1 - v0) * alongDown
-						+ math.abs(f.normal.Z) * thick
-				)
-				local at = origin
-					+ f.right * ((u0 + u1) / 2 * alongRight)
-					+ f.down * ((v0 + v1) / 2 * alongDown)
-					- f.normal * (thick / 2 - (if layer == 1 then lift else 0))
-				plate.CFrame = centre * CFrame.new(at)
-				plate.Color = Color3.fromHex(colour)
-				plate.Material = Enum.Material.SmoothPlastic
-				plate.TopSurface, plate.BottomSurface =
-					Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
-				plate.Massless = true
-				plate.CanCollide, plate.CanTouch, plate.CanQuery = false, false, false
-				plate.CastShadow = layer == 0
-				local weld = Instance.new("WeldConstraint")
-				weld.Part0, weld.Part1 = limb, plate
-				weld.Parent = plate
-				plate.Parent = parent
-			end
-		end
-	end
+	local grown = box.length + 2 * box.grow
+	local top = (box.a0 + box.a1) / 2 + box.grow -- the grown limb's top, px above the part's centre
+	local y0 = top - grown * box.r0 / box.length
+	local y1 = top - grown * box.r1 / box.length
+	local size = Vector3.new(box.width + 2 * box.grow, y0 - y1, box.depth + 2 * box.grow) * px
+	makeBox(parent, limb, piece, material, box.key, size, (y0 + y1) / 2 * px, glint, true)
 end
 
 -- Minecraft draws armor over the skin and hides nothing else, but Roblox avatars wear bulky layered
@@ -295,7 +329,12 @@ local function render(rig: Rig)
 		local glint = enchanted(id, level)
 		anyGlint = anyGlint or glint
 		if block then
-			buildBlockArmor(visual, rig.character, id, material) -- an enchanted piece glows (EnchantGlow below)
+			for _, box in ipairs(BLOCK_BOXES[id] or {}) do
+				local limb = rig.character:FindFirstChild(box.part)
+				if limb and limb:IsA("BasePart") then
+					buildBlockBox(visual, limb, id, material, box, glint)
+				end
+			end
 		else
 			for _, box in ipairs(boxes) do
 				local limb = rig.character:FindFirstChild(box.limb)

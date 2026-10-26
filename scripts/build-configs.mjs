@@ -1,6 +1,6 @@
 // Generates src/shared/Config/*.json from confirmed wiki data + scripts/design-decisions.json.
 // Usage: node scripts/build-configs.mjs
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -231,7 +231,13 @@ const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tier
 }));
 write("artifacts.json", { source: "[меню, клиент]; шанс за блок [владелец], из кейса [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
-write("armor.json", { source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0)", ...read("assets/armor/ids.json") });
+// our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
+const blockArmor = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json").faces : undefined;
+write("armor.json", {
+	source: "assets/armor/ids.json — textured armor faces (CC BY-SA 4.0); block = our own faces (assets/armor/block/ids.json)",
+	...read("assets/armor/ids.json"),
+	...(blockArmor ? { block: blockArmor } : {}),
+});
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
 // a ModuleScript holds at most 200 000 characters: the Blender item models get their own file
 write("itemmodels.json", { source: "assets/icons/models3d.json — Blender voxel item models (assets/models/*/<item>.py -- export)", ...read("assets/icons/models3d.json") });

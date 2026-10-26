@@ -1,340 +1,586 @@
 # Our armor for the block body [владелец 26.10: «броню сделаем по телу»; «броню также делаем новую в блендер. Кожаная
-# броня, кольчужная, железная и алмазная»]. Minecraft's way of wearing it (assets/models/player/player.py has the body):
-# each piece is a shell round whole limbs grown by 1 px on every side (leggings ½ px, the inner layer), painted per
-# face on the limb's own pixel grid (head 8³, body 8×12×4, arms and legs 4×12×4), transparent where the body shows.
-# The pixels and colours are ours (nothing from Minecraft or VoxeLibre): leather — a stitched jerkin, a cap with ear
-# flaps, laces; chain — rows of rings, a coif; iron — plates with seams and rivets, a helmet with a nose guard;
-# diamond — faceted plates with sparkles, long cheek guards. Material keys as in the game: wood = leather,
-# stone = chain, iron, diamond.
+# броня, кольчужная, железная и алмазная»; «такое себе, слабо очень. Бери пример с майна»]. Made the way Minecraft makes
+# it, with our own pixels: each piece is a box round a whole limb grown by 1 px on every side (leggings ½ px, the inner
+# layer), textured per face on the limb's own pixel grid (head 8³, body 8×12×4, arms and legs 4×12×4) and transparent
+# where the body shows. The look follows Minecraft's armor: a dark outline where the armor ends, light from the upper
+# left, 4–6 shades of one colour with scattered off-tone pixels, plates split by darker grooves; the chainmail is a see-
+# through mesh. The shapes are drawn below as shade maps (0 = outline … 5 = highlight, letters = accents, "." = open)
+# and coloured per material; nothing is copied from a Minecraft or VoxeLibre texture.
+# Material keys as in the game: wood = leather, stone = chain, iron, diamond.
 #
 # Run: "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P assets/models/armor/armor.py
-#   → render-<material>-{front,34,back}.png on the body (built exactly as the game builds it), armor-sheet.png;
-# "… -- export" → src/shared/Models/armor.json: the boxes (part, rows, growth) and per material and piece the plates of
-#   each face as [u0, v0, u1, v1, hex, layer] fractions of the face (layer 0 = the shell, 1 = details on it) —
-#   ArmorVisual.luau builds them.
-import json
+#   → assets/armor/block/<piece>_<material>_<key>_<face>.png (the Decal images, ×8, faces named as Roblox's: right = +X,
+#   the character's right), render-<material>-{front,34,back}.png on the body (boxes as ArmorVisual builds them),
+#   armor-sheet.png (node tiling, see the end of this file), armor.blend.
+#   Upload the PNGs (Studio upload_image) → assets/armor/block/ids.json {"faces": {name: id}} → node scripts/build-configs.mjs
+#   → Config.armor.block; until then the block body wears the old VoxeLibre faces.
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
+OUT = os.path.join(ROOT, "assets", "armor", "block")
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "player"))
 import player  # noqa: E402
 
-THICK = 0.06  # studs: the shell plates, sunk under the grown surface
-LIFT = 0.012  # studs: the detail plates stand this far out of the shell
-
 MATERIALS = ("wood", "stone", "iron", "diamond")
+# shades 0 (outline) … 5 (highlight) and accents
 PALETTES = {
-    "wood": {"base": "#8d5b33", "light": "#a9733f", "mid": "#774a28", "dark": "#5a381b", "stitch": "#d8bf8c", "lace": "#3a2414"},
-    "stone": {"base": "#7b8087", "light": "#b9bdc3", "mid": "#969ba2", "dark": "#3f4349"},
-    "iron": {"base": "#c3c6c9", "light": "#eceef0", "mid": "#9a9ea2", "dark": "#686c70", "rivet": "#4f5357"},
-    "diamond": {"base": "#45c4d1", "light": "#93ecf2", "white": "#e2ffff", "mid": "#2b9bab", "dark": "#176877"},
+    "wood": ["#3a2213", "#5b3920", "#744a2a", "#8d5b34", "#a7703f", "#c2874f"],
+    "stone": ["#2b2e32", "#4b4f55", "#6b7077", "#8e939a", "#b2b6bc", "#d2d5d9"],
+    "iron": ["#3e4144", "#6a6e72", "#8e9296", "#b3b7ba", "#d4d7d9", "#eff1f2"],
+    "diamond": ["#0d4850", "#197784", "#25a0ab", "#3dc5cd", "#80e2e5", "#cbfbfb"],
+}
+ACCENTS = {
+    "wood": {"a": "#2a180c", "b": "#dcc08b"},  # laces, stitches
+    "stone": {"a": "#2b2e32", "b": "#d2d5d9"},
+    "iron": {"a": "#55595d", "b": "#f7f8f8"},  # rivets, glints
+    "diamond": {"a": "#0f5e67", "b": "#f4ffff"},  # the gem's setting, sparkles
 }
 SIZES = {"head": (8, 8, 8), "body": (8, 12, 4), "arm": (4, 12, 4), "leg": (4, 12, 4)}
-SIDES = ("front", "back", "right", "left")
-# the faces of a right limb that touch the body or the other leg: never seen, never built
-INNER = {"arm": "left", "leg": "left"}
 
 
-def rows(a, b):
-    return range(a, b)
+def rows_of(text):
+    return [list(line) for line in text.split()]
 
 
-# ---------------------------------------------------------------- shapes: {face: set((col, row))} on the limb grids
-def full(limb, face, r_from=0, r_to=None):
-    w, h = player.dims(SIZES[limb], face)
-    r_to = h if r_to is None else r_to
-    return {(c, r) for c in range(w) for r in range(r_from, r_to)}
+def blank(w, h):
+    return [["."] * w for _ in range(h)]
 
 
-def toward_front(face, c):
-    """0 = the back edge … 7 = the front edge of an 8-wide head side."""
-    return c if face == "right" else 7 - c
+def fill(grid, rows, start=0):
+    """Puts shade rows into a grid from row `start`."""
+    for i, row in enumerate(rows):
+        grid[start + i] = list(row)
+    return grid
 
 
-def helmet_shape(mat):
-    s = {"top": full("head", "top")}
-    if mat == "wood":  # a cap with ear flaps
-        s["front"] = full("head", "front", 0, 2)
-        for face in ("right", "left"):
-            s[face] = full("head", face, 0, 7)
-        s["back"] = full("head", "back", 0, 7)
-    elif mat == "stone":  # a coif: round the face, under the chin
-        s["front"] = full("head", "front", 0, 2) | {(c, r) for c in (0, 7) for r in rows(2, 7)} | {(c, 7) for c in range(8)}
-        for face in ("right", "left", "back"):
-            s[face] = full("head", face)
-        s["bottom"] = full("head", "bottom")
-    elif mat == "iron":  # a helm with a nose guard and cheek guards
-        s["front"] = full("head", "front", 0, 2) | {(c, 2) for c in (0, 1, 3, 4, 6, 7)} | {(c, r) for c in (0, 3, 4, 7) for r in (3, 4)} | {(0, 5), (7, 5)}
-        for face in ("right", "left"):
-            s[face] = full("head", face, 0, 6) | {(c, 6) for c in range(8) if toward_front(face, c) <= 3}
-        s["back"] = full("head", "back", 0, 7)
-    else:  # diamond: long cheek guards, the brow dips at the middle
-        s["front"] = full("head", "front", 0, 2) | {(c, 2) for c in (0, 1, 3, 4, 6, 7)} | {(c, r) for c in (0, 7) for r in rows(3, 7)}
-        for face in ("right", "left"):
-            s[face] = full("head", face, 0, 7)
-        s["back"] = full("head", "back")
-    return {"head": s}
+# ---------------------------------------------------------------- shade maps. Every grid is seen from outside: column
+# 0 on the viewer's left, row 0 at the top. Head and body sides are drawn as the RIGHT face (column 0 = the back) and
+# mirrored for the left face; arms and legs get the same outer face on both sides (the inner one is never seen).
+PLATE = {  # iron and diamond share the plate armor shapes
+    "head": {
+        "front": """
+            45555543
+            34444432
+            21100112
+            3......2
+            3......2
+            1......0
+            ........
+            ........""",
+        "side": """
+            45555554
+            34444443
+            34333332
+            33133332
+            23333322
+            22222221
+            1111000.
+            0000....""",
+        "back": """
+            45555554
+            34444443
+            34333332
+            33333332
+            33333332
+            23333322
+            22222221
+            00000000""",
+        "top": """
+            34444443
+            45555554
+            45444454
+            45433454
+            45433454
+            45444454
+            34444443
+            23333332""",
+    },
+    "body": {
+        "front": """
+            45500554
+            45555554
+            34444443
+            34414443
+            33313332
+            21111112
+            34414443
+            33313332
+            21111112
+            33333332
+            00000000
+            ........""",
+        "back": """
+            34444443
+            45555554
+            34444443
+            33333332
+            33333332
+            21111112
+            34444443
+            33333332
+            21111112
+            33333332
+            00000000
+            ........""",
+        "side": """
+            4554
+            4443
+            3332
+            3332
+            3332
+            2111
+            3443
+            3332
+            2111
+            3332
+            0000
+            ....""",
+        "top": """
+            34444443
+            45555554
+            45555554
+            23333332""",
+    },
+    "arm": {
+        "front": """
+            4554
+            4443
+            3332
+            3332
+            2221
+            0000""",
+        "top": """
+            4554
+            5555
+            4554
+            3443""",
+    },
+    "legs_body": {  # the leggings' waist: rows 8–12 of the body
+        "front": """
+            344aa443
+            21100112
+            33313332
+            33313332""",
+        "back": """
+            34444443
+            21111112
+            33333332
+            33333332""",
+        "side": """
+            3443
+            2111
+            3332
+            3332""",
+    },
+    "leg": {
+        "front": """
+            3443
+            3332
+            3332
+            3332
+            2221
+            4554
+            3443
+            2221
+            3332
+            0000""",
+        "back": """
+            3443
+            3332
+            3332
+            3332
+            2221
+            3332
+            3332
+            2221
+            3332
+            0000""",
+    },
+    "boots": {
+        "front": """
+            4554
+            3443
+            1111""",
+        "back": """
+            4554
+            3332
+            1111""",
+        "bottom": """
+            0110
+            1221
+            1221
+            0110""",
+    },
+}
+
+LEATHER = {
+    "head": {
+        "front": """
+            45555554
+            34444443
+            1b1bb1b1
+            2......2
+            1......1
+            ........
+            ........
+            ........""",
+        "side": """
+            45555554
+            34444443
+            33333332
+            33333332
+            33333332
+            23333322
+            1b1b1b1.
+            ........""",
+        "back": """
+            45555554
+            34444443
+            33333332
+            33333332
+            33333332
+            23333332
+            1b1b1b1b
+            ........""",
+        "top": """
+            34444443
+            44555544
+            45544554
+            45444454
+            45444454
+            45544554
+            34455443
+            23333332""",
+    },
+    "body": {
+        "front": """
+            344..443
+            3440 0443
+            333a4333
+            3334a332
+            333a4332
+            3334a332
+            33333332
+            33333332
+            3b3b3b32
+            11111111
+            ........
+            ........""",
+        "back": """
+            34444443
+            44444443
+            33333332
+            33333332
+            33333332
+            33333332
+            33333332
+            33333332
+            3b3b3b32
+            11111111
+            ........
+            ........""",
+        "side": """
+            4443
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            3b32
+            1111
+            ....
+            ....""",
+        "top": """
+            34444443
+            44555544
+            44555544
+            33333332""",
+    },
+    "arm": {
+        "front": """
+            4443
+            3332
+            3332
+            b3b2
+            1111""",
+        "top": """
+            4444
+            4554
+            4554
+            3443""",
+    },
+    "legs_body": {
+        "front": """
+            1111a111
+            33313332
+            33313332
+            33313332""",
+        "back": """
+            11111111
+            33333332
+            33333332
+            33333332""",
+        "side": """
+            1111
+            3332
+            3332
+            3332""",
+    },
+    "leg": {
+        "front": """
+            3443
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            b3b2
+            1111""",
+        "back": """
+            3443
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            3332
+            3b32
+            1111""",
+    },
+    "boots": {
+        "front": """
+            4aa4
+            3aa3
+            1111""",
+        "back": """
+            4444
+            3332
+            1111""",
+        "bottom": """
+            0110
+            1221
+            1221
+            0110""",
+    },
+}
+
+CHAIN_HEAD = {  # the coif: round the face and under the chin
+    "front": """
+        45555554
+        34444443
+        3......3
+        3......3
+        3......3
+        2......2
+        2......2
+        21111112""",
+    "side": """
+        45555554
+        34444443
+        33333333
+        33333333
+        33333333
+        33333333
+        23333332
+        11111111""",
+    "back": """
+        45555554
+        34444443
+        33333333
+        33333333
+        33333333
+        33333333
+        23333332
+        11111111""",
+    "top": PLATE["head"]["top"],
+}
 
 
-def chest_shape(mat):
-    bottom = {"wood": 10, "stone": 11, "iron": 10, "diamond": 10}[mat]
-    body = {f: full("body", f, 0, bottom) for f in SIDES}
-    body["top"] = full("body", "top")
+def shapes(mat):
     if mat == "wood":
-        body["front"] -= {(3, 0), (4, 0)}  # the open collar
-    arm_rows = {"wood": [(0, 5)], "stone": [(0, 8)], "iron": [(0, 5), (8, 11)], "diamond": [(0, 6), (8, 12)]}[mat]
-    arm = {}
-    for f in SIDES:
-        if f != INNER["arm"]:
-            arm[f] = set().union(*(full("arm", f, a, b) for a, b in arm_rows))
-    arm["top"] = full("arm", "top")
-    return {"body": body, "arm": arm}
+        return LEATHER
+    if mat == "stone":
+        out = dict(PLATE)
+        out["head"] = CHAIN_HEAD
+        return out
+    return PLATE
 
 
-def legs_shape(mat):
-    body = {f: full("body", f, 8, 12) for f in SIDES}
-    leg = {f: full("leg", f, 0, 9) for f in SIDES if f != INNER["leg"]}
-    return {"body": body, "leg": leg}
+def parse(text):
+    return [row.replace(" ", "") for row in text.split("\n") if row.strip()]
 
 
-def boots_shape(mat):
-    top = 8 if mat == "wood" else 9  # leather boots reach a pixel higher (only rows 9–12 are inside the boots' box)
-    leg = {f: full("leg", f, max(top, 9), 12) for f in SIDES if f != INNER["leg"]}
-    leg["bottom"] = full("leg", "bottom")
-    return {"leg": leg}
-
-
-SHAPES = {"helmet": helmet_shape, "chestplate": chest_shape, "leggings": legs_shape, "boots": boots_shape}
-
-
-# ---------------------------------------------------------------- colours
-def paint(mat, piece, limb, face, shape):
-    """{(c, r): hex} for the covered pixels of one face. Patterns run along rows so the plates merge (fewer parts)."""
-    pal = PALETTES[mat]
-    w, h = player.dims(SIZES[limb], face)
+def limb_faces(mat, piece):
+    """{limb key: {face: shade grid}} for the piece; limb keys head, body, arm, leg; face grids at full limb size."""
+    S = shapes(mat)
     out = {}
-    side = face in SIDES
-    wide = side and w >= 8  # the body's front and back, the head's faces
-    for (c, r) in shape:
-        role = "base"
-        hem = side and (c, r + 1) not in shape
-        rim = side and (c, r - 1) not in shape
-        border = not side and (c in (0, w - 1) or r in (0, h - 1))
-        ridge = wide and limb == "body" and face == "front" and c in (3, 4)  # the breastplate's middle
-        knee = limb == "leg" and side and r in (5, 6)
-        if mat == "wood":
-            if (c * 7 + r * 13 + len(face)) % 17 == 0:
-                role = "mid"
-            if side and (c, r + 2) not in shape and (c, r + 1) in shape and c % 2 == 0:
-                role = "stitch"
-            if piece == "chestplate" and limb == "body" and face == "front" and 1 <= r <= 7 and c == (3 if r % 2 else 4):
-                role = "lace"
-            if piece == "boots" and face == "front" and r == 10 and c in (1, 2):
-                role = "lace"
-            if border:
-                role = "mid"
-            if rim:
-                role = "light"
-            if hem or face == "bottom":
-                role = "dark"
-        elif mat == "stone":
-            # rows of rings (light) over the dark links, a link every fourth pixel between them
-            if side or face == "bottom":
-                role = "light" if r % 2 == 0 else ("dark" if (c + r) % 4 == 1 else "base")
-            elif border:
-                role = "mid"
-            if hem:
-                role = "dark"
-        elif mat == "iron":
-            if side and r % 4 == 3:
-                role = "mid"  # the seams between the plates
-            if ridge and r < 9:
-                role = "light"
-            if knee:
-                role = "light" if r == 5 else "mid"
-            if wide and r % 4 == 1 and c in (1, w - 2):
-                role = "rivet"
-            if piece == "helmet" and face == "front" and c in (3, 4) and r >= 2:
-                role = "mid" if r < 4 else "dark"  # the nose guard
-            if piece == "helmet" and face == "top" and c in (3, 4):
-                role = "light"  # the crest
-            if border:
-                role = "mid"
-            if rim:
-                role = "light"
-            if hem or (piece == "boots" and face == "bottom"):
-                role = "dark"
-        else:  # diamond
-            if side and r % 4 == 3:
-                role = "mid"
-            if side and r % 4 == 0:
-                role = "light"  # each plate catches the light at its top
-            if ridge and r < 9:
-                role = "white" if r % 4 == 1 else "light"
-            if knee:
-                role = "white" if r == 5 else "mid"
-            if wide and r % 4 == 1 and c in (1, w - 2):
-                role = "white"  # a sparkle on each plate
-            if piece == "helmet" and face == "top" and c in (3, 4):
-                role = "white" if r in (3, 4) else "light"
-            if border:
-                role = "mid"
-            if rim:
-                role = "light"
-            if hem or (piece == "boots" and face == "bottom"):
-                role = "dark"
-        out[(c, r)] = pal[role]
-    return out
 
-
-def mirror(faces, limb):
-    """A right limb's faces → the left limb's (mirrored across X)."""
-    w = {f: player.dims(SIZES[limb], f)[0] for f in player.FACES}
-    flip = lambda f, px: {(w[f] - 1 - c, r): v for (c, r), v in px.items()}  # noqa: E731
-    out = {}
-    for f, px in faces.items():
-        target = {"right": "left", "left": "right"}.get(f, f)
-        out[target] = flip(f, px)
-    return out
-
-
-def painted(mat, piece):
-    """{limb key: {face: {(c, r): hex}}} with limb keys head, body, rarm, larm, rleg, lleg."""
-    out = {}
-    for limb, faces in SHAPES[piece](mat).items():
-        px = {f: paint(mat, piece, limb, f, shape) for f, shape in faces.items() if shape}
-        if limb in ("arm", "leg"):
-            out["r" + limb] = px
-            out["l" + limb] = mirror(px, limb)
-        else:
-            out[limb] = px
-    return out
-
-
-# ---------------------------------------------------------------- boxes: (part, a0, a1, limb key, r0, r1, grow)
-def boxes(piece):
-    if piece == "helmet":
-        return [("Head", 0, 8, "head", 0, 8, 1)]
-    out = []
-    if piece == "chestplate":
-        out += [("UpperTorso", 0, 8, "body", 0, 8, 1), ("LowerTorso", 8, 12, "body", 8, 12, 1)]
-    elif piece == "leggings":
-        out += [("LowerTorso", 8, 12, "body", 8, 12, 0.5)]
-    for side, key in (("Right", "r"), ("Left", "l")):
-        if piece == "chestplate":
-            out += [(side + "UpperArm", 0, 6, key + "arm", 0, 6, 1), (side + "LowerArm", 6, 10, key + "arm", 6, 12, 1)]
-        elif piece == "leggings":
-            out += [(side + "UpperLeg", 0, 6, key + "leg", 0, 6, 0.5), (side + "LowerLeg", 6, 10, key + "leg", 6, 12, 0.5)]
-        elif piece == "boots":
-            out += [(side + "Foot", 10, 12, key + "leg", 9, 12, 1)]
-    return out
-
-
-def limb_size(key):
-    return SIZES[key[1:] if key[0] in "rl" and key[1:] in ("arm", "leg") else key]
-
-
-def face_rects(px, w, h):
-    """The shell (the covered shape in its commonest colour) and the details over it: [[u0, v0, u1, v1, hex, layer]]."""
-    if not px:
-        return []
-    counts = {}
-    for v in px.values():
-        counts[v] = counts.get(v, 0) + 1
-    base = max(counts, key=counts.get)
-    shape = [[("x" if (c, r) in px else "") for c in range(w)] for r in range(h)]
-    detail = [[(px[(c, r)] if (c, r) in px and px[(c, r)] != base else "") for c in range(w)] for r in range(h)]
-    out = []
-    for c, r, rw, rh, _ in player.rects(shape, ""):
-        out.append([round(c / w, 4), round(r / h, 4), round((c + rw) / w, 4), round((r + rh) / h, 4), base, 0])
-    for c, r, rw, rh, col in player.rects(detail, ""):
-        out.append([round(c / w, 4), round(r / h, 4), round((c + rw) / w, 4), round((r + rh) / h, 4), col, 1])
-    return out
-
-
-def box_faces(mat, piece):
-    """Per box of `piece`: {face: rects}, the side faces cut to the box's rows."""
-    paint_all = painted(mat, piece)
-    out = []
-    for part, a0, a1, key, r0, r1, grow in boxes(piece):
-        size = limb_size(key)
-        length = size[1]
+    def sides(part, size, start, src):
+        """front/back/right/left/top/bottom grids of one limb from a shape group placed from row `start`."""
+        w, h, d = size
         faces = {}
-        for face, px in paint_all.get(key, {}).items():
-            w, h = player.dims(size, face)
-            if face in SIDES:
-                cut = {(c, r - r0): v for (c, r), v in px.items() if r0 <= r < r1}
-                rects = face_rects(cut, w, r1 - r0)
-            elif (face == "top" and r0 == 0) or (face == "bottom" and r1 == length):
-                rects = face_rects(px, w, h)
-            else:
+        front = parse(src["front"])
+        faces["front"] = fill(blank(w, h), front, start)
+        faces["back"] = fill(blank(w, h), parse(src.get("back", src["front"])), start)
+        side = parse(src.get("side", src["front"]))
+        faces["right"] = fill(blank(d, h), side, start)
+        faces["left"] = fill(blank(d, h), [row[::-1] for row in side], start)
+        faces["top"] = [list(r) for r in parse(src["top"])] if "top" in src else blank(w, d)
+        faces["bottom"] = [list(r) for r in parse(src["bottom"])] if "bottom" in src else blank(w, d)
+        if part in ("arm", "leg"):  # the outer face on both sides (the inner one is hidden in the body)
+            faces["left"] = [row[::-1] for row in faces["right"]]
+        return faces
+
+    if piece == "helmet":
+        out["head"] = sides("head", SIZES["head"], 0, S["head"])
+    elif piece == "chestplate":
+        out["body"] = sides("body", SIZES["body"], 0, S["body"])
+        out["arm"] = sides("arm", SIZES["arm"], 0, S["arm"])
+        if mat == "stone":  # chain sleeves down to the elbow
+            out["arm"] = sides("arm", SIZES["arm"], 0, {**S["arm"], "front": "\n".join(["4554", "4443", "3332", "3332", "3332", "3332", "3332", "2221", "0000"])})
+    elif piece == "leggings":
+        out["body"] = sides("body", SIZES["body"], 8, S["legs_body"])
+        out["leg"] = sides("leg", SIZES["leg"], 0, S["leg"])
+    else:
+        out["leg"] = sides("leg", SIZES["leg"], 9, S["boots"])
+    return out
+
+
+# ---------------------------------------------------------------- colouring
+def hashed(*v):
+    x = 2166136261
+    for n in v:
+        x = ((x ^ (n & 0xFFFF)) * 16777619) & 0xFFFFFFFF
+    return x
+
+
+def colour(mat, grid, face_id):
+    """Shade grid → rows of hex (None = open): outline where the armor ends, scattered off-tone pixels, chain holes."""
+    pal, acc = PALETTES[mat], ACCENTS[mat]
+    h, w = len(grid), len(grid[0])
+    out = [[None] * w for _ in range(h)]
+    for r in range(h):
+        for c in range(w):
+            ch = grid[r][c]
+            if ch == ".":
                 continue
-            if rects:
-                faces[face] = rects
-        out.append(faces)
+            if ch in acc:
+                out[r][c] = acc[ch]
+                continue
+            level = int(ch)
+            k = hashed(face_id, r, c)
+            # Minecraft-like grain: one pixel in five a shade off (never on the outline or the highlight rim)
+            if 1 <= level <= 4 and k % 5 == 0:
+                level += 1 if (k >> 8) % 2 else -1
+            if mat == "diamond" and level == 4 and k % 7 == 1:
+                out[r][c] = acc["b"]  # a sparkle
+                continue
+            if mat == "stone" and 2 <= int(ch) <= 4:
+                # the mesh: rows of rings (light / base) and between them dark links round open holes, a hole every
+                # other pixel, the holes shifted by one on every link row
+                if r % 2 == 0:
+                    level = 4 if (c + r // 2) % 2 == 0 else 3
+                elif (c + r // 2) % 2 == 1:
+                    continue
+                else:
+                    level = 2
+            out[r][c] = pal[max(0, min(5, level))]
     return out
 
 
-def export():
-    data = {
-        "source": "assets/models/armor/armor.py -- export: our armor for the block body. boxes[piece] = [part, a0, a1, "
-        "length, width, depth, r0, r1, grow] (px: the part holds rows a0..a1 of a limb length × width × depth, the box "
-        "is rows r0..r1 of that limb grown by `grow` a side); sets[material][piece][i] = the faces of box i: [u0, v0, u1, "
-        "v1, hex, layer] fractions of the face in the face grids of player.py (layer 1 stands on layer 0)",
-        "thick": THICK,
-        "lift": LIFT,
-        "boxes": {},
-        "sets": {},
-    }
-    total = {}
-    for piece in SHAPES:
-        data["boxes"][piece] = [[p, a0, a1, *limb_size(k)[1:2], limb_size(k)[0], limb_size(k)[2], r0, r1, g] for p, a0, a1, k, r0, r1, g in boxes(piece)]
+# ---------------------------------------------------------------- the game's boxes (ArmorVisual.BLOCK_BOXES): key, limb, rows
+KEYS = {
+    "helmet": [("head", "head", 0, 8)],
+    "chestplate": [("torsoupper", "body", 0, 8), ("torsolower", "body", 8, 12), ("upperarm", "arm", 0, 6), ("lowerarm", "arm", 6, 12)],
+    "leggings": [("torso", "body", 6, 12), ("upperleg", "leg", 0, 6), ("lowerleg", "leg", 6, 12)],
+    "boots": [("foot", "leg", 9, 12)],
+}
+
+
+def face_images(mat, piece):
+    """{key: {face: rows of hex/None}} cut to each box's rows; ends only on the boxes at the limb's ends; empty faces
+    left out."""
+    limbs = limb_faces(mat, piece)
+    out = {}
+    for key, limb, r0, r1 in KEYS[piece]:
+        length = SIZES[limb][1]
+        faces = {}
+        for face, grid in limbs[limb].items():
+            if face in ("top", "bottom"):
+                if (face == "top" and r0 != 0) or (face == "bottom" and r1 != length):
+                    continue
+                part = grid
+            else:
+                part = grid[r0:r1]
+            img = colour(mat, part, hashed(len(piece), len(key), len(face), ord(face[0])))
+            if any(v for row in img for v in row):
+                faces[face] = img
+        out[key] = faces
+    return out
+
+
+def save_png(path, img, scale=8):
+    """A face image (rows of hex/None) upscaled ×scale as an RGBA PNG (no PIL in Blender's Python: zlib by hand)."""
+    import struct
+    import zlib
+
+    h, w = len(img), len(img[0])
+    raw = bytearray()
+    for r in range(h * scale):
+        raw.append(0)
+        for c in range(w * scale):
+            v = img[r // scale][c // scale]
+            if v:
+                raw += bytes(int(v[i:i + 2], 16) for i in (1, 3, 5)) + b"\xff"
+            else:
+                raw += b"\x00\x00\x00\x00"
+
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+
+    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w * scale, h * scale, 8, 6, 0, 0, 0))
+    png += chunk(b"IDAT", zlib.compress(bytes(raw), 9)) + chunk(b"IEND", b"")
+    with open(path, "wb") as f:
+        f.write(png)
+
+
+def write_images():
+    os.makedirs(OUT, exist_ok=True)
+    for name in os.listdir(OUT):
+        if name.endswith(".png"):
+            os.remove(os.path.join(OUT, name))
+    n = 0
     for mat in MATERIALS:
-        data["sets"][mat] = {}
-        for piece in SHAPES:
-            faces = box_faces(mat, piece)
-            for box in faces:
-                for rects in box.values():
-                    for rect in rects:
-                        rect[4] = rect[4].lstrip("#")
-            data["sets"][mat][piece] = faces
-            total[mat] = total.get(mat, 0) + sum(len(r) for b in faces for r in b.values())
-    path = os.path.join(ROOT, "src", "shared", "Models", "armor.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
-    print("exported armor →", path, "plates per full set", total)
+        for piece in KEYS:
+            for key, faces in face_images(mat, piece).items():
+                for face, img in faces.items():
+                    save_png(os.path.join(OUT, "%s_%s_%s_%s.png" % (piece, mat, key, face)), img)
+                    n += 1
+    print("armor faces written:", n)
 
 
-# ---------------------------------------------------------------- the game's build, mirrored (ArmorVisual.buildBlockArmor)
-def game_plates(body, mat, pieces):
-    """[(centre studs, size studs, hex)] of the armor as the game places it on the body."""
-    px = body["px"]
-    out = []
-    for piece in pieces:
-        for (part, a0, a1, key, r0, r1, grow), faces in zip(boxes(piece), box_faces(mat, piece)):
-            width, length, depth = limb_size(key)
-            grown = length + 2 * grow
-            top = (a0 + a1) / 2 + grow
-            y0, y1 = top - grown * r0 / length, top - grown * r1 / length
-            S = [(width + 2 * grow) * px, (y0 - y1) * px, (depth + 2 * grow) * px]
-            pos = body["parts"][part]["pos"]
-            centre = [pos[0] * px, pos[1] * px + (y0 + y1) / 2 * px, pos[2] * px]
-            half = [v / 2 for v in S]
-            for face, rects in faces.items():
-                tl, right, down, normal = player.GAME_FACES[face]
-                lr = sum(abs(right[i]) * S[i] for i in range(3))
-                ld = sum(abs(down[i]) * S[i] for i in range(3))
-                for u0, v0, u1, v1, col, layer in rects:
-                    lift = LIFT if layer else 0
-                    local = [tl[i] * half[i] + right[i] * (u0 + u1) / 2 * lr + down[i] * (v0 + v1) / 2 * ld - normal[i] * (THICK / 2 - lift) for i in range(3)]
-                    size = [abs(right[i]) * (u1 - u0) * lr + abs(down[i]) * (v1 - v0) * ld + abs(normal[i]) * THICK for i in range(3)]
-                    out.append(([centre[i] + local[i] for i in range(3)], size, col))
-    return out
+# ---------------------------------------------------------------- the boxes on the body, as ArmorVisual builds them
+BOXES = {  # part, a0, a1 (rows of the limb the part holds), key, r0, r1, grow
+    "helmet": [("Head", 0, 8, "head", 0, 8, 1)],
+    "chestplate": [("UpperTorso", 0, 8, "torsoupper", 0, 8, 1), ("LowerTorso", 8, 12, "torsolower", 8, 12, 1)]
+    + [(s + p, a0, a1, k, r0, r1, 1) for s in ("Right", "Left") for p, a0, a1, k, r0, r1 in (("UpperArm", 0, 6, "upperarm", 0, 6), ("LowerArm", 6, 10, "lowerarm", 6, 12))],
+    "leggings": [("LowerTorso", 8, 12, "torso", 6, 12, 0.5)]
+    + [(s + p, a0, a1, k, r0, r1, 0.5) for s in ("Right", "Left") for p, a0, a1, k, r0, r1 in (("UpperLeg", 0, 6, "upperleg", 0, 6), ("LowerLeg", 6, 10, "lowerleg", 6, 12))],
+    "boots": [(s + "Foot", 10, 12, "foot", 9, 12, 1) for s in ("Right", "Left")],
+}
+LIMB_OF = {"head": "head", "torsoupper": "body", "torsolower": "body", "torso": "body", "upperarm": "arm", "lowerarm": "arm",
+           "upperleg": "leg", "lowerleg": "leg", "foot": "leg"}
 
 
 def render():
+    import bmesh
     import bpy
     from mathutils import Vector
 
@@ -342,14 +588,66 @@ def render():
     from voxeltool import look, setup
 
     body = player.load_body()
+    px = body["px"]
     scene, cam = setup(700, 900)
     mid = Vector((0, 0, 16 * player.PX))
     looks = {"wood": (1, 1), "stone": (0, 3), "iron": (2, 0), "diamond": (3, 5)}
+    mats = {}
+
+    def material(path):
+        if path not in mats:
+            img = bpy.data.images.load(path)
+            m = bpy.data.materials.new(os.path.basename(path))
+            m.use_nodes = True
+            nt = m.node_tree
+            tex = nt.nodes.new("ShaderNodeTexImage")
+            tex.image, tex.interpolation = img, "Closest"
+            bsdf = nt.nodes["Principled BSDF"]
+            nt.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+            nt.links.new(tex.outputs["Alpha"], bsdf.inputs["Alpha"])
+            bsdf.inputs["Roughness"].default_value = 0.9
+            mats[path] = m
+        return mats[path]
+
     for mat in MATERIALS:
         player.clear_meshes()
         skin, hair = looks[mat]
         player.add_boxes(player.game_boxes(body, player.check_colours(body, skin, hair), ["hair_short"]), "player")
-        player.add_boxes(game_plates(body, mat, SHAPES.keys()), "armor")
+        me = bpy.data.meshes.new("armor")
+        obj = bpy.data.objects.new("armor", me)
+        scene.collection.objects.link(obj)
+        bm = bmesh.new()
+        uv = bm.loops.layers.uv.new()
+        index = {}
+        for piece, boxes in BOXES.items():
+            for part, a0, a1, key, r0, r1, grow in boxes:
+                width, length, depth = SIZES[LIMB_OF[key]]
+                grown = length + 2 * grow
+                top = (a0 + a1) / 2 + grow
+                y0, y1 = top - grown * r0 / length, top - grown * r1 / length
+                S = [(width + 2 * grow) * px, (y0 - y1) * px, (depth + 2 * grow) * px]
+                pos = body["parts"][part]["pos"]
+                centre = [pos[0] * px, pos[1] * px + (y0 + y1) / 2 * px, pos[2] * px]
+                for face, (tl, right, down, _normal) in player.GAME_FACES.items():
+                    path = os.path.join(OUT, "%s_%s_%s_%s.png" % (piece, mat, key, face))
+                    if not os.path.exists(path):
+                        continue
+                    lr = sum(abs(right[i]) * S[i] for i in range(3))
+                    ld = sum(abs(down[i]) * S[i] for i in range(3))
+
+                    def corner(u, v):
+                        p = [centre[i] + tl[i] * S[i] / 2 + right[i] * u * lr + down[i] * v * ld for i in range(3)]
+                        return (-p[0], p[2], p[1])
+
+                    f = bm.faces.new([bm.verts.new(corner(u, v)) for u, v in ((0, 0), (1, 0), (1, 1), (0, 1))])
+                    for loop, (u, v) in zip(f.loops, ((0, 1), (1, 1), (1, 0), (0, 0))):
+                        loop[uv].uv = (u, v)
+                    if path not in index:
+                        me.materials.append(material(path))
+                        index[path] = len(me.materials) - 1
+                    f.material_index = index[path]
+        bm.to_mesh(me)
+        bm.free()
         for view, loc in (("front", (0, -20, 16 * player.PX)), ("34", (-11, -14, 16 * player.PX + 3.5)), ("back", (9, 17, 16 * player.PX + 2))):
             look(cam, Vector(loc), mid, 6.6, None)
             scene.render.filepath = os.path.join(HERE, "render-%s-%s.png" % (mat, view))
@@ -358,7 +656,6 @@ def render():
 
 
 if __name__ == "__main__":
-    if sys.argv[-1] == "export":
-        export()
-    else:
+    write_images()
+    if sys.argv[-1] != "images":
         render()
