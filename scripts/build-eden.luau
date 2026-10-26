@@ -930,6 +930,5316 @@ print(("[build-eden] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ eden/20-hill.luau
+do
+-- ================================================================ eden: the HILL part (d < 100 from (0, -60))
+-- The ring bridges (pink cherry planks), the hill stairs (S1, S2, west, east), the Tree of Life with its buttress
+-- roots, branches, the pink crown, hanging vines / wisteria and the serpent, the summit plaza with the tiered
+-- fountain, L1 (leaf arches, ruins, cherry and apple trees, flower beds, the giant mushroom meadow, the gazebo) and
+-- the bank (reeds, lily pads, a dock). Every height step is measured from the 8-stud cells 10-core built.
+local hillF = folder("Hill")
+local HX, HZ = HILL.x, HILL.z
+local c0 = count
+
+-- the ground height of the 8-stud cell holding (x, z), exactly as 10-core built it
+local function cellY(x, z)
+	local cx = math.floor((x + 232) / 8) * 8 - 232 + 4
+	local cz = math.floor((z + 232) / 8) * 8 - 232 + 4
+	return groundY(cx, cz)
+end
+-- true when the rectangle (x ± hx, z ± hz) stands on cells of height y
+local function fits(x, z, hx, hz, y)
+	for _, c in ipairs({ { 0, 0 }, { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		if cellY(x + c[1] * hx, z + c[2] * hz) ~= y then
+			return false
+		end
+	end
+	return true
+end
+-- a point on a circle round the hill centre; angle in degrees (0 east, 90 south)
+local function polar(a, r)
+	local t = math.rad(a)
+	return HX + r * math.cos(t), HZ + r * math.sin(t)
+end
+-- a block relative to a frame (decor when asked)
+local function rel(parent, cf, name, sx, sy, sz, ox, oy, oz, variant, tint, isDecor)
+	local p = part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(ox, oy, oz), tint, nil, parent)
+	if variant then
+		textured(p, variant, tint)
+	end
+	if isDecor then
+		decor(p)
+	end
+	return p
+end
+
+-- a Minecraft lantern (world position); only `lit` ones get a PointLight, at most 25 in the hill part
+local LIT = { n = 0, max = 25 }
+local function lamp(pos, parent, hangTop, lit)
+	local iron = Color3.fromRGB(45, 45, 50)
+	local m = Enum.Material.Metal
+	decor(
+		part(
+			"Lantern",
+			Vector3.new(1.3, 0.25, 1.3),
+			CFrame.new(pos - Vector3.new(0, 0.62, 0)),
+			iron,
+			m,
+			parent
+		)
+	)
+	decor(
+		part(
+			"LanternTop",
+			Vector3.new(1.3, 0.25, 1.3),
+			CFrame.new(pos + Vector3.new(0, 0.62, 0)),
+			iron,
+			m,
+			parent
+		)
+	)
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		local o = Vector3.new(c[1] * 0.55, 0, c[2] * 0.55)
+		decor(part("LanternBar", Vector3.new(0.2, 1, 0.2), CFrame.new(pos + o), iron, m, parent))
+	end
+	local core = decor(
+		part(
+			"LanternGlow",
+			Vector3.new(0.9, 1, 0.9),
+			CFrame.new(pos),
+			LANTERN_GLOW,
+			Enum.Material.Neon,
+			parent
+		)
+	)
+	core.Transparency = 0.1
+	decor(
+		part(
+			"LanternCap",
+			Vector3.new(0.7, 0.35, 0.7),
+			CFrame.new(pos + Vector3.new(0, 0.9, 0)),
+			iron,
+			m,
+			parent
+		)
+	)
+	if hangTop and hangTop > pos.Y + 1 then
+		local len = hangTop - pos.Y - 0.9
+		decor(
+			part(
+				"Chain",
+				Vector3.new(0.25, len, 0.25),
+				CFrame.new(pos.X, pos.Y + 0.9 + len / 2, pos.Z),
+				iron,
+				m,
+				parent
+			)
+		)
+	end
+	if lit and LIT.n < LIT.max then
+		LIT.n += 1
+		light(core, 30, 1.2, LANTERN_GLOW)
+	end
+end
+
+local FLOWERS = {
+	Color3.fromRGB(235, 60, 60), -- red
+	Color3.fromRGB(250, 215, 60), -- yellow
+	Color3.fromRGB(248, 248, 240), -- white
+	Color3.fromRGB(245, 150, 200), -- pink
+	Color3.fromRGB(170, 110, 225), -- purple
+	Color3.fromRGB(95, 145, 235), -- blue
+	Color3.fromRGB(245, 150, 50), -- orange
+}
+-- a small flower head (decor), standing on y
+local function bloom(x, y, z, color, parent, s)
+	s = s or 1.3
+	return decor(cube("Flower", x, y + s / 2, z, s, s, s, "px_white_wool", color, parent))
+end
+-- thin flush slabs over 4-stud cells: one box per run along x where flag(cx, cz) holds
+local function slabRuns(x0, x1, z0, z1, y0, y1, flag, name, variant, tint, parent)
+	for z = z0, z1 - 4, 4 do
+		local start
+		for x = x0, x1, 4 do
+			local on = x < x1 and flag(x + 2, z + 2)
+			if on and not start then
+				start = x
+			elseif not on and start then
+				local p = decor(box(name, start, y0, z, x, y1, z + 4, variant, tint, parent))
+				p.CastShadow = false
+				start = nil
+			end
+		end
+	end
+end
+
+-- a sparse voxel grid merged greedily (x, then z, then y) into boxes: the trunk, the branches and the crown
+local G = {}
+do
+	local OFF, SPAN = 512, 1024
+	local function key(i, j, k)
+		return ((j + OFF) * SPAN + (k + OFF)) * SPAN + (i + OFF)
+	end
+	function G.new(c)
+		return { c = c, cells = {} }
+	end
+	function G.set(g, i, j, k, v)
+		g.cells[key(i, j, k)] = v
+	end
+	function G.get(g, i, j, k)
+		return g.cells[key(i, j, k)]
+	end
+	-- kinds[v] = { name, variant, tint, decor, shadow }; returns the number of boxes
+	function G.emit(g, kinds, parent)
+		local cells, c = g.cells, g.c
+		local keys = {}
+		for kk in pairs(cells) do
+			table.insert(keys, kk)
+		end
+		table.sort(keys)
+		local done = {}
+		local n = 0
+		for _, k0 in ipairs(keys) do
+			if not done[k0] then
+				local v = cells[k0]
+				local i = k0 % SPAN - OFF
+				local rest = math.floor(k0 / SPAN)
+				local k = rest % SPAN - OFF
+				local j = math.floor(rest / SPAN) - OFF
+				local function free(kk)
+					return cells[kk] == v and not done[kk]
+				end
+				local i1 = i
+				while free(key(i1 + 1, j, k)) do
+					i1 += 1
+				end
+				local k1 = k
+				while true do
+					local ok = true
+					for ii = i, i1 do
+						if not free(key(ii, j, k1 + 1)) then
+							ok = false
+							break
+						end
+					end
+					if not ok then
+						break
+					end
+					k1 += 1
+				end
+				local j1 = j
+				while true do
+					local ok = true
+					for kz = k, k1 do
+						for ii = i, i1 do
+							if not free(key(ii, j1 + 1, kz)) then
+								ok = false
+								break
+							end
+						end
+						if not ok then
+							break
+						end
+					end
+					if not ok then
+						break
+					end
+					j1 += 1
+				end
+				for jj = j, j1 do
+					for kz = k, k1 do
+						for ii = i, i1 do
+							done[key(ii, jj, kz)] = true
+						end
+					end
+				end
+				local kind = kinds[v]
+				local p = box(
+					kind.name,
+					i * c,
+					j * c,
+					k * c,
+					(i1 + 1) * c,
+					(j1 + 1) * c,
+					(k1 + 1) * c,
+					kind.variant,
+					kind.tint,
+					parent
+				)
+				if kind.decor then
+					decor(p)
+				end
+				if kind.shadow == false then
+					p.CastShadow = false
+				end
+				n += 1
+				if n % 250 == 0 then
+					task.wait()
+				end
+			end
+		end
+		return n
+	end
+end
+
+-- ================================================================ 1. the ring bridges (measured from the river cells)
+do
+	local bf0 = folder("Bridges", hillF)
+	-- the z extent of the river cells under the deck footprint
+	local function riverSpan(x0, x1, z0, z1)
+		local a, b = math.huge, -math.huge
+		for x = x0 + 1, x1 - 1, 2 do
+			for z = z0, z1 do
+				if cellY(x, z) == RIVER_BED then
+					local lo = math.floor((z + 232) / 8) * 8 - 232
+					a = math.min(a, lo)
+					b = math.max(b, lo + 8)
+				end
+			end
+		end
+		return a, b
+	end
+	-- a deck running along z: flat landings on both banks (top y 0.1), a stepped hump (0.6 a step) over the water,
+	-- cherry rails from railA to railB, tall end posts with lanterns (litA / litB: lit at that end)
+	local function bridge(name, x0, x1, z0, z1, railA, railB, litA, litB)
+		local bf = folder(name, bf0)
+		local rz0, rz1 = riverSpan(x0, x1, z0, z1)
+		rz0, rz1 = math.max(rz0, z0 + 2), math.min(rz1, z1 - 2)
+		local segs = { { z0, rz0 } }
+		local n = math.max(1, math.floor((rz1 - rz0) / 4 + 0.5))
+		for s = 1, n do
+			table.insert(segs, { rz0 + (s - 1) * (rz1 - rz0) / n, rz0 + s * (rz1 - rz0) / n })
+		end
+		table.insert(segs, { rz1, z1 })
+		local m = #segs
+		for idx, s in ipairs(segs) do
+			s.top = 0.1 + 0.6 * math.min(idx - 1, m - idx, 3)
+			box("Deck", x0, s.top - 1, s[1], x1, s.top, s[2], "px_cherry_planks", nil, bf)
+			if idx > 1 and idx < m then
+				box(
+					"DeckBeam",
+					x0 - 0.4,
+					s.top - 2.4,
+					s[1],
+					x0 + 1.2,
+					s.top - 0.6,
+					s[2],
+					"px_cherry_log",
+					nil,
+					bf
+				)
+				box(
+					"DeckBeam",
+					x1 - 1.2,
+					s.top - 2.4,
+					s[1],
+					x1 + 0.4,
+					s.top - 0.6,
+					s[2],
+					"px_cherry_log",
+					nil,
+					bf
+				)
+			end
+		end
+		local function topAt(z)
+			local t = 0.1
+			for _, s in ipairs(segs) do
+				if z >= s[1] - 0.01 and z <= s[2] + 0.01 then
+					t = math.max(t, s.top)
+				end
+			end
+			return t
+		end
+		-- stone piers at the water's edges
+		for _, zz in ipairs({ rz0, rz1 }) do
+			for _, xx in ipairs({ x0 + 2, x1 - 2 }) do
+				box(
+					"Pier",
+					xx - 2,
+					RIVER_BED,
+					zz - 2,
+					xx + 2,
+					topAt(zz) - 1,
+					zz + 2,
+					"px_mossy_stone_bricks",
+					nil,
+					bf
+				)
+			end
+		end
+		-- rails: two cherry rails per segment (stepping with the deck), posts every ~4 studs
+		for _, xx in ipairs({ x0 + 0.6, x1 - 0.6 }) do
+			for _, s in ipairs(segs) do
+				local a, b = math.max(s[1], railA), math.min(s[2], railB)
+				if b - a > 0.5 then
+					for _, h in ipairs({ 1.3, 2.7 }) do
+						box(
+							"Rail",
+							xx - 0.25,
+							s.top + h - 0.3,
+							a,
+							xx + 0.25,
+							s.top + h + 0.3,
+							b,
+							"px_cherry_planks",
+							nil,
+							bf
+						)
+					end
+				end
+			end
+			local np = math.max(1, math.floor((railB - railA) / 4 + 0.5))
+			for q = 0, np do
+				local z = railA + (railB - railA) * q / np
+				local base = topAt(z)
+				local endPost = q == 0 or q == np
+				local h = if endPost then 5 else 3.4
+				local w = if endPost then 1.4 else 1
+				box(
+					"RailPost",
+					xx - w / 2,
+					base,
+					z - w / 2,
+					xx + w / 2,
+					base + h,
+					z + w / 2,
+					"px_cherry_log",
+					nil,
+					bf
+				)
+				if endPost then
+					lamp(
+						V(xx, base + h + 0.75, z),
+						bf,
+						nil,
+						(q == 0 and litA) or (q == np and litB)
+					)
+				end
+			end
+		end
+		return rz0, rz1
+	end
+	local a, b = bridge(
+		"BridgeSouth",
+		BRIDGE_S[1],
+		BRIDGE_S[3],
+		BRIDGE_S[2],
+		BRIDGE_S[4],
+		22,
+		BRIDGE_S[4],
+		false,
+		true
+	)
+	print(("[build-eden] hill: south bridge over the river z %d..%d"):format(a, b))
+	-- the north-west and north-east crossings where the ring runs diagonally: rectangular decks along z
+	a, b = bridge("BridgeNW", -70, -58, -140, -100, -140, -100, true, false)
+	print(("[build-eden] hill: NW bridge over the river z %d..%d"):format(a, b))
+	bridge("BridgeNE", 58, 70, -140, -100, -140, -100, true, false)
+end
+task.wait()
+
+-- ================================================================ 2. the hill stairs (placed where the cells step)
+do
+	local sf = folder("Stairs", hillF)
+	local STEP, CHEEK = "px_stone_bricks", "px_mossy_stone_bricks"
+	-- the first cell boundary where the ground reaches `level`, walking from `from` toward `to` along an axis
+	local function edge(ax, fixed, from, to, level)
+		local dir = if to > from then 1 else -1
+		for t = from, to, dir do
+			local y = if ax == "z" then cellY(fixed, t) else cellY(t, fixed)
+			if y and y >= level then
+				local lo = math.floor((t + 232) / 8) * 8 - 232
+				return if dir > 0 then lo else lo + 8
+			end
+		end
+		return to
+	end
+	local e1 = edge("z", 0, 40, -40, 8) -- S1: the L1 edge south of the hill
+	local e2 = edge("z", 0, e1 - 2, -60, 16) -- S2: the summit edge
+	local eW = edge("x", HZ, -110, -30, 8)
+	local eE = edge("x", HZ, 110, 30, 8)
+	print(
+		("[build-eden] hill: stairs edges S1 z %d, S2 z %d, W x %d, E x %d"):format(e1, e2, eW, eE)
+	)
+	local function pot(x, y, z)
+		decor(cube("FlowerPot", x, y + 0.6, z, 1.6, 1.2, 1.6, "px_terracotta", nil, sf))
+		decor(cube("PotLeaves", x, y + 1.6, z, 1.4, 0.8, 1.4, "px_hedge", LEAF, sf))
+		bloom(x, y + 2, z, pick(FLOWERS), sf, 1)
+	end
+	-- a stepped cheek wall beside a flight: `ax` is the axis the flight runs along, c0..c1 the wall's cross span
+	local function cheek(ax, c0, c1, a0, a1, y0, rise, base, litBottom, litTop)
+		local run = math.abs(a1 - a0)
+		local dir = if a1 > a0 then 1 else -1
+		local nseg = math.max(1, math.floor(run / 4 + 0.5))
+		local seg = run / nseg
+		local cc = (c0 + c1) / 2
+		for q = 0, nseg - 1 do
+			local top = math.ceil((y0 + rise * (q + 1) / nseg + 2) / 2) * 2
+			local s0, s1 = a0 + dir * q * seg, a0 + dir * (q + 1) * seg
+			local lo, hi = math.min(s0, s1), math.max(s0, s1)
+			local mid = (s0 + s1) / 2
+			if ax == "z" then
+				box("CheekWall", c0, base, lo, c1, top, hi, CHEEK, nil, sf)
+			else
+				box("CheekWall", lo, base, c0, hi, top, c1, CHEEK, nil, sf)
+			end
+			local px, pz = if ax == "z" then cc else mid, if ax == "z" then mid else cc
+			if q == 0 or q == nseg - 1 then
+				-- a lantern on the end blocks of the wall
+				local lx, lz = px, pz
+				local lit = (q == 0 and litBottom) or (q == nseg - 1 and litTop)
+				lamp(V(lx, top + 0.75, lz), sf, nil, lit)
+			else
+				pot(px, top, pz)
+			end
+		end
+	end
+	-- S1: from the bridge landing up onto L1 (20 wide like the bridge)
+	stairs("S1", 0, e1 + 12, e1, 0, 8, 20, STEP, sf)
+	cheek("z", 10, 14, e1 + 12, e1, 0, 8, -1, true, false)
+	cheek("z", -14, -10, e1 + 12, e1, 0, 8, -1, true, false)
+	-- S2: from L1 onto the summit (16 wide)
+	stairs("S2", 0, e2 + 12, e2, 8, 8, 16, STEP, sf)
+	cheek("z", 8, 12, e2 + 12, e2, 8, 8, 7, false, true)
+	cheek("z", -12, -8, e2 + 12, e2, 8, 8, 7, false, true)
+	-- the side stairs from the bank onto L1, running along x (the bank is one cell wide here)
+	stairs("StairsW", HZ, eW - 10, eW, 0, 8, 16, STEP, sf, "x")
+	box("StairFooting", eW - 10, RIVER_BED, HZ - 8, eW - 6, -2.4, HZ + 8, CHEEK, nil, sf)
+	cheek("x", HZ - 12, HZ - 8, eW - 10, eW, 0, 8, RIVER_BED, true, false)
+	cheek("x", HZ + 8, HZ + 12, eW - 10, eW, 0, 8, RIVER_BED, false, false)
+	stairs("StairsE", HZ, eE + 10, eE, 0, 8, 16, STEP, sf, "x")
+	box("StairFooting", eE + 6, RIVER_BED, HZ - 8, eE + 10, -2.4, HZ + 8, CHEEK, nil, sf)
+	cheek("x", HZ - 12, HZ - 8, eE + 10, eE, 0, 8, RIVER_BED, true, false)
+	cheek("x", HZ + 8, HZ + 12, eE + 10, eE, 0, 8, RIVER_BED, false, false)
+	-- coarse dirt paths: S1 top → S2 foot, the side stairs' tops → the L1 ring path
+	local DIRT = "px_dirt"
+	decor(box("Path", -8, 8, e2 + 12, 8, 8.1, e1, DIRT, PATH, sf)).CastShadow = false
+	decor(box("Path", eW, 8, HZ - 6, eW + 18, 8.1, HZ + 6, DIRT, PATH, sf)).CastShadow = false
+	decor(box("Path", eE - 18, 8, HZ - 6, eE, 8.1, HZ + 6, DIRT, PATH, sf)).CastShadow = false
+end
+task.wait()
+
+-- ================================================================ 3. the Tree of Life, its crown, vines and the serpent
+do
+	local tf = folder("TreeOfLife", hillF)
+	local function trunkR(y)
+		if y < 20 then
+			return 13.5
+		elseif y < 28 then
+			return 12.5
+		end
+		return 12 - 3 * math.clamp((y - 28) / 52, 0, 1)
+	end
+	local tg = G.new(4)
+	local function bark(x, y, z)
+		return if math.noise(x * 0.07, y * 0.045, z * 0.07 + 3.3) > 0.28 then "cherry" else "dark"
+	end
+	-- the trunk: stepped rings of 4-stud blocks, y 16..80, a little uneven
+	for j = 4, 19 do
+		local yc = j * 4 + 2
+		for k = -15 - 5, -15 + 4 do
+			for i = -5, 4 do
+				local x, z = i * 4 + 2, k * 4 + 2
+				local dx, dz = x - HX, z - HZ
+				local d = math.sqrt(dx * dx + dz * dz)
+				local r = trunkR(yc) + 1.6 * math.noise(math.atan2(dz, dx) * 1.3, yc * 0.035, 7.7)
+				if d <= r then
+					G.set(tg, i, j, k, if d > r - 4 then bark(x, yc, z) else "dark")
+				end
+			end
+		end
+	end
+	-- buttress roots: 1–2 blocks high, none toward the south (the S2 landing, the fountain, the plaza)
+	for _, a in ipairs({ 0, 35, 145, 180, 215, 250, 290, 325 }) do
+		local len = rng:NextNumber(20, 24.5)
+		local ux, uz = math.cos(math.rad(a)), math.sin(math.rad(a))
+		for k = -15 - 8, -15 + 7 do
+			for i = -8, 7 do
+				local dx, dz = i * 4 + 2 - HX, k * 4 + 2 - HZ
+				local along = dx * ux + dz * uz
+				local perp = math.abs(-dx * uz + dz * ux)
+				if along > 8 and along <= len and perp < 3 then
+					if not G.get(tg, i, 4, k) then
+						G.set(tg, i, 4, k, "root")
+					end
+					if along <= len - 7 and not G.get(tg, i, 5, k) then
+						G.set(tg, i, 5, k, "root")
+					end
+				end
+			end
+		end
+	end
+	-- the branches: stepped log beams out and up into the crown
+	local function limb(p0, p1, r0, r1)
+		local len = (p1 - p0).Magnitude
+		for t = 0, len, 1.5 do
+			local p = p0:Lerp(p1, t / len)
+			local rr = r0 + (r1 - r0) * t / len
+			for j = math.floor((p.Y - rr) / 4), math.floor((p.Y + rr) / 4) do
+				for k = math.floor((p.Z - rr) / 4), math.floor((p.Z + rr) / 4) do
+					for i = math.floor((p.X - rr) / 4), math.floor((p.X + rr) / 4) do
+						local cx, cy, cz = i * 4 + 2, j * 4 + 2, k * 4 + 2
+						if
+							(cx - p.X) ^ 2 + (cy - p.Y) ^ 2 + (cz - p.Z) ^ 2 <= rr * rr
+							and not G.get(tg, i, j, k)
+						then
+							G.set(tg, i, j, k, bark(cx, cy, cz))
+						end
+					end
+				end
+			end
+		end
+	end
+	local function P(a, r, y)
+		local x, z = polar(a, r)
+		return Vector3.new(x, y, z)
+	end
+	-- { angle, base y, mid r, mid y, tip r, tip y, thickness }; the serpent's head rests on the first
+	local BR = {
+		{ 60, 54, 30, 66, 60, 82, 6.5 },
+		{ 105, 68, 32, 78, 64, 92, 6 },
+		{ 150, 62, 30, 72, 62, 86, 6.5 },
+		{ 195, 66, 34, 76, 66, 90, 6 },
+		{ 240, 63, 30, 72, 60, 86, 6.5 },
+		{ 285, 70, 34, 80, 66, 96, 6 },
+		{ 330, 66, 30, 76, 62, 90, 6 },
+		{ 15, 68, 32, 80, 64, 94, 6 },
+	}
+	local tips = {}
+	for _, b in ipairs(BR) do
+		local p0, p1, p2 = P(b[1], 4, b[2]), P(b[1] + 8, b[3], b[4]), P(b[1] + 14, b[5], b[6])
+		limb(p0, p1, b[7], b[7] * 0.75)
+		limb(p1, p2, b[7] * 0.75, 3)
+		table.insert(tips, p2)
+	end
+	for _, a in ipairs({ 30, 150, 270 }) do
+		limb(P(a, 4, 72), P(a + 10, 22, 104), 6, 3.5)
+	end
+	-- the top of the first branch where the serpent's head lies
+	local SER_A = BR[1][1]
+	local hx, hz = polar(SER_A, 19)
+	local headTop = 66
+	do
+		local hi, hk = math.floor(hx / 4), math.floor(hz / 4)
+		for j = 30, 10, -1 do
+			if G.get(tg, hi, j, hk) then
+				headTop = j * 4 + 4
+				break
+			end
+		end
+	end
+	local tn = G.emit(tg, {
+		dark = { name = "Trunk", variant = "px_dark_oak_log" },
+		cherry = { name = "Bark", variant = "px_cherry_log" },
+		root = { name = "Root", variant = "px_dark_oak_log" },
+	}, tf)
+	task.wait()
+
+	-- the crown: 8-stud leaf cells in patches of cherry blossom, pink wool and a little green, y 72..~120, r ≤ 80
+	local crownF = folder("Crown", tf)
+	local cg = G.new(8)
+	local function leafKey(x, y, z)
+		if math.noise(x * 0.035, y * 0.05, z * 0.035 + 17.7) > 0.3 then
+			return "hedge"
+		elseif math.noise(x * 0.04, y * 0.05, z * 0.04 + 5.1) < -0.12 then
+			return "wool"
+		end
+		return "blossom"
+	end
+	local function blob(cx, cy, cz, rx, ry, rz)
+		for j = math.max(9, math.floor((cy - ry) / 8)), math.floor((cy + ry) / 8) do
+			for k = math.floor((cz - rz) / 8), math.floor((cz + rz) / 8) do
+				for i = math.floor((cx - rx) / 8), math.floor((cx + rx) / 8) do
+					local x, y, z = i * 8 + 4, j * 8 + 4, k * 8 + 4
+					local e = ((x - cx) / rx) ^ 2 + ((y - cy) / ry) ^ 2 + ((z - cz) / rz) ^ 2
+					if
+						e <= 1 + 0.4 * math.noise(x * 0.07, y * 0.07, z * 0.07 + 9.1)
+						and (x - HX) ^ 2 + (z - HZ) ^ 2 <= 80 * 80
+					then
+						G.set(cg, i, j, k, leafKey(x, y, z))
+					end
+				end
+			end
+		end
+	end
+	blob(HX, 100, HZ, 48, 13, 48) -- the dome
+	for k = 0, 8 do -- the ring of cushions
+		local x, z = polar(k * 40 + rng:NextNumber(-10, 10), rng:NextNumber(36, 48))
+		local rx = rng:NextNumber(18, 23)
+		blob(
+			x,
+			rng:NextNumber(88, 98),
+			z,
+			rx,
+			rng:NextNumber(10, 13),
+			rx * rng:NextNumber(0.85, 1.15)
+		)
+	end
+	for _, t in ipairs(tips) do -- over every branch tip
+		blob(t.X, t.Y + 5, t.Z, 15, 9, 15)
+	end
+	for k = 0, 11 do -- the ragged outer fringe
+		local x, z = polar(k * 30 + 15 + rng:NextNumber(-8, 8), rng:NextNumber(62, 70))
+		blob(x, rng:NextNumber(78, 90), z, rng:NextNumber(10, 14), 7, rng:NextNumber(10, 14))
+	end
+	for _ = 1, 6 do -- tufts on top
+		local x, z = polar(rng:NextNumber(0, 360), rng:NextNumber(0, 34))
+		blob(x, rng:NextNumber(108, 114), z, rng:NextNumber(10, 14), 7, rng:NextNumber(10, 14))
+	end
+	local KINDS = {
+		blossom = {
+			name = "Blossom",
+			variant = "px_cherry_leaves",
+			tint = BLOSSOM,
+			decor = true,
+			shadow = false,
+		},
+		wool = {
+			name = "PinkWool",
+			variant = "px_white_wool",
+			tint = PINK_WOOL,
+			decor = true,
+			shadow = false,
+		},
+		hedge = { name = "Leaves", variant = "px_hedge", tint = LEAF, decor = true }, -- the green patches cast the shade
+	}
+	local cn = G.emit(cg, KINDS, crownF)
+	task.wait()
+
+	-- the columns of the crown: 4-stud tufts on top and drips below (a ragged silhouette), vines and wisteria
+	local vf = folder("Vines", tf)
+	local KEYS = { "blossom", "blossom", "wool", "hedge" }
+	local vines, vineLit = 0, 0
+	for k = -18, 2 do
+		for i = -10, 10 do
+			local jb, jt
+			for j = 9, 16 do
+				if G.get(cg, i, j, k) then
+					jb = jb or j
+					jt = j
+				end
+			end
+			if jb then
+				local x, z = i * 8 + 4, k * 8 + 4
+				local d = math.sqrt((x - HX) ^ 2 + (z - HZ) ^ 2)
+				if rng:NextNumber() < 0.3 then
+					local kd = KINDS[pick(KEYS)]
+					local ox, oz = rng:NextInteger(0, 1) * 4 - 2, rng:NextInteger(0, 1) * 4 - 2
+					local p = cube(
+						"Tuft",
+						x + ox,
+						(jt + 1) * 8 + 2,
+						z + oz,
+						4,
+						4,
+						4,
+						kd.variant,
+						kd.tint,
+						crownF
+					)
+					decor(p).CastShadow = false
+				end
+				if rng:NextNumber() < 0.2 then
+					local kd = KINDS[pick(KEYS)]
+					local ox, oz = rng:NextInteger(0, 1) * 4 - 2, rng:NextInteger(0, 1) * 4 - 2
+					local p = cube(
+						"Drip",
+						x + ox,
+						jb * 8 - 2,
+						z + oz,
+						4,
+						4,
+						4,
+						kd.variant,
+						kd.tint,
+						crownF
+					)
+					decor(p).CastShadow = false
+				end
+				if d > 15 and rng:NextNumber() < 0.3 then
+					local L = rng:NextInteger(2, 8) * 4
+					local sx, sz = x + rng:NextNumber(-3, 3), z + rng:NextNumber(-3, 3)
+					local top = jb * 8
+					local roll = rng:NextNumber()
+					local p
+					if roll < 0.45 then
+						p = cube(
+							"Wisteria",
+							sx,
+							top - L / 2,
+							sz,
+							2,
+							L,
+							2,
+							"px_wisteria_leaves",
+							nil,
+							vf
+						)
+					elseif roll < 0.85 then
+						p = cube("Vine", sx, top - L / 2, sz, 1.2, L, 1.2, "px_hedge", LEAF, vf)
+						vines += 1
+						if vines % 6 == 0 then
+							local lit = d < 36 and vineLit < 2
+							if lit then
+								vineLit += 1
+							end
+							lamp(V(sx, top - L - 1.2, sz), vf, nil, lit)
+						end
+					else
+						L = math.min(L, 16)
+						p = cube(
+							"BlossomStrand",
+							sx,
+							top - L / 2,
+							sz,
+							2,
+							L,
+							2,
+							"px_cherry_leaves",
+							BLOSSOM,
+							vf
+						)
+					end
+					decor(p).CastShadow = false
+				end
+			end
+		end
+		if k % 4 == 0 then
+			task.wait()
+		end
+	end
+
+	-- the serpent: a blocky green snake coiled twice round the trunk (y 20 → 60), its head on the first branch
+	local snake = folder("Serpent", tf)
+	local BODY = Color3.fromRGB(150, 200, 120)
+	local BELLY = Color3.fromRGB(90, 160, 70)
+	local SPOT = Color3.fromRGB(95, 140, 75)
+	local aEnd = math.rad(SER_A - 28)
+	local aStart = aEnd - 4 * math.pi
+	local pts = {}
+	local N = 56
+	for s = 0, N do
+		local t = s / N
+		local a = aStart + (aEnd - aStart) * t
+		local y = 20 + 40 * t
+		local R = trunkR(y) + 4.4
+		table.insert(pts, Vector3.new(HX + R * math.cos(a), y, HZ + R * math.sin(a)))
+	end
+	-- the neck climbs onto the branch
+	local nx, nz = polar(SER_A - 10, 15.5)
+	table.insert(pts, Vector3.new(nx, (60 + headTop) / 2 + 1, nz))
+	local headPos = Vector3.new(hx, headTop + 2, hz)
+	table.insert(pts, headPos)
+	for s = 1, #pts - 1 do
+		local p, q = pts[s], pts[s + 1]
+		local len = (q - p).Magnitude
+		local cf = CFrame.lookAt(V(0, 0, 0) + (p + q) / 2, V(0, 0, 0) + q)
+		local w = if s > #pts - 3 then 4 else 4.6 -- the neck is a little slimmer
+		rel(snake, cf, "SerpentBody", w, 4.2, len + 1.2, 0, 0, 0, "px_hedge", BODY, true)
+		rel(
+			snake,
+			cf,
+			"SerpentBelly",
+			w + 0.2,
+			0.8,
+			len + 1.2,
+			0,
+			-1.9,
+			0,
+			"px_white_wool",
+			BELLY,
+			true
+		)
+		if s % 3 == 0 then
+			rel(snake, cf, "SerpentSpot", 2.4, 0.5, 2.4, 0, 2.2, 0, "px_hedge", SPOT, true)
+		end
+	end
+	do
+		local out = Vector3.new(math.cos(math.rad(SER_A)), 0, math.sin(math.rad(SER_A)))
+		local wp = V(0, 0, 0) + headPos
+		local cf = CFrame.lookAt(wp, wp + out)
+		rel(snake, cf, "SerpentHead", 5.4, 3.6, 6, 0, 0, -1.5, "px_hedge", BODY, true)
+		rel(snake, cf, "SerpentSnout", 4.2, 2.6, 3, 0, -0.4, -5.6, "px_hedge", BODY, true)
+		rel(snake, cf, "SerpentJaw", 4.4, 0.8, 7.4, 0, -1.9, -3.2, "px_white_wool", BELLY, true)
+		rel(snake, cf, "SerpentBrow", 5.6, 0.6, 4, 0, 2, -1.5, "px_hedge", SPOT, true)
+		for _, sx in ipairs({ -1, 1 }) do
+			rel(
+				snake,
+				cf,
+				"SerpentEye",
+				0.6,
+				1.3,
+				1.3,
+				sx * 2.75,
+				0.8,
+				-3,
+				nil,
+				Color3.fromRGB(250, 215, 60),
+				true
+			)
+			rel(
+				snake,
+				cf,
+				"SerpentPupil",
+				0.3,
+				1,
+				0.5,
+				sx * 3.1,
+				0.8,
+				-3,
+				nil,
+				Color3.fromRGB(20, 20, 20),
+				true
+			)
+		end
+		local red = Color3.fromRGB(205, 30, 40)
+		rel(snake, cf, "SerpentTongue", 0.5, 0.25, 3, 0, -1.2, -8.4, nil, red, true)
+		for _, sx in ipairs({ -1, 1 }) do
+			local fork = cf * CFrame.new(sx * 0.4, -1.2, -10.3) * CFrame.Angles(0, sx * 0.45, 0)
+			decor(part("SerpentFork", Vector3.new(0.35, 0.25, 1.4), fork, red, nil, snake))
+		end
+	end
+	print(("[build-eden] hill: tree boxes %d, crown boxes %d, vines %d"):format(tn, cn, vines))
+end
+task.wait()
+
+-- ================================================================ 4. the summit plaza: coarse dirt and petals, the fountain
+do
+	local pf = folder("Summit", hillF)
+	local Y = 16
+	local FX, FZ = 0, -38
+	local SB, MS = "px_stone_bricks", "px_mossy_stone_bricks"
+	local function plaza(cx, cz)
+		local d = math.sqrt((cx - HX) ^ 2 + (cz - HZ) ^ 2)
+		return cellY(cx, cz) == Y
+			and d > 11
+			and d < 37
+			and (cz > HZ - 4 or d < 22)
+			and not (math.abs(cx - FX) < 6 and math.abs(cz - FZ) < 6)
+	end
+	slabRuns(-40, 40, -100, -20, Y, Y + 0.1, plaza, "PlazaDirt", "px_dirt", PATH, pf)
+	slabRuns(-40, 40, -100, -20, Y + 0.1, Y + 0.18, function(cx, cz)
+		return plaza(cx, cz) and math.noise(cx * 0.08, cz * 0.08, 4.4) > 0.25
+	end, "Petals", "px_white_wool", PINK_WOOL, pf)
+	task.wait()
+
+	-- the tiered fountain of mossy stone bricks (water: no collision)
+	local ff = folder("Fountain", pf)
+	local function water(x0, y0, z0, x1, y1, z1)
+		local w = decor(box("FountainWater", x0, y0, z0, x1, y1, z1, "px_water", WATER, ff))
+		w.Transparency = 0.25
+		w.CastShadow = false
+		return w
+	end
+	box("BasinFloor", FX - 6, Y, FZ - 6, FX + 6, Y + 0.3, FZ + 6, SB, nil, ff)
+	box("BasinRim", FX - 6, Y, FZ - 6, FX + 6, Y + 2.5, FZ - 4, MS, nil, ff)
+	box("BasinRim", FX - 6, Y, FZ + 4, FX + 6, Y + 2.5, FZ + 6, MS, nil, ff)
+	box("BasinRim", FX - 6, Y, FZ - 4, FX - 4, Y + 2.5, FZ + 4, MS, nil, ff)
+	box("BasinRim", FX + 4, Y, FZ - 4, FX + 6, Y + 2.5, FZ + 4, MS, nil, ff)
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		local x, z = FX + c[1] * 5, FZ + c[2] * 5
+		box("RimCap", x - 1, Y + 2.5, z - 1, x + 1, Y + 3.5, z + 1, SB, nil, ff)
+	end
+	water(FX - 4, Y + 0.3, FZ - 4, FX + 4, Y + 2.1, FZ + 4)
+	box("FountainColumn", FX - 1.5, Y + 0.3, FZ - 1.5, FX + 1.5, Y + 11, FZ + 1.5, MS, nil, ff)
+	-- the middle basin
+	box("MidBasin", FX - 4, Y + 5.5, FZ - 4, FX + 4, Y + 6.5, FZ + 4, SB, nil, ff)
+	box("MidRim", FX - 4, Y + 6.5, FZ - 4, FX + 4, Y + 7.6, FZ - 3.2, MS, nil, ff)
+	box("MidRim", FX - 4, Y + 6.5, FZ + 3.2, FX + 4, Y + 7.6, FZ + 4, MS, nil, ff)
+	box("MidRim", FX - 4, Y + 6.5, FZ - 3.2, FX - 3.2, Y + 7.6, FZ + 3.2, MS, nil, ff)
+	box("MidRim", FX + 3.2, Y + 6.5, FZ - 3.2, FX + 4, Y + 7.6, FZ + 3.2, MS, nil, ff)
+	water(FX - 3.2, Y + 6.5, FZ - 3.2, FX + 3.2, Y + 7.3, FZ + 3.2)
+	-- falls from under the middle basin's lip into the lower one
+	water(FX - 3, Y + 2.1, FZ - 4, FX + 3, Y + 5.5, FZ - 3.6)
+	water(FX - 3, Y + 2.1, FZ + 3.6, FX + 3, Y + 5.5, FZ + 4)
+	water(FX - 4, Y + 2.1, FZ - 3, FX - 3.6, Y + 5.5, FZ + 3)
+	water(FX + 3.6, Y + 2.1, FZ - 3, FX + 4, Y + 5.5, FZ + 3)
+	-- the top bowl, the spout and its small falls
+	box("TopBowl", FX - 2.2, Y + 11, FZ - 2.2, FX + 2.2, Y + 12, FZ + 2.2, SB, nil, ff)
+	water(FX - 0.8, Y + 12, FZ - 0.8, FX + 0.8, Y + 14.5, FZ + 0.8)
+	water(FX - 0.8, Y + 7.3, FZ - 2.6, FX + 0.8, Y + 12.2, FZ - 2.3)
+	water(FX - 0.8, Y + 7.3, FZ + 2.3, FX + 0.8, Y + 12.2, FZ + 2.6)
+	water(FX - 2.6, Y + 7.3, FZ - 0.8, FX - 2.3, Y + 12.2, FZ + 0.8)
+	water(FX + 2.3, Y + 7.3, FZ - 0.8, FX + 2.6, Y + 12.2, FZ + 0.8)
+
+	-- stone-brick planters with flowers and a lantern
+	local function planter(x, z, lit)
+		box("Planter", x - 4, Y, z - 4, x + 4, Y + 3, z + 4, SB, nil, pf)
+		decor(
+			box(
+				"PlanterSoil",
+				x - 3.4,
+				Y + 3,
+				z - 3.4,
+				x + 3.4,
+				Y + 3.3,
+				z + 3.4,
+				"px_dirt",
+				MUD,
+				pf
+			)
+		)
+		decor(box("PlanterBush", x - 3, Y + 3.3, z - 3, x + 1, Y + 5, z + 3, "px_hedge", LEAF, pf))
+		for q = 1, 6 do
+			bloom(
+				x - 2.6 + (q - 1) % 3 * 1.6,
+				Y + 5,
+				z - 2 + math.floor((q - 1) / 3) * 3.2,
+				pick(FLOWERS),
+				pf,
+				1.1
+			)
+		end
+		box(
+			"PlanterPost",
+			x + 1.8,
+			Y + 3.3,
+			z - 0.6,
+			x + 3,
+			Y + 7.5,
+			z + 0.6,
+			"px_dark_oak_log",
+			nil,
+			pf
+		)
+		lamp(V(x + 2.4, Y + 8.3, z), pf, nil, lit)
+	end
+	local function bench(x, z, alongX)
+		local hx, hz = if alongX then 4 else 1.3, if alongX then 1.3 else 4
+		box(
+			"BenchSeat",
+			x - hx,
+			Y + 1.6,
+			z - hz,
+			x + hx,
+			Y + 2.2,
+			z + hz,
+			"px_dark_oak_planks",
+			nil,
+			pf
+		)
+		for _, s in ipairs({ -1, 1 }) do
+			local lx, lz =
+				if alongX then x + s * (hx - 0.8) else x, if alongX then z else z + s * (hz - 0.8)
+			box("BenchLeg", lx - 0.8, Y, lz - 0.8, lx + 0.8, Y + 1.6, lz + 0.8, SB, nil, pf)
+		end
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		local px, pz = s * 19, -36
+		if fits(px, pz, 4, 4, Y) then
+			planter(px, pz, true)
+		end
+		local qx, qz = polar(if s > 0 then 15 else 165, 31)
+		qx, qz = math.floor(qx + 0.5), math.floor(qz + 0.5)
+		if not fits(qx, qz, 4, 4, Y) then
+			qx, qz = polar(if s > 0 then 15 else 165, 28)
+		end
+		planter(qx, qz, true)
+		bench(s * 26, -44, false)
+	end
+
+	-- kneeling deer and a rabbit near the tree (decor)
+	local FUR = Color3.fromRGB(240, 215, 190)
+	local function deer(x, z, yaw)
+		local cf = at(x, Y, z) * CFrame.Angles(0, yaw, 0)
+		local f = folder("Deer", pf)
+		rel(f, cf, "DeerBody", 3.6, 2.6, 6.4, 0, 1.3, 0, "px_brown_wool", FUR, true)
+		for _, s in ipairs({ -1, 1 }) do
+			rel(f, cf, "DeerLeg", 1, 0.8, 2.4, s * 1.3, 0.4, -3.8, "px_brown_wool", FUR, true)
+			rel(f, cf, "DeerEar", 1.1, 0.6, 0.4, s * 1.5, 6.2, -3.4, "px_brown_wool", FUR, true)
+			rel(
+				f,
+				cf,
+				"DeerAntler",
+				0.4,
+				2.6,
+				0.4,
+				s * 0.7,
+				7.6,
+				-3.4,
+				nil,
+				Color3.fromRGB(120, 90, 60),
+				true
+			)
+			rel(
+				f,
+				cf,
+				"DeerTine",
+				1.6,
+				0.4,
+				0.4,
+				s * 1.3,
+				8.2,
+				-3.4,
+				nil,
+				Color3.fromRGB(120, 90, 60),
+				true
+			)
+		end
+		rel(f, cf, "DeerNeck", 1.6, 3, 1.6, 0, 3.4, -2.6, "px_brown_wool", FUR, true)
+		rel(f, cf, "DeerHead", 2, 2, 3, 0, 5.2, -3.6, "px_brown_wool", FUR, true)
+		rel(f, cf, "DeerMuzzle", 1.4, 1.2, 1, 0, 4.8, -5.4, nil, Color3.fromRGB(60, 45, 35), true)
+		rel(f, cf, "DeerChest", 1.8, 1.6, 0.4, 0, 2.6, -3.3, "px_white_wool", nil, true)
+		rel(f, cf, "DeerTail", 1, 1, 0.6, 0, 2.2, 3.4, "px_white_wool", nil, true)
+	end
+	local dx, dz = polar(200, 30)
+	deer(dx, dz, math.rad(-30))
+	dx, dz = polar(340, 30)
+	deer(dx, dz, math.rad(200))
+	do
+		local rx, rz = polar(268, 30)
+		local cf = at(rx, Y, rz) * CFrame.Angles(0, math.rad(40), 0)
+		local f = folder("Rabbit", pf)
+		rel(f, cf, "RabbitBody", 1.8, 1.6, 2.6, 0, 0.8, 0, "px_white_wool", nil, true)
+		rel(f, cf, "RabbitHead", 1.4, 1.4, 1.4, 0, 1.8, -1.4, "px_white_wool", nil, true)
+		for _, s in ipairs({ -1, 1 }) do
+			rel(f, cf, "RabbitEar", 0.4, 1.4, 0.3, s * 0.4, 3.1, -1.4, "px_white_wool", nil, true)
+		end
+		rel(
+			f,
+			cf,
+			"RabbitNose",
+			0.4,
+			0.3,
+			0.2,
+			0,
+			1.8,
+			-2.15,
+			nil,
+			Color3.fromRGB(240, 140, 160),
+			true
+		)
+	end
+end
+task.wait()
+
+-- ================================================================ 5. L1: the ring path, leaf arches, ruins, trees, beds,
+-- the mushroom meadow, the gazebo; flowers at the foot of the summit wall
+do
+	local lf = folder("Gardens", hillF)
+	local Y = 8
+	-- a free spot on the L1 ring (outside the 4-block walkway r 42..58), trying a few radii
+	local function onL1(a, hx, hz)
+		for _, r in ipairs({ 65, 63, 61, 67, 59 }) do
+			local x, z = polar(a, r)
+			x, z = math.floor(x + 0.5), math.floor(z + 0.5)
+			if fits(x, z, hx, hz, Y) then
+				return x, z
+			end
+		end
+		return nil
+	end
+	-- the ring path of coarse dirt (r 47..55) with petal patches
+	local function ring(cx, cz)
+		local d = math.sqrt((cx - HX) ^ 2 + (cz - HZ) ^ 2)
+		return d >= 47 and d <= 55 and cellY(cx, cz) == Y and not (math.abs(cx) < 8 and cz > -14)
+	end
+	slabRuns(-72, 72, -132, 12, Y, Y + 0.1, ring, "RingPath", "px_dirt", PATH, lf)
+	slabRuns(-72, 72, -132, 12, Y + 0.1, Y + 0.18, function(cx, cz)
+		return ring(cx, cz) and math.noise(cx * 0.09, cz * 0.09, 6.6) > 0.32
+	end, "Petals", "px_white_wool", PINK_WOOL, lf)
+	task.wait()
+
+	-- leaf arches with flowers, wisteria and lanterns over the paths
+	local function leafArch(cx, y0, cz, alongX, span, h, lit)
+		local af = folder("LeafArch", lf)
+		local cf = at(cx, y0, cz)
+			* (if alongX then CFrame.identity else CFrame.Angles(0, math.pi / 2, 0))
+		local px = span / 2 + 2
+		for _, s in ipairs({ -1, 1 }) do
+			rel(af, cf, "ArchBase", 4, 4, 4, s * px, 2, 0, "px_mossy_stone_bricks")
+			rel(af, cf, "ArchPillar", 4, h - 4, 4, s * px, 4 + (h - 4) / 2, 0, "px_hedge", LEAF)
+			rel(af, cf, "ArchCorner", 4, 4, 4, s * (px - 4), h - 2, 0, "px_hedge", LEAF)
+		end
+		rel(af, cf, "ArchBeam", span + 8, 4, 4, 0, h + 2, 0, "px_hedge", LEAF)
+		rel(af, cf, "ArchCrown", span - 4, 4, 4.4, 0, h + 6, 0, "px_cherry_leaves", BLOSSOM, true)
+		rel(
+			af,
+			cf,
+			"ArchCrownTop",
+			span - 12,
+			2,
+			3.6,
+			0,
+			h + 9,
+			0,
+			"px_white_wool",
+			PINK_WOOL,
+			true
+		)
+		for f = 1, 16 do
+			local side = if rng:NextNumber() < 0.5 then -1 else 1
+			local ox, oy
+			if f <= 9 then
+				ox, oy = rng:NextNumber(-span / 2 - 3, span / 2 + 3), h + rng:NextNumber(0.6, 3.4)
+			else
+				ox, oy =
+					(if rng:NextNumber() < 0.5 then -px else px) + rng:NextNumber(-1.4, 1.4),
+					rng:NextNumber(5, h - 1)
+			end
+			rel(
+				af,
+				cf,
+				"ArchFlower",
+				1.4,
+				1.4,
+				0.8,
+				ox,
+				oy,
+				side * 2.2,
+				"px_white_wool",
+				pick(FLOWERS),
+				true
+			)
+		end
+		for _, ox in ipairs({ -span / 2 + 1.5, -span / 6, span / 6, span / 2 - 1.5 }) do
+			local L = rng:NextInteger(3, 7)
+			local o = rng:NextNumber(-1, 1)
+			rel(
+				af,
+				cf,
+				"Wisteria",
+				1.6,
+				L,
+				1.6,
+				ox + o,
+				h - L / 2,
+				o * 1.2,
+				"px_wisteria_leaves",
+				nil,
+				true
+			)
+		end
+		for i, s in ipairs({ -1, 1 }) do
+			local p = (cf * CFrame.new(s * span / 4, h - 3.2, 0)).Position
+			lamp(p, af, p.Y + 3.2, lit and i == 1)
+		end
+	end
+	leafArch(0, Y, 2, true, 24, 16, true) -- over the top of S1
+	leafArch(0, 16, -28, true, 24, 14, true) -- over the top of S2 (the summit entrance)
+	leafArch(-66, Y, HZ, false, 24, 16, true) -- over the top of the west stairs
+	leafArch(66, Y, HZ, false, 24, 16, true) -- over the top of the east stairs
+	leafArch(0, Y, -112, false, 24, 16, true) -- over the ring path in the north
+	task.wait()
+
+	-- mossy stone arch ruins
+	local function ruin(cx, cz, alongX)
+		local rf = folder("ArchRuin", lf)
+		local cf = at(cx, Y, cz)
+			* (if alongX then CFrame.identity else CFrame.Angles(0, math.pi / 2, 0))
+		rel(rf, cf, "RuinPillar", 4, 16, 4, -6, 8, 0, "px_mossy_stone_bricks")
+		rel(rf, cf, "RuinPillarTop", 4, 4, 4, -6, 18, 0, "px_mossy_cobblestone")
+		rel(rf, cf, "RuinPillar", 4, 8, 4, 6, 4, 0, "px_mossy_stone_bricks")
+		rel(rf, cf, "RuinPillarTop", 4, 2, 4, 6, 9, 0, "px_mossy_cobblestone")
+		rel(rf, cf, "RuinLintel", 8, 4, 4, -2, 14, 0, "px_mossy_stone_bricks")
+		rel(rf, cf, "RuinCorner", 4, 4, 4, -2, 10, 0, "px_mossy_cobblestone")
+		rel(rf, cf, "RuinRubble", 4, 4, 4, 10, 2, 4, "px_mossy_cobblestone")
+		rel(rf, cf, "RuinRubble", 2, 2, 2, 7, 1, -4, "px_stone_bricks")
+		rel(rf, cf, "RuinRubble", 2, 2, 2, -10, 1, 3, "px_mossy_stone_bricks")
+		rel(rf, cf, "RuinMoss", 4.4, 0.6, 4.4, -6, 20.3, 0, "px_hedge", LEAF, true)
+		rel(rf, cf, "RuinVine", 1.2, 7, 1.2, -1, 10.5, 2.2, "px_hedge", LEAF, true)
+		rel(rf, cf, "RuinVine", 1.2, 10, 1.2, -7.2, 13, 2.2, "px_hedge", LEAF, true)
+		rel(rf, cf, "RuinVine", 1.2, 5, 1.2, 1.5, 13.5, -2.2, "px_wisteria_leaves", nil, true)
+		for _ = 1, 3 do
+			local p = (cf * CFrame.new(rng:NextNumber(-9, 9), 0, rng:NextNumber(-4, 4))).Position
+			bloom(p.X - BX, Y, p.Z - BZ, pick(FLOWERS), rf, 1.1)
+		end
+	end
+	do
+		local x, z = onL1(120, 9, 3)
+		if x then
+			ruin(x, z, true)
+		end
+		x, z = onL1(335, 3, 9)
+		if x then
+			ruin(x, z, false)
+		end
+	end
+
+	-- small pink cherry trees and apple trees with red apples
+	local function smallTree(x, z, apple)
+		local tf = folder(if apple then "AppleTree" else "CherryTree", lf)
+		local h = rng:NextInteger(3, 4) * 4
+		box(
+			"TreeTrunk",
+			x - 2,
+			Y,
+			z - 2,
+			x + 2,
+			Y + h,
+			z + 2,
+			if apple then "px_oak_log" else "px_cherry_log",
+			nil,
+			tf
+		)
+		local lv, lt =
+			if apple then "px_hedge" else "px_cherry_leaves", if apple then LEAF else BLOSSOM
+		local function leaves(x0, y0, z0, x1, y1, z1)
+			decor(box("TreeLeaves", x0, y0, z0, x1, y1, z1, lv, lt, tf))
+		end
+		leaves(x - 10, Y + h - 4, z - 6, x + 10, Y + h + 4, z + 6)
+		leaves(x - 6, Y + h - 4, z - 10, x + 6, Y + h + 4, z - 6)
+		leaves(x - 6, Y + h - 4, z + 6, x + 6, Y + h + 4, z + 10)
+		leaves(x - 6, Y + h + 4, z - 6, x + 6, Y + h + 8, z + 6)
+		if apple then
+			for _ = 1, 7 do
+				local side = rng:NextInteger(1, 4)
+				local u = rng:NextNumber(-5, 5)
+				local ay = Y + h + rng:NextNumber(-3, 3)
+				local ax, az = x + u, z + u
+				if side == 1 then
+					ax = x + 10.4
+				elseif side == 2 then
+					ax = x - 10.4
+				elseif side == 3 then
+					az = z + 10.4
+				else
+					az = z - 10.4
+				end
+				decor(cube("Apple", ax, ay, az, 1.6, 1.6, 1.6, "px_white_wool", APPLE, tf))
+			end
+		else
+			for _ = 1, 3 do
+				local ox, oz = rng:NextInteger(-2, 2) * 4, rng:NextInteger(-2, 2) * 4
+				decor(
+					cube(
+						"PinkWool",
+						x + ox,
+						Y + h + rng:NextInteger(0, 1) * 4 + 2,
+						z + oz,
+						4.2,
+						4.2,
+						4.2,
+						"px_white_wool",
+						PINK_WOOL,
+						tf
+					)
+				)
+			end
+			-- fallen petals round the foot
+			slabRuns(x - 12, x + 12, z - 12, z + 12, Y + 0.12, Y + 0.2, function(cx, cz)
+				return (cx - x) ^ 2 + (cz - z) ^ 2 < 90
+					and cellY(cx, cz) == Y
+					and math.noise(cx * 0.3, cz * 0.3, 8.8) > 0
+			end, "Petals", "px_white_wool", PINK_WOOL, tf)
+		end
+	end
+	for _, t in ipairs({
+		{ 47, false },
+		{ 60, true },
+		{ 135, true },
+		{ 148, false },
+		{ 160, true },
+		{ 258, false },
+		{ 284, true },
+		{ 310, false },
+		{ 323, true },
+	}) do
+		local x, z = onL1(t[1], 2, 2)
+		if x then
+			smallTree(x, z, t[2])
+		end
+	end
+	task.wait()
+
+	-- flower beds in single-colour rows
+	local function flowerBed(x, z, alongX, n, colors)
+		local bf = folder("FlowerBed", lf)
+		local len = n * 2.4
+		local hx, hz = if alongX then len / 2 + 1 else 4.4, if alongX then 4.4 else len / 2 + 1
+		decor(box("BedSoil", x - hx, Y, z - hz, x + hx, Y + 0.15, z + hz, "px_dirt", MUD, bf)).CastShadow =
+			false
+		for r, col in ipairs(colors) do
+			local off = (r - (#colors + 1) / 2) * 2.6
+			local bx, bz = if alongX then x else x + off, if alongX then z + off else z
+			local sx, sz = if alongX then len else 1.4, if alongX then 1.4 else len
+			decor(cube("BedLeaves", bx, Y + 0.6, bz, sx, 1.2, sz, "px_hedge", LEAF, bf))
+			for q = 0, n - 1 do
+				local u = -len / 2 + 1.2 + q * 2.4
+				bloom(
+					if alongX then bx + u else bx,
+					Y + 1.2,
+					if alongX then bz else bz + u,
+					col,
+					bf,
+					1.2
+				)
+			end
+		end
+	end
+	for _, b in ipairs({
+		{ 18, false, { FLOWERS[1], FLOWERS[3], FLOWERS[2] } },
+		{ 73, true, { FLOWERS[4], FLOWERS[3], FLOWERS[5] } },
+		{ 106, true, { FLOWERS[2], FLOWERS[7], FLOWERS[1] } },
+		{ 297, true, { FLOWERS[6], FLOWERS[3], FLOWERS[4] } },
+	}) do
+		local hx, hz = if b[2] then 7 else 4.4, if b[2] then 4.4 else 7
+		local x, z = onL1(b[1], hx, hz)
+		if x then
+			flowerBed(x, z, b[2], 5, b[3])
+		end
+	end
+
+	-- the meadow of giant umbrella mushrooms on the north-west of L1
+	local mf = folder("MushroomMeadow", lf)
+	local STEM = Color3.fromRGB(240, 236, 226)
+	local GILL = Color3.fromRGB(235, 205, 180)
+	local DOT = Color3.fromRGB(250, 248, 240)
+	local function giantMushroom(x, z, hb, cb, thick)
+		local h = hb * 4
+		local w = if thick then 4 else 2
+		box("MushroomStem", x - w, Y, z - w, x + w, Y + h, z + w, "px_white_wool", STEM, mf)
+		local c = cb * 2
+		decor(
+			box(
+				"MushroomGills",
+				x - c + 2,
+				Y + h - 1,
+				z - c + 2,
+				x + c - 2,
+				Y + h,
+				z + c - 2,
+				"px_white_wool",
+				GILL,
+				mf
+			)
+		)
+		box(
+			"MushroomCap",
+			x - c,
+			Y + h,
+			z - c,
+			x + c,
+			Y + h + 4,
+			z + c,
+			"px_white_wool",
+			MUSHROOM,
+			mf
+		)
+		if cb >= 4 then
+			box(
+				"MushroomCapTop",
+				x - c + 4,
+				Y + h + 4,
+				z - c + 4,
+				x + c - 4,
+				Y + h + 7,
+				z + c - 4,
+				"px_white_wool",
+				MUSHROOM,
+				mf
+			)
+		end
+		for _ = 1, 3 + cb do
+			local u, v = rng:NextNumber(-c + 1.5, c - 1.5), rng:NextNumber(-c + 1.5, c - 1.5)
+			local top = if cb >= 4
+					and math.abs(u) < c - 4
+					and math.abs(v) < c - 4
+				then Y + h + 7
+				else Y + h + 4
+			decor(
+				cube(
+					"MushroomDot",
+					x + u,
+					top + 0.12,
+					z + v,
+					1.8,
+					0.25,
+					1.8,
+					"px_white_wool",
+					DOT,
+					mf
+				)
+			).CastShadow =
+				false
+		end
+	end
+	local function smallMushroom(x, z)
+		decor(cube("SmallStem", x, Y + 1, z, 1, 2, 1, "px_white_wool", STEM, mf))
+		decor(cube("SmallCap", x, Y + 2.5, z, 3, 1.2, 3, "px_white_wool", MUSHROOM, mf))
+	end
+	local placed = 0
+	for a = 200, 250, 7 do
+		local hb = rng:NextInteger(3, 8)
+		local thick = hb >= 6
+		local w = if thick then 4 else 2
+		local x, z = onL1(a + rng:NextNumber(-2, 2), w, w)
+		if x then
+			giantMushroom(x, z, hb, rng:NextInteger(3, 5), thick)
+			placed += 1
+			for _ = 1, 2 do
+				local sx, sz = x + rng:NextNumber(-9, 9), z + rng:NextNumber(-9, 9)
+				local d = math.sqrt((sx - HX) ^ 2 + (sz - HZ) ^ 2)
+				if
+					d > 59
+					and cellY(sx, sz) == Y
+					and (math.abs(sx - x) > w + 1.5 or math.abs(sz - z) > w + 1.5)
+				then
+					smallMushroom(sx, sz)
+				end
+			end
+		end
+	end
+
+	-- the green-roofed gazebo
+	do
+		local gx, gz = onL1(30, 5, 5)
+		if gx then
+			local gf = folder("Gazebo", lf)
+			box(
+				"GazeboFloor",
+				gx - 5,
+				Y,
+				gz - 5,
+				gx + 5,
+				Y + 0.6,
+				gz + 5,
+				"px_mossy_stone_bricks",
+				nil,
+				gf
+			)
+			for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+				local x, z = gx + c[1] * 4.3, gz + c[2] * 4.3
+				box(
+					"GazeboPost",
+					x - 0.7,
+					Y + 0.6,
+					z - 0.7,
+					x + 0.7,
+					Y + 9.6,
+					z + 0.7,
+					"px_dark_oak_log",
+					nil,
+					gf
+				)
+				decor(
+					box(
+						"GazeboVine",
+						x - 0.9,
+						Y + 3,
+						z - 0.9,
+						x + 0.9,
+						Y + 9,
+						z + 0.9,
+						"px_hedge",
+						LEAF,
+						gf
+					)
+				)
+				bloom(x, Y + 0.6, z + c[2] * 1.4, pick(FLOWERS), gf, 1)
+			end
+			box(
+				"GazeboBeam",
+				gx - 5,
+				Y + 9.6,
+				gz - 5,
+				gx + 5,
+				Y + 10.6,
+				gz - 4,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBeam",
+				gx - 5,
+				Y + 9.6,
+				gz + 4,
+				gx + 5,
+				Y + 10.6,
+				gz + 5,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBeam",
+				gx - 5,
+				Y + 9.6,
+				gz - 4,
+				gx - 4,
+				Y + 10.6,
+				gz + 4,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBeam",
+				gx + 4,
+				Y + 9.6,
+				gz - 4,
+				gx + 5,
+				Y + 10.6,
+				gz + 4,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			local hw = 7
+			local y = Y + 10.6
+			for _ = 1, 4 do
+				box(
+					"GazeboRoof",
+					gx - hw,
+					y,
+					gz - hw,
+					gx + hw,
+					y + 1.5,
+					gz + hw,
+					"px_white_wool",
+					ROOF_GREEN,
+					gf
+				)
+				y += 1.5
+				hw -= 1.8
+			end
+			box(
+				"GazeboTip",
+				gx - 0.6,
+				y,
+				gz - 0.6,
+				gx + 0.6,
+				y + 1.6,
+				gz + 0.6,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBench",
+				gx - 3.6,
+				Y + 2,
+				gz + 2.6,
+				gx + 3.6,
+				Y + 2.6,
+				gz + 3.8,
+				"px_dark_oak_planks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBenchLeg",
+				gx - 3.2,
+				Y + 0.6,
+				gz + 2.8,
+				gx - 2.2,
+				Y + 2,
+				gz + 3.6,
+				"px_stone_bricks",
+				nil,
+				gf
+			)
+			box(
+				"GazeboBenchLeg",
+				gx + 2.2,
+				Y + 0.6,
+				gz + 2.8,
+				gx + 3.2,
+				Y + 2,
+				gz + 3.6,
+				"px_stone_bricks",
+				nil,
+				gf
+			)
+			lamp(V(gx, Y + 7.4, gz), gf, BY + Y + 9.6, true)
+		end
+	end
+
+	-- bushes with flowers at the foot of the summit wall (decor), off the S2 flight and the north arch
+	for k = 0, 35 do
+		local a = k * 10 + rng:NextNumber(-3, 3)
+		if not (a > 66 and a < 114) and not (a > 262 and a < 278) then
+			local x, z = polar(a, 41.6)
+			if cellY(x, z) == Y then
+				decor(cube("WallBush", x, Y + 1.25, z, 3, 2.5, 3, "px_hedge", LEAF, lf))
+				bloom(
+					x + rng:NextNumber(-0.8, 0.8),
+					Y + 2.5,
+					z + rng:NextNumber(-0.8, 0.8),
+					pick(FLOWERS),
+					lf,
+					1.2
+				)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 6. the bank: reeds, lily pads on the river, a dock
+do
+	local kf = folder("Bank", hillF)
+	local DOCK = { -94, -40, -74, -32 } -- x0, z0, x1, z1 (on the west bank, out over the ring)
+	local function nearCrossing(x, z)
+		return (math.abs(x) < 16 and z > 0 and z < 48) -- the south bridge and S1
+			or (math.abs(x) > 52 and math.abs(x) < 76 and z > -146 and z < -94) -- the NW / NE bridges
+			or (x > DOCK[1] - 4 and x < DOCK[3] + 4 and z > DOCK[2] - 4 and z < DOCK[4] + 4)
+			or (math.abs(x) > 64 and z > HZ - 14 and z < HZ + 14) -- the side stairs
+	end
+	-- reeds along the water's edge
+	local REED = Color3.fromRGB(110, 165, 70)
+	local reeds = 0
+	for a0 = 0, 355, 7 do
+		local a = a0 + rng:NextNumber(-2, 2)
+		for r = 81.5, 74, -1 do
+			local x, z = polar(a, r)
+			local ox, oz = polar(a, r + 4)
+			if cellY(x, z) == 0 and cellY(ox, oz) == RIVER_BED and not nearCrossing(x, z) then
+				for q = 1, 3 do
+					local h = rng:NextNumber(3, 6)
+					local rx, rz = x + rng:NextNumber(-1.5, 1.5), z + rng:NextNumber(-1.5, 1.5)
+					decor(cube("Reed", rx, h / 2, rz, 0.5, h, 0.5, nil, REED, kf))
+					if q == 1 then
+						decor(
+							cube(
+								"Cattail",
+								rx,
+								h + 0.5,
+								rz,
+								0.8,
+								1.4,
+								0.8,
+								nil,
+								Color3.fromRGB(110, 75, 45),
+								kf
+							)
+						)
+					end
+				end
+				reeds += 1
+				break
+			end
+		end
+	end
+	-- lily pads on the ring river
+	local pads = 0
+	for _ = 1, 70 do
+		local x, z = polar(rng:NextNumber(0, 360), rng:NextNumber(84.5, 95.5))
+		local d = math.sqrt((x - HX) ^ 2 + (z - HZ) ^ 2)
+		if cellY(x, z) == RIVER_BED and d > 83 and d < 97 and not nearCrossing(x, z) then
+			local s = if rng:NextNumber() < 0.5 then 2.6 else 3.4
+			local p = decor(
+				cube(
+					"LilyPad",
+					x,
+					RIVER_TOP + 0.06,
+					z,
+					s,
+					0.12,
+					s,
+					"px_hedge",
+					Color3.fromRGB(200, 235, 170),
+					kf
+				)
+			)
+			p.CastShadow = false
+			if rng:NextNumber() < 0.3 then
+				local col = if rng:NextNumber() < 0.5 then FLOWERS[4] else FLOWERS[3]
+				bloom(x + 0.4, RIVER_TOP + 0.12, z - 0.3, col, kf, 0.9)
+			end
+			pads += 1
+		end
+	end
+	-- a small dock of planks on posts, a lantern at its end
+	do
+		local x0, z0, x1, z1 = DOCK[1], DOCK[2], DOCK[3], DOCK[4]
+		box("Dock", x0, -0.6, z0, x1, 0.3, z1, "px_planks", nil, kf)
+		for _, px in ipairs({ x0 + 0.8, x0 + 8 }) do
+			for _, pz in ipairs({ z0 + 0.8, z1 - 0.8 }) do
+				box(
+					"DockPost",
+					px - 0.6,
+					RIVER_BED,
+					pz - 0.6,
+					px + 0.6,
+					1.4,
+					pz + 0.6,
+					"px_oak_log",
+					nil,
+					kf
+				)
+			end
+		end
+		box(
+			"DockLampPost",
+			x0 + 0.2,
+			0.3,
+			z0 + 0.2,
+			x0 + 1.4,
+			6.5,
+			z0 + 1.4,
+			"px_dark_oak_log",
+			nil,
+			kf
+		)
+		box(
+			"DockLampArm",
+			x0 + 0.2,
+			6.5,
+			z0 + 0.2,
+			x0 + 1.4,
+			7.3,
+			z0 + 3.4,
+			"px_dark_oak_log",
+			nil,
+			kf
+		)
+		lamp(V(x0 + 0.8, 4.9, z0 + 2.8), kf, BY + 6.5, true)
+		barrel(x1 - 6, 0.3, z1 - 2.4, kf)
+		crate(x1 - 10, 0.3, z1 - 2.6, kf, 3)
+	end
+	print(("[build-eden] hill: reeds %d, lily pads %d"):format(reeds, pads))
+end
+print(("[build-eden] hill: %d parts, %d lights"):format(count - c0, LIT.n))
+
+end
+task.wait()
+-- ================================================================================ eden/30-south.luau
+do
+-- ================================================================ eden: the south garden (zone "south": z > -52 outside the hill)
+-- The mine, the arrival and the gardens round them [concept: assets/concepts/eden/concept-v2.webp]:
+--   pit fence     dark oak posts and rails 1 block outside the rim (x -114 / 34, z 54 / 202), open at the ladder shafts
+--                 (x -52..-28 north and south, z 116..140 west) and wide on the east toward the arrival (z 100..156);
+--                 lanterns on dark oak log stumps at the corners and the openings (the NE corner on the CROSS path
+--                 keeps a plain post)
+--   mushrooms     giant umbrella mushrooms (white stems, stepped terracotta caps with white dots): M1 (-92, 36),
+--                 M3 (-132, 84), M4 (-128, 164), M5 (48, 190), M6 (72, 52), M8 (-132, 0); small clusters at (-68, 44),
+--                 (-128, 100), (-108, 20)
+--   leaf arches   three over the EAST path (z 60, 72, 84; legs x 34 / 58), two over the garden spine W2 (z 20, 140)
+--   walks         coarse dirt, flush, 4 blocks: W1 x 56..196 z 88..104 (from the EAST path), W2 x 142..158
+--                 z -40..184 (from the east bridge landing), W3 x 60..148 z 168..184, W4 x 84..100 z 104..168,
+--                 W6 x -164..-114 z 120..136 (to the west opening),
+--                 W7 x -158..-142 z -40..120 (from the west bridge landing to W6); the bridge landings x ±138..±162,
+--                 z -52..-30 stay clear
+--   south-east    gazebo G1 (126, -32) by the pond (x 104..132, z -16..12) with the pink cherry-plank bridge
+--                 (x 96..142, z -6..6) and the bamboo grove (x 100..116, z -46..-26); gazebo G2 (120, 136) between
+--                 flower beds; beds of single-colour rows; apple trees (66, 24), (100, 56), (128, 72), (168, 120),
+--                 (164, 156); cherry trees (96, 28), (176, -28), (190, 40), (88, 194); the apiary (104..120, 80);
+--                 trellises (164, 36 / 54 / 70); the mossy arch ruin (184, 76); deer, rabbits, benches, lamp posts
+--   south-west    the orchard row (x -176, z -20..64), a cherry (-126, 40), the fenced vegetable patch (x -192..-160,
+--                 z 84..116), the tool shed (-170, 150), flower beds; vines hanging over the west, south and east rim
+local southF = folder("SouthGarden")
+local startCount = count
+local C = {
+	red = Color3.fromRGB(220, 50, 50),
+	yellow = Color3.fromRGB(245, 215, 60),
+	white = Color3.fromRGB(246, 246, 240),
+	purple = Color3.fromRGB(170, 100, 220),
+	blue = Color3.fromRGB(90, 130, 235),
+	orange = Color3.fromRGB(240, 140, 40),
+	stem = Color3.fromRGB(242, 238, 228),
+	gill = Color3.fromRGB(232, 210, 180),
+	dot = Color3.fromRGB(252, 250, 244),
+	honey = Color3.fromRGB(255, 214, 120),
+	stripe = Color3.fromRGB(96, 64, 30),
+	bee = Color3.fromRGB(245, 200, 40),
+	black = Color3.fromRGB(28, 26, 24),
+	wing = Color3.fromRGB(235, 245, 255),
+	deer = Color3.fromRGB(172, 116, 72),
+	deerDark = Color3.fromRGB(110, 76, 48),
+	antler = Color3.fromRGB(205, 185, 150),
+	cream = Color3.fromRGB(245, 236, 216),
+	hare = Color3.fromRGB(190, 150, 112),
+	soil = Color3.fromRGB(150, 110, 80),
+	carrot = Color3.fromRGB(236, 128, 36),
+	beet = Color3.fromRGB(150, 40, 72),
+	wheat = Color3.fromRGB(238, 212, 112),
+	cabbage = Color3.fromRGB(200, 235, 160),
+	bamboo = Color3.fromRGB(170, 220, 120),
+	bambooNode = Color3.fromRGB(120, 160, 70),
+	lily = Color3.fromRGB(150, 210, 120),
+	reed = Color3.fromRGB(130, 170, 80),
+	iron = Color3.fromRGB(70, 70, 76),
+	handle = Color3.fromRGB(140, 100, 62),
+	window = Color3.fromRGB(40, 50, 60),
+}
+C.flowers = { C.red, C.yellow, C.white, C.purple, C.blue, PINK_WOOL }
+C.archFlowers = { PINK_WOOL, C.white, C.purple, PINK_WOOL, C.yellow }
+-- the part's state: lit lanterns (≤ 22 PointLights) and the footprints already used
+local st = { lights = 0, cap = 22, taken = {} }
+
+-- the point and the corners of its pad square belong to this part
+local function inZone(x, z, pad)
+	pad = pad or 0
+	for _, c in ipairs({ { 0, 0 }, { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		if zoneOf(x + c[1] * pad, z + c[2] * pad) ~= "south" then
+			return false
+		end
+	end
+	return true
+end
+local function take(x0, z0, x1, z1)
+	table.insert(st.taken, { x0, z0, x1, z1 })
+end
+local function isTaken(x, z, pad)
+	pad = pad or 0
+	for _, t in ipairs(st.taken) do
+		if x >= t[1] - pad and x <= t[3] + pad and z >= t[2] - pad and z <= t[4] + pad then
+			return true
+		end
+	end
+	return false
+end
+-- free ground for a solid prop of half-size pad (warns when `what` is given, so the evening check can look at it)
+local function spot(x, z, pad, what)
+	local ok = freeGround(x, z, pad) and inZone(x, z, pad + 2) and not isTaken(x, z, pad)
+	if not ok and what then
+		warn(("[build-eden] south: %s at (%g, %g) skipped"):format(what, x, z))
+	end
+	return ok
+end
+-- a rectangle whose corners and centre are free ground of this part
+local function rectFree(x0, z0, x1, z1, what)
+	for _, p in ipairs({
+		{ x0, z0 },
+		{ x1, z0 },
+		{ x1, z1 },
+		{ x0, z1 },
+		{ (x0 + x1) / 2, (z0 + z1) / 2 },
+	}) do
+		if
+			not freeGround(p[1], p[2], 0)
+			or zoneOf(p[1], p[2]) ~= "south"
+			or isTaken(p[1], p[2], 0)
+		then
+			if what then
+				warn(
+					("[build-eden] south: %s at (%g, %g) skipped"):format(
+						what,
+						(x0 + x1) / 2,
+						(z0 + z1) / 2
+					)
+				)
+			end
+			return false
+		end
+	end
+	return true
+end
+-- a kit lantern in its own folder; only `lit` ones keep their PointLight while the cap allows
+local function lamp(pos, parent, hangTop, lit)
+	local f = folder("Lantern", parent)
+	lantern(pos, f, false, hangTop)
+	if lit and st.lights < st.cap then
+		st.lights += 1
+	else
+		local l = f:FindFirstChildWhichIsA("PointLight", true)
+		if l then
+			l:Destroy()
+		end
+	end
+	return f
+end
+-- a frame at local (x, z) turned by yaw; its front is -Z (yaw 0 faces north, pi south, pi/2 west, -pi/2 east)
+local function fr(x, z, yaw, y)
+	return at(x, y or 0, z) * CFrame.Angles(0, yaw or 0, 0)
+end
+-- a textured box in a frame cf by two local corners
+local function lb(cf, name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(
+		name,
+		size,
+		cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2),
+		tint,
+		nil,
+		parent
+	)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+-- a small decor block of tinted white wool in a frame cf by size and local centre (animals, flowers)
+local function lw(cf, name, sx, sy, sz, x, y, z, tint, parent)
+	local p = decor(part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), nil, nil, parent))
+	p.CastShadow = false
+	return textured(p, "px_white_wool", tint)
+end
+-- a garden walk of coarse dirt, flush with the grass (0.06 above it), cut where the island ends
+local function walk(x0, z0, x1, z1, parent)
+	take(x0, z0, x1, z1)
+	local alongX = (x1 - x0) >= (z1 - z0)
+	local a0 = if alongX then x0 else z0
+	local a1 = if alongX then x1 else z1
+	local s
+	local function ok(a)
+		if alongX then
+			return onIsland(a + 2, z0 + 2, 6) and onIsland(a + 2, z1 - 2, 6)
+		end
+		return onIsland(x0 + 2, a + 2, 6) and onIsland(x1 - 2, a + 2, 6)
+	end
+	local function flush(e)
+		if s and e > s then
+			if alongX then
+				box("GardenWalk", s, -0.5, z0, e, 0.06, z1, "px_dirt", PATH, parent)
+			else
+				box("GardenWalk", x0, -0.5, s, x1, 0.06, e, "px_dirt", PATH, parent)
+			end
+		end
+		s = nil
+	end
+	for a = a0, a1 - 4, 4 do
+		if ok(a) then
+			s = s or a
+		else
+			flush(a)
+		end
+	end
+	flush(a1)
+end
+-- a giant umbrella mushroom: h blocks to the cap, stem s blocks wide (0 = a thin 2-stud stem), cap w blocks wide;
+-- a stepped terracotta cap with a hanging rim and pale gills, white dots on top; caps below head height are decor
+local function mushroom(x, z, h, s, w, parent)
+	local f = folder("GiantMushroom", parent)
+	local H = h * B
+	local sw = if s > 0 then s * B else 2
+	local stem = cube("MushroomStem", x, H / 2, z, sw, H, sw, "px_white_wool", C.stem, f)
+	if s == 0 then
+		decor(stem)
+	end
+	local hw = w * B / 2
+	local solid = H - B >= 10
+	local function capBox(name, x0, y0, z0, x1, y1, z1)
+		local p = box(name, x0, y0, z0, x1, y1, z1, "px_terracotta", MUSHROOM, f)
+		if not solid then
+			decor(p)
+		end
+		return p
+	end
+	capBox("MushroomCap", x - hw, H, z - hw, x + hw, H + B, z + hw)
+	local top = H + B
+	if w >= 3 then
+		capBox("MushroomCapTop", x - hw + B, H + B, z - hw + B, x + hw - B, H + 2 * B, z + hw - B)
+		top = H + 2 * B
+		if w >= 5 then
+			capBox("MushroomRim", x - hw, H - B, z - hw, x + hw, H, z - hw + B)
+			capBox("MushroomRim", x - hw, H - B, z + hw - B, x + hw, H, z + hw)
+			capBox("MushroomRim", x - hw, H - B, z - hw + B, x - hw + B, H, z + hw - B)
+			capBox("MushroomRim", x + hw - B, H - B, z - hw + B, x + hw, H, z + hw - B)
+			decor(
+				box(
+					"MushroomGills",
+					x - hw + B,
+					H - 0.3,
+					z - hw + B,
+					x + hw - B,
+					H,
+					z + hw - B,
+					nil,
+					C.gill,
+					f
+				)
+			)
+		end
+	end
+	-- the white dots: on the top step and on the ledge round it
+	for i = 1, w + 1 do
+		local dx, dz, y
+		if w >= 3 and i % 2 == 0 then
+			local r = hw - B - 1.2
+			dx, dz, y = rng:NextNumber(-r, r), rng:NextNumber(-r, r), top
+		elseif w >= 3 then
+			local along = rng:NextNumber(-hw + 1.2, hw - 1.2)
+			local across = hw - B / 2
+			local side = rng:NextInteger(1, 4)
+			if side == 1 then
+				dx, dz = along, -across
+			elseif side == 2 then
+				dx, dz = along, across
+			elseif side == 3 then
+				dx, dz = -across, along
+			else
+				dx, dz = across, along
+			end
+			y = H + B
+		else
+			local r = hw - 1.2
+			dx, dz, y = rng:NextNumber(-r, r), rng:NextNumber(-r, r), top
+		end
+		local d = decor(
+			part(
+				"MushroomDot",
+				Vector3.new(1.6, 0.24, 1.6),
+				at(x + dx, y + 0.12, z + dz),
+				C.dot,
+				nil,
+				f
+			)
+		)
+		d.CastShadow = false
+	end
+	take(x - sw / 2 - 1, z - sw / 2 - 1, x + sw / 2 + 1, z + sw / 2 + 1)
+	return f
+end
+-- an apple tree: an oak trunk, a blocky crown of hedge leaves (a full layer, a cross, a top), red apples
+local function appleTree(x, z, h, parent)
+	local f = folder("AppleTree", parent)
+	cube("Trunk", x, (h + 4) / 2, z, B, h + 4, B, "px_oak_log", nil, f)
+	local function leaf(cx, y0, cz, sx, sy, sz)
+		return cube("Leaves", cx, y0 + sy / 2, cz, sx, sy, sz, "px_hedge", LEAF, f)
+	end
+	leaf(x, h - 2, z, 20, 4, 20)
+	leaf(x, h + 2, z, 20, 4, 12)
+	leaf(x, h + 2, z - 8, 12, 4, 4)
+	leaf(x, h + 2, z + 8, 12, 4, 4)
+	leaf(x, h + 6, z, 12, 4, 12)
+	-- loose leaf blocks on the sides of the bottom layer
+	for i = 1, 3 do
+		local o = rng:NextInteger(-1, 1) * B
+		local side = (i + rng:NextInteger(0, 3)) % 4
+		local dx, dz = 12, o
+		if side == 1 then
+			dx, dz = -12, o
+		elseif side == 2 then
+			dx, dz = o, 12
+		elseif side == 3 then
+			dx, dz = o, -12
+		end
+		leaf(x + dx, h - 2, z + dz, B, B, B)
+	end
+	for i = 1, 8 do
+		local t = rng:NextNumber(-7.5, 7.5)
+		local y = h - 1.2 + rng:NextNumber(0, 2.4)
+		local side = i % 4
+		local ax, az = x + 10.5, z + t
+		if side == 1 then
+			ax, az = x - 10.5, z + t
+		elseif side == 2 then
+			ax, az = x + t, z + 10.5
+		elseif side == 3 then
+			ax, az = x + t, z - 10.5
+		end
+		if i > 6 then
+			-- hanging under the crown
+			ax, az, y = x + rng:NextNumber(-8, 8), z + rng:NextNumber(-8, 8), h - 2.7
+		end
+		local p = decor(part("Apple", Vector3.new(1.4, 1.4, 1.4), at(ax, y, az), APPLE, nil, f))
+		p.CastShadow = false
+	end
+	local a = rng:NextNumber(0, math.pi * 2)
+	decor(
+		part(
+			"FallenApple",
+			Vector3.new(1.4, 1.4, 1.4),
+			at(x + math.cos(a) * 6, 0.7, z + math.sin(a) * 6),
+			APPLE,
+			nil,
+			f
+		)
+	)
+	take(x - 3, z - 3, x + 3, z + 3)
+	return f
+end
+-- a pink cherry tree: a cherry log with a bend, a wide blossom crown, hanging blossoms and petals on the grass
+local function cherryTree(x, z, h, parent)
+	local f = folder("CherryTree", parent)
+	cube("Trunk", x, h / 2, z, B, h, B, "px_cherry_log", nil, f)
+	local dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local d = dirs[rng:NextInteger(1, 4)]
+	cube("Branch", x + d[1] * B, h - 2, z + d[2] * B, B, B, B, "px_cherry_log", nil, f)
+	local function leaf(cx, y0, cz, sx, sy, sz, deco)
+		local p = cube("Blossom", cx, y0 + sy / 2, cz, sx, sy, sz, "px_cherry_leaves", BLOSSOM, f)
+		if deco then
+			decor(p)
+		end
+		return p
+	end
+	leaf(x, h, z, 28, 4, 20)
+	leaf(x, h, z - 12, 20, 4, 4)
+	leaf(x, h, z + 12, 20, 4, 4)
+	leaf(x + d[1] * 2, h + 4, z + d[2] * 2, 20, 4, 20)
+	leaf(x, h + 8, z, 12, 4, 12)
+	-- blossoms hanging under the crown edge
+	for i = 1, 4 do
+		local o = rng:NextInteger(-2, 2) * B
+		local side = (i + rng:NextInteger(0, 1)) % 4
+		local dx, dz = 12, o
+		if side == 1 then
+			dx, dz = -12, o
+		elseif side == 2 then
+			dx, dz = math.clamp(o, -8, 8), 12
+		elseif side == 3 then
+			dx, dz = math.clamp(o, -8, 8), -12
+		end
+		leaf(x + dx, h - rng:NextInteger(1, 2) * B, z + dz, B, rng:NextInteger(1, 2) * B, B, true)
+	end
+	-- fallen petals
+	for _ = 1, 5 do
+		local a = rng:NextNumber(0, math.pi * 2)
+		local r = rng:NextNumber(4, 13)
+		local s = if rng:NextNumber() < 0.5 then 4 else 2
+		local p = decor(
+			part(
+				"Petals",
+				Vector3.new(s, 0.12, s),
+				at(x + math.cos(a) * r, 0.06, z + math.sin(a) * r),
+				nil,
+				nil,
+				f
+			)
+		)
+		textured(p, "px_white_wool", PINK_WOOL)
+		p.CastShadow = false
+	end
+	take(x - 3, z - 3, x + 3, z + 3)
+	return f
+end
+-- a spruce bench; front (where you sit facing) is -Z of the frame
+local function bench(x, z, yaw, parent)
+	local cf = fr(x, z, yaw)
+	local f = folder("Bench", parent)
+	lb(cf, "BenchSeat", -4, 1.8, -1.2, 4, 2.4, 1.2, "px_spruce_planks", nil, f)
+	lb(cf, "BenchLeg", -4, 0, -1.2, -3, 1.8, 1.2, "px_dark_oak_planks", nil, f)
+	lb(cf, "BenchLeg", 3, 0, -1.2, 4, 1.8, 1.2, "px_dark_oak_planks", nil, f)
+	lb(cf, "BenchBack", -4, 2.4, 0.8, 4, 4.8, 1.3, "px_spruce_planks", nil, f)
+	take(x - 4, z - 4, x + 4, z + 4)
+end
+local function rabbit(x, z, yaw, col, parent)
+	local cf = fr(x, z, yaw)
+	local f = folder("Rabbit", parent)
+	lw(cf, "RabbitBody", 1.6, 1.4, 2.2, 0, 0.7, 0.2, col, f)
+	lw(cf, "RabbitHead", 1.2, 1.2, 1.2, 0, 1.5, -1.0, col, f)
+	lw(cf, "RabbitEar", 0.35, 1.2, 0.3, -0.3, 2.6, -0.9, col, f)
+	lw(cf, "RabbitEar", 0.35, 1.2, 0.3, 0.3, 2.6, -0.9, col, f)
+	lw(cf, "RabbitTail", 0.6, 0.6, 0.5, 0, 1.0, 1.45, C.cream, f)
+end
+-- a blocky deer looking toward -Z of its frame; the body is solid, the rest decor
+local function deer(x, z, yaw, parent)
+	local cf = fr(x, z, yaw)
+	local f = folder("Deer", parent)
+	local body = part("DeerBody", Vector3.new(3, 3, 6.4), cf * CFrame.new(0, 5.5, 0.4), nil, nil, f)
+	textured(body, "px_white_wool", C.deer)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -1, 1 }) do
+			lw(cf, "DeerLeg", 0.9, 4, 0.9, sx * 1, 2, 0.4 + sz * 2.4, C.deerDark, f)
+		end
+	end
+	lw(cf, "DeerBelly", 2.6, 0.4, 5, 0, 3.9, 0.4, C.cream, f)
+	lw(cf, "DeerNeck", 1.5, 3, 1.5, 0, 7.8, -2.3, C.deer, f)
+	lw(cf, "DeerHead", 2, 2, 2.8, 0, 9.6, -3.2, C.deer, f)
+	lw(cf, "DeerMuzzle", 1.2, 1, 1, 0, 9.1, -5, C.deerDark, f)
+	lw(cf, "DeerTail", 0.8, 0.8, 0.5, 0, 6.3, 3.75, C.cream, f)
+	for _, s in ipairs({ -1, 1 }) do
+		lw(cf, "DeerEar", 1, 0.5, 0.4, s * 1.3, 10.4, -2.4, C.deer, f)
+		lw(cf, "Antler", 0.4, 2.4, 0.4, s * 0.7, 11.8, -2.8, C.antler, f)
+		lw(cf, "Antler", 1.4, 0.4, 0.4, s * 1.2, 12.6, -2.8, C.antler, f)
+		lw(cf, "Antler", 0.4, 1.4, 0.4, s * 1.8, 13.5, -2.8, C.antler, f)
+	end
+	take(x - 4, z - 4, x + 4, z + 4)
+end
+-- a flower bed of single-colour rows (rows run along `axis`, 4 studs apart), a low curb round it
+local function bed(x0, z0, x1, z1, axis, colors, parent, curbV)
+	if not rectFree(x0 - 1, z0 - 1, x1 + 1, z1 + 1, "flower bed") then
+		return
+	end
+	local f = folder("FlowerBed", parent)
+	take(x0 - 1, z0 - 1, x1 + 1, z1 + 1)
+	curbV = curbV or "px_mossy_stone_bricks"
+	decor(box("BedCurb", x0 - 1, 0, z0 - 1, x1 + 1, 0.8, z0, curbV, nil, f))
+	decor(box("BedCurb", x0 - 1, 0, z1, x1 + 1, 0.8, z1 + 1, curbV, nil, f))
+	decor(box("BedCurb", x0 - 1, 0, z0, x0, 0.8, z1, curbV, nil, f))
+	decor(box("BedCurb", x1, 0, z0, x1 + 1, 0.8, z1, curbV, nil, f))
+	local u0, u1, a0, a1 = z0, z1, x0, x1
+	if axis == "z" then
+		u0, u1, a0, a1 = x0, x1, z0, z1
+	end
+	local function rowBox(name, y0, y1, r0, r1, variant, tint)
+		if axis == "x" then
+			return decor(box(name, a0 + 0.5, y0, r0, a1 - 0.5, y1, r1, variant, tint, f))
+		end
+		return decor(box(name, r0, y0, a0 + 0.5, r1, y1, a1 - 0.5, variant, tint, f))
+	end
+	for k = 0, math.floor((u1 - u0) / 4) - 1 do
+		local col = colors[k % #colors + 1]
+		local r0 = u0 + k * 4 + 0.5
+		local r1 = r0 + 3
+		rowBox("BedLeaves", 0, 1.0, r0, r1, "px_hedge", LEAF)
+		rowBox("BedFlowers", 1.0, 1.7, r0 + 0.3, r1 - 0.3, "px_white_wool", col)
+		local a = a0 + 2 + (k % 2) * 3
+		while a < a1 - 1.5 do
+			local u = (r0 + r1) / 2 + rng:NextNumber(-0.6, 0.6)
+			local p = decor(
+				part(
+					"Flower",
+					Vector3.new(1.3, 1.3, 1.3),
+					if axis == "x" then at(a, 2.15, u) else at(u, 2.15, a),
+					nil,
+					nil,
+					f
+				)
+			)
+			textured(p, "px_white_wool", col)
+			p.CastShadow = false
+			a += 6
+		end
+	end
+end
+
+-- ================================================================ keep-outs and the garden walks
+do
+	take(62, 106, 74, 118) -- the zone sign
+	take(54, 138, 78, 162) -- the buyer's stall, its crate, barrel and lamp post
+	take(-56, 36, -24, 54) -- the approach to the north opening of the fence
+	take(-56, 202, -24, 222) -- the approach to the south opening
+	take(138, -52, 162, -30) -- the landing of the north part's east river bridge
+	take(-162, -52, -138, -30) -- the landing of the west river bridge
+	local wf = folder("GardenWalks", southF)
+	walk(56, 88, 196, 104, wf) -- W1 east from the EAST path
+	walk(142, -40, 158, 184, wf) -- W2 the garden spine from the east bridge landing
+	walk(60, 168, 148, 184, wf) -- W3 south of the buyer
+	walk(84, 104, 100, 168, wf) -- W4 between W1 and W3
+	walk(-164, 120, -114, 136, wf) -- W6 to the west opening of the fence
+	walk(-158, -40, -142, 120, wf) -- W7 from the west bridge landing south to W6
+end
+
+-- ================================================================ the fence round the pit
+do
+	local f = folder("PitFence", southF)
+	local R = PIT_HALF + 2 * B + 2 -- 74: one block outside the mossy rim
+	local function world(side, u)
+		if side == "N" then
+			return PIT.x + u, PIT.z - R
+		elseif side == "S" then
+			return PIT.x + u, PIT.z + R
+		elseif side == "W" then
+			return PIT.x - R, PIT.z + u
+		end
+		return PIT.x + R, PIT.z + u
+	end
+	local function rails(ax, az, bx, bz)
+		local a, b = V(ax, 0, az), V(bx, 0, bz)
+		local len = (b - a).Magnitude
+		local n = math.max(1, math.floor(len / 8 + 0.5))
+		for i = 0, n do
+			local p = a:Lerp(b, i / n)
+			if onIsland(p.X - BX, p.Z - BZ, 4) then
+				textured(
+					part(
+						"FencePost",
+						Vector3.new(1.6, 4.4, 1.6),
+						CFrame.new(p + Vector3.new(0, 2.2, 0)),
+						nil,
+						nil,
+						f
+					),
+					"px_dark_oak_log"
+				)
+			end
+		end
+		for _, h in ipairs({ 1.6, 3.4 }) do
+			local rail = part(
+				"FenceRail",
+				Vector3.new(0.5, 0.7, len),
+				CFrame.lookAt((a + b) / 2 + Vector3.new(0, h, 0), b + Vector3.new(0, h, 0)),
+				nil,
+				nil,
+				f
+			)
+			textured(rail, "px_dark_oak_planks")
+		end
+	end
+	local function stump(x, z)
+		if onPath(x, z, 1.9) then
+			-- the CROSS path passes the north-east corner: a plain post keeps the path clear
+			textured(
+				part("FencePost", Vector3.new(1.6, 4.4, 1.6), at(x, 2.2, z), nil, nil, f),
+				"px_dark_oak_log"
+			)
+			return
+		end
+		cube("LanternStump", x, 2, z, B, B, B, "px_dark_oak_log", nil, f)
+		lamp(V(x, 4.75, z), f, nil, true)
+	end
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		stump(PIT.x + c[1] * R, PIT.z + c[2] * R)
+	end
+	-- each side: the opening (the ladder shaft ± 1 block; the east wide toward the arrival), its stumps, two runs
+	for _, s in ipairs({ { "N", 12 }, { "S", 12 }, { "W", 12 }, { "E", 28 } }) do
+		local side, o = s[1], s[2]
+		local ax, az = world(side, -o - 2)
+		local bx, bz = world(side, o + 2)
+		stump(ax, az)
+		stump(bx, bz)
+		local p0x, p0z = world(side, -R + 2)
+		local p1x, p1z = world(side, -o - 4)
+		rails(p0x, p0z, p1x, p1z)
+		local q0x, q0z = world(side, o + 4)
+		local q1x, q1z = world(side, R - 2)
+		rails(q0x, q0z, q1x, q1z)
+	end
+end
+task.wait()
+
+-- ================================================================ leaf arches with flowers over the paths
+do
+	local af = folder("LeafArches", southF)
+	-- an arch across a north-south path centred at (cx, cz): legs `span` apart (mossy stone base, hedge leg), a
+	-- stepped leafy top 12..20 studs up, flowers, wisteria hanging inside, maybe a lit lantern under the top
+	local function arch(cx, cz, span, lit)
+		local f = folder("LeafArch", af)
+		local cf = fr(cx, cz, 0)
+		local o = span / 2
+		for _, s in ipairs({ -1, 1 }) do
+			lb(cf, "ArchBase", s * o - 2, 0, -2, s * o + 2, 4, 2, "px_mossy_stone_bricks", nil, f)
+			lb(cf, "ArchLeg", s * o - 2, 4, -2, s * o + 2, 12, 2, "px_hedge", LEAF, f)
+			decor(lb(cf, "ArchStep", s * (o - 2), 8, -2, s * (o - 6), 12, 2, "px_hedge", LEAF, f))
+			decor(
+				lb(cf, "Wisteria", s * 3, 8.4, -1.2, s * 5, 12, 1.2, "px_wisteria_leaves", nil, f)
+			)
+			take(cx + s * o - 2, cz - 2, cx + s * o + 2, cz + 2)
+		end
+		lb(cf, "ArchTop", -o - 2, 12, -2, o + 2, 16, 2, "px_hedge", LEAF, f)
+		decor(lb(cf, "ArchCrown", -o + 6, 16, -2, o - 6, 20, 2, "px_hedge", LEAF, f))
+		for i = 1, 10 do
+			local zf = if i % 2 == 0 then 2.05 else -2.05
+			local x, y
+			local r = rng:NextNumber()
+			if r < 0.35 then
+				x = (if i % 4 < 2 then -o else o) + rng:NextNumber(-1.4, 1.4)
+				y = rng:NextNumber(5, 11)
+			elseif r < 0.8 then
+				x = rng:NextNumber(-o - 1, o + 1)
+				y = rng:NextNumber(13, 15)
+			else
+				x = rng:NextNumber(-o + 7, o - 7)
+				y = rng:NextNumber(17, 19)
+			end
+			local sz = rng:NextNumber(1.1, 1.6)
+			lw(cf, "ArchFlower", sz, sz, sz, x, y, zf, pick(C.archFlowers), f)
+		end
+		if lit then
+			lamp(
+				(cf * CFrame.new(0, 9.5, 0)).Position,
+				f,
+				(cf * CFrame.new(0, 12, 0)).Position.Y,
+				true
+			)
+		end
+	end
+	-- the arbour over the EAST path (x 36..56): legs x 34 / 58, the outer ones lit
+	arch(46, 60, 24, true)
+	arch(46, 72, 24, false)
+	arch(46, 84, 24, true)
+	-- two over the garden spine W2 (x 142..158)
+	arch(150, 20, 24, false)
+	arch(150, 140, 24, false)
+end
+task.wait()
+
+-- ================================================================ giant umbrella mushrooms round the pit
+do
+	local mf = folder("Mushrooms", southF)
+	-- { x, z, height blocks, stem blocks, cap blocks }
+	for _, m in ipairs({
+		{ -92, 36, 8, 2, 8 }, -- M1 north-west of the pit, beside the hill bank
+		{ -132, 84, 7, 2, 8 }, -- M3 west of the fence
+		{ -128, 164, 5, 1, 5 }, -- M4 south-west, over the flower bed
+		{ 48, 190, 7, 2, 8 }, -- M5 south-east of the pit, behind the buyer
+		{ 72, 52, 6, 1, 7 }, -- M6 by the EAST path arbour
+		{ -132, 0, 5, 1, 5 }, -- M8 by the south-west flower beds
+	}) do
+		if spot(m[1], m[2], m[4] * 2 + 1, "giant mushroom") then
+			mushroom(m[1], m[2], m[3], m[4], m[5], mf)
+		end
+	end
+	-- small clusters: { centre x, z, { dx, dz, h, w } ... }
+	for _, c in ipairs({
+		{ -68, 44, { { 0, 0, 2, 3 }, { 8, 6, 1, 2 }, { -8, -6, 1, 2 } } },
+		{ -128, 100, { { 0, 0, 2, 3 }, { 6, -8, 1, 2 }, { -7, 5, 1, 2 } } },
+		{ -108, 20, { { 0, 0, 2, 3 }, { 8, -6, 1, 2 }, { -8, 6, 1, 2 } } },
+	}) do
+		for _, m in ipairs(c[3]) do
+			local x, z = c[1] + m[1], c[2] + m[2]
+			if spot(x, z, 1) then
+				mushroom(x, z, m[3], 0, m[4], mf)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the south-east garden: gazebos, the pond and its bridge, bamboo
+do
+	local gf = folder("Gazebos", southF)
+	-- a gazebo: a mossy stone floor, stone plinths with dark oak posts, a stepped green roof, a hanging lantern, a
+	-- bench inside, vines on two posts
+	local function gazebo(cx, cz)
+		if not rectFree(cx - 10, cz - 10, cx + 10, cz + 10, "gazebo") then
+			return
+		end
+		local f = folder("Gazebo", gf)
+		box(
+			"GazeboFloor",
+			cx - 9,
+			-0.4,
+			cz - 9,
+			cx + 9,
+			0.4,
+			cz + 9,
+			"px_mossy_stone_bricks",
+			nil,
+			f
+		)
+		for i, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+			local px, pz = cx + c[1] * 6, cz + c[2] * 6
+			cube("GazeboPlinth", px, 2.4, pz, B, 4, B, "px_mossy_stone_bricks", nil, f)
+			cube("GazeboPost", px, 8.2, pz, 2.4, 7.6, 2.4, "px_dark_oak_log", nil, f)
+			if i % 2 == 1 then
+				local vx = px + c[1] * 1.45
+				decor(
+					box(
+						"GazeboVines",
+						vx - 0.25,
+						4.4,
+						pz - 1,
+						vx + 0.25,
+						11.6,
+						pz + 1,
+						"px_hedge",
+						LEAF,
+						f
+					)
+				)
+				local d = decor(
+					part(
+						"VineFlower",
+						Vector3.new(1.1, 1.1, 1.1),
+						at(vx, rng:NextNumber(6, 10), pz),
+						nil,
+						nil,
+						f
+					)
+				)
+				textured(d, "px_white_wool", PINK_WOOL)
+			end
+		end
+		-- the beams under the roof between the posts
+		decor(
+			box(
+				"GazeboBeam",
+				cx - 7.2,
+				11,
+				cz - 6.6,
+				cx + 7.2,
+				12,
+				cz - 5.4,
+				"px_dark_oak_planks",
+				nil,
+				f
+			)
+		)
+		decor(
+			box(
+				"GazeboBeam",
+				cx - 7.2,
+				11,
+				cz + 5.4,
+				cx + 7.2,
+				12,
+				cz + 6.6,
+				"px_dark_oak_planks",
+				nil,
+				f
+			)
+		)
+		decor(
+			box(
+				"GazeboBeam",
+				cx - 6.6,
+				11,
+				cz - 5.4,
+				cx - 5.4,
+				12,
+				cz + 5.4,
+				"px_dark_oak_planks",
+				nil,
+				f
+			)
+		)
+		decor(
+			box(
+				"GazeboBeam",
+				cx + 5.4,
+				11,
+				cz - 5.4,
+				cx + 6.6,
+				12,
+				cz + 5.4,
+				"px_dark_oak_planks",
+				nil,
+				f
+			)
+		)
+		-- the stepped roof
+		box(
+			"GazeboRoof",
+			cx - 13,
+			12,
+			cz - 13,
+			cx + 13,
+			14,
+			cz + 13,
+			"px_spruce_planks",
+			ROOF_GREEN,
+			f
+		)
+		box("GazeboRoof", cx - 9, 14, cz - 9, cx + 9, 18, cz + 9, "px_spruce_planks", ROOF_GREEN, f)
+		box("GazeboRoof", cx - 5, 18, cz - 5, cx + 5, 22, cz + 5, "px_spruce_planks", ROOF_GREEN, f)
+		box("GazeboCap", cx - 2, 22, cz - 2, cx + 2, 24, cz + 2, "px_dark_oak_planks", nil, f)
+		lamp(V(cx, 9, cz), f, BY + 12, true)
+		bench(cx, cz + 3.5, 0, f)
+		take(cx - 10, cz - 10, cx + 10, cz + 10)
+	end
+	gazebo(126, -32) -- G1 by the pond
+	gazebo(120, 136) -- G2 among the flower beds
+end
+task.wait()
+
+do
+	local f = folder("Pond", southF)
+	local X0, Z0, X1, Z1 = 104, -16, 132, 12 -- the water
+	if rectFree(X0 - 4, Z0 - 4, X1 + 4, Z1 + 4, "pond") then
+		-- the curb (1 block wide, 1 stud high), split where the bridge steps sit on it
+		local CURB = "px_mossy_stone_bricks"
+		box("PondCurb", X0 - 4, 0, Z0 - 4, X1 + 4, 1, Z0, CURB, nil, f)
+		box("PondCurb", X0 - 4, 0, Z1, X1 + 4, 1, Z1 + 4, CURB, nil, f)
+		box("PondCurb", X0 - 4, 0, Z0, X0, 1, -6, CURB, nil, f)
+		box("PondCurb", X0 - 4, 0, 6, X0, 1, Z1, CURB, nil, f)
+		box("PondCurb", X1, 0, Z0, X1 + 4, 1, -6, CURB, nil, f)
+		box("PondCurb", X1, 0, 6, X1 + 4, 1, Z1, CURB, nil, f)
+		decor(box("PondBed", X0, 0, Z0, X1, 0.08, Z1, "px_dirt", MUD, f))
+		local w = decor(box("PondWater", X0, 0.08, Z0, X1, 0.8, Z1, "px_water", WATER, f))
+		w.Transparency = 0.3
+		w.CastShadow = false
+		-- lily pads (some in flower) off the bridge
+		for i = 1, 8 do
+			local x = rng:NextNumber(X0 + 2, X1 - 2)
+			local z = if i % 2 == 0
+				then rng:NextNumber(Z0 + 2, -8.5)
+				else rng:NextNumber(8.5, Z1 - 2)
+			local p =
+				decor(part("LilyPad", Vector3.new(2.6, 0.15, 2.6), at(x, 0.88, z), nil, nil, f))
+			textured(p, "px_hedge", C.lily)
+			p.CastShadow = false
+			if i % 3 == 0 then
+				decor(
+					part("LilyFlower", Vector3.new(0.9, 0.9, 0.9), at(x, 1.4, z), PINK_WOOL, nil, f)
+				)
+			end
+		end
+		-- reeds with cattails in the corners
+		for _, r in ipairs({
+			{ X0 + 1.5, Z0 + 1.5 },
+			{ X0 + 3, Z0 + 1.2 },
+			{ X1 - 1.5, Z1 - 1.5 },
+			{ X1 - 1.2, Z1 - 3.4 },
+			{ X0 + 1.4, Z1 - 1.6 },
+			{ X1 - 1.5, Z0 + 1.6 },
+		}) do
+			local h = rng:NextNumber(3, 5)
+			textured(
+				decor(part("Reed", Vector3.new(0.6, h, 0.6), at(r[1], h / 2, r[2]), nil, nil, f)),
+				"px_hedge",
+				C.reed
+			)
+			decor(
+				part(
+					"Cattail",
+					Vector3.new(0.8, 1.2, 0.8),
+					at(r[1], h + 0.4, r[2]),
+					C.handle,
+					nil,
+					f
+				)
+			)
+		end
+		-- two little spouts
+		for _, s in ipairs({ { 110, 8 }, { 126, -12 } }) do
+			decor(
+				box(
+					"SpoutStone",
+					s[1] - 1,
+					0,
+					s[2] - 1,
+					s[1] + 1,
+					1.2,
+					s[2] + 1,
+					"px_mossy_stone_bricks",
+					nil,
+					f
+				)
+			)
+			local col =
+				decor(part("Spout", Vector3.new(0.8, 3.2, 0.8), at(s[1], 2.8, s[2]), nil, nil, f))
+			textured(col, "px_water", WATER)
+			col.Transparency = 0.3
+			local splash = decor(
+				part(
+					"Splash",
+					Vector3.new(2.8, 0.3, 2.8),
+					at(s[1], 0.95, s[2]),
+					Color3.fromRGB(220, 240, 255),
+					nil,
+					f
+				)
+			)
+			splash.Transparency = 0.4
+		end
+		-- the pink cherry-plank bridge: 1-stud steps up to a deck over the water, rails on the deck
+		local BR = "px_cherry_planks"
+		for _, s in ipairs({ { 96, 100, 1 }, { 100, 104, 2 }, { 132, 136, 2 }, { 136, 142, 1 } }) do
+			box("BridgeStep", s[1], 0, -6, s[2], s[3], 6, BR, nil, f)
+		end
+		box("BridgeDeck", X0, 2.2, -6, X1, 3, 6, BR, nil, f)
+		for _, x in ipairs({ 108, 128 }) do
+			box("BridgePier", x - 1, 0, -6, x + 1, 2.2, 6, BR, nil, f)
+		end
+		for _, z in ipairs({ -5.5, 5.5 }) do
+			for x = X0, X1, 7 do
+				cube("BridgePost", x, 4.5, z, 1, 3, 1, "px_cherry_log", nil, f)
+			end
+			box("BridgeRail", X0, 5, z - 0.3, X1, 5.6, z + 0.3, BR, nil, f)
+		end
+		-- lanterns on cherry posts at both ends
+		for _, p in ipairs({ { 96, -8.5 }, { 141, 8.5 } }) do
+			cube("BridgeLampPost", p[1], 3, p[2], 2, 6, 2, "px_cherry_log", nil, f)
+			lamp(V(p[1], 6.75, p[2]), f, nil, true)
+		end
+		take(X0 - 4, Z0 - 4, X1 + 4, Z1 + 4)
+		take(94, -10, 142, 10)
+	end
+end
+
+do
+	local f = folder("Bamboo", southF)
+	for gx = 100, 112, 4 do
+		for gz = -46, -30, 4 do
+			if rng:NextNumber() < 0.75 then
+				local x, z = gx + 2 + rng:NextNumber(-0.6, 0.6), gz + 2 + rng:NextNumber(-0.6, 0.6)
+				if spot(x, z, 1) then
+					local n = rng:NextInteger(4, 8)
+					local h = n * B
+					decor(cube("Bamboo", x, h / 2, z, 2, h, 2, "px_hedge", C.bamboo, f))
+					decor(
+						cube(
+							"BambooNode",
+							x,
+							rng:NextInteger(1, n - 1) * B,
+							z,
+							2.3,
+							0.4,
+							2.3,
+							nil,
+							C.bambooNode,
+							f
+						)
+					)
+					decor(
+						cube(
+							"BambooLeaves",
+							x + rng:NextNumber(-1.5, 1.5),
+							h - 1,
+							z + rng:NextNumber(-1.5, 1.5),
+							3.2,
+							1.6,
+							3.2,
+							"px_hedge",
+							LEAF,
+							f
+						)
+					)
+				end
+			end
+		end
+	end
+	take(100, -46, 116, -26)
+end
+task.wait()
+
+-- ================================================================ the south-east garden: beds, trees, bees, trellises, the ruin
+do
+	local f = folder("Garden", southF)
+	local fl = C.flowers
+	-- flower beds of single-colour rows
+	bed(108, 20, 132, 44, "x", { C.red, C.yellow, C.white, C.purple, C.blue, PINK_WOOL }, f) -- Bed1 north of the pond
+	bed(66, 66, 90, 84, "z", { C.yellow, C.red, C.white, C.purple, C.blue, C.yellow }, f) -- Bed2 under M6
+	bed(170, -8, 198, 16, "x", { C.purple, C.white, C.blue, C.red, C.yellow, C.purple }, f) -- Bed3 east of W2
+	bed(108, 108, 132, 124, "x", { C.red, C.white, C.red, C.yellow }, f) -- Bed4 north of G2
+	bed(108, 150, 132, 166, "x", { C.blue, C.purple, C.white, PINK_WOOL }, f) -- Bed5 south of G2
+	-- apple trees, cherry trees
+	for _, t in ipairs({
+		{ 66, 24, 12 },
+		{ 100, 56, 13 },
+		{ 128, 72, 12 },
+		{ 168, 120, 13 },
+		{ 164, 156, 12 },
+	}) do
+		if spot(t[1], t[2], 2, "apple tree") then
+			appleTree(t[1], t[2], t[3], f)
+		end
+	end
+	for _, t in ipairs({ { 96, 28, 14 }, { 176, -28, 14 }, { 190, 40, 13 }, { 88, 194, 13 } }) do
+		if spot(t[1], t[2], 2, "cherry tree") then
+			cherryTree(t[1], t[2], t[3], f)
+		end
+	end
+	task.wait()
+	-- the apiary: three honey hives on posts facing W1, bees round them
+	do
+		local function bee(pos, yaw, parent)
+			local cf = CFrame.new(pos) * CFrame.Angles(0, yaw, 0)
+			local p = decor(part("Bee", Vector3.new(0.9, 0.9, 1.3), cf, C.bee, nil, parent))
+			p.CastShadow = false
+			decor(
+				part(
+					"BeeStripe",
+					Vector3.new(0.95, 0.95, 0.35),
+					cf * CFrame.new(0, 0, 0.1),
+					C.black,
+					nil,
+					parent
+				)
+			).CastShadow =
+				false
+			local w = decor(
+				part(
+					"BeeWings",
+					Vector3.new(1.6, 0.1, 0.6),
+					cf * CFrame.new(0, 0.5, -0.05),
+					C.wing,
+					nil,
+					parent
+				)
+			)
+			w.Transparency = 0.35
+			w.CastShadow = false
+		end
+		for _, x in ipairs({ 104, 112, 120 }) do
+			local z = 80
+			if spot(x, z, 2, "beehive") then
+				local hf = folder("Beehive", f)
+				cube("HiveStand", x, 1.5, z, 1.6, 3, 1.6, "px_dark_oak_log", nil, hf)
+				cube("Hive", x, 5, z, B, B, B, "px_hay", C.honey, hf)
+				for _, y in ipairs({ 4.3, 5.7 }) do
+					decor(cube("HiveStripe", x, y, z, B + 0.1, 0.45, B + 0.1, nil, C.stripe, hf))
+				end
+				decor(
+					cube("HiveLid", x, 7.3, z, B + 0.6, 0.6, B + 0.6, "px_spruce_planks", nil, hf)
+				)
+				decor(cube("HiveDoor", x, 3.9, z + 2.05, 1.6, 0.6, 0.2, nil, C.black, hf))
+				for _ = 1, 4 do
+					local a = rng:NextNumber(0, math.pi * 2)
+					local r = rng:NextNumber(2.8, 5.2)
+					bee(
+						V(x + math.cos(a) * r, rng:NextNumber(3.5, 8.5), z + math.sin(a) * r),
+						rng:NextNumber(0, math.pi * 2),
+						hf
+					)
+				end
+				take(x - 3, z - 3, x + 3, z + 3)
+			end
+		end
+	end
+	-- trellises with vines and wisteria along the east side of W2
+	for _, z in ipairs({ 36, 54, 70 }) do
+		local x = 164
+		if spot(x, z, 2, "trellis") then
+			local tf = folder("Trellis", f)
+			for _, s in ipairs({ -1, 1 }) do
+				cube("TrellisPost", x, 6, z + s * 6, 1.2, 12, 1.2, "px_dark_oak_log", nil, tf)
+			end
+			for _, y in ipairs({ 3, 7, 11 }) do
+				decor(
+					box(
+						"TrellisLath",
+						x - 0.3,
+						y - 0.3,
+						z - 6,
+						x + 0.3,
+						y + 0.3,
+						z + 6,
+						"px_dark_oak_planks",
+						nil,
+						tf
+					)
+				)
+			end
+			box("TrellisVines", x - 0.5, 0, z - 5.4, x + 0.5, 8, z + 5.4, "px_hedge", LEAF, tf)
+			decor(
+				box("TrellisVines", x - 0.5, 8, z - 5.4, x + 0.5, 11.2, z + 1, "px_hedge", LEAF, tf)
+			)
+			decor(
+				box(
+					"Wisteria",
+					x - 0.7,
+					6,
+					z + 1.5,
+					x + 0.7,
+					11,
+					z + 4.5,
+					"px_wisteria_leaves",
+					nil,
+					tf
+				)
+			)
+			decor(
+				box(
+					"Wisteria",
+					x - 0.7,
+					3.6,
+					z - 4.5,
+					x + 0.7,
+					8.4,
+					z - 2,
+					"px_wisteria_leaves",
+					nil,
+					tf
+				)
+			)
+			for i = 1, 5 do
+				local side = if i % 2 == 0 then 0.6 else -0.6
+				local d = decor(
+					part(
+						"VineFlower",
+						Vector3.new(1.1, 1.1, 1.1),
+						at(x + side, rng:NextNumber(1.5, 9.5), z + rng:NextNumber(-4.5, 4.5)),
+						nil,
+						nil,
+						tf
+					)
+				)
+				textured(d, "px_white_wool", pick(fl))
+			end
+			take(x - 2, z - 7, x + 2, z + 7)
+		end
+	end
+	-- the mossy stone arch ruin: a tall and a broken pillar, the lintel broken off mid-span, fallen blocks, vines
+	do
+		local cx, cz = 184, 76
+		if rectFree(cx - 10, cz - 4, cx + 10, cz + 4, "ruin") then
+			local rf = folder("Ruin", f)
+			local MB, MC = "px_mossy_stone_bricks", "px_mossy_cobblestone"
+			box("RuinPillar", cx - 10, 0, cz - 2, cx - 6, 12, cz + 2, MB, nil, rf)
+			box("RuinPillar", cx - 10, 12, cz - 2, cx - 6, 20, cz + 2, MC, nil, rf)
+			box("RuinPillar", cx + 6, 0, cz - 2, cx + 10, 8, cz + 2, MB, nil, rf)
+			box("RuinPillar", cx + 6, 8, cz - 2, cx + 10, 12, cz + 2, MC, nil, rf)
+			box("RuinLintel", cx - 10, 20, cz - 2, cx + 2, 24, cz + 2, MB, nil, rf)
+			box("RuinStep", cx - 6, 16, cz - 2, cx - 2, 20, cz + 2, MB, nil, rf)
+			box("RuinRubble", cx + 2, 0, cz + 4, cx + 6, 4, cz + 8, MC, nil, rf)
+			box("RuinRubble", cx + 12, 0, cz - 6, cx + 16, 2, cz - 2, MB, nil, rf)
+			box("RuinRubble", cx - 2, 0, cz - 8, cx + 2, 4, cz - 4, MB, nil, rf)
+			box("RuinRubble", cx - 2, 4, cz - 8, cx, 6, cz - 6, MC, nil, rf)
+			decor(
+				box("RuinVines", cx - 1.8, 14, cz + 2, cx + 1.8, 20, cz + 2.5, "px_hedge", LEAF, rf)
+			)
+			decor(
+				box(
+					"RuinVines",
+					cx - 10.5,
+					6,
+					cz - 1.8,
+					cx - 10,
+					20,
+					cz + 1.8,
+					"px_hedge",
+					LEAF,
+					rf
+				)
+			)
+			decor(
+				box("RuinVines", cx + 10, 2, cz - 1, cx + 10.5, 11, cz + 1.6, "px_hedge", LEAF, rf)
+			)
+			for i = 1, 4 do
+				local d = decor(
+					part(
+						"RuinFlower",
+						Vector3.new(1.2, 1.2, 1.2),
+						at(
+							cx - 10.3 + (i % 2) * 20.6,
+							rng:NextNumber(4, 12),
+							cz + rng:NextNumber(-1.5, 1.5)
+						),
+						nil,
+						nil,
+						rf
+					)
+				)
+				textured(d, "px_white_wool", pick(C.archFlowers))
+			end
+			take(cx - 16, cz - 9, cx + 17, cz + 9)
+		end
+	end
+	task.wait()
+	-- lamp posts along the walks (their lanterns count toward the light cap)
+	for _, l in ipairs({ { 162, 84, math.pi }, { 104, 112, math.pi / 2 }, { 68, 192, 0 } }) do
+		if spot(l[1], l[2], 2, "lamp post") then
+			local lf = folder("LampPost", f)
+			lampPost(l[1], l[2], lf, false, l[3])
+			if st.lights < st.cap then
+				st.lights += 1
+			else
+				local pl = lf:FindFirstChildWhichIsA("PointLight", true)
+				if pl then
+					pl:Destroy()
+				end
+			end
+			take(l[1] - 2, l[2] - 2, l[1] + 2, l[2] + 2)
+		end
+	end
+	-- benches by the walks
+	for _, b in ipairs({ { 110, 190, 0 }, { 180, 108, 0 }, { 164, 6, math.pi / 2 } }) do
+		if spot(b[1], b[2], 3, "bench") then
+			bench(b[1], b[2], b[3], f)
+		end
+	end
+	-- deer and rabbits
+	for _, d in ipairs({ { 172, 24, math.pi * 0.6 }, { 184, 134, -0.8 } }) do
+		if spot(d[1], d[2], 3, "deer") then
+			deer(d[1], d[2], d[3], f)
+		end
+	end
+	for _, r in ipairs({ { 88, 46, 0.4 }, { 194, 64, 2.2 }, { 136, 196, -1.2 }, { 100, 140, 1.6 } }) do
+		if spot(r[1], r[2], 1) then
+			rabbit(r[1], r[2], r[3], if rng:NextNumber() < 0.5 then C.hare else C.white, f)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the south-west strip: orchard, vegetables, the tool shed
+do
+	local f = folder("SouthWest", southF)
+	-- the orchard row and a cherry by the fence corner
+	for _, z in ipairs({ -20, 8, 36, 64 }) do
+		if spot(-176, z, 2, "orchard tree") then
+			appleTree(-176, z, 12, f)
+		end
+	end
+	if spot(-126, 40, 2, "cherry tree") then
+		cherryTree(-126, 40, 13, f)
+	end
+	bed(
+		-136,
+		-40,
+		-112,
+		-16,
+		"x",
+		{ C.yellow, C.white, C.red, C.purple, C.blue, PINK_WOOL },
+		f,
+		"px_spruce_planks"
+	) -- Bed6
+	bed(
+		-152,
+		142,
+		-128,
+		158,
+		"x",
+		{ PINK_WOOL, C.white, C.purple, C.yellow },
+		f,
+		"px_spruce_planks"
+	) -- Bed7
+	task.wait()
+	-- the vegetable patch x -192..-160, z 84..116: a spruce fence with a gate toward W6, crop rows, a scarecrow
+	do
+		local X0, Z0, X1, Z1 = -192, 84, -160, 116
+		if rectFree(X0, Z0, X1, Z1, "vegetable patch") then
+			local vf = folder("VegetablePatch", f)
+			local FV = "px_spruce_planks"
+			fence(X0, Z0, X1, Z0, vf, 0, FV)
+			fence(X0, Z0, X0, Z1, vf, 0, FV)
+			fence(X1, Z0, X1, Z1, vf, 0, FV)
+			fence(X0, Z1, -180, Z1, vf, 0, FV)
+			fence(-172, Z1, X1, Z1, vf, 0, FV)
+			local CYCLE = { "cabbage", "carrot", "wheat", "wheat", "beet", "carrot", "cabbage" }
+			for k = 0, 6 do
+				local xc = X0 + 4 + k * 4
+				local z0, z1 = Z0 + 2, Z1 - 2
+				decor(box("Soil", xc - 1.7, -0.3, z0, xc + 1.7, 0.12, z1, "px_dirt", C.soil, vf))
+				local crop = CYCLE[k + 1]
+				if crop == "wheat" then
+					decor(
+						box(
+							"Wheat",
+							xc - 1.4,
+							0.12,
+							z0 + 0.4,
+							xc + 1.4,
+							3.2,
+							z1 - 0.4,
+							"px_hay",
+							C.wheat,
+							vf
+						)
+					)
+				elseif crop == "cabbage" then
+					decor(
+						box(
+							"CabbageLeaves",
+							xc - 1.3,
+							0.12,
+							z0 + 0.4,
+							xc + 1.3,
+							1.0,
+							z1 - 0.4,
+							"px_hedge",
+							LEAF,
+							vf
+						)
+					)
+					for z = z0 + 3, z1 - 2, 6 do
+						decor(cube("Cabbage", xc, 1.6, z, 2.2, 2, 2.2, "px_hedge", C.cabbage, vf))
+					end
+				else
+					local tint = if crop == "carrot" then C.carrot else C.beet
+					decor(
+						box(
+							"CropLeaves",
+							xc - 1,
+							0.12,
+							z0 + 0.4,
+							xc + 1,
+							1.3,
+							z1 - 0.4,
+							"px_hedge",
+							LEAF,
+							vf
+						)
+					)
+					for z = z0 + 4, z1 - 3, 8 do
+						decor(
+							cube(
+								"CropRoot",
+								xc + (if (z // 8) % 2 == 0 then -1.1 else 1.1),
+								0.5,
+								z,
+								0.9,
+								0.9,
+								0.9,
+								nil,
+								tint,
+								vf
+							)
+						)
+					end
+				end
+			end
+			-- the scarecrow in the wheat
+			local sx, sz = X0 + 16, Z0 + 16
+			decor(cube("ScarecrowPole", sx, 3.5, sz, 0.6, 7, 0.6, "px_dark_oak_planks", nil, vf))
+			decor(cube("ScarecrowArms", sx, 5.2, sz, 0.5, 0.5, 5, "px_dark_oak_planks", nil, vf))
+			decor(
+				cube(
+					"ScarecrowCoat",
+					sx,
+					4.6,
+					sz,
+					1.2,
+					2.2,
+					2,
+					"px_white_wool",
+					Color3.fromRGB(110, 140, 200),
+					vf
+				)
+			)
+			decor(cube("ScarecrowHead", sx, 6.6, sz, 1.6, 1.6, 1.6, "px_hay", nil, vf))
+			decor(cube("ScarecrowHat", sx, 7.6, sz, 2.4, 0.5, 2.4, "px_hay", C.stripe, vf))
+			barrel(-188, 0, 121, vf)
+			take(X0 - 1, Z0 - 1, X1 + 1, Z1 + 1)
+			take(-191, 118, -185, 124)
+		end
+	end
+	-- the tool shed: corner logs, plank walls, a door toward W6, a stepped dark oak roof, tools, a lantern
+	do
+		local cx, cz = -170, 150
+		if rectFree(cx - 8, cz - 8, cx + 8, cz + 8, "tool shed") then
+			local sf = folder("ToolShed", f)
+			local W = "px_spruce_planks"
+			box("ShedFloor", cx - 6, -0.5, cz - 6, cx + 6, 0.1, cz + 6, "px_planks", nil, sf)
+			for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+				cube("ShedLog", cx + c[1] * 5, 6, cz + c[2] * 5, 2, 12, 2, "px_oak_log", nil, sf)
+			end
+			box("ShedWall", cx - 4, 0, cz + 5, cx + 4, 12, cz + 6, W, nil, sf)
+			box("ShedWall", cx - 6, 0, cz - 4, cx - 5, 12, cz + 4, W, nil, sf)
+			box("ShedWall", cx + 5, 0, cz - 4, cx + 6, 12, cz + 4, W, nil, sf)
+			box("ShedWall", cx - 4, 0, cz - 6, cx - 2, 12, cz - 5, W, nil, sf)
+			box("ShedWall", cx + 2, 0, cz - 6, cx + 4, 12, cz - 5, W, nil, sf)
+			box("ShedLintel", cx - 2, 8, cz - 6, cx + 2, 12, cz - 5, W, nil, sf)
+			decor(
+				box("ShedWindow", cx - 6.1, 5, cz - 1.5, cx - 5.9, 8, cz + 1.5, nil, C.window, sf)
+			)
+			box("ShedRoof", cx - 8, 12, cz - 8, cx + 8, 14, cz + 8, "px_dark_oak_planks", nil, sf)
+			box("ShedRoof", cx - 5, 14, cz - 8, cx + 5, 16, cz + 8, "px_dark_oak_planks", nil, sf)
+			box("ShedRoof", cx - 2, 16, cz - 8, cx + 2, 18, cz + 8, "px_dark_oak_planks", nil, sf)
+			cube("Workbench", cx + 2.5, 2, cz + 2.5, B, B, B, "px_planks", nil, sf)
+			-- a hoe and a shovel leaning on the east wall
+			for i, t in ipairs({ { 1.2, 0.3, 0.8 }, { 1.1, 1.3, 0.3 } }) do
+				local tz = cz - 2 + i * 2.5
+				local cf = at(cx + 6.8, 3, tz) * CFrame.Angles(0, 0, math.rad(-12))
+				textured(
+					decor(part("ToolHandle", Vector3.new(0.4, 6, 0.4), cf, nil, nil, sf)),
+					"px_planks",
+					C.handle
+				)
+				decor(
+					part(
+						"ToolHead",
+						Vector3.new(t[1], t[2], t[3]),
+						cf * CFrame.new(0, 3.1, 0),
+						C.iron,
+						Enum.Material.Metal,
+						sf
+					)
+				)
+			end
+			barrel(cx + 9.5, 0, cz - 3, sf)
+			crate(cx + 9.5, 0, cz + 2, sf)
+			lamp(V(cx, 10, cz - 7.3), sf, BY + 12, true)
+			take(cx - 8, cz - 8, cx + 12, cz + 8)
+		end
+	end
+	if spot(-134, 114, 3, "bench") then
+		bench(-134, 114, math.pi, f)
+	end
+	for _, r in ipairs({ { -166, 20, 1.1 }, { -166, 76, -0.6 }, { -196, 44, 2.5 } }) do
+		if spot(r[1], r[2], 1) then
+			rabbit(r[1], r[2], r[3], if rng:NextNumber() < 0.5 then C.hare else C.white, f)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ vines and flowers hanging over the west, south and east rim
+do
+	local f = folder("RimVines", southF)
+	local CELL = 8
+	local function strip(x, z, alongX)
+		local L = rng:NextInteger(1, 4) * B
+		local size = if alongX then Vector3.new(B, L, 0.5) else Vector3.new(0.5, L, B)
+		local p = decor(part("RimVine", size, at(x, -L / 2, z), nil, nil, f))
+		if rng:NextNumber() < 0.2 then
+			textured(p, "px_wisteria_leaves")
+		else
+			textured(p, "px_hedge", LEAF)
+		end
+		p.CastShadow = false
+		if rng:NextNumber() < 0.45 then
+			local y = -rng:NextNumber(1, L - 1)
+			local d = decor(part("RimFlower", Vector3.new(1.2, 1.2, 1.2), at(x, y, z), nil, nil, f))
+			textured(d, "px_white_wool", pick(C.flowers))
+			d.CastShadow = false
+		end
+	end
+	-- the island cells are 8 studs on a grid from -232: the first land cell of a row or column has its face open
+	for z = -48, 224 - CELL, CELL do
+		local cz = z + CELL / 2
+		for x = -232, -96, CELL do
+			if onIsland(x + CELL / 2, cz) then
+				if rng:NextNumber() < 0.65 then
+					strip(x - 0.3, cz + rng:NextNumber(-1.5, 1.5), false)
+				end
+				break
+			end
+		end
+		for x = 224, 96, -CELL do
+			if onIsland(x + CELL / 2, cz) then
+				if rng:NextNumber() < 0.65 then
+					strip(x + CELL + 0.3, cz + rng:NextNumber(-1.5, 1.5), false)
+				end
+				break
+			end
+		end
+	end
+	for x = -232, 224, CELL do
+		local cx = x + CELL / 2
+		for z = 224, 120, -CELL do
+			if onIsland(cx, z + CELL / 2) then
+				if rng:NextNumber() < 0.65 then
+					strip(cx + rng:NextNumber(-1.5, 1.5), z + CELL + 0.3, true)
+				end
+				break
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ bushes along the rim and flowers in the grass
+do
+	local f = folder("Bushes", southF)
+	local n, tries = 0, 0
+	while n < 46 and tries < 4000 do
+		tries += 1
+		local x, z = snap(rng:NextNumber(-216, 216)), snap(rng:NextNumber(-44, 216))
+		if
+			onIsland(x, z, 12)
+			and not onIsland(x, z, 26)
+			and zoneOf(x, z) == "south"
+			and inZone(x, z, 4)
+			and freeGround(x, z, 2)
+			and not isTaken(x, z, 4)
+		then
+			local h = rng:NextInteger(1, 2)
+			cube("Bush", x, h * B / 2, z, B, h * B, B, "px_hedge", LEAF, f)
+			if rng:NextNumber() < 0.5 then
+				local dx, dz = 0, 0
+				if rng:NextNumber() < 0.5 then
+					dx = if rng:NextNumber() < 0.5 then -B else B
+				else
+					dz = if rng:NextNumber() < 0.5 then -B else B
+				end
+				if onIsland(x + dx, z + dz, 12) then
+					cube("Bush", x + dx, B / 2, z + dz, B, B, B, "px_hedge", LEAF, f)
+				end
+			end
+			if rng:NextNumber() < 0.5 then
+				local d = decor(
+					part(
+						"BushFlower",
+						Vector3.new(1.4, 1.4, 1.4),
+						at(x + rng:NextNumber(-1, 1), h * B + 0.5, z + rng:NextNumber(-1, 1)),
+						nil,
+						nil,
+						f
+					)
+				)
+				textured(d, "px_white_wool", pick(C.flowers))
+				d.CastShadow = false
+			end
+			take(x - 6, z - 6, x + 6, z + 6)
+			n += 1
+		end
+	end
+end
+do
+	local f = folder("Flowers", southF)
+	local n, tries = 0, 0
+	while n < 380 and tries < 6000 do
+		tries += 1
+		local x, z = rng:NextNumber(-216, 216), rng:NextNumber(-48, 216)
+		if zoneOf(x, z) == "south" and freeGround(x, z, 0) and not isTaken(x, z, 1) then
+			local col = pick(C.flowers)
+			for _ = 1, rng:NextInteger(1, 3) do
+				local s = rng:NextNumber(0.9, 1.3)
+				local p = decor(
+					part(
+						"Flower",
+						Vector3.new(s, s, s),
+						at(x + rng:NextNumber(-1.5, 1.5), s / 2, z + rng:NextNumber(-1.5, 1.5)),
+						nil,
+						nil,
+						f
+					)
+				)
+				textured(p, "px_white_wool", col)
+				p.CastShadow = false
+			end
+			n += 1
+		end
+	end
+end
+print(("[build-eden] south: %d parts, %d lights"):format(count - startCount, st.lights))
+
+end
+task.wait()
+-- ================================================================================ eden/40-north.luau
+do
+-- ================================================================ eden: the north gardens, the bridges, the falls, under the island, the sky
+-- My zone: zoneOf(x, z) == "north" (z ≤ -52 outside r 100 round the hill) + under the island + the sky.
+-- 1. Pink cherry-plank arched bridges (deck 4 blocks wide, top y 0.1 on the banks, a hump of 0.8 a plank, fence
+--    rails, a lantern post at each end) over the WEST river at x -158..-142, the EAST river at x 142..158 (decks along
+--    z, the gap measured from core's cells) and the NORTH river at z -186..-170 (deck along x).
+-- 2. The north-west and north-east gardens (mirrored round x 0): coarse dirt walks 4 blocks wide (x ∓158..∓142 from the
+--    W/E bridges north to z -186, then z -186..-170 to the north bridge) under leaf arches, lamp posts; a green-roofed
+--    gazebo at (∓112, -134); a pond with lily pads and jets (north-west), a beehive tree and a bamboo grove (north-east);
+--    apple trees, pink cherry trees, flower beds in single-colour rows, trellises, mossy stone arch ruins, benches,
+--    deer and rabbits; reeds on the banks, lily pads on the rivers, stepping stones over the W/E rivers at x ∓196.
+-- 3. Waterfalls where the three rivers leave the island: a lip, a column of px_water 37 blocks down, widening, a white
+--    wool foam cloud and a slow mist at the bottom; dense vines and flowers on the cliff beside them.
+-- 4. Under the whole island: vines (px_hedge / wisteria / cherry leaves) down the rim faces and under the bottom,
+--    stepped grey stone tips under the columns (core's rockDepth replicated), denser at the rim.
+-- 5. Floating grassy islets with a tree / flower bed / beehive / deer / lantern; 6. blocky wool clouds.
+local northF = folder("NorthGarden")
+local startCount = count
+local lit = 0 -- PointLights made by this part (≤ 20)
+local ROCK_LOW = Color3.fromRGB(176, 176, 180) -- core's rockLowTint
+local ROCK_TOP = Color3.fromRGB(150, 110, 80) -- core's rockTopTint
+local FALL = Color3.fromRGB(120, 176, 236)
+local CLOUD = Color3.fromRGB(250, 252, 255)
+local FLOWERS = {
+	Color3.fromRGB(206, 50, 46), -- red
+	Color3.fromRGB(240, 206, 60), -- yellow
+	Color3.fromRGB(86, 120, 220), -- blue
+	Color3.fromRGB(240, 240, 236), -- white
+	PINK_WOOL,
+	Color3.fromRGB(232, 140, 50), -- orange
+	Color3.fromRGB(150, 92, 200), -- purple
+}
+local claimed = {} -- { x0, z0, x1, z1 } taken on the island by this part
+local DECKS = {} -- name → { x0, z0, x1, z1 } of the bridge decks
+local FALLS = {} -- { alongX, dir, outer, v0, v1 } of the waterfalls
+local CORR = {} -- { x0, x1, z0, z1, y0, y1 }: the floaters keep off (in front of the falls)
+local tipLow = {} -- cell key → the lowest y hanging under that cell (for the clouds)
+
+-- a hanging lantern at local (x, y, z) on a chain up to local hangTop; lit up to the light budget
+local function lamp(x, y, z, parent, hangTop, dark)
+	local f = folder("Lantern", parent)
+	lantern(V(x, y, z), f, false, if hangTop then BY + hangTop else nil)
+	if not dark then
+		lit += 1
+	end
+	if dark or lit > 20 then
+		for _, d in ipairs(f:GetDescendants()) do
+			if d:IsA("PointLight") then
+				d:Destroy()
+			end
+		end
+	end
+	return f
+end
+-- core's rockDepth (10-core is wrapped in its own do … end): the column of a cell is the ground block (top - 4 .. top),
+-- then rock down to top - 4 - depth
+local function rockDepth(x, z)
+	local e = math.clamp(((math.abs(x) / HALF) ^ 4 + (math.abs(z) / HALF) ^ 4) ^ 0.25, 0, 1)
+	local d = 16 + (1 - e) ^ 1.2 * 140 + math.max(0, groundY(x, z) or 0)
+	if e > 0.84 then
+		d += (n2(x, z, 7.7, 0.09) + 0.5) * 28
+	end
+	return math.max(8, math.floor(d / 16 + 0.5) * 16)
+end
+-- the centre of core's 8-stud cell holding v (cells -232 + 8k .. -224 + 8k)
+local function cc(v)
+	return math.floor((v + 232) / 8) * 8 - 228
+end
+local function claim(x0, z0, x1, z1)
+	table.insert(claimed, { x0, z0, x1, z1 })
+end
+-- the rectangle is free: in the north zone well off the hill part, `inset` studs inside the island, off the rivers
+-- and off what is claimed
+local function okArea(x0, z0, x1, z1, inset)
+	for _, r in ipairs(claimed) do
+		if x1 > r[1] and x0 < r[3] and z1 > r[2] and z0 < r[4] then
+			return false
+		end
+	end
+	local nx, nz = math.max(1, math.ceil((x1 - x0) / 4)), math.max(1, math.ceil((z1 - z0) / 4))
+	for i = 0, nx do
+		for j = 0, nz do
+			local x, z = x0 + (x1 - x0) * i / nx, z0 + (z1 - z0) * j / nz
+			if
+				zoneOf(x, z) ~= "north"
+				or hillDist(x, z) < 108
+				or not onIsland(x, z, inset or 10)
+				or onRiver(x, z, 6)
+			then
+				return false
+			end
+		end
+	end
+	return true
+end
+-- a free w × d rectangle (studs) inside region r = { x0, z0, x1, z1 }: its corner, claimed; nil if none found
+local function place(r, w, d, inset)
+	for _ = 1, 80 do
+		local x0 = snap(rng:NextNumber(r[1], math.max(r[1], r[3] - w)))
+		local z0 = snap(rng:NextNumber(r[2], math.max(r[2], r[4] - d)))
+		if okArea(x0, z0, x0 + w, z0 + d, inset) then
+			claim(x0 - 2, z0 - 2, x0 + w + 2, z0 + d + 2)
+			return x0, z0
+		end
+	end
+	return nil
+end
+-- floating things are decor
+local function finish(f, solid)
+	if not solid then
+		for _, d in ipairs(f:GetDescendants()) do
+			if d:IsA("BasePart") then
+				decor(d)
+			end
+		end
+	end
+	return f
+end
+-- one flower: a green stem and a coloured head (decor)
+local function flower(x, y, z, parent, color)
+	decor(
+		box("FlowerStem", x - 0.2, y, z - 0.2, x + 0.2, y + 1.4, z + 0.2, "px_hedge", LEAF, parent)
+	)
+	decor(
+		box(
+			"Flower",
+			x - 0.55,
+			y + 1.2,
+			z - 0.55,
+			x + 0.55,
+			y + 2.2,
+			z + 0.55,
+			"px_white_wool",
+			color or pick(FLOWERS),
+			parent
+		)
+	)
+end
+-- an apple tree: an oak trunk, a stepped crown of leaves (a cross, a layer, a top block) with red apples; returns the
+-- folder and the crown bottom y
+local function appleTree(x, z, parent, y0, solid, noApples)
+	y0 = y0 or 0
+	local f = folder("AppleTree", parent)
+	local h = rng:NextInteger(3, 4) * B
+	box("Trunk", x - 2, y0, z - 2, x + 2, y0 + h + 4, z + 2, "px_oak_log", nil, f)
+	local c = y0 + h
+	box("Crown", x - 10, c, z - 6, x + 10, c + 8, z + 6, "px_hedge", LEAF, f)
+	box("Crown", x - 6, c, z - 10, x + 6, c + 8, z + 10, "px_hedge", LEAF, f)
+	box("Crown", x - 6, c + 8, z - 6, x + 6, c + 12, z + 6, "px_hedge", LEAF, f)
+	box("Crown", x - 2, c + 12, z - 2, x + 2, c + 16, z + 2, "px_hedge", LEAF, f)
+	if not noApples then
+		for _ = 1, 8 do
+			local s = rng:NextInteger(1, 4)
+			local a = rng:NextInteger(-3, 3) * 1.5
+			local y = c + rng:NextInteger(1, 6) + 0.5
+			local px, pz
+			if s == 1 then
+				px, pz = x + 10.4, z + a
+			elseif s == 2 then
+				px, pz = x - 10.4, z + a
+			elseif s == 3 then
+				px, pz = x + a, z + 10.4
+			else
+				px, pz = x + a, z - 10.4
+			end
+			decor(cube("Apple", px, y, pz, 1.8, 1.8, 1.8, "px_white_wool", APPLE, f))
+		end
+		-- one fallen in the grass
+		decor(
+			cube(
+				"Apple",
+				x + pick({ -7, 6 }),
+				y0 + 0.9,
+				z + pick({ -6, 7 }),
+				1.8,
+				1.8,
+				1.8,
+				"px_white_wool",
+				APPLE,
+				f
+			)
+		)
+	end
+	return finish(f, solid), c
+end
+-- a pink cherry tree: a cherry log trunk with a side branch, a wide flat crown of blossom, hanging drips, petals
+local function cherryTree(x, z, parent, y0, solid)
+	y0 = y0 or 0
+	local f = folder("CherryTree", parent)
+	local h = rng:NextInteger(3, 4) * B
+	box("Trunk", x - 2, y0, z - 2, x + 2, y0 + h + 4, z + 2, "px_cherry_log", nil, f)
+	local ox, oz = pick({ { 4, 0 }, { -4, 0 }, { 0, 4 }, { 0, -4 } })[1], 0
+	if ox == 0 then
+		oz = pick({ 4, -4 })
+	end
+	box(
+		"Branch",
+		x - 2 + ox,
+		y0 + h - 2,
+		z - 2 + oz,
+		x + 2 + ox,
+		y0 + h + 4,
+		z + 2 + oz,
+		"px_cherry_log",
+		nil,
+		f
+	)
+	local c = y0 + h + 4
+	box("Blossom", x - 14, c, z - 10, x + 14, c + 6, z + 10, "px_cherry_leaves", BLOSSOM, f)
+	box("Blossom", x - 10, c, z - 14, x + 10, c + 6, z + 14, "px_cherry_leaves", BLOSSOM, f)
+	box(
+		"Blossom",
+		x - 8 + ox,
+		c + 6,
+		z - 8 + oz,
+		x + 8 + ox,
+		c + 10,
+		z + 8 + oz,
+		"px_cherry_leaves",
+		BLOSSOM,
+		f
+	)
+	for _ = 1, 5 do
+		local len = rng:NextInteger(2, 4) * 2
+		local px, pz
+		if rng:NextNumber() < 0.5 then
+			px, pz = x + pick({ -13, 11 }), z + rng:NextInteger(-4, 3) * 2
+		else
+			px, pz = x + rng:NextInteger(-4, 3) * 2, z + pick({ -13, 11 })
+		end
+		decor(
+			box("BlossomDrip", px, c - len, pz, px + 2, c, pz + 2, "px_cherry_leaves", BLOSSOM, f)
+		)
+	end
+	local petals = decor(
+		box(
+			"Petals",
+			x - 8,
+			y0 + 0.06,
+			z - 8,
+			x + 8,
+			y0 + 0.14,
+			z + 8,
+			"px_cherry_leaves",
+			BLOSSOM,
+			f
+		)
+	)
+	petals.Transparency = 0.35
+	petals.CastShadow = false
+	return finish(f, solid)
+end
+-- a flower bed: soil, then rows (one block wide) of a single colour each: leaves and a flower head on every block
+local function flowerBed(x0, z0, w, d, parent, colors, y0)
+	y0 = y0 or 0
+	local f = folder("FlowerBed", parent)
+	box(
+		"BedSoil",
+		x0,
+		y0 - 0.3,
+		z0,
+		x0 + w * B,
+		y0 + 0.3,
+		z0 + d * B,
+		"px_dirt",
+		Color3.fromRGB(150, 120, 96),
+		f
+	)
+	local alongX = w >= d
+	local rows, len = if alongX then d else w, if alongX then w else d
+	for r = 0, rows - 1 do
+		local col = colors[r % #colors + 1]
+		local a = r * B
+		if alongX then
+			decor(
+				box(
+					"BedLeaves",
+					x0 + 0.6,
+					y0 + 0.3,
+					z0 + a + 0.8,
+					x0 + w * B - 0.6,
+					y0 + 1.3,
+					z0 + a + 3.2,
+					"px_hedge",
+					LEAF,
+					f
+				)
+			)
+		else
+			decor(
+				box(
+					"BedLeaves",
+					x0 + a + 0.8,
+					y0 + 0.3,
+					z0 + 0.6,
+					x0 + a + 3.2,
+					y0 + 1.3,
+					z0 + d * B - 0.6,
+					"px_hedge",
+					LEAF,
+					f
+				)
+			)
+		end
+		for k = 0, len - 1 do
+			local px = if alongX then x0 + k * B + 2 else x0 + a + 2
+			local pz = if alongX then z0 + a + 2 else z0 + k * B + 2
+			decor(cube("BedFlower", px, y0 + 1.8, pz, 1.6, 1.2, 1.6, "px_white_wool", col, f))
+		end
+	end
+	return f
+end
+-- a blocky deer facing local -Z turned by yaw (the body solid on the island)
+local function deer(x, z, yaw, parent, y0, solid)
+	y0 = y0 or 0
+	local f = folder("Deer", parent)
+	local cf = at(x, y0, z) * CFrame.Angles(0, yaw, 0)
+	local FUR, DARK, HORN =
+		Color3.fromRGB(235, 205, 175), Color3.fromRGB(160, 130, 110), Color3.fromRGB(225, 200, 160)
+	local function dp(name, sx, sy, sz, ox, oy, oz, v, t)
+		local p = textured(
+			part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(ox, oy, oz), nil, nil, f),
+			v,
+			t
+		)
+		if name ~= "DeerBody" or not solid then
+			decor(p)
+		end
+		return p
+	end
+	dp("DeerBody", 2.6, 2.8, 5.2, 0, 4.6, 0, "px_brown_wool", FUR)
+	for _, l in ipairs({ { -0.8, -1.8 }, { 0.8, -1.8 }, { -0.8, 1.8 }, { 0.8, 1.8 } }) do
+		dp("DeerLeg", 0.9, 3.4, 0.9, l[1], 1.7, l[2], "px_brown_wool", DARK)
+	end
+	dp("DeerNeck", 1.4, 2.6, 1.6, 0, 6.6, -2.3, "px_brown_wool", FUR)
+	dp("DeerHead", 1.8, 1.8, 2.6, 0, 8.1, -3.1, "px_brown_wool", FUR)
+	dp("DeerSnout", 1.2, 1, 1, 0, 7.7, -4.8, "px_brown_wool", DARK)
+	dp("DeerChest", 1.6, 1.6, 0.3, 0, 5.2, -2.65, "px_white_wool", nil)
+	dp("DeerTail", 0.8, 1, 0.4, 0, 5.4, 2.75, "px_white_wool", nil)
+	for _, s in ipairs({ -1, 1 }) do
+		dp("DeerEar", 0.8, 0.5, 0.5, s * 1.2, 8.7, -2.6, "px_brown_wool", FUR)
+		dp("Antler", 0.4, 2.4, 0.4, s * 0.6, 10.2, -2.8, "px_planks", HORN)
+		dp("Antler", 1.6, 0.4, 0.4, s * 1.2, 10.4, -2.8, "px_planks", HORN)
+		dp("Antler", 0.4, 0.4, 1.6, s * 0.6, 11.2, -2.4, "px_planks", HORN)
+	end
+	return f
+end
+-- a rabbit (decor)
+local function rabbit(x, z, yaw, parent, y0)
+	y0 = y0 or 0
+	local f = folder("Rabbit", parent)
+	local cf = at(x, y0, z) * CFrame.Angles(0, yaw, 0)
+	local v, t =
+		pick({ { "px_white_wool", nil }, { "px_brown_wool", Color3.fromRGB(235, 210, 185) } })[1],
+		nil
+	if v == "px_brown_wool" then
+		t = Color3.fromRGB(235, 210, 185)
+	end
+	local function rp(name, sx, sy, sz, ox, oy, oz)
+		decor(
+			textured(
+				part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(ox, oy, oz), nil, nil, f),
+				v,
+				t
+			)
+		)
+	end
+	rp("RabbitBody", 1.4, 1.4, 2, 0, 0.7, 0)
+	rp("RabbitHead", 1.2, 1.2, 1.2, 0, 1.6, -1)
+	rp("RabbitEar", 0.3, 1.1, 0.5, -0.3, 2.7, -1)
+	rp("RabbitEar", 0.3, 1.1, 0.5, 0.3, 2.7, -1)
+	return f
+end
+-- a beehive under a crown (x, y, z: the hive centre) with three bees round it (decor)
+local function beehive(x, y, z, parent)
+	local f = folder("Beehive", parent)
+	decor(cube("Beehive", x, y, z, 3, 3.4, 3, "px_planks", Color3.fromRGB(240, 205, 120), f))
+	decor(
+		cube(
+			"HiveBand",
+			x,
+			y + 0.6,
+			z,
+			3.15,
+			0.6,
+			3.15,
+			"px_planks",
+			Color3.fromRGB(205, 155, 80),
+			f
+		)
+	)
+	decor(cube("HiveDoor", x, y - 0.8, z - 1.55, 1, 0.8, 0.12, nil, Color3.fromRGB(40, 30, 20), f))
+	for i = 1, 3 do
+		local a = i * 2.1
+		local bx, by, bz =
+			x + math.cos(a) * 3.4, y + rng:NextNumber(-1.5, 1.5), z + math.sin(a) * 3.4
+		decor(cube("Bee", bx, by, bz, 1.2, 1, 1.4, "px_yellow_wool", nil, f))
+		decor(cube("BeeStripe", bx, by, bz, 1.25, 1.05, 0.4, nil, Color3.fromRGB(30, 26, 22), f))
+		local wing =
+			decor(cube("BeeWing", bx, by + 0.6, bz, 1.6, 0.12, 0.7, "px_white_wool", nil, f))
+		wing.Transparency = 0.3
+	end
+	return f
+end
+-- a garden bench facing local -Z (yaw turns it); y0 the floor
+local function bench(x, z, yaw, parent, y0)
+	local cf = at(x, y0 or 0, z) * CFrame.Angles(0, yaw, 0)
+	local function bp(name, size, off, v)
+		return textured(part(name, size, cf * off, nil, nil, parent), v)
+	end
+	bp("BenchSeat", Vector3.new(8, 0.6, 2.6), CFrame.new(0, 1.9, 0), "px_spruce_planks")
+	bp("BenchLeg", Vector3.new(0.8, 1.6, 2.2), CFrame.new(-3.4, 0.8, 0), "px_dark_oak_planks")
+	bp("BenchLeg", Vector3.new(0.8, 1.6, 2.2), CFrame.new(3.4, 0.8, 0), "px_dark_oak_planks")
+	bp("BenchBack", Vector3.new(8, 2, 0.6), CFrame.new(0, 3.5, 1.2), "px_spruce_planks")
+end
+
+-- ================================================================ 1. the bridges over the rivers
+do
+	local bf = folder("Bridges", northF)
+	-- the river bed across a deck band c0..c1 along u (x if alongX, else z) from the cells: g0, g1 (cell edges)
+	local function gapOf(alongX, c0, c1, uFrom, uTo)
+		local g0, g1
+		for u = cc(uFrom), cc(uTo), 8 do
+			for v = cc(c0), cc(c1 - 0.01), 8 do
+				local x, z = if alongX then u else v, if alongX then v else u
+				if onIsland(x, z) and groundY(x, z) == RIVER_BED then
+					g0 = math.min(g0 or u - 4, u - 4)
+					g1 = math.max(g1 or u + 4, u + 4)
+				end
+			end
+		end
+		return g0, g1
+	end
+	-- a pink arched bridge: the deck c0..c1 across, over the gap g0..g1 along u, 8 studs onto each bank
+	local function bridge(name, alongX, c0, c1, uFrom, uTo)
+		local g0, g1 = gapOf(alongX, c0, c1, uFrom, uTo)
+		if not g0 then
+			warn("[build-eden] north: no river under the " .. name .. " bridge")
+			return
+		end
+		local f = folder(name .. "Bridge", bf)
+		local a0, a1 = g0 - 8, g1 + 8
+		local function bx(nm, u0, y0, v0, u1, y1, v1, variant, tint)
+			if alongX then
+				return box(nm, u0, y0, v0, u1, y1, v1, variant, tint, f)
+			end
+			return box(nm, v0, y0, u0, v1, y1, u1, variant, tint, f)
+		end
+		local n = math.floor((g1 - g0) / 4 + 0.5)
+		local tops = {}
+		local planks = math.floor((a1 - a0) / 4 + 0.5)
+		for i = 0, planks - 1 do
+			local j = i - 2
+			tops[i] = if j >= 0 and j < n then 0.1 + 0.8 * math.min(j + 1, n - j) else 0.1
+		end
+		for i = 0, planks - 1 do
+			local u0, top = a0 + i * 4, tops[i]
+			bx("BridgeDeck", u0, top - 1, c0 - 1, u0 + 4, top, c1 + 1, "px_cherry_planks")
+			if top > 0.2 then
+				-- the stringers under the deck edges
+				bx("BridgeBeam", u0, top - 2.2, c0 - 1, u0 + 4, top - 1, c0 + 1, "px_cherry_log")
+				bx("BridgeBeam", u0, top - 2.2, c1 - 1, u0 + 4, top - 1, c1 + 1, "px_cherry_log")
+			end
+			-- the rails, one stepped piece a plank on each side, posts at the plank joints
+			for _, v in ipairs({ c0 - 1, c1 }) do
+				bx("BridgeRail", u0, top + 2.4, v, u0 + 4, top + 3.1, v + 1, "px_cherry_planks")
+				if i > 0 then
+					local pt = math.max(top, tops[i - 1])
+					bx("BridgePost", u0 - 0.5, pt, v, u0 + 0.5, pt + 3.4, v + 1, "px_cherry_log")
+				end
+			end
+		end
+		-- the piers in the river at both banks
+		for _, u in ipairs({ g0, g1 - 2 }) do
+			for _, v in ipairs({ c0 - 1, c1 - 1 }) do
+				bx("BridgePier", u, RIVER_BED, v, u + 2, 0, v + 2, "px_cherry_log")
+			end
+		end
+		-- the end posts with lanterns (one lit at each end)
+		for _, u in ipairs({ a0, a1 - 2 }) do
+			for s, v in ipairs({ c0 - 2, c1 }) do
+				bx("BridgeEndPost", u, -0.5, v, u + 2, 5, v + 2, "px_cherry_log")
+				local px, pz = if alongX then u + 1 else v + 1, if alongX then v + 1 else u + 1
+				lamp(px, 5.75, pz, f, nil, s == 2)
+			end
+		end
+		local r = if alongX then { a0, c0 - 2, a1, c1 + 2 } else { c0 - 2, a0, c1 + 2, a1 }
+		DECKS[name] = r
+		claim(r[1] - 4, r[2] - 4, r[3] + 4, r[4] + 4)
+		print(
+			("[build-eden] north: %s bridge deck %d..%d over the gap %d..%d"):format(
+				name,
+				a0,
+				a1,
+				g0,
+				g1
+			)
+		)
+	end
+	bridge("West", false, -158, -142, -100, -20)
+	bridge("East", false, 142, 158, -100, -20)
+	bridge("North", true, -186, -170, -40, 40)
+end
+task.wait()
+
+-- ================================================================ 2. the north-west and north-east gardens
+do
+	local gf = folder("Gardens", northF)
+	-- a coarse dirt walk (flush) along u from a0 to a1, across c0..c1; only where the island holds it
+	local function walk(alongX, a0, a1, c0, c1, parent)
+		local u0 = math.min(a0, a1)
+		local u1 = math.max(a0, a1)
+		local runStart
+		local function flush(uEnd)
+			if runStart and uEnd > runStart then
+				if alongX then
+					box("Walk", runStart, -0.3, c0, uEnd, 0.05, c1, "px_dirt", PATH, parent)
+				else
+					box("Walk", c0, -0.3, runStart, c1, 0.05, uEnd, "px_dirt", PATH, parent)
+				end
+			end
+			runStart = nil
+		end
+		for u = u0, u1 - 4, 4 do
+			local ok = true
+			for _, v in ipairs({ c0, (c0 + c1) / 2, c1 }) do
+				local x, z = if alongX then u + 2 else v, if alongX then v else u + 2
+				if not onIsland(x, z, 4) or onRiver(x, z, 0) then
+					ok = false
+				end
+			end
+			if ok then
+				runStart = runStart or u
+			else
+				flush(u)
+			end
+		end
+		flush(u1)
+		if alongX then
+			claim(u0 - 4, c0 - 4, u1 + 4, c1 + 4)
+		else
+			claim(c0 - 4, u0 - 4, c1 + 4, u1 + 4)
+		end
+	end
+	-- a leaf arch over a walk running along u (x if alongX) across c0..c1, at u
+	local function leafArch(alongX, u, c0, c1, parent)
+		local f = folder("LeafArch", parent)
+		local function ab(name, u0, y0, v0, u1, y1, v1, v, t)
+			if alongX then
+				return box(name, u0, y0, v0, u1, y1, v1, v, t, f)
+			end
+			return box(name, v0, y0, u0, v1, y1, u1, v, t, f)
+		end
+		for _, s in ipairs({ { c0 - 4, c0 }, { c1, c1 + 4 } }) do
+			ab("ArchBase", u - 2, -0.3, s[1], u + 2, 4, s[2], "px_mossy_stone_bricks")
+			ab("ArchLeaves", u - 2, 4, s[1], u + 2, 16, s[2], "px_hedge", LEAF)
+		end
+		ab("ArchTop", u - 2, 16, c0 - 4, u + 2, 20, c1 + 4, "px_hedge", LEAF)
+		ab("ArchCorner", u - 2, 12, c0, u + 2, 16, c0 + 4, "px_hedge", LEAF)
+		ab("ArchCorner", u - 2, 12, c1 - 4, u + 2, 16, c1, "px_hedge", LEAF)
+		decor(
+			ab("ArchBloom", u - 2.4, 18, c0 + 2, u + 2.4, 20.8, c1 - 2, "px_cherry_leaves", BLOSSOM)
+		)
+		-- flowers on the faces of the legs, wisteria hanging from the corners
+		for _ = 1, 6 do
+			local side = pick({ -2.5, 2.5 })
+			local v = pick({ c0 - 2, c1 + 2 }) + rng:NextNumber(-1.2, 1.2)
+			local y = rng:NextNumber(5, 15)
+			decor(
+				ab(
+					"ArchFlower",
+					u + side - 0.7,
+					y,
+					v - 0.7,
+					u + side + 0.7,
+					y + 1.4,
+					v + 0.7,
+					"px_white_wool",
+					pick({ PINK_WOOL, FLOWERS[7], FLOWERS[4], FLOWERS[2] })
+				)
+			)
+		end
+		for _, v in ipairs({ c0 + 0.5, c1 - 2 }) do
+			local len = rng:NextInteger(2, 4) * 1.5
+			decor(
+				ab("ArchWisteria", u - 0.8, 12 - len, v, u + 0.8, 12, v + 1.5, "px_wisteria_leaves")
+			)
+		end
+		return f
+	end
+	-- a green-roofed gazebo (5×5 blocks) on a mossy stone floor, lanterns under the roof, two benches
+	local function gazebo(cx, cz, parent)
+		local f = folder("Gazebo", parent)
+		box(
+			"GazeboFloor",
+			cx - 10,
+			-0.4,
+			cz - 10,
+			cx + 10,
+			1,
+			cz + 10,
+			"px_mossy_stone_bricks",
+			nil,
+			f
+		)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				local px, pz = cx + sx * 8, cz + sz * 8
+				box(
+					"GazeboPlinth",
+					px - 2,
+					1,
+					pz - 2,
+					px + 2,
+					5,
+					pz + 2,
+					"px_mossy_stone_bricks",
+					nil,
+					f
+				)
+				box("GazeboPost", px - 1, 5, pz - 1, px + 1, 13, pz + 1, "px_oak_log", nil, f)
+				if rng:NextNumber() < 0.6 then
+					local len = rng:NextInteger(4, 8)
+					decor(
+						box(
+							"GazeboVine",
+							px + sx * 1,
+							13 - len,
+							pz - 1,
+							px + sx * 1.4,
+							13,
+							pz + 1,
+							"px_hedge",
+							LEAF,
+							f
+						)
+					)
+					flower(px + sx * 1.6, 13 - len - 1.5, pz, f, PINK_WOOL)
+				end
+			end
+		end
+		-- the eave beams and the stepped green roof
+		box("GazeboBeam", cx - 9, 12, cz - 9, cx + 9, 13.4, cz - 7, "px_spruce_planks", nil, f)
+		box("GazeboBeam", cx - 9, 12, cz + 7, cx + 9, 13.4, cz + 9, "px_spruce_planks", nil, f)
+		box("GazeboBeam", cx - 9, 12, cz - 7, cx - 7, 13.4, cz + 7, "px_spruce_planks", nil, f)
+		box("GazeboBeam", cx + 7, 12, cz - 7, cx + 9, 13.4, cz + 7, "px_spruce_planks", nil, f)
+		box(
+			"GazeboRoof",
+			cx - 14,
+			13.4,
+			cz - 14,
+			cx + 14,
+			14.6,
+			cz + 14,
+			"px_spruce_planks",
+			ROOF_GREEN,
+			f
+		)
+		box(
+			"GazeboRoof",
+			cx - 11,
+			14.6,
+			cz - 11,
+			cx + 11,
+			16.6,
+			cz + 11,
+			"px_spruce_planks",
+			ROOF_GREEN,
+			f
+		)
+		box(
+			"GazeboRoof",
+			cx - 7,
+			16.6,
+			cz - 7,
+			cx + 7,
+			18.6,
+			cz + 7,
+			"px_spruce_planks",
+			ROOF_GREEN,
+			f
+		)
+		box(
+			"GazeboRoof",
+			cx - 3,
+			18.6,
+			cz - 3,
+			cx + 3,
+			20.6,
+			cz + 3,
+			"px_spruce_planks",
+			ROOF_GREEN,
+			f
+		)
+		box("GazeboTip", cx - 1, 20.6, cz - 1, cx + 1, 22.6, cz + 1, "px_oak_log", nil, f)
+		lamp(cx - 6, 10, cz - 6, f, 13.4)
+		lamp(cx + 6, 10, cz + 6, f, 13.4)
+		bench(cx, cz + 5, 0, f, 1)
+		bench(cx, cz - 5, math.pi, f, 1)
+		return f
+	end
+	-- a pond (w × d studs) in a low mossy cobblestone rim: dark bed, a water layer, lily pads, two jets, reeds
+	local function pond(x0, z0, w, d, parent)
+		local f = folder("Pond", parent)
+		local x1, z1 = x0 + w, z0 + d
+		box(
+			"PondBed",
+			x0 + 2,
+			-0.3,
+			z0 + 2,
+			x1 - 2,
+			0.1,
+			z1 - 2,
+			"px_dirt",
+			Color3.fromRGB(84, 76, 70),
+			f
+		)
+		local water =
+			decor(box("PondWater", x0 + 2, 0.1, z0 + 2, x1 - 2, 0.9, z1 - 2, "px_water", WATER, f))
+		water.Transparency = 0.3
+		water.CastShadow = false
+		box("PondRim", x0, -0.3, z0, x1, 1.2, z0 + 2, "px_mossy_cobblestone", nil, f)
+		box("PondRim", x0, -0.3, z1 - 2, x1, 1.2, z1, "px_mossy_cobblestone", nil, f)
+		box("PondRim", x0, -0.3, z0 + 2, x0 + 2, 1.2, z1 - 2, "px_mossy_cobblestone", nil, f)
+		box("PondRim", x1 - 2, -0.3, z0 + 2, x1, 1.2, z1 - 2, "px_mossy_cobblestone", nil, f)
+		for _ = 1, 7 do
+			local px, pz = rng:NextNumber(x0 + 4, x1 - 5), rng:NextNumber(z0 + 4, z1 - 5)
+			decor(
+				box(
+					"LilyPad",
+					px,
+					0.92,
+					pz,
+					px + 2.4,
+					1.04,
+					pz + 2.4,
+					"px_hedge",
+					Color3.fromRGB(150, 210, 110),
+					f
+				)
+			)
+			if rng:NextNumber() < 0.35 then
+				decor(
+					cube(
+						"LilyFlower",
+						px + 1.2,
+						1.4,
+						pz + 1.2,
+						0.9,
+						0.8,
+						0.9,
+						"px_white_wool",
+						PINK_WOOL,
+						f
+					)
+				)
+			end
+		end
+		for _, j in ipairs({ { x0 + w * 0.35, z0 + d * 0.5 }, { x0 + w * 0.65, z0 + d * 0.45 } }) do
+			local jet = decor(
+				box(
+					"PondJet",
+					j[1] - 0.5,
+					0.9,
+					j[2] - 0.5,
+					j[1] + 0.5,
+					4.4,
+					j[2] + 0.5,
+					"px_water",
+					FALL,
+					f
+				)
+			)
+			jet.Transparency = 0.35
+			local foam = decor(
+				box(
+					"PondFoam",
+					j[1] - 0.9,
+					4.2,
+					j[2] - 0.9,
+					j[1] + 0.9,
+					4.8,
+					j[2] + 0.9,
+					"px_white_wool",
+					CLOUD,
+					f
+				)
+			)
+			foam.Transparency = 0.3
+		end
+		for _, c in ipairs({ { x0 + 1, z0 + 1 }, { x1 - 1, z1 - 1 } }) do
+			for k = 1, 3 do
+				local px, pz = c[1] + rng:NextNumber(-0.8, 0.8), c[2] + rng:NextNumber(-0.8, 0.8)
+				local h = 2.5 + k * 0.6
+				decor(
+					box(
+						"Reed",
+						px - 0.25,
+						1.2,
+						pz - 0.25,
+						px + 0.25,
+						1.2 + h,
+						pz + 0.25,
+						"px_hedge",
+						GRASS,
+						f
+					)
+				)
+			end
+		end
+		return f
+	end
+	-- a mossy stone arch ruin: a tall pillar with a broken lintel, a short broken pillar, fallen blocks, vines
+	local function archRuin(x, z, alongX, parent)
+		local f = folder("ArchRuin", parent)
+		local function rb(name, u0, y0, v0, u1, y1, v1, v, t)
+			if alongX then
+				return box(name, x + v0, y0, z + u0, x + v1, y1, z + u1, v, t, f)
+			end
+			return box(name, x + u0, y0, z + v0, x + u1, y1, z + v1, v, t, f)
+		end
+		rb("RuinPillar", -2, -0.3, -8, 2, 8, -4, "px_mossy_stone_bricks")
+		rb("RuinPillar", -2, 8, -8, 2, 16, -4, "px_mossy_cobblestone")
+		rb("RuinCap", -3, 16, -9, 3, 17.4, -3, "px_stone_bricks", ROCK_LOW)
+		rb("RuinLintel", -2, 17.4, -8, 2, 21.4, 2, "px_mossy_stone_bricks")
+		rb("RuinCorner", -2, 13.4, -4, 2, 17.4, 0, "px_mossy_stone_bricks")
+		rb("RuinPillar", -2, -0.3, 4, 2, 6, 8, "px_mossy_stone_bricks")
+		rb("RuinPillar", -2, 6, 4, 2, 10, 6, "px_mossy_cobblestone")
+		rb("RuinFallen", 3, -0.3, 9, 7, 4, 13, "px_mossy_cobblestone")
+		rb("RuinFallen", -7, -0.3, 6, -3, 2, 10, "px_mossy_stone_bricks")
+		decor(rb("RuinMoss", -2.2, 21.2, -8.2, 2.2, 21.6, 2.2, "px_hedge", MOSS))
+		decor(rb("RuinVine", -2.5, 9, -7.5, -2.1, 17.4, -5, "px_hedge", LEAF))
+		decor(rb("RuinVine", 2.1, 12, -6, 2.5, 17.4, -4.5, "px_hedge", LEAF))
+		decor(rb("RuinVine", -1.5, 12.6, -2, 1.5, 17.4, -0.6, "px_wisteria_leaves"))
+		return f
+	end
+	-- a trellis (3 blocks wide) of spruce posts and slats with vines and flowers climbing it
+	local function trellis(x, z, alongX, parent)
+		local f = folder("Trellis", parent)
+		local function tb(name, u0, y0, v0, u1, y1, v1, v, t)
+			if alongX then
+				return box(name, x + u0, y0, z + v0, x + u1, y1, z + v1, v, t, f)
+			end
+			return box(name, x + v0, y0, z + u0, x + v1, y1, z + u1, v, t, f)
+		end
+		tb("TrellisPost", -6.5, 0, -0.5, -5.5, 10, 0.5, "px_spruce_planks")
+		tb("TrellisPost", 5.5, 0, -0.5, 6.5, 10, 0.5, "px_spruce_planks")
+		tb("TrellisBeam", -7, 10, -0.6, 7, 11, 0.6, "px_spruce_planks")
+		for _, y in ipairs({ 3.5, 7 }) do
+			decor(tb("TrellisSlat", -5.5, y, -0.2, 5.5, y + 0.4, 0.2, "px_spruce_planks"))
+		end
+		for _, u in ipairs({ -3, 0, 3 }) do
+			decor(tb("TrellisSlat", u - 0.2, 0, -0.2, u + 0.2, 10, 0.2, "px_spruce_planks"))
+			local h = rng:NextNumber(4, 9.5)
+			decor(tb("TrellisVine", u - 1.4, 0, 0.25, u + 1.4, h, 0.75, "px_hedge", LEAF))
+			local fy = rng:NextNumber(2, h - 1)
+			local col = pick({ PINK_WOOL, FLOWERS[7], FLOWERS[4] })
+			decor(
+				tb("TrellisFlower", u - 0.6, fy, 0.6, u + 0.6, fy + 1.2, 1.4, "px_white_wool", col)
+			)
+		end
+		return f
+	end
+	-- a bamboo clump: tall thin stalks with leaf tufts (stalks solid)
+	local function bamboo(x0, z0, w, d, parent)
+		local f = folder("Bamboo", parent)
+		for _ = 1, math.floor(w * d / 10) do
+			local px, pz =
+				x0 + rng:NextInteger(0, w / 2 - 1) * 2 + 0.5,
+				z0 + rng:NextInteger(0, d / 2 - 1) * 2 + 0.5
+			local h = rng:NextInteger(5, 11) * 2
+			box(
+				"BambooStalk",
+				px,
+				-0.3,
+				pz,
+				px + 1,
+				h,
+				pz + 1,
+				"px_hedge",
+				Color3.fromRGB(190, 235, 130),
+				f
+			)
+			decor(
+				box(
+					"BambooLeaves",
+					px - 1,
+					h - 3,
+					pz - 1,
+					px + 2,
+					h - 1.6,
+					pz + 2,
+					"px_hedge",
+					LEAF,
+					f
+				)
+			)
+		end
+		return f
+	end
+	local function lampPostL(x, z, yaw, parent)
+		if not okArea(x - 2, z - 2, x + 2, z + 2, 6) then
+			return
+		end
+		local f = folder("LampPost", parent)
+		lampPost(x, z, f, false, yaw)
+		lit += 1
+		if lit > 20 then
+			for _, d in ipairs(f:GetDescendants()) do
+				if d:IsA("PointLight") then
+					d:Destroy()
+				end
+			end
+		end
+		claim(x - 3, z - 3, x + 3, z + 3)
+	end
+
+	local stats = { trees = 0, beds = 0 }
+	local function garden(side)
+		local name = if side < 0 then "NorthWest" else "NorthEast"
+		local f = folder(name, gf)
+		-- a region given in west coordinates, mirrored for the east
+		local function R(x0, z0, x1, z1)
+			if side < 0 then
+				return { x0, z0, x1, z1 }
+			end
+			return { -x1, z0, -x0, z1 }
+		end
+		local A = R(-212, -200, -162, -76) -- west of the walk
+		local Bq = R(-138, -168, -30, -76) -- between the walk and the hill
+		local C = R(-150, -214, -12, -190) -- north of the cross walk
+		local ALL = R(-214, -214, -12, -76)
+		-- the walks: from the W/E bridge north, then across to the north bridge
+		local deck = DECKS[if side < 0 then "West" else "East"]
+		local nDeck = DECKS.North
+		local wx0, wx1 = if side < 0 then -158 else 142, if side < 0 then -142 else 158
+		local deckZ0 = if deck then deck[2] else -80
+		walk(false, -186, deckZ0, wx0, wx1, f)
+		local nEnd = if nDeck then (if side < 0 then nDeck[1] else nDeck[3]) else side * 16
+		walk(true, if side < 0 then -158 else nEnd, if side < 0 then nEnd else 158, -186, -170, f)
+		-- leaf arches over them, lamp posts beside them
+		leafArch(false, -104, wx0, wx1, f)
+		leafArch(false, -146, wx0, wx1, f)
+		leafArch(true, side * 112, -186, -170, f)
+		leafArch(true, side * 60, -186, -170, f)
+		claim(wx0 - 6, -152, wx1 + 6, -98)
+		lampPostL(side * 164, -126, if side < 0 then -math.pi / 2 else math.pi / 2, f)
+		lampPostL(side * 86, -192, math.pi, f)
+		-- the gazebo
+		gazebo(side * 112, -134, f)
+		claim(side * 112 - 16, -150, side * 112 + 16, -118)
+		-- the pond (north-west) or the beehive tree and the bamboo grove (north-east)
+		if side < 0 then
+			local px, pz = place(A, 28, 28, 8)
+			if px then
+				pond(px, pz, 28, 28, f)
+			end
+			local bx, bz = place(ALL, 8, 8, 10)
+			if bx then
+				bamboo(bx, bz, 8, 8, f)
+			end
+		else
+			local tx, tz = place(Bq, 20, 20, 10)
+			if tx then
+				local tf, c = appleTree(tx + 10, tz + 10, f, 0, true, true)
+				beehive(tx + 18, c - 2, tz + 10, tf)
+				stats.trees += 1
+			end
+			for _ = 1, 2 do
+				local bx, bz = place(ALL, 12, 12, 10)
+				if bx then
+					bamboo(bx, bz, 12, 12, f)
+				end
+			end
+		end
+		-- apple and cherry trees
+		local apples, cherries = if side < 0 then 2 else 3, if side < 0 then 3 else 2
+		for _ = 1, apples do
+			local tx, tz = place(pick({ A, Bq, ALL }), 20, 20, 10)
+			if tx then
+				appleTree(tx + 10, tz + 10, f, 0, true)
+				stats.trees += 1
+			end
+		end
+		for _ = 1, cherries do
+			local tx, tz = place(pick({ A, Bq, ALL }), 24, 24, 10)
+			if tx then
+				cherryTree(tx + 12, tz + 12, f, 0, true)
+				stats.trees += 1
+			end
+		end
+		task.wait()
+		-- flower beds in single-colour rows
+		for i = 1, 5 do
+			local w, d = rng:NextInteger(4, 6), rng:NextInteger(3, 4)
+			if rng:NextNumber() < 0.4 then
+				w, d = d, w
+			end
+			local reg = if i == 5 then C else pick({ A, Bq, ALL })
+			local bx, bz = place(reg, w * B, d * B, 8)
+			if bx then
+				local c1 = rng:NextInteger(1, #FLOWERS)
+				local c2 = (c1 + rng:NextInteger(1, #FLOWERS - 1) - 1) % #FLOWERS + 1
+				local cols = { FLOWERS[c1], FLOWERS[c2] }
+				if rng:NextNumber() < 0.4 then
+					table.insert(cols, FLOWERS[(c2 + 2) % #FLOWERS + 1])
+				end
+				flowerBed(bx, bz, w, d, f, cols)
+				stats.beds += 1
+			end
+		end
+		-- trellises by the gazebo and the walks, a ruin, benches, animals
+		for _ = 1, if side < 0 then 2 else 1 do
+			local alongX = rng:NextNumber() < 0.5
+			local tx, tz = place(Bq, if alongX then 16 else 4, if alongX then 4 else 16, 8)
+			if tx then
+				trellis(tx + (if alongX then 8 else 2), tz + (if alongX then 2 else 8), alongX, f)
+			end
+		end
+		do
+			local alongX = rng:NextNumber() < 0.5
+			local rx, rz = place(pick({ A, Bq }), 28, 28, 10)
+			if rx then
+				archRuin(rx + 14, rz + 14, alongX, f)
+			end
+		end
+		if okArea(side * 166 - 2, -164, side * 166 + 2, -156, 8) then
+			bench(side * 166, -160, if side < 0 then -math.pi / 2 else math.pi / 2, f)
+			claim(side * 166 - 3, -165, side * 166 + 3, -155)
+		end
+		do
+			local bx, bz = place(C, 8, 4, 8)
+			if bx then
+				bench(bx + 4, bz + 2, math.pi, f)
+			end
+		end
+		for _ = 1, if side < 0 then 1 else 2 do
+			local dx, dz = place(pick({ A, Bq }), 8, 8, 10)
+			if dx then
+				deer(dx + 4, dz + 4, rng:NextNumber(0, 2 * math.pi), f, 0, true)
+			end
+		end
+		for _ = 1, 3 do
+			local rx, rz = place(ALL, 4, 4, 10)
+			if rx then
+				rabbit(rx + 2, rz + 2, rng:NextNumber(0, 2 * math.pi), f)
+			end
+		end
+		-- loose flowers in the grass
+		for _ = 1, 14 do
+			local fx, fz = rng:NextNumber(ALL[1], ALL[3]), rng:NextNumber(ALL[2], ALL[4])
+			if okArea(fx - 1, fz - 1, fx + 1, fz + 1, 10) then
+				flower(fx, 0, fz, f)
+			end
+		end
+	end
+	garden(-1)
+	task.wait()
+	garden(1)
+	task.wait()
+
+	-- reeds on the banks, lily pads on the rivers (my zone), stepping stones over the W/E rivers
+	local rf = folder("RiverSide", northF)
+	local reeds, pads = 0, 0
+	local function nearDeck(x, z)
+		for _, r in pairs(DECKS) do
+			if inRect(x, z, r, 6) then
+				return true
+			end
+		end
+		return false
+	end
+	for cz = -228, -52, 8 do
+		for cx = -228, 228, 8 do
+			if
+				onIsland(cx, cz, 6)
+				and zoneOf(cx, cz) == "north"
+				and hillDist(cx, cz) > 106
+				and not nearDeck(cx, cz)
+			then
+				local gy = groundY(cx, cz)
+				if gy == 0 and reeds < 160 and rng:NextNumber() < 0.35 then
+					for _, d in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+						local nx, nz = cx + d[1] * 8, cz + d[2] * 8
+						if onIsland(nx, nz) and groundY(nx, nz) == RIVER_BED then
+							-- a bank cell next to the river, off the walks and the props
+							local free = true
+							for _, r in ipairs(claimed) do
+								if
+									cx + 4 > r[1]
+									and cx - 4 < r[3]
+									and cz + 4 > r[2]
+									and cz - 4 < r[4]
+								then
+									free = false
+									break
+								end
+							end
+							if free then
+								local bx, bz = cx + d[1] * 2.6, cz + d[2] * 2.6
+								for k = 1, 3 do
+									local px = bx
+										+ (
+											if d[1] == 0
+												then rng:NextNumber(-3, 3)
+												else rng:NextNumber(-0.8, 0.8)
+										)
+									local pz = bz
+										+ (
+											if d[2] == 0
+												then rng:NextNumber(-3, 3)
+												else rng:NextNumber(-0.8, 0.8)
+										)
+									local h = rng:NextNumber(2.5, 4.5)
+									decor(
+										box(
+											"Reed",
+											px - 0.25,
+											-0.2,
+											pz - 0.25,
+											px + 0.25,
+											h,
+											pz + 0.25,
+											"px_hedge",
+											GRASS,
+											rf
+										)
+									)
+									reeds += 1
+									if k == 1 and rng:NextNumber() < 0.5 then
+										decor(
+											box(
+												"Cattail",
+												px - 0.4,
+												h - 1.2,
+												pz - 0.4,
+												px + 0.4,
+												h + 0.2,
+												pz + 0.4,
+												"px_brown_wool",
+												nil,
+												rf
+											)
+										)
+										reeds += 1
+									end
+								end
+							end
+							break
+						end
+					end
+				elseif gy == RIVER_BED and pads < 70 and rng:NextNumber() < 0.08 then
+					local px, pz = cx + rng:NextNumber(-3, 0.6), cz + rng:NextNumber(-3, 0.6)
+					decor(
+						box(
+							"LilyPad",
+							px,
+							RIVER_TOP + 0.02,
+							pz,
+							px + 2.4,
+							RIVER_TOP + 0.14,
+							pz + 2.4,
+							"px_hedge",
+							Color3.fromRGB(150, 210, 110),
+							rf
+						)
+					)
+					pads += 1
+					if rng:NextNumber() < 0.3 then
+						decor(
+							cube(
+								"LilyFlower",
+								px + 1.2,
+								RIVER_TOP + 0.5,
+								pz + 1.2,
+								0.9,
+								0.8,
+								0.9,
+								"px_white_wool",
+								PINK_WOOL,
+								rf
+							)
+						)
+						pads += 1
+					end
+				end
+			end
+		end
+	end
+	-- stepping stones over the west and east rivers
+	for _, sx in ipairs({ -196, 196 }) do
+		local g0, g1
+		for z = cc(-90), cc(-30), 8 do
+			if onIsland(sx, z) and groundY(sx, z) == RIVER_BED then
+				g0 = math.min(g0 or z - 4, z - 4)
+				g1 = math.max(g1 or z + 4, z + 4)
+			end
+		end
+		if g0 and onIsland(sx, g0, 10) and onIsland(sx, g1, 10) then
+			local mid = (g0 + g1) / 2
+			for _, z0 in ipairs({ g0 + 4, mid - 2, g1 - 8 }) do
+				box(
+					"SteppingStone",
+					sx - 2,
+					RIVER_BED,
+					z0,
+					sx + 2,
+					0.3,
+					z0 + 4,
+					"px_mossy_cobblestone",
+					nil,
+					rf
+				)
+				decor(
+					box(
+						"StoneMoss",
+						sx - 2.1,
+						0.3,
+						z0 + rng:NextNumber(0, 2),
+						sx + 2.1,
+						0.4,
+						z0 + 4,
+						"px_hedge",
+						MOSS,
+						rf
+					)
+				)
+			end
+		end
+	end
+	print(
+		("[build-eden] north: gardens %d trees, %d beds, %d reed parts, %d lily parts"):format(
+			stats.trees,
+			stats.beds,
+			reeds,
+			pads
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 3. the waterfalls off the edges
+do
+	local ff = folder("Waterfalls", northF)
+	-- alongX: the river runs along x (outward ±x), else along z; rows: the across cell centres scanned from v0..v1;
+	-- start: an along cell centre on the river
+	local function fall(name, alongX, dir, start, v0, v1)
+		local function cell(u, v)
+			if alongX then
+				return u, v
+			end
+			return v, u
+		end
+		local faces, a0, a1 = {}, nil, nil
+		for v = cc(v0), cc(v1), 8 do
+			local x, z = cell(start, v)
+			if onIsland(x, z) and groundY(x, z) == RIVER_BED then
+				local u = start
+				for _ = 1, 40 do
+					local nx, nz = cell(u + dir * 8, v)
+					if onIsland(nx, nz) and groundY(nx, nz) == RIVER_BED then
+						u += dir * 8
+					else
+						break
+					end
+				end
+				faces[v] = u + dir * 4
+				a0 = math.min(a0 or v - 4, v - 4)
+				a1 = math.max(a1 or v + 4, v + 4)
+			end
+		end
+		if not a0 then
+			warn("[build-eden] north: no river end for the " .. name .. " waterfall")
+			return
+		end
+		local outer
+		for _, fu in pairs(faces) do
+			outer = if outer == nil
+				then fu
+				elseif dir < 0 then math.min(outer, fu)
+				else math.max(outer, fu)
+		end
+		local f = folder(name .. "Waterfall", ff)
+		local function fb(nm, ua, ya, va, ub, yb, vb, tr, variant, tint)
+			local x0, z0 = cell(ua, va)
+			local x1, z1 = cell(ub, vb)
+			local p = decor(box(nm, x0, ya, z0, x1, yb, z1, variant or "px_water", tint or FALL, f))
+			p.Transparency = tr
+			p.CastShadow = false
+			return p
+		end
+		-- the lip of every row rolling over the edge
+		for v, fu in pairs(faces) do
+			fb("FallLip", fu - dir * 2, -3.4, v - 4, outer + dir * 1.6, -0.6, v + 4, 0.3)
+		end
+		local mid, hw = (a0 + a1) / 2, (a1 - a0) / 2
+		local steps = { -- { top, bottom, out, thick, widen }
+			{ -1, -30, 0, 2, 0 },
+			{ -30, -60, 0.6, 2.4, 1 },
+			{ -60, -90, 1.2, 2.8, 2 },
+			{ -90, -120, 1.8, 3.2, 3 },
+			{ -120, -150, 2.4, 3.6, 4 },
+		}
+		for _, s in ipairs(steps) do
+			local u0, u1 = outer + dir * s[3], outer + dir * (s[3] + s[4])
+			local w = hw + s[5]
+			fb("Waterfall", u0, s[2], mid - w, u1, s[1], mid + w, 0.3)
+			for _ = 1, 2 do
+				local v = rng:NextNumber(mid - w + 0.5, mid + w - 1.5)
+				local y1 = rng:NextNumber(s[2] + 6, s[1])
+				fb(
+					"FallStreak",
+					u1,
+					y1 - rng:NextNumber(6, 16),
+					v,
+					u1 + dir * 0.15,
+					y1,
+					v + 1,
+					0.45,
+					"px_white_wool",
+					CLOUD
+				)
+			end
+		end
+		-- the foam cloud at the bottom and a slow mist
+		local fy, out = -152, outer + dir * 4
+		fb(
+			"FallFoam",
+			out - dir * 10,
+			fy - 4,
+			mid - hw - 10,
+			out + dir * 16,
+			fy + 4,
+			mid + hw + 10,
+			0.1,
+			"px_white_wool",
+			CLOUD
+		)
+		fb(
+			"FallFoam",
+			out - dir * 4,
+			fy + 4,
+			mid - hw - 4,
+			out + dir * 10,
+			fy + 8,
+			mid + hw + 4,
+			0.12,
+			"px_white_wool",
+			CLOUD
+		)
+		fb(
+			"FallFoam",
+			out + dir * 16,
+			fy - 4,
+			mid - 8,
+			out + dir * 24,
+			fy,
+			mid + 6,
+			0.12,
+			"px_white_wool",
+			CLOUD
+		)
+		fb(
+			"FallFoam",
+			out - dir * 18,
+			fy - 8,
+			mid - hw,
+			out - dir * 6,
+			fy - 4,
+			mid + 4,
+			0.12,
+			"px_white_wool",
+			CLOUD
+		)
+		local mx, mz = cell(out + dir * 3, mid)
+		local mist =
+			decor(part("FallMist", Vector3.new(20, 2, 20), at(mx, fy + 6, mz), nil, nil, f))
+		mist.Transparency = 1
+		mist.CastShadow = false
+		emitter(mist, {
+			Texture = "rbxasset://textures/particles/smoke_main.dds",
+			Color = ColorSequence.new(Color3.fromRGB(245, 248, 252)),
+			Size = NumberSequence.new(8, 16),
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.3, 0.6),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+			Lifetime = NumberRange.new(6, 9),
+			Rate = 3,
+			Speed = NumberRange.new(1, 3),
+			SpreadAngle = Vector2.new(70, 70),
+			Acceleration = Vector3.new(0, 0.6, 0),
+			LightEmission = 0,
+		})
+		table.insert(FALLS, { alongX = alongX, dir = dir, outer = outer, v0 = a0, v1 = a1 })
+		-- floaters keep out of the view in front of it
+		local ua, ub = outer - dir * 12, outer + dir * 70
+		local xa, za = cell(math.min(ua, ub), a0 - 30)
+		local xb, zb = cell(math.max(ua, ub), a1 + 30)
+		table.insert(
+			CORR,
+			{ math.min(xa, xb), math.max(xa, xb), math.min(za, zb), math.max(za, zb), -210, 30 }
+		)
+		print(("[build-eden] north: %s waterfall at %d, across %d..%d"):format(name, outer, a0, a1))
+	end
+	fall("West", true, -1, -100, -76, -44)
+	fall("East", true, 1, 100, -76, -44)
+	fall("North", false, -1, -156, -16, 16)
+end
+task.wait()
+
+-- ================================================================ 4. under the island: vines and stone tips
+do
+	local uf = folder("UnderIsland", northF)
+	local C = 8
+	local vineParts, tipParts, hangParts, tips = 0, 0, 0, 0
+	local DIRS = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local VINES = { LEAF, LEAF, MOSS, GRASS_DEEP }
+	-- the cell's face (dx, dz) is under a waterfall / right beside one
+	local function fallNear(cx, cz, dx, dz, pad)
+		for _, w in ipairs(FALLS) do
+			local u, v = if w.alongX then cx else cz, if w.alongX then cz else cx
+			local du = if w.alongX then dx else dz
+			if
+				math.abs(u - w.outer) < 20
+				and v > w.v0 - pad
+				and v < w.v1 + pad
+				and (du == 0 or du == w.dir)
+			then
+				return true
+			end
+		end
+		return false
+	end
+	local function vineKind()
+		local r = rng:NextNumber()
+		if r < 0.12 then
+			return "px_wisteria_leaves", nil
+		elseif r < 0.22 then
+			return "px_cherry_leaves", BLOSSOM
+		end
+		return "px_hedge", pick(VINES)
+	end
+	for z = -232, 232 - C, C do
+		for x = -232, 232 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			if onIsland(cx, cz) then
+				local gy = groundY(cx, cz) or 0
+				local rim = false
+				for _, d in ipairs(DIRS) do
+					if not onIsland(cx + d[1] * C, cz + d[2] * C) then
+						rim = true
+						local under = fallNear(cx, cz, d[1], d[2], 2)
+						local beside = not under and fallNear(cx, cz, d[1], d[2], 34)
+						if
+							not under
+							and vineParts < 470
+							and rng:NextNumber() < (if beside then 0.95 else 0.42)
+						then
+							local face = if d[1] ~= 0 then cx + d[1] * 4 else cz + d[2] * 4
+							local s = d[1] + d[2]
+							local o0, o1 = face + s * 0.3, face + s * 1.3
+							local strands = if beside or rng:NextNumber() < 0.3 then 2 else 1
+							for k = 1, strands do
+								local len = if rng:NextNumber() < 0.12
+									then rng:NextInteger(9, 12) * B
+									else rng:NextInteger(2, 8) * B
+								local v, t = vineKind()
+								local a = (if d[1] ~= 0 then cz else cx) - 4 + (k - 1) * B
+								local y1 = gy - 0.3
+								if d[1] ~= 0 then
+									decor(box("RimVine", o0, y1 - len, a, o1, y1, a + B, v, t, uf))
+								else
+									decor(box("RimVine", a, y1 - len, o0, a + B, y1, o1, v, t, uf))
+								end
+								vineParts += 1
+								if beside or rng:NextNumber() < 0.25 then
+									local fu = (o0 + o1) / 2 + s * 0.4
+									local fa = a + rng:NextNumber(1, 3)
+									local fy = y1 - rng:NextNumber(2, len - 1)
+									local col =
+										pick({ PINK_WOOL, FLOWERS[7], FLOWERS[4], FLOWERS[2] })
+									if d[1] ~= 0 then
+										decor(
+											cube(
+												"VineFlower",
+												fu,
+												fy,
+												fa,
+												1.4,
+												1.4,
+												1.4,
+												"px_white_wool",
+												col,
+												uf
+											)
+										)
+									else
+										decor(
+											cube(
+												"VineFlower",
+												fa,
+												fy,
+												fu,
+												1.4,
+												1.4,
+												1.4,
+												"px_white_wool",
+												col,
+												uf
+											)
+										)
+									end
+									vineParts += 1
+								end
+							end
+						end
+					end
+				end
+				local bottom = gy - 4 - rockDepth(cx, cz)
+				local key = cx * 10000 + cz
+				local low = bottom
+				-- grey stone tips: stepped 2×2 → 1×1 → half-block, denser at the rim
+				if
+					tipParts < 520
+					and not fallNear(cx, cz, 0, 0, 10)
+					and rng:NextNumber() < (if rim then 0.26 else 1 / 28)
+				then
+					local L = if rim then rng:NextInteger(2, 7) else rng:NextInteger(4, 12)
+					L = math.min(L, math.floor((bottom + 236) / B))
+					if L >= 2 then
+						local y = bottom + 1
+						local a = math.max(1, math.floor(L * 0.4))
+						box(
+							"RockTip",
+							x,
+							y - a * B - 1,
+							z,
+							x + 8,
+							y,
+							z + 8,
+							"px_stone",
+							ROCK_LOW,
+							uf
+						)
+						y -= a * B + 1
+						local qx, qz = x + rng:NextInteger(0, 1) * 4, z + rng:NextInteger(0, 1) * 4
+						local b = math.max(1, math.floor((L - a) * 0.6))
+						box(
+							"RockTip",
+							qx,
+							y - b * B,
+							qz,
+							qx + 4,
+							y,
+							qz + 4,
+							"px_stone",
+							ROCK_LOW,
+							uf
+						)
+						y -= b * B
+						local rest = L - a - b
+						tipParts += 2
+						if rest >= 1 then
+							local sx, sz = qx + pick({ 0, 2 }), qz + pick({ 0, 2 })
+							box(
+								"RockTip",
+								sx,
+								y - rest * B,
+								sz,
+								sx + 2,
+								y,
+								sz + 2,
+								"px_cobblestone",
+								ROCK_LOW,
+								uf
+							)
+							y -= rest * B
+							tipParts += 1
+						end
+						low = math.min(low, y)
+						tips += 1
+					end
+				end
+				-- a vine hanging under the bottom near the rim
+				if
+					hangParts < 110
+					and rng:NextNumber() < (if rim then 0.14 else 0.012)
+					and not fallNear(cx, cz, 0, 0, 10)
+				then
+					local len = rng:NextInteger(2, 8) * B
+					len = math.min(len, bottom + 232)
+					if len >= B then
+						local v, t = vineKind()
+						local px, pz = x + pick({ 0.6, 5.8 }), z + pick({ 0.6, 5.8 })
+						decor(
+							box(
+								"HangingVine",
+								px,
+								bottom - len,
+								pz,
+								px + 1.6,
+								bottom + 0.5,
+								pz + 1.6,
+								v,
+								t,
+								uf
+							)
+						)
+						hangParts += 1
+						low = math.min(low, bottom - len)
+					end
+				end
+				tipLow[key] = low
+			end
+		end
+		if z % 32 == 0 then
+			task.wait()
+		end
+	end
+	print(
+		("[build-eden] north: under the island %d tips (%d parts), rim vines %d parts, hanging vines %d"):format(
+			tips,
+			tipParts,
+			vineParts,
+			hangParts
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 5–6. floating islets and clouds
+do
+	local sky = folder("Sky", northF)
+	local TAKEN = {}
+	local function blocked(x0, x1, z0, z1, y0, y1)
+		for _, c in ipairs(CORR) do
+			if
+				x1 >= c[1]
+				and x0 <= c[2]
+				and z1 >= c[3]
+				and z0 <= c[4]
+				and y1 >= c[5]
+				and y0 <= c[6]
+			then
+				return true
+			end
+		end
+		return false
+	end
+	-- no island ground within half + 24 studs (horizontally) of (x, z)
+	local function clearOfIsland(x, z, half)
+		local e = half + 24
+		if math.abs(x) > HALF + 12 + e or math.abs(z) > HALF + 12 + e then
+			return true
+		end
+		local n = math.max(1, math.ceil(2 * e / 8))
+		for i = 0, n do
+			for j = 0, n do
+				if onIsland(x - e + 2 * e * i / n, z - e + 2 * e * j / n) then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	local function findSpot(half, down, up, yMin, yMax)
+		for attempt = 1, 300 do
+			if attempt % 60 == 0 then
+				task.wait()
+			end
+			local x, z =
+				rng:NextNumber(-380 + half, 380 - half), rng:NextNumber(-380 + half, 380 - half)
+			local y = rng:NextNumber(yMin, yMax)
+			local ok = not blocked(x - half, x + half, z - half, z + half, y - down, y + up)
+				and not (hillDist(x, z) < 90 + half and y + up > 40)
+				and clearOfIsland(x, z, half)
+			if ok then
+				for _, t in ipairs(TAKEN) do
+					local dh = math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2)
+					if dh < t[3] + half + 10 and y + up + 8 > t[4] and y - down - 8 < t[5] then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				table.insert(TAKEN, { x, z, half, y - down, y + up })
+				return x, y, z
+			end
+		end
+		return nil
+	end
+	-- a floating islet: a grass top, a stepped cone of dirt then stone under it, vines down the sides (decor)
+	local function islet(x, y, z, w, d, parent)
+		local f = folder("Islet", parent)
+		local hx, hz = w * B / 2, d * B / 2
+		box(
+			"IsletTop",
+			x - hx,
+			y - B,
+			z - hz,
+			x + hx,
+			y,
+			z + hz,
+			"px_grass_top",
+			pick({ GRASS, GRASS_DEEP }),
+			f
+		)
+		local layers = math.clamp(math.floor((w + d) / 3) + rng:NextInteger(0, 1), 2, 5)
+		local yTop = y - B
+		local ix0, ix1, iz0, iz1 = 0, w, 0, d
+		for k = 1, layers do
+			local f01 = 1 - k / (layers + 1)
+			local lw = math.clamp(math.floor(w * f01 + 0.5), 1, ix1 - ix0)
+			local ld = math.clamp(math.floor(d * f01 + 0.5), 1, iz1 - iz0)
+			local sx = math.clamp(
+				ix0 + math.floor((ix1 - ix0 - lw) / 2 + rng:NextNumber(-0.5, 0.99)),
+				ix0,
+				ix1 - lw
+			)
+			local sz = math.clamp(
+				iz0 + math.floor((iz1 - iz0 - ld) / 2 + rng:NextNumber(-0.5, 0.99)),
+				iz0,
+				iz1 - ld
+			)
+			local hgt = if lw >= 3 and rng:NextNumber() < 0.5 then 2 * B else B
+			local v, t = "px_dirt", ROCK_TOP
+			if k > layers / 2 then
+				v, t = "px_stone", ROCK_LOW
+			end
+			box(
+				"IsletRock",
+				x - hx + sx * B,
+				yTop - hgt,
+				z - hz + sz * B,
+				x - hx + (sx + lw) * B,
+				yTop,
+				z - hz + (sz + ld) * B,
+				v,
+				t,
+				f
+			)
+			yTop -= hgt
+			ix0, ix1, iz0, iz1 = sx, sx + lw, sz, sz + ld
+		end
+		for _ = 1, rng:NextInteger(2, 4) do
+			local side = rng:NextInteger(1, 4)
+			local len = rng:NextInteger(1, 4) * B
+			local vv, vt = "px_hedge", pick({ LEAF, MOSS })
+			if rng:NextNumber() < 0.2 then
+				vv, vt = "px_wisteria_leaves", nil
+			end
+			if side <= 2 then
+				local fx = if side == 1 then x - hx - 0.3 else x + hx + 0.3
+				local a = z - hz + rng:NextInteger(0, d - 1) * B
+				box(
+					"IsletVine",
+					fx,
+					y - 0.4 - len,
+					a,
+					fx + (if side == 1 then -0.8 else 0.8),
+					y - 0.4,
+					a + B,
+					vv,
+					vt,
+					f
+				)
+			else
+				local fz = if side == 3 then z - hz - 0.3 else z + hz + 0.3
+				local a = x - hx + rng:NextInteger(0, w - 1) * B
+				box(
+					"IsletVine",
+					a,
+					y - 0.4 - len,
+					fz,
+					a + B,
+					y - 0.4,
+					fz + (if side == 3 then -0.8 else 0.8),
+					vv,
+					vt,
+					f
+				)
+			end
+		end
+		return finish(f, false)
+	end
+
+	-- 5. the floating islets
+	local fly = folder("FloatingIslets", sky)
+	local c0 = count
+	local islets, lamps = 0, 0
+	local want = rng:NextInteger(16, 18)
+	for i = 1, 50 do
+		if islets >= want or count - c0 > 800 then
+			break
+		end
+		local w, d = rng:NextInteger(3, 7), rng:NextInteger(3, 7)
+		local half = math.max(w, d) * B / 2 + 2
+		local big = w >= 4 and d >= 4
+		local kind = if big then rng:NextInteger(1, 7) else rng:NextInteger(3, 7)
+		local up = if kind <= 2 then 34 else 14
+		local x, y, z = findSpot(math.max(half, if kind <= 2 then 16 else 0), 56, up, -60, 100 - up)
+		if x then
+			x, y, z = snap(x), math.floor(y), snap(z)
+			if w % 2 == 1 then
+				x += 2
+			end
+			if d % 2 == 1 then
+				z += 2
+			end
+			local f = islet(x, y, z, w, d, fly)
+			local hx, hz = w * B / 2, d * B / 2
+			local px, pz =
+				x - hx + rng:NextInteger(0, w - 1) * B + 2,
+				z - hz + rng:NextInteger(0, d - 1) * B + 2
+			if kind == 1 then
+				cherryTree(x, z, f, y, false)
+			elseif kind == 2 then
+				appleTree(x, z, f, y, false)
+			elseif kind == 3 then
+				finish(
+					flowerBed(
+						x - hx + B / 2,
+						z - hz + B / 2,
+						math.max(1, w - 1),
+						math.max(1, d - 1),
+						f,
+						{ pick(FLOWERS), pick(FLOWERS) },
+						y
+					),
+					false
+				)
+			elseif kind == 4 then
+				decor(
+					box(
+						"HivePost",
+						px - 0.5,
+						y,
+						pz - 0.5,
+						px + 0.5,
+						y + 5,
+						pz + 0.5,
+						"px_oak_log",
+						nil,
+						f
+					)
+				)
+				beehive(px, y + 6.7, pz, f)
+			elseif kind == 5 then
+				deer(x, z, rng:NextNumber(0, 2 * math.pi), f, y, false)
+			elseif kind == 6 then
+				decor(
+					box(
+						"IsletLampPost",
+						px - 0.5,
+						y,
+						pz - 0.5,
+						px + 0.5,
+						y + 7,
+						pz + 0.5,
+						"px_oak_log",
+						nil,
+						f
+					)
+				)
+				decor(
+					box(
+						"IsletLampArm",
+						px - 0.5,
+						y + 6.5,
+						pz - 0.5,
+						px + 0.5,
+						y + 7.5,
+						pz + 3,
+						"px_spruce_planks",
+						nil,
+						f
+					)
+				)
+				lamp(px, y + 4.6, pz + 2.4, f, y + 6.5, lamps >= 3)
+				lamps += 1
+			else
+				rabbit(px, pz, rng:NextNumber(0, 2 * math.pi), f, y)
+			end
+			for _ = 1, rng:NextInteger(1, 3) do
+				flower(
+					x - hx + rng:NextNumber(1, w * B - 1),
+					y,
+					z - hz + rng:NextNumber(1, d * B - 1),
+					f
+				)
+			end
+			islets += 1
+		end
+		if i % 4 == 0 then
+			task.wait()
+		end
+	end
+	local isletParts = count - c0
+	task.wait()
+
+	-- 6. the clouds: flat stacked white wool slabs (a base, a smaller puff on top, a lobe under one side)
+	local cf = folder("Clouds", sky)
+	local function cloud(x, y, z, w, d, th)
+		local hx, hz = w * B / 2, d * B / 2
+		local tr = rng:NextNumber(0, 0.15)
+		local function puff(x0, y0, z0, x1, y1, z1)
+			local p = decor(box("Cloud", x0, y0, z0, x1, y1, z1, "px_white_wool", CLOUD, cf))
+			p.Transparency = tr
+			p.CastShadow = false
+		end
+		puff(x - hx, y, z - hz, x + hx, y + th * B, z + hz)
+		local w2, d2 =
+			math.max(2, w - rng:NextInteger(3, 6)), math.max(2, d - rng:NextInteger(2, 5))
+		local ox, oz = rng:NextInteger(-1, 1) * B, rng:NextInteger(-1, 1) * B
+		puff(
+			x + ox - w2 * B / 2,
+			y + th * B,
+			z + oz - d2 * B / 2,
+			x + ox + w2 * B / 2,
+			y + (th + 1) * B,
+			z + oz + d2 * B / 2
+		)
+		if w >= 8 then
+			local lw = rng:NextInteger(3, math.floor(w / 2))
+			local sx = if rng:NextNumber() < 0.5 then x - hx else x + hx - lw * B
+			puff(sx, y - B, z - hz + B, sx + lw * B, y, z + hz - B)
+		end
+	end
+	local low, edge = 0, 0
+	-- the layer under the island (y -150..-230), always below what hangs under it
+	for attempt = 1, 400 do
+		if low >= 30 then
+			break
+		end
+		local x, z
+		if attempt % 3 == 0 then
+			x, z = rng:NextNumber(-380, 380), rng:NextNumber(-380, 380)
+		else
+			x, z = rng:NextNumber(-250, 250), rng:NextNumber(-250, 250)
+		end
+		x, z = snap(x), snap(z)
+		local w, d, th = rng:NextInteger(6, 20), rng:NextInteger(5, 14), rng:NextInteger(1, 2)
+		local y = snap(rng:NextNumber(-230, -150))
+		local hx, hz = w * B / 2 + 8, d * B / 2 + 8
+		local floor0 = 0
+		for px = cc(x - hx), cc(x + hx), 8 do
+			for pz = cc(z - hz), cc(z + hz), 8 do
+				local lowY = tipLow[px * 10000 + pz]
+				if lowY then
+					floor0 = math.min(floor0, lowY)
+				end
+			end
+		end
+		local h = (th + 1) * B
+		if y + h > floor0 - 8 then
+			y = floor0 - 8 - h
+		end
+		if y >= -234 and not blocked(x - hx, x + hx, z - hz, z + hz, y - B, y + h) then
+			cloud(x, y, z, w, d, th)
+			low += 1
+		end
+		if attempt % 50 == 0 then
+			task.wait()
+		end
+	end
+	-- a few round the island at y -40..40, off it and off the islets, out of the falls' view
+	for _ = 1, 40 do
+		if edge >= 10 then
+			break
+		end
+		local w, d, th = rng:NextInteger(6, 16), rng:NextInteger(4, 10), rng:NextInteger(1, 2)
+		local x, y, z = findSpot(math.max(w, d) * B / 2 + 4, B, (th + 1) * B, -40, 40)
+		if x then
+			cloud(snap(x), snap(y), snap(z), w, d, th)
+			edge += 1
+		end
+	end
+	print(
+		("[build-eden] north: islets %d (%d parts), clouds %d low + %d round"):format(
+			islets,
+			isletParts,
+			low,
+			edge
+		)
+	)
+end
+print(
+	("[build-eden] north: %d parts in all, %d lights"):format(count - startCount, math.min(lit, 20))
+)
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-eden] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
