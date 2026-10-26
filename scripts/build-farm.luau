@@ -919,6 +919,2635 @@ print(("[build-farm] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ farm/20-fields.luau
+do
+-- ================================================================ farm: the fields (L0 west of x 116)
+-- The patchwork of crop beds round the pit: each bed (BEDS, inside FIELDS) is planted in stripes 5 blocks wide —
+-- golden wheat rows, low carrot and beet rows with orange / red tops at the root, rows of cabbage cubes, melon and
+-- pumpkin blocks on vines — with water channels under spruce trapdoors between some stripes, an oak fence with a
+-- 3-block gate toward the nearest path and a lamp post at one corner. Three yards are cut out of the fields:
+--   YARD_W1  x -136..-100, z -60..8    the chicken coop with its fenced run, the sheep pen
+--   YARD_W2  x -140..-100, z 40..112   the yellow-white produce stall at the west path entrance, the beehive tree, the
+--                                      tool shed, compost bins, a haystack, the stone well with a roof at (-120, 102)
+--   YARD_S   x 20..48, z 124..204      the pumpkin cart near the buyer, sacks, crates, a haystack, a wheelbarrow,
+--                                      compost bins, an apple tree, a flower strip along the south path
+-- Round the pit: an oak fence on the inner block of the ring path (x ±74, z -50 / 98), open at the ladder shafts and
+-- in front of the arrival; six lamp posts on the ring's outer edge. Scarecrows in the wheat of beds 1 and 3. Hedges on
+-- the west rim, between the fields and under the hill; a low stone wall along the south rim with gaps; benches at the
+-- south viewpoint at the end of the south path; oak / apple trees on the edges.
+local fields = folder("Fields")
+local startCount = count
+local C = {
+	wheat = { WHEAT, Color3.fromRGB(238, 212, 112), Color3.fromRGB(214, 196, 96) },
+	carrotTop = Color3.fromRGB(112, 200, 64),
+	carrot = Color3.fromRGB(236, 128, 36),
+	beetTop = Color3.fromRGB(72, 140, 60),
+	beet = Color3.fromRGB(150, 40, 72),
+	cabbage = { Color3.fromRGB(156, 214, 112), Color3.fromRGB(122, 192, 90) },
+	leafDark = Color3.fromRGB(78, 136, 56),
+	vine = Color3.fromRGB(70, 128, 48),
+	stem = Color3.fromRGB(96, 110, 44),
+	honey = Color3.fromRGB(232, 172, 52),
+	iron = Color3.fromRGB(60, 60, 66),
+	carve = Color3.fromRGB(46, 26, 12),
+	sack = Color3.fromRGB(206, 176, 126),
+	wool = Color3.fromRGB(240, 240, 236),
+	face = Color3.fromRGB(70, 56, 48),
+	comb = Color3.fromRGB(210, 40, 40),
+	beak = Color3.fromRGB(240, 170, 40),
+	flowers = {
+		Color3.fromRGB(220, 50, 50),
+		Color3.fromRGB(245, 215, 60),
+		Color3.fromRGB(90, 120, 225),
+		Color3.fromRGB(245, 245, 245),
+		Color3.fromRGB(240, 140, 190),
+		Color3.fromRGB(240, 140, 40),
+	},
+}
+
+-- a textured box in a local frame cf (a world CFrame) by two corners
+local function lb(cf, name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(name, size, cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), tint, nil, parent)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+-- a small plain decor bit in a frame cf by size and local centre
+local function lc(cf, name, sx, sy, sz, x, y, z, color, parent)
+	return decor(part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), color, nil, parent))
+end
+-- a frame at local (x, z) turned by yaw; its front is -Z (yaw 0 faces north, pi south, pi/2 west, -pi/2 east)
+local function fr(x, z, yaw, y)
+	return at(x, y or 0, z) * CFrame.Angles(0, yaw or 0, 0)
+end
+-- crop ground: on the island (10 studs in), off the stairs, the paths and other zones
+local function okCrop(x, z)
+	return onIsland(x, z, 10) and not inStairCorridor(x, z) and not onPath(x, z, 1) and zoneOf(x, z) == "fields"
+end
+-- the runs of a line along `axis` ("x": points (a, c), "z": (c, a)) from a0 to a1, sampled every 4 studs, where ok
+-- holds at every cross coordinate in cs: { {s, e}, ... }
+local function runs(axis, a0, a1, cs, ok)
+	local out, s = {}, nil
+	local a = a0 + 2
+	while a < a1 do
+		local good = true
+		for _, c in ipairs(cs) do
+			local x, z = a, c
+			if axis == "z" then
+				x, z = c, a
+			end
+			if not ok(x, z) then
+				good = false
+				break
+			end
+		end
+		if good then
+			s = s or (a - 2)
+		elseif s then
+			table.insert(out, { s, a - 2 })
+			s = nil
+		end
+		a += 4
+	end
+	if s then
+		table.insert(out, { s, math.min(a - 2, a1) })
+	end
+	return out
+end
+-- a box in stripe coordinates: a along the stripe, u across it
+local function sbox(name, axis, a0, a1, u0, u1, y0, y1, variant, tint, parent)
+	if axis == "x" then
+		return box(name, a0, y0, u0, a1, y1, u1, variant, tint, parent)
+	end
+	return box(name, u0, y0, a0, u1, y1, a1, variant, tint, parent)
+end
+local function scube(name, axis, a, u, y, sa, sy, su, variant, tint, parent)
+	if axis == "x" then
+		return cube(name, a, y, u, sa, sy, su, variant, tint, parent)
+	end
+	return cube(name, u, y, a, su, sy, sa, variant, tint, parent)
+end
+-- a free spot for a prop (warns when the plan check fails, so the evening check can look at it)
+local function spot(x, z, pad, what)
+	if not freeGround(x, z, pad) or zoneOf(x, z) ~= "fields" then
+		warn(("[build-farm] fields: %s at (%d, %d) is not on free ground"):format(what, x, z))
+	end
+end
+-- an oak / apple tree of blocks where the ground is free (the trunk off the rim, the paths and the pit)
+local function tryTree(x, z, h, parent, apples)
+	if
+		not onIsland(x, z, 12)
+		or onPath(x, z, 3)
+		or inPitArea(x, z, 4)
+		or inStairCorridor(x, z)
+		or zoneOf(x, z) ~= "fields"
+		or math.sqrt((x - SPAWN.x) ^ 2 + (z - SPAWN.z) ^ 2) < 24
+	then
+		return nil
+	end
+	local t = tree(x, z, h, parent, "px_hedge", "px_oak_log")
+	if apples then
+		for i = 1, 5 do
+			local a = (i / 5) * math.pi * 2 + rng:NextNumber(0, 0.6)
+			local r = 10.3
+			local p = decor(part("Apple", Vector3.new(1.2, 1.2, 1.2), at(x + math.cos(a) * r, h + rng:NextInteger(-1, 1), z + math.sin(a) * r), Color3.fromRGB(200, 30, 30), nil, t))
+			p.CastShadow = false
+		end
+	end
+	return t
+end
+
+-- ================================================================ 1. the crop beds
+do
+	local crops = folder("CropBeds", fields)
+	-- the beds: rect, the crop cycle offset, gates { side, centre } (12 studs wide), the lamp post { x, z, yaw }
+	local BEDS = {
+		{ -208, -60, -136, 8, off = 0, gates = { { "s", -172 } }, lamp = { -140, 12, math.pi } },
+		{ -208, 40, -140, 112, off = 2, gates = { { "n", -172 }, { "e", 94 } }, lamp = { -144, 36, 0 } },
+		{ -208, 124, -20, 204, off = 4, gates = { { "e", 164 }, { "n", -56 } }, lamp = { -16, 200, -math.pi / 2 } },
+		{ 52, 124, 112, 204, off = 1, gates = { { "w", 164 }, { "n", 82 } }, lamp = { 50, 121, 0 } },
+		{ 100, -60, 116, 8, off = 1, gates = { { "w", -26 } }, lamp = { 96, 4, math.pi / 2 } },
+		{ 100, 40, 116, 112, off = 3, gates = { { "w", 76 } }, lamp = { 96, 108, math.pi / 2 } },
+	}
+	local CYCLE = { "wheat", "carrot", "cabbage", "melon", "wheat", "beet", "pumpkin" }
+	local planted = { wheat = 0, carrot = 0, cabbage = 0, melon = 0, beet = 0, pumpkin = 0 }
+
+	-- low rows (carrots, beets): a coloured root fringe under a green top, a few root specks
+	local function lowRows(axis, a0, a1, u0, u1, parent, topTint, rootTint, h)
+		local n = math.floor((u1 - u0) / 4)
+		for k = 0, n - 1 do
+			local r0 = u0 + k * 4 + 0.5
+			local r1 = r0 + 3
+			for _, s in ipairs(runs(axis, a0, a1, { r0, r1 }, okCrop)) do
+				decor(sbox("CropRoots", axis, s[1], s[2], r0 - 0.2, r1 + 0.2, 0, 0.6, "px_hay", rootTint, parent))
+				decor(sbox("CropLeaves", axis, s[1], s[2], r0 + 0.4, r1 - 0.4, 0.6, h, "px_hedge", topTint, parent))
+				local a = s[1] + 4 + (k % 3) * 4
+				while a < s[2] - 2 do
+					local side = if (a // 4 + k) % 2 == 0 then r0 + 0.3 else r1 - 0.3
+					decor(scube("CropSpeck", axis, a, side, 1.0, 1.2, 0.9, 1.2, nil, rootTint, parent))
+					a += 12
+				end
+			end
+		end
+	end
+	-- block rows (cabbages, melons, pumpkins): rows 6 studs apart across the stripe
+	local function blockRowCentres(u0, u1)
+		local w = u1 - u0
+		local m = math.max(1, math.floor((w + 2) / 6))
+		local first = u0 + (w - (m - 1) * 6) / 2
+		local out = {}
+		for k = 0, m - 1 do
+			table.insert(out, first + k * 6)
+		end
+		return out
+	end
+	local function pumpkin(axis, a, u, parent)
+		scube("Pumpkin", axis, a, u, 1.9, 3.8, 3.8, 3.8, "px_hay", PUMPKIN, parent)
+		decor(scube("PumpkinStem", axis, a, u, 4.2, 0.7, 0.8, 0.7, nil, C.stem, parent))
+	end
+	local function vineRows(axis, a0, a1, u0, u1, parent, mode)
+		for k, u in ipairs(blockRowCentres(u0, u1)) do
+			for _, s in ipairs(runs(axis, a0, a1, { u - 2, u + 2 }, okCrop)) do
+				decor(sbox("Vine", axis, s[1], s[2], u - 0.6, u + 0.6, 0, 0.5, "px_hedge", C.vine, parent))
+				local a = s[1] + 2 + (k % 2) * 4
+				while a <= s[2] - 2 do
+					local r = rng:NextNumber()
+					if r < 0.28 then
+						decor(scube("VineLeaves", axis, a, u, 0.5, 2.6, 1, 2.6, "px_hedge", C.leafDark, parent))
+					elseif mode == "pumpkin" or (mode == "mixed" and k % 2 == 0) or r > 0.92 then
+						pumpkin(axis, a, u, parent)
+					else
+						scube("Melon", axis, a, u, 1.9, 3.8, 3.8, 3.8, "px_melon", nil, parent)
+					end
+					a += 8
+				end
+			end
+		end
+	end
+	local PLANT = {
+		wheat = function(axis, a0, a1, u0, u1, parent)
+			local n = math.floor((u1 - u0) / 4)
+			for k = 0, n - 1 do
+				local r0 = u0 + k * 4 + 0.5
+				local r1 = r0 + 3
+				for _, s in ipairs(runs(axis, a0, a1, { r0, r1 }, okCrop)) do
+					local p = s[1]
+					while p < s[2] - 0.1 do
+						local q = math.min(s[2], p + rng:NextInteger(3, 7) * 4)
+						if s[2] - q < 8 then
+							q = s[2]
+						end
+						local h = 2.8 + rng:NextInteger(0, 3) * 0.3
+						decor(sbox("Wheat", axis, p, q, r0, r1, 0, h, "px_hay", pick(C.wheat), parent))
+						p = q
+					end
+				end
+			end
+		end,
+		carrot = function(axis, a0, a1, u0, u1, parent)
+			lowRows(axis, a0, a1, u0, u1, parent, C.carrotTop, C.carrot, 2.2)
+		end,
+		beet = function(axis, a0, a1, u0, u1, parent)
+			lowRows(axis, a0, a1, u0, u1, parent, C.beetTop, C.beet, 1.8)
+		end,
+		cabbage = function(axis, a0, a1, u0, u1, parent)
+			for k, u in ipairs(blockRowCentres(u0, u1)) do
+				for _, s in ipairs(runs(axis, a0, a1, { u - 2, u + 2 }, okCrop)) do
+					decor(sbox("CabbageLeaves", axis, s[1], s[2], u - 2.2, u + 2.2, 0, 0.4, "px_hedge", C.leafDark, parent))
+					local a = s[1] + 2 + (k % 2) * 3
+					while a <= s[2] - 2 do
+						decor(scube("Cabbage", axis, a, u, 1.9, 3.6, 3.2, 3.6, "px_hedge", pick(C.cabbage), parent))
+						a += 6
+					end
+				end
+			end
+		end,
+		melon = function(axis, a0, a1, u0, u1, parent)
+			vineRows(axis, a0, a1, u0, u1, parent, "mixed")
+		end,
+		pumpkin = function(axis, a0, a1, u0, u1, parent)
+			vineRows(axis, a0, a1, u0, u1, parent, "pumpkin")
+		end,
+	}
+	-- a water channel 1 block wide, flush on the farmland, spruce trapdoors over it every 4 blocks
+	local function channel(axis, a0, a1, u0, parent)
+		for _, s in ipairs(runs(axis, a0, a1, { u0 + 0.5, u0 + 3.5 }, okCrop)) do
+			local w = decor(sbox("WaterChannel", axis, s[1], s[2], u0 + 0.3, u0 + 3.7, 0.02, 0.14, "px_water", nil, parent))
+			w.Transparency = 0.3
+			w.CastShadow = false
+			local a = s[1] + 6
+			while a <= s[2] - 2 do
+				scube("Trapdoor", axis, a, u0 + 2, 0.4, 3.8, 0.5, 3.8, "px_spruce_planks", nil, parent)
+				a += 16
+			end
+		end
+	end
+	-- the oak fence round a bed: posts + 2 rails, gaps at the gates, clipped to the island
+	local function okFence(x, z)
+		return onIsland(x, z, 10) and not inStairCorridor(x, z) and not onPath(x, z, 1) and zoneOf(x, z) == "fields"
+	end
+	local function bedFence(b, parent)
+		local X0, Z0, X1, Z1 = b[1] + 2, b[2] + 2, b[3] - 2, b[4] - 2
+		local sides = {
+			n = { "x", X0, X1, Z0 },
+			s = { "x", X0, X1, Z1 },
+			w = { "z", Z0, Z1, X0 },
+			e = { "z", Z0, Z1, X1 },
+		}
+		for key, sd in pairs(sides) do
+			local axis, a0, a1, c = sd[1], sd[2], sd[3], sd[4]
+			-- the side minus its gates
+			local parts = { { a0, a1 } }
+			for _, g in ipairs(b.gates) do
+				if g[1] == key then
+					local nxt = {}
+					for _, p in ipairs(parts) do
+						if g[2] - 6 > p[1] then
+							table.insert(nxt, { p[1], math.min(p[2], g[2] - 6) })
+						end
+						if g[2] + 6 < p[2] then
+							table.insert(nxt, { math.max(p[1], g[2] + 6), p[2] })
+						end
+					end
+					parts = nxt
+					-- gate posts: a little taller, with a lantern-less cap
+					for _, e in ipairs({ g[2] - 6, g[2] + 6 }) do
+						local gx, gz = e, c
+						if axis == "z" then
+							gx, gz = c, e
+						end
+						if okFence(gx, gz) then
+							cube("GatePost", gx, 2.2, gz, 1.4, 4.4, 1.4, "px_oak_log", nil, parent)
+						end
+					end
+				end
+			end
+			for _, p in ipairs(parts) do
+				for _, s in ipairs(runs(axis, p[1], p[2], { c }, okFence)) do
+					if s[2] - s[1] >= 4 then
+						if axis == "x" then
+							fence(s[1], c, s[2], c, parent, 0, "px_planks")
+						else
+							fence(c, s[1], c, s[2], parent, 0, "px_planks")
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for i, b in ipairs(BEDS) do
+		local bed = folder("Bed" .. i, crops)
+		local ix0, iz0, ix1, iz1 = b[1] + 4, b[2] + 4, b[3] - 4, b[4] - 4
+		local axis, a0, a1, c0, c1 = "x", ix0, ix1, iz0, iz1
+		if ix1 - ix0 < iz1 - iz0 then
+			axis, a0, a1, c0, c1 = "z", iz0, iz1, ix0, ix1
+		end
+		local pos, k = c0, 0
+		while c1 - pos >= 8 do
+			local w = math.min(20, c1 - pos)
+			if c1 - pos - w > 0 and c1 - pos - w < 8 then
+				w = c1 - pos
+			end
+			local crop = CYCLE[(b.off + k) % #CYCLE + 1]
+			PLANT[crop](axis, a0, a1, pos, pos + w, bed)
+			planted[crop] += 1
+			pos += w
+			k += 1
+			if k % 2 == 1 and c1 - pos >= 12 then
+				channel(axis, a0, a1, pos, bed)
+				pos += 4
+			end
+		end
+		bedFence(b, bed)
+		lampPost(b.lamp[1], b.lamp[2], bed, false, b.lamp[3])
+		task.wait()
+	end
+	print(
+		("[build-farm] fields: beds %d, stripes wheat %d, carrot %d, beet %d, cabbage %d, melon %d, pumpkin %d"):format(
+			#BEDS,
+			planted.wheat,
+			planted.carrot,
+			planted.beet,
+			planted.cabbage,
+			planted.melon,
+			planted.pumpkin
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 2. round the pit: the fence and the lamp posts
+do
+	local ring = folder("PitFence", fields)
+	-- on the inner block of the ring path, open at the ladder shafts and in front of the arrival
+	for _, seg in ipairs({
+		{ -74, -50, -12, -50 },
+		{ 12, -50, 74, -50 },
+		{ -74, 98, -20, 98 },
+		{ 20, 98, 74, 98 },
+		{ -74, -50, -74, 12 },
+		{ -74, 36, -74, 98 },
+		{ 74, -50, 74, 12 },
+		{ 74, 36, 74, 98 },
+	}) do
+		fence(seg[1], seg[2], seg[3], seg[4], ring, 0, "px_planks")
+	end
+	for _, e in ipairs({ { -12, -50 }, { 12, -50 }, { -20, 98 }, { 20, 98 }, { -74, 12 }, { -74, 36 }, { 74, 12 }, { 74, 36 } }) do
+		cube("FenceEndPost", e[1], 2.2, e[2], 1.4, 4.4, 1.4, "px_oak_log", nil, ring)
+	end
+	-- lamp posts on the ring's outer edge, the lanterns hanging over the path
+	for _, l in ipairs({
+		{ -90, -40, -math.pi / 2 },
+		{ 90, -40, math.pi / 2 },
+		{ -90, 76, -math.pi / 2 },
+		{ 90, 76, math.pi / 2 },
+		{ -56, 114, 0 },
+		{ 56, 114, 0 },
+	}) do
+		lampPost(l[1], l[2], ring, false, l[3])
+	end
+end
+task.wait()
+
+-- ================================================================ 3. the yards: coop, sheep, stall, well, shed, cart
+do
+	local yards = folder("Yards", fields)
+
+	local function sack(x, z, parent)
+		cube("Sack", x, 1.4, z, 2.4, 2.8, 2.4, "px_brown_wool", C.sack, parent)
+		decor(cube("SackTie", x, 3.1, z, 1.2, 0.6, 1.2, nil, Color3.fromRGB(120, 90, 60), parent))
+	end
+	local function haystack(x, z, parent)
+		box("Haystack", x - 4, 0, z - 4, x + 4, 4, z + 4, "px_hay", nil, parent)
+		cube("Haystack", x + (if rng:NextNumber() < 0.5 then -2 else 2), 6, z - 2, B, B, B, "px_hay", nil, parent)
+	end
+	local function compost(x, z, parent)
+		cube("Composter", x, 2, z, B, B, B, "px_spruce_planks", Color3.fromRGB(160, 120, 86), parent)
+		decor(cube("Compost", x, 3.95, z, 3, 0.2, 3, "px_dirt", FARMLAND, parent))
+	end
+	local function flower(x, z, col, parent)
+		decor(cube("FlowerStem", x, 0.8, z, 0.4, 1.6, 0.4, nil, C.vine, parent))
+		decor(cube("Flower", x, 2.1, z, 1.3, 1.3, 1.3, nil, col, parent))
+	end
+	local function chicken(x, z, yaw, parent)
+		local cf = fr(x, z, yaw)
+		lb(cf, "ChickenBody", -1, 0.9, -1.3, 1, 2.9, 1.3, "px_white_wool", nil, parent)
+		lb(cf, "ChickenHead", -0.7, 2.4, -2.1, 0.7, 4.2, -0.9, "px_white_wool", nil, parent)
+		lc(cf, "ChickenBeak", 0.7, 0.4, 0.6, 0, 3.4, -2.35, C.beak, parent)
+		lc(cf, "ChickenComb", 0.4, 0.6, 0.8, 0, 4.5, -1.6, C.comb, parent)
+		lc(cf, "ChickenWattle", 0.4, 0.6, 0.3, 0, 2.8, -2.2, C.comb, parent)
+		for _, s in ipairs({ -0.5, 0.5 }) do
+			lc(cf, "ChickenLeg", 0.3, 0.9, 0.3, s, 0.45, 0, C.beak, parent)
+		end
+	end
+	local function sheep(x, z, yaw, parent)
+		local cf = fr(x, z, yaw)
+		lb(cf, "SheepBody", -1.8, 1.8, -2.6, 1.8, 5, 2.6, "px_white_wool", nil, parent)
+		lb(cf, "SheepHead", -1.1, 3.4, -4.2, 1.1, 5.6, -2.4, nil, C.face, parent)
+		lb(cf, "SheepWoolCap", -1.2, 5.2, -3.8, 1.2, 5.9, -2.4, "px_white_wool", nil, parent)
+		for _, sx in ipairs({ -1.1, 1.1 }) do
+			for _, sz in ipairs({ -1.8, 1.8 }) do
+				lc(cf, "SheepLeg", 0.9, 1.8, 0.9, sx, 0.9, sz, C.face, parent)
+			end
+		end
+	end
+	local function scarecrow(x, z, yaw, parent)
+		local f = folder("Scarecrow", parent)
+		local cf = fr(x, z, yaw)
+		lb(cf, "ScarecrowPost", -0.6, 0, -0.6, 0.6, 4.4, 0.6, "px_oak_log", nil, f)
+		lb(cf, "ScarecrowBody", -1.8, 4, -1.2, 1.8, 8.4, 1.2, "px_hay", nil, f)
+		lb(cf, "ScarecrowBelt", -1.9, 5.4, -1.3, 1.9, 6, 1.3, "px_brown_wool", nil, f)
+		lb(cf, "ScarecrowArms", -5.2, 6.8, -0.5, 5.2, 7.6, 0.5, "px_oak_log", nil, f)
+		for _, s in ipairs({ -1, 1 }) do
+			lb(cf, "Straw", s * 5.2 - 0.6, 6.3, -0.7, s * 5.2 + 0.6, 8.1, 0.7, "px_hay", nil, f)
+		end
+		lb(cf, "PumpkinHead", -1.7, 8.4, -1.7, 1.7, 11.8, 1.7, "px_hay", PUMPKIN, f)
+		-- the carved face: dark cut-outs on the front
+		for _, s in ipairs({ -0.75, 0.75 }) do
+			lc(cf, "CarvedEye", 0.8, 0.8, 0.2, s, 10.7, -1.75, C.carve, f)
+		end
+		lc(cf, "CarvedNose", 0.5, 0.4, 0.2, 0, 10, -1.75, C.carve, f)
+		lc(cf, "CarvedMouth", 2.3, 0.6, 0.2, 0, 9.3, -1.75, C.carve, f)
+		lb(cf, "StrawHatBrim", -2.4, 11.8, -2.4, 2.4, 12.2, 2.4, "px_hay", Color3.fromRGB(205, 175, 95), f)
+		lb(cf, "StrawHat", -1.3, 12.2, -1.3, 1.3, 13.6, 1.3, "px_hay", Color3.fromRGB(205, 175, 95), f)
+	end
+	local function bench(x, z, yaw, parent)
+		local cf = fr(x, z, yaw)
+		for _, s in ipairs({ -1, 1 }) do
+			lb(cf, "BenchLeg", s * 3.5 - 0.5, 0, -1.4, s * 3.5 + 0.5, 2, 1.4, "px_dark_oak_planks", nil, parent)
+		end
+		lb(cf, "BenchSeat", -4, 2, -1.4, 4, 2.7, 1.4, "px_spruce_planks", nil, parent)
+		lb(cf, "BenchBack", -4, 2.7, 1, 4, 5, 1.6, "px_spruce_planks", nil, parent)
+	end
+
+	-- ---------------------------------------------------------------- YARD_W1: the chicken coop and the sheep pen
+	do
+		local coop = folder("ChickenCoop", yards)
+		spot(-126, -50, 0, "coop")
+		local logs, planks, roof = "px_oak_log", "px_spruce_planks", "px_dark_oak_planks"
+		box("CoopWall", -134, 0, -56, -118, 8, -54, planks, nil, coop)
+		box("CoopWall", -134, 0, -54, -132, 8, -46, planks, nil, coop)
+		box("CoopWall", -120, 0, -54, -118, 8, -46, planks, nil, coop)
+		for _, x in ipairs({ -133, -119 }) do
+			box("CoopPost", x - 1, 0, -46, x + 1, 8, -44, logs, nil, coop)
+		end
+		box("CoopFrontLow", -132, 0, -46, -125, 2, -44, planks, nil, coop)
+		box("CoopLintel", -132, 7, -46, -120, 8, -44, planks, nil, coop)
+		for i = 0, 3 do
+			decor(cube("CoopBar", -131 + i * 1.7, 4.5, -45, 0.4, 5, 0.4, nil, C.iron, coop))
+		end
+		decor(cube("CoopBarRail", -128.5, 4.5, -45, 7, 0.4, 0.4, nil, C.iron, coop))
+		-- the hen door with a little plank ramp
+		local ramp = wedge("CoopRamp", Vector3.new(3.6, 2, 4), at(-122.5, 1, -42) * CFrame.Angles(0, math.pi, 0), nil, nil, coop)
+		textured(ramp, planks)
+		cube("CoopNest", -129, 1.5, -51, 3, 3, 3, "px_hay", nil, coop)
+		cube("CoopNest", -123, 1.5, -51, 3, 3, 3, "px_hay", nil, coop)
+		box("CoopRoof", -136, 8, -58, -116, 9.2, -42, roof, nil, coop)
+		box("CoopRoof", -134, 9.2, -55, -118, 10.4, -45, roof, nil, coop)
+		box("CoopRoofRidge", -132, 10.4, -52, -120, 11.6, -48, roof, nil, coop)
+		lantern(V(-126, 6.4, -42.6), coop, false, BY + 8)
+		-- the fenced run in front of the coop, the gate east toward the ring path
+		fence(-134, -44, -134, -22, coop, 0, "px_planks")
+		fence(-134, -22, -106, -22, coop, 0, "px_planks")
+		fence(-118, -44, -106, -44, coop, 0, "px_planks")
+		fence(-106, -44, -106, -36, coop, 0, "px_planks")
+		fence(-106, -28, -106, -22, coop, 0, "px_planks")
+		cube("Trough", -110, 0.8, -26, 4, 1.6, 2, planks, nil, coop)
+		decor(cube("Feed", -110, 1.65, -26, 3.4, 0.2, 1.4, "px_hay", nil, coop))
+		for _, c in ipairs({ { -128, -38, 0.4 }, { -122, -30, 2.1 }, { -116, -36, -1.2 }, { -126, -27, 3.0 }, { -112, -40, 1.5 }, { -118, -26, -2.4 } }) do
+			chicken(c[1], c[2], c[3], coop)
+		end
+
+		local pen = folder("SheepPen", yards)
+		spot(-120, -6, 0, "sheep pen")
+		fence(-134, -16, -106, -16, pen, 0, "px_planks")
+		fence(-134, -16, -134, 4, pen, 0, "px_planks")
+		fence(-134, 4, -106, 4, pen, 0, "px_planks")
+		fence(-106, -16, -106, -10, pen, 0, "px_planks")
+		fence(-106, -2, -106, 4, pen, 0, "px_planks")
+		cube("HayBale", -130, 2, -12, B, B, B, "px_hay", nil, pen)
+		cube("HayBale", -130, 2, -8, B, B, B, "px_hay", nil, pen)
+		cube("WaterTrough", -112, 1, 0, 6, 2, 2.4, planks, nil, pen)
+		local w = decor(cube("TroughWater", -112, 2.02, 0, 5.2, 0.1, 1.6, "px_water", nil, pen))
+		w.Transparency = 0.3
+		for _, s in ipairs({ { -125, -10, 0.6 }, { -118, -4, 2.4 }, { -126, 0, -1 }, { -114, -11, 1.7 }, { -120, -13, -2.6 } }) do
+			sheep(s[1], s[2], s[3], pen)
+		end
+		haystack(-112, -54, yards)
+		sack(-104, -48, yards)
+		sack(-104, -45, yards)
+	end
+	task.wait()
+
+	-- ---------------------------------------------------------------- YARD_W2: stall, beehive tree, shed, well
+	do
+		local yard = folder("WestYard", yards)
+		-- the yellow-white produce stall at the west path entrance, the counter toward the path (north)
+		spot(-120, 46, 0, "produce stall")
+		local cf = fr(-120, 46, 0)
+		stall(cf, {
+			w = 3 * B,
+			d = 2 * B,
+			colA = Color3.fromRGB(240, 200, 50),
+			colB = Color3.fromRGB(245, 240, 225),
+			goods = { "px_melon", "px_hay", "px_melon" },
+			sign = "Урожай",
+		}, yard)
+		for _, s in ipairs({ -1, 1 }) do
+			local p = (cf * CFrame.new(s * 6.6, 6, -4.6)).Position
+			lantern(p, yard, false, p.Y + 1.6)
+		end
+		crate(-109, 0, 44, yard)
+		cube("Pumpkin", -109, 6, 44, 3.6, 3.6, 3.6, "px_hay", PUMPKIN, yard)
+		cube("Pumpkin", -131, 1.8, 43, 3.6, 3.6, 3.6, "px_hay", PUMPKIN, yard)
+		cube("Melon", -131, 1.8, 47, 3.6, 3.6, 3.6, "px_melon", nil, yard)
+		sack(-110, 49, yard)
+
+		-- the beehive tree: an oak with three hives on the trunk under the crown
+		spot(-130, 72, 0, "beehive tree")
+		local bt = tree(-130, 72, 14, yard, "px_hedge", "px_oak_log")
+		for _, h in ipairs({ { 4, 0, -math.pi / 2 }, { -4, 0, math.pi / 2 }, { 0, 4, math.pi } }) do
+			local hcf = fr(-130 + h[1], 72 + h[2], h[3], 6.2)
+			lb(hcf, "Beehive", -1.9, -1.5, -1.9, 1.9, 1.5, 1.9, "px_hay", C.honey, bt)
+			lc(hcf, "HiveEntrance", 1.4, 0.5, 0.2, 0, -0.4, -1.95, C.carve, bt)
+		end
+
+		-- the tool shed (door west), barrels and a crate by it
+		spot(-110, 64, 0, "tool shed")
+		local shed = folder("ToolShed", yard)
+		local planks, logs, roof = "px_spruce_planks", "px_oak_log", "px_dark_oak_planks"
+		box("ShedWall", -118, 0, 58, -102, 8, 60, planks, nil, shed)
+		box("ShedWall", -118, 0, 68, -102, 8, 70, planks, nil, shed)
+		box("ShedWall", -104, 0, 60, -102, 8, 68, planks, nil, shed)
+		box("ShedWall", -118, 0, 60, -116, 8, 62, planks, nil, shed)
+		box("ShedWall", -118, 0, 66, -116, 8, 68, planks, nil, shed)
+		box("ShedLintel", -118, 6, 62, -116, 8, 66, planks, nil, shed)
+		for _, c in ipairs({ { -118, 58 }, { -104, 58 }, { -118, 68 }, { -104, 68 } }) do
+			box("ShedPost", c[1] - 0.1, 0, c[2] - 0.1, c[1] + 2.1, 8, c[2] + 2.1, logs, nil, shed)
+		end
+		decor(cube("ShedWindow", -110, 4.5, 70.05, 3, 2, 0.2, nil, Color3.fromRGB(40, 50, 64), shed))
+		box("ShedRoof", -120, 8, 56, -100, 9.2, 72, roof, nil, shed)
+		box("ShedRoof", -120, 9.2, 59, -100, 10.4, 69, roof, nil, shed)
+		box("ShedRoofRidge", -120, 10.4, 62, -100, 11.6, 66, roof, nil, shed)
+		cube("ShedBench", -106, 1.5, 64, 2, 3, 6, planks, nil, shed)
+		barrel(-121, 0, 59, shed)
+		barrel(-121, 0, 69, shed, "px_hay")
+		crate(-107, 0, 75, shed)
+
+		-- compost bins and a haystack
+		compost(-108, 84, yard)
+		compost(-104, 84, yard)
+		haystack(-104, 92, yard)
+		for i = 0, 5 do
+			flower(-136 + i * 3, 80 + (i % 2) * 2, C.flowers[i % #C.flowers + 1], yard)
+		end
+
+		-- the stone well with a roof
+		spot(-120, 102, 0, "well")
+		local well = folder("Well", yard)
+		local wx, wz = -120, 102
+		local stone = "px_cobblestone"
+		box("WellRim", wx - 6, 0, wz - 6, wx + 6, 4, wz - 2, stone, nil, well)
+		box("WellRim", wx - 6, 0, wz + 2, wx + 6, 4, wz + 6, stone, nil, well)
+		box("WellRim", wx - 6, 0, wz - 2, wx - 2, 4, wz + 2, stone, nil, well)
+		box("WellRim", wx + 2, 0, wz - 2, wx + 6, 4, wz + 2, stone, nil, well)
+		local water = decor(box("WellWater", wx - 2, 2.6, wz - 2, wx + 2, 2.8, wz + 2, "px_water", nil, well))
+		water.Transparency = 0.2
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, sz in ipairs({ -1, 1 }) do
+				box("WellPost", wx + sx * 5 - 0.6, 4, wz + sz * 5 - 0.6, wx + sx * 5 + 0.6, 11, wz + sz * 5 + 0.6, "px_dark_oak_planks", nil, well)
+			end
+		end
+		box("WellCrank", wx - 5, 9, wz - 0.3, wx + 5, 9.6, wz + 0.3, "px_oak_log", nil, well)
+		decor(cube("WellRope", wx, 7.9, wz, 0.25, 2.2, 0.25, nil, Color3.fromRGB(120, 100, 70), well))
+		cube("WellBucket", wx, 6.1, wz, 1.4, 1.4, 1.4, "px_spruce_planks", nil, well)
+		box("WellRoof", wx - 7, 11, wz - 7, wx + 7, 12.4, wz + 7, "px_cobblestone", nil, well)
+		box("WellRoof", wx - 5, 12.4, wz - 5, wx + 5, 13.8, wz + 5, "px_stone_bricks", nil, well)
+		box("WellRoof", wx - 3, 13.8, wz - 3, wx + 3, 15.2, wz + 3, "px_stone_bricks", nil, well)
+		box("WellRoofTop", wx - 1, 15.2, wz - 1, wx + 1, 16.4, wz + 1, "px_cobblestone", nil, well)
+		lantern(V(wx + 4, 9.2, wz + 4), well, false, BY + 11)
+		cube("Pumpkin", wx + 9, 1.8, wz - 3, 3.6, 3.6, 3.6, "px_hay", PUMPKIN, yard)
+		crate(wx + 9, 0, wz + 2, yard)
+	end
+	task.wait()
+
+	-- ---------------------------------------------------------------- YARD_S: the pumpkin cart and the farm clutter
+	do
+		local yard = folder("SouthYard", yards)
+		-- the pumpkin cart near the buyer (along z, the handles south)
+		spot(34, 136, 0, "pumpkin cart")
+		local cart = folder("PumpkinCart", yard)
+		local cf = fr(34, 136, math.pi / 2)
+		local wood, dark = "px_spruce_planks", "px_dark_oak_planks"
+		lb(cf, "CartBed", -5, 2.6, -3, 5, 3.4, 3, wood, nil, cart)
+		lb(cf, "CartSide", -5, 3.4, -3, 5, 4.8, -2.4, wood, nil, cart)
+		lb(cf, "CartSide", -5, 3.4, 2.4, 5, 4.8, 3, wood, nil, cart)
+		lb(cf, "CartEnd", -5, 3.4, -2.4, -4.4, 4.8, 2.4, wood, nil, cart)
+		lb(cf, "CartEnd", 4.4, 3.4, -2.4, 5, 4.8, 2.4, wood, nil, cart)
+		lc(cf, "CartAxle", 0.6, 0.6, 7.8, 1, 1.8, 0, C.iron, cart)
+		for _, s in ipairs({ -1, 1 }) do
+			lb(cf, "CartWheel", -0.8, 0, s * 3.6 - 0.4, 2.8, 3.6, s * 3.6 + 0.4, dark, nil, cart)
+			lc(cf, "CartHub", 1, 1, 1.0, 1, 1.8, s * 4.1, C.iron, cart)
+			lb(cf, "CartHandle", -9, 2.8, s * 2 - 0.3, -5, 3.4, s * 2 + 0.3, wood, nil, cart)
+		end
+		lb(cf, "CartLeg", -4.6, 0, -0.5, -3.8, 2.6, 0.5, dark, nil, cart)
+		lb(cf, "CartPumpkin", -4.2, 3.4, -2.2, 0, 7.6, 2.2, "px_hay", PUMPKIN, cart)
+		lb(cf, "CartMelon", 0.4, 3.4, -2, 4.2, 7.2, 1.8, "px_melon", nil, cart)
+		lb(cf, "CartPumpkin", -1, 7.6, -1.4, 1.8, 10.4, 1.4, "px_hay", PUMPKIN, cart)
+		sack(26, 130, yard)
+		sack(26, 133, yard)
+		sack(28.5, 131.5, yard)
+		crate(42, 0, 130, yard)
+		cube("Melon", 42, 6, 130, 3.6, 3.6, 3.6, "px_melon", nil, yard)
+		crate(44, 0, 142, yard, nil, 0.3)
+		haystack(38, 154, yard)
+		-- a wheelbarrow with dirt
+		do
+			local wcf = fr(28, 164, 0.5)
+			lb(wcf, "BarrowTub", -1.6, 1.6, -2.4, 1.6, 3.2, 2, wood, nil, yard)
+			decor(lb(wcf, "BarrowDirt", -1.2, 3.1, -2, 1.2, 3.35, 1.6, "px_dirt", FARMLAND, yard))
+			lb(wcf, "BarrowWheel", -0.4, 0, -3.6, 0.4, 2, -2, dark, nil, yard)
+			for _, s in ipairs({ -1, 1 }) do
+				lb(wcf, "BarrowHandle", s * 1.2 - 0.2, 2.6, 2, s * 1.2 + 0.2, 3, 5, wood, nil, yard)
+				lb(wcf, "BarrowLeg", s * 1.2 - 0.2, 0, 1.4, s * 1.2 + 0.2, 1.6, 1.8, wood, nil, yard)
+			end
+		end
+		tryTree(34, 182, 12, yard, true)
+		compost(44, 196, yard)
+		compost(40, 196, yard)
+		sack(24, 198, yard)
+		-- a flower strip along the south path (both sides)
+		for z = 130, 190, 5 do
+			if rng:NextNumber() < 0.75 then
+				flower(15, z + rng:NextInteger(-1, 1), pick(C.flowers), yard)
+			end
+			if rng:NextNumber() < 0.6 then
+				flower(-15, z + rng:NextInteger(-1, 1), pick(C.flowers), yard)
+			end
+		end
+		-- the scarecrows in the wheat of beds 1 and 3, facing south
+		scarecrow(-150, -46, math.pi, yard)
+		scarecrow(-110, 138, math.pi, yard)
+		-- the south viewpoint: benches at the end of the south path, looking out over the rim
+		spot(15, 207, 0, "bench")
+		bench(-15, 207, math.pi, yard)
+		bench(15, 207, math.pi, yard)
+		flower(-20, 206, C.flowers[1], yard)
+		flower(20, 206, C.flowers[2], yard)
+	end
+end
+task.wait()
+
+-- ================================================================ 4. borders: hedges, the south wall, trees, haystacks
+do
+	local edge = folder("Borders", fields)
+	local function okHedge(x, z)
+		return onIsland(x, z, 10) and not onPath(x, z, 2) and not inStairCorridor(x, z) and zoneOf(x, z) == "fields"
+	end
+	-- a hedge row: one box per run, some 2-block bumps on it
+	local function hedge(axis, a0, a1, c0, c1)
+		for _, s in ipairs(runs(axis, a0, a1, { c0 + 0.2, c1 - 0.2 }, okHedge)) do
+			if s[2] - s[1] >= 4 then
+				if axis == "x" then
+					box("Hedge", s[1], 0, c0, s[2], B, c1, "px_hedge", nil, edge)
+				else
+					box("Hedge", c0, 0, s[1], c1, B, s[2], "px_hedge", nil, edge)
+				end
+				local a = s[1] + 2
+				while a < s[2] - 2 do
+					if rng:NextNumber() < 0.3 then
+						scube("HedgeBump", axis, a, (c0 + c1) / 2, B * 1.5, B, B, c1 - c0, "px_hedge", nil, edge)
+					end
+					a += 8
+				end
+			end
+		end
+	end
+	hedge("z", -76, 204, -211, -208) -- the west rim
+	hedge("x", -208, -182, 116, 120) -- between the west fields and the south-west bed
+	hedge("x", -170, -156, 116, 120)
+	hedge("x", -144, -100, 116, 120)
+	hedge("x", -208, -100, -65, -62) -- under the hill
+	task.wait()
+
+	-- the low stone wall along the south rim, gaps at the viewpoint and the trees
+	local GAPS = { { -20, 20 }, { -176, -164 }, { -116, -104 }, { -62, -50 }, { 64, 76 } }
+	local function okWall(x, z)
+		if not okHedge(x, z) or not onIsland(x, z + 4, 10) then
+			return false
+		end
+		for _, g in ipairs(GAPS) do
+			if x > g[1] and x < g[2] then
+				return false
+			end
+		end
+		return true
+	end
+	for _, s in ipairs(runs("x", -208, 112, { 205 }, okWall)) do
+		if s[2] - s[1] >= 4 then
+			local v = if rng:NextNumber() < 0.5 then "px_cobblestone" else "px_mossy_cobblestone"
+			box("RimWall", s[1], 0, 205, s[2], 3, 208, v, nil, edge)
+		end
+	end
+	for _, x in ipairs({ -170, -110, -56, 70 }) do
+		tryTree(x, 207, 11, edge, x % 3 == 0)
+	end
+	-- trees between the fields and under the hill
+	tryTree(-176, 118, 12, edge, true)
+	tryTree(-150, 118, 11, edge, false)
+	tryTree(-124, -70, 12, edge, false)
+	tryTree(-200, -70, 11, edge, true)
+	tryTree(-52, -74, 11, edge, false)
+	tryTree(52, -74, 12, edge, true)
+	-- haystacks and bushes on the free strips
+	for _, h in ipairs({ { -36, -74 }, { 40, -75 } }) do
+		if freeGround(h[1], h[2], 2) and zoneOf(h[1], h[2]) == "fields" then
+			box("Haystack", h[1] - 4, 0, h[2] - 2, h[1] + 4, 4, h[2] + 2, "px_hay", nil, edge)
+		end
+	end
+	for _, b in ipairs({ { -96, 40 }, { -96, 8 }, { 96, 36 }, { 96, 12 }, { -96, -60 }, { -24, 120 } }) do
+		if freeGround(b[1], b[2], 0) and zoneOf(b[1], b[2]) == "fields" then
+			cube("Bush", b[1], 2, b[2], B, B, B, "px_hedge", nil, edge)
+		end
+	end
+end
+
+print(("[build-farm] fields: %d parts"):format(count - startCount))
+
+end
+task.wait()
+-- ================================================================================ farm/30-farmstead.luau
+do
+-- ================================================================ farm: the farmstead (L0 x ≥ 116, the hill L1 and the mound east of x -24)
+-- The red barn (BARN: x 152..200, z -36..4, walls 5 blocks, a dark stepped gable roof to y 44, a cupola with a
+-- weathervane) with its big doors open to the west toward the east path end (132, 24); inside: stalls with a cow and
+-- a horse, hay, a cart, a hay loft (x 184..196, y 12) with a ladder. The yard: a hay wagon, a fenced paddock
+-- (x 160..204, z 12..40) with cows, a horse and sheep, troughs, a water pump, hay stacks, barrels.
+-- The farmhouse (x 136..168, z 76..116, two storeys of cream clapboard, a dark roof to y 44, a porch facing west, a
+-- red-brick chimney) in its fenced plot FARMHOUSE (gate at x 120..132 on the north side, reached by a lane x 120..132
+-- from the east path): a vegetable garden, a washing line, flower boxes, a mailbox.
+-- The hill: a dirt track z -104..-96 from the grove's track (x 4) east to the silo spur (x 148..164); the path
+-- from the east stair top (x 80..104) to the MOUND STAIR, stretched to x 88..104, z -112 → -136 (12 one-stud steps,
+-- y 16 → 28); the windmill on the mound (96, -168): a tapered tower (cobblestone 6×6 → stone bricks 5×5 → planks 4×4,
+-- y 28..80) under a stepped dark cap to y 92, the door facing south, four white wool sails on a dark lattice (hub at
+-- (96, 76, -153), Model "MillSails" tagged AmbientSpin with its pivot's Y axis along +Z, so it turns round the axle);
+-- the red-brick silo at SILO (octagon 5 blocks across, y 16..64, a grey stepped dome to y 80) with a grain shed; an
+-- orchard of apple trees, beehives, a pond, haystacks, fences, wild flowers; vines off the cliffs by the barn; rim trees.
+local stead = folder("Farmstead")
+local partsBefore = count
+local TRIM = Color3.fromRGB(240, 236, 228)
+local CREAM = Color3.fromRGB(238, 226, 196)
+local GLASS = Color3.fromRGB(44, 54, 70)
+local IRON = Color3.fromRGB(150, 150, 156)
+local ROOF_TINT = Color3.fromRGB(125, 125, 135)
+local LEAF_TINT = Color3.fromRGB(150, 210, 120)
+local SACK = Color3.fromRGB(222, 206, 170)
+
+-- the ground height of the 8-stud island cell holding (x, z) (the island is built from cell centres)
+local function cellY(x, z)
+	return groundY(math.floor(x / 8) * 8 + 4, math.floor(z / 8) * 8 + 4)
+end
+-- true when the cells round (x, z) within r all lie at height y (keeps props off the cliff edges)
+local function flatAt(x, z, r, y)
+	for _, o in ipairs({ { 0, 0 }, { -r, -r }, { r, -r }, { -r, r }, { r, r }, { 0, -r }, { 0, r }, { -r, 0 }, { r, 0 } }) do
+		if cellY(x + o[1], z + o[2]) ~= y then
+			return false
+		end
+	end
+	return true
+end
+-- footprints (x0, z0, x1, z1) the loose props keep out of: buildings, pens, my paths
+local KEEP = {}
+local function keep(x0, z0, x1, z1)
+	table.insert(KEEP, { x0, z0, x1, z1 })
+end
+local function blocked(x, z, pad)
+	for _, r in ipairs(KEEP) do
+		if inRect(x, z, r, pad) then
+			return true
+		end
+	end
+	return false
+end
+-- the grove part's dirt track from the main stair top (0, 16, -82) via (-6, -102), (-20, -128) to x -24 at z ≈ -136
+-- (16 wide) and the main stair corridor stay free of my solid props (rects round the track's legs)
+keep(-18, -88, 18, -56)
+keep(-16, -106, 8, -80)
+keep(-28, -122, 2, -100)
+keep(-30, -142, -8, -120)
+-- a spot for a loose prop of radius r at height y: my zone, free ground, flat, not in a footprint
+local function spot(x, z, r, y)
+	return zoneOf(x, z) == "farmstead" and freeGround(x, z, r) and flatAt(x, z, r + 4, y) and not blocked(x, z, r)
+end
+-- a dirt path laid as thin plates on whatever level each cell has (equal cells along x merged)
+local function dirtRect(x0, z0, x1, z1, parent, tint)
+	keep(x0, z0, x1, z1)
+	local cz = math.floor(z0 / 8) * 8
+	while cz < z1 do
+		local za, zb = math.max(z0, cz), math.min(z1, cz + 8)
+		local cx = math.floor(x0 / 8) * 8
+		local runA, runY = nil, nil
+		while true do
+			local xe = math.min(x1, math.max(x0, cx))
+			local y = if cx < x1 then cellY(cx + 4, cz + 4) else nil
+			if y ~= runY then
+				if runA and xe > runA then
+					decor(box("Path", runA, runY, za, xe, runY + 0.12, zb, "px_dirt", tint or PATH_DIRT, parent))
+				end
+				runA, runY = xe, y
+			end
+			if cx >= x1 then
+				break
+			end
+			cx += 8
+		end
+		cz += 8
+	end
+end
+-- a flat decor plate on a building face: face N/S (plane = z, a = x) or W/E (plane = x, a = z), `out` studs proud
+local function fp(name, face, a0, y0, a1, y1, plane, out, variant, tint, parent)
+	if face == "N" then
+		return decor(box(name, a0, y0, plane - out, a1, y1, plane, variant, tint, parent))
+	elseif face == "S" then
+		return decor(box(name, a0, y0, plane, a1, y1, plane + out, variant, tint, parent))
+	elseif face == "W" then
+		return decor(box(name, plane - out, y0, a0, plane, y1, a1, variant, tint, parent))
+	end
+	return decor(box(name, plane, y0, a0, plane + out, y1, a1, variant, tint, parent))
+end
+-- a window: a frame, dark glass and a cross of glazing bars (a, yc = the centre on the face)
+local function window(face, a, yc, w, h, plane, parent, frameVariant, frameTint)
+	local fv, ft = frameVariant or "px_white_wool", frameTint or TRIM
+	fp("WindowFrame", face, a - w / 2 - 0.6, yc - h / 2 - 0.6, a + w / 2 + 0.6, yc + h / 2 + 0.6, plane, 0.25, fv, ft, parent)
+	fp("WindowGlass", face, a - w / 2, yc - h / 2, a + w / 2, yc + h / 2, plane, 0.35, nil, GLASS, parent)
+	fp("WindowBar", face, a - 0.3, yc - h / 2, a + 0.3, yc + h / 2, plane, 0.45, fv, ft, parent)
+	fp("WindowBar", face, a - w / 2, yc - 0.3, a + w / 2, yc + 0.3, plane, 0.45, fv, ft, parent)
+end
+local function hayBale(x, y, z, parent)
+	return cube("HayBale", x, y + 2, z, B, B, B, "px_hay", nil, parent)
+end
+-- a stepped haystack (3×3, 2×2, 1 block) standing on y
+local function haystack(x, z, y, parent)
+	local f = folder("Haystack", parent)
+	box("Haystack", x - 6, y, z - 6, x + 6, y + 4, z + 6, "px_hay", nil, f)
+	box("Haystack", x - 4, y + 4, z - 4, x + 4, y + 8, z + 4, "px_hay", nil, f)
+	box("Haystack", x - 2, y + 8, z - 2, x + 2, y + 12, z + 2, "px_hay", nil, f)
+end
+-- a flour/grain sack standing on cf (its bottom centre)
+local function sack(cf, parent)
+	local p = textured(part("Sack", Vector3.new(2.6, 3, 2.6), cf * CFrame.new(0, 1.5, 0), nil, nil, parent), "px_white_wool", SACK)
+	textured(decor(part("SackTie", Vector3.new(1, 0.6, 1), cf * CFrame.new(0, 3.3, 0), nil, nil, parent)), "px_brown_wool")
+	return p
+end
+-- a blocky farm animal looking along +Z of its yaw: "Cow", "Horse" or "Sheep"
+local function animal(kind, x, y, z, yaw, parent)
+	local f = folder(kind, parent)
+	local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+	local function blk(name, sx, sy, sz, ox, oy, oz, tint, solid)
+		local p = textured(part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(ox, oy, oz), nil, nil, f), "px_white_wool", tint)
+		if not solid then
+			decor(p)
+		end
+		return p
+	end
+	if kind == "Cow" then
+		local hide, pale = Color3.fromRGB(96, 64, 44), Color3.fromRGB(235, 230, 222)
+		blk("Body", 3.6, 3.2, 6, 0, 3.8, 0, hide, true)
+		blk("Patch", 3.7, 1.8, 2.2, 0, 4.1, -0.9, pale)
+		blk("Patch", 3.7, 1.4, 1.4, 0, 3.4, 1.6, pale)
+		for _, l in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+			blk("Leg", 1.2, 2.2, 1.2, l[1] * 1.1, 1.1, l[2] * 2.2, hide)
+		end
+		blk("Head", 2.6, 2.6, 2.2, 0, 5, 3.9, hide, true)
+		blk("Snout", 1.8, 1.2, 0.5, 0, 4.3, 5.2, Color3.fromRGB(222, 166, 152))
+		blk("Horn", 0.5, 0.8, 0.5, -1.4, 6.6, 3.9, pale)
+		blk("Horn", 0.5, 0.8, 0.5, 1.4, 6.6, 3.9, pale)
+	elseif kind == "Horse" then
+		local coat, mane = Color3.fromRGB(128, 84, 50), Color3.fromRGB(50, 36, 28)
+		blk("Body", 3, 3.2, 6.4, 0, 4.6, 0, coat, true)
+		for _, l in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+			blk("Leg", 1, 3, 1, l[1] * 0.9, 1.5, l[2] * 2.4, coat)
+		end
+		blk("Neck", 1.6, 3.4, 1.8, 0, 6.9, 3, coat, true)
+		blk("Head", 1.6, 1.6, 3, 0, 8.4, 4.4, coat, true)
+		blk("Mane", 0.5, 3.8, 1.2, 0, 7.4, 2.2, mane)
+		blk("Tail", 0.8, 3, 0.8, 0, 4.2, -3.5, mane)
+		blk("Saddle", 3.1, 0.6, 2.4, 0, 6.3, -0.2, Color3.fromRGB(90, 50, 30))
+	else
+		local wool, face = Color3.fromRGB(238, 236, 230), Color3.fromRGB(112, 102, 96)
+		blk("Body", 3.2, 3, 4.6, 0, 3, 0, wool, true)
+		for _, l in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+			blk("Leg", 0.9, 1.6, 0.9, l[1] * 0.9, 0.8, l[2] * 1.5, face)
+		end
+		blk("Head", 1.8, 1.8, 1.8, 0, 3.9, 2.8, face, true)
+		blk("WoolCap", 1.9, 0.7, 1.3, 0, 4.85, 2.6, wool)
+	end
+	return f
+end
+-- a hand cart with square wheels (block style) and a load: "hay", "sacks" or "pumpkins"
+local function cart(x, y, z, yaw, parent, load)
+	local f = folder("Cart", parent)
+	local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0)
+	textured(part("CartBed", Vector3.new(5, 0.8, 7), cf * CFrame.new(0, 2.8, 0), nil, nil, f), "px_spruce_planks")
+	for _, s in ipairs({ -1, 1 }) do
+		textured(part("CartSide", Vector3.new(0.6, 1.4, 7), cf * CFrame.new(s * 2.2, 3.9, 0), nil, nil, f), "px_spruce_planks")
+		textured(decor(part("CartWheel", Vector3.new(0.8, 3.2, 3.2), cf * CFrame.new(s * 2.9, 1.6, -0.8), nil, nil, f)), "px_dark_oak_planks")
+		textured(decor(part("CartHandle", Vector3.new(0.5, 0.5, 4), cf * CFrame.new(s * 1.8, 2.7, 5.4), nil, nil, f)), "px_dark_oak_planks")
+	end
+	decor(part("CartAxle", Vector3.new(5.4, 0.5, 0.5), cf * CFrame.new(0, 1.6, -0.8), Color3.fromRGB(60, 60, 64), Enum.Material.Metal, f))
+	if load == "hay" then
+		textured(part("CartHay", Vector3.new(4, 3, 6), cf * CFrame.new(0, 4.7, 0), nil, nil, f), "px_hay")
+	elseif load == "sacks" then
+		sack(cf * CFrame.new(-1.1, 3.2, -1.6), f)
+		sack(cf * CFrame.new(1.1, 3.2, -1.2), f)
+		sack(cf * CFrame.new(0, 3.2, 1.6), f)
+	elseif load == "pumpkins" then
+		for _, o in ipairs({ { -1.1, -1.7 }, { 1.1, -1.7 }, { 0, 1.5 } }) do
+			textured(part("Pumpkin", Vector3.new(2.6, 2.4, 2.6), cf * CFrame.new(o[1], 4.4, o[2]), nil, nil, f), "px_white_wool", PUMPKIN)
+		end
+	end
+	return f
+end
+-- a wild flower (a stem and a block head)
+local function flower(x, y, z, color, parent)
+	decor(part("FlowerStem", Vector3.new(0.4, 1.4, 0.4), at(x, y + 0.7, z), Color3.fromRGB(70, 130, 50), Enum.Material.SmoothPlastic, parent))
+	textured(decor(part("Flower", Vector3.new(1, 1, 1), at(x, y + 1.9, z), nil, nil, parent)), "px_white_wool", color)
+end
+local FLOWER_COLORS = {
+	Color3.fromRGB(250, 220, 60),
+	Color3.fromRGB(220, 50, 50),
+	Color3.fromRGB(110, 140, 240),
+	Color3.fromRGB(250, 250, 245),
+	Color3.fromRGB(240, 130, 200),
+}
+
+-- ================================================================ the red barn
+do
+	local f = folder("Barn", stead)
+	local X0, X1, Z0, Z1, H = 152, 200, -36, 4, 20
+	local CZ = (Z0 + Z1) / 2 -- -16
+	local RED = BARN_RED
+	keep(X0 - 10, Z0 - 6, X1 + 6, Z1 + 6)
+	-- the walls (one block thick), the west gable wall with the 4×4-block doorway
+	box("BarnWall", X0, 0, Z0, X1, H, Z0 + B, "px_planks", RED, f)
+	box("BarnWall", X0, 0, Z1 - B, X1, H, Z1, "px_planks", RED, f)
+	box("BarnWall", X1 - B, 0, Z0 + B, X1, H, Z1 - B, "px_planks", RED, f)
+	box("BarnWall", X0, 0, Z0 + B, X0 + B, H, CZ - 8, "px_planks", RED, f)
+	box("BarnWall", X0, 0, CZ + 8, X0 + B, H, Z1 - B, "px_planks", RED, f)
+	box("BarnLintel", X0, 16, CZ - 8, X0 + B, H, CZ + 8, "px_planks", RED, f)
+	decor(box("BarnFloor", X0 + B, 0, Z0 + B, X1 - B, 0.15, Z1 - B, "px_spruce_planks", nil, f))
+	-- the white trim: corner posts, an eave band, the doorway frame
+	for _, c in ipairs({ { X0, Z0 }, { X1 - B, Z0 }, { X0, Z1 - B }, { X1 - B, Z1 - B } }) do
+		decor(box("BarnTrim", c[1] - 0.35, 0, c[2] - 0.35, c[1] + B + 0.35, H, c[2] + B + 0.35, "px_white_wool", TRIM, f))
+	end
+	fp("BarnTrim", "N", X0, H - 1.2, X1, H, Z0, 0.25, "px_white_wool", TRIM, f)
+	fp("BarnTrim", "S", X0, H - 1.2, X1, H, Z1, 0.25, "px_white_wool", TRIM, f)
+	fp("BarnTrim", "E", Z0, H - 1.2, Z1, H, X1, 0.25, "px_white_wool", TRIM, f)
+	fp("BarnTrim", "W", Z0, H - 1.2, Z1, H, X0, 0.25, "px_white_wool", TRIM, f)
+	fp("DoorFrame", "W", CZ - 9.2, 0, CZ - 8, 17.2, X0, 0.3, "px_white_wool", TRIM, f)
+	fp("DoorFrame", "W", CZ + 8, 0, CZ + 9.2, 17.2, X0, 0.3, "px_white_wool", TRIM, f)
+	fp("DoorFrame", "W", CZ - 9.2, 16, CZ + 9.2, 17.2, X0, 0.3, "px_white_wool", TRIM, f)
+	-- the big double doors swung open (perpendicular to the wall), red with a white frame and the white X
+	for _, s in ipairs({ -1, 1 }) do
+		local p = CZ + s * 8.6
+		box("BarnDoor", X0 - 8, 0.4, p - 0.3, X0, 16, p + 0.3, "px_planks", RED, f)
+		decor(box("DoorTrim", X0 - 8, 15, p - 0.5, X0, 16, p + 0.5, "px_white_wool", TRIM, f))
+		decor(box("DoorTrim", X0 - 8, 0.4, p - 0.5, X0, 1.4, p + 0.5, "px_white_wool", TRIM, f))
+		decor(box("DoorTrim", X0 - 8, 0.4, p - 0.5, X0 - 7, 16, p + 0.5, "px_white_wool", TRIM, f))
+		decor(box("DoorTrim", X0 - 1, 0.4, p - 0.5, X0, 16, p + 0.5, "px_white_wool", TRIM, f))
+		for _, d in ipairs({ { X0 - 7, 1.4, X0 - 1, 15 }, { X0 - 7, 15, X0 - 1, 1.4 } }) do
+			local bar = decor(beam("DoorX", V(d[1], d[2], p), V(d[3], d[4], p), 0.9, TRIM, f))
+			textured(bar, "px_white_wool", TRIM)
+		end
+	end
+	-- windows on the long walls and the east gable
+	for _, x in ipairs({ 164, 176, 188 }) do
+		window("N", x, 10, 4, 4, Z0, f)
+		window("S", x, 10, 4, 4, Z1, f)
+	end
+	window("E", CZ, 10, 4, 4, X1, f)
+	-- the dark stepped gable roof: per layer red gable infill and two dark skins overhanging one block
+	for i = 0, 5 do
+		local y0, hw = H + 4 * i, 24 - 4 * i
+		local w = hw - 4
+		if w > 0 then
+			box("BarnGable", X0, y0, CZ - w, X1, y0 + 4, CZ + w, "px_planks", RED, f)
+			box("BarnRoof", X0 - 4, y0, CZ - hw, X1 + 4, y0 + 4, CZ - w, "px_dark_oak_planks", nil, f)
+			box("BarnRoof", X0 - 4, y0, CZ + w, X1 + 4, y0 + 4, CZ + hw, "px_dark_oak_planks", nil, f)
+			if i >= 1 then
+				for _, g in ipairs({ { "W", X0 }, { "E", X1 } }) do
+					fp("GableTrim", g[1], CZ - w, y0, CZ - w + 1, y0 + 4, g[2], 0.3, "px_white_wool", TRIM, f)
+					fp("GableTrim", g[1], CZ + w - 1, y0, CZ + w, y0 + 4, g[2], 0.3, "px_white_wool", TRIM, f)
+				end
+			end
+		else
+			box("BarnRidge", X0 - 4, y0, CZ - hw, X1 + 4, y0 + 4, CZ + hw, "px_dark_oak_planks", nil, f)
+		end
+	end
+	-- the hay loft door in the west gable and the hay hook over it
+	fp("LoftDoor", "W", CZ - 4.6, 21.4, CZ + 4.6, 30.6, X0, 0.25, "px_white_wool", TRIM, f)
+	fp("LoftDoor", "W", CZ - 4, 22, CZ + 4, 30, X0, 0.35, nil, Color3.fromRGB(34, 24, 18), f)
+	textured(box("HayHook", X0 - 6, 32.4, CZ - 0.6, X0, 33.6, CZ + 0.6, nil, nil, f), "px_dark_oak_planks")
+	decor(part("HookRope", Vector3.new(0.3, 4, 0.3), at(X0 - 5.4, 30.4, CZ), Color3.fromRGB(120, 100, 70), Enum.Material.Fabric, f))
+	decor(part("Hook", Vector3.new(1, 1, 0.4), at(X0 - 5.4, 28, CZ), Color3.fromRGB(60, 60, 64), Enum.Material.Metal, f))
+	textured(decor(part("HookBale", Vector3.new(3, 3, 3), at(X0 - 5.4, 25.8, CZ), nil, nil, f)), "px_hay")
+	-- the cupola on the ridge with a weathervane
+	do
+		local cx = (X0 + X1) / 2
+		box("Cupola", cx - 4, 44, CZ - 4, cx + 4, 51, CZ + 4, "px_white_wool", TRIM, f)
+		for _, face in ipairs({ { "N", CZ - 4 }, { "S", CZ + 4 } }) do
+			fp("Louvre", face[1], cx - 2.4, 45.6, cx + 2.4, 49.6, face[2], 0.25, nil, Color3.fromRGB(40, 30, 24), f)
+		end
+		for _, face in ipairs({ { "W", cx - 4 }, { "E", cx + 4 } }) do
+			fp("Louvre", face[1], CZ - 2.4, 45.6, CZ + 2.4, 49.6, face[2], 0.25, nil, Color3.fromRGB(40, 30, 24), f)
+		end
+		box("CupolaRoof", cx - 6, 51, CZ - 6, cx + 6, 53, CZ + 6, "px_dark_oak_planks", nil, f)
+		box("CupolaRoof", cx - 4, 53, CZ - 4, cx + 4, 55, CZ + 4, "px_dark_oak_planks", nil, f)
+		box("CupolaRoof", cx - 2, 55, CZ - 2, cx + 2, 57, CZ + 2, "px_dark_oak_planks", nil, f)
+		local metal, dark = Color3.fromRGB(60, 60, 66), Color3.fromRGB(30, 30, 34)
+		decor(part("VanePole", Vector3.new(0.5, 9, 0.5), at(cx, 61.5, CZ), metal, Enum.Material.Metal, f))
+		decor(part("VaneArm", Vector3.new(8, 0.5, 0.5), at(cx, 63.6, CZ), metal, Enum.Material.Metal, f))
+		decor(part("VaneArm", Vector3.new(0.5, 0.5, 4), at(cx, 62.4, CZ), metal, Enum.Material.Metal, f))
+		decor(part("VaneTip", Vector3.new(1.4, 1.4, 0.4), at(cx - 4.4, 63.6, CZ), metal, Enum.Material.Metal, f))
+		decor(part("VaneFin", Vector3.new(1.6, 2, 0.3), at(cx + 4, 63.8, CZ), metal, Enum.Material.Metal, f))
+		decor(part("Rooster", Vector3.new(2.6, 2.2, 0.4), at(cx, 66.2, CZ), dark, Enum.Material.Metal, f))
+		decor(part("RoosterTail", Vector3.new(1, 1.6, 0.4), at(cx + 1.6, 67, CZ), dark, Enum.Material.Metal, f))
+		decor(part("RoosterComb", Vector3.new(0.8, 0.8, 0.45), at(cx - 1, 67.6, CZ), Color3.fromRGB(180, 40, 30), Enum.Material.SmoothPlastic, f))
+	end
+	-- a lantern by the doorway
+	decor(box("LampBracket", X0 - 2, 15, CZ - 11.4, X0, 15.6, CZ - 10.8, "px_dark_oak_planks", nil, f))
+	lantern(V(X0 - 1.6, 13.4, CZ - 11.1), f, false, BY + 15)
+	task.wait()
+
+	-- inside: stalls along both long walls, the loft at the east end, hay, a cart, lanterns
+	local inside = folder("BarnInside", f)
+	for _, x in ipairs({ 160, 168, 176, 184 }) do
+		box("StallWall", x - 0.5, 0, Z0 + B, x + 0.5, 6, Z0 + 12, "px_spruce_planks", nil, inside)
+		box("StallWall", x - 0.5, 0, Z1 - 12, x + 0.5, 6, Z1 - B, "px_spruce_planks", nil, inside)
+	end
+	for _, x in ipairs({ 164, 172, 180 }) do
+		decor(box("StallHay", x - 3.5, 0.15, Z0 + B, x + 3.5, 0.4, Z0 + 12, "px_hay", nil, inside))
+		decor(box("StallHay", x - 3.5, 0.15, Z1 - 12, x + 3.5, 0.4, Z1 - B, "px_hay", nil, inside))
+	end
+	animal("Cow", 164, 0.15, Z0 + 8, 0, inside)
+	animal("Horse", 172, 0.15, Z1 - 8, math.pi, inside)
+	hayBale(180, 0.15, Z0 + 6, inside)
+	hayBale(180, 0.15, Z0 + 10, inside)
+	hayBale(180, 4.15, Z0 + 6, inside)
+	textured(box("Trough", 162, 0.15, Z1 - 6, 166, 2, Z1 - B, "px_spruce_planks", nil, inside), "px_spruce_planks")
+	barrel(180, 0.15, Z1 - 7, inside)
+	crate(158, 0.15, Z0 + 7, inside)
+	barrel(158, 0.15, Z1 - 7, inside, "px_hay")
+	-- the hay loft over the east end, two posts, a ladder up its west edge (a climbable truss behind the picture)
+	box("LoftFloor", 184, 11, Z0 + B, X1 - B, 12, Z1 - B, "px_spruce_planks", nil, inside)
+	for _, z in ipairs({ CZ - 8, CZ + 8 }) do
+		box("LoftPost", 184.2, 0, z - 0.6, 185.4, 11, z + 0.6, "px_dark_oak_planks", nil, inside)
+	end
+	for _, b in ipairs({ { 188, Z0 + 6 }, { 192, Z0 + 6 }, { 188, Z0 + 10 }, { 192, Z1 - 6 }, { 192, Z1 - 10 } }) do
+		hayBale(b[1], 12, b[2], inside)
+	end
+	hayBale(192, 16, Z0 + 6, inside)
+	do
+		local truss = Instance.new("TrussPart")
+		truss.Name = "LoftLadder"
+		truss.Size = Vector3.new(2, 12, 2)
+		truss.CFrame = at(183, 6, CZ)
+		truss.Anchored = true
+		truss.Transparency = 1
+		truss.Parent = inside
+		local plate = decor(part("LoftLadderFace", Vector3.new(0.2, 12, 4), at(181.9, 6, CZ), nil, nil, inside))
+		plate.Transparency = 1
+		if TEX.ladder then
+			local tex = Instance.new("Texture")
+			tex.Texture = TEX.ladder
+			tex.Face = Enum.NormalId.Left
+			tex.StudsPerTileU, tex.StudsPerTileV = B, B
+			tex.Parent = plate
+		end
+	end
+	cart(190, 0.15, CZ, math.pi / 2, inside, "hay")
+	-- a second ladder leaning on the north wall (picture only)
+	textured(decor(part("LeaningLadder", Vector3.new(3, 10, 0.4), at(170, 5, Z0 + B + 0.8) * CFrame.Angles(-0.12, 0, 0), nil, nil, inside)), "px_spruce_planks")
+	lantern(V(166, 15.5, CZ), inside, false, BY + H)
+	lantern(V(178, 15.5, CZ), inside, false, BY + H)
+end
+task.wait()
+
+-- ================================================================ the barn yard: wagon, paddock with animals, troughs, pump, hay, barrels
+do
+	local f = folder("BarnYard", stead)
+	-- the apron from the east path end to the barn doors
+	dirtRect(132, -24, 148, 32, f)
+	-- the hay wagon (along x) in the north-west corner of the yard
+	do
+		local w = folder("HayWagon", f)
+		box("WagonBed", 134, 3, -44, 150, 4, -36, "px_spruce_planks", nil, w)
+		box("WagonSide", 134, 4, -44, 150, 5.4, -43.4, "px_spruce_planks", nil, w)
+		box("WagonSide", 134, 4, -36.6, 150, 5.4, -36, "px_spruce_planks", nil, w)
+		for _, x in ipairs({ 137, 147 }) do
+			for _, z in ipairs({ -44.6, -35.4 }) do
+				decor(box("WagonWheel", x - 1.8, 0, z - 0.5, x + 1.8, 3.6, z + 0.5, "px_dark_oak_planks", nil, w))
+			end
+			decor(part("WagonAxle", Vector3.new(0.6, 0.6, 9.6), at(x, 1.8, -40), Color3.fromRGB(60, 60, 64), Enum.Material.Metal, w))
+		end
+		for _, z in ipairs({ -42, -38 }) do
+			textured(decor(beam("WagonShaft", V(134, 3, z), V(127, 2, z), 0.6, nil, w)), "px_dark_oak_planks")
+		end
+		for _, b in ipairs({ { 137, -42 }, { 137, -38 }, { 141, -42 }, { 141, -38 }, { 145, -40 } }) do
+			hayBale(b[1], 4, b[2], w)
+		end
+		hayBale(139, 8, -40, w)
+	end
+	-- the paddock south of the barn: fence with a gate gap on the west, animals, a trough, hay
+	do
+		local p = folder("Paddock", f)
+		keep(158, 10, 206, 42)
+		fence(160, 12, 204, 12, p)
+		fence(204, 12, 204, 40, p)
+		fence(160, 40, 204, 40, p)
+		fence(160, 12, 160, 22, p)
+		fence(160, 30, 160, 40, p)
+		animal("Cow", 176, 0, 26, math.pi * 0.6, p)
+		animal("Cow", 190, 0, 32, -math.pi * 0.3, p)
+		animal("Horse", 184, 0, 20, math.pi / 2, p)
+		animal("Sheep", 170, 0, 34, math.pi, p)
+		animal("Sheep", 196, 0, 22, -math.pi / 2, p)
+		box("Trough", 168, 0, 14, 180, 2.4, 17.2, "px_spruce_planks", nil, p)
+		decor(box("TroughWater", 168.5, 2.4, 14.5, 179.5, 2.5, 16.7, "px_water", nil, p))
+		hayBale(200, 0, 36, p)
+		hayBale(196, 0, 36, p)
+		hayBale(200, 4, 36, p)
+		decor(box("PaddockHay", 194, 0, 14, 202, 0.2, 20, "px_hay", nil, p))
+	end
+	-- the water pump and a trough at the yard's south edge, barrels and crates
+	do
+		local metal = Color3.fromRGB(70, 74, 80)
+		box("PumpBase", 142, 0, 34, 146, 1, 38, "px_cobblestone", nil, f)
+		part("Pump", Vector3.new(1.6, 5, 1.6), at(144, 3.5, 36), metal, Enum.Material.Metal, f)
+		decor(part("PumpSpout", Vector3.new(0.6, 0.6, 2), at(144, 4.6, 37.6), metal, Enum.Material.Metal, f))
+		decor(part("PumpHandle", Vector3.new(0.4, 0.4, 3.2), at(144, 6.2, 34.2) * CFrame.Angles(0.5, 0, 0), metal, Enum.Material.Metal, f))
+		box("Trough", 140, 0, 38.2, 152, 2.4, 41.4, "px_spruce_planks", nil, f)
+		decor(box("TroughWater", 140.5, 2.4, 38.7, 151.5, 2.5, 40.9, "px_water", nil, f))
+		barrel(136, 0, 36, f)
+		barrel(136, 0, 40, f, "px_hay")
+		for _, x in ipairs({ 160, 164, 172 }) do
+			barrel(x, 0, -42, f)
+		end
+		crate(168, 0, -42, f)
+		crate(168, 4, -42, f, 3)
+		-- hay stacks: by the north-east corner and against the east wall
+		for _, b in ipairs({ { 192, -44, 0 }, { 196, -44, 0 }, { 200, -44, 0 }, { 194, -44, 4 }, { 198, -44, 4 }, { 196, -44, 8 } }) do
+			hayBale(b[1], b[3], b[2], f)
+		end
+		hayBale(204, 0, -24, f)
+		hayBale(204, 0, -20, f)
+		hayBale(204, 4, -22, f)
+		zoneSign(130, 12, "Амбар", math.pi / 2, f)
+	end
+end
+task.wait()
+
+-- ================================================================ the farmhouse in its fenced plot
+do
+	local f = folder("Farmhouse", stead)
+	local X0, X1, Z0, Z1 = 136, 168, 76, 116
+	local CX = (X0 + X1) / 2 -- 152
+	local DARK = "px_dark_oak_planks"
+	keep(FARMHOUSE[1] - 2, FARMHOUSE[2] - 2, FARMHOUSE[3] + 2, FARMHOUSE[4] + 2)
+	-- the lane from the east path to the gate, the path inside to the porch
+	dirtRect(120, 32, 132, 64, f)
+	dirtRect(120, 64, 128, 100, f)
+	-- the house: a cream clapboard block of two storeys on a cobblestone footing, dark corner posts and floor band
+	box("HouseWalls", X0, 0, Z0, X1, 24, Z1, "px_white_wool", CREAM, f)
+	box("HouseFooting", X0 - 0.4, 0, Z0 - 0.4, X1 + 0.4, 1.6, Z1 + 0.4, "px_cobblestone", nil, f)
+	decor(box("FloorBand", X0 - 0.3, 11.4, Z0 - 0.3, X1 + 0.3, 12.6, Z1 + 0.3, DARK, nil, f))
+	for _, c in ipairs({ { X0, Z0 }, { X1, Z0 }, { X0, Z1 }, { X1, Z1 } }) do
+		decor(box("HousePost", c[1] - 0.6, 1.6, c[2] - 0.6, c[1] + 0.6, 24, c[2] + 0.6, DARK, nil, f))
+	end
+	-- the roof: ridge north-south, stepped dark tiles overhanging one block, cream gables north and south
+	for i = 0, 4 do
+		local y0, hw = 24 + 4 * i, 20 - 4 * i
+		local w = hw - 4
+		if w > 0 then
+			box("HouseGable", CX - w, y0, Z0, CX + w, y0 + 4, Z1, "px_white_wool", CREAM, f)
+			box("HouseRoof", CX - hw, y0, Z0 - 4, CX - w, y0 + 4, Z1 + 4, "px_roof_tiles", ROOF_TINT, f)
+			box("HouseRoof", CX + w, y0, Z0 - 4, CX + hw, y0 + 4, Z1 + 4, "px_roof_tiles", ROOF_TINT, f)
+		else
+			box("HouseRidge", CX - hw, y0, Z0 - 4, CX + hw, y0 + 4, Z1 + 4, "px_roof_tiles", ROOF_TINT, f)
+		end
+	end
+	-- windows (dark frames), the door, flower boxes
+	for _, z in ipairs({ 84, 108 }) do
+		window("W", z, 6, 4, 4, X0, f, DARK)
+	end
+	for _, z in ipairs({ 84, 96, 108 }) do
+		window("W", z, 18, 4, 4, X0, f, DARK)
+	end
+	for _, y in ipairs({ 6, 18 }) do
+		window("N", 144, y, 4, 4, Z0, f, DARK)
+		window("N", 160, y, 4, 4, Z0, f, DARK)
+		window("S", 144, y, 4, 4, Z1, f, DARK)
+		window("E", 88, y, 4, 4, X1, f, DARK)
+		window("E", 104, y, 4, 4, X1, f, DARK)
+	end
+	window("N", CX, 30, 3, 3, Z0, f, DARK)
+	window("S", CX - 6, 30, 3, 3, Z1, f, DARK)
+	fp("DoorFrame", "W", 93.4, 1, 98.6, 9.8, X0, 0.25, DARK, nil, f)
+	fp("Door", "W", 94, 1, 98, 9.2, X0, 0.4, "px_spruce_planks", nil, f)
+	fp("DoorKnob", "W", 94.6, 4.6, 95.2, 5.2, X0, 0.6, nil, Color3.fromRGB(200, 170, 60), f)
+	for _, b in ipairs({ { 84, 2.4 }, { 108, 2.4 }, { 84, 14.4 }, { 96, 14.4 }, { 108, 14.4 } }) do
+		local z, y = b[1], b[2]
+		fp("FlowerBox", "W", z - 2.6, y, z + 2.6, y + 1.4, X0, 1.4, "px_spruce_planks", nil, f)
+		for k = -1, 1 do
+			textured(decor(part("BoxFlower", Vector3.new(1, 1, 1), at(X0 - 0.7, y + 1.9, z + k * 1.6), nil, nil, f)), "px_white_wool", FLOWER_COLORS[(k + 2 + math.floor(z / 12)) % #FLOWER_COLORS + 1])
+		end
+	end
+	-- the porch facing west: a plank deck, posts, a railing with a gap at the steps, a stepped roof, a lantern
+	box("PorchDeck", 128, 0, 80, X0, 1, 112, "px_spruce_planks", nil, f)
+	box("PorchStep", 126, 0, 92, 128, 0.5, 100, "px_spruce_planks", nil, f)
+	for _, z in ipairs({ 80.6, 92, 100, 111.4 }) do
+		box("PorchPost", 128, 1, z - 0.6, 129.2, 12, z + 0.6, DARK, nil, f)
+	end
+	fence(128.6, 81, 128.6, 92, f, 1, DARK)
+	fence(128.6, 100, 128.6, 111, f, 1, DARK)
+	box("PorchRoof", 126, 12, 78, 132, 13, 114, "px_roof_tiles", ROOF_TINT, f)
+	box("PorchRoof", 132, 12, 78, X0, 14, 114, "px_roof_tiles", ROOF_TINT, f)
+	box("PorchBench", 131, 1, 102, 133.4, 3, 109, "px_spruce_planks", nil, f)
+	box("PorchBench", 133.4, 1, 102, 134.4, 5.4, 109, "px_spruce_planks", nil, f)
+	lantern(V(130.4, 9.6, 96), f, false, BY + 12)
+	-- the red-brick chimney on the south gable with a little smoke
+	box("Chimney", 156, 0, Z1, 164, 36, Z1 + 4, "px_red_brick", nil, f)
+	box("Chimney", 157, 36, Z1 + 0.4, 163, 48, Z1 + 3.6, "px_red_brick", nil, f)
+	box("ChimneyCap", 156.4, 48, Z1, 163.6, 49.4, Z1 + 4, "px_stone_bricks", nil, f)
+	do
+		local smoke = decor(part("Smoke", Vector3.new(3, 0.5, 2), at(160, 49.8, Z1 + 2), nil, nil, f))
+		smoke.Transparency = 1
+		emitter(smoke, {
+			Texture = "rbxasset://textures/particles/smoke_main.dds",
+			Color = ColorSequence.new(Color3.fromRGB(200, 200, 200)),
+			Size = NumberSequence.new(1.5, 4),
+			Transparency = NumberSequence.new(0.45, 1),
+			Lifetime = NumberRange.new(4, 6),
+			Rate = 2,
+			Speed = NumberRange.new(1.5, 2.5),
+			SpreadAngle = Vector2.new(10, 10),
+			EmissionDirection = Enum.NormalId.Top,
+		})
+	end
+	-- a woodpile against the north wall
+	box("Woodpile", 147.4, 0, Z0 - 3.4, 156.6, 4, Z0 - 0.4, "px_oak_log", nil, f)
+	box("Woodpile", 149, 4, Z0 - 3.4, 155, 6, Z0 - 0.4, "px_oak_log", nil, f)
+	task.wait()
+
+	-- the vegetable garden east of the house: three beds in a low fence
+	do
+		local g = folder("Garden", f)
+		fence(174, 74, 194, 74, g)
+		fence(194, 74, 194, 126, g)
+		fence(174, 126, 194, 126, g)
+		fence(174, 74, 174, 96, g)
+		fence(174, 104, 174, 126, g)
+		for r, x in ipairs({ 178, 184, 190 }) do
+			decor(box("GardenBed", x - 2, 0, 78, x + 2, 0.2, 122, "px_dirt", FARMLAND, g))
+			for z = 80, 120, 4 do
+				if r == 1 then
+					textured(decor(part("Cabbage", Vector3.new(2.4, 2, 2.4), at(x, 1.2, z), nil, nil, g)), "px_hedge", LEAF_TINT)
+				elseif r == 2 then
+					textured(decor(part("CarrotTops", Vector3.new(1.6, 1.4, 1.6), at(x, 0.9, z), nil, nil, g)), "px_hedge")
+					textured(decor(part("Carrot", Vector3.new(1, 0.4, 1), at(x, 0.35, z), nil, nil, g)), "px_white_wool", PUMPKIN)
+				elseif z % 8 == 0 then
+					textured(part("Pumpkin", Vector3.new(3, 2.6, 3), at(x, 1.5, z), nil, nil, g), "px_white_wool", PUMPKIN)
+				else
+					textured(decor(part("PumpkinLeaves", Vector3.new(2.6, 0.8, 2.6), at(x, 0.6, z), nil, nil, g)), "px_hedge")
+				end
+			end
+		end
+	end
+	-- the washing line south of the house
+	do
+		local w = folder("WashingLine", f)
+		for _, x in ipairs({ 140, 168 }) do
+			box("LinePost", x - 0.5, 0, 124.5, x + 0.5, 9, 125.5, DARK, nil, w)
+			box("LineBar", x - 0.5, 8.4, 123, x + 0.5, 9, 127, DARK, nil, w)
+		end
+		decor(beam("Line", V(140, 8.6, 125), V(168, 8.6, 125), 0.15, Color3.fromRGB(230, 230, 230), w, Enum.Material.Fabric))
+		local clothes = {
+			Color3.fromRGB(250, 250, 245),
+			Color3.fromRGB(90, 130, 200),
+			Color3.fromRGB(200, 60, 50),
+			Color3.fromRGB(240, 210, 80),
+			Color3.fromRGB(250, 250, 245),
+		}
+		for i, c in ipairs(clothes) do
+			local h = if i % 2 == 0 then 3.6 else 2.6
+			textured(decor(part("Laundry", Vector3.new(3, h, 0.2), at(140 + i * 4.7, 8.5 - h / 2, 125), nil, nil, w)), "px_white_wool", c)
+		end
+	end
+	-- the plot fence with the gate arch at x 120..132 on the north side, the mailbox by it
+	do
+		local p = folder("PlotFence", f)
+		fence(132, 64, 196, 64, p)
+		fence(196, 64, 196, 132, p)
+		fence(120, 132, 196, 132, p)
+		fence(120, 64, 120, 132, p)
+		for _, x in ipairs({ 120, 132 }) do
+			box("GatePost", x - 0.8, 0, 63.2, x + 0.8, 9, 64.8, "px_oak_log", nil, p)
+		end
+		box("GateBeam", 119, 9, 63.4, 133, 10.2, 64.6, DARK, nil, p)
+		local board = textured(part("GateSign", Vector3.new(8, 2, 0.4), at(126, 7.6, 64), nil, nil, p), "px_spruce_planks")
+		boardText(board, "Усадьба")
+		decor(part("SignChain", Vector3.new(0.2, 0.6, 0.2), at(123, 8.8, 64), Color3.fromRGB(60, 60, 64), Enum.Material.Metal, p))
+		decor(part("SignChain", Vector3.new(0.2, 0.6, 0.2), at(129, 8.8, 64), Color3.fromRGB(60, 60, 64), Enum.Material.Metal, p))
+		box("MailPost", 134.6, 0, 59.6, 135.4, 3.6, 60.4, DARK, nil, p)
+		part("Mailbox", Vector3.new(1.6, 1.4, 2.6), at(135, 4.3, 60), Color3.fromRGB(60, 90, 140), Enum.Material.Metal, p)
+		decor(part("MailFlag", Vector3.new(0.2, 1, 0.6), at(135.9, 5, 60.6), Color3.fromRGB(200, 40, 30), Enum.Material.SmoothPlastic, p))
+	end
+end
+task.wait()
+
+-- ================================================================ the hill: the track, the east-stair path, the mound stair
+do
+	local f = folder("HillPaths", stead)
+	dirtRect(4, -104, 168, -96, f) -- the track east along the hill (joins the grove's track from the main stair top)
+	dirtRect(80, -96, 104, -88, f) -- from the east stair top
+	dirtRect(88, -112, 104, -104, f) -- to the mound stair
+	dirtRect(148, -136, 164, -104, f) -- the silo spur
+	dirtRect(92, -156, 100, -136, f) -- on the mound, to the windmill door
+	-- the mound stair, stretched south to z -112 so the 12-stud rise is 12 one-stud steps (2-stud treads)
+	local S = STAIRS.mound
+	local zBot, zTop = -112, -136
+	keep(S.x0 - 10, zTop, S.x1 + 10, zBot + 2)
+	stairs("MoundStair", (S.x0 + S.x1) / 2, zBot, zTop, L1_Y, MOUND_Y - L1_Y, S.x1 - S.x0, "px_stone_bricks", f)
+	for k = 0, 11 do
+		local top = L1_Y + k + 1
+		local za, zb = zBot - 2 * k, zBot - 2 * (k + 1)
+		if top - B > L1_Y then
+			box("StairFill", S.x0, L1_Y, zb, S.x1, top - B, za, "px_stone_bricks", nil, f)
+		end
+		box("StairCheek", S.x0 - 2, L1_Y, zb, S.x0, top + 2, za, "px_cobblestone", nil, f)
+		box("StairCheek", S.x1, L1_Y, zb, S.x1 + 2, top + 2, za, "px_cobblestone", nil, f)
+	end
+	-- lamp posts along the track (north side, the lantern over the track)
+	for _, x in ipairs({ 36, 120 }) do
+		lampPost(x, -106.5, f, false, math.pi, L1_Y)
+	end
+	lampPost(108, -130, f, false, math.pi / 2, L1_Y)
+end
+task.wait()
+
+-- ================================================================ the windmill on the mound (hero)
+do
+	local f = folder("Windmill", stead)
+	local MX, MZ, Y = MOUND.x, MOUND.z, MOUND_Y
+	local DARK = "px_dark_oak_planks"
+	keep(MX - 18, MZ - 18, MX + 18, MZ + 24)
+	-- the tapered tower: cobblestone 6×6 (4 blocks), stone bricks 5×5 (4), planks 4×4 (5), a stepped dark cap
+	box("MillPlinth", MX - 13, Y, MZ - 13, MX + 13, Y + 1.2, MZ + 13, "px_mossy_cobblestone", nil, f)
+	box("MillBase", MX - 12, Y, MZ - 12, MX + 12, Y + 16, MZ + 12, "px_cobblestone", nil, f)
+	box("MillMid", MX - 10, Y + 16, MZ - 10, MX + 10, Y + 32, MZ + 10, "px_stone_bricks", nil, f)
+	decor(box("MillBand", MX - 10.4, Y + 31.6, MZ - 10.4, MX + 10.4, Y + 32.6, MZ + 10.4, DARK, nil, f))
+	box("MillTop", MX - 8, Y + 32, MZ - 8, MX + 8, Y + 52, MZ + 8, "px_planks", nil, f)
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+		decor(box("MillFrame", MX + c[1] * 8 - 0.6, Y + 32, MZ + c[2] * 8 - 0.6, MX + c[1] * 8 + 0.6, Y + 52, MZ + c[2] * 8 + 0.6, DARK, nil, f))
+	end
+	decor(box("MillBand", MX - 8.4, Y + 41.6, MZ - 8.4, MX + 8.4, Y + 42.4, MZ + 8.4, DARK, nil, f))
+	box("MillCap", MX - 10, Y + 52, MZ - 10, MX + 10, Y + 56, MZ + 10, DARK, nil, f)
+	box("MillCap", MX - 7, Y + 56, MZ - 7, MX + 7, Y + 60, MZ + 7, DARK, nil, f)
+	box("MillCap", MX - 4, Y + 60, MZ - 4, MX + 4, Y + 63, MZ + 4, DARK, nil, f)
+	box("MillCap", MX - 1.5, Y + 63, MZ - 1.5, MX + 1.5, Y + 66, MZ + 1.5, DARK, nil, f)
+	-- the door facing south (to the mound stair), windows, a lantern
+	local S0 = MZ + 12
+	fp("MillDoorFrame", "S", MX - 3, Y, MX + 3, Y + 9.4, S0, 0.25, "px_stone_bricks", nil, f)
+	fp("MillDoor", "S", MX - 2.2, Y, MX + 2.2, Y + 8.6, S0, 0.4, "px_spruce_planks", nil, f)
+	fp("MillStep", "S", MX - 3, Y, MX + 3, Y + 0.6, S0, 1.6, "px_stone_bricks", nil, f)
+	window("S", MX, Y + 24, 3, 4, MZ + 10, f, DARK)
+	window("W", MZ, Y + 24, 3, 4, MX - 10, f, DARK)
+	window("E", MZ, Y + 24, 3, 4, MX + 10, f, DARK)
+	window("W", MZ, Y + 46, 3, 3, MX - 8, f, DARK)
+	window("E", MZ, Y + 46, 3, 3, MX + 8, f, DARK)
+	window("N", MX, Y + 38, 3, 3, MZ - 8, f, DARK)
+	decor(box("LampBracket", MX + 4.4, Y + 9, S0, MX + 5, Y + 9.6, S0 + 1.4, DARK, nil, f))
+	lantern(V(MX + 4.7, Y + 7.4, S0 + 1.1), f, false, BY + Y + 9)
+	-- flour sacks by the door and a cart of sacks
+	for _, s in ipairs({ { -6, 0 }, { -8.8, 0 }, { -7.4, 3 } }) do
+		sack(at(MX + s[1], Y + s[2], S0 + 1.8), f)
+	end
+	sack(at(MX + 7, Y, S0 + 2), f)
+	cart(MX + 12, Y, S0 + 9, -math.pi * 0.35, f, "sacks")
+	hayBale(MX - 14, Y, S0 + 6, f)
+	-- the sails: axle, hub, four stocks with white wool panels on a dark lattice, in one Model that spins about the
+	-- axle (AmbientSpin turns round the pivot's Y axis, so the pivot's Y points south along the axle)
+	local HY, HZ = Y + 48, MZ + 15
+	local sails = Instance.new("Model")
+	sails.Name = "MillSails"
+	sails.Parent = f
+	textured(decor(box("MillAxle", MX - 1.2, HY - 1.2, MZ + 8, MX + 1.2, HY + 1.2, HZ, nil, nil, sails)), "px_dark_oak_log")
+	textured(decor(box("MillHub", MX - 2, HY - 2, HZ - 1, MX + 2, HY + 2, HZ + 1.4, nil, nil, sails)), DARK)
+	local hub = V(MX, HY, HZ)
+	local CLOTH = Color3.fromRGB(246, 244, 238)
+	for i = 0, 3 do
+		local hcf = CFrame.new(hub) * CFrame.Angles(0, 0, math.rad(45 + 90 * i))
+		local function piece(name, size, ox, oy, oz, variant, tint)
+			return textured(decor(part(name, size, hcf * CFrame.new(ox, oy, oz), nil, nil, sails)), variant, tint)
+		end
+		piece("SailStock", Vector3.new(1.6, 40, 1.6), 0, 19, 0, DARK)
+		for _, rx in ipairs({ 6.8, 12.4 }) do
+			piece("SailRail", Vector3.new(0.8, 30.8, 0.6), rx, 23, 0, DARK)
+		end
+		for k = 0, 4 do
+			piece("SailBar", Vector3.new(12, 0.8, 0.6), 6.8, 8 + 7.5 * k, 0, DARK)
+		end
+		for c = 0, 1 do
+			for r = 0, 3 do
+				piece("SailCloth", Vector3.new(5.2, 6.7, 0.3), 3.8 + 5.8 * c, 11.75 + 7.5 * r, 0.45, "px_white_wool", CLOTH)
+			end
+		end
+	end
+	sails.WorldPivot = CFrame.fromMatrix(hub, Vector3.new(1, 0, 0), Vector3.new(0, 0, 1))
+	sails.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	sails:SetAttribute("Speed", 0.3)
+	CollectionService:AddTag(sails, "AmbientSpin")
+end
+task.wait()
+
+-- ================================================================ the silo and the grain shed on the hill
+do
+	local f = folder("Silo", stead)
+	local SX, SZ, Y = SILO.x, SILO.z, L1_Y
+	keep(SX - 20, SZ - 14, SX + 34, SZ + 14)
+	-- an octagon of two crossed boxes: r = the half width, cut = the corner notch
+	local function oct(name, r, cut, y0, y1, variant, tint)
+		box(name, SX - r + cut, y0, SZ - r, SX + r - cut, y1, SZ + r, variant, tint, f)
+		box(name, SX - r, y0, SZ - r + cut, SX + r, y1, SZ + r - cut, variant, tint, f)
+	end
+	oct("SiloFoot", 11, 4.4, Y, Y + 1.6, "px_cobblestone", nil)
+	oct("SiloWall", 10, 4, Y, Y + 48, "px_red_brick", nil)
+	for _, by in ipairs({ Y + 12, Y + 24, Y + 36, Y + 46.6 }) do
+		oct("SiloBand", 10.3, 3.7, by, by + 1, "px_iron_block", IRON)
+	end
+	oct("SiloDome", 11, 4, Y + 48, Y + 52, "px_smooth_stone", nil)
+	oct("SiloDome", 8, 3, Y + 52, Y + 56, "px_smooth_stone", nil)
+	oct("SiloDome", 5, 2, Y + 56, Y + 60, "px_smooth_stone", nil)
+	box("SiloCap", SX - 2, Y + 60, SZ - 2, SX + 2, Y + 64, SZ + 2, "px_iron_block", IRON, f)
+	decor(part("SiloFinial", Vector3.new(0.6, 4, 0.6), at(SX, Y + 66, SZ), Color3.fromRGB(70, 70, 76), Enum.Material.Metal, f))
+	-- the ladder up the south face (picture) and a little hatch at its top
+	do
+		local plate = decor(part("SiloLadder", Vector3.new(4, 44, 0.2), at(SX, Y + 24, SZ + 10.15), nil, nil, f))
+		plate.Transparency = 1
+		if TEX.ladder then
+			local tex = Instance.new("Texture")
+			tex.Texture = TEX.ladder
+			tex.Face = Enum.NormalId.Back
+			tex.StudsPerTileU, tex.StudsPerTileV = B, B
+			tex.Parent = plate
+		end
+		fp("SiloHatch", "S", SX - 2, Y + 41, SX + 2, Y + 45, SZ + 10, 0.3, nil, Color3.fromRGB(50, 50, 56), f)
+	end
+	-- hay bales stacked at its foot (west and south-west)
+	for _, b in ipairs({
+		{ SX - 16, SZ - 2, 0 },
+		{ SX - 16, SZ + 2, 0 },
+		{ SX - 16, SZ + 6, 0 },
+		{ SX - 12, SZ + 12, 0 },
+		{ SX - 8, SZ + 13, 0 },
+		{ SX - 16, SZ, 4 },
+		{ SX - 16, SZ + 4, 4 },
+		{ SX - 16, SZ + 2, 8 },
+	}) do
+		hayBale(b[1], Y + b[3], b[2], f)
+	end
+	-- the grain shed east of the silo, open to the south: grain heap, sacks, a lantern
+	local g = folder("GrainShed", f)
+	local G0, G1, H0, H1 = SX + 16, SX + 32, SZ - 8, SZ + 8 -- x 172..188, z -158..-142
+	box("ShedWall", G0, Y, H0, G1, Y + 12, H0 + 4, "px_spruce_planks", nil, g)
+	box("ShedWall", G0, Y, H0 + 4, G0 + 4, Y + 12, H1, "px_spruce_planks", nil, g)
+	box("ShedWall", G1 - 4, Y, H0 + 4, G1, Y + 12, H1, "px_spruce_planks", nil, g)
+	box("ShedRoof", G0 - 2, Y + 12, H0 - 2, G1 + 2, Y + 14, H1 + 2, "px_dark_oak_planks", nil, g)
+	box("ShedRoof", G0 + 2, Y + 14, H0, G1 - 2, Y + 16, H1, "px_dark_oak_planks", nil, g)
+	box("GrainHeap", G0 + 4, Y, H0 + 4, G1 - 4, Y + 2, H0 + 10, "px_hay", WHEAT, g)
+	box("GrainHeap", G0 + 6, Y + 2, H0 + 4, G1 - 6, Y + 3.4, H0 + 7, "px_hay", WHEAT, g)
+	sack(at(G0 + 6, Y, H1 - 3), g)
+	sack(at(G0 + 9, Y, H1 - 2.6), g)
+	sack(at(G1 - 6.5, Y, H1 - 3), g)
+	lantern(V((G0 + G1) / 2, Y + 9.6, H1 - 1), g, false, BY + Y + 12)
+end
+task.wait()
+
+-- ================================================================ the hill: orchard, beehives, pond, haystacks, fences, flowers
+do
+	local f = folder("Hill", stead)
+	-- the pond east of the mound: flush water in a cobblestone edge, reeds and lily pads
+	do
+		local P0, Q0, P1, Q1 = 136, -200, 160, -180
+		keep(P0 - 4, Q0 - 4, P1 + 4, Q1 + 4)
+		local p = folder("Pond", f)
+		decor(box("PondEdge", P0 - 2, L1_Y, Q0 - 2, P1 + 2, L1_Y + 0.2, Q1 + 2, "px_cobblestone", nil, p))
+		decor(box("PondWater", P0, L1_Y, Q0, P1, L1_Y + 0.3, Q1, "px_water", nil, p))
+		for _, r in ipairs({ { P0 + 1, Q0 + 1 }, { P0 + 2.4, Q0 + 1.2 }, { P1 - 1, Q1 - 1.4 }, { P1 - 2.4, Q1 - 1 } }) do
+			textured(decor(part("Reed", Vector3.new(0.8, 4, 0.8), at(r[1], L1_Y + 2, r[2]), nil, nil, p)), "px_hedge", LEAF_TINT)
+		end
+		for _, l in ipairs({ { P0 + 8, Q0 + 6 }, { P0 + 15, Q0 + 12 }, { P0 + 6, Q0 + 14 } }) do
+			textured(decor(part("LilyPad", Vector3.new(2.4, 0.1, 2.4), at(l[1], L1_Y + 0.35, l[2]), nil, nil, p)), "px_hedge")
+		end
+	end
+	-- the orchard west of the mound: apple trees in staggered rows, crates of apples
+	do
+		local o = folder("Orchard", f)
+		local APPLE = Color3.fromRGB(205, 32, 30)
+		local n = 0
+		for j = 0, 3 do
+			for i = 0, 2 do
+				local x, z = -12 + 24 * i + (j % 2) * 12, -124 - 24 * j
+				if spot(x, z, 6, L1_Y) then
+					local h = 12 + rng:NextInteger(0, 1) * 4
+					tree(x, z, h, o, "px_hedge", "px_oak_log", L1_Y)
+					-- apples on the faces of the wide lower crown
+					for _ = 1, 4 do
+						local side = rng:NextInteger(1, 4)
+						local u = rng:NextInteger(-3, 3) * 2.4
+						local ax, az = x + u, z + u
+						if side == 1 then
+							ax = x + 10.5
+						elseif side == 2 then
+							ax = x - 10.5
+						elseif side == 3 then
+							az = z + 10.5
+						else
+							az = z - 10.5
+						end
+						local ay = L1_Y + h - 4 + rng:NextInteger(-1, 1)
+						decor(part("Apple", Vector3.new(1.4, 1.4, 1.4), at(ax, ay, az), APPLE, Enum.Material.SmoothPlastic, o))
+					end
+					n += 1
+					if n % 3 == 0 then
+						local c = crate(x + 4, L1_Y, z + 4, o)
+						decor(part("Apples", Vector3.new(3.4, 0.6, 3.4), c.CFrame * CFrame.new(0, 2.2, 0), APPLE, Enum.Material.SmoothPlastic, o))
+					end
+					keep(x - 10, z - 10, x + 10, z + 10)
+				end
+			end
+		end
+		-- a fence along the track's north side with an opening into the orchard
+		fence(28, -110, 60, -110, o, L1_Y)
+		fence(-20, -148, -20, -196, o, L1_Y)
+	end
+	-- beehives on stands at the orchard edge
+	do
+		local h = folder("Beehives", f)
+		local HONEY = Color3.fromRGB(236, 196, 104)
+		for _, b in ipairs({ { 52, -116 }, { 58, -116 }, { 64, -116 } }) do
+			local x, z = b[1], b[2]
+			if not blocked(x, z, 0) and cellY(x, z) == L1_Y then
+				box("HiveStand", x - 2.2, L1_Y, z - 2.2, x + 2.2, L1_Y + 1.2, z + 2.2, "px_spruce_planks", nil, h)
+				box("Beehive", x - 2, L1_Y + 1.2, z - 2, x + 2, L1_Y + 5.2, z + 2, "px_planks", HONEY, h)
+				box("HiveRoof", x - 2.4, L1_Y + 5.2, z - 2.4, x + 2.4, L1_Y + 5.8, z + 2.4, "px_spruce_planks", nil, h)
+				fp("HiveSlot", "S", x - 1.2, L1_Y + 2, x + 1.2, L1_Y + 2.8, z + 2, 0.2, nil, Color3.fromRGB(40, 28, 16), h)
+				keep(x - 3, z - 3, x + 3, z + 3)
+			end
+		end
+	end
+	-- haystacks on the open grass of the east hill
+	do
+		local hs = folder("Haystacks", f)
+		local placed = 0
+		for _, c in ipairs({ { 124, -120 }, { 196, -112 }, { 200, -136 }, { 120, -200 }, { 180, -196 }, { 132, -148 }, { 60, -208 } }) do
+			if placed < 5 and spot(c[1], c[2], 8, L1_Y) then
+				haystack(c[1], c[2], L1_Y, hs)
+				keep(c[1] - 7, c[2] - 7, c[1] + 7, c[2] + 7)
+				placed += 1
+			end
+		end
+	end
+	-- wild flowers in clumps over the hill (and a few by the farmhouse)
+	do
+		local fl = folder("Flowers", f)
+		local clumps = 0
+		for _ = 1, 160 do
+			if clumps >= 22 then
+				break
+			end
+			local x, z = rng:NextInteger(-20, 200), rng:NextInteger(-215, -106)
+			if spot(x, z, 2, L1_Y) then
+				local col = pick(FLOWER_COLORS)
+				for k = 0, 2 do
+					flower(x + (k - 1) * 1.8, L1_Y, z + (if k == 1 then 1.6 else 0), col, fl)
+				end
+				keep(x - 2, z - 2, x + 2, z + 2)
+				clumps += 1
+			end
+		end
+		for _ = 1, 40 do
+			local x, z = rng:NextInteger(120, 210), rng:NextInteger(136, 210)
+			if spot(x, z, 2, 0) then
+				flower(x, 0, z, pick(FLOWER_COLORS), fl)
+				flower(x + 1.8, 0, z + 1, pick(FLOWER_COLORS), fl)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ vines and hanging grass off the cliffs by the barn (L1 → L0)
+do
+	local f = folder("CliffVines", stead)
+	local VINE = Color3.fromRGB(96, 150, 66)
+	local n = 0
+	for cz = -128, -48, 8 do
+		for cx = 112, 208, 8 do
+			local x, z = cx + 4, cz + 4
+			if cellY(x, z) == L1_Y and onIsland(x, z, 4) then
+				-- each face of this cell that drops to L0 (south, east, west)
+				for _, d in ipairs({ { 0, 8, "S" }, { 8, 0, "E" }, { -8, 0, "W" } }) do
+					local nx, nz = x + d[1], z + d[2]
+					if cellY(nx, nz) == 0 and zoneOf(nx, nz) == "farmstead" and onIsland(nx, nz, 4) then
+						local face = d[3]
+						local plane = if face == "S" then cz + 8 else (if face == "E" then cx + 8 else cx)
+						local a0 = if face == "S" then cx else cz
+						local off = if face == "W" then -0.2 else 0.2 -- the plate stands 0.2..0.6 off the face
+						fp("HangingGrass", face, a0, L1_Y - 2, a0 + 8, L1_Y, plane + off, 0.4, "px_grass_top", GRASS, f)
+						for _ = 1, rng:NextInteger(1, 2) do
+							local u = a0 + rng:NextInteger(0, 1) * 4
+							local len = rng:NextInteger(1, 3) * 4
+							fp("Vine", face, u, L1_Y - 2 - len, u + 4, L1_Y - 2, plane + off, 0.4, "px_hedge", VINE, f)
+						end
+						n += 1
+					end
+				end
+			end
+		end
+	end
+	print(("[build-farm] farmstead: %d cliff faces with vines"):format(n))
+end
+task.wait()
+
+-- ================================================================ rim decor: trees and bushes near the island edge in my zone
+do
+	local f = folder("RimGreen", stead)
+	local trees, bushes = 0, 0
+	for _ = 1, 600 do
+		if trees >= 14 and bushes >= 26 then
+			break
+		end
+		local x, z = rng:NextInteger(-24, 220), rng:NextInteger(-220, 220)
+		local y = cellY(x, z)
+		local isTree = trees < 14 and rng:NextNumber() < 0.45
+		local r = if isTree then 10 else 4
+		if onIsland(x, z, 10 + r) and not onIsland(x, z, 26 + r) and spot(x, z, r, y) then
+			if isTree then
+				tree(x, z, 12 + rng:NextInteger(0, 2) * 4, f, "px_hedge", if rng:NextNumber() < 0.3 then "px_birch_log" else "px_oak_log", y)
+				keep(x - 10, z - 10, x + 10, z + 10)
+				trees += 1
+			elseif bushes < 26 then
+				box("Bush", x - 4, y, z - 4, x + 4, y + 4, z + 4, "px_hedge", nil, f)
+				box("Bush", x - 2 + rng:NextInteger(-1, 1) * 2, y + 4, z - 2, x + 2 + rng:NextInteger(-1, 1) * 2, y + 8, z + 2, "px_hedge", nil, f)
+				keep(x - 5, z - 5, x + 5, z + 5)
+				bushes += 1
+			end
+		end
+	end
+	print(("[build-farm] farmstead: %d parts, rim trees %d, bushes %d"):format(count - partsBefore, trees, bushes))
+end
+
+end
+task.wait()
+-- ================================================================================ farm/40-grove.luau
+do
+-- ================================================================ farm: the grove (L1 west of x -24) and the three stairs
+-- The three L0 → L1 stairs (MAIN x -10..10, EAST x 80..96, WEST x -180..-164; z -64 → -80) with log kerbs and lamp
+-- posts; dirt paths on L1: the track from the main stair top to the arena's east opening, the forest path from the
+-- south opening to the west stair top, the trail from the west opening to the woodcutter, the hut and the west stair.
+-- The arena ARENA (-92, -136) r 52: packed dirt (core) with a stone paving ring r 30..34, a leaf-litter ring r 38..42
+-- and a cobbled border r 48..52 laid flush; four old dark oak pillar trees on the diagonals (r 34, tagged Pillar);
+-- ruined mossy posts r 54.5; a dark oak fence ring r 58 (straight along the cliff in the south) with three openings
+-- 6 blocks wide (E 0°, S 140°, W 180°) and lamp posts beside them; the north side is left to the Ent.
+-- The Ent at ENT (-92, -200): a 6×6-block trunk 12 blocks high with a carved angry face toward the arena (deep-set
+-- eyes with a faint green glow, heavy brows, a frowning mouth, a dark hollow at the bottom), root arches and branch
+-- arms on both sides, a stepped crown y 64..92 with hanging vines, moss and mushrooms at the roots.
+-- The forest: old dark oak trees with wide crowns, bushes, ferns, fallen logs, mossy boulders, mushrooms, a
+-- woodcutter's stump with an axe, a hunter's hut; grass curtains and roots on the cliffs.
+local grove = folder("Grove")
+local GY = L1_Y
+local count0 = count
+local GREEN_GLOW = Color3.fromRGB(140, 255, 110)
+local LEAF_TINTS = { Color3.fromRGB(255, 255, 255), Color3.fromRGB(215, 235, 200), Color3.fromRGB(190, 212, 172) }
+local DARK_LOG = "px_dark_oak_log"
+
+-- the yaw that turns a kit prop's local -Z toward (dx, dz)
+local function yawToward(dx, dz)
+	return math.atan2(-dx, -dz)
+end
+-- what the core really built under (x, z): its 8-stud island cell
+local function cellOf(v)
+	return math.floor(v / 8) * 8 + 4
+end
+local function onL1(x, z)
+	local cx, cz = cellOf(x), cellOf(z)
+	return onIsland(cx, cz) and groundY(cx, cz) == GY
+end
+-- flush tiles (y 15.8 .. 16.1) on the 4-stud cells of [x0, x1] × [z0, z1]: fn(cx, cz) -> variant, tint | nil;
+-- equal neighbours along x are merged into one run
+local function tiles(name, x0, x1, z0, z1, fn, parent)
+	for z = z0, z1 - B, B do
+		local runX, runKey, runV, runT = nil, nil, nil, nil
+		local function flush(xEnd)
+			if runX then
+				box(name, runX, GY - 0.2, z, xEnd, GY + 0.1, z + B, runV, runT, parent)
+			end
+			runX = nil
+		end
+		for x = x0, x1 - B, B do
+			local v, t = fn(x + B / 2, z + B / 2)
+			local key = if v then v .. tostring(t) else nil
+			if key ~= runKey then
+				flush(x)
+				if v then
+					runX, runV, runT = x, v, t
+				end
+				runKey = key
+			end
+		end
+		flush(x1)
+	end
+end
+
+-- dirt paths on L1 (polylines, width in studs)
+local ROUTES = {
+	{ w = 16, pts = { { 0, -82 }, { -6, -102 }, { -20, -128 }, { -30, -136 }, { -42, -136 } } }, -- main stair → arena E
+	{ w = 12, pts = { { -129, -105 }, { -140, -96 }, { -156, -94 }, { -168, -92 }, { -172, -82 } } }, -- arena S → west stair
+	{ w = 12, pts = { { -142, -136 }, { -164, -134 }, { -184, -124 } } }, -- arena W → the woodcutter
+	{ w = 10, pts = { { -184, -124 }, { -180, -106 }, { -172, -92 } } }, -- the woodcutter → the west stair
+	{ w = 8, pts = { { -184, -124 }, { -188, -146 }, { -190, -160 } } }, -- the woodcutter → the hunter's hut
+}
+-- the distance from (x, z) to the nearest path edge (negative: on a path)
+local function routeDist(x, z)
+	local best = math.huge
+	for _, r in ipairs(ROUTES) do
+		for i = 1, #r.pts - 1 do
+			local a, b = r.pts[i], r.pts[i + 1]
+			local d = segDist(x, z, a[1], a[2], b[1], b[2]) - r.w / 2
+			if d < best then
+				best = d
+			end
+		end
+	end
+	return best
+end
+
+-- the arena openings (angle from +X toward +Z: 0 east, 90 south, 180 west) and their half clear width
+local OPEN = { 0, 140, 180 }
+local OPEN_HALF = 12
+-- the distance of (dx, dz) from the arena centre to the nearest opening axis, on the outward side of it
+local function openPerp(dx, dz)
+	local best = math.huge
+	for _, deg in ipairs(OPEN) do
+		local a = math.rad(deg)
+		local along = dx * math.cos(a) + dz * math.sin(a)
+		if along > 0 then
+			best = math.min(best, math.abs(-dx * math.sin(a) + dz * math.cos(a)))
+		end
+	end
+	return best
+end
+
+-- the Ent's footprint with its roots and arms; reserved clearings { x, z, r }: the hut, the woodcutter
+local ENT_BOX = { -162, -232, -24, -182 }
+local HUT = { x = -190, z = -172 }
+local RES = { { HUT.x, HUT.z, 16 }, { -186, -118, 14 } }
+local OCC = {} -- placed solid things { x, z, r } (trees, boulders, logs)
+local function taken(x, z, r)
+	for _, o in ipairs(OCC) do
+		if (x - o[1]) ^ 2 + (z - o[2]) ^ 2 < (r + o[3]) ^ 2 then
+			return true
+		end
+	end
+	return false
+end
+-- room for a solid thing of radius rad: grove L1 ground all round, 10 studs from the rim, off the paths, the stairs,
+-- the arena (outside the fence), the Ent and the clearings
+local function solidOk(x, z, rad)
+	for _, o in ipairs({ { 0, 0 }, { rad, 0 }, { -rad, 0 }, { 0, rad }, { 0, -rad } }) do
+		local px, pz = x + o[1], z + o[2]
+		if not onIsland(px, pz, 10) or not onL1(px, pz) or px >= -26 or inStairCorridor(px, pz) then
+			return false
+		end
+	end
+	if inArena(x, z, 7 + rad) then
+		return false
+	end
+	if x > ENT_BOX[1] - rad and x < ENT_BOX[3] + rad and z > ENT_BOX[2] - rad and z < ENT_BOX[4] + rad then
+		return false
+	end
+	if routeDist(x, z) < rad + 1 then
+		return false
+	end
+	for _, c in ipairs(RES) do
+		if (x - c[1]) ^ 2 + (z - c[2]) ^ 2 < (c[3] + rad) ^ 2 then
+			return false
+		end
+	end
+	return true
+end
+
+-- a stepped leaf layer of w × d blocks centred on (cx, cz), corners cut (three boxes, no overlaps)
+local function leafLayer(name, cx, cz, w, d, y0, y1, tint, parent, isDecor)
+	local hw, hd = w * B / 2, d * B / 2
+	local parts = {}
+	if w >= 3 and d >= 3 then
+		table.insert(parts, box(name, cx - hw + B, y0, cz - hd, cx + hw - B, y1, cz + hd, "px_hedge", tint, parent))
+		table.insert(parts, box(name, cx - hw, y0, cz - hd + B, cx - hw + B, y1, cz + hd - B, "px_hedge", tint, parent))
+		table.insert(parts, box(name, cx + hw - B, y0, cz - hd + B, cx + hw, y1, cz + hd - B, "px_hedge", tint, parent))
+	else
+		table.insert(parts, box(name, cx - hw, y0, cz - hd, cx + hw, y1, cz + hd, "px_hedge", tint, parent))
+	end
+	if isDecor then
+		for _, p in ipairs(parts) do
+			decor(p)
+		end
+	end
+end
+-- a hanging vine strand (decor) from yTop down by len
+local function vine(x, yTop, z, len, parent)
+	local p = textured(decor(part("Vine", Vector3.new(1.2, len, 1.2), at(x, yTop - len / 2, z), nil, nil, parent)), "px_hedge")
+	p.CastShadow = false
+	return p
+end
+-- a block mushroom (decor): a pale stem and a red or brown cap; s scales it
+local function mushroom(x, y, z, red, s, parent)
+	s = s or 1
+	textured(
+		decor(part("MushroomStem", Vector3.new(1.2 * s, 1.6 * s, 1.2 * s), at(x, y + 0.8 * s, z), nil, nil, parent)),
+		"px_white_wool",
+		Color3.fromRGB(235, 225, 200)
+	)
+	local cap = decor(part("MushroomCap", Vector3.new(3 * s, 1.2 * s, 3 * s), at(x, y + 2.2 * s, z), nil, nil, parent))
+	if red then
+		textured(cap, "px_white_wool", Color3.fromRGB(205, 45, 40))
+	else
+		textured(cap, "px_brown_wool", nil)
+	end
+end
+-- an old dark oak: a 2×2 trunk h studs high, root flares, a wide stepped crown, optional hanging vines
+local function bigTree(x, z, h, cw, parent, vines)
+	local f = folder("OldTree", parent)
+	local top = GY + h
+	box("Trunk", x - 4, GY, z - 4, x + 4, top + 4, z + 4, DARK_LOG, nil, f)
+	for _, d in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+		if rng:NextNumber() < 0.7 then
+			local rh = pick({ 4, 4, 8 })
+			local off = pick({ -2, 2 })
+			local px, pz = x + d[1] * 6 + d[2] * off, z + d[2] * 6 + d[1] * off
+			cube("TreeRoot", px, GY + rh / 2, pz, B, rh, B, DARK_LOG, nil, f)
+		end
+	end
+	-- a branch stub or two under the crown
+	for _ = 1, rng:NextInteger(1, 2) do
+		local d = pick({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } })
+		cube("Branch", x + d[1] * 6, top - 6, z + d[2] * 6, B, B, B, DARK_LOG, nil, f)
+		cube("Branch", x + d[1] * 10, top - 2, z + d[2] * 10, B, B, B, DARK_LOG, nil, f)
+	end
+	local tint = pick(LEAF_TINTS)
+	leafLayer("Leaves", x, z, cw, cw, top - 4, top + 4, tint, f)
+	leafLayer("Leaves", x, z, cw - 2, cw - 2, top + 4, top + 8, tint, f)
+	leafLayer("Leaves", x, z, cw - 4, cw - 4, top + 8, top + 12, tint, f)
+	local e = cw * B / 2
+	for _ = 1, rng:NextInteger(3, 5) do
+		local side = rng:NextInteger(1, 4)
+		local t = rng:NextInteger(-cw // 2 + 1, cw // 2 - 1) * B
+		local bx, bz = x + t, z + t
+		if side == 1 then
+			bx = x + e
+		elseif side == 2 then
+			bx = x - e
+		elseif side == 3 then
+			bz = z + e
+		else
+			bz = z - e
+		end
+		cube("Leaves", bx, top + pick({ -6, -2, 2 }), bz, 2 * B, B, 2 * B, "px_hedge", tint, f)
+	end
+	if vines then
+		for _ = 1, rng:NextInteger(4, 7) do
+			local t = rng:NextNumber(-e + 2, e - 2)
+			local side = rng:NextInteger(1, 4)
+			local vx, vz = x + t, z + t
+			if side == 1 then
+				vx = x + e - 1
+			elseif side == 2 then
+				vx = x - e + 1
+			elseif side == 3 then
+				vz = z + e - 1
+			else
+				vz = z - e + 1
+			end
+			vine(vx, top - 4, vz, math.min(rng:NextInteger(6, 16), h - 8), f)
+		end
+	end
+	return f
+end
+
+-- ================================================================ 1. the three stairs L0 → L1
+do
+	local f = folder("Stairs", grove)
+	for _, s in ipairs({
+		{ "Main", STAIRS.main, "px_cobblestone", nil },
+		{ "East", STAIRS.east, "px_dirt", PATH_DIRT },
+		{ "West", STAIRS.west, "px_dirt", PATH_DIRT },
+	}) do
+		local name, st, variant, tint = s[1], s[2], s[3], s[4]
+		local x0, x1 = st.x0, st.x1
+		local sf = folder(name .. "Stair", f)
+		stairs(name, (x0 + x1) / 2, st.z0, st.z1, 0, L1_Y, x1 - x0, variant, sf)
+		for _, c in ipairs(sf:GetChildren()) do
+			if c.Name == name .. "Step" and tint then
+				c.Color = tint
+			end
+		end
+		-- fill under the steps (8 steps of 2 studs; each step box is one block high)
+		for k = 0, 7 do
+			local top = 2 * (k + 1)
+			if top - B > 0 then
+				local za = st.z0 - 2 * k
+				box(name .. "StepFill", x0, 0, za - 2, x1, top - B, za, variant, tint, sf)
+			end
+		end
+		-- log kerbs on both sides, a block above the steps
+		for j = 0, 3 do
+			local za = st.z0 - 4 * j
+			local top = 4 * (j + 1) + 4
+			box("Kerb", x0 - B, 0, za - 4, x0, top, za, "px_oak_log", nil, sf)
+			box("Kerb", x1, 0, za - 4, x1 + B, top, za, "px_oak_log", nil, sf)
+		end
+		-- lamp posts at the foot (east side) and the top (west side), lanterns over the steps
+		lampPost(x1 + 6, st.z0 + 6, sf, false, yawToward(-1, 0), 0)
+		lampPost(x0 - 6, st.z1 - 6, sf, false, yawToward(1, 0), L1_Y)
+	end
+end
+task.wait()
+
+-- ================================================================ 2. the paths on L1
+do
+	local f = folder("Paths", grove)
+	tiles("Path", -204, 16, -168, -76, function(cx, cz)
+		if not onL1(cx, cz) or inArena(cx, cz, 8) then
+			return nil
+		end
+		local d = routeDist(cx, cz)
+		if d > 0 then
+			return nil
+		end
+		if d > -2.5 and n2(cx, cz, 5.5, 0.2) > -0.1 then
+			return "px_dirt", Color3.fromRGB(150, 118, 84) -- ragged darker edges
+		end
+		if n2(cx, cz, 2.2, 0.09) > 0.3 then
+			return "px_gravel", nil
+		end
+		return "px_dirt", PATH_DIRT
+	end, f)
+end
+task.wait()
+
+-- ================================================================ 3. the arena
+do
+	local arena = folder("Arena", grove)
+	local AX, AZ = ARENA.x, ARENA.z
+	-- the floor pattern laid flush: the paving ring, the leaf litter, the cobbled border, the opening thresholds
+	tiles("ArenaFloor", AX - 60, AX + 60, AZ - 60, AZ + 60, function(cx, cz)
+		local dx, dz = cx - AX, cz - AZ
+		local rr = math.sqrt(dx * dx + dz * dz)
+		if rr >= 60 or not onL1(cx, cz) then
+			return nil
+		end
+		if rr >= 52 then
+			if openPerp(dx, dz) < OPEN_HALF then
+				return if rng:NextNumber() < 0.3 then "px_mossy_cobblestone" else "px_cobblestone", nil
+			end
+			return nil
+		end
+		if rr >= 48 then
+			return if rng:NextNumber() < 0.3 then "px_mossy_cobblestone" else "px_cobblestone", nil
+		end
+		if rr >= 38 and rr < 42 and n2(cx, cz, 9.3, 0.09) > -0.1 then
+			return "px_forest_floor", Color3.fromRGB(175, 135, 95) -- a ring of fallen, scorched leaves
+		end
+		if rr >= 30 and rr < 34 then
+			local u = rng:NextNumber()
+			if u < 0.08 then
+				return nil -- a missing stone
+			end
+			return if u < 0.32 then "px_mossy_stone_bricks" else "px_stone_bricks", nil
+		end
+		return nil
+	end, arena)
+	task.wait()
+
+	-- four old dark oaks on the diagonals (r 34): 3×3 trunks 8 blocks high, crowns above y +28 (every trunk part is
+	-- a stun pillar)
+	for _, s in ipairs({ { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }) do
+		local px, pz = AX + s[1] * 24, AZ + s[2] * 24
+		local f = folder("PillarTree", arena)
+		pillarTag(box("PillarTrunk", px - 6, GY, pz - 6, px + 6, GY + 36, pz + 6, DARK_LOG, nil, f))
+		for _, d in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+			local outward = d[1] * s[1] + d[2] * s[2] > 0
+			local h = if outward then 8 else 4
+			local rx, rz = px + d[1] * 8, pz + d[2] * 8
+			local hx, hz = if d[1] ~= 0 then 2 else 4, if d[2] ~= 0 then 2 else 4
+			pillarTag(box("PillarRoot", rx - hx, GY, rz - hz, rx + hx, GY + h, rz + hz, DARK_LOG, nil, f))
+		end
+		-- stripped lighter bark patches and moss on the trunk
+		for _ = 1, 3 do
+			local d = pick({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } })
+			local y = GY + rng:NextInteger(2, 7) * B
+			local o = rng:NextInteger(-1, 1) * B
+			local bx, bz = px + d[1] * 6.2 + d[2] * o, pz + d[2] * 6.2 + d[1] * o
+			local sx, sz = if d[1] ~= 0 then 0.4 else B, if d[2] ~= 0 then 0.4 else B
+			pillarTag(cube("PillarBark", bx, y, bz, sx, 2 * B, sz, "px_oak_log", nil, f))
+		end
+		-- branch stubs reaching out under the crown
+		for _, d in ipairs({ { s[1], 0 }, { 0, s[2] } }) do
+			pillarTag(cube("PillarBranch", px + d[1] * 8, GY + 26, pz + d[2] * 8, B, B, B, DARK_LOG, nil, f))
+			pillarTag(cube("PillarBranch", px + d[1] * 12, GY + 30, pz + d[2] * 12, B, B, B, DARK_LOG, nil, f))
+		end
+		local tint = LEAF_TINTS[2]
+		leafLayer("PillarLeaves", px, pz, 9, 9, GY + 28, GY + 36, tint, f)
+		leafLayer("PillarLeaves", px, pz, 7, 7, GY + 36, GY + 44, tint, f)
+		leafLayer("PillarLeaves", px, pz, 5, 5, GY + 44, GY + 48, tint, f)
+		for _ = 1, 4 do
+			local side = rng:NextInteger(1, 4)
+			local t = rng:NextInteger(-3, 3) * B
+			local bx, bz = px + t, pz + t
+			if side == 1 then
+				bx = px + 18
+			elseif side == 2 then
+				bx = px - 18
+			elseif side == 3 then
+				bz = pz + 18
+			else
+				bz = pz - 18
+			end
+			decor(cube("PillarLeaves", bx, GY + 26, bz, 2 * B, B, 2 * B, "px_hedge", tint, f))
+		end
+		for _ = 1, 6 do
+			local t = rng:NextNumber(-16, 16)
+			local side = rng:NextInteger(1, 4)
+			local vx, vz = px + t, pz + t
+			if side == 1 then
+				vx = px + 17
+			elseif side == 2 then
+				vx = px - 17
+			elseif side == 3 then
+				vz = pz + 17
+			else
+				vz = pz - 17
+			end
+			vine(vx, GY + 28, vz, rng:NextInteger(6, 12), f)
+		end
+	end
+	task.wait()
+
+	-- ruined stone posts round the rim (r 54.5): mossy, broken, some with a fallen block
+	local VARS = { "px_mossy_stone_bricks", "px_stone_bricks", "px_mossy_cobblestone", "px_mossy_stone_bricks" }
+	for k = 0, 23 do
+		local a = math.rad(k * 15 + 7.5)
+		local deg = k * 15 + 7.5
+		local x, z = AX + math.cos(a) * 54.5, AZ + math.sin(a) * 54.5
+		local dx, dz = x - AX, z - AZ
+		if openPerp(dx, dz) >= OPEN_HALF + 4 and not (deg > 228 and deg < 312) and z < -86 and onL1(x, z) then
+			local f = folder("RuinedPost", arena)
+			local cf = at(x, GY, z) * CFrame.Angles(0, -a, 0)
+			local n = rng:NextInteger(1, 3)
+			for i = 1, n do
+				textured(part("PostBlock", Vector3.new(B, B, B), cf * CFrame.new(0, (i - 0.5) * B, 0), nil, nil, f), pick(VARS))
+			end
+			local u = rng:NextNumber()
+			if u < 0.4 then
+				-- a broken top block, knocked askew
+				textured(
+					part("PostBroken", Vector3.new(B, B * 0.75, B), cf * CFrame.new(0.5, n * B + 1.4, 0.3) * CFrame.Angles(0.15, 0.3, 0.22), nil, nil, f),
+					pick(VARS)
+				)
+			elseif u < 0.7 then
+				textured(part("PostCap", Vector3.new(B + 0.6, 1, B + 0.6), cf * CFrame.new(0, n * B + 0.5, 0), nil, nil, f), "px_stone_bricks")
+			end
+			if rng:NextNumber() < 0.35 then
+				-- a fallen block on the ground beside it (along the ring)
+				textured(
+					part("PostFallen", Vector3.new(B, B, B), cf * CFrame.new(0, 1.6, pick({ -6, 6 })) * CFrame.Angles(0, 0.4, 0.25), nil, nil, f),
+					pick(VARS)
+				)
+			end
+			if rng:NextNumber() < 0.5 then
+				textured(decor(part("PostMoss", Vector3.new(B + 0.3, 0.4, B + 0.3), cf * CFrame.new(0, n * B + 0.2, 0), nil, nil, f)), "px_hedge")
+			end
+		end
+	end
+
+	-- the dark oak fence ring r 58 (straight along the cliff in the south), open at E, S, W and toward the Ent
+	local FR, N = 58, 48
+	local pts = {}
+	for i = 0, N do
+		local a = i / N * 2 * math.pi
+		local x, z = AX + math.cos(a) * FR, AZ + math.sin(a) * FR
+		local deg = math.deg(a) % 360
+		z = math.min(z, -83)
+		local ok = not (deg > 236 and deg < 304) and openPerp(x - AX, z - AZ) >= OPEN_HALF + 1 and onL1(x, z)
+		pts[i] = { V(x, GY, z), ok }
+	end
+	local fence = folder("Fence", arena)
+	for i = 0, N - 1 do
+		local p, q = pts[i], pts[i + 1]
+		if p[2] then
+			textured(part("FencePost", Vector3.new(1, 3.4, 1), CFrame.new(p[1] + Vector3.new(0, 1.7, 0)), nil, nil, fence), WOOD_DARK)
+		end
+		if p[2] and q[2] then
+			local len = (q[1] - p[1]).Magnitude
+			for _, h in ipairs({ 1.2, 2.6 }) do
+				local mid = (p[1] + q[1]) / 2 + Vector3.new(0, h, 0)
+				textured(part("FenceRail", Vector3.new(0.4, 0.6, len), CFrame.lookAt(mid, q[1] + Vector3.new(0, h, 0)), nil, nil, fence), WOOD_DARK)
+			end
+		end
+	end
+	-- each opening: mossy stone columns at the fence ends and a lamp post outside each
+	for _, deg in ipairs(OPEN) do
+		local a = math.rad(deg)
+		local ux, uz = math.cos(a), math.sin(a)
+		local px, pz = -uz, ux
+		for _, side in ipairs({ -1, 1 }) do
+			local off = side * (OPEN_HALF + 2.5)
+			local cx, cz = AX + ux * FR + px * off, AZ + uz * FR + pz * off
+			if onL1(cx, cz) then
+				box("OpeningColumn", cx - 2, GY, cz - 2, cx + 2, GY + 8, cz + 2, "px_mossy_cobblestone", nil, fence)
+				box("OpeningColumnCap", cx - 2.3, GY + 8, cz - 2.3, cx + 2.3, GY + 9, cz + 2.3, "px_stone_bricks", nil, fence)
+			end
+			for r = 63, 59, -1 do
+				local lx, lz = AX + ux * r + px * side * (OPEN_HALF + 4), AZ + uz * r + pz * side * (OPEN_HALF + 4)
+				if onL1(lx, lz) and onL1(lx + 2, lz + 2) and onL1(lx - 2, lz - 2) then
+					lampPost(lx, lz, fence, false, yawToward(-px * side, -pz * side), GY)
+					break
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 4. the Ent: the huge ancient tree with a face
+do
+	local ent = folder("Ent", grove)
+	local EX, EZ = ENT.x, ENT.z
+	local tx0, tx1 = EX - 12, EX + 12 -- 6 blocks wide
+	local tzF = EZ + 12 -- the face toward the arena (z -188)
+	local tzB = EZ - 12 -- 6 blocks deep, less if the north rim is too close
+	while tzB < EZ - 4 and not (onIsland(tx0, tzB, 10) and onIsland(tx1, tzB, 10)) do
+		tzB += B
+	end
+	local TOP = GY + 48 -- 12 blocks of trunk
+	local hx0, hx1 = tx0 + 8, tx0 + 16 -- the hollow at the bottom, 2 blocks wide, 3 high, 2 deep
+	-- the trunk core with the notch of the hollow
+	box("EntTrunk", tx0, GY + 12, tzB, tx1, TOP, tzF - B, DARK_LOG, nil, ent)
+	box("EntTrunk", tx0, GY, tzB, hx0, GY + 12, tzF - B, DARK_LOG, nil, ent)
+	box("EntTrunk", hx1, GY, tzB, tx1, GY + 12, tzF - B, DARK_LOG, nil, ent)
+	box("EntTrunk", hx0, GY, tzB, hx1, GY + 12, tzF - 2 * B, DARK_LOG, nil, ent)
+	-- the dark inside of the hollow
+	local function darkPlate(x0, y0, z0, x1, y1, z1)
+		decor(box("EntHollow", x0, y0, z0, x1, y1, z1, "px_coal_block", Color3.fromRGB(70, 70, 70), ent))
+	end
+	darkPlate(hx0, GY, tzF - 2 * B, hx1, GY + 12, tzF - 2 * B + 0.2)
+	darkPlate(hx0, GY, tzF - 2 * B, hx0 + 0.2, GY + 12, tzF)
+	darkPlate(hx1 - 0.2, GY, tzF - 2 * B, hx1, GY + 12, tzF)
+	darkPlate(hx0, GY + 11.8, tzF - 2 * B, hx1, GY + 12, tzF)
+	darkPlate(hx0, GY, tzF - 2 * B, hx1, GY + 0.3, tzF)
+
+	-- the face layer (6 × 12 cells of one block, the front block row): carved mouth and eyes, lighter stripped bark
+	local KIND = {}
+	for r = 0, 2 do
+		KIND[r * 6 + 2], KIND[r * 6 + 3] = "hole", "hole"
+	end
+	for c = 1, 4 do
+		KIND[5 * 6 + c] = "carve" -- the frowning mouth: the middle high, the corners lower
+	end
+	KIND[4 * 6 + 1], KIND[4 * 6 + 4] = "carve", "carve"
+	KIND[7 * 6 + 1], KIND[7 * 6 + 4] = "eye", "eye"
+	for r = 0, 11 do
+		local runC, runV = nil, nil
+		local function flush(cEnd)
+			if runC and runV then
+				box("EntFace", tx0 + runC * B, GY + r * B, tzF - B, tx0 + cEnd * B, GY + (r + 1) * B, tzF, runV, nil, ent)
+			end
+		end
+		for c = 0, 5 do
+			local k = KIND[r * 6 + c]
+			local v = nil
+			if k == nil then
+				v = if rng:NextNumber() < 0.2 then "px_oak_log" else DARK_LOG
+			end
+			if v ~= runV then
+				flush(c)
+				runC, runV = c, v
+			end
+			if k == "carve" or k == "eye" then
+				local x0 = tx0 + c * B
+				local y0 = GY + r * B
+				box("EntCarve", x0, y0, tzF - B, x0 + B, y0 + B, tzF - B + 1.5, "px_coal_block", nil, ent)
+				if k == "eye" then
+					-- a faint green glow deep in the socket, nearer the nose
+					local gx = x0 + B / 2 + (if c < 3 then 0.6 else -0.6)
+					local glow = decor(part("EntEyeGlow", Vector3.new(1.6, 1.4, 0.3), at(gx, y0 + 1.6, tzF - B + 1.65), GREEN_GLOW, Enum.Material.Neon, ent))
+					glow.Transparency = 0.25
+					light(glow, 10, 0.8, GREEN_GLOW)
+				end
+			end
+		end
+		flush(6)
+	end
+	-- heavy brows slanting down to the nose (angry), the nose, cheek ridges
+	local BROW = Color3.fromRGB(150, 130, 120)
+	box("EntBrow", tx0, GY + 51.5, tzF, tx0 + 4, GY + 54.5, tzF + 3, DARK_LOG, BROW, ent)
+	box("EntBrow", tx0 + 4, GY + 49, tzF, tx0 + 10, GY + 52, tzF + 3, DARK_LOG, BROW, ent)
+	box("EntBrow", tx1 - 4, GY + 51.5, tzF, tx1, GY + 54.5, tzF + 3, DARK_LOG, BROW, ent)
+	box("EntBrow", tx1 - 10, GY + 49, tzF, tx1 - 4, GY + 52, tzF + 3, DARK_LOG, BROW, ent)
+	box("EntNose", EX - 2, GY + 40, tzF, EX + 2, GY + 47, tzF + 2.5, DARK_LOG, nil, ent)
+	box("EntCheek", tx0 + 1, GY + 41, tzF, tx0 + 7, GY + 43, tzF + 1.2, "px_oak_log", nil, ent)
+	box("EntCheek", tx1 - 7, GY + 41, tzF, tx1 - 1, GY + 43, tzF + 1.2, "px_oak_log", nil, ent)
+	-- the lintel over the hollow and the bark lips round it
+	box("EntLip", hx0 - 1, GY + 12, tzF, hx1 + 1, GY + 14, tzF + 1.5, DARK_LOG, BROW, ent)
+	box("EntLip", hx0 - 1.5, GY, tzF, hx0, GY + 12, tzF + 1, DARK_LOG, BROW, ent)
+	box("EntLip", hx1, GY, tzF, hx1 + 1.5, GY + 12, tzF + 1, DARK_LOG, BROW, ent)
+
+	-- bark texture on the sides and back: stripped lighter patches, moss low down, shelf fungi
+	for _ = 1, 14 do
+		local side = rng:NextInteger(1, 3)
+		local y = GY + rng:NextInteger(1, 10) * B
+		if side == 3 then
+			local x = rng:NextInteger(0, 4) * B + tx0 + 2
+			cube("EntBark", x + 2, y, tzB - 0.2, B, 2 * B, 0.4, "px_oak_log", nil, ent)
+		else
+			local x = if side == 1 then tx0 - 0.2 else tx1 + 0.2
+			local z = tzB + rng:NextInteger(1, math.max(1, (tzF - tzB) / B - 2)) * B
+			cube("EntBark", x, y, z, 0.4, 2 * B, B, "px_oak_log", nil, ent)
+		end
+	end
+	for _, side in ipairs({ -1, 1 }) do
+		local x = if side < 0 then tx0 - 0.25 else tx1 + 0.25
+		decor(box("EntMoss", x - 0.25, GY, tzB + 4, x + 0.25, GY + 6, tzF - 2, "px_hedge", nil, ent))
+		for i = 1, 2 do
+			local fy = GY + 18 + i * 9 + rng:NextInteger(0, 4)
+			local fz = tzB + 6 + rng:NextNumber() * (tzF - tzB - 12)
+			textured(decor(part("ShelfFungus", Vector3.new(3, 0.8, 4), at(x + side * 1.5, fy, fz), nil, nil, ent)), "px_brown_wool")
+		end
+	end
+	decor(box("EntMoss", tx0, GY, tzF, hx0 - 1.5, GY + 4, tzF + 0.4, "px_hedge", nil, ent))
+	decor(box("EntMoss", hx1 + 1.5, GY, tzF, tx1, GY + 3, tzF + 0.4, "px_hedge", nil, ent))
+	task.wait()
+
+	-- root arches on both sides (2 blocks thick): an inner root springing from the trunk at +36 and landing 7 blocks
+	-- out (walk under it), then a smaller round arch beyond it; low roots creep out in front of the trunk
+	local function column(name, x0, x1, b, t, z0, z1)
+		box(name, x0, GY + b, z0, x1, GY + t, z1, DARK_LOG, nil, ent)
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		local edge = if s > 0 then tx1 else tx0
+		local D, H = 28, 36
+		for i = 0, D / B - 1 do
+			local d = i * B + 2
+			local t = math.floor(H * math.sqrt(1 - (d / D) ^ 2) / B + 0.5) * B
+			local b = t - 8
+			if b < 8 then
+				b = 0
+			end
+			column("EntRoot", edge + s * i * B, edge + s * (i + 1) * B, b, t, tzF - 10, tzF - 2)
+		end
+		local A, AH, T = 12, 20, 8
+		local start = edge + s * D
+		for i = 0, 2 * A / B - 1 do
+			local u = i * B + 2 - A
+			local t = math.floor(AH * math.sqrt(math.max(0, 1 - (u / A) ^ 2)) / B + 0.5) * B
+			local ia, ih = A - T, AH - T
+			local b = 0
+			if math.abs(u) < ia then
+				b = math.floor(ih * math.sqrt(1 - (u / ia) ^ 2) / B + 0.5) * B
+			end
+			if b >= t then
+				b = t - B
+			end
+			column("EntRoot", start + s * i * B, start + s * (i + 1) * B, b, math.max(t, B), tzF - 14, tzF - 6)
+		end
+		-- the root feet flare
+		local fx = start + s * 2 * A
+		column("EntRootFoot", fx, fx + s * B, 0, B, tzF - 14, tzF - 6)
+		column("EntRootFoot", start - s * 2, start + s * 2, 0, B, tzF - 6, tzF - 2)
+		-- low roots creeping out in front of the trunk corners (outside r 48)
+		local cx = if s > 0 then tx1 else tx0
+		box("EntLowRoot", cx, GY, tzF - 2, cx + s * 6, GY + 4, tzF + 2, DARK_LOG, nil, ent)
+		box("EntLowRoot", cx + s * 4, GY, tzF + 2, cx + s * 10, GY + 3, tzF + 5, DARK_LOG, nil, ent)
+		box("EntLowRoot", cx + s * 9, GY, tzF + 5, cx + s * 14, GY + 2, tzF + 8, DARK_LOG, nil, ent)
+		-- the branch arm from high on the back of the trunk down to the ground, with splayed fingers
+		local za, zb = tzB, tzB + 8
+		local top = GY + 40
+		local x = edge
+		local flat = 0
+		while flat < 3 do
+			box("EntArm", x, top - 8, za, x + s * B, top, zb, DARK_LOG, nil, ent)
+			x += s * B
+			if top > GY + 8 then
+				top -= B
+			else
+				flat += 1
+			end
+		end
+		box("EntFinger", x, GY, za + 4, x + s * 10, GY + 4, zb, DARK_LOG, nil, ent)
+		box("EntFinger", x, GY, za, x + s * 6, GY + 4, za + 4, "px_oak_log", nil, ent)
+		if onIsland(x, zb + 8, 4) then
+			box("EntFinger", x - s * 4, GY, zb, x, GY + 4, zb + 8, DARK_LOG, nil, ent)
+		end
+		if onIsland(x, za - 8, 4) then
+			box("EntFinger", x - s * 8, GY, za - 8, x - s * 4, GY + 4, za, DARK_LOG, nil, ent)
+		end
+		-- limbs climbing from the trunk top into the crown
+		for i = 0, 3 do
+			local lx = edge + s * (i * 8)
+			cube("EntLimb", lx + s * 4, TOP - 4 + i * 4, EZ - 4, 8, 8, 8, DARK_LOG, nil, ent)
+		end
+	end
+	for i = 0, 2 do
+		cube("EntLimb", EX + 2, TOP - 2 + i * 4, tzB - 4 - i * 8, 8, 8, 8, DARK_LOG, nil, ent)
+	end
+	task.wait()
+
+	-- the crown: stepped leaf layers (decor) leaning back over the north rim, side blobs, drooping lobes, vines
+	local CZ = EZ - 6
+	local tint = Color3.fromRGB(190, 218, 172)
+	local crown = folder("EntCrown", ent)
+	leafLayer("EntLeaves", EX, CZ, 16, 12, TOP, TOP + 8, tint, crown, true)
+	leafLayer("EntLeaves", EX, CZ, 20, 16, TOP + 8, TOP + 16, tint, crown, true)
+	leafLayer("EntLeaves", EX, CZ, 16, 14, TOP + 16, TOP + 24, tint, crown, true)
+	leafLayer("EntLeaves", EX, CZ, 10, 8, TOP + 24, TOP + 28, tint, crown, true)
+	for _ = 1, 12 do
+		local side = rng:NextInteger(1, 4)
+		local bx, bz = EX + rng:NextInteger(-9, 9) * B, CZ + rng:NextInteger(-7, 7) * B
+		if side == 1 then
+			bx = EX + 40
+		elseif side == 2 then
+			bx = EX - 40
+		elseif side == 3 then
+			bz = CZ + 32
+		else
+			bz = CZ - 32
+		end
+		local sz = rng:NextInteger(3, 5) * B
+		decor(cube("EntLeaves", bx, TOP + rng:NextInteger(1, 5) * B, bz, sz, rng:NextInteger(2, 3) * B, sz, "px_hedge", tint, crown))
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		decor(cube("EntLeaves", EX + s * 44, TOP - 6, CZ - 4, 16, 8, 20, "px_hedge", tint, crown))
+		decor(cube("EntLeaves", EX + s * 50, TOP - 12, CZ - 2, 8, 4, 12, "px_hedge", tint, crown))
+	end
+	for _ = 1, 44 do
+		local layer = rng:NextInteger(1, 3)
+		local hw, hd, y = 32, 24, TOP
+		if layer == 2 then
+			hw, hd, y = 40, 32, TOP + 8
+		elseif layer == 3 then
+			hw, hd, y = 50, 10, TOP - 8 -- under the drooping lobes
+		end
+		local side = rng:NextInteger(1, 4)
+		local vx, vz = EX + rng:NextNumber(-hw + 2, hw - 2), CZ + rng:NextNumber(-hd + 2, hd - 2)
+		if side == 1 then
+			vx = EX + hw - 1
+		elseif side == 2 then
+			vx = EX - hw + 1
+		elseif side == 3 then
+			vz = CZ + hd - 1
+		else
+			vz = CZ - hd + 1
+		end
+		local len = rng:NextInteger(8, 30)
+		if inArena(vx, vz, 4) then
+			len = math.min(len, y - (GY + 22)) -- keep the fight clear
+		end
+		vine(vx, y, vz, len, crown)
+	end
+	-- mushrooms and moss at the roots
+	for _, m in ipairs({
+		{ EX - 9, tzF + 3, true, 1.4 },
+		{ EX + 9, tzF + 2, false, 1.2 },
+		{ tx0 - 30, tzF + 1, true, 1.8 },
+		{ tx0 - 26, tzF + 3, false, 1.2 },
+		{ tx1 + 30, tzF + 1, true, 1.8 },
+		{ tx1 + 34, tzF + 2, false, 1.4 },
+		{ tx0 - 52, tzF - 2, false, 1.6 },
+		{ tx1 + 52, tzF - 3, true, 1.4 },
+		{ tx0 - 14, tzF - 4, false, 1 },
+		{ tx1 + 14, tzF - 4, true, 1 },
+	}) do
+		mushroom(m[1], GY, m[2], m[3], m[4], ent)
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		local edge = if s > 0 then tx1 else tx0
+		decor(box("RootMoss", edge + s * 4, GY, tzF - 2, edge + s * 26, GY + 0.3, tzF + 2, "px_hedge", nil, ent))
+		decor(box("RootMoss", edge + s * 30, GY, tzF - 6, edge + s * 50, GY + 0.3, tzF - 2, "px_hedge", nil, ent))
+	end
+end
+task.wait()
+
+-- ================================================================ 5. the forest
+do
+	local forest = folder("Forest", grove)
+	-- the hunter's hut (door south to the path) and the woodcutter's clearing are hand-placed
+	do
+		local f = folder("HunterHut", forest)
+		local hx, hz = HUT.x, HUT.z
+		local x0, x1, z0, z1 = hx - 10, hx + 10, hz - 8, hz + 8
+		for _, cx in ipairs({ x0, x1 - B }) do
+			for _, cz in ipairs({ z0, z1 - B }) do
+				box("HutCorner", cx, GY, cz, cx + B, GY + 12, cz + B, "px_oak_log", nil, f)
+			end
+		end
+		box("HutWall", x0 + B, GY, z0, x1 - B, GY + 12, z0 + B, WOOD, nil, f)
+		box("HutWall", x0 + B, GY, z1 - B, hx - 2, GY + 12, z1, WOOD, nil, f)
+		box("HutWall", hx + 2, GY, z1 - B, x1 - B, GY + 12, z1, WOOD, nil, f)
+		box("HutLintel", hx - 2, GY + 8, z1 - B, hx + 2, GY + 12, z1, WOOD_DARK, nil, f)
+		box("HutWall", x0, GY, z0 + B, x0 + B, GY + 12, z1 - B, WOOD, nil, f)
+		box("HutWall", x1 - B, GY, z0 + B, x1, GY + 4, z1 - B, WOOD, nil, f)
+		box("HutWall", x1 - B, GY + 8, z0 + B, x1, GY + 12, z1 - B, WOOD, nil, f)
+		box("HutWall", x1 - B, GY + 4, z0 + B, x1, GY + 8, hz - 2, WOOD, nil, f)
+		box("HutWall", x1 - B, GY + 4, hz + 2, x1, GY + 8, z1 - B, WOOD, nil, f)
+		box("HutFloor", x0 + B, GY, z0 + B, x1 - B, GY + 0.3, z1 - B, WOOD_DARK, nil, f)
+		box("HutRoof", x0 - 2, GY + 12, z0 - 2, x1 + 2, GY + 16, z1 + 2, WOOD_DARK, nil, f)
+		box("HutRoof", x0 - 2, GY + 16, z0 + 2, x1 + 2, GY + 20, z1 - 2, WOOD_DARK, nil, f)
+		box("HutRoof", x0 - 2, GY + 20, hz - 2, x1 + 2, GY + 24, hz + 2, WOOD_DARK, nil, f)
+		box("HutRidge", x0 - 3, GY + 24, hz - 1, x1 + 3, GY + 25, hz + 1, "px_oak_log", nil, f)
+		box("HutChimney", x0 + 2, GY + 12, z0 + 2, x0 + 6, GY + 28, z0 + 6, "px_cobblestone", nil, f)
+		lantern(V(hx + 4.5, GY + 9.5, z1 + 1.2), f, false, BY + GY + 12)
+		barrel(x0 + 6, GY, z0 + 6, f)
+		crate(x1 - 6, GY, z0 + 6, f)
+		textured(box("HutBed", x0 + 4, GY, hz - 2, x0 + 8, GY + 2, hz + 6, nil, nil, f), "px_white_wool", Color3.fromRGB(160, 50, 45))
+		-- a drying rack with a hide beside the door, a stack of firewood on the east wall
+		local rx = x1 + 6
+		box("RackPost", rx, GY, z1 - 2, rx + 1, GY + 7, z1 - 1, WOOD_DARK, nil, f)
+		box("RackPost", rx, GY, z1 - 11, rx + 1, GY + 7, z1 - 10, WOOD_DARK, nil, f)
+		box("RackBar", rx, GY + 6.5, z1 - 11, rx + 1, GY + 7.3, z1 - 1, WOOD_DARK, nil, f)
+		textured(decor(box("Hide", rx + 0.3, GY + 2, z1 - 9.5, rx + 0.7, GY + 6.5, z1 - 2.5, nil, nil, f)), "px_brown_wool")
+		box("Firewood", x1, GY, z0 + 1, x1 + B, GY + 8, z0 + 7, "px_oak_log", nil, f)
+	end
+	do
+		local f = folder("Woodcutter", forest)
+		box("Stump", -198, GY, -118, -194, GY + 4, -114, "px_oak_log", nil, f)
+		box("StumpTop", -197.8, GY + 4, -117.8, -194.2, GY + 4.15, -114.2, "px_oak_log_top", nil, f)
+		local axe = at(-196, GY + 5.6, -116) * CFrame.Angles(0, 0.6, math.rad(22))
+		textured(decor(part("AxeHandle", Vector3.new(0.4, 3.6, 0.4), axe, nil, nil, f)), "px_planks")
+		textured(decor(part("AxeHead", Vector3.new(0.5, 1.2, 1.8), axe * CFrame.new(0, -1.5, 0.6), nil, nil, f)), "px_iron_block")
+		box("ChoppingBlock", -192, GY, -124, -188, GY + 2.5, -120, "px_oak_log", nil, f)
+		box("ChoppingTop", -191.8, GY + 2.5, -123.8, -188.2, GY + 2.6, -120.2, "px_oak_log_top", nil, f)
+		box("LogPile", -174, GY, -120, -170, GY + 4, -108, "px_oak_log", nil, f)
+		box("LogPile", -170, GY, -120, -166, GY + 4, -108, "px_oak_log", nil, f)
+		box("LogPile", -172, GY + 4, -119, -168, GY + 8, -109, "px_oak_log", nil, f)
+		box("LogEnd", -174, GY, -120.2, -166, GY + 4, -120, "px_oak_log_top", nil, f)
+		box("Planks", -198, GY, -128, -192, GY + 1, -126, "px_planks", nil, f)
+		box("Planks", -198, GY + 1, -128, -193, GY + 1.6, -126, "px_planks", nil, f)
+		table.insert(OCC, { -196, -116, 4 })
+		table.insert(OCC, { -170, -114, 8 })
+	end
+	task.wait()
+
+	-- old trees: random spots with room (deterministic rng), spaced apart
+	local trees = 0
+	for _ = 1, 2000 do
+		if trees >= 28 then
+			break
+		end
+		local x = snap(rng:NextNumber(-212, -32))
+		local z = snap(rng:NextNumber(-212, -88))
+		if solidOk(x, z, 10) and not taken(x, z, 14) then
+			local cw = pick({ 7, 7, 9 })
+			bigTree(x, z, rng:NextInteger(6, 9) * B, cw, forest, rng:NextNumber() < 0.45)
+			table.insert(OCC, { x, z, 10 })
+			trees += 1
+		end
+	end
+	task.wait()
+
+	-- fallen logs with moss and a mushroom, mossy boulders
+	local logs, rocks = 0, 0
+	for _ = 1, 800 do
+		if logs >= 6 and rocks >= 10 then
+			break
+		end
+		local x = snap(rng:NextNumber(-210, -32))
+		local z = snap(rng:NextNumber(-210, -90))
+		if logs < 6 then
+			local len = pick({ 12, 16, 20 })
+			if solidOk(x, z, len / 2 + 2) and not taken(x, z, len / 2 + 2) then
+				local f = folder("FallenLog", forest)
+				local alongX = rng:NextNumber() < 0.5
+				local hx, hz = if alongX then len / 2 else 2, if alongX then 2 else len / 2
+				box("FallenLog", x - hx, GY, z - hz, x + hx, GY + B, z + hz, pick({ DARK_LOG, "px_oak_log" }), nil, f)
+				decor(box("LogMoss", x - hx * 0.6, GY + B, z - hz * 0.6, x + hx * 0.4, GY + B + 0.3, z + hz * 0.4, "px_hedge", nil, f))
+				mushroom(x + (if alongX then hx * 0.6 else 0), GY + B, z + (if alongX then 0 else hz * 0.6), rng:NextNumber() < 0.5, 0.8, f)
+				table.insert(OCC, { x, z, len / 2 + 2 })
+				logs += 1
+				continue
+			end
+		end
+		if rocks < 10 and solidOk(x, z, 6) and not taken(x, z, 6) then
+			local f = folder("Boulder", forest)
+			local big = rng:NextNumber() < 0.5
+			local s = if big then 2 * B else B
+			box("Boulder", x - s / 2 - 2, GY, z - s / 2, x + s / 2 - 2, GY + s, z + s / 2, "px_mossy_cobblestone", nil, f)
+			box("Boulder", x + s / 2 - 2, GY, z - 2, x + s / 2 + 2, GY + B, z + 2, pick({ "px_cobblestone", "px_mossy_cobblestone" }), nil, f)
+			if big then
+				box("Boulder", x - 4, GY + s, z - 2, x, GY + s + B, z + 2, "px_mossy_cobblestone", nil, f)
+			end
+			decor(box("BoulderMoss", x - s / 2 - 2, GY + s, z - s / 2, x - 2, GY + s + 0.3, z + s / 2, "px_hedge", nil, f))
+			table.insert(OCC, { x, z, 6 })
+			rocks += 1
+		end
+	end
+	task.wait()
+
+	-- bushes and ferns (hedge blocks) round the trees and along the paths, mushrooms in the shade
+	local bushes, shrooms = 0, 0
+	for _ = 1, 1500 do
+		if bushes >= 64 and shrooms >= 30 then
+			break
+		end
+		local x = snap(rng:NextNumber(-212, -30)) + 2
+		local z = snap(rng:NextNumber(-212, -88)) + 2
+		if bushes < 64 and solidOk(x, z, 3) and not taken(x, z, 3) then
+			local f = folder("Bush", forest)
+			local h = pick({ B, B, B / 2 })
+			cube("Bush", x, GY + h / 2, z, B, h, B, "px_hedge", pick(LEAF_TINTS), f)
+			if rng:NextNumber() < 0.5 then
+				local d = pick({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } })
+				cube("Bush", x + d[1] * B, GY + B / 4, z + d[2] * B, B, B / 2, B, "px_hedge", pick(LEAF_TINTS), f)
+			end
+			if rng:NextNumber() < 0.25 then
+				cube("Bush", x, GY + h + B / 4, z, B, B / 2, B, "px_hedge", nil, f)
+			end
+			table.insert(OCC, { x, z, 4 })
+			bushes += 1
+		elseif shrooms < 30 and solidOk(x, z, 2) and not taken(x, z, 2) then
+			local red = rng:NextNumber() < 0.5
+			mushroom(x, GY, z, red, pick({ 0.8, 1, 1.2 }), forest)
+			if rng:NextNumber() < 0.5 then
+				mushroom(x + 3, GY, z + 2, red, 0.7, forest)
+			end
+			table.insert(OCC, { x, z, 2 })
+			shrooms += 1
+		end
+	end
+	print(("[build-farm] grove forest: %d trees, %d logs, %d boulders, %d bushes, %d mushroom spots"):format(trees, logs, rocks, bushes, shrooms))
+end
+task.wait()
+
+-- ================================================================ 6. grass curtains and roots on the cliffs of the grove
+do
+	local f = folder("CliffCurtains", grove)
+	for x = -240, -32, 8 do
+		for z = -240, -72, 8 do
+			local mx, mz = x + 4, z + 4
+			if mx < -24 and onIsland(mx, mz) and groundY(mx, mz) == GY then
+				for _, d in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+					local nx, nz = mx + d[1] * 8, mz + d[2] * 8
+					local outer = not onIsland(nx, nz)
+					local low = not outer and groundY(nx, nz) == 0
+					local fx, fz = mx + d[1] * 4, mz + d[2] * 4
+					if (outer or low) and not inStairCorridor(fx, fz) and rng:NextNumber() < (if outer then 0.4 else 0.65) then
+						local len = if outer then rng:NextInteger(3, 7) * B else rng:NextInteger(1, 3) * B
+						local w = pick({ 8, 8, 4 })
+						local o = if w == 4 then pick({ -2, 2 }) else 0
+						local px, pz = fx + d[1] * 0.8, fz + d[2] * 0.8
+						local sx, sz = 0.4, w
+						if d[2] ~= 0 then
+							px, sx, sz = mx + o, w, 0.4
+						else
+							pz = mz + o
+						end
+						local p = textured(decor(part("GrassCurtain", Vector3.new(sx, len, sz), at(px, GY - len / 2, pz), nil, nil, f)), "px_hedge")
+						p.CastShadow = false
+						if rng:NextNumber() < 0.4 then
+							-- a hanging root strand a little further out
+							local rl = len + rng:NextInteger(1, 2) * B
+							local t = rng:NextNumber(-3, 3)
+							local rx, rz = fx + d[1] * 1.4, fz + d[2] * 1.4
+							if d[2] ~= 0 then
+								rx = mx + t
+							else
+								rz = mz + t
+							end
+							textured(decor(part("HangingRoot", Vector3.new(1, rl, 1), at(rx, GY - rl / 2, rz), nil, nil, f)), DARK_LOG)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+print(("[build-farm] grove: %d parts"):format(count - count0))
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-farm] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
