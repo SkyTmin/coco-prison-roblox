@@ -7,6 +7,8 @@
 -- Optional attributes tint the air of a whole location (Преисподняя: a red murk, scripts/build-underworld.luau):
 -- Haze (Atmosphere.Density instead of the thin indoor haze), AtmosphereColor, AtmosphereDecay (Color3);
 -- ClockTime and Brightness turn an open location to night (Пустотная крепость: scripts/build-end-castle.luau).
+-- Tint (Color3) colours the whole picture through a ColorCorrectionEffect: the atmosphere's haze does not show at
+-- low render quality (Studio 26.10, Изнанка: the red dusk read as a plain blue sky).
 -- Local only: other players keep their own lighting.
 
 local CollectionService = game:GetService("CollectionService")
@@ -46,6 +48,20 @@ function IndoorLighting.Start()
 	}? =
 		nil
 	local current: BasePart? = nil
+	local tintEffect: ColorCorrectionEffect? = nil
+	local function tint(colour: Color3)
+		if not tintEffect then
+			if colour == Color3.new(1, 1, 1) then
+				return
+			end
+			local effect = Instance.new("ColorCorrectionEffect")
+			effect.Name = "VolumeTint"
+			effect.Parent = Lighting
+			tintEffect = effect
+		end
+		TweenService:Create(tintEffect :: ColorCorrectionEffect, EASE, { TintColor = colour })
+			:Play()
+	end
 	local function atmosphere(): Atmosphere?
 		return Lighting:FindFirstChildOfClass("Atmosphere")
 	end
@@ -88,6 +104,8 @@ function IndoorLighting.Start()
 			end
 			local ambient = volume:GetAttribute("Ambient")
 			local exposure = volume:GetAttribute("Exposure")
+			local tintColour = volume:GetAttribute("Tint")
+			tint(if typeof(tintColour) == "Color3" then tintColour else Color3.new(1, 1, 1))
 			TweenService:Create(Lighting, EASE, {
 				Ambient = if typeof(ambient) == "Color3" then ambient else Lighting.Ambient,
 				ExposureCompensation = if typeof(exposure) == "number"
@@ -123,6 +141,7 @@ function IndoorLighting.Start()
 					:Play()
 			end
 		elseif outdoor then
+			tint(Color3.new(1, 1, 1))
 			TweenService:Create(Lighting, EASE, {
 				Ambient = outdoor.Ambient,
 				ExposureCompensation = outdoor.ExposureCompensation,

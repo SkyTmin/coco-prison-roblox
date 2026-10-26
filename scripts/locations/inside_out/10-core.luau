@@ -138,11 +138,14 @@ end
 -- ================================================================ the boss, the light, the ash, the void net, the edge walls
 bossSpawn("vecna", ARENA.x, ARENA.y + 2, ARENA.z, ARENA.r - 8, core)
 -- a dark red dusk over the whole floor (the only lighting volume of this floor): red haze from below, readable
+-- (Studio 26.10: at ClockTime 18.4 the sun was down and the island nearly black; the atmosphere's red haze does not
+-- show at Studio's render quality — the red comes from the Tint colour correction instead)
 lightingVolume("UpsideDownAir", 0, 60, 0, 900, 640, 1120, {
-	Ambient = Color3.fromRGB(150, 104, 104),
-	Exposure = -0.15,
+	Ambient = Color3.fromRGB(190, 140, 136),
+	Exposure = 0.4,
 	Haze = 0.3,
-	ClockTime = 18.4,
+	ClockTime = 17,
+	Tint = Color3.fromRGB(255, 176, 166),
 	Brightness = 1.3,
 	AtmosphereColor = Color3.fromRGB(190, 70, 64),
 	AtmosphereDecay = Color3.fromRGB(96, 24, 32),

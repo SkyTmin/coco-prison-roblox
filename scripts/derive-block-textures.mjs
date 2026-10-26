@@ -295,3 +295,5 @@ await recolor("yellow_wool.png", "green_wool.png", [[0, [50, 74, 18]], [0.5, [82
 	await sharp(data, { raw: { width: N * S, height: N * S, channels: 4 } }).png().toFile(path.join(dir, "pumpkin.png"));
 	console.log("wrote pumpkin.png");
 }
+// Изнанка: dark oak leaves — our hedge darkened by a tint read as a black pit in the red dusk (Studio 26.10)
+await recolor("grass_top.png", "dark_oak_leaves.png", [[0, [22, 50, 20]], [0.5, [40, 80, 32]], [1, [72, 118, 52]]]);

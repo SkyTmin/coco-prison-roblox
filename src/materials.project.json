@@ -737,6 +737,14 @@
         "ColorMap": "rbxassetid://89231630874271",
         "StudsPerTile": 4
       }
+    },
+    "px_dark_oak_leaves": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://77115109989306",
+        "StudsPerTile": 4
+      }
     }
   }
 }

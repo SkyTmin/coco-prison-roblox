@@ -6,8 +6,9 @@
     "fraction_base": "rbxassetid://88768395156265",
     "market": "rbxassetid://89889196488968",
     "leprechaun_valley": "rbxassetid://75554425420931",
-    "castle": "rbxassetid://89437763250488"
+    "castle": "rbxassetid://89437763250488",
+    "inside_out": "rbxassetid://80043759062096"
   },
-  "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base, market, leprechaun_valley, castle (26.10): Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
+  "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base, market, leprechaun_valley, castle, inside_out (26.10): Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
   "_removed": "[владелец 22.10: «другие превью у шахт удали»] the Codex art previews of mountain_foot, underworld, pyramid, basement removed (the menu draws its block diorama) until top-down shots of their built maps exist"
 }

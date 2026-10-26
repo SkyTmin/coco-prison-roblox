@@ -86,9 +86,10 @@ local function freeTown(x, z, pad)
 end
 
 -- palette: the dead suburb under a red sky
-local ASPHALT = Color3.fromRGB(62, 60, 64)
+-- (Studio 26.10: the square and the streets read as black under the red dusk — the cobbles and the asphalt lighter)
+local ASPHALT = Color3.fromRGB(84, 82, 88)
 local LINE_YELLOW = Color3.fromRGB(232, 190, 40)
-local COBBLE = Color3.fromRGB(150, 146, 146)
+local COBBLE = Color3.fromRGB(196, 192, 192)
 local DEAD_GRASS = Color3.fromRGB(128, 104, 88)
 local VINE_RED = Color3.fromRGB(150, 24, 30)
 local VINE_DARK = Color3.fromRGB(96, 14, 22)
