@@ -952,6 +952,2505 @@ print(("[build-inside-out] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ inside_out/20-town.luau
+do
+-- ================================================================ inside_out: the dead town (the main island)
+-- The Upside Down copy of a small American suburb round the mine square, in blocks:
+--   square   an oak fence ring 1 block outside the pit rim (stone-brick pillars every 4 blocks; open at the four
+--            ladder shafts), six lamp posts, benches, crates, barrels, two dead trees, the overturned car (86, -94)
+--   streets  yellow dashed centre lines on every street and round the ring road, potholes and heaved slabs
+--   houses   22 two-storey clapboard houses in DISTRICTS (two designs: front-gable with a half porch, side-gable with
+--            a full porch and dormers; garages on some), every one choked by crimson vines
+--   church   the white church in NE (164, -26 → -90), a stepped steeple with a dark spire and a cross, a rift door
+--   wall     the alphabet wall in NNW (x -24..-20, z -172..-144, facing the north street) under Christmas lights
+--   props    telephone poles with sagging wires, street lamps (two broken), the school bus (119, 36), two wrecked
+--            cars, a bicycle by a picket fence (-33, -133), mailboxes, hydrants, a town sign, cocoons, rift doors
+--   growth   vine bushes, crimson carpets and ash piles on every free bit of town ground (seeded rng)
+local town = folder("Town")
+local startCount = count
+local C = {
+	trim = Color3.fromRGB(232, 228, 220),
+	glass = Color3.fromRGB(86, 76, 92),
+	roof = Color3.fromRGB(112, 114, 134), -- dark slate
+	roofBrown = Color3.fromRGB(128, 96, 92),
+	found = Color3.fromRGB(150, 140, 140),
+	stone = Color3.fromRGB(150, 146, 146),
+	oak = Color3.fromRGB(200, 164, 112),
+	bark = Color3.fromRGB(120, 100, 96),
+	deck = Color3.fromRGB(150, 120, 100),
+	door = Color3.fromRGB(150, 104, 84),
+	metal = Color3.fromRGB(150, 150, 156),
+	tyre = Color3.fromRGB(70, 66, 72),
+	wire = Color3.fromRGB(24, 22, 26),
+	cap = Color3.fromRGB(90, 84, 88),
+	drive = Color3.fromRGB(120, 116, 118),
+	mail = Color3.fromRGB(120, 130, 150),
+	can = Color3.fromRGB(120, 126, 124),
+	bus = Color3.fromRGB(240, 178, 40),
+	church = Color3.fromRGB(236, 232, 224),
+	pale = Color3.fromRGB(196, 170, 150),
+	-- clapboard walls (variant, tint): pale green, blue-grey, cream, red-brown, cream wool, grey, green-grey, rose
+	walls = {
+		{ "px_white_wool", Color3.fromRGB(150, 172, 150) },
+		{ "px_white_wool", Color3.fromRGB(140, 152, 174) },
+		{ "px_planks", Color3.fromRGB(250, 238, 212) },
+		{ "px_spruce_planks", Color3.fromRGB(206, 132, 118) },
+		{ "px_white_wool", Color3.fromRGB(214, 204, 176) },
+		{ "px_spruce_planks", Color3.fromRGB(172, 182, 192) },
+		{ "px_dark_oak_planks", Color3.fromRGB(196, 206, 190) },
+		{ "px_white_wool", Color3.fromRGB(178, 136, 126) },
+	},
+}
+local ROOF = "px_roof_tiles"
+local FACE_YAW = { N = 0, S = math.pi, E = -math.pi / 2, W = math.pi / 2 } -- the house front (local -Z) faces this way
+
+-- a textured box in a frame cf (a world CFrame) by two local corners; variant nil = a plain part in colour tint
+local function lb(cf, name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(name, size, cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), tint, nil, parent)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+-- a small plain decor part in a frame cf by size and local centre
+local function lc(cf, name, sx, sy, sz, x, y, z, color, material, parent)
+	return decor(part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), color, material, parent))
+end
+
+-- occupied ground (local x0, z0, x1, z1): lots, the church, vehicles, poles — the random growth keeps off it
+local occ = {
+	{ -16, -204, 16, -176 }, -- the north street end (the sky road)
+	{ -16, 176, 16, 204 }, -- the south street end (the arena bridge)
+	{ -144, 168, -96, 204 }, -- the SW street end (the islet bridge)
+	{ 96, 168, 144, 204 }, -- the SE street end
+	{ -19, 88, -9, 96 }, -- the zone sign at the arrival (core)
+}
+local function addOcc(x0, z0, x1, z1)
+	table.insert(occ, { math.min(x0, x1), math.min(z0, z1), math.max(x0, x1), math.max(z0, z1) })
+end
+local function isFree(x, z, r)
+	for _, o in ipairs(occ) do
+		if x > o[1] - r and x < o[3] + r and z > o[2] - r and z < o[4] + r then
+			return false
+		end
+	end
+	return true
+end
+-- the first free spot at (x, z) shifted along (ux, uz): props slide along the kerb past mailboxes and lots
+local function freeSpot(x, z, r, ux, uz)
+	for _, o in ipairs({ 0, 6, -6, 12, -12, 18, -18 }) do
+		local px, pz = x + ux * o, z + uz * o
+		if isFree(px, pz, r) then
+			return px, pz
+		end
+	end
+	return nil
+end
+
+-- a window on a wall plane: axis "z" = the wall is the plane z = plane (a runs along x), axis "x" = the plane
+-- x = plane (a runs along z); sgn = the outward side; white frame, dark pane
+local function win(cf, axis, plane, sgn, a, y0, w, h, f, frameTint)
+	local ft = frameTint or C.trim
+	if axis == "z" then
+		decor(lb(cf, "WinFrame", a - w / 2 - 0.6, y0 - 0.6, plane, a + w / 2 + 0.6, y0 + h + 0.6, plane + sgn * 0.25, "px_white_wool", ft, f))
+		decor(lb(cf, "Window", a - w / 2, y0, plane, a + w / 2, y0 + h, plane + sgn * 0.4, "px_blackstone", C.glass, f))
+	else
+		decor(lb(cf, "WinFrame", plane, y0 - 0.6, a - w / 2 - 0.6, plane + sgn * 0.25, y0 + h + 0.6, a + w / 2 + 0.6, "px_white_wool", ft, f))
+		decor(lb(cf, "Window", plane, y0, a - w / 2, plane + sgn * 0.4, y0 + h, a + w / 2, "px_blackstone", C.glass, f))
+	end
+end
+-- a white picket fence in a frame: axis "x" runs along x at z = c (axis "z": along z at x = c), from a0 to a1
+local function picket(cf, axis, c, a0, a1, f)
+	local function seg(name, s0, s1, y0, y1, t0, t1)
+		if axis == "x" then
+			return lb(cf, name, s0, y0, c + t0, s1, y1, c + t1, "px_white_wool", C.trim, f)
+		end
+		return lb(cf, name, c + t0, y0, s0, c + t1, y1, s1, "px_white_wool", C.trim, f)
+	end
+	decor(seg("PicketRail", a0, a1, 1, 1.5, -0.35, 0.35))
+	decor(seg("PicketRail", a0, a1, 2.4, 2.9, -0.35, 0.35))
+	local n = math.max(1, math.floor(math.abs(a1 - a0) / 2.5))
+	for i = 0, n do
+		local s = a0 + (a1 - a0) * i / n
+		seg("Picket", s - 0.4, s + 0.4, 0, 3.6, -0.2, 0.2)
+	end
+end
+-- a rift door: a glowing red tear in a wall inside a frame of crimson growth; cf = the bottom centre on the wall
+-- face, local -Z out of the wall
+local function rift(cf, f)
+	local r = folder("RiftDoor", f)
+	decor(lb(cf, "RiftFrame", -4.5, 0, -0.8, -2.5, 13, 0, "px_nether_wart", VINE_DARK, r))
+	decor(lb(cf, "RiftFrame", 2.5, 0, -0.8, 4.5, 12, 0, "px_nether_wart", VINE_RED, r))
+	decor(lb(cf, "RiftFrame", -3, 12, -0.8, 3.5, 14.5, 0, "px_nether_wart", VINE_DARK, r))
+	decor(lb(cf, "RiftFrame", -3, 0, -0.8, 3, 0.8, 0, "px_nether_wart", VINE_RED, r))
+	-- the tear: narrow at the ends, widest in the middle
+	for i, s in ipairs({ { 0.8, 2.5, 1.2 }, { 2.5, 5, 2 }, { 5, 8, 2.5 }, { 8, 10.5, 1.8 }, { 10.5, 12, 1 } }) do
+		local v = if i == 3 then "px_shroomlight" else "px_magma"
+		decor(lb(cf, "RiftGlow", -s[3], s[1], -0.5, s[3], s[2], 0.1, v, Color3.fromRGB(255, 96, 80), r))
+	end
+	local core = lc(cf, "RiftCore", 0.6, 8.4, 0.2, 0.3, 6.2, -0.6, GLOW_RED, Enum.Material.Neon, r)
+	lc(cf, "RiftCore", 0.4, 4, 0.2, -0.9, 4.6, -0.6, GLOW_RED, Enum.Material.Neon, r)
+	light(core, 22, 2.2, GLOW_RED)
+	emitter(core, {
+		Rate = 3,
+		Lifetime = NumberRange.new(2, 3),
+		Speed = NumberRange.new(0.6, 1.4),
+		SpreadAngle = Vector2.new(40, 40),
+		EmissionDirection = Enum.NormalId.Front,
+		Size = NumberSequence.new(0.2),
+		Color = ColorSequence.new(GLOW_RED),
+		LightEmission = 1,
+	})
+	decor(lb(cf, "RiftVine", 3.4, 5, -1.3, 5, 15, -0.6, "px_nether_wart", VINE_RED, r))
+	return r
+end
+-- a cocoon (2×3 blocks of crimson growth with a pale shape inside); cf = the bottom centre on the wall face,
+-- local -Z out of the wall (or free hanging)
+local function cocoon(cf, f)
+	local c = folder("Cocoon", f)
+	decor(lb(cf, "Cocoon", -4, 2, -4, 4, 10, 0, "px_nether_wart", VINE_DARK, c))
+	decor(lb(cf, "Cocoon", -2.5, 0, -3.4, 2.5, 2, -0.3, "px_nether_wart", VINE_RED, c))
+	decor(lb(cf, "Cocoon", -2.5, 10, -3.4, 2.5, 12.5, -0.3, "px_nether_wart", VINE_RED, c))
+	decor(lb(cf, "CocoonBody", -1.6, 3.5, -4.3, 1.6, 9, -3.8, "px_white_wool", C.pale, c))
+	decor(lb(cf, "CocoonStrand", -0.6, -5, -2.4, 0.6, 0, -1.2, "px_nether_wart", VINE_RED, c))
+	decor(lb(cf, "CocoonStrand", 1.4, 12.5, -2.2, 2.4, 16, -1.2, "px_nether_wart", VINE_DARK, c))
+	return c
+end
+-- a dead tree: a dark log trunk with three bare limbs (each turning up at the end), a few red vine blobs
+local function deadTree(x, z, h, f, blobs)
+	local t = folder("DeadTree", f)
+	box("Trunk", x - 2, 0, z - 2, x + 2, h, z + 2, "px_dark_oak_log", C.bark, t)
+	local dirs = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }
+	local first = rng:NextInteger(1, 4)
+	for i = 0, 2 do
+		local d = dirs[(first + i - 1) % 4 + 1]
+		local y = math.max(6, h - 3 - i * 4)
+		local len = rng:NextInteger(1, 2) * 4
+		local ex, ez = x + d[1] * (2 + len), z + d[2] * (2 + len)
+		if d[1] ~= 0 then
+			box("Branch", x + d[1] * 2, y, z - 1.5, ex, y + 3, z + 1.5, "px_dark_oak_log", C.bark, t)
+		else
+			box("Branch", x - 1.5, y, z + d[2] * 2, x + 1.5, y + 3, ez, "px_dark_oak_log", C.bark, t)
+		end
+		local up = rng:NextInteger(1, 2) * 4
+		local cx, cz = ex - d[1] * 1.5, ez - d[2] * 1.5
+		box("Branch", cx - 1.5, y + 3, cz - 1.5, cx + 1.5, y + 3 + up, cz + 1.5, "px_dark_oak_log", C.bark, t)
+		if blobs and rng:NextNumber() < 0.6 then
+			decor(box("TreeVine", cx - 2, y + 3 + up, cz - 2, cx + 2, y + 7 + up, cz + 2, "px_nether_wart", VINE_RED, t))
+		end
+	end
+	decor(box("RootMoss", x - 6, 0, z - 6, x + 6, 0.3, z + 6, "px_crimson_nylium", nil, t))
+	return t
+end
+-- the world (local) point of a lot-local point (lx along the front, lz back from the lot front)
+local function toWorld(L, lx, lz)
+	if L.face == "N" then
+		return L.x + lx, L.z + lz
+	elseif L.face == "S" then
+		return L.x - lx, L.z - lz
+	elseif L.face == "E" then
+		return L.x - lz, L.z + lx
+	end
+	return L.x + lz, L.z - lx
+end
+
+-- ================================================================ the houses
+-- A lot: front edge at local z 0 (on the street side), the porch z 0..8, the house body z 8..8+D, x ±W/2 (+2 for
+-- the chimney and fences, +16 on the garage side). design 1: front-gable, half porch on the door side, a lawn on
+-- the other; design 2: side-gable, full porch, a dormer, the chimney on the ridge. m mirrors the door side,
+-- g = garage side (±1), rift / cocoon = the side wall that carries it, fence = a picket fence along that side.
+local function house(L, idx)
+	local W, D = L.w, L.d
+	local hw, F, WT = W / 2, 8, 20
+	local zb = F + D
+	local g = L.g or 0
+	local x0, x1 = -hw - 2, hw + 2
+	if g < 0 then
+		x0 = -hw - 16
+	elseif g > 0 then
+		x1 = hw + 16
+	end
+	-- the lot must sit on the island (12 studs off the rim) and off every street (4 studs)
+	for i = 0, 8 do
+		local t = i / 8
+		for _, p in ipairs({ { x0 + (x1 - x0) * t, 0 }, { x0 + (x1 - x0) * t, zb + 2 }, { x0, (zb + 2) * t }, { x1, (zb + 2) * t } }) do
+			local wx, wz = toWorld(L, p[1], p[2])
+			if not onMain(wx, wz, 12) or onStreet(wx, wz, 4) then
+				warn(("[build-inside-out] house %d skipped: lot off the island or on a street at (%d, %d)"):format(idx, wx, wz))
+				return
+			end
+		end
+	end
+	do
+		local ax, az = toWorld(L, x0, 0)
+		local bx, bz = toWorld(L, x1, zb + 2)
+		addOcc(ax, az, bx, bz)
+	end
+	local f = folder("House" .. idx, town)
+	local cf = at(L.x, 0, L.z) * CFrame.Angles(0, FACE_YAW[L.face], 0)
+	local wv, wt = C.walls[L.col][1], C.walls[L.col][2]
+	local m = L.m or 1
+	local roofT = if L.brown then C.roofBrown else C.roof
+	local d1 = L.design == 1
+	local dx = if d1 then -6 * m else 0
+	local cs = if g ~= 0 then -g elseif L.rift then -L.rift else m -- the chimney side
+	-- the body: a cobble foundation, one box of clapboard, white corner boards and a floor band
+	lb(cf, "Foundation", -hw - 0.3, 0, F - 0.3, hw + 0.3, 2, zb + 0.3, "px_cobblestone", C.found, f)
+	lb(cf, "Walls", -hw, 2, F, hw, WT, zb, wv, wt, f)
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, zz in ipairs({ F, zb }) do
+			decor(lb(cf, "CornerBoard", sx * hw - 0.7, 2, zz - 0.7, sx * hw + 0.7, WT, zz + 0.7, "px_white_wool", C.trim, f))
+		end
+	end
+	decor(lb(cf, "Band", -hw, 11, F - 0.3, hw, 12, F, "px_white_wool", C.trim, f))
+	-- the porch: a plank deck, white posts, a slate roof, railings either side of the walk to the door
+	local px0, px1 = -hw + 1, hw - 1
+	if d1 then
+		px0, px1 = if m == 1 then -hw + 1 else -2, if m == 1 then 2 else hw - 1
+	end
+	lb(cf, "Porch", px0, 0, 0.5, px1, 1, F, "px_spruce_planks", C.deck, f)
+	decor(lb(cf, "PorchRoof", px0 - 0.6, 11, 0, px1 + 0.6, 12, F, ROOF, roofT, f))
+	local posts = { px0 + 0.6, px1 - 0.6 }
+	if not d1 then
+		table.insert(posts, -hw / 3)
+		table.insert(posts, hw / 3)
+	end
+	for _, x in ipairs(posts) do
+		lb(cf, "PorchPost", x - 0.6, 1, 0.6, x + 0.6, 11, 1.8, "px_white_wool", C.trim, f)
+	end
+	if dx - 3 > px0 + 1 then
+		decor(lb(cf, "Railing", px0 + 1, 3, 0.8, dx - 3, 3.6, 1.6, "px_white_wool", C.trim, f))
+	end
+	if px1 - 1 > dx + 3 then
+		decor(lb(cf, "Railing", dx + 3, 3, 0.8, px1 - 1, 3.6, 1.6, "px_white_wool", C.trim, f))
+	end
+	decor(lb(cf, "DoorFrame", dx - 2.7, 1, F - 0.25, dx + 2.7, 10.7, F, "px_white_wool", C.trim, f))
+	lb(cf, "Door", dx - 2, 1, F - 0.45, dx + 2, 10, F, "px_dark_oak_planks", C.door, f)
+	-- windows: front, sides (none behind the garage, none above the rift), back
+	if d1 then
+		win(cf, "z", F, -1, 6 * m, 4, 6, 6, f)
+		win(cf, "z", F, -1, -6, 13.5, 4, 4.5, f)
+		win(cf, "z", F, -1, 6, 13.5, 4, 4.5, f)
+	else
+		win(cf, "z", F, -1, -9, 4, 4, 6, f)
+		win(cf, "z", F, -1, 9, 4, 4, 6, f)
+		for _, a in ipairs({ -9, 0, 9 }) do
+			win(cf, "z", F, -1, a, 13.5, 4, 4.5, f)
+		end
+	end
+	for _, sx in ipairs({ -1, 1 }) do
+		local za = if d1 then F + D * 0.3 else F + D / 2
+		if g ~= sx then
+			win(cf, "x", sx * hw, sx, za, 4, 4, 6, f)
+		end
+		win(cf, "x", sx * hw, sx, za, 13.5, 4, 4.5, f)
+		if d1 and L.rift ~= sx then
+			win(cf, "x", sx * hw, sx, F + D * 0.7, 13.5, 4, 4.5, f)
+		end
+	end
+	win(cf, "z", zb, 1, if d1 then -6 else -9, 13.5, 4, 4.5, f)
+	win(cf, "z", zb, 1, if d1 then 6 else 9, 13.5, 4, 4.5, f)
+	-- the roof: stepped slate layers one block up and one block in; the gable ends filled with clapboard
+	local dorm = nil
+	if d1 then
+		for k = 0, 3 do
+			local h = hw + 2 - 4 * k
+			if h <= 0 then
+				break
+			end
+			lb(cf, "Roof", -h, WT + 4 * k, F - 2, h, WT + 4 * k + 4, zb + 2, ROOF, roofT, f)
+			if h - 4 > 0 then
+				lb(cf, "Gable", -(h - 4), WT + 4 * k, F - 2.2, h - 4, WT + 4 * k + 4, zb + 2.2, wv, wt, f)
+			end
+		end
+		win(cf, "z", F - 2.2, -1, 0, 24.6, 3, 3, f)
+		local zc = F + D / 2
+		lb(cf, "Chimney", cs * hw - 2, 0, zc - 2, cs * hw + 2, WT + 18, zc + 2, "px_red_brick", nil, f)
+		decor(lb(cf, "ChimneyCap", cs * hw - 2.5, WT + 18, zc - 2.5, cs * hw + 2.5, WT + 19, zc + 2.5, "px_blackstone", C.cap, f))
+	else
+		local hd, zc = D / 2 + 2, F + D / 2
+		for k = 0, 3 do
+			local h = hd - 4 * k
+			if h <= 0 then
+				break
+			end
+			lb(cf, "Roof", -hw - 2, WT + 4 * k, zc - h, hw + 2, WT + 4 * k + 4, zc + h, ROOF, roofT, f)
+			if h - 4 > 0 then
+				lb(cf, "Gable", -hw - 2.2, WT + 4 * k, zc - (h - 4), hw + 2.2, WT + 4 * k + 4, zc + (h - 4), wv, wt, f)
+			end
+		end
+		dorm = 0
+		lb(cf, "Dormer", -4, WT + 4, F - 1, 4, WT + 10, F + 8, wv, wt, f)
+		decor(lb(cf, "DormerRoof", -5, WT + 10, F - 2, 5, WT + 11, F + 9, ROOF, roofT, f))
+		win(cf, "z", F - 1, -1, 0, WT + 5, 3, 3.5, f)
+		local cx = cs * (hw - 6)
+		lb(cf, "Chimney", cx - 2, WT + 8, zc - 2, cx + 2, WT + 22, zc + 2, "px_red_brick", nil, f)
+		decor(lb(cf, "ChimneyCap", cx - 2.5, WT + 22, zc - 2.5, cx + 2.5, WT + 23, zc + 2.5, "px_blackstone", C.cap, f))
+	end
+	-- the garage (set back, flat slate roof, a white door, a grey drive to the lot front)
+	if g ~= 0 then
+		local a, b = math.min(g * hw, g * (hw + 16)), math.max(g * hw, g * (hw + 16))
+		local gz0 = zb - 22
+		lb(cf, "Garage", a, 0, gz0, b, 12, zb, wv, wt, f)
+		decor(lb(cf, "GarageRoof", a - 0.8, 12, gz0 - 0.8, b + 0.8, 13, zb + 0.8, ROOF, roofT, f))
+		lb(cf, "GarageDoor", a + 2, 0, gz0 - 0.3, b - 2, 9.5, gz0, "px_white_wool", C.trim, f)
+		decor(lb(cf, "GarageSlat", a + 2, 3, gz0 - 0.45, b - 2, 3.4, gz0, nil, C.metal, f))
+		decor(lb(cf, "GarageSlat", a + 2, 6.4, gz0 - 0.45, b - 2, 6.8, gz0, nil, C.metal, f))
+		decor(lb(cf, "Driveway", a + 1, 0, 0, b - 1, 0.12, gz0 - 0.3, "px_smooth_stone", C.drive, f))
+	end
+	-- the lawn of a front-gable house: a red hedge under the window or a trash can
+	if d1 and L.lawn == "hedge" then
+		lb(cf, "Hedge", m * 3, 0, F - 3.5, m * (hw - 1), 3, F - 0.4, "px_nether_wart", VINE_DARK, f)
+	elseif d1 and L.lawn == "trash" then
+		local tx = m * (hw - 2.5)
+		lb(cf, "TrashCan", tx - 1.2, 0, 1.8, tx + 1.2, 3.2, 4.2, "px_iron_block", C.can, f)
+		decor(lb(cf, "TrashLid", tx - 1.4, 3.2, 1.6, tx + 1.4, 3.6, 4.4, "px_iron_block", C.cap, f))
+	end
+	if L.fence then
+		picket(cf, "z", L.fence * (hw + 1.5), 0.5, F + 6, f)
+	end
+	-- the mailbox at the kerb
+	do
+		local mx = m * (hw - 1)
+		lb(cf, "MailPost", mx - 0.4, 0, -2.4, mx + 0.4, 3.4, -1.6, "px_dark_oak_planks", nil, f)
+		decor(lb(cf, "Mailbox", mx - 0.8, 3.4, -3.1, mx + 0.8, 4.8, -0.9, "px_iron_block", C.mail, f))
+		local wx, wz = toWorld(L, mx, -2)
+		addOcc(wx - 1.5, wz - 1.5, wx + 1.5, wz + 1.5)
+	end
+	-- overgrown: vine columns hanging from the eaves on the front and the sides, vine blobs on the roof steps,
+	-- a vine curtain off the porch roof, crimson moss on it
+	for _ = 1, rng:NextInteger(4, 6) do
+		local tint = if rng:NextNumber() < 0.5 then VINE_RED else VINE_DARK
+		local len = rng:NextInteger(2, 4) * 4
+		local side = rng:NextInteger(0, 2)
+		if side == 0 then
+			local x = -hw + 2 + 4 * rng:NextInteger(0, W / 4 - 1)
+			if math.abs(x - dx) >= 4.5 then
+				local bot = WT - len
+				if x > px0 - 2 and x < px1 + 2 then
+					bot = math.max(bot, 12)
+				end
+				decor(lb(cf, "Vine", x - 2, bot, F - 0.7, x + 2, WT + 0.6, F - 0.05, "px_nether_wart", tint, f))
+			end
+		else
+			local sx = if side == 1 then -1 else 1
+			local z = F + 2 + 4 * rng:NextInteger(0, D / 4 - 1)
+			local clash = g == sx
+				or (d1 and sx == cs and math.abs(z - (F + D / 2)) < 4.5)
+				or (L.rift == sx and math.abs(z - (zb - 5.5)) < 7)
+				or (L.cocoon == sx and math.abs(z - (F + 4.6)) < 6.5)
+			if not clash then
+				decor(lb(cf, "Vine", sx * (hw + 0.05), math.max(2, WT - len - 4), z - 2, sx * (hw + 0.7), WT + 0.6, z + 2, "px_nether_wart", tint, f))
+			end
+		end
+	end
+	for _ = 1, rng:NextInteger(1, 2) do
+		local k = rng:NextInteger(0, 1)
+		local s = if rng:NextNumber() < 0.5 then -1 else 1
+		local top = WT + 4 * k + 4
+		local tint = if rng:NextNumber() < 0.5 then VINE_RED else VINE_DARK
+		local x, z
+		if d1 then
+			x, z = s * (hw - 4 * k), F + 2 + 4 * rng:NextInteger(0, D / 4 - 1)
+		else
+			x, z = -hw + 2 + 4 * rng:NextInteger(0, W / 4 - 1), F + D / 2 + s * (D / 2 - 4 * k)
+		end
+		local hitsDormer = dorm and s < 0 and k == 0 and math.abs(x - dorm) < 7
+		if not hitsDormer then
+			decor(lb(cf, "RoofVine", x - 2, top, z - 2, x + 2, top + 4, z + 2, "px_nether_wart", tint, f))
+		end
+	end
+	if rng:NextNumber() < 0.6 then
+		local vx = if d1 then 0 else px0 + 2
+		decor(lb(cf, "PorchVine", vx - 2, 6, -0.6, vx + 2, 12, 0, "px_nether_wart", VINE_RED, f))
+	end
+	if rng:NextNumber() < 0.5 then
+		local a = math.min(px0 + 1, px1 - 9)
+		decor(lb(cf, "PorchMoss", a, 12, 0.5, a + 8, 12.3, F - 0.5, "px_crimson_nylium", nil, f))
+	end
+	if L.rift then
+		rift(cf * CFrame.new(L.rift * hw, 2, zb - 5.5) * CFrame.Angles(0, -L.rift * math.pi / 2, 0), f)
+	end
+	if L.cocoon then
+		cocoon(cf * CFrame.new(L.cocoon * hw, 6, F + 4.6) * CFrame.Angles(0, -L.cocoon * math.pi / 2, 0), f)
+	end
+	return f
+end
+
+-- every lot fronts a street (checked: all corners onMain(…, 12), nothing within 4 studs of a street)
+local LOTS = {
+	-- NW: the west street and the ring road
+	{ x = -182, z = -26, face = "S", design = 2, w = 28, d = 24, col = 1, m = 1, fence = -1, brown = true },
+	{ x = -146, z = -26, face = "S", design = 1, w = 24, d = 28, col = 2, m = -1, lawn = "hedge" },
+	{ x = -128, z = -96, face = "E", design = 1, w = 24, d = 28, col = 3, m = 1, lawn = "trash", fence = 1 },
+	{ x = -128, z = -136, face = "E", design = 2, w = 28, d = 24, col = 4, m = -1, cocoon = 1 },
+	-- NNW: the ring road (the alphabet wall next door; house 6 carries a rift on its side toward it)
+	{ x = -88, z = -132, face = "S", design = 1, w = 24, d = 28, col = 5, m = 1, lawn = "hedge" },
+	{ x = -56, z = -132, face = "S", design = 1, w = 24, d = 28, col = 6, m = -1, rift = -1, lawn = "trash" },
+	-- NNE
+	{ x = 34, z = -132, face = "S", design = 2, w = 28, d = 24, col = 7, m = 1, fence = 1, brown = true },
+	{ x = 68, z = -132, face = "S", design = 1, w = 24, d = 28, col = 8, m = 1, g = -1 },
+	-- NE (the church at 164, -26)
+	{ x = 128, z = -112, face = "W", design = 2, w = 28, d = 24, col = 2, m = 1, rift = 1 },
+	{ x = 128, z = -144, face = "W", design = 1, w = 20, d = 24, col = 3, m = -1, lawn = "hedge" },
+	-- SW: the west street, the ring road and the SW street
+	{ x = -182, z = 10, face = "N", design = 1, w = 24, d = 28, col = 4, m = -1, lawn = "trash", fence = -1 },
+	{ x = -148, z = 10, face = "N", design = 2, w = 28, d = 24, col = 5, m = 1, brown = true },
+	{ x = -132, z = 80, face = "E", design = 2, w = 28, d = 24, col = 6, m = 1, fence = -1 },
+	{ x = -132, z = 122, face = "E", design = 1, w = 24, d = 28, col = 1, m = 1, rift = -1, lawn = "hedge" },
+	-- SE: the east street, the ring road (the school bus parks by house 17)
+	{ x = 182, z = 10, face = "N", design = 2, w = 28, d = 24, col = 7, m = -1 },
+	{ x = 148, z = 10, face = "N", design = 1, w = 24, d = 28, col = 8, m = 1, lawn = "hedge" },
+	{ x = 132, z = 84, face = "W", design = 1, w = 24, d = 28, col = 1, m = -1, g = 1 },
+	{ x = 132, z = 124, face = "W", design = 2, w = 28, d = 24, col = 3, m = 1, cocoon = -1, brown = true },
+	-- SSW / SSE: the ring road south
+	{ x = -84, z = 128, face = "N", design = 2, w = 28, d = 24, col = 2, m = -1, fence = 1 },
+	{ x = -44, z = 128, face = "N", design = 1, w = 24, d = 28, col = 5, m = 1, g = 1 },
+	{ x = 52, z = 128, face = "N", design = 1, w = 24, d = 28, col = 6, m = -1, lawn = "trash" },
+	{ x = 84, z = 128, face = "N", design = 2, w = 28, d = 24, col = 4, m = 1, brown = true },
+}
+for i, L in ipairs(LOTS) do
+	house(L, i)
+	if i % 6 == 0 then
+		task.wait()
+	end
+end
+task.wait()
+
+-- ================================================================ the church (NE, facing the east street)
+do
+	local f = folder("Church", town)
+	local cf = at(164, 0, -26) * CFrame.Angles(0, math.pi, 0)
+	local WH, WT = "px_white_wool", C.church
+	local DARK = Color3.fromRGB(70, 64, 74)
+	addOcc(148, -92, 180, -24)
+	lb(cf, "Step", -8, 0, 0, 8, 1, 3, "px_stone_bricks", C.found, f)
+	lb(cf, "Step", -8, 0, 3, 8, 2, 6.2, "px_stone_bricks", C.found, f)
+	lb(cf, "Foundation", -14.3, 0, 13.7, 14.3, 2, 62.3, "px_cobblestone", C.found, f)
+	lb(cf, "TowerFoot", -6.3, 0, 5.7, 6.3, 2, 18.3, "px_cobblestone", C.found, f)
+	lb(cf, "Nave", -14, 2, 14, 14, 22, 62, WH, WT, f)
+	lb(cf, "Tower", -6, 2, 6, 6, 31, 18, WH, WT, f)
+	-- the nave roof: stepped slate, the gable ends white
+	for k = 0, 3 do
+		local h = 16 - 4 * k
+		lb(cf, "Roof", -h, 22 + 4 * k, 12, h, 26 + 4 * k, 64, ROOF, C.roof, f)
+		if k < 3 then
+			lb(cf, "Gable", -(h - 4), 22 + 4 * k, 11.8, h - 4, 26 + 4 * k, 64.2, WH, WT, f)
+		end
+	end
+	-- the steeple: a band, the belfry with dark openings, a cornice, stepped stages, the dark spire and the cross
+	decor(lb(cf, "TowerBand", -6.5, 31, 5.5, 6.5, 32, 18.5, "px_dark_oak_planks", nil, f))
+	lb(cf, "Belfry", -6, 32, 6, 6, 40, 18, WH, WT, f)
+	decor(lb(cf, "BelfryOpening", -2, 33, 5.6, 2, 39, 18.4, "px_blackstone", Color3.fromRGB(60, 50, 56), f))
+	decor(lb(cf, "BelfryOpening", -6.4, 33, 10, 6.4, 39, 14, "px_blackstone", Color3.fromRGB(60, 50, 56), f))
+	lb(cf, "Cornice", -7, 40, 5, 7, 41, 19, ROOF, C.roof, f)
+	lb(cf, "Steeple", -5, 41, 7, 5, 45, 17, WH, WT, f)
+	lb(cf, "Steeple", -4, 45, 8, 4, 50, 16, ROOF, C.roof, f)
+	lb(cf, "Steeple", -3, 50, 9, 3, 56, 15, ROOF, C.roof, f)
+	lb(cf, "Spire", -2, 56, 10, 2, 62, 14, "px_blackstone", DARK, f)
+	lb(cf, "Spire", -1, 62, 11, 1, 68, 13, "px_blackstone", DARK, f)
+	lc(cf, "Cross", 0.8, 7, 0.8, 0, 71.5, 12, Color3.fromRGB(40, 38, 44), Enum.Material.Metal, f)
+	lc(cf, "Cross", 4, 0.8, 0.8, 0, 72.6, 12, Color3.fromRGB(40, 38, 44), Enum.Material.Metal, f)
+	-- the doors and windows (dark frames on the white walls)
+	decor(lb(cf, "DoorFrame", -4, 2, 5.7, 4, 14, 6, "px_dark_oak_planks", Color3.fromRGB(110, 86, 74), f))
+	lb(cf, "Door", -3, 2, 5.45, 3, 12, 6, "px_dark_oak_planks", C.door, f)
+	decor(lb(cf, "DoorArch", -2, 12, 5.45, 2, 13.4, 6, "px_dark_oak_planks", C.door, f))
+	win(cf, "z", 6, -1, 0, 18, 4, 4, f, DARK)
+	for _, s in ipairs({ -1, 1 }) do
+		win(cf, "z", 14, -1, s * 10, 8, 4, 8, f, DARK)
+		for _, z in ipairs({ 24, 34, 44, 54 }) do
+			if not (s == 1 and z == 54) then
+				win(cf, "x", s * 14, s, z, 6, 4, 10, f, DARK)
+				decor(lb(cf, "WinPoint", s * 14, 16.6, z - 1, s * (14 + 0.4), 18, z + 1, "px_blackstone", C.glass, f))
+			end
+		end
+	end
+	-- the rift on the west wall (local +x), a cocoon on the back wall
+	rift(cf * CFrame.new(14, 2, 54) * CFrame.Angles(0, -math.pi / 2, 0), f)
+	cocoon(cf * CFrame.new(-6, 6, 62) * CFrame.Angles(0, math.pi, 0), f)
+	-- vines: columns down the nave walls and the tower, blobs on the roof steps
+	for _, v in ipairs({ { -1, 19, 12 }, { -1, 39, 16 }, { -1, 59, 8 }, { 1, 29, 14 }, { 1, 39, 10 }, { 1, 49, 16 } }) do
+		local s = v[1]
+		decor(lb(cf, "Vine", s * 14.05, 22.6 - v[3], v[2] - 2, s * 14.7, 22.6, v[2] + 2, "px_nether_wart", if v[3] > 12 then VINE_DARK else VINE_RED, f))
+	end
+	decor(lb(cf, "Vine", 2, 20, 5.3, 6, 31.5, 5.95, "px_nether_wart", VINE_RED, f))
+	decor(lb(cf, "Vine", -6.7, 8, 8, -6.05, 31.5, 12, "px_nether_wart", VINE_DARK, f))
+	for _, v in ipairs({ { -14, 26, 30 }, { 14, 26, 42 }, { -10, 30, 50 } }) do
+		decor(lb(cf, "RoofVine", v[1] - 2, v[2], v[3] - 2, v[1] + 2, v[2] + 4, v[3] + 2, "px_nether_wart", VINE_RED, f))
+	end
+	decor(lb(cf, "Moss", -8, 0.05, -2, 8, 0.35, 0, "px_crimson_nylium", nil, f))
+	light(lc(cf, "BelfryGlow", 1, 1, 1, 0, 35, 12, GLOW_RED, Enum.Material.Neon, f), 18, 1.2, GLOW_RED)
+end
+task.wait()
+
+-- ================================================================ street markings and broken asphalt
+do
+	local f = folder("StreetMarkings", town)
+	local RING_C = { { -106, -114, 106, -114 }, { 106, -114, 106, 110 }, { 106, 110, -106, 110 }, { -106, 110, -106, -114 } }
+	local segs = {}
+	for _, s in ipairs(STREETS) do
+		table.insert(segs, { s[1], s[2], s[3], s[4] })
+	end
+	for _, s in ipairs(RING_C) do
+		table.insert(segs, s)
+	end
+	-- yellow dashes 8 long every 16 along every centre line (none near the rim)
+	for _, s in ipairs(segs) do
+		local ax, az, bx, bz = s[1], s[2], s[3], s[4]
+		local len = math.sqrt((bx - ax) ^ 2 + (bz - az) ^ 2)
+		for i = 0, math.floor(len / 16) - 1 do
+			local t0, t1 = (i * 16 + 4) / len, (i * 16 + 12) / len
+			local x0, z0 = ax + (bx - ax) * t0, az + (bz - az) * t0
+			local x1, z1 = ax + (bx - ax) * t1, az + (bz - az) * t1
+			if onMain(x0, z0, 10) and onMain(x1, z1, 10) then
+				local mid = V((x0 + x1) / 2, 0.075, (z0 + z1) / 2)
+				local p = part("CentreLine", Vector3.new(0.8, 0.15, 8), CFrame.lookAt(mid, V(x1, 0.075, z1)), nil, nil, f)
+				textured(decor(p), "px_yellow_wool", LINE_YELLOW)
+			end
+		end
+	end
+	-- heaved slabs, potholes and cracks off the centre lines
+	for _ = 1, 22 do
+		local s = pick(segs)
+		local ax, az, bx, bz = s[1], s[2], s[3], s[4]
+		local len = math.sqrt((bx - ax) ^ 2 + (bz - az) ^ 2)
+		local t = rng:NextNumber(0.08, 0.92)
+		local off = (if rng:NextNumber() < 0.5 then -1 else 1) * rng:NextNumber(4, 7)
+		local x = ax + (bx - ax) * t - (bz - az) / len * off
+		local z = az + (bz - az) * t + (bx - ax) / len * off
+		if onMain(x, z, 14) and onStreet(x, z, -2) then
+			local r = rng:NextNumber()
+			local sx, sz = snap(x) + 2, snap(z) + 2
+			if r < 0.4 then
+				local p = part("BrokenAsphalt", Vector3.new(4, 1, 4), at(sx, 0.2, sz) * CFrame.Angles(rng:NextNumber(-0.25, 0.25), rng:NextNumber(0, 1.5), rng:NextNumber(-0.25, 0.25)), nil, nil, f)
+				textured(decor(p), "px_smooth_stone", ASPHALT)
+			elseif r < 0.7 then
+				decor(box("Pothole", sx - 2, -0.05, sz - 2, sx + 2, 0.07, sz + 2, "px_blackstone", Color3.fromRGB(60, 50, 56), f))
+			else
+				local p = part("Crack", Vector3.new(0.5, 0.08, rng:NextNumber(6, 12)), at(x, 0.04, z) * CFrame.Angles(0, rng:NextNumber(0, math.pi), 0), nil, nil, f)
+				textured(decor(p), "px_blackstone", Color3.fromRGB(40, 36, 40))
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the square round the mine
+do
+	local f = folder("Square", town)
+	local E = 76
+	-- the oak fence ring with stone-brick pillars; gaps at the four ladder shafts (4 blocks + 1 block margin)
+	local function seg(ax, az, bx, bz, skipA, skipB)
+		local alongX = az == bz
+		local len = if alongX then math.abs(bx - ax) else math.abs(bz - az)
+		for _, h in ipairs({ 1.4, 3 }) do
+			if alongX then
+				box("FenceRail", ax, h, az - 0.3, bx, h + 0.6, az + 0.3, "px_planks", C.oak, f)
+			else
+				box("FenceRail", ax - 0.3, h, az, ax + 0.3, h + 0.6, bz, "px_planks", C.oak, f)
+			end
+		end
+		local n = math.floor(len / 8 + 0.5)
+		for i = 0, n do
+			local x, z = ax + (bx - ax) * i / n, az + (bz - az) * i / n
+			if i % 2 == 0 then
+				if not ((i == 0 and skipA) or (i == n and skipB)) then
+					box("FencePillar", x - 2, 0, z - 2, x + 2, 6, z + 2, "px_stone_bricks", C.stone, f)
+				end
+			else
+				box("FencePost", x - 0.6, 0, z - 0.6, x + 0.6, 4, z + 0.6, "px_planks", C.oak, f)
+			end
+		end
+	end
+	seg(-E, -84, -14, -84)
+	seg(14, -84, E, -84)
+	seg(-E, 68, -14, 68)
+	seg(14, 68, E, 68)
+	seg(-E, -84, -E, -22, true, false)
+	seg(-E, 6, -E, 68, false, true)
+	seg(E, -84, E, -22, true, false)
+	seg(E, 6, E, 68, false, true)
+	-- vine curtains hanging on the fence
+	for _, v in ipairs({ { -50, -84, true }, { 38, -84, true }, { -E, -46, false }, { E, 30, false }, { -30, 68, true }, { E, -60, false } }) do
+		if v[3] then
+			decor(box("FenceVine", v[1] - 2, 0.6, v[2] - 0.7, v[1] + 2, 4, v[2] + 0.7, "px_nether_wart", VINE_RED, f))
+		else
+			decor(box("FenceVine", v[1] - 0.7, 0.6, v[2] - 2, v[1] + 0.7, 4, v[2] + 2, "px_nether_wart", VINE_DARK, f))
+		end
+	end
+	-- lamp posts (warm lanterns)
+	for _, l in ipairs({ { -86, -94, -math.pi / 2 }, { 56, -94, 0 }, { -86, 90, -math.pi / 2 }, { 86, 90, math.pi / 2 }, { -86, 14, -math.pi / 2 }, { 86, -30, math.pi / 2 } }) do
+		lampPost(l[1], l[2], f, false, l[3])
+		addOcc(l[1] - 3, l[2] - 3, l[1] + 3, l[2] + 3)
+	end
+	-- benches
+	local function bench(x, z, alongX, back)
+		local cf = at(x, 0, z) * CFrame.Angles(0, if alongX then 0 else math.pi / 2, 0)
+		lb(cf, "BenchSeat", -4, 1.8, -1.2, 4, 2.4, 1.2, "px_spruce_planks", nil, f)
+		lb(cf, "BenchBack", -4, 2.4, back * 1.2 - 0.25, 4, 4.6, back * 1.2 + 0.25, "px_spruce_planks", nil, f)
+		for _, sx in ipairs({ -3.4, 3.4 }) do
+			lb(cf, "BenchLeg", sx - 0.5, 0, -1.2, sx + 0.5, 1.8, 1.2, "px_dark_oak_planks", nil, f)
+		end
+		addOcc(x - 5, z - 5, x + 5, z + 5)
+	end
+	bench(-40, -97, true, -1)
+	bench(36, -97, true, -1)
+	bench(-88, 40, false, 1)
+	bench(88, -56, false, 1)
+	-- crates and barrels
+	crate(-44, 0, 92, f)
+	crate(-40, 0, 92, f, 4, 0.3)
+	crate(-44, 4, 92, f, 3.4, 0.2)
+	barrel(-36, 0, 93, f)
+	barrel(62, 0, 92, f)
+	crate(66, 0, 92, f, 4, 0.5)
+	barrel(66, 0, 87, f, "px_nether_wart")
+	crate(-88, 0, -74, f)
+	barrel(-88, 0, -70, f)
+	addOcc(-47, 89, -33, 96)
+	addOcc(59, 84, 69, 95)
+	addOcc(-91, -77, -85, -67)
+	-- two dead trees (a cocoon hangs from the first)
+	deadTree(-86, -56, 20, f, true)
+	cocoon(at(-86, 3, -49) * CFrame.Angles(0, math.pi, 0), f)
+	addOcc(-90, -60, -82, -52)
+	deadTree(86, 36, 16, f, true)
+	addOcc(82, 32, 90, 40)
+	-- the overturned car in the north-east corner
+	addOcc(78, -104, 94, -84)
+	-- growth on the square: vine bushes, crimson carpets, ash, never on the ladder paths, the arrival or the stall
+	local placed = 0
+	for _ = 1, 400 do
+		if placed >= 34 then
+			break
+		end
+		local x, z = snap(rng:NextNumber(-92, 92)) + 2, snap(rng:NextNumber(-100, 96)) + 2
+		local onPath = (math.abs(x) < 16 and (z > 50 or z < -78)) or (math.abs(z + 8) < 16 and math.abs(x) > 70)
+		local nearSpawn = math.sqrt((x - SPAWN.x) ^ 2 + (z - SPAWN.z) ^ 2) < 16
+		if not inPitArea(x, z, 8) and not onPath and not nearSpawn and not inRect(x, z, { 18, 70, 50, 98 }) and isFree(x, z, 4) then
+			placed += 1
+			local r = rng:NextNumber()
+			if r < 0.3 then
+				box("VineBush", x - 2, 0, z - 2, x + 2, 4, z + 2, "px_nether_wart", pick({ VINE_RED, VINE_DARK }), f)
+			elseif r < 0.65 then
+				local s = pick({ 4, 8 })
+				decor(box("VineCarpet", x - s, 0, z - s / 2 - 2, x + s, 0.3, z + s / 2 + 2, "px_crimson_nylium", nil, f))
+			else
+				decor(box("Ash", x - 4, 0, z - 4, x + 4, 0.4, z + 4, "px_white_wool", ASH, f))
+				if r > 0.85 then
+					decor(box("Ash", x - 2, 0.4, z - 2, x + 2, 0.8, z + 2, "px_white_wool", ASH, f))
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ vehicles: the school bus, the overturned car, two wrecks
+local function car(cf, paint, flipped, f)
+	local c = folder(if flipped then "OverturnedCar" else "WreckedCar", f)
+	local k = cf
+	if flipped then
+		k = cf * CFrame.new(0, 7.6, 0) * CFrame.Angles(0.06, 0, math.pi)
+	end
+	lb(k, "CarBody", -4, 1.4, -8, 4, 4.4, 8, "px_iron_block", paint, c)
+	lb(k, "CarCabin", -3.6, 4.4, -3, 3.6, 7.4, 4.5, "px_iron_block", paint, c)
+	decor(lb(k, "CarGlass", -3.8, 4.9, -2.6, 3.8, 7, 4.1, "px_blackstone", C.glass, c))
+	decor(lb(k, "CarGlass", -3.1, 4.9, -3.2, 3.1, 7, 4.7, "px_blackstone", C.glass, c))
+	decor(lb(k, "CarTrim", -4.2, 1.4, -8.4, 4.2, 2.4, 8.4, "px_iron_block", C.metal, c))
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, sz in ipairs({ -5, 5 }) do
+			lb(k, "Wheel", sx * 3.6, 0, sz - 1.5, sx * 4.4, 3, sz + 1.5, "px_blackstone", C.tyre, c)
+		end
+		decor(lb(k, "Headlight", sx * 2.6 - 0.8, 2.8, -8.5, sx * 2.6 + 0.8, 3.6, -8.1, nil, Color3.fromRGB(210, 200, 170), c))
+	end
+	if not flipped then
+		decor(lb(k, "CarMoss", -3, 7.4, -2, 1.5, 7.8, 3.5, "px_crimson_nylium", nil, c))
+		decor(lb(k, "CarVine", 4, 2.5, -1, 4.6, 7.4, 3, "px_nether_wart", VINE_RED, c))
+	else
+		decor(lb(cf, "CarVine", 4.2, 0, -6, 8.2, 4, -2, "px_nether_wart", VINE_DARK, c))
+		decor(lb(cf, "CarAsh", -9, 0, 2, -3, 0.4, 10, "px_white_wool", ASH, c))
+	end
+	return c
+end
+do
+	local f = folder("Vehicles", town)
+	-- the yellow school bus at the kerb of the ring road east (one block on the asphalt: a 4-block lane stays)
+	do
+		local cf = at(119, 0, 36) * CFrame.Angles(0, 0, 0.03)
+		local b = folder("SchoolBus", f)
+		local Y = C.bus
+		local BLACK = Color3.fromRGB(26, 24, 28)
+		lb(cf, "BusBody", -6, 2, -14, 6, 12, 20, "px_yellow_wool", Y, b)
+		lb(cf, "BusRoof", -5.4, 12, -13.4, 5.4, 13, 19.4, "px_yellow_wool", Y, b)
+		lb(cf, "BusHood", -5, 2, -20, 5, 8, -14, "px_yellow_wool", Y, b)
+		decor(lb(cf, "BusGrille", -3.5, 3, -20.3, 3.5, 7, -20, "px_iron_block", C.metal, b))
+		lb(cf, "BusBumper", -5.5, 1.6, -20.8, 5.5, 3, -20, "px_blackstone", C.tyre, b)
+		lb(cf, "BusBumper", -6, 1.6, 20, 6, 3, 20.6, "px_blackstone", C.tyre, b)
+		decor(lb(cf, "BusWindows", -6.2, 7, -12, 6.2, 10.6, 18.5, "px_blackstone", C.glass, b))
+		decor(lb(cf, "BusWindshield", -5.4, 7, -14.3, 5.4, 11, -13.9, "px_blackstone", C.glass, b))
+		decor(lb(cf, "BusRearWindow", -4.6, 7, 19.9, 4.6, 10.6, 20.3, "px_blackstone", C.glass, b))
+		for _, z in ipairs({ -6.5, -1, 4.5, 10, 15.5 }) do
+			decor(lb(cf, "BusPost", -6.35, 7, z - 0.5, 6.35, 10.6, z + 0.5, "px_yellow_wool", Y, b))
+		end
+		decor(lb(cf, "BusStripe", -6.15, 5.6, -14, 6.15, 6.2, 20.1, nil, BLACK, b))
+		decor(lb(cf, "BusStripe", -6.15, 3.8, -14, 6.15, 4.3, 20.1, nil, BLACK, b))
+		decor(lb(cf, "BusDoor", 6, 3, -13, 6.35, 11, -9, "px_blackstone", C.glass, b))
+		lc(cf, "StopArm", 0.25, 2.4, 2.4, -6.5, 8.8, -11, Color3.fromRGB(190, 30, 30), Enum.Material.SmoothPlastic, b)
+		for _, sx in ipairs({ -1, 1 }) do
+			for _, z in ipairs({ -15.5, 13 }) do
+				lb(cf, "BusWheel", sx * 5.4, 0, z - 2, sx * 6.6, 4.4, z + 2, "px_blackstone", C.tyre, b)
+			end
+			decor(lb(cf, "BusLight", sx * 3.8 - 0.8, 5.5, -20.3, sx * 3.8 + 0.8, 7, -20, nil, Color3.fromRGB(220, 210, 170), b))
+		end
+		local plate = decor(lb(cf, "BusSign", -4.5, 11.2, -14.45, 4.5, 12.7, -14.15, "px_yellow_wool", Color3.fromRGB(220, 150, 30), b))
+		boardText(plate, "ШКОЛЬНЫЙ АВТОБУС", Color3.fromRGB(20, 18, 18), { Enum.NormalId.Front })
+		-- overgrown and ash-covered
+		decor(lb(cf, "BusMoss", -4, 13, 2, 3, 13.4, 14, "px_crimson_nylium", nil, b))
+		decor(lb(cf, "BusVine", 1, 13, -10, 5, 16, -6, "px_nether_wart", VINE_RED, b))
+		decor(lb(cf, "BusVine", 6.05, 5, 4, 6.7, 13, 8, "px_nether_wart", VINE_DARK, b))
+		decor(lb(cf, "BusAsh", -5, 13, -12, -1, 13.3, -4, "px_white_wool", ASH, b))
+		addOcc(112, 14, 126, 58)
+	end
+	car(at(86, 0, -94) * CFrame.Angles(0, 0.3, 0), Color3.fromRGB(200, 196, 186), true, f)
+	car(at(-176, 0, 3.5) * CFrame.Angles(0, math.pi / 2 + 0.05, 0), Color3.fromRGB(120, 150, 170), false, f)
+	addOcc(-186, -2, -166, 9)
+	car(at(48, 0, 121) * CFrame.Angles(0, math.pi / 2 - 0.06, 0), Color3.fromRGB(170, 70, 60), false, f)
+	addOcc(38, 115, 58, 127)
+end
+task.wait()
+
+-- ================================================================ the alphabet wall and the bicycle (NNW, by the north street)
+do
+	local f = folder("AlphabetWall", town)
+	addOcc(-26, -178, -18, -138)
+	box("Wall", -24, 0, -172, -20, 16, -144, "px_planks", Color3.fromRGB(226, 196, 150), f)
+	box("WallPillar", -25, 0, -176, -19, 20, -172, "px_red_brick", nil, f)
+	box("WallPillar", -25, 0, -144, -19, 20, -140, "px_red_brick", nil, f)
+	box("WallCoping", -24.5, 16, -172, -19.5, 17.5, -144, "px_red_brick", nil, f)
+	-- the hand-painted letters in three rows
+	for i, row in ipairs({ "A B C D E F G H", "I J K L M N O P Q", "R S T U V W X Y Z" }) do
+		local y = 17 - i * 4
+		local board = decor(part("Letters", Vector3.new(24, 3.4, 0.1), CFrame.lookAt(V(-19.94, y, -158), V(-10, y, -158)), nil, nil, f))
+		board.Transparency = 1
+		boardText(board, row, Color3.fromRGB(34, 22, 18), { Enum.NormalId.Front })
+	end
+	-- the Christmas lights: coloured bulbs on a sagging black wire between the pillars (four of them light up)
+	do
+		local a, b = V(-18.8, 19.4, -174), V(-18.8, 19.4, -142)
+		local cols = {
+			Color3.fromRGB(255, 40, 40),
+			Color3.fromRGB(60, 220, 70),
+			Color3.fromRGB(60, 110, 255),
+			Color3.fromRGB(255, 220, 50),
+			Color3.fromRGB(255, 140, 30),
+		}
+		local n = 11
+		local prev = a
+		for i = 1, n do
+			local t = i / n
+			local p = a:Lerp(b, t) - Vector3.new(0, math.sin(t * math.pi) * 2, 0)
+			decor(beam("LightWire", prev, p, 0.15, C.wire, f))
+			if i < n then
+				local col = cols[(i - 1) % #cols + 1]
+				decor(part("Socket", Vector3.new(0.6, 0.5, 0.6), CFrame.new(p - Vector3.new(0, 0.35, 0)), C.wire, nil, f))
+				local bulb = decor(part("Bulb", Vector3.new(1, 1.3, 1), CFrame.new(p - Vector3.new(0, 1.2, 0)), col, Enum.Material.Neon, f))
+				if i % 3 == 1 then
+					light(bulb, 12, 1.4, col)
+				end
+			end
+			prev = p
+		end
+	end
+	-- vines over the south pillar and the coping, crimson moss at the foot of the wall
+	decor(box("WallVine", -19, 4, -176, -18.4, 20, -172, "px_nether_wart", VINE_DARK, f))
+	decor(box("WallVine", -25, 20, -176, -19, 24, -172, "px_nether_wart", VINE_RED, f))
+	decor(box("WallVine", -19.6, 9, -171, -19, 17.5, -168, "px_nether_wart", VINE_RED, f))
+	decor(box("WallVine", -24.5, 17.5, -160, -19.5, 18.5, -150, "px_crimson_nylium", nil, f))
+	decor(box("WallMoss", -20, 0, -176, -16, 0.3, -158, "px_crimson_nylium", nil, f))
+	-- the yard between the wall and house 6: a picket fence along the ring road, the bicycle leaning on it
+	picket(at(0, 0, 0), "x", -134, -42, -26, f)
+	addOcc(-43, -136, -25, -131)
+	do
+		local cfB = at(-33, 0, -132.7) * CFrame.Angles(-0.2, 0, 0)
+		local RED = Color3.fromRGB(196, 32, 34)
+		local BLACK = Color3.fromRGB(28, 26, 30)
+		local bk = folder("Bicycle", f)
+		local function wp(x, y)
+			return (cfB * CFrame.new(x, y, 0)).Position
+		end
+		for _, wx in ipairs({ -2.3, 2.3 }) do
+			lc(cfB, "Tyre", 2.8, 0.35, 0.3, wx, 2.625, 0, BLACK, nil, bk)
+			lc(cfB, "Tyre", 2.8, 0.35, 0.3, wx, 0.175, 0, BLACK, nil, bk)
+			lc(cfB, "Tyre", 0.35, 2.8, 0.3, wx - 1.225, 1.4, 0, BLACK, nil, bk)
+			lc(cfB, "Tyre", 0.35, 2.8, 0.3, wx + 1.225, 1.4, 0, BLACK, nil, bk)
+			lc(cfB, "Hub", 0.5, 0.5, 0.4, wx, 1.4, 0, C.metal, Enum.Material.Metal, bk)
+		end
+		for _, s in ipairs({
+			{ -2.3, 1.4, 0, 1.2 },
+			{ -2.3, 1.4, -0.8, 3.3 },
+			{ 0, 1.2, -0.8, 3.3 },
+			{ -0.8, 3.3, 1.8, 3.4 },
+			{ 0, 1.2, 1.8, 3.4 },
+			{ 1.8, 3.4, 2.3, 1.4 },
+			{ 1.8, 3.4, 1.9, 3.9 },
+		}) do
+			decor(beam("Frame", wp(s[1], s[2]), wp(s[3], s[4]), 0.3, RED, bk))
+		end
+		lc(cfB, "Handlebar", 0.3, 0.3, 1.8, 1.9, 3.95, 0, BLACK, nil, bk)
+		lc(cfB, "Saddle", 1.1, 0.3, 0.6, -0.9, 3.5, 0, BLACK, nil, bk)
+		lc(cfB, "Pedal", 0.8, 0.2, 0.4, 0.2, 0.8, 0.45, BLACK, nil, bk)
+	end
+	-- a dead tree in the yard
+	deadTree(-34, -160, 18, f, true)
+	addOcc(-38, -164, -30, -156)
+end
+task.wait()
+
+-- ================================================================ telephone poles, street lamps, hydrants, the town sign
+do
+	local f = folder("StreetProps", town)
+	-- a dead telephone pole: a stone foot, a dark log pole, two cross-arms across the street, vines hanging off
+	-- them; returns the two wire anchors at the ends of the top arm
+	local function telePole(x, z, alongX, h)
+		local p = folder("TelephonePole", f)
+		box("PoleFoot", x - 2.5, 0, z - 2.5, x + 2.5, 3, z + 2.5, "px_stone_bricks", C.stone, p)
+		box("Pole", x - 2, 3, z - 2, x + 2, h, z + 2, "px_dark_oak_log", C.bark, p)
+		local ux, uz = if alongX then 0 else 1, if alongX then 1 else 0
+		local function arm(half, y0, y1)
+			box("CrossArm", x - ux * half - uz * 1.2, y0, z - uz * half - ux * 1.2, x + ux * half + uz * 1.2, y1, z + uz * half + ux * 1.2, "px_dark_oak_planks", C.bark, p)
+		end
+		arm(9, h - 3, h - 0.6)
+		arm(6, h - 8, h - 5.6)
+		for _ = 1, rng:NextInteger(1, 2) do
+			local o = pick({ -7, -5, 5, 7 })
+			local len = rng:NextInteger(6, 12)
+			local vx, vz = x + ux * o, z + uz * o
+			decor(box("PoleVine", vx - 1, h - 3 - len, vz - 1, vx + 1, h - 3, vz + 1, "px_nether_wart", pick({ VINE_RED, VINE_DARK }), p))
+		end
+		if rng:NextNumber() < 0.35 then
+			decor(box("Transformer", x - ux * 3.5 - 1.5, h - 13, z - uz * 3.5 - 1.5, x - ux * 3.5 + 1.5, h - 8, z - uz * 3.5 + 1.5, "px_iron_block", C.metal, p))
+		end
+		if rng:NextNumber() < 0.5 then
+			decor(box("PoleVine", x - 2.6, 0, z - 2.6, x + 2.6, rng:NextInteger(5, 9), z - 2.05, "px_nether_wart", VINE_DARK, p))
+		end
+		return { V(x - ux * 8.4, h - 0.4, z - uz * 8.4), V(x + ux * 8.4, h - 0.4, z + uz * 8.4) }
+	end
+	local function wire(a, b)
+		local mid = (a + b) / 2 - Vector3.new(0, 1.6, 0)
+		decor(beam("Wire", a, mid, 0.2, C.wire, f))
+		decor(beam("Wire", mid, b, 0.2, C.wire, f))
+	end
+	local LINES = {
+		{ true, { -200, -22 }, { -170, -22 }, { -140, -22 } }, -- the west street, north side
+		{ true, { 126, 6 }, { 164, 6 }, { 200, 6 } }, -- the east street, south side
+		{ false, { -14, -140 }, { -14, -172 } }, -- the north street, west side
+		{ false, { 14, 140 }, { 14, 172 } }, -- the south street, east side
+		{ false, { -122, -110 }, { -122, -70 }, { -122, -40 } }, -- the ring road, outside
+		{ false, { -122, 30 }, { -122, 70 }, { -122, 104 } },
+		{ false, { 122, -110 }, { 122, -70 }, { 122, -40 } },
+		{ false, { 122, 74 }, { 122, 104 } },
+		{ true, { -82, -128 }, { -46, -128 } },
+		{ true, { 44, -128 }, { 88, -128 } },
+		{ true, { -96, 124 }, { -62, 124 }, { -24, 124 } },
+		{ true, { 26, 124 }, { 74, 124 } },
+	}
+	local poleAt = {}
+	for _, line in ipairs(LINES) do
+		local alongX = line[1]
+		local prev = nil
+		for i = 2, #line do
+			local x, z = freeSpot(line[i][1], line[i][2], 2.5, if alongX then 1 else 0, if alongX then 0 else 1)
+			if x then
+				local anchors = telePole(x, z, alongX, 24 + rng:NextInteger(0, 1) * 4)
+				addOcc(x - 2.5, z - 2.5, x + 2.5, z + 2.5)
+				table.insert(poleAt, { x, z, alongX })
+				if prev then
+					wire(prev[1], anchors[1])
+					wire(prev[2], anchors[2])
+				end
+				prev = anchors
+			else
+				prev = nil
+			end
+		end
+	end
+	-- cocoons on two poles (on the side away from the street)
+	for _, c in ipairs({ { -122, -70, -1 }, { 122, -40, 1 } }) do
+		for _, p in ipairs(poleAt) do
+			if math.abs(p[1] - c[1]) < 20 and math.abs(p[2] - c[2]) < 20 then
+				cocoon(at(p[1] + c[3] * 2, 5, p[2]) * CFrame.Angles(0, -c[3] * math.pi / 2, 0), f)
+				break
+			end
+		end
+	end
+	-- a lone pole leaning over, its wires torn and hanging
+	do
+		local cf = at(196, 0, 100) * CFrame.Angles(0.22, 0.4, 0.1)
+		local p = folder("TelephonePole", f)
+		box("PoleFoot", 193.5, 0, 97.5, 198.5, 3, 102.5, "px_stone_bricks", C.stone, p)
+		lb(cf, "Pole", -2, 0, -2, 2, 24, 2, "px_dark_oak_log", C.bark, p)
+		lb(cf, "CrossArm", -1.2, 21, -9, 1.2, 23.4, 9, "px_dark_oak_planks", C.bark, p)
+		decor(lb(cf, "PoleVine", -1, 12, 6, 1, 21, 8, "px_nether_wart", VINE_RED, p))
+		for _, s in ipairs({ -8.4, 8.4 }) do
+			local top = (cf * CFrame.new(0, 23.6, s)).Position
+			decor(beam("TornWire", top, Vector3.new(top.X - 4, BY + 0.2, top.Z + s * 0.6), 0.2, C.wire, p))
+		end
+		addOcc(192, 96, 200, 104)
+	end
+	task.wait()
+	-- street lamps (two dead and leaning)
+	for _, l in ipairs({
+		{ 14, -156, math.pi / 2, 0, 1 },
+		{ -13, 156, -math.pi / 2, 0, 1 },
+		{ -150, 6, 0, 1, 0 },
+		{ 150, -22, math.pi, 1, 0 },
+		{ -122, -130, math.pi, 1, 0 },
+		{ 122, 124, 0, 1, 0 },
+	}) do
+		local x, z = freeSpot(l[1], l[2], 2.5, l[4], l[5])
+		if x then
+			lampPost(x, z, f, false, l[3])
+			addOcc(x - 2.5, z - 2.5, x + 2.5, z + 2.5)
+		end
+	end
+	for _, l in ipairs({ { -196, 6, 0, 0.3 }, { 196, -22, math.pi, -0.26 } }) do
+		local x, z = freeSpot(l[1], l[2], 3, 1, 0)
+		if x then
+			local cf = at(x, 0, z) * CFrame.Angles(0, l[3], 0)
+			lb(cf, "LampBase", -2, 0, -2, 2, 1, 2, "px_stone_bricks", nil, f)
+			local tcf = cf * CFrame.new(0, 1, 0) * CFrame.Angles(l[4], 0, l[4] * 0.4)
+			lb(tcf, "LampPost", -0.5, 0, -0.5, 0.5, 9, 0.5, "px_dark_oak_planks", nil, f)
+			lb(tcf, "LampArm", -0.5, 8.5, -3.2, 0.5, 9.5, 0.5, "px_dark_oak_planks", nil, f)
+			lc(tcf, "DeadLantern", 1.3, 1.5, 1.3, 0, 6.6, -2.8, Color3.fromRGB(45, 45, 50), Enum.Material.Metal, f)
+			decor(lb(tcf, "LampVine", -0.9, 1, -0.9, 0.9, 6, -0.55, "px_nether_wart", VINE_RED, f))
+			addOcc(x - 2.5, z - 2.5, x + 2.5, z + 2.5)
+		end
+	end
+	-- fire hydrants
+	for _, h in ipairs({ { -126, 8 }, { 126, -24 }, { 18, 166 } }) do
+		local x, z = freeSpot(h[1], h[2], 1.5, 1, 0)
+		if x then
+			box("Hydrant", x - 0.8, 0, z - 0.8, x + 0.8, 2.4, z + 0.8, "px_iron_block", Color3.fromRGB(196, 50, 40), f)
+			decor(box("HydrantCap", x - 1, 2.4, z - 1, x + 1, 2.9, z + 1, "px_iron_block", Color3.fromRGB(150, 36, 30), f))
+			decor(box("HydrantNozzle", x - 1.3, 1.2, z - 0.4, x + 1.3, 1.8, z + 0.4, "px_iron_block", Color3.fromRGB(150, 36, 30), f))
+			addOcc(x - 1.5, z - 1.5, x + 1.5, z + 1.5)
+		end
+	end
+	-- the town sign by the south street (a made-up town)
+	do
+		box("SignPost", 19.4, 0, 145, 20.6, 9, 146.2, "px_dark_oak_planks", nil, f)
+		box("SignPost", 19.4, 0, 157.8, 20.6, 9, 159, "px_dark_oak_planks", nil, f)
+		local board = part("TownSign", Vector3.new(16, 5, 0.6), CFrame.lookAt(V(20, 7.5, 152), V(10, 7.5, 152)), nil, nil, f)
+		textured(board, "px_spruce_planks", Color3.fromRGB(140, 168, 146))
+		boardText(board, "Добро пожаловать\nв Тихий Дол")
+		decor(box("SignVine", 19.2, 3, 154, 20.8, 10.2, 157, "px_nether_wart", VINE_RED, f))
+		addOcc(18, 143, 22, 161)
+	end
+end
+task.wait()
+
+-- ================================================================ dead trees round the town and the growth on free ground
+do
+	local f = folder("Overgrowth", town)
+	for _, t in ipairs({
+		{ -114, -150 },
+		{ 114, -150 },
+		{ 190, -48 },
+		{ -200, -90 },
+		{ -200, 80 },
+		{ 200, 70 },
+		{ 60, -178 },
+		{ 26, 176 },
+		{ -26, 176 },
+		{ -196, -110 },
+		{ 196, 150 },
+	}) do
+		local x, z = t[1], t[2]
+		if freeTown(x, z, 6) and isFree(x, z, 8) then
+			deadTree(x, z, rng:NextInteger(4, 6) * 4, f, true)
+			addOcc(x - 4, z - 4, x + 4, z + 4)
+		end
+	end
+	task.wait()
+	-- vine bushes (1–2 blocks), crimson carpets and ash piles on every free bit of town ground
+	local placed = 0
+	for _ = 1, 2400 do
+		if placed >= 190 then
+			break
+		end
+		local x, z = snap(rng:NextNumber(-212, 212)) + 2, snap(rng:NextNumber(-192, 192)) + 2
+		if freeTown(x, z, 2) and isFree(x, z, 3) then
+			placed += 1
+			local r = rng:NextNumber()
+			local tint = if rng:NextNumber() < 0.5 then VINE_RED else VINE_DARK
+			if r < 0.4 then
+				box("VineBush", x - 2, 0, z - 2, x + 2, 4, z + 2, "px_nether_wart", tint, f)
+				if rng:NextNumber() < 0.4 then
+					box("VineBush", x - 2, 4, z - 2, x + 2, 8, z + 2, "px_nether_wart", VINE_RED, f)
+				elseif rng:NextNumber() < 0.5 then
+					local ox = pick({ -4, 4 })
+					box("VineBush", x + ox - 2, 0, z - 2, x + ox + 2, 4, z + 2, "px_nether_wart", VINE_DARK, f)
+				end
+				addOcc(x - 6, z - 6, x + 6, z + 6)
+			elseif r < 0.7 then
+				local sx, sz = pick({ 4, 8 }), pick({ 4, 8 })
+				decor(box("VineCarpet", x - sx - 2, 0, z - sz - 2, x + sx + 2, 0.3, z + sz + 2, "px_crimson_nylium", nil, f))
+			else
+				decor(box("Ash", x - 4, 0, z - 4, x + 4, 0.4, z + 4, "px_white_wool", ASH, f))
+				if r > 0.88 then
+					decor(box("Ash", x - 2, 0.4, z - 2, x + 2, 0.8, z + 2, "px_white_wool", ASH, f))
+				end
+			end
+		end
+	end
+end
+print(("[build-inside-out] town: %d parts"):format(count - startCount))
+
+end
+task.wait()
+-- ================================================================================ inside_out/30-mansion-arena.luau
+do
+-- ================================================================ inside_out: the mansion, the sky road, the arena
+-- 1. The Creel mansion (hero) on its island (MANSION, ground y 48): main block x -24..24, z -358..-318 (3 storeys,
+--    eave 88, stepped roof to 124), west wing x -36..-16, z -346..-310 (2 storeys, front gable), corner tower
+--    x 20..36, z -330..-314 (4 storeys to 104, spire to 139), a wide porch x -16..20, z -318..-302 facing south with
+--    steps down to the drive at z -298; the grandfather clock hangs over the porch (x -3.6..3.6, y 66..87, z ≈ -315.5)
+--    under the central front gable. Dead garden: an iron fence at z -286 with a stone gate (x ±12), dead trees,
+--    graves, beds; the drive x -8..8 stays clear.
+-- 2. The sky road from the north street end (0, 0, -196) up to the mansion island: three stair flights (16 up over
+--    16 each, 20 wide) joined by torn-off asphalt chunks (24 wide, top 16 and 32) with dirt cones and vines; the top
+--    chunk lands on the island at y 48.1 (from the measured island edge to z -280). Tilted chunks float beside it.
+-- 3. The arena (ARENA, floor y -16): a flush cracked floor (red magma and neon seams, a burnt star, dark rings),
+--    4 broken lamp-post pillars at (±26, 320 ± 26) tagged Pillar, a broken rim wall r 58..62 with gaps (N, S, WNW,
+--    ENE), the ring rift at (0, -16, 384), small rift tears, broken posts and ruins round the rim, and the clock of
+--    Vecna floating over the centre (AmbientSpin). Ways in: the north bridge (0, 0, 194) → (0, -16, 258); the islet
+--    bridges (∓120, 0, 188) → (∓120, -8, 248); the arches (∓112, -8, 272) → (∓44, -16, 272).
+local works = folder("Heights")
+local startCount = count
+local IRON = Color3.fromRGB(44, 44, 50)
+local CLAP = Color3.fromRGB(118, 160, 255) -- px_planks → dark grey clapboard
+local ROOF_T = Color3.fromRGB(110, 160, 255) -- px_roof_tiles → dark slate-plum
+local TRIM = Color3.fromRGB(232, 228, 220)
+local PANE_DARK = Color3.fromRGB(24, 26, 38)
+local PANE_LIT = Color3.fromRGB(255, 222, 150)
+local STONE_T = Color3.fromRGB(150, 144, 144)
+local STONE_DARK = Color3.fromRGB(120, 112, 116)
+local DIRT_T = Color3.fromRGB(150, 108, 100)
+local DECK_T = Color3.fromRGB(160, 152, 150)
+
+-- the ground height of the 8-stud island cell holding (x, z) (the core builds the islands in those cells)
+local function cellY(x, z)
+	return groundY(math.floor(x / 8) * 8 + 4, math.floor(z / 8) * 8 + 4)
+end
+-- a decor part in a frame cf by size and local centre
+local function lc(cf, name, sx, sy, sz, x, y, z, color, material, parent)
+	return decor(part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), color, material, parent))
+end
+-- a crimson vine strand hanging from (x, yTop, z): w wide along axis ("x": in a wall facing z; "z": facing x)
+local function strand(x, yTop, z, len, w, axis, parent)
+	local sx, sz = if axis == "x" then w else 1, if axis == "x" then 1 else w
+	local tint = if rng:NextNumber() < 0.5 then VINE_RED else VINE_DARK
+	return decor(box("Vine", x - sx / 2, yTop - len, z - sz / 2, x + sx / 2, yTop, z + sz / 2, "px_nether_wart", tint, parent))
+end
+-- a vine curtain under an edge: strands one block wide from a0 to a1 (axis "x": along x at z = c, "z": along z at x = c)
+local function curtain(axis, c, a0, a1, yTop, minLen, maxLen, density, parent)
+	for a = a0 + 2, a1 - 2, B do
+		if rng:NextNumber() < density then
+			local len = rng:NextInteger(minLen, maxLen)
+			if axis == "x" then
+				strand(a, yTop, c, len, B, "x", parent)
+			else
+				strand(c, yTop, a, len, B, "z", parent)
+			end
+		end
+	end
+end
+-- a tall window: white frame, a pane (dark glass or warm-lit neon) and a transom bar; axis "x" = a wall along x at
+-- z = c facing out (±1 in z), "z" = a wall along z at x = c facing out in x
+local function win(axis, c, out, a, y0, w, h, lit, parent)
+	local function slab(name, a0, a1, b0, b1, d0, d1, color, material)
+		local p
+		if axis == "x" then
+			p = box(name, a0, b0, c + out * d0, a1, b1, c + out * d1, nil, color, parent)
+		else
+			p = box(name, c + out * d0, b0, a0, c + out * d1, b1, a1, nil, color, parent)
+		end
+		p.Material = material or Enum.Material.SmoothPlastic
+		return decor(p)
+	end
+	slab("WindowFrame", a - w / 2 - 0.6, a + w / 2 + 0.6, y0 - 0.6, y0 + h + 0.6, 0, 0.3, TRIM)
+	local pane = slab("WindowPane", a - w / 2, a + w / 2, y0, y0 + h, 0, 0.45, if lit then PANE_LIT else PANE_DARK, if lit then Enum.Material.Neon else Enum.Material.Glass)
+	slab("WindowBar", a - w / 2, a + w / 2, y0 + h * 0.62, y0 + h * 0.62 + 0.5, 0, 0.55, TRIM)
+	return pane
+end
+-- an iron railing (guard rail, garden fence): posts every block and two rails between local points at height y0;
+-- bars = a thin bar between the posts (a fence rather than a guard rail)
+local function ironRail(ax, az, bx, bz, y0, h, parent, bars)
+	local a, b = V(ax, y0, az), V(bx, y0, bz)
+	local len = (b - a).Magnitude
+	local n = math.max(1, math.floor(len / B + 0.5))
+	for i = 0, n do
+		local p = a:Lerp(b, i / n)
+		part("IronPost", Vector3.new(0.6, h, 0.6), CFrame.new(p + Vector3.new(0, h / 2, 0)), IRON, Enum.Material.Metal, parent)
+		if bars and i < n then
+			local q = a:Lerp(b, (i + 0.5) / n)
+			decor(part("IronBar", Vector3.new(0.35, h - 0.4, 0.35), CFrame.new(q + Vector3.new(0, h / 2 - 0.2, 0)), IRON, Enum.Material.Metal, parent))
+		end
+	end
+	for _, f in ipairs({ 0.35, 0.9 }) do
+		part("IronRail", Vector3.new(0.4, 0.4, len), CFrame.lookAt((a + b) / 2 + Vector3.new(0, h * f, 0), b + Vector3.new(0, h * f, 0)), IRON, Enum.Material.Metal, parent)
+	end
+end
+-- a flight of the kit's walkable stairs (visible steps on an invisible ramp), tinted, the space under the steps filled
+-- down to one block below the lower end; parapet = stepped stone parapets 2 studs wide on both sides
+local function flight(name, c, a0, a1, y0, rise, w, variant, tint, parent, axis, parapet)
+	local f = folder(name, parent)
+	stairs(name, c, a0, a1, y0, rise, w, variant, f, axis)
+	for _, p in ipairs(f:GetChildren()) do
+		if p.Name == name .. "Step" then
+			p.Color = tint
+		end
+	end
+	local run = math.abs(a1 - a0)
+	local dir = if a1 > a0 then 1 else -1
+	local steps = math.max(1, math.floor(run / 2))
+	local stepD = run / steps
+	local low = math.min(y0, y0 + rise) - B
+	local function slab(nm, s0, s1, c0, c1, ya, yb, v, t)
+		if axis == "x" then
+			box(nm, s0, ya, c0, s1, yb, c1, v, t, f)
+		else
+			box(nm, c0, ya, s0, c1, yb, s1, v, t, f)
+		end
+	end
+	for k = 0, steps - 1 do
+		local top = y0 + (k + 1) * rise / steps
+		local s0, s1 = a0 + dir * k * stepD, a0 + dir * (k + 1) * stepD
+		if top - B - low > 0.05 then
+			slab(name .. "Fill", s0, s1, c - w / 2, c + w / 2, low, top - B, variant, tint)
+		end
+		if parapet then
+			for _, sd in ipairs({ -1, 1 }) do
+				slab(name .. "Parapet", s0, s1, c + sd * w / 2, c + sd * (w / 2 + 2), top - B, top + 3, "px_stone_bricks", STONE_DARK)
+			end
+		end
+	end
+	return f
+end
+-- a torn-off chunk of asphalt road (x -12..12, z zN..zS, top y): a dashed yellow centre line, broken edges, an
+-- upside-down cone of dirt and rock below, vines hanging off the sides, iron guard rails (some broken)
+local function roadChunk(name, zN, zS, top, parent, layers)
+	local f = folder(name, parent)
+	local hw = 12
+	box("Asphalt", -hw, top - B, zN, hw, top, zS, "px_smooth_stone", ASPHALT, f)
+	for z = zN + 2, zS - 5, 8 do
+		decor(box("RoadLine", -0.6, top - 0.2, z, 0.6, top + 0.05, z + 4, "px_yellow_wool", LINE_YELLOW, f))
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		if rng:NextNumber() < 0.7 then
+			local zz = zN + rng:NextInteger(0, math.max(0, math.floor((zS - zN) / B) - 1)) * B
+			box("AsphaltTorn", s * hw, top - B - 1.5, zz, s * (hw + B), top - 1.5, zz + B, "px_smooth_stone", ASPHALT, f)
+		end
+	end
+	local w, a0, a1, y = hw - B, zN, zS, top - B
+	for k = 1, layers do
+		local inset = math.min(B, math.max(0, (a1 - a0 - B) / 2))
+		a0 += inset
+		a1 -= inset
+		local h = if k == 1 then B else 2 * B
+		box("ChunkRock", -w, y - h, a0, w, y, a1, if k == 1 then "px_dirt" else "px_blackstone", if k == 1 then DIRT_T else ROCK_RED, f)
+		y -= h
+		w -= if w > 4 then B else 2
+		if w < 2 then
+			break
+		end
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		curtain("z", s * (hw + 0.5), zN, zS, top - 1, 4, 18, 0.45, f)
+		curtain("z", s * (hw - B + 0.5), zN, zS, top - B - 1, 6, 14, 0.3, f)
+		local r = rng:NextNumber()
+		if r < 0.45 then
+			ironRail(s * 11.4, zN + 1, s * 11.4, zS - 1, top, 3.2, f)
+		elseif r < 0.85 then
+			local zm = (zN + zS) / 2
+			ironRail(s * 11.4, zm, s * 11.4, zS - 1, top, 3.2, f)
+			decor(beam("BentRail", V(s * 11.4, top + 2.9, zm), V(s * 15, top - 2, zm - 6), 0.4, IRON, f, Enum.Material.Metal))
+		end
+	end
+	return f
+end
+-- a hanging lantern (kit) whose cage does not collide, chain up to local height top
+local function hangLantern(x, y, z, top, parent)
+	return decor(lantern(V(x, y, z), parent, false, BY + top))
+end
+-- a dead tree of blocks: a dark trunk and bare branches sticking out (axis-aligned) with a twig up at each end
+local function deadTree(x, z, y0, h, parent)
+	local f = folder("DeadTree", parent)
+	box("Trunk", x - 2, y0, z - 2, x + 2, y0 + h, z + 2, "px_dark_oak_log", Color3.fromRGB(150, 130, 130), f)
+	local dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	for i = 1, 3 do
+		local d = dirs[rng:NextInteger(1, 4)]
+		local y = y0 + h - 2 - (i - 1) * 4
+		local len = rng:NextInteger(2, 4) * 2
+		local ex, ez = x + d[1] * (2 + len), z + d[2] * (2 + len)
+		local bx0, bz0 = x + d[1] * 2 - (if d[1] == 0 then 1 else 0), z + d[2] * 2 - (if d[2] == 0 then 1 else 0)
+		local bx1, bz1 = ex + (if d[1] == 0 then 1 else 0), ez + (if d[2] == 0 then 1 else 0)
+		box("Branch", bx0, y - 1, bz0, bx1, y + 1, bz1, "px_dark_oak_log", Color3.fromRGB(150, 130, 130), f)
+		local tx, tz = ex - d[1], ez - d[2]
+		box("Twig", tx - 1, y + 1, tz - 1, tx + 1, y + 1 + rng:NextInteger(2, 3) * 2, tz + 1, "px_dark_oak_log", Color3.fromRGB(150, 130, 130), f)
+		if rng:NextNumber() < 0.6 then
+			strand(tx, y - 1, tz, rng:NextInteger(4, 10), 2, if d[1] == 0 then "z" else "x", f)
+		end
+	end
+	return f
+end
+-- a grandfather clock in a frame cf (base centre, the face toward -Z of cf), scale s; evil = the clock of Vecna (a
+-- face on both sides, red neon marks and glow)
+local function grandClock(cf, s, parent, evil)
+	local WOODV, TRIMV = "px_dark_oak_planks", "px_spruce_planks"
+	local BRASS = Color3.fromRGB(196, 156, 70)
+	local function bit(name, sx, sy, sz, x, y, z, variant, tint, material)
+		local p = lc(cf, name, sx * s, sy * s, sz * s, x * s, y * s, z * s, tint, material, parent)
+		if variant then
+			textured(p, variant, tint)
+		end
+		return p
+	end
+	bit("ClockPlinth", 8, 2.5, 4.4, 0, 1.25, 0, WOODV, nil)
+	bit("ClockTrunk", 6.4, 10, 3.6, 0, 7.5, 0, WOODV, nil)
+	bit("ClockBand", 7.4, 1, 4.2, 0, 13, 0, TRIMV, Color3.fromRGB(170, 130, 120))
+	bit("ClockHood", 8, 6.5, 4.4, 0, 16.75, 0, WOODV, nil)
+	bit("ClockCrown", 9, 1, 4.8, 0, 20.5, 0, TRIMV, Color3.fromRGB(170, 130, 120))
+	bit("ClockPediment", 5, 1.2, 4.6, 0, 21.6, 0, WOODV, nil)
+	bit("ClockFinial", 1.2, 1.4, 1.2, 0, 22.9, 0, nil, BRASS, Enum.Material.Metal)
+	for _, side in ipairs(if evil then { 1, -1 } else { 1 }) do
+		local zf = -side
+		for _, cx in ipairs({ -3.6, 3.6 }) do
+			bit("ClockColumn", 0.8, 6.5, 0.8, cx, 16.75, zf * 2.2, TRIMV, Color3.fromRGB(170, 130, 120))
+		end
+		local glass = bit("ClockGlass", 3.2, 7, 0.3, 0, 7.5, zf * 1.9, nil, if evil then Color3.fromRGB(120, 16, 20) else PANE_DARK, if evil then Enum.Material.Neon else Enum.Material.Glass)
+		if evil then
+			glass.Transparency = 0.35
+		end
+		bit("PendulumRod", 0.3, 5, 0.2, 0.3, 8.6, zf * 2.1, nil, BRASS, Enum.Material.Metal)
+		bit("PendulumBob", 1.6, 1.6, 0.3, 0.5, 5.8, zf * 2.15, nil, BRASS, Enum.Material.Metal)
+		local face = bit("ClockFace", 5.6, 5.6, 0.3, 0, 16.75, zf * 2.3, nil, Color3.fromRGB(228, 218, 194), Enum.Material.SmoothPlastic)
+		local markC, markM = if evil then GLOW_RED else Color3.fromRGB(34, 28, 28), if evil then Enum.Material.Neon else Enum.Material.SmoothPlastic
+		for _, m in ipairs({ { 0, 2.1, 0.6, 1.1 }, { 0, -2.1, 0.6, 1.1 }, { 2.1, 0, 1.1, 0.6 }, { -2.1, 0, 1.1, 0.6 } }) do
+			bit("ClockMark", m[3], m[4], 0.2, m[1], 16.75 + m[2], zf * 2.5, nil, markC, markM)
+		end
+		-- the hands a few minutes to midnight (seen from the front the hour hand leans to 11)
+		for _, hnd in ipairs({ { 0.5, 1.8, -0.45 }, { 0.35, 2.5, -0.1 } }) do
+			local hcf = cf * CFrame.new(0, 16.75 * s, zf * 2.6 * s) * CFrame.Angles(0, 0, hnd[3] * side) * CFrame.new(0, hnd[2] / 2 * s, 0)
+			decor(part("ClockHand", Vector3.new(hnd[1] * s, hnd[2] * s, 0.2 * s), hcf, Color3.fromRGB(26, 22, 22), Enum.Material.SmoothPlastic, parent))
+		end
+		if evil and side == 1 then
+			light(face, 50, 2, GLOW_RED)
+		end
+	end
+end
+-- a broken lamp post round the arena / on the islets: a dark brick shaft, an arm with a hanging lantern (lit) or a
+-- broken top; (dx, dz) = the arm direction
+local function brokenPost(x, z, y0, h, dx, dz, lit, parent)
+	local f = folder("BrokenLamp", parent)
+	box("LampBase", x - 3, y0, z - 3, x + 3, y0 + 2, z + 3, "px_blackstone_bricks", nil, f)
+	box("LampShaft", x - 2, y0 + 2, z - 2, x + 2, y0 + h, z + 2, "px_stone_bricks", STONE_DARK, f)
+	if lit then
+		local ex, ez = x + dx * 8, z + dz * 8
+		box("LampArm", math.min(x, ex) - (if dx == 0 then 1 else 0), y0 + h - 2, math.min(z, ez) - (if dz == 0 then 1 else 0), math.max(x, ex) + (if dx == 0 then 1 else 0), y0 + h, math.max(z, ez) + (if dz == 0 then 1 else 0), "px_blackstone_bricks", nil, f)
+		hangLantern(x + dx * 7, y0 + h - 5.5, z + dz * 7, y0 + h - 2, f)
+	else
+		textured(lc(at(x, y0 + h + 1.4, z) * CFrame.Angles(rng:NextNumber(-0.4, 0.4), rng:NextNumber(0, 3), rng:NextNumber(-0.4, 0.4)), "LampRubble", 4, 3, 4, 0, 0, 0, nil, nil, f), "px_stone_bricks", STONE_DARK)
+	end
+	strand(x + 2.5, y0 + h - 1, z, rng:NextInteger(4, math.max(5, math.floor(h - 3))), 2, "z", f)
+	return f
+end
+
+-- ================================================================ 1. the mansion
+do
+	local house = folder("Mansion", works)
+	local G = MANSION.y
+	local F1, F2, F3, EAVE = G + 4, G + 16, G + 28, G + 40 -- 52, 64, 76, 88
+	local ROOFV = "px_roof_tiles"
+	local function mass(name, x0, z0, x1, z1, top)
+		box(name .. "Base", x0 - 0.5, G - 2, z0 - 0.5, x1 + 0.5, F1, z1 + 0.5, "px_stone_bricks", STONE_DARK, house)
+		box(name, x0, F1, z0, x1, top, z1, "px_planks", CLAP, house)
+		for _, y in ipairs({ F2, F3, EAVE }) do
+			if y < top - 2 then
+				decor(box(name .. "Band", x0 - 0.3, y - 0.4, z0 - 0.3, x1 + 0.3, y + 0.4, z1 + 0.3, "px_smooth_stone", TRIM, house))
+			end
+		end
+		decor(box(name .. "Cornice", x0 - 1, top - 1, z0 - 1, x1 + 1, top, z1 + 1, "px_smooth_stone", TRIM, house))
+		for _, cx in ipairs({ x0, x1 }) do
+			for _, cz in ipairs({ z0, z1 }) do
+				decor(box(name .. "Corner", cx - 0.6, F1, cz - 0.6, cx + 0.6, top - 1, cz + 0.6, "px_smooth_stone", TRIM, house))
+			end
+		end
+	end
+	mass("MainBlock", -24, -358, 24, -318, EAVE)
+	mass("WestWing", -36, -346, -16, -310, F3)
+	mass("Tower", 20, -330, 36, -314, G + 56)
+
+	-- roofs: the main roof (ridge along x, steep: one block in per 6 studs up), the central front gable, the wing gable
+	for k = 0, 5 do
+		box("Roof", -26, EAVE + 6 * k, -360 + 4 * k, 26, EAVE + 6 * k + 6, -316 - 4 * k, ROOFV, ROOF_T, house)
+	end
+	for k = 0, 2 do
+		local hw = 12 - 4 * k
+		box("GableRoof", -hw, EAVE + 6 * k, -334, hw, EAVE + 6 * k + 6, -314, ROOFV, ROOF_T, house)
+		box("GableFace", -(hw - 2), EAVE + 6 * k, -314, hw - 2, EAVE + 6 * k + 6, -313.6, "px_planks", CLAP, house)
+		local ww = 12 - 4 * k
+		box("WingRoof", -26 - ww, F3 + 6 * k, -348, -26 + ww, F3 + 6 * k + 6, -308, ROOFV, ROOF_T, house)
+		box("WingGableFace", -26 - (ww - 2), F3 + 6 * k, -308, -26 + (ww - 2), F3 + 6 * k + 6, -307.6, "px_planks", CLAP, house)
+	end
+	-- dormers on the front slope of the main roof
+	for _, dx in ipairs({ -19, 15 }) do
+		box("Dormer", dx - 3, EAVE + 6, -326, dx + 3, EAVE + 15, -319.6, "px_planks", CLAP, house)
+		box("DormerRoof", dx - 4, EAVE + 15, -327, dx + 4, EAVE + 17, -319, ROOFV, ROOF_T, house)
+		box("DormerRoof", dx - 2, EAVE + 17, -327, dx + 2, EAVE + 19, -320, ROOFV, ROOF_T, house)
+		win("x", -319.6, 1, dx, EAVE + 7.5, 3, 6, false, house)
+	end
+	-- the tower spire: stepped to a point with an iron finial
+	box("SpireBase", 19, G + 56, -331, 37, G + 58, -313, "px_dark_oak_planks", nil, house)
+	for k, hw in ipairs({ 7, 5, 3 }) do
+		box("Spire", 28 - hw, G + 58 + (k - 1) * 8, -322 - hw, 28 + hw, G + 66 + (k - 1) * 8, -322 + hw, ROOFV, ROOF_T, house)
+	end
+	box("SpireTip", 27, G + 82, -323, 29, G + 90, -321, nil, IRON, house).Material = Enum.Material.Metal
+	cube("SpireBall", 28, G + 91, -322, 1.6, 1.6, 1.6, nil, IRON, house).Material = Enum.Material.Metal
+	-- chimneys of dark brick
+	for _, c in ipairs({ { -12, -346, 128 }, { 16, -352, 122 } }) do
+		box("Chimney", c[1] - 2, EAVE + 8, c[2] - 2, c[1] + 2, c[3], c[2] + 2, "px_red_brick", Color3.fromRGB(150, 120, 120), house)
+		box("ChimneyCap", c[1] - 3, c[3], c[2] - 3, c[1] + 3, c[3] + 1, c[2] + 3, "px_stone_bricks", STONE_DARK, house)
+	end
+	task.wait()
+
+	-- windows: tall, white frames, mostly dark, a few warm-lit (three of them cast light)
+	local lights = 0
+	local function w(axis, c, out, a, y0, lit, ww, hh)
+		local pane = win(axis, c, out, a, y0, ww or 4, hh or 8, lit, house)
+		if lit and lights < 3 and (ww or 4) >= 4 then
+			lights += 1
+			light(pane, 22, 1.2, PANE_LIT)
+		end
+	end
+	local Y1, Y2, Y3, Y4 = F1 + 2, F2 + 2, F3 + 2, EAVE + 3
+	for _, a in ipairs({ -12, 12 }) do
+		w("x", -318, 1, a, Y1, false)
+		w("x", -318, 1, a, Y2, a == 12)
+		w("x", -318, 1, a, Y3, a == -12, 4, 7.5)
+	end
+	for _, a in ipairs({ -30, -22 }) do
+		w("x", -310, 1, a, Y1, a == -30)
+		w("x", -310, 1, a, Y2, false)
+	end
+	for _, a in ipairs({ -340, -326 }) do
+		w("z", -36, -1, a, Y1, false)
+		w("z", -36, -1, a, Y2, false)
+	end
+	for _, a in ipairs({ -350, -340 }) do
+		for _, y in ipairs({ Y1, Y2, Y3 }) do
+			w("z", 24, 1, a, y, false, 4, if y == Y3 then 7.5 else 8)
+		end
+	end
+	for _, y in ipairs({ Y1, Y2, Y3 }) do
+		w("z", -24, -1, -352, y, y == Y2, 4, if y == Y3 then 7.5 else 8)
+	end
+	for _, a in ipairs({ -16, 0, 16 }) do
+		w("x", -358, -1, a, Y2, false)
+		w("x", -358, -1, a, Y3, false, 4, 7.5)
+	end
+	w("x", -314, 1, 28, Y4, true)
+	for _, y in ipairs({ Y1, Y2, Y3 }) do
+		w("x", -314, 1, 28, y, false, 4, if y == Y3 then 7.5 else 8)
+		w("z", 36, 1, -322, y, false, 4, if y == Y3 then 7.5 else 8)
+	end
+	w("z", 36, 1, -322, Y4, false)
+	w("z", 20, -1, -322, Y4, false)
+	w("x", -330, -1, 28, Y4, false)
+	w("x", -313.6, 1, 0, EAVE + 2, true, 3, 6) -- the attic window in the front gable
+	w("x", -307.6, 1, -26, F3 + 2, false, 3, 6) -- the wing gable
+
+	-- the front door: one leaf swung out onto the porch, a dark hall behind it, a lit transom
+	decor(box("DoorFrame", -5, F1, -318, 5, F1 + 11, -317.7, "px_smooth_stone", TRIM, house))
+	local hall = decor(box("DarkHall", -4, F1, -318, 4, F1 + 10, -317.5, nil, Color3.fromRGB(10, 8, 12), house))
+	hall.Material = Enum.Material.SmoothPlastic
+	textured(decor(part("DoorLeaf", Vector3.new(4, 10, 0.4), at(4 - 2, F1 + 5, -317.2), nil, nil, house)), "px_dark_oak_planks")
+	local a = math.rad(70)
+	textured(decor(part("DoorLeaf", Vector3.new(4, 10, 0.4), at(-4 + 2 * math.cos(a), F1 + 5, -317.4 + 2 * math.sin(a)) * CFrame.Angles(0, -a, 0), nil, nil, house)), "px_dark_oak_planks")
+	local transom = decor(box("Transom", -4, F1 + 10.3, -318, 4, F1 + 11.3, -317.4, nil, PANE_LIT, house))
+	transom.Material = Enum.Material.Neon
+
+	-- the porch: stone base, plank deck, white columns, lattice railings, a slate roof, lanterns, steps to the drive
+	box("PorchBase", -16, G - 2, -318, 20, F1 - 1, -302, "px_stone_bricks", STONE_DARK, house)
+	box("PorchDeck", -16, F1 - 1, -318, 20, F1, -302, "px_spruce_planks", Color3.fromRGB(170, 150, 140), house)
+	for _, cx in ipairs({ -15, -8, 8, 18 }) do
+		box("PorchColumn", cx - 1, F1, -304, cx + 1, F2, -302, "px_smooth_stone", TRIM, house)
+		box("ColumnCap", cx - 1.5, F2 - 1, -304.5, cx + 1.5, F2, -301.5, "px_smooth_stone", TRIM, house)
+	end
+	for _, r in ipairs({ { -16, -303.4, -8, -302.6 }, { 8, -303.4, 20, -302.6 }, { -16.4, -310, -15.6, -303 }, { 19.6, -314, 20.4, -303 } }) do
+		box("PorchRail", r[1], F1, r[2], r[3], F1 + 2.6, r[4], "px_spruce_planks", TRIM, house)
+		box("PorchRailTop", r[1] - 0.2, F1 + 2.6, r[2] - 0.2, r[3] + 0.2, F1 + 3.2, r[4] + 0.2, "px_smooth_stone", TRIM, house)
+	end
+	box("PorchRoof", -17, F2, -319, 21, F2 + 1.5, -301, ROOFV, ROOF_T, house)
+	decor(box("PorchFascia", -17, F2 - 1, -301.6, 21, F2, -301, "px_smooth_stone", TRIM, house))
+	for _, lx in ipairs({ -12, 12 }) do
+		hangLantern(lx, F2 - 4, -306, F2, house)
+	end
+	flight("PorchSteps", 0, -298, -302, G, 4, 16, "px_stone_bricks", STONE_T, house)
+
+	-- the grandfather clock hanging over the porch under the front gable, on an iron bracket
+	local clock = folder("MansionClock", house)
+	grandClock(CFrame.lookAt(V(0, F2 + 2, -315.5), V(0, F2 + 2, -300)), 0.9, clock, false)
+	decor(box("ClockBracket", -1, EAVE - 0.6, -318, 1, EAVE, -314.5, nil, IRON, clock)).Material = Enum.Material.Metal
+	task.wait()
+
+	-- vines: curtains from the eaves, the porch roof and the gables; blobs on the roofs
+	curtain("x", -317.4, -16, -4, EAVE - 1, 4, 16, 0.6, house)
+	curtain("x", -317.4, 4, 20, EAVE - 1, 4, 16, 0.6, house)
+	curtain("x", -300.6, -17, -8, F2, 3, 9, 0.7, house)
+	curtain("x", -300.6, 8, 21, F2, 3, 9, 0.7, house)
+	curtain("x", -307.2, -38, -14, F3, 4, 14, 0.5, house)
+	curtain("x", -313.2, 20, 36, G + 55, 6, 22, 0.6, house)
+	curtain("z", 24.6, -358, -330, EAVE - 1, 6, 20, 0.5, house)
+	curtain("z", -36.6, -346, -310, F3 - 1, 4, 16, 0.5, house)
+	curtain("x", -358.6, -24, 24, EAVE - 1, 6, 24, 0.4, house)
+	for _, b in ipairs({
+		{ -38, F3 + 6, -336, -34, F3 + 9, -324 },
+		{ -26, EAVE + 6, -320, -22, EAVE + 9, -316 },
+		{ 0, EAVE + 6, -360, 12, EAVE + 9, -356 },
+		{ 33, G + 66, -329, 36, G + 69, -324 },
+		{ -14, F2 + 1.5, -312, -8, F2 + 4, -306 },
+		{ 10, F2 + 1.5, -310, 18, F2 + 4, -304 },
+		{ 4, EAVE + 24, -332, 10, EAVE + 27, -328 },
+	}) do
+		decor(box("VineBlob", b[1], b[2], b[3], b[4], b[5], b[6], "px_nether_wart", VINE_DARK, house))
+	end
+
+	-- the dead garden: beds of dead shrubs, an iron fence with a stone gate across the drive, dead trees, graves
+	local garden = folder("Garden", house)
+	for _, bed in ipairs({ { -35, -309, -17, -303 }, { 21, -313, 35, -305 } }) do
+		box("DeadBed", bed[1], G - 0.2, bed[2], bed[3], G + 0.1, bed[4], "px_dirt", Color3.fromRGB(120, 96, 88), garden)
+		for x = bed[1] + 1, bed[3] - 4, 6 do
+			if rng:NextNumber() < 0.75 then
+				box("DeadShrub", x, G + 0.1, bed[2] + 1, x + 4, G + 3, bed[2] + 5, "px_nether_wart", Color3.fromRGB(110, 70, 70), garden)
+			end
+		end
+	end
+	ironRail(-44, -286, -14, -286, G, 6, garden, true)
+	ironRail(14, -286, 44, -286, G, 6, garden, true)
+	ironRail(-44, -306, -44, -286, G, 6, garden, true)
+	ironRail(44, -306, 44, -286, G, 6, garden, true)
+	for _, sx in ipairs({ -1, 1 }) do
+		box("GatePillar", sx * 10, G, -288, sx * 14, G + 10, -284, "px_stone_bricks", STONE_DARK, garden)
+		box("GatePillarCap", sx * 9.5, G + 10, -288.5, sx * 14.5, G + 11, -283.5, "px_smooth_stone", STONE_T, garden)
+		local lan = lantern(V(sx * 12, G + 11.75, -286), garden, false)
+		decor(lan)
+		-- the gate leaf stands open, swung in along the pillar line (off the drive)
+		local gx = sx * 9.5
+		box("GateRail", gx - 0.3, G + 1, -298, gx + 0.3, G + 1.6, -288, nil, IRON, garden).Material = Enum.Material.Metal
+		box("GateRail", gx - 0.3, G + 6.4, -298, gx + 0.3, G + 7, -288, nil, IRON, garden).Material = Enum.Material.Metal
+		for gz = -297, -289, 2.5 do
+			box("GateBar", gx - 0.2, G + 0.5, gz - 0.2, gx + 0.2, G + 8, gz + 0.2, nil, IRON, garden).Material = Enum.Material.Metal
+		end
+	end
+	for _, t in ipairs({ { -48, -300 }, { 46, -296 }, { -52, -344 }, { 50, -350 }, { -28, -274 }, { 30, -280 }, { -40, -368 }, { 36, -370 } }) do
+		local y = cellY(t[1], t[2])
+		if y == G and cellY(t[1] + 8, t[2]) and cellY(t[1] - 8, t[2]) then
+			deadTree(t[1], t[2], G, rng:NextInteger(4, 6) * 4, garden)
+		end
+	end
+	local function grave(x, z)
+		if cellY(x, z) ~= G or cellY(x, z + 6) ~= G then
+			return
+		end
+		local cf = at(x, G, z) * CFrame.Angles(rng:NextNumber(-0.12, 0.12), rng:NextNumber(-0.2, 0.2), rng:NextNumber(-0.1, 0.1))
+		textured(part("Grave", Vector3.new(4, 5, 1.6), cf * CFrame.new(0, 2.2, 0), nil, nil, garden), "px_stone_bricks", Color3.fromRGB(170, 164, 168))
+		if rng:NextNumber() < 0.4 then
+			textured(decor(part("GraveTop", Vector3.new(2, 2, 1.4), cf * CFrame.new(0, 5.4, 0), nil, nil, garden)), "px_stone_bricks", Color3.fromRGB(170, 164, 168))
+		end
+		box("GraveMound", x - 2, G - 0.2, z + 1, x + 2, G + 0.4, z + 5, "px_dirt", Color3.fromRGB(120, 96, 88), garden)
+	end
+	for _, gz in ipairs({ -330, -320, -310 }) do
+		for _, gx in ipairs({ -58, -51, -44 }) do
+			if rng:NextNumber() < 0.8 then
+				grave(gx, gz)
+			end
+		end
+	end
+	for _, g in ipairs({ { 46, -336 }, { 53, -336 }, { 46, -326 }, { 53, -324 } }) do
+		grave(g[1], g[2])
+	end
+	-- vine carpets creeping over the lawn toward the house
+	for _ = 1, 10 do
+		local x, z = rng:NextInteger(-14, 14) * 4, rng:NextInteger(-92, -72) * 4
+		if math.abs(x) > 14 and not (math.abs(x + 4) < 44 and z > -366 and z < -298) and cellY(x, z) == G and cellY(x + 8, z + 8) == G then
+			box("VineCarpet", x, G - 0.2, z, x + 8, G + 0.15, z + 4 * rng:NextInteger(1, 3), "px_nether_wart", VINE_DARK, garden)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 2. the sky road up to the mansion
+do
+	local road = folder("SkyRoad", works)
+	-- the island's south edge on the road (x -20..20): the top landing starts where the island cells begin
+	local zE = -264
+	for _, cx in ipairs({ -20, -12, -4, 4, 12, 20 }) do
+		if groundY(cx, -260) then
+			zE = -256
+		end
+	end
+	local land = (-196 - zE - 48) / 2 -- each mid landing: 6 or 10 studs (plus 8 under the next flight)
+	local z, y = -196, 0
+	for k = 1, 3 do
+		flight("SkyStairs" .. k, 0, z, z - 16, y, 16, 20, "px_stone_bricks", STONE_T, road)
+		-- a small rock under each floating flight
+		box("StairRock", -6, y - 12, z - 12, 6, y - 4, z - 4, "px_dirt", DIRT_T, road)
+		box("StairRock", -2, y - 20, z - 10, 2, y - 12, z - 6, "px_blackstone", ROCK_RED, road)
+		z -= 16
+		y += 16
+		if k < 3 then
+			roadChunk("RoadChunk" .. k, z - land - 8, z, y, road, 3 + k % 2)
+			-- a bent street lamp with a hanging lantern
+			local sx = if k == 1 then -1 else 1
+			local lz = z - land / 2
+			part("StreetLamp", Vector3.new(1, 11, 1), at(sx * 11, y + 5.5, lz), IRON, Enum.Material.Metal, road)
+			part("StreetLampArm", Vector3.new(4, 0.8, 0.8), at(sx * 9, y + 10.6, lz) * CFrame.Angles(0, 0, sx * 0.25), IRON, Enum.Material.Metal, road)
+			hangLantern(sx * 7.5, y + 7, lz, y + 10, road)
+			z -= land
+		end
+	end
+	roadChunk("RoadChunkTop", -280, zE, MANSION.y + 0.1, road, 2)
+	-- torn chunks drifting beside the road (decor, out of the path)
+	for _, t in ipairs({ { -26, 4, -206, 0.3, 0.2 }, { 25, 18, -226, -0.25, -0.3 }, { -25, 30, -246, 0.2, 0.4 }, { 26, 44, -254, -0.35, 0.1 } }) do
+		local cf = at(t[1], t[2], t[3]) * CFrame.Angles(t[5], rng:NextNumber(0, 6.28), t[4])
+		local m = folder("TiltedChunk", road)
+		textured(lc(cf, "Asphalt", 12, 4, 12, 0, 0, 0, nil, nil, m), "px_smooth_stone", ASPHALT)
+		textured(lc(cf, "RoadLine", 1.2, 0.3, 4, 0, 2.05, 0, nil, nil, m), "px_yellow_wool", LINE_YELLOW)
+		textured(lc(cf, "ChunkRock", 8, 6, 8, 0, -5, 0, nil, nil, m), "px_dirt", DIRT_T)
+		textured(lc(cf, "ChunkRock", 4, 6, 4, 0, -11, 0, nil, nil, m), "px_blackstone", ROCK_RED)
+		textured(lc(cf, "Vine", 4, 10, 1, 2, -7, 6.5, nil, nil, m), "px_nether_wart", VINE_RED)
+	end
+end
+task.wait()
+
+-- ================================================================ 3. the arena island
+do
+	local arena = folder("Arena", works)
+	local AX, AZ, AY = ARENA.x, ARENA.z, ARENA.y
+	-- openings in the rim: angle (deg from +X toward +Z) and half width: N bridge, S rift, WNW and ENE arches
+	local OPEN = { { 270, 14 }, { 90, 16 }, { 223.8, 14 }, { 316.2, 14 } }
+	local function openingPerp(dx, dz)
+		local best = math.huge
+		for _, o in ipairs(OPEN) do
+			local ang = math.rad(o[1])
+			local ux, uz = math.cos(ang), math.sin(ang)
+			if dx * ux + dz * uz > 0 then
+				best = math.min(best, math.abs(-dx * uz + dz * ux) - o[2])
+			end
+		end
+		return best
+	end
+
+	-- the cracked floor: jagged seams of magma and red neon from a burnt star, a dark ring, laid flush in runs
+	local floorF = folder("Floor", arena)
+	local crack = {}
+	local function mark(dx, dz, kind)
+		local key = math.floor(dx / B) .. "," .. math.floor(dz / B)
+		if not crack[key] then
+			crack[key] = kind
+		end
+	end
+	local function walk(x, z, phi, len, depth)
+		local s = 0
+		while s < len do
+			if x * x + z * z >= 51 * 51 then
+				break
+			end
+			mark(x, z, if rng:NextNumber() < 0.3 then "neon" else "magma")
+			if s < 14 and depth == 0 then
+				mark(x - math.sin(phi) * 3, z + math.cos(phi) * 3, "magma")
+			end
+			if depth == 0 and s >= 20 and s < 22.5 and rng:NextNumber() < 0.75 then
+				walk(x, z, phi + (if rng:NextNumber() < 0.5 then 0.7 else -0.7), rng:NextNumber(10, 16), 1)
+			end
+			x += math.cos(phi) * 2.5
+			z += math.sin(phi) * 2.5
+			phi += rng:NextNumber(-0.16, 0.16)
+			s += 2.5
+		end
+	end
+	for i = 0, 9 do
+		local th = i * math.pi / 5 + rng:NextNumber(-0.18, 0.18)
+		walk(math.cos(th) * 7, math.sin(th) * 7, th, 46, 0)
+	end
+	local KIND = {
+		neon = { nil, GLOW_RED },
+		magma = { "px_magma", nil },
+		ring = { "px_blackstone_bricks", Color3.fromRGB(110, 100, 110) },
+		star = { "px_basalt", Color3.fromRGB(96, 88, 94) },
+		soot = { "px_basalt", Color3.fromRGB(130, 120, 126) },
+	}
+	local function cellKind(ix, iz)
+		local dx, dz = ix * B + 2, iz * B + 2
+		local rr = math.sqrt(dx * dx + dz * dz)
+		if rr >= 56 then
+			return nil
+		end
+		if rr < 4 then
+			return "magma"
+		end
+		local c = crack[ix .. "," .. iz]
+		if c and rr < 52 then
+			return c
+		end
+		if rr >= 52 then
+			return "ring"
+		end
+		local th = math.atan2(dz, dx)
+		if rr < 9 + 9 * math.max(0, math.cos(5 * th)) ^ 3 then
+			return "star"
+		end
+		if rr >= 20 and rr < 23.5 then
+			return "ring"
+		end
+		if rng:NextNumber() < 0.05 then
+			return "soot"
+		end
+		return nil
+	end
+	for iz = -14, 13 do
+		local z0 = AZ + iz * B
+		local runX, runKey = nil, nil
+		local function flush(xEnd)
+			if runX then
+				local k = KIND[runKey]
+				local p = box("ArenaFloor", runX, AY - 0.2, z0, xEnd, AY + 0.1, z0 + B, k[1], k[2], floorF)
+				if runKey == "neon" then
+					p.Material = Enum.Material.Neon
+				end
+			end
+			runX = nil
+		end
+		for ix = -14, 13 do
+			local kind = cellKind(ix, iz)
+			if kind ~= runKey then
+				flush(AX + ix * B)
+				if kind then
+					runX = AX + ix * B
+				end
+				runKey = kind
+			end
+		end
+		flush(AX + 14 * B)
+	end
+	task.wait()
+
+	-- the four broken lamp-post pillars on the diagonals (tagged Pillar: the boss's charge stuns on them)
+	for i, s in ipairs({ { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }) do
+		local px, pz = AX + s[1] * 26, AZ + s[2] * 26
+		local pf = folder("LampPillar", arena)
+		pillarTag(box("PillarBase", px - 6, AY, pz - 6, px + 6, AY + 8, pz + 6, "px_blackstone_bricks", nil, pf))
+		pillarTag(box("PillarPlinth", px - 5, AY + 8, pz - 5, px + 5, AY + 9, pz + 5, "px_stone_bricks", STONE_DARK, pf))
+		local shaftTop = if i == 3 then AY + 20 else AY + 24
+		pillarTag(box("PillarShaft", px - 4, AY + 9, pz - 4, px + 4, shaftTop, pz + 4, "px_stone_bricks", STONE_DARK, pf))
+		local inward = -s[1] -- the arm reaches toward the middle along x
+		if i == 3 then
+			-- snapped off: two jagged stubs and a tilted broken block
+			pillarTag(box("PillarStub", px - 4, shaftTop, pz - 4, px, shaftTop + 6, pz, "px_stone_bricks", STONE_DARK, pf))
+			pillarTag(box("PillarStub", px, shaftTop, pz, px + 4, shaftTop + 3, pz + 4, "px_stone_bricks", STONE_DARK, pf))
+			textured(lc(at(px + 1, shaftTop + 4, pz + 2) * CFrame.Angles(0.3, 0.6, -0.35), "PillarRubble", 4, 4, 4, 0, 0, 0, nil, nil, pf), "px_blackstone_bricks")
+		else
+			pillarTag(box("PillarCollar", px - 5, AY + 24, pz - 5, px + 5, AY + 26, pz + 5, "px_blackstone_bricks", nil, pf))
+			-- the bent top: straight on two pillars, crooked on one
+			local cf = at(px, AY + 26, pz) * CFrame.Angles(0, 0, if i == 2 then inward * 0.16 else 0)
+			local function seg(name, sx, sy, sz, x, y, z, variant, tint)
+				local p = part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), nil, nil, pf)
+				textured(p, variant, tint)
+				return pillarTag(p)
+			end
+			seg("PillarNeck", 6, 8, 6, 0, 4, 0, "px_stone_bricks", STONE_DARK)
+			seg("PillarArm", 14, 4, 4, inward * 6, 6, 0, "px_blackstone_bricks", nil)
+			seg("PillarHook", 4, 4, 4, inward * 12, 2, 0, "px_blackstone_bricks", nil)
+			local tip = (cf * CFrame.new(inward * 12, 0, 0)).Position
+			decor(lantern(tip - Vector3.new(0, 3.5, 0), pf, false, tip.Y))
+		end
+		-- crimson vines wrapping and hanging down the shaft
+		decor(box("VineWrap", px - 4.6, AY + 12 + rng:NextInteger(0, 2) * 3, pz - 4.6, px + 4.6, AY + 15 + rng:NextInteger(0, 2) * 3, pz + 4.6, "px_nether_wart", VINE_RED, pf))
+		curtain("z", px + s[1] * 4.6, pz - 4, pz + 4, shaftTop - 1, 6, 14, 0.8, pf)
+		curtain("x", pz + s[2] * 4.6, px - 4, px + 4, shaftTop - 1, 4, 12, 0.7, pf)
+		decor(box("VineCarpet", px - 8, AY - 0.15, pz - 8, px + 8, AY + 0.2, pz - 6, "px_nether_wart", VINE_DARK, pf))
+	end
+	task.wait()
+
+	-- the broken rim wall r 58..62.5 (1-3 blocks, gaps and openings), merged in runs per row by height
+	local rim = folder("Rim", arena)
+	local HEIGHTS = {}
+	for k = 1, 36 do
+		HEIGHTS[k] = pick({ 0, 4, 4, 8, 8, 8, 12 })
+	end
+	for iz = -16, 15 do
+		local z0 = AZ + iz * B
+		local runX, runH = nil, 0
+		local function flush(xEnd)
+			if runX and runH > 0 then
+				box("RimWall", runX, AY, z0, xEnd, AY + runH, z0 + B, "px_stone_bricks", STONE_T, rim)
+				if runH >= 8 and rng:NextNumber() < 0.4 then
+					decor(box("RimVine", runX, AY + runH, z0, xEnd, AY + runH + 0.8, z0 + B, "px_nether_wart", VINE_DARK, rim))
+				end
+			end
+			runX = nil
+		end
+		for ix = -16, 15 do
+			local dx, dz = ix * B + 2, iz * B + 2
+			local rr = math.sqrt(dx * dx + dz * dz)
+			local h = 0
+			if rr >= 58 and rr < 62.5 and openingPerp(dx, dz) > 0 then
+				local deg = (math.deg(math.atan2(dz, dx)) + 360) % 360
+				h = HEIGHTS[math.floor(deg / 10) % 36 + 1]
+			end
+			if h ~= runH then
+				flush(AX + ix * B)
+				if h > 0 then
+					runX = AX + ix * B
+				end
+				runH = h
+			end
+		end
+		flush(AX + 16 * B)
+	end
+
+	-- round the rim in the free arcs between the openings: broken lamp posts (two flank the rift), ruins, rift tears
+	for _, p in ipairs({ { 352, 66, true }, { 38, 66, false }, { 64, 64, true }, { 116, 64, true }, { 158, 66, false }, { 186, 66, false } }) do
+		local ang = math.rad(p[1])
+		local x, z = AX + snap(math.cos(ang) * p[2]) + 2, AZ + snap(math.sin(ang) * p[2]) + 2
+		if cellY(x - 3, z - 3) == AY and cellY(x + 3, z + 3) == AY and cellY(x - 3, z + 3) == AY and cellY(x + 3, z - 3) == AY then
+			local dx = if math.cos(ang) > 0 then -1 else 1
+			brokenPost(x, z, AY, if p[3] then 18 else rng:NextInteger(3, 5) * 4, dx, 0, p[3], rim)
+		end
+	end
+	for _, r in ipairs({ { 22, 70 }, { 144, 70 } }) do
+		local ang = math.rad(r[1])
+		local x, z = AX + snap(math.cos(ang) * r[2]), AZ + snap(math.sin(ang) * r[2])
+		local ok = true
+		for _, c in ipairs({ { -6, -2 }, { 6, 2 }, { -2, -6 }, { 2, 6 } }) do
+			if cellY(x + c[1], z + c[2]) ~= AY then
+				ok = false
+			end
+		end
+		if ok then
+			local f = folder("Ruin", rim)
+			box("RuinWall", x - 6, AY, z - 2, x + 6, AY + 4 * rng:NextInteger(1, 2), z + 2, "px_stone_bricks", STONE_T, f)
+			box("RuinWall", x - 6, AY, z + 2, x - 2, AY + 4 * rng:NextInteger(1, 3), z + 6, "px_stone_bricks", STONE_T, f)
+			box("RuinRubble", x + 2, AY, z + 2, x + 6, AY + 4, z + 6, "px_cobblestone", STONE_DARK, f)
+			curtain("x", z - 2.5, x - 6, x + 6, AY + 4, 2, 4, 0.6, f)
+		end
+	end
+		for _, deg in ipairs({ 340, 8, 52, 130, 172, 200, 247, 293 }) do
+		local ang = math.rad(deg)
+		local cx, cz = AX + math.cos(ang) * 70, AZ + math.sin(ang) * 70
+		if cellY(cx, cz) == AY then
+			local f = folder("RiftTear", rim)
+			local tx, tz = -math.sin(ang), math.cos(ang)
+			for j = -2, 2 do
+				local x, z = snap(cx + tx * j * 4), snap(cz + tz * j * 4)
+				if cellY(x, z) == AY then
+					decor(box("TearCrack", x - 2, AY - 0.1, z - 2, x + 2, AY + 0.12, z + 2, "px_magma", nil, f))
+				end
+			end
+			local glow = decor(part("TearGlow", Vector3.new(1.2, 0.3, 14), CFrame.lookAt(V(cx, AY + 0.15, cz), V(cx + tx, AY + 0.15, cz + tz)), GLOW_RED, Enum.Material.Neon, f))
+			if deg == 8 or deg == 172 or deg == 247 then
+				light(glow, 18, 1.2, GLOW_RED)
+			end
+		end
+	end
+	task.wait()
+
+	-- the ring rift at the back (south): an oval of crimson wart and stems round a red glowing core
+	do
+		local rift = folder("RingRift", arena)
+		local RZ = AZ + 64
+		local CY = AY + 17
+		for iy = 0, 8 do
+			local cy = AY + iy * B + 2
+			local runX, runKey = nil, nil
+			local coreX0, coreX1 = nil, nil
+			local function flush(xEnd)
+				if runX then
+					box("RiftRing", runX, AY + iy * B, RZ - 2, xEnd, AY + iy * B + B, RZ + 2, runKey, if runKey == "px_nether_wart" then VINE_RED else nil, rift)
+				end
+				runX = nil
+			end
+			for ix = -4, 3 do
+				local cx = ix * B + 2
+				local e = (cx / 13) ^ 2 + ((cy - CY) / 17) ^ 2
+				local key = nil
+				if e >= 0.5 and e <= 1.05 then
+					key = if (ix + iy) % 3 == 0 then "px_crimson_stem" else "px_nether_wart"
+				elseif e < 0.5 then
+					coreX0 = coreX0 or ix * B
+					coreX1 = ix * B + B
+				end
+				if key ~= runKey then
+					flush(AX + ix * B)
+					if key then
+						runX = AX + ix * B
+					end
+					runKey = key
+				end
+			end
+			flush(AX + 16)
+			if coreX0 then
+				local core = decor(box("RiftCore", AX + coreX0, AY + iy * B, RZ - 0.5, AX + coreX1, AY + iy * B + B, RZ + 0.5, nil, GLOW_RED, rift))
+				core.Material = Enum.Material.Neon
+				core.Transparency = 0.15
+				if iy == 4 then
+					light(core, 50, 2.2, GLOW_RED)
+					emitter(core, {
+						Rate = 6,
+						Lifetime = NumberRange.new(2, 4),
+						Speed = NumberRange.new(1, 3),
+						SpreadAngle = Vector2.new(40, 40),
+						Size = NumberSequence.new(0.4),
+						Color = ColorSequence.new(GLOW_RED),
+						LightEmission = 0.6,
+					})
+				end
+			end
+		end
+		-- tendrils curling out of the top, vines spreading over the ground from its foot
+		for _, t in ipairs({ { -10, 30, 0.5 }, { 8, 32, -0.4 }, { -2, 36, 0.15 } }) do
+			textured(lc(at(AX + t[1], AY + t[2], RZ) * CFrame.Angles(0, 0, t[3]), "RiftTendril", 2, 9, 2, 0, 0, 0, nil, nil, rift), "px_crimson_stem")
+		end
+		for _, v in ipairs({ { -20, -4, -12, 8 }, { 12, -2, 22, 6 }, { -6, 2, 6, 6 }, { -16, -10, -8, -4 }, { 10, -12, 18, -6 } }) do
+			box("RiftVines", AX + v[1], AY - 0.15, RZ + v[2], AX + v[3], AY + 0.2, RZ + v[4], "px_nether_wart", VINE_DARK, rift)
+		end
+		curtain("x", RZ - 2.5, AX - 12, AX + 12, AY + 34, 4, 10, 0.5, rift)
+		curtain("x", RZ + 2.5, AX - 12, AX + 12, AY + 34, 4, 14, 0.5, rift)
+	end
+
+	-- the clock of Vecna floating over the arena, turning slowly (src/client/AmbientMotion.luau, tag AmbientSpin)
+	do
+		local model = Instance.new("Model")
+		model.Name = "VecnaClock"
+		model.Parent = arena
+		local s = 1.6
+		grandClock(at(AX, 26 - 12 * s, AZ), s, model, true)
+		model.WorldPivot = at(AX, 26, AZ)
+		model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+		model:SetAttribute("Speed", 0.12)
+		CollectionService:AddTag(model, "AmbientSpin")
+	end
+	task.wait()
+
+	-- the north bridge: from the south street end (y 0) down one flight to the arena island (y -16)
+	do
+		local nb = folder("NorthBridge", arena)
+		box("BridgeHead", -12, -3.9, 194, 12, 0.1, 212, "px_stone_bricks", DECK_T, nb)
+		for _, sx in ipairs({ -1, 1 }) do
+			box("BridgeParapet", sx * 10, 0.1, 200, sx * 12, 3.1, 210, "px_stone_bricks", STONE_DARK, nb)
+			box("BridgePost", sx * 10, 0.1, 210, sx * 13, 5.1, 214, "px_stone_bricks", STONE_DARK, nb)
+		end
+		decor(lantern(V(-11.5, 5.85, 212), nb, false))
+		flight("NorthStairs", 0, 212, 228, 0, -16, 20, "px_stone_bricks", DECK_T, nb, nil, true)
+		box("BridgeDeck", -12, AY - 3.9, 228, 12, AY + 0.1, 258, "px_stone_bricks", DECK_T, nb)
+		for _, sx in ipairs({ -1, 1 }) do
+			box("BridgeParapet", sx * 10, AY + 0.1, 228, sx * 12, AY + 2.6, 244, "px_stone_bricks", STONE_DARK, nb)
+			fence(sx * 11, 229, sx * 11, 243, nb, AY + 2.6, "px_planks")
+			box("BridgePost", sx * 10, AY + 0.1, 244, sx * 13, AY + 5.1, 248, "px_stone_bricks", STONE_DARK, nb)
+		end
+		decor(lantern(V(11.5, AY + 5.85, 246), nb, false))
+		-- stepped supports under the spans
+		box("BridgeArch", -10, -12, 202, 10, -4, 210, "px_stone_bricks", STONE_DARK, nb)
+		box("BridgeArch", -6, -20, 204, 6, -12, 208, "px_stone_bricks", STONE_DARK, nb)
+		box("BridgeArch", -10, AY - 12, 230, 10, AY - 4, 242, "px_stone_bricks", STONE_DARK, nb)
+		box("BridgeArch", -6, AY - 20, 233, 6, AY - 12, 239, "px_stone_bricks", STONE_DARK, nb)
+		curtain("x", 241.5, -10, 10, AY - 4, 4, 14, 0.5, nb)
+	end
+
+	-- the islets: bridges from the SW/SE street ends (y 0) down to their north edges (y -8), then stone arches down
+	-- to the arena island's west and east sides (y -16); a ruin, a broken lamp post and vines on each islet
+	for _, sx in ipairs({ -1, 1 }) do
+		local c = sx * 120
+		local isl = ISLETS[if sx < 0 then 1 else 2]
+		local ib = folder(if sx < 0 then "WestIslet" else "EastIslet", arena)
+		box("IsletBridgeHead", c - 12, -3.9, 188, c + 12, 0.1, 208, "px_stone_bricks", DECK_T, ib)
+		for _, sd in ipairs({ -1, 1 }) do
+			box("IsletParapet", c + sd * 10, 0.1, 197, c + sd * 12, 3.1, 208, "px_stone_bricks", STONE_DARK, ib)
+		end
+		flight("IsletStairs", c, 208, 216, 0, -8, 20, "px_stone_bricks", DECK_T, ib, nil, true)
+		box("IsletBridgeDeck", c - 12, isl.y - 3.9, 216, c + 12, isl.y + 0.1, 248, "px_stone_bricks", DECK_T, ib)
+		for _, sd in ipairs({ -1, 1 }) do
+			box("IsletParapet", c + sd * 10, isl.y + 0.1, 216, c + sd * 12, isl.y + 2.6, 236, "px_stone_bricks", STONE_DARK, ib)
+			if rng:NextNumber() < 0.6 then
+				fence(c + sd * 11, 218, c + sd * 11, 234, ib, isl.y + 2.6, "px_planks")
+			end
+		end
+		box("IsletArch", c - 10, isl.y - 12, 218, c + 10, isl.y - 4, 232, "px_stone_bricks", STONE_DARK, ib)
+		box("IsletArch", c - 6, isl.y - 20, 221, c + 6, isl.y - 12, 229, "px_stone_bricks", STONE_DARK, ib)
+		curtain("x", 232.5, c - 10, c + 10, isl.y - 4, 4, 12, 0.5, ib)
+
+		-- the arch bridge east/west to the arena island: walkway z 264..280, parapets outside it
+		box("ArchDeckHigh", sx * 112, isl.y - 3.9, 262, sx * 88, isl.y + 0.1, 282, "px_stone_bricks", DECK_T, ib)
+		flight("ArchStairs", 272, sx * 88, sx * 80, isl.y, AY - isl.y, 16, "px_stone_bricks", DECK_T, ib, "x", true)
+		box("ArchDeckLow", sx * 80, AY - 3.9, 262, sx * 44, AY + 0.1, 282, "px_stone_bricks", DECK_T, ib)
+		for _, z in ipairs({ 262, 280 }) do
+			box("ArchParapet", sx * 98, isl.y + 0.1, z, sx * 88, isl.y + 3.1, z + 2, "px_stone_bricks", STONE_DARK, ib)
+			box("ArchParapet", sx * 80, AY + 0.1, z, sx * 70, AY + 3.1, z + 2, "px_stone_bricks", STONE_DARK, ib)
+			box("ArchParapet", sx * 66, AY + 0.1, z, sx * 58, AY + 2.1, z + 2, "px_stone_bricks", STONE_DARK, ib)
+			-- the gateway arch at the arena end
+			box("ArchPost", sx * 58, AY + 0.1, z, sx * 62, AY + 14, z + 2, "px_stone_bricks", STONE_DARK, ib)
+		end
+		box("ArchLintel", sx * 57, AY + 14, 261, sx * 63, AY + 17, 283, "px_stone_bricks", STONE_DARK, ib)
+		box("ArchLintel", sx * 58, AY + 17, 265, sx * 62, AY + 19, 279, "px_stone_bricks", STONE_DARK, ib)
+		curtain("z", sx * 56.6, 262, 282, AY + 17, 3, 8, 0.6, ib)
+		-- the stone arch under the span between the islet and the arena island
+		box("ArchUnder", sx * 98, isl.y - 12, 264, sx * 88, isl.y - 4, 280, "px_stone_bricks", STONE_DARK, ib)
+		box("ArchUnder", sx * 80, AY - 10, 264, sx * 66, AY - 4, 280, "px_stone_bricks", STONE_DARK, ib)
+		box("ArchUnder", sx * 76, AY - 16, 266, sx * 70, AY - 10, 278, "px_stone_bricks", STONE_DARK, ib)
+		curtain("z", sx * 66 - sx * 0.5, 264, 280, AY - 4, 4, 14, 0.5, ib)
+
+		-- the islet itself: a broken lamp post, a ruin and vines (keep its middle free for the walk)
+		brokenPost(c + sx * 12, 250, isl.y, 16, -sx, 0, true, ib)
+		local rx, rz = c + sx * 10, 270
+		box("IsletRuin", rx - 4, isl.y, rz - 6, rx + 4, isl.y + 8, rz - 2, "px_stone_bricks", STONE_T, ib)
+		box("IsletRuin", rx, isl.y, rz - 2, rx + 4, isl.y + 12, rz + 6, "px_stone_bricks", STONE_T, ib)
+		box("IsletRubble", rx - 4, isl.y, rz + 2, rx, isl.y + 4, rz + 6, "px_cobblestone", STONE_DARK, ib)
+		decor(box("VineBlob", rx, isl.y + 12, rz - 2, rx + 4, isl.y + 14, rz + 6, "px_nether_wart", VINE_DARK, ib))
+		curtain("x", rz - 6.5, rx - 4, rx + 4, isl.y + 8, 3, 7, 0.8, ib)
+		box("IsletVines", c - sx * 14, isl.y - 0.15, 256, c - sx * 6, isl.y + 0.2, 262, "px_nether_wart", VINE_DARK, ib)
+	end
+end
+print(("[build-inside-out] mansion + sky road + arena: %d parts"):format(count - startCount))
+
+end
+task.wait()
+-- ================================================================================ inside_out/40-sky.luau
+do
+-- ================================================================ inside_out: the sky round the islands
+-- 1. Vine curtains on every island rim: dark-red strands (1 block wide, 2..8 long, a second shorter strand in front
+--    of many) hang down the outer faces of the rim cells, 0.6 stud off the cliff; crimson carpets spill over the top
+--    edge; weeping strands hang from the cone undersides. Nothing on the path landings (CORRIDORS).
+-- 2. Floating upside-down cone islets (the signature look): a flat top (dead grass, dirt or crimson nylium, now and
+--    then a dead bush, a broken lamp post, a telephone pole, a ruined wall corner or a tilted mailbox), stepped
+--    layers of dirt and dark rock shrinking to a point, red vines from the edges. Far ones are bigger.
+-- 3. Torn-off asphalt road chunks (yellow dashes, a dirt cone under each, some tilted) and floating boulders.
+-- 4. Red zig-zag lightning high at the edge of the sky; slow red embers rising under the main island and the arena.
+-- Every floater keeps 24 studs off every island (groundY) and out of the path corridors; all of it is decor.
+local sky = folder("Sky")
+local startCount = count
+local ROCK_TOP_T = Color3.fromRGB(150, 108, 100) -- core's rockTopTint
+local VINES = { VINE_RED, VINE_DARK }
+-- the walkable paths other parts build through the void: x0, x1, z0, z1, y0, y1, pad
+local CORRIDORS = {
+	{ -20, 20, -275, -185, -20, 70, 12 }, -- the sky road up to the mansion
+	{ -20, 20, 185, 255, -30, 20, 12 }, -- the bridge down to the arena
+	{ -140, -100, 180, 245, -20, 20, 12 }, -- the west islet bridge
+	{ 100, 140, 180, 245, -20, 20, 12 }, -- the east islet bridge
+	{ -120, -76, 262, 300, -30, 20, 16 }, -- the west arch islet → arena
+	{ 76, 120, 262, 300, -30, 20, 16 }, -- the east arch islet → arena
+}
+-- does the box x0..x1, z0..z1, y0..y1 touch a corridor (with its pad)?
+local function inCorridor(x0, x1, z0, z1, y0, y1)
+	for _, c in ipairs(CORRIDORS) do
+		local p = c[7]
+		if x1 >= c[1] - p and x0 <= c[2] + p and z1 >= c[3] - p and z0 <= c[4] + p and y1 >= c[5] - p and y0 <= c[6] + p then
+			return true
+		end
+	end
+	return false
+end
+-- a hanging vine strand: a world-aligned box (local corners), the colour by index
+local function vine(name, x0, y0, z0, x1, y1, z1, ci, parent)
+	return decor(box(name, x0, y0, z0, x1, y1, z1, "px_nether_wart", VINES[(ci % 2) + 1], parent))
+end
+
+-- ================================================================ 1. the vine fringe on the island rims
+do
+	local fringe = folder("RimVines", sky)
+	local c0 = count
+	local C = 8
+	-- core's rockDepth (10-core is wrapped in its own do … end, so it is replicated here)
+	local function rockDepth(x, z)
+		local y = groundY(x, z)
+		local jag = (n2(x, z, 7.7, 0.09) + 0.5) * 22 + n2(x, z, 3.1, 0.035) * 14
+		local rr, deep
+		if y == 0 then
+			rr = ((math.abs(x) / MAIN.rx) ^ 4 + (math.abs(z) / MAIN.rz) ^ 4) ^ 0.25
+			deep = 150
+		elseif y == MANSION.y then
+			rr, deep = math.sqrt((x - MANSION.x) ^ 2 + (z - MANSION.z) ^ 2) / MANSION.r, 96
+		elseif y == ARENA.y then
+			rr, deep = math.sqrt((x - ARENA.x) ^ 2 + (z - ARENA.z) ^ 2) / ARENA.islandR, 80
+		else
+			local s = if x < 0 then ISLETS[1] else ISLETS[2]
+			rr, deep = math.sqrt((x - s.x) ^ 2 + (z - s.z) ^ 2) / s.r, 36
+		end
+		rr = math.clamp(rr, 0, 1)
+		local d = 10 + (1 - rr) ^ 1.4 * deep
+		if rr > 0.82 then
+			d += jag
+		end
+		return math.max(8, math.floor(d / 16 + 0.5) * 16)
+	end
+	local DIRS = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local strands, carpets, weeps, ci = 0, 0, 0, 0
+	-- one strand down a face: the face is perpendicular to x (dx ~= 0) at `face`, or to z; a0..a1 along it
+	local function faceStrand(dx, dz, face, a0, a1, top, len, off, thick)
+		ci += 1
+		local o0, o1 = face + (dx + dz) * off, face + (dx + dz) * (off + thick)
+		if dx ~= 0 then
+			vine("RimVine", o0, top - len, a0, o1, top, a1, ci, fringe)
+		else
+			vine("RimVine", a0, top - len, o0, a1, top, o1, ci, fringe)
+		end
+		strands += 1
+	end
+	for z = -408, 408 - C, C do
+		for x = -240, 240 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			local gy = groundY(cx, cz)
+			if gy ~= nil and not inCorridor(cx - 4, cx + 4, cz - 4, cz + 4, gy, gy) then
+				local depth = rockDepth(cx, cz)
+				for _, d in ipairs(DIRS) do
+					local dx, dz = d[1], d[2]
+					if groundY(cx + dx * C, cz + dz * C) == nil then
+						local face = if dx ~= 0 then cx + dx * 4 else cz + dz * 4
+						local along = if dx ~= 0 then cz else cx
+						-- two 1-block strands per 8-stud face (some skipped for a ragged edge)
+						for k = 0, 1 do
+							if rng:NextNumber() > 0.2 then
+								local a0 = along - 4 + k * B
+								local top = gy - rng:NextNumber(0.05, 0.4)
+								-- longer where the rock below is deep; a few run past the rock bottom
+								local maxLen = math.clamp(math.floor((depth + 4) / B) + 2, 3, 8)
+								local len = rng:NextInteger(2, maxLen) * B
+								local thick = rng:NextNumber(0.7, 1.5)
+								faceStrand(dx, dz, face, a0, a0 + B, top, len, 0.6, thick)
+								-- a shorter strand in front, shifted half a block: a thick curtain
+								if rng:NextNumber() < 0.6 then
+									local s = math.clamp(a0 + (if rng:NextNumber() < 0.5 then -2 else 2), along - 4, along + 4 - B)
+									local len2 = rng:NextInteger(1, math.max(1, len / B - 1)) * B
+									faceStrand(dx, dz, face, s, s + B, top - rng:NextNumber(0.5, 2), len2, 0.6 + thick, rng:NextNumber(0.6, 1))
+								end
+							end
+						end
+						-- crimson vine carpet spilling over the top edge (not on the asphalt)
+						if rng:NextNumber() < 0.28 and not (gy == 0 and onStreet(cx, cz, 2)) then
+							local w = rng:NextInteger(1, 2) * B
+							local a0 = math.clamp(along - 4 + rng:NextInteger(0, 1) * B, along - 4, along + 4 - w)
+							local inner = face - (dx + dz) * B * rng:NextInteger(1, 2)
+							local outer = face + (dx + dz) * 1.8
+							if dx ~= 0 then
+								decor(box("VineCarpet", inner, gy, a0, outer, gy + 0.4, a0 + w, "px_crimson_nylium", nil, fringe))
+							else
+								decor(box("VineCarpet", a0, gy, inner, a0 + w, gy + 0.4, outer, "px_crimson_nylium", nil, fringe))
+							end
+							carpets += 1
+						end
+					end
+				end
+				-- weeping strands from the underside of the hanging rock (longer toward the deep tip)
+				if rng:NextNumber() < 0.045 then
+					local bottom = gy - B - depth
+					local len = rng:NextInteger(2, 4 + math.floor(depth / 40)) * B
+					local ox, oz = rng:NextInteger(-1, 1) * 2, rng:NextInteger(-1, 1) * 2
+					ci += 1
+					if rng:NextNumber() < 0.5 then
+						vine("WeepingVine", cx + ox - 2, bottom - len, cz + oz - 0.6, cx + ox + 2, bottom + 0.2, cz + oz + 0.6, ci, fringe)
+					else
+						vine("WeepingVine", cx + ox - 0.6, bottom - len, cz + oz - 2, cx + ox + 0.6, bottom + 0.2, cz + oz + 2, ci, fringe)
+					end
+					weeps += 1
+				end
+			end
+		end
+		if z % 64 == 0 then
+			task.wait()
+		end
+	end
+	print(("[build-inside-out] sky: rim strands %d, carpets %d, weeping %d (%d parts)"):format(strands, carpets, weeps, count - c0))
+end
+task.wait()
+
+-- ================================================================ floaters: placement shared by cones, chunks, boulders
+local taken = {} -- { x, z, r, y0, y1 }
+-- no island cell within `half` + 24 studs of (x, z)
+local function clearOfIslands(x, z, half)
+	if groundY(x, z) ~= nil then
+		return false
+	end
+	local e = half + 24
+	local n = math.max(1, math.ceil(2 * e / 8))
+	for i = 0, n do
+		for j = 0, n do
+			if groundY(x - e + 2 * e * i / n, z - e + 2 * e * j / n) ~= nil then
+				return false
+			end
+		end
+	end
+	return true
+end
+-- a free spot for a floater `half` studs wide (horizontal half-size), reaching `down` below and `up` above its y
+local function findSpot(half, down, up, yMin, yMax, far)
+	for attempt = 1, 400 do
+		if attempt % 100 == 0 then
+			task.wait()
+		end
+		local x, z = rng:NextNumber(-420, 420), rng:NextNumber(-520, 520)
+		local y = rng:NextNumber(yMin, yMax)
+		local ok = (not far or math.abs(x) > 330 or math.abs(z) > 450)
+			and not inCorridor(x - half, x + half, z - half, z + half, y - down, y + up)
+			and clearOfIslands(x, z, half)
+		if ok then
+			for _, t in ipairs(taken) do
+				local dh = math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2)
+				if dh < t[3] + half + 10 and y + up + 8 > t[4] and y - down - 8 < t[5] then
+					ok = false
+					break
+				end
+			end
+		end
+		if ok then
+			table.insert(taken, { x, z, half, y - down, y + up })
+			return x, y, z
+		end
+	end
+	return nil
+end
+-- the rock of a hanging layer `dep` studs under the top of a floater `total` deep: dirt above, dark rock below
+local function rockOf(dep, total)
+	if dep < math.max(8, total * 0.4) then
+		return "px_dirt", ROCK_TOP_T
+	end
+	return "px_blackstone", ROCK_RED
+end
+
+-- ================================================================ 2. the floating cone islets
+do
+	local cones = folder("FloatingCones", sky)
+	local c0 = count
+	local WOOD_D = "px_dark_oak_planks"
+	local POLE = "px_dark_oak_log"
+	-- the props on a cone top (at local x, y, z: the top surface); w = top width in blocks
+	local function deadBush(x, y, z, f)
+		decor(cube("DeadBush", x, y + 1.5, z, 0.8, 3, 0.8, POLE, Color3.fromRGB(110, 86, 74), f))
+		local base = V(x, y + 2, z)
+		for i = 1, 3 do
+			local a = rng:NextNumber(0, 2 * math.pi)
+			local tip = base + Vector3.new(math.cos(a) * 1.8, rng:NextNumber(1, 2.4), math.sin(a) * 1.8)
+			decor(beam("DeadTwig", base + Vector3.new(0, i * 0.3, 0), tip, 0.4, Color3.fromRGB(78, 58, 50), f, Enum.Material.Wood))
+		end
+	end
+	local function brokenLamp(x, y, z, f)
+		decor(cube("LampBase", x, y + 0.5, z, B, 1, B, "px_stone_bricks", COBBLE, f))
+		local cf = at(x, y + 1, z) * CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 6.28), rng:NextNumber(0.15, 0.35))
+		textured(decor(part("LampPost", Vector3.new(1, 8, 1), cf * CFrame.new(0, 4, 0), nil, nil, f)), WOOD_D)
+		textured(decor(part("LampArm", Vector3.new(1, 1, 3), cf * CFrame.new(0, 7.5, -1.5), nil, nil, f)), WOOD_D)
+		decor(part("DeadLantern", Vector3.new(1.3, 1.5, 1.3), cf * CFrame.new(0, 6, -2.6), Color3.fromRGB(45, 42, 46), Enum.Material.Metal, f))
+	end
+	local function phonePole(x, y, z, f)
+		local cf = at(x, y, z) * CFrame.Angles(rng:NextNumber(-0.12, 0.12), rng:NextNumber(0, 6.28), rng:NextNumber(-0.12, 0.12))
+		textured(decor(part("PhonePole", Vector3.new(1.2, 14, 1.2), cf * CFrame.new(0, 7, 0), nil, nil, f)), POLE)
+		textured(decor(part("PoleBar", Vector3.new(7, 0.8, 0.8), cf * CFrame.new(0, 12.4, 0), nil, nil, f)), WOOD_D)
+		textured(decor(part("PoleBar", Vector3.new(5, 0.8, 0.8), cf * CFrame.new(0, 10.6, 0), nil, nil, f)), WOOD_D)
+		-- a torn wire dangling from one end
+		decor(part("TornWire", Vector3.new(0.2, 5, 0.2), cf * CFrame.new(3.2, 9.9, 0) * CFrame.Angles(0, 0, 0.25), Color3.fromRGB(30, 28, 30), nil, f))
+	end
+	local function ruinedWall(x, y, z, f)
+		local v, t = pick({ "px_stone_bricks", "px_cobblestone" }), COBBLE
+		local h = rng:NextInteger(2, 3) * B
+		decor(box("RuinWall", x - B, y, z - B, x + B, y + h, z, v, t, f))
+		decor(box("RuinWall", x - B, y, z, x, y + h - B, z + B, v, t, f))
+		decor(box("RuinWall", x, y + h, z - B, x + B, y + h + B, z, v, t, f)) -- a broken top block
+	end
+	local function mailbox(x, y, z, f)
+		local cf = at(x, y, z) * CFrame.Angles(rng:NextNumber(0.2, 0.4), rng:NextNumber(0, 6.28), 0)
+		textured(decor(part("MailPost", Vector3.new(0.6, 3.4, 0.6), cf * CFrame.new(0, 1.7, 0), nil, nil, f)), WOOD_D)
+		decor(part("Mailbox", Vector3.new(1.4, 1.4, 2.4), cf * CFrame.new(0, 4, 0), Color3.fromRGB(70, 80, 108), Enum.Material.Metal, f))
+		decor(part("MailFlag", Vector3.new(0.15, 1, 0.4), cf * CFrame.new(0.8, 4.6, 0.6), Color3.fromRGB(170, 36, 36), nil, f))
+	end
+	local PROPS = { deadBush, deadBush, brokenLamp, phonePole, phonePole, ruinedWall, mailbox }
+
+	-- one cone: top w × d blocks at (x, y, z) = the centre of its top surface
+	local function cone(x, y, z, w, d, layers, f)
+		local cf = folder("Cone", f)
+		local n = rng:NextNumber()
+		local topV, topT = "px_grass_top", DEAD_GRASS
+		if n < 0.35 then
+			topV, topT = "px_crimson_nylium", nil
+		elseif n < 0.55 then
+			topV, topT = "px_dirt", Color3.fromRGB(120, 96, 88)
+		end
+		local hx, hz = w * B / 2, d * B / 2
+		decor(box("ConeTop", x - hx, y - B, z - hz, x + hx, y, z + hz, topV, topT, cf))
+		-- the stepped layers: each shrinks, its edges stay on the block grid of the top
+		local heights, total = {}, B
+		for k = 1, layers do
+			heights[k] = if w >= 6 and rng:NextNumber() < 0.5 then 2 * B else B
+			total += heights[k]
+		end
+		local tipLen = rng:NextInteger(1, 2) * B
+		total += tipLen
+		local yTop = y - B
+		local ix0, ix1, iz0, iz1 = 0, w, 0, d -- the previous layer in block indices
+		for k = 1, layers do
+			local f01 = 1 - k / (layers + 1)
+			local lw = math.max(1, math.floor(w * f01 + 0.5))
+			local ld = math.max(1, math.floor(d * f01 + 0.5))
+			lw, ld = math.min(lw, ix1 - ix0), math.min(ld, iz1 - iz0)
+			local sx = ix0 + math.floor((ix1 - ix0 - lw) / 2 + rng:NextNumber(-0.5, 0.99))
+			local sz = iz0 + math.floor((iz1 - iz0 - ld) / 2 + rng:NextNumber(-0.5, 0.99))
+			sx = math.clamp(sx, ix0, ix1 - lw)
+			sz = math.clamp(sz, iz0, iz1 - ld)
+			local v, t = rockOf(y - yTop, total)
+			local yb = yTop - heights[k]
+			decor(box("ConeRock", x - hx + sx * B, yb, z - hz + sz * B, x - hx + (sx + lw) * B, yTop, z - hz + (sz + ld) * B, v, t, cf))
+			-- a ragged nub: one more block row on a side, shorter (within the layer above)
+			if lw >= 2 and rng:NextNumber() < 0.55 then
+				local side = rng:NextInteger(1, 4)
+				local nb = { sx, sz, sx + lw, sz + ld }
+				if side == 1 and sx > ix0 then
+					nb = { sx - 1, sz, sx, sz + math.max(1, ld - 1) }
+				elseif side == 2 and sx + lw < ix1 then
+					nb = { sx + lw, sz + 1, sx + lw + 1, sz + ld }
+				elseif side == 3 and sz > iz0 then
+					nb = { sx + 1, sz - 1, sx + lw, sz }
+				elseif side == 4 and sz + ld < iz1 then
+					nb = { sx, sz + ld, sx + math.max(1, lw - 1), sz + ld + 1 }
+				else
+					nb = nil
+				end
+				if nb then
+					decor(box("ConeRock", x - hx + nb[1] * B, yTop - B, z - hz + nb[2] * B, x - hx + nb[3] * B, yTop, z - hz + nb[4] * B, v, t, cf))
+				end
+			end
+			ix0, ix1, iz0, iz1 = sx, sx + lw, sz, sz + ld
+			yTop = yb
+		end
+		-- the point: one block column
+		local px = ix0 + rng:NextInteger(0, ix1 - ix0 - 1)
+		local pz = iz0 + rng:NextInteger(0, iz1 - iz0 - 1)
+		decor(box("ConeTip", x - hx + px * B, yTop - tipLen, z - hz + pz * B, x - hx + (px + 1) * B, yTop, z - hz + (pz + 1) * B, "px_blackstone", ROCK_RED, cf))
+		-- red vines from the top edges, hanging free past the shrinking layers
+		local ci = rng:NextInteger(0, 1)
+		for side = 1, 4 do
+			local along = if side <= 2 then w else d
+			local nv = math.clamp(math.floor(along / 2 + rng:NextNumber(0, 1.5)), 1, 4)
+			for _ = 1, nv do
+				local a = rng:NextInteger(0, along - 1) * B
+				local len = rng:NextInteger(2, math.max(3, math.floor(total / B) + 1)) * B
+				local top = y - rng:NextNumber(0.05, 0.5)
+				local th = rng:NextNumber(0.7, 1.3)
+				ci += 1
+				if side == 1 then
+					vine("ConeVine", x - hx - 0.6 - th, top - len, z - hz + a, x - hx - 0.6, top, z - hz + a + B, ci, cf)
+				elseif side == 2 then
+					vine("ConeVine", x + hx + 0.6, top - len, z - hz + a, x + hx + 0.6 + th, top, z - hz + a + B, ci, cf)
+				elseif side == 3 then
+					vine("ConeVine", x - hx + a, top - len, z - hz - 0.6 - th, x - hx + a + B, top, z - hz - 0.6, ci, cf)
+				else
+					vine("ConeVine", x - hx + a, top - len, z + hz + 0.6, x - hx + a + B, top, z + hz + 0.6 + th, ci, cf)
+				end
+			end
+		end
+		-- a crimson carpet over one top edge
+		if topV ~= "px_crimson_nylium" and rng:NextNumber() < 0.6 then
+			local cw = math.max(1, math.floor(w / 2)) * B
+			local cx0 = x - hx + rng:NextInteger(0, w - cw / B) * B
+			decor(box("VineCarpet", cx0, y, z - hz - 1.6, cx0 + cw, y + 0.4, z - hz + B, "px_crimson_nylium", nil, cf))
+		end
+		-- a prop from the dead town on bigger tops
+		if math.min(w, d) >= 3 and rng:NextNumber() < 0.5 then
+			local ox = (rng:NextInteger(0, w - 1) - (w - 1) / 2) * B * 0.5
+			local oz = (rng:NextInteger(0, d - 1) - (d - 1) / 2) * B * 0.5
+			pick(PROPS)(x + ox, y, z + oz, cf)
+		end
+		return total
+	end
+
+	local made, big = 0, 0
+	for i = 1, 56 do
+		local isBig = i <= 6
+		local w = if isBig then rng:NextInteger(8, 10) else rng:NextInteger(2, 7)
+		local d = math.clamp(w + rng:NextInteger(-1, 1), 2, 10)
+		local layers = math.clamp(math.floor(math.max(w, d) / 2) + rng:NextInteger(1, 2), 3, 6)
+		local half = math.max(w, d) * B / 2 + 2
+		local down = B * (layers * (if w >= 6 then 2 else 1) + 3)
+		local yMin, yMax = -80, 140
+		if not isBig and rng:NextNumber() < 0.6 then
+			yMin, yMax = -40, 90 -- most of them near the town's eye line
+		end
+		local x, y, z = findSpot(half, down, 16, yMin, yMax, isBig)
+		if x then
+			-- snap to the block grid so the tops line up like blocks
+			cone(snap(x) + (w % 2) * 2, snap(y), snap(z) + (d % 2) * 2, w, d, layers, cones)
+			made += 1
+			if isBig then
+				big += 1
+			end
+		end
+		if i % 8 == 0 then
+			task.wait()
+		end
+	end
+	print(("[build-inside-out] sky: cones %d (big %d), %d parts"):format(made, big, count - c0))
+end
+task.wait()
+
+-- ================================================================ 3. torn-off road chunks and boulders
+do
+	local junk = folder("FloatingJunk", sky)
+	local c0 = count
+	local chunks, boulders = 0, 0
+	-- a world-aligned-in-yaw vertical vine at world point p (yaw = the chunk's)
+	local function hangVine(p, yaw, len, ci, f)
+		local c = VINES[(ci % 2) + 1]
+		local s = decor(part("ChunkVine", Vector3.new(B, len, 1), CFrame.new(p - Vector3.new(0, len / 2, 0)) * CFrame.Angles(0, yaw, 0), c, nil, f))
+		textured(s, "px_nether_wart", c)
+	end
+	local function roadChunk(x, y, z, L, W, f)
+		local cf0 = folder("RoadChunk", f)
+		local yaw = rng:NextNumber(0, 2 * math.pi)
+		local tilt = math.rad(rng:NextNumber(0, 25))
+		local cf = at(x, y, z) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(rng:NextNumber(-1, 1) * tilt, 0, rng:NextNumber(-1, 1) * tilt * 0.6)
+		local lx, lz = W * B, L * B
+		local slab = decor(part("Asphalt", Vector3.new(lx, B, lz), cf * CFrame.new(0, -B / 2, 0), nil, nil, cf0))
+		textured(slab, "px_smooth_stone", ASPHALT)
+		-- a broken end: a shorter piece of the next row
+		local bw = rng:NextInteger(1, W - 1)
+		local bx = (-W / 2 + bw / 2 + rng:NextInteger(0, W - bw)) * B
+		textured(decor(part("Asphalt", Vector3.new(bw * B, B, B), cf * CFrame.new(bx, -B / 2, lz / 2 + B / 2), nil, nil, cf0)), "px_smooth_stone", ASPHALT)
+		-- the yellow dashes down the middle (or a double line along one side of a wide chunk)
+		local lineX = if W >= 4 and rng:NextNumber() < 0.5 then 0 else (if W % 2 == 1 then 0 else B / 2)
+		for k = 0, L - 1, 2 do
+			local zc = -lz / 2 + (k + 0.5) * B
+			local dash = decor(part("RoadLine", Vector3.new(0.8, 0.12, 3), cf * CFrame.new(lineX, 0.06, zc), nil, nil, cf0))
+			textured(dash, "px_yellow_wool", LINE_YELLOW)
+		end
+		-- a kerb on one side now and then
+		if rng:NextNumber() < 0.4 then
+			local side = if rng:NextNumber() < 0.5 then -1 else 1
+			textured(decor(part("Kerb", Vector3.new(B, 1, lz), cf * CFrame.new(side * (lx / 2 + B / 2), 0.5, 0), nil, nil, cf0)), "px_smooth_stone", COBBLE)
+		end
+		-- the dirt and rock torn off with it, stepped down to a point
+		local layers = rng:NextInteger(2, 3)
+		local total = B * (layers + 2)
+		local yTop = -B
+		for k = 1, layers do
+			local f01 = 1 - k / (layers + 1)
+			local sw = math.max(1, math.floor(W * f01 + 0.5)) * B
+			local sl = math.max(1, math.floor(L * f01 + 0.5)) * B
+			local v, t = rockOf(-yTop, total)
+			textured(decor(part("ChunkRock", Vector3.new(sw, B, sl), cf * CFrame.new(rng:NextInteger(-1, 1) * 2 * (if sw < lx then 1 else 0), yTop - B / 2, rng:NextInteger(-1, 1) * 2), nil, nil, cf0)), v, t)
+			yTop -= B
+		end
+		textured(decor(part("ChunkTip", Vector3.new(B, 2 * B, B), cf * CFrame.new(0, yTop - B, 0), nil, nil, cf0)), "px_blackstone", ROCK_RED)
+		-- vines hanging from the long edges
+		for i = 1, rng:NextInteger(2, 4) do
+			local side = if i % 2 == 0 then -1 else 1
+			local p = (cf * CFrame.new(side * (lx / 2 + 1.2), -0.3, rng:NextNumber(-lz / 2 + 2, lz / 2 - 2))).Position
+			hangVine(p, yaw, rng:NextInteger(2, 6) * B, i, cf0)
+		end
+	end
+	local function boulder(x, y, z, f)
+		local bf = folder("Boulder", f)
+		local v, t = "px_blackstone", ROCK_RED
+		if rng:NextNumber() < 0.4 then
+			v, t = "px_cobblestone", Color3.fromRGB(128, 114, 116)
+		end
+		local s = rng:NextInteger(2, 4)
+		local h = s * B / 2
+		decor(cube("Boulder", x, y, z, s * B, s * B, s * B, v, t, bf))
+		-- stepped lumps on its faces
+		for _ = 1, rng:NextInteger(2, 4) do
+			local ls = rng:NextInteger(1, math.max(1, s - 1)) * B
+			local ax = rng:NextInteger(1, 3)
+			local sg = if rng:NextNumber() < 0.5 then -1 else 1
+			local ox, oy, oz = rng:NextInteger(-1, 1) * 2, rng:NextInteger(-1, 1) * 2, rng:NextInteger(-1, 1) * 2
+			if ax == 1 then
+				ox = sg * (h + ls / 2 - B / 2)
+			elseif ax == 2 then
+				oy = sg * (h + ls / 2 - B / 2)
+			else
+				oz = sg * (h + ls / 2 - B / 2)
+			end
+			decor(cube("BoulderLump", x + ox, y + oy, z + oz, ls, ls, ls, v, t, bf))
+		end
+		if rng:NextNumber() < 0.6 then
+			decor(box("VineCarpet", x - h, y + h, z - h, x - h + B, y + h + 0.4, z + h, "px_crimson_nylium", nil, bf))
+			vine("BoulderVine", x - h - 1.6, y + h - rng:NextInteger(3, 6) * B, z - B, x - h - 0.6, y + h, z, 1, bf)
+		end
+	end
+	for _ = 1, 9 do
+		local L, W = rng:NextInteger(4, 7), rng:NextInteger(3, 4)
+		local x, y, z = findSpot(L * B / 2 + 4, 6 * B, 8, -60, 120)
+		if x then
+			roadChunk(x, y, z, L, W, junk)
+			chunks += 1
+		end
+	end
+	task.wait()
+	for _ = 1, 9 do
+		local x, y, z = findSpot(16, 12, 12, -80, 140)
+		if x then
+			boulder(snap(x), snap(y), snap(z), junk)
+			boulders += 1
+		end
+	end
+	print(("[build-inside-out] sky: road chunks %d, boulders %d, %d parts"):format(chunks, boulders, count - c0))
+end
+task.wait()
+
+-- ================================================================ 4. red lightning at the edge of the sky, embers below
+do
+	local bolts = folder("RedLightning", sky)
+	local c0 = count
+	-- high and far from the islands, round the edge of the volume
+	local ANCHORS = { { -405, 240, -170 }, { 400, 215, 250 }, { -270, 255, 505 }, { 310, 190, -480 }, { 60, 235, -515 }, { -390, 175, 330 } }
+	for _, a in ipairs(ANCHORS) do
+		local p = V(a[1], a[2], a[3])
+		local segs = rng:NextInteger(4, 7)
+		local dir = 1
+		for k = 1, segs do
+			dir = -dir
+			local q = p + Vector3.new(dir * rng:NextNumber(4, 10), -rng:NextNumber(10, 18), rng:NextNumber(-6, 6))
+			local s = decor(beam("Bolt", p, q, 1.5, GLOW_RED, bolts, Enum.Material.Neon))
+			s.CastShadow = false
+			-- a short fork off the middle of the bolt
+			if k == 2 and rng:NextNumber() < 0.7 then
+				local fq = q + Vector3.new(-dir * rng:NextNumber(8, 14), -rng:NextNumber(8, 14), rng:NextNumber(-5, 5))
+				local fs = decor(beam("BoltFork", q, fq, 1, GLOW_RED, bolts, Enum.Material.Neon))
+				fs.CastShadow = false
+			end
+			p = q
+		end
+	end
+	-- slow red embers rising toward the hanging rock of the main island and the arena island
+	for _, e in ipairs({ { 0, -200, 0, 260, 240 }, { ARENA.x, -140, ARENA.z, 110, 110 } }) do
+		local src = decor(part("EmberRise", Vector3.new(e[4], 1, e[5]), at(e[1], e[2], e[3]), nil, nil, bolts))
+		src.Transparency = 1
+		src.CastShadow = false
+		emitter(src, {
+			Rate = 5,
+			Lifetime = NumberRange.new(18, 26),
+			Speed = NumberRange.new(2, 4),
+			SpreadAngle = Vector2.new(15, 15),
+			EmissionDirection = Enum.NormalId.Top,
+			Size = NumberSequence.new(0.35),
+			Color = ColorSequence.new(Color3.fromRGB(255, 70, 40)),
+			LightEmission = 1,
+			Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.15, 0.3), NumberSequenceKeypoint.new(0.85, 0.4), NumberSequenceKeypoint.new(1, 1) }),
+		})
+	end
+	print(("[build-inside-out] sky: lightning and embers, %d parts"):format(count - c0))
+end
+print(("[build-inside-out] sky: %d parts in all"):format(count - startCount))
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-inside_out] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
