@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_un_king = { -- [клиент] prison.classic.boss.un_king.notify.spawn
+		ru = "Земля под Рынком треснула… Король нежити восстал из могилы!",
+		en = "The ground beneath the Market cracked... the Undead King has risen from the grave!",
+		es = "La tierra bajo el Mercado se agrietó... ¡el Rey No Muerto se ha alzado de la tumba!",
+		fr = "Le sol sous le Marché s'est fendu… le Roi mort-vivant s'est relevé de sa tombe !",
+	},
 	boss_spawned_mole = { -- [клиент] prison.classic.boss.mole.notify.spawn (the boss is «Моль», a moth)
 		ru = "Тьма сгущается… Моль начинает охоту!",
 		en = "The darkness is thickening... the Moth is on the hunt!",

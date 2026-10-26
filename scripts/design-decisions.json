@@ -499,6 +499,14 @@
         32
       ],
       "_size": "[решение 23.10] 32×12×32 — ледяной карьер в запястье «длани» (scripts/build-snowy-hand.luau); состав из меню (mine-shares: лёд 50 / плотный лёд 50)"
+    },
+    "market": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 26.10] 32×12×32 — шахта на площади Рынка «под прилавками» (scripts/locations/market, scripts/build-market.luau); состав из меню (mine-shares: красная шерсть 100 %); шот-шахта [вики 26.10] пока не сделана"
     }
   },
   "pvpFromLevel": 9,
@@ -1374,6 +1382,74 @@
           ]
         },
         "_abilities": "[решение] вихрь пыльцы (полоса), ледяные шипы из-под озера (круги), бросок из тьмы — о фонарный столб оглушение 3 с; набор как у Минотавра, своя модель позже"
+      }
+    },
+    "un_king": {
+      "hp": 10000,
+      "damage": 13,
+      "respawnSeconds": 4200,
+      "name": "Король нежити",
+      "nameEn": "Undead King",
+      "locationId": "market",
+      "unlockLevel": 21,
+      "_source": "[клиент] имя «Король нежити», описание, объявление «Земля под Рынком треснула… Король нежити восстал из могилы!»; [меню] 0–9500 $, древние звёзды 10–15, порошок 1–35 %; hp 10000 / урон 13 / респаун 70 мин [решение] по шкале боссов (Моль 9000), в справочнике респаун 6 ч [вики 26.10]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            110,
+            230,
+            235
+          ],
+          "blade": [
+            150,
+            250,
+            255
+          ],
+          "spikes": [
+            60,
+            120,
+            130
+          ],
+          "glow": [
+            120,
+            240,
+            230
+          ]
+        },
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10: «босса пока кидай как затычку, их отдельно будем»]: набор Минотавра (полоса, круги из-под пола, рывок — о колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: тёмные снаряды, взрывные черепа, призрачный меч, гули, метеоры (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       }
     }
   },

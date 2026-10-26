@@ -154,14 +154,24 @@ local function styleCobweb(part: BasePart, web: boolean)
 	end
 end
 
+-- Wool colours we have no texture of: our white wool texture tinted (Рынок: red and lime wool [меню, вики 26.10])
+local TINTED: { [string]: { base: string, color: Color3 } } = {
+	red_wool = { base = "white_wool", color = Color3.fromRGB(196, 46, 40) },
+	lime_wool = { base = "white_wool", color = Color3.fromRGB(120, 196, 52) },
+}
+
 local function stylePart(part: BasePart, id: string)
 	local variant = TextureService.variantName(id)
+	local tint = Color3.new(1, 1, 1)
+	local tinted = TINTED[id]
+	if not variant and tinted then
+		variant = TextureService.variantName(tinted.base)
+		tint = tinted.color
+	end
 	local material = if variant
 		then Enum.Material.Plastic
 		else MATERIALS[id] or Enum.Material.SmoothPlastic
-	local color = if variant
-		then Color3.new(1, 1, 1)
-		else COLORS[id] or Color3.fromRGB(200, 200, 200)
+	local color = if variant then tint else COLORS[id] or Color3.fromRGB(200, 200, 200)
 	if part.Name ~= id then
 		part.Name = id
 	end
