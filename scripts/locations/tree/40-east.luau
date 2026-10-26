@@ -952,7 +952,8 @@ do
 		claim(108, -14, 116, -10)
 	end
 	-- the beehive tree: an oak with a bee nest under its crown, two hives beside it and bees
-	for _, c in ipairs({ { 68, 42 }, { 100, 36 }, { 116, -58 }, { 20, 60 } }) do
+	-- (Studio 26.10: the old spots sat on the rim and all failed; the free pocket is east of MAIN STREET, x 60..90)
+	for _, c in ipairs({ { 64, 28 }, { 68, 42 }, { 100, 36 }, { 116, -58 }, { 20, 60 } }) do
 		local x, z = c[1], c[2]
 		if okArea(x - 6, z - 6, x + 14, z + 6, 12) then
 			local h = smallTree(x, z, "oak", gf, 0, true)
@@ -1015,6 +1016,8 @@ do
 	-- small trees (3..5)
 	local trees = 0
 	for _, c in ipairs({
+		{ 84, 30, "blossom" },
+		{ 112, -22, "azalea" },
 		{ 84, 34, "oak" },
 		{ 110, 28, "azalea" },
 		{ 116, -30, "blossom" },
@@ -1024,7 +1027,7 @@ do
 		{ 72, 54, "oak" },
 		{ 112, -72, "azalea" },
 	}) do
-		if trees < 5 and okArea(c[1] - 6, c[2] - 6, c[1] + 6, c[2] + 6, 12) then
+		if trees < 5 and okArea(c[1] - 6, c[2] - 6, c[1] + 6, c[2] + 6, 8) then
 			smallTree(c[1], c[2], c[3], gf, 0, true)
 			claim(c[1] - 8, c[2] - 8, c[1] + 8, c[2] + 8)
 			trees += 1

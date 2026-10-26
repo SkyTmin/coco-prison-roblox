@@ -766,7 +766,7 @@
       "$className": "MaterialVariant",
       "$properties": {
         "BaseMaterial": "Plastic",
-        "ColorMap": "rbxassetid://111857822224684",
+        "ColorMap": "rbxassetid://101182138664192",
         "StudsPerTile": 4
       }
     }

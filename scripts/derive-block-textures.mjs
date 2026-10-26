@@ -353,4 +353,6 @@ await recolor("grass_top.png", "dark_oak_leaves.png", [[0, [22, 50, 20]], [0.5, 
 // Врата края / Древо: magenta and white concrete — our concrete floor on their own ramps, like the yellow and cyan
 // concrete (the tinted smooth stone read near-black purple in the End night, Studio 26.10)
 await recolor("concrete_floor.png", "magenta_concrete.png", [[0, [150, 40, 140]], [0.5, [192, 66, 182]], [1, [218, 100, 208]]], 0.7);
-await recolor("concrete_floor.png", "white_concrete.png", [[0, [206, 210, 212]], [0.5, [228, 231, 232]], [1, [244, 246, 246]]], 0.7);
+// (Studio 26.10: the Древо morning sun is bright — a near-white ramp read as one flat white sheet; greyer stops and a
+// steep gamma spread the speckle of the floor so the blocks show)
+await recolor("concrete_floor.png", "white_concrete.png", [[0, [176, 180, 184]], [0.55, [214, 217, 220]], [1, [238, 240, 242]]], 3);
