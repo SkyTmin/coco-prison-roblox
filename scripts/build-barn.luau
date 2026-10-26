@@ -854,11 +854,14 @@ end
 -- ================================================================ the boss, the dusk, the void net, the edge walls
 bossSpawn("forest_guardian", ARENA.x, 2, ARENA.z, ARENA.r - 8, core)
 -- an autumn dusk with fog over the whole island (the only lighting volume of this floor); pumpkins give the light
+-- (Studio 26.10: at ClockTime 17.6 the long shadows and the dark dirt read nearly black, like the Изнанка the owner
+-- found too dark — a higher sun, more light, a warm Tint)
 lightingVolume("AutumnDusk", 0, 80, 0, 520, 360, 520, {
-	Ambient = Color3.fromRGB(170, 132, 104),
-	Exposure = -0.05,
-	Haze = 0.38,
-	ClockTime = 17.6,
+	Ambient = Color3.fromRGB(190, 150, 120),
+	Exposure = 0.25,
+	Haze = 0.32,
+	ClockTime = 16.8,
+	Tint = Color3.fromRGB(255, 234, 210),
 	Brightness = 1.4,
 	AtmosphereColor = Color3.fromRGB(214, 156, 108),
 	AtmosphereDecay = Color3.fromRGB(110, 72, 60),

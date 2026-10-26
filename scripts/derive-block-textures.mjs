@@ -297,3 +297,56 @@ await recolor("yellow_wool.png", "green_wool.png", [[0, [50, 74, 18]], [0.5, [82
 }
 // Изнанка: dark oak leaves — our hedge darkened by a tint read as a black pit in the red dusk (Studio 26.10)
 await recolor("grass_top.png", "dark_oak_leaves.png", [[0, [22, 50, 20]], [0.5, [40, 80, 32]], [1, [72, 118, 52]]]);
+// Амбар: the jack o'lantern — our pumpkin ribs with a carved face glowing from inside (triangle eyes, a nose, a
+// toothy grin); a MaterialVariant shows it on every side, so the mine is a field of grinning lanterns
+{
+	const N = 16;
+	const S = 19;
+	let seed = 20261027;
+	const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+	const rib = [[150, 70, 10], [206, 116, 22], [232, 148, 40], [214, 126, 28]];
+	const face = [
+		"................",
+		"................",
+		"................",
+		"...###....###...",
+		"...###....###...",
+		"....##....##....",
+		"................",
+		".......##.......",
+		"................",
+		"..#..........#..",
+		"..############..",
+		"..##.######.##..",
+		"...##.#..#.##...",
+		"....###..###....",
+		"................",
+		"................",
+	];
+	const carved = (x, y) => face[y]?.[x] === "#";
+	const data = Buffer.alloc(N * S * N * S * 4);
+	for (let y = 0; y < N; y++) {
+		for (let x = 0; x < N; x++) {
+			const k = 0.9 + rnd() * 0.2 - (y === 0 || y === N - 1 ? 0.08 : 0);
+			let c = rib[x % 4].map((v) => Math.max(0, Math.min(255, Math.round(v * k))));
+			if (carved(x, y)) {
+				// the light inside: hot yellow in the middle of a carving, orange where it meets the rind
+				const edge = !carved(x, y - 1) || !carved(x, y + 1);
+				c = edge ? [255, 196, 64] : [255, 240, 140];
+			} else if (carved(x - 1, y) || carved(x + 1, y) || carved(x, y - 1) || carved(x, y + 1)) {
+				c = [110, 46, 6]; // the cut rind round a carving, in shadow
+			}
+			for (let yy = 0; yy < S; yy++) {
+				for (let xx = 0; xx < S; xx++) {
+					const i = ((y * S + yy) * N * S + x * S + xx) * 4;
+					data[i] = c[0];
+					data[i + 1] = c[1];
+					data[i + 2] = c[2];
+					data[i + 3] = 255;
+				}
+			}
+		}
+	}
+	await sharp(data, { raw: { width: N * S, height: N * S, channels: 4 } }).png().toFile(path.join(dir, "jack_o_lantern.png"));
+	console.log("wrote jack_o_lantern.png");
+}

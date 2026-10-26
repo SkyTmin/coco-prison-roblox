@@ -94,7 +94,8 @@
     "pink_wool": "rbxassetid://108523271753200",
     "green_wool": "rbxassetid://95459638561316",
     "pumpkin": "rbxassetid://89231630874271",
-    "dark_oak_leaves": "rbxassetid://77115109989306"
+    "dark_oak_leaves": "rbxassetid://77115109989306",
+    "jack_o_lantern": "rbxassetid://83681073522884"
   },
   "_ladder": "ladder: VoxeLibre default_ladder.png (Pixel Perfection, CC BY-SA 4.0), uploaded 21.10.2026",
   "_derived": "coal_block, gold_ore: derived from our stone / coal_ore by scripts/derive-block-textures.mjs, uploaded 22.10.2026",

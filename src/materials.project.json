@@ -745,6 +745,14 @@
         "ColorMap": "rbxassetid://77115109989306",
         "StudsPerTile": 4
       }
+    },
+    "px_jack_o_lantern": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://83681073522884",
+        "StudsPerTile": 4
+      }
     }
   }
 }
