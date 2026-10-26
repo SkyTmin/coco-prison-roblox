@@ -27,11 +27,51 @@ local SWING_SCALE = 1.0 / 0.72
 
 local started = false
 
--- The bow in view like Minecraft's first person: the item faces the camera at the lower right with its arrow pointing
--- to the upper left, at the crosshair; while drawing it comes up towards the centre and shakes a little at full draw.
-local BOW_REST = CFrame.new(0.78, -0.62, -1.15)
-local BOW_DRAWN = CFrame.new(0.5, -0.36, -1.05)
-local BOW_FACE = CFrame.Angles(0, math.rad(90), 0) -- image right → camera right
+-- The bow in view [владелец 27.10: «натяжка лука от 1 лица выглядит плохо, надо как в майне»]: Minecraft's item-in-hand
+-- transforms [ваниль ItemInHandRenderer, item/generated firstperson_righthand], in its units (1 = the item before
+-- the 0.68 display scale). At rest the bow is held like any item at the lower right; while drawing it turns so the
+-- arrow points at the crosshair (head deep in the view, fletching by the camera), creeps closer and trembles at
+-- full draw. MC_TO_MODEL turns Minecraft's item frame into ours (image right = +Z, up = +Y); our bow sprites are
+-- drawn mirrored to the vanilla ones (arrow head at the upper left), so the turn has no mirror (Studio 27.10: with one
+-- the drawn arrow pointed straight up).
+local BOW_BLEND = 0.12 -- s from the rest hold into the draw pose
+-- Minecraft draws the hand with a fixed 70° view, but our drawing zooms the camera (FOV −15 %), so the bow is pushed
+-- deeper by the zoom to keep its size and place on screen; 0.87 brings it up to the size on the owner's Java
+-- screenshots (27.10: both limbs leave the screen at the top and the bottom).
+local BOW_SIZE = 0.87
+local MC_TO_MODEL = CFrame.fromMatrix(
+	Vector3.zero,
+	Vector3.new(0, 0, -1),
+	Vector3.new(0, 1, 0),
+	Vector3.new(1, 0, 0)
+)
+local function mcBow(k: number, drawnSeconds: number?, blend: number): CFrame
+	local function at(x: number, y: number, z: number): CFrame
+		return CFrame.new(x * k, y * k, z * k)
+	end
+	local arm = at(0.56, -0.52, -0.72)
+	local pose = arm
+	if drawnSeconds then
+		local m = drawnSeconds * 20 -- ticks
+		local f = BowState.Power(drawnSeconds)
+		local shake = if f > 0.1
+			then at(0, math.sin((m - 0.1) * 1.3) * (f - 0.1) * 0.004, 0)
+			else CFrame.identity
+		local draw = arm
+			* at(-0.2785682, 0.18344387, 0.15731531)
+			* CFrame.Angles(math.rad(-13.935), 0, 0)
+			* CFrame.Angles(0, math.rad(35.3), 0)
+			* CFrame.Angles(0, 0, math.rad(-9.785))
+			* shake
+			* at(0, 0, f * 0.04)
+			* CFrame.Angles(0, math.rad(-45), 0)
+		pose = arm:Lerp(draw, blend * blend * (3 - 2 * blend))
+	end
+	return pose
+		* at(1.13 / 16, 3.2 / 16, 1.13 / 16)
+		* CFrame.Angles(0, math.rad(-90), math.rad(25))
+		* MC_TO_MODEL
+end
 
 -- Zoom from the camera focus, not the distance to the head: the head bobs with the walk animation
 -- (0.6..1.3 studs from the camera), which hid the hand every other frame while walking.
@@ -197,15 +237,20 @@ function FirstPersonHand.Start()
 			-- the arm comes from below the screen edge towards the hand point
 			arm.CFrame = handFrame * CFrame.new(0, -0.05, ARM_SIZE.Z / 2 - 0.05)
 			if item and itemPart and itemId == "bow" and item:IsA("Model") then
-				local drawn = BowState.Drawn(character)
-				local pull = if BowState.DrawStart(character)
-					then math.clamp(drawn / 0.4, 0, 1)
-					else 0
-				local shake = if BowState.Power(drawn) >= 1 and pull > 0
-					then CFrame.new(0, math.sin(os.clock() * 40) * 0.006, 0)
-					else CFrame.identity
-				local place = BOW_REST:Lerp(BOW_DRAWN, pull * pull * (3 - 2 * pull))
-				item:PivotTo(camera.CFrame * bobOffset * place * shake * BOW_FACE)
+				local drawing = BowState.DrawStart(character) ~= nil
+				local drawn = if drawing then BowState.Drawn(character) else nil
+				-- studs per Minecraft unit: the root part is the 16-px sprite, 0.68 of a unit in view
+				local k = itemPart.Size.Y / 0.68
+				local blend = if drawn then math.clamp(drawn / BOW_BLEND, 0, 1) else 0
+				local pose = mcBow(k, drawn, blend)
+				local depth = math.tan(math.rad(35))
+					/ math.tan(math.rad(camera.FieldOfView) / 2)
+					* BOW_SIZE
+				local target = camera.CFrame
+					* bobOffset
+					* CFrame.new(pose.X, pose.Y, pose.Z * depth)
+					* pose.Rotation
+				item:PivotTo(target * itemPart.CFrame:ToObjectSpace(item:GetPivot()))
 				arm.Transparency = 1
 				return
 			end
