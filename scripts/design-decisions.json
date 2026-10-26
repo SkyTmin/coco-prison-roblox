@@ -507,6 +507,14 @@
         32
       ],
       "_size": "[решение 26.10] 32×12×32 — шахта на площади Рынка «под прилавками» (scripts/locations/market, scripts/build-market.luau); состав из меню (mine-shares: красная шерсть 100 %); шот-шахта [вики 26.10] пока не сделана"
+    },
+    "leprechaun_valley": {
+      "size": [
+        32,
+        12,
+        32
+      ],
+      "_size": "[решение 26.10] 32×12×32 — шахта в долине с клеверной площадью (scripts/locations/leprechaun_valley, scripts/build-leprechaun-valley.luau); состав из меню (mine-shares: жёлтый цемент 100 %); шот-шахта [вики 26.10] пока не сделана"
     }
   },
   "pvpFromLevel": 9,
@@ -1450,6 +1458,74 @@
           ]
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10: «босса пока кидай как затычку, их отдельно будем»]: набор Минотавра (полоса, круги из-под пола, рывок — о колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: тёмные снаряды, взрывные черепа, призрачный меч, гули, метеоры (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+      }
+    },
+    "forest_spirit": {
+      "hp": 11000,
+      "damage": 14,
+      "respawnSeconds": 4500,
+      "name": "Лесной дух",
+      "nameEn": "Forest Spirit",
+      "locationId": "leprechaun_valley",
+      "unlockLevel": 23,
+      "_source": "[клиент] имя «Лесной дух», описание, объявление «Тотем пробудился… Лесной дух восстал в Лепреконовой долине!»; [меню] 0–8600 $, древние звёзды 9–14, за последний удар Лунная сталь; hp 11000 / урон 14 / респаун 75 мин [решение] по шкале боссов (Король нежити 10000), в справочнике респаун 5 ч [вики 26.10]",
+      "fight": {
+        "meleeDamage": 2,
+        "meleeRange": 8,
+        "meleeCooldown": 1.6,
+        "walkSpeed": 16,
+        "leashSeconds": 300,
+        "abilityCooldown": 5,
+        "phase2At": 0.5,
+        "phase2CooldownScale": 0.65,
+        "firstSpawnSeconds": 5,
+        "lavaBlade": {
+          "telegraph": 1,
+          "length": 34,
+          "width": 6,
+          "speed": 48,
+          "damage": 4
+        },
+        "earthSpikes": {
+          "telegraph": 1.1,
+          "radius": 4.5,
+          "damage": 4,
+          "perTarget": 1,
+          "perTargetPhase2": 3
+        },
+        "charge": {
+          "telegraph": 1,
+          "speed": 50,
+          "maxDistance": 44,
+          "width": 7,
+          "damage": 5,
+          "stunPillar": 3,
+          "stunWall": 2.3,
+          "stunDamageMultiplier": 1.7
+        },
+        "palette": {
+          "telegraph": [
+            180,
+            240,
+            90
+          ],
+          "blade": [
+            220,
+            255,
+            140
+          ],
+          "spikes": [
+            90,
+            70,
+            40
+          ],
+          "glow": [
+            200,
+            255,
+            120
+          ]
+        },
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о колонну-тотем оглушение 3 с). Настоящие приёмы из ресурс-пака: тотем, корни, шипы, буря, молнии, летающие черепа, культисты — шаманы и заблудшие исследователи (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       }
     }
   },

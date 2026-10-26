@@ -1245,6 +1245,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "La realidad tembló... ¡el Ilusionista ha salido del mundo de las ilusiones!",
 		fr = "La réalité a tremblé… l'Illusionniste est sorti du monde des illusions !",
 	},
+	boss_spawned_forest_spirit = { -- [клиент] prison.classic.boss.forest_spirit.notify.spawn
+		ru = "Тотем пробудился… Лесной дух восстал в Лепреконовой долине!",
+		en = "The totem has awakened... the Forest Spirit has risen in Leprechaun Valley!",
+		es = "El tótem ha despertado... ¡el Espíritu del Bosque se ha alzado en el Valle de los Duendes!",
+		fr = "Le totem s'est éveillé… l'Esprit de la forêt s'est levé dans la Vallée des farfadets !",
+	},
 	boss_spawned_un_king = { -- [клиент] prison.classic.boss.un_king.notify.spawn
 		ru = "Земля под Рынком треснула… Король нежити восстал из могилы!",
 		en = "The ground beneath the Market cracked... the Undead King has risen from the grave!",

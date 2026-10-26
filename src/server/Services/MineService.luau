@@ -158,6 +158,12 @@ end
 local TINTED: { [string]: { base: string, color: Color3 } } = {
 	red_wool = { base = "white_wool", color = Color3.fromRGB(196, 46, 40) },
 	lime_wool = { base = "white_wool", color = Color3.fromRGB(120, 196, 52) },
+	-- concrete: our smooth stone tinted (Лепреконовая долина: жёлтый цемент [меню]; the справочник adds four colours)
+	yellow_concrete = { base = "smooth_stone", color = Color3.fromRGB(240, 200, 40) },
+	orange_concrete = { base = "smooth_stone", color = Color3.fromRGB(235, 120, 30) },
+	lime_concrete = { base = "smooth_stone", color = Color3.fromRGB(110, 190, 40) },
+	purple_concrete = { base = "smooth_stone", color = Color3.fromRGB(130, 50, 180) },
+	red_concrete = { base = "smooth_stone", color = Color3.fromRGB(180, 40, 40) },
 }
 
 local function stylePart(part: BasePart, id: string)
