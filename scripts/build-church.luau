@@ -913,6 +913,4352 @@ print(("[build-church] core: island runs %d"):format(islandRuns))
 
 end
 task.wait()
+-- ================================================================================ church/20-cathedral.luau
+do
+-- ================================================================ church: the cathedral, the steps, the bell tower
+-- The PLINTH x -40..40, z -190..-70, y 0..8 (white stone bricks, a grey course y 6..8 = the nave floor level). The
+-- STEPS x -24..24 from the portal (z -70, y 8) down to the square (z -48, y 0): kit stairs on a fill, cheek walls
+-- x ±24..28 with candles, two lantern pillars at x ±32, z -50.
+-- The NAVE x -20..20 (10 blocks) inside, z -166..-78, floor y 8 (a blue-and-white mosaic, lattice down the aisle
+-- x -8..8 and over the crossing z -166..-138); PIERS 2×2 blocks at x ±20..28 every 5 blocks (centres z -82, -102,
+-- -122, -142, -162) to y 68 with pinnacles to 84; between them the stained-glass LANCETS (glass plane x ±24, z 12 wide,
+-- y 12..55 with a stepped pointed head, two lights, diamond medallions, a little gold); FLYING BUTTRESSES (two stepped
+-- flyers each) to outer piers x ±36..40 with slate pinnacles and gargoyles. The ROOF: px_roof_tiles slate, six steps
+-- from y 60 (half-width 24) to the ridge at y 84, a flèche over the crossing (z -146) to y 134.
+-- The FACADE z -78..-70 (three layers): the PORTAL x -12..12 (stepped archivolts ±16 / ±14 / ±12, springing y 18,
+-- apex ≈ 33..37), the ROSE WINDOW centre (0, 56) r 16 (2-stud panes, 8 white spokes, a ring, gold centre and foils),
+-- niches with statues at x ±21, blue banners, the stepped gable to y 84 with a gold cross; TURRETS x ±28..40,
+-- z -82..-70 to y 76, slate spires to y 112.
+-- The APSE z -190..-166: a stepped half-octagon of glass columns and pinnacled corner piers; the altar on a dais.
+-- Inside: spruce pews x ±9..17 (aisle x -8..8 clear), shafts and stepped ribs at the piers, blue banners with a white
+-- cross, candle stands (4 lit), two iron chandeliers, the pulpit (west, z -150), the lectern and the organ (east).
+-- The BELL TOWER x 48..76, z -98..-70: walls 1 block, the door on the south (x 52..58, y 0..14); inside a square
+-- spiral of 13 flights (6 wide, rise 8 over 8 — 4 steps of 2) round a central pier x 58..66, z -88..-80, landings in
+-- the corners, 32 studs per turn (headroom ≥ 24); the BELFRY floor y 104 (the SUMMIT) with a railed stairwell, open
+-- pointed arches with parapets on all four sides, the bronze bell (12 wide, y 112..127) under an oak headstock; the
+-- cornice y 136..140, the slate spire to y 180 and a gold cross to y 192.
+local cath = folder("Cathedral")
+local partsBefore = count
+local nLights = 0
+local STONE, SMOOTH, GREYB, ROOF =
+	"px_white_stone_bricks", "px_smooth_stone", "px_stone_bricks", "px_roof_tiles"
+local OAK_DARK, GOLDB = "px_dark_oak_planks", "px_gold_block"
+local BRONZE = Color3.fromRGB(214, 152, 92)
+local IRON = Color3.fromRGB(62, 62, 70)
+local WAX = Color3.fromRGB(242, 234, 212)
+local FLAME = Color3.fromRGB(255, 196, 110)
+local GARGOYLE = Color3.fromRGB(150, 150, 160)
+local PZ = { -82, -102, -122, -142, -162 } -- the pier centres (z)
+
+-- a pane of stained glass (Glass, light passes: no shadow)
+local function glass(name, x0, y0, z0, x1, y1, z1, color, parent)
+	local p = box(name, x0, y0, z0, x1, y1, z1, nil, color, parent)
+	p.Material = Enum.Material.Glass
+	p.Transparency = 0.28
+	p.CastShadow = false
+	return p
+end
+-- a dark iron bar (decor)
+local function iron(name, x0, y0, z0, x1, y1, z1, parent)
+	local p = decor(box(name, x0, y0, z0, x1, y1, z1, nil, IRON, parent))
+	p.Material = Enum.Material.Metal
+	return p
+end
+-- inside a pointed (two-centre) arch: half-span h, arc radius r, springing at y `spring`
+local function pointed(u, y, h, r, spring)
+	u = math.abs(u)
+	if u > h then
+		return false
+	end
+	if y <= spring then
+		return true
+	end
+	return (u + r - h) ^ 2 + (y - spring) ^ 2 <= r * r
+end
+-- greedy rectangles over a grid of cells (res studs): cellFn(u, v) -> kind (string) or nil; equal runs of a row are
+-- merged, then equal runs of consecutive rows; emit(kind, u0, u1, v0, v1) builds one rectangle
+local function greedy(u0, u1, v0, v1, res, cellFn, emit)
+	local nu = math.floor((u1 - u0) / res + 0.5)
+	local nv = math.floor((v1 - v0) / res + 0.5)
+	local open = {}
+	for j = 0, nv do
+		local runs = {}
+		if j < nv then
+			local v = v0 + (j + 0.5) * res
+			local prev, start = nil, 0
+			for i = 0, nu do
+				local k = if i < nu then cellFn(u0 + (i + 0.5) * res, v) else nil
+				if k ~= prev then
+					if prev ~= nil then
+						runs[start .. ":" .. i .. ":" .. prev] = { start, i, prev }
+					end
+					prev, start = k, i
+				end
+			end
+		end
+		for key, r in pairs(open) do
+			if not runs[key] then
+				emit(r[3], u0 + r[1] * res, u0 + r[2] * res, v0 + r[4] * res, v0 + j * res)
+				open[key] = nil
+			end
+		end
+		for key, r in pairs(runs) do
+			if not open[key] then
+				open[key] = { r[1], r[2], r[3], j }
+			end
+		end
+	end
+end
+-- one candle (a lit one gets a flame); returns the flame
+local function candle(x, y, z, h, lit, parent)
+	decor(
+		part(
+			"Candle",
+			Vector3.new(0.6, h, 0.6),
+			at(x, y + h / 2, z),
+			WAX,
+			Enum.Material.SmoothPlastic,
+			parent
+		)
+	)
+	if lit then
+		local f = decor(
+			part(
+				"CandleFlame",
+				Vector3.new(0.3, 0.5, 0.3),
+				at(x, y + h + 0.3, z),
+				FLAME,
+				Enum.Material.Neon,
+				parent
+			)
+		)
+		f.CastShadow = false
+		return f
+	end
+	return nil
+end
+-- a cluster of three candles on a top at y; a lit cluster carries one warm PointLight
+local function candles(x, y, z, lit, parent)
+	local flame
+	for _, c in ipairs({ { -0.7, -0.5, 1.6 }, { 0.7, -0.3, 1.1 }, { 0, 0.6, 2.2 } }) do
+		flame = candle(x + c[1], y, z + c[2], c[3], lit, parent) or flame
+	end
+	if flame then
+		light(flame, 26, 1.3, FLAME)
+		nLights += 1
+	end
+end
+-- a blue banner with a white cross (cf on the cloth plane, +Z out)
+local function crossBanner(cf, w, h, parent)
+	banner(cf, BANNER_BLUE, parent, nil, w, h)
+	local white = Color3.fromRGB(240, 240, 236)
+	decor(
+		part(
+			"BannerCross",
+			Vector3.new(w * 0.2, h * 0.62, 0.28),
+			cf * CFrame.new(0, h * 0.04, 0),
+			white,
+			Enum.Material.Fabric,
+			parent
+		)
+	)
+	decor(
+		part(
+			"BannerCross",
+			Vector3.new(w * 0.66, h * 0.1, 0.28),
+			cf * CFrame.new(0, h * 0.18, 0),
+			white,
+			Enum.Material.Fabric,
+			parent
+		)
+	)
+end
+-- a grey stepped gargoyle; cf at the attachment point, LookVector outward
+local function gargoyle(cf, parent)
+	local function g(name, sx, sy, sz, ox, oy, oz, tint)
+		textured(
+			part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(ox, oy, oz), nil, nil, parent),
+			SMOOTH,
+			tint or GARGOYLE
+		)
+	end
+	g("GargoyleBody", 2.4, 2.2, 4, 0, 0, -2)
+	g("GargoyleHead", 3, 2.6, 2.6, 0, 0.6, -4.8)
+	g("GargoyleJaw", 2.2, 0.8, 1.8, 0, -0.9, -5.6, Color3.fromRGB(112, 112, 122))
+	g("GargoyleSnout", 1.8, 1.2, 1, 0, 0.6, -6.5)
+	for _, s in ipairs({ -1, 1 }) do
+		g("GargoyleWing", 0.8, 2.6, 2.6, s * 1.6, 1.4, -1.6)
+		g("GargoyleHorn", 0.6, 1.2, 0.6, s, 2.4, -4.2)
+	end
+end
+-- the apse: a half-octagon "radius" of a 4-stud cell centre (cx, t = depth north of z -166)
+local function apseR(cx, t)
+	return math.max(math.abs(cx), t, (math.abs(cx) + t) * 0.75)
+end
+local function apseIn(cx, t)
+	if t < 0 then
+		return math.abs(cx) < 20
+	end
+	return apseR(cx, t) < 20
+end
+
+-- ================================================================ the plinth, the steps, the lantern pillars
+do
+	local f = folder("PlinthSteps", cath)
+	box("Plinth", -40, 0, -190, 40, 6, -70, STONE, WHITE_STONE, f)
+	box("PlinthCourse", -40, 6, -190, 40, 8, -70, GREYB, GREY_STONE, f)
+	stairs("Steps", 0, -48, -70, 0, 8, 48, STONE, f)
+	box("StepsFill", -24, 0, -70, 24, 4, -58, STONE, WHITE_STONE, f)
+	for _, sx in ipairs({ -1, 1 }) do
+		-- the cheek walls follow the stair a block above it, candles on every other cap (the lowest ones lit)
+		for s = 0, 5 do
+			local za = -70 + 4 * s
+			local zb = math.min(za + 4, -48)
+			local top = math.ceil(8 * (-48 - za) / 22) + 3
+			box("StepWall", sx * 24, 0, za, sx * 28, top - 1, zb, STONE, WHITE_STONE, f)
+			box("StepWallCap", sx * 24, top - 1, za, sx * 28, top, zb, SMOOTH, GREY_STONE, f)
+			if s % 2 == 0 then
+				candles(sx * 26, top, za + 2, s == 4, f)
+			end
+		end
+		-- a lantern pillar with a blue banner at the foot of the stair
+		local px = sx * 32
+		box("PillarBase", px - 3, 0, -53, px + 3, 2, -47, GREYB, GREY_STONE, f)
+		box("Pillar", px - 2, 2, -52, px + 2, 12, -48, STONE, WHITE_STONE, f)
+		box("PillarCap", px - 2.5, 12, -52.5, px + 2.5, 13, -47.5, SMOOTH, GREY_STONE, f)
+		lantern(V(px, 13.85, -50), f)
+		nLights += 1
+		crossBanner(at(px, 7, -47.7), 4, 8, f)
+	end
+end
+task.wait()
+
+-- ================================================================ the facade: portal, rose window, gable, turrets
+do
+	local f = folder("Facade", cath)
+	local LAYERS = { { -72, -70 }, { -76, -72 }, { -78, -76 } } -- front, middle (the glass), back
+	local GLASS = { gB = GLASS_BLUE, gC = GLASS_CYAN, gW = GLASS_WHITE }
+	local Q = math.pi / 4
+	-- the rose: gold centre, a white hub, 8 spokes, a ring at r 10, white-cored petals inside, cyan foils outside
+	local function roseKind(u, yy, d)
+		if d < 2.5 then
+			return "gold"
+		end
+		if d < 4.2 then
+			return "mull"
+		end
+		local a = math.atan2(yy, u) % Q
+		if d * math.sin(math.min(a, Q - a)) < 1.1 or math.abs(d - 10) < 1.1 then
+			return "mull"
+		end
+		local mid = d * math.sin(math.abs(a - Q / 2))
+		if d < 10 then
+			if mid < 1.2 then
+				return "gW"
+			end
+			return if d < 6.6 then "gC" else "gB"
+		end
+		local fd = math.sqrt((d - 13.5) ^ 2 + mid * mid)
+		if fd < 1.2 then
+			return "gold"
+		end
+		return if fd < 2.6 then "gC" else "gB"
+	end
+	local function kind(layer, u, y)
+		local hw = if y < 60 then 28 else 24 - 4 * math.floor((y - 60) / 4) -- the gable steps with the roof
+		if math.abs(u) >= hw then
+			return nil
+		end
+		local d = math.sqrt(u * u + (y - 56) ^ 2)
+		if layer == 1 then
+			if pointed(u, y, 16, 19, 18) or d < 17.5 then
+				return nil
+			end
+			if y > 20 and pointed(math.abs(u) - 21, y, 3, 4, 30) then
+				return nil -- the statue niches
+			end
+			if (y > 36 and y < 38) or (y > 58 and y < 60) then
+				return "trim"
+			end
+			return "stone"
+		elseif layer == 2 then
+			if pointed(u, y, 14, 17, 18) then
+				return nil
+			end
+			if d < 16 then
+				return roseKind(u, y - 56, d)
+			end
+			return if d < 17.5 then "ring" else "stone"
+		end
+		if pointed(u, y, 12, 15, 18) or d < 16 then
+			return nil
+		end
+		return "stone"
+	end
+	for li, zr in ipairs(LAYERS) do
+		greedy(-28, 28, 8, 84, 2, function(u, y)
+			return kind(li, u, y)
+		end, function(k, ua, ub, ya, yb)
+			if k == "stone" then
+				box("FacadeWall", ua, ya, zr[1], ub, yb, zr[2], STONE, WHITE_STONE, f)
+			elseif k == "trim" then
+				box("FacadeCourse", ua, ya, zr[1], ub, yb, zr[2], GREYB, GREY_STONE, f)
+			elseif k == "ring" then
+				box("RoseFrame", ua, ya, zr[1], ub, yb, zr[2], SMOOTH, WHITE_STONE, f)
+			elseif k == "mull" then
+				box("RoseMullion", ua, ya, -76, ub, yb, -72, SMOOTH, WHITE_STONE, f)
+			elseif k == "gold" then
+				box("RoseGold", ua, ya, -75.4, ub, yb, -72.6, GOLDB, nil, f)
+			else
+				glass("RoseGlass", ua, ya, -74.5, ub, yb, -73.5, GLASS[k], f)
+			end
+		end)
+	end
+	-- crockets on the gable steps, the gold cross on top
+	for _, hw in ipairs({ 24, 20, 16, 12, 8 }) do
+		local y = 60 + (24 - hw) + 4
+		for _, sx in ipairs({ -1, 1 }) do
+			box("Crocket", sx * (hw - 2), y, -73, sx * hw, y + 2, -70, SMOOTH, GREY_STONE, f)
+		end
+	end
+	box("GableTop", -2, 84, -76, 2, 86, -72, SMOOTH, WHITE_STONE, f)
+	box("GableCross", -1, 86, -75, 1, 98, -73, GOLDB, nil, f)
+	box("GableCross", -4, 92, -75, 4, 94, -73, GOLDB, nil, f)
+	for _, sx in ipairs({ -1, 1 }) do
+		-- statues in the niches, banners above them, a lantern on a bracket by the portal
+		textured(
+			part("Statue", Vector3.new(2.4, 6, 1.6), at(sx * 21, 23, -71), nil, nil, f),
+			SMOOTH,
+			WHITE_STONE
+		)
+		textured(
+			part("StatueHead", Vector3.new(1.6, 1.6, 1.4), at(sx * 21, 26.8, -71), nil, nil, f),
+			SMOOTH,
+			WHITE_STONE
+		)
+		crossBanner(at(sx * 21, 46, -69.6), 4, 10, f)
+		iron("LanternBracket", sx * 14.5, 28, -70, sx * 15.5, 28.6, -68.4, f)
+		lantern(V(sx * 15, 26, -68.8), f, false, BY + 28)
+		nLights += 1
+		-- the open door leaves inside the portal
+		decor(box("DoorLeaf", sx * 11, 8, -90, sx * 12, 28, -78, OAK_DARK, nil, f))
+		for _, y in ipairs({ 12, 22 }) do
+			iron("DoorBand", sx * 10.8, y, -89.5, sx * 11, y + 0.8, -78.5, f)
+		end
+		-- the turret: body, courses, an open stage with corner pinnacles, a slate spire with a gold cross
+		local tx = sx * 34
+		box("Turret", sx * 28, 8, -82, sx * 40, 64, -70, STONE, WHITE_STONE, f)
+		for _, y in ipairs({ 36, 62 }) do
+			box("TurretCourse", sx * 27, y, -83, sx * 41, y + 2, -69, GREYB, GREY_STONE, f)
+		end
+		for _, w in ipairs({ { 18, 30 }, { 42, 56 } }) do
+			glass("TurretLancet", tx - 1, w[1], -70, tx + 1, w[2], -69.6, GLASS_BLUE, f)
+			glass("TurretLancet", tx - 0.5, w[2], -70, tx + 0.5, w[2] + 1.5, -69.6, GLASS_CYAN, f)
+			box("TurretSill", tx - 1.5, w[1] - 1, -70, tx + 1.5, w[1], -69.4, SMOOTH, GREY_STONE, f)
+			glass("TurretLancet", sx * 40, w[1], -77, sx * 40.4, w[2], -75, GLASS_BLUE, f)
+			glass("TurretLancet", sx * 40, w[2], -76.5, sx * 40.4, w[2] + 1.5, -75.5, GLASS_CYAN, f)
+			box(
+				"TurretSill",
+				sx * 40,
+				w[1] - 1,
+				-77.5,
+				sx * 40.6,
+				w[1],
+				-74.5,
+				SMOOTH,
+				GREY_STONE,
+				f
+			)
+		end
+		box("TurretStage", sx * 30, 64, -80, sx * 38, 76, -72, STONE, WHITE_STONE, f)
+		glass("TurretStageGlass", tx - 1, 66, -72, tx + 1, 74, -71.6, GLASS_CYAN, f)
+		glass("TurretStageGlass", sx * 38, 66, -77, sx * 38.4, 74, -75, GLASS_CYAN, f)
+		for _, cx in ipairs({ 28, 37 }) do
+			for _, cz in ipairs({ -82, -73 }) do
+				box(
+					"TurretPinnacle",
+					sx * cx,
+					64,
+					cz,
+					sx * (cx + 3),
+					70,
+					cz + 3,
+					STONE,
+					WHITE_STONE,
+					f
+				)
+				box(
+					"TurretPinnacleTip",
+					sx * (cx + 0.5),
+					70,
+					cz + 0.5,
+					sx * (cx + 2.5),
+					74,
+					cz + 2.5,
+					ROOF,
+					SLATE,
+					f
+				)
+			end
+		end
+		for i, hw in ipairs({ 4, 3, 2, 1 }) do
+			local y0 = 76 + (i - 1) * 8
+			box(
+				"TurretSpire",
+				tx - hw,
+				y0,
+				-76 - hw,
+				tx + hw,
+				y0 + (if hw == 1 then 6 else 8),
+				-76 + hw,
+				ROOF,
+				SLATE,
+				f
+			)
+		end
+		box("TurretCross", tx - 0.5, 106, -76.5, tx + 0.5, 112, -75.5, GOLDB, nil, f)
+		box("TurretCross", tx - 1.5, 109, -76.5, tx + 1.5, 110, -75.5, GOLDB, nil, f)
+		gargoyle(CFrame.lookAt(V(sx * 40, 60, -70), V(sx * 50, 60, -60)), f)
+	end
+end
+task.wait()
+
+-- ================================================================ the nave walls: piers, lancets, flying buttresses
+do
+	local f = folder("NaveWalls", cath)
+	local GLASS = { gB = GLASS_BLUE, gC = GLASS_CYAN, gW = GLASS_WHITE }
+	-- a lancet 12 wide (uu -6..6): stone sill, two lights of diamond medallions, a pointed head with a small rose
+	local function winKind(uu, y)
+		if y < 12 then
+			return "sill"
+		end
+		if y > 56 or not pointed(uu, y, 6, 10, 46) then
+			return "stone"
+		end
+		if y > 46 then
+			local dc = math.sqrt(uu * uu + (y - 50) ^ 2)
+			return if dc < 1.5 then "gold" elseif dc < 3.2 then "gC" else "gB"
+		end
+		local p = math.clamp(math.floor((y - 12) / 12), 0, 2)
+		local md = math.abs(uu - (if uu < 0 then -3 else 3)) + math.abs(y - (18 + 12 * p))
+		if md <= 1 then
+			return if p == 1 then "gold" else "gW"
+		end
+		return if md <= 3 then "gC" else "gB"
+	end
+	for _, sx in ipairs({ -1, 1 }) do
+		for _, pc in ipairs(PZ) do
+			box("Pier", sx * 20, 8, pc - 4, sx * 28, 68, pc + 4, STONE, WHITE_STONE, f)
+			box("PierBase", sx * 19, 8, pc - 5, sx * 29, 11, pc + 5, GREYB, GREY_STONE, f)
+			box("PierCap", sx * 20, 60, pc - 5, sx * 29, 62, pc + 5, GREYB, GREY_STONE, f)
+			box("Pinnacle", sx * 22, 68, pc - 2, sx * 26, 76, pc + 2, STONE, WHITE_STONE, f)
+			box("PinnacleTip", sx * 23, 76, pc - 1, sx * 25, 82, pc + 1, ROOF, SLATE, f)
+			box("PinnacleGold", sx * 23.5, 82, pc - 0.5, sx * 24.5, 84, pc + 0.5, GOLDB, nil, f)
+			-- inside: a white shaft with a capital and a stepped rib arch over the nave
+			box("Shaft", sx * 18, 8, pc - 2, sx * 20, 50, pc + 2, SMOOTH, WHITE_STONE, f)
+			box("Capital", sx * 17, 50, pc - 3, sx * 20, 53, pc + 3, SMOOTH, WHITE_STONE, f)
+			decor(
+				box("CapitalGold", sx * 17.9, 49.6, pc - 2.1, sx * 20, 50, pc + 2.1, GOLDB, nil, f)
+			)
+			box("Rib", sx * 16, 53, pc - 2, sx * 20, 60, pc + 2, SMOOTH, WHITE_STONE, f)
+			box("Rib", sx * 12, 56, pc - 2, sx * 16, 60, pc + 2, SMOOTH, WHITE_STONE, f)
+			if pc ~= -82 then
+				-- the outer pier with its pinnacle, two stepped flyers, a gargoyle
+				box("Buttress", sx * 34, 8, pc - 4, sx * 40, 20, pc + 4, STONE, WHITE_STONE, f)
+				box("Buttress", sx * 36, 20, pc - 3, sx * 40, 56, pc + 3, STONE, WHITE_STONE, f)
+				box("ButtressCap", sx * 35, 56, pc - 4, sx * 40, 58, pc + 4, GREYB, GREY_STONE, f)
+				box(
+					"ButtressPinnacle",
+					sx * 36,
+					58,
+					pc - 2,
+					sx * 40,
+					66,
+					pc + 2,
+					STONE,
+					WHITE_STONE,
+					f
+				)
+				box("ButtressTip", sx * 37, 66, pc - 1, sx * 39, 74, pc + 1, ROOF, SLATE, f)
+				box("ButtressGold", sx * 37.5, 74, pc - 0.5, sx * 38.5, 76, pc + 0.5, GOLDB, nil, f)
+				box("Flyer", sx * 28, 54, pc - 2, sx * 32, 58, pc + 2, STONE, WHITE_STONE, f)
+				box("Flyer", sx * 32, 50, pc - 2, sx * 36, 54, pc + 2, STONE, WHITE_STONE, f)
+				box("Flyer", sx * 28, 38, pc - 2, sx * 32, 42, pc + 2, STONE, WHITE_STONE, f)
+				box("Flyer", sx * 32, 34, pc - 2, sx * 36, 38, pc + 2, STONE, WHITE_STONE, f)
+				gargoyle(CFrame.lookAt(V(sx * 40, 54, pc), V(sx * 60, 54, pc)), f)
+			end
+		end
+		box("Parapet", sx * 24, 60, -166, sx * 27, 62, -78, STONE, WHITE_STONE, f)
+		-- the four lancets of this side (between the piers)
+		for b = 1, 4 do
+			local zc = -92 - 20 * (b - 1)
+			greedy(zc - 6, zc + 6, 8, 60, 2, function(u, y)
+				return winKind(u - zc, y)
+			end, function(k, ua, ub, ya, yb)
+				if k == "sill" then
+					box("WindowSill", sx * 22, ya, ua, sx * 26, yb, ub, SMOOTH, GREY_STONE, f)
+				elseif k == "stone" then
+					box("WindowStone", sx * 22, ya, ua, sx * 26, yb, ub, STONE, WHITE_STONE, f)
+				elseif k == "gold" then
+					box("WindowGold", sx * 23.4, ya, ua, sx * 24.6, yb, ub, GOLDB, nil, f)
+				else
+					glass("WindowGlass", sx * 23.5, ya, ua, sx * 24.5, yb, ub, GLASS[k], f)
+				end
+			end)
+			decor(
+				box("Mullion", sx * 23, 12, zc - 0.6, sx * 25, 52, zc + 0.6, SMOOTH, WHITE_STONE, f)
+			)
+			for _, y in ipairs({ 24, 36 }) do
+				decor(
+					box(
+						"Transom",
+						sx * 23,
+						y - 0.6,
+						zc - 6,
+						sx * 25,
+						y + 0.6,
+						zc + 6,
+						SMOOTH,
+						WHITE_STONE,
+						f
+					)
+				)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the apse: glass columns and pinnacled corner piers
+do
+	local f = folder("Apse", cath)
+	local GC = { B = GLASS_BLUE, C = GLASS_CYAN, W = GLASS_WHITE }
+	local BANDS =
+		{ { 12, 24, "B" }, { 24, 28, "C" }, { 28, 40, "B" }, { 40, 44, "W" }, { 44, 48, "B" } }
+	for cx = -22, 22, 4 do
+		for t = 2, 22, 4 do
+			if not apseIn(cx, t) then
+				local near, side = false, false
+				for dx = -1, 1 do
+					for dt = -1, 1 do
+						if apseIn(cx + dx * 4, t + dt * 4) then
+							near = true
+							side = side or dx == 0 or dt == 0
+						end
+					end
+				end
+				local cz = -166 - t
+				if near and side then
+					-- a face cell: a lancet of glass bands, thin across the wall's normal
+					local nx = apseIn(cx - 4, t) or apseIn(cx + 4, t)
+					local nz = apseIn(cx, t - 4) or apseIn(cx, t + 4)
+					local hx = if nx and not nz then 1 else 2
+					local hz = if nz and not nx then 1 else 2
+					box("ApseSill", cx - 2, 8, cz - 2, cx + 2, 12, cz + 2, SMOOTH, GREY_STONE, f)
+					box("ApseLintel", cx - 2, 50, cz - 2, cx + 2, 60, cz + 2, STONE, WHITE_STONE, f)
+					for bi, b in ipairs(BANDS) do
+						local col = if bi == 3 and (cx + t) % 8 == 0 then "C" else b[3]
+						glass(
+							"ApseGlass",
+							cx - hx,
+							b[1],
+							cz - hz,
+							cx + hx,
+							b[2],
+							cz + hz,
+							GC[col],
+							f
+						)
+					end
+					box("ApseGold", cx - hx, 48, cz - hz, cx + hx, 50, cz + hz, GOLDB, nil, f)
+				elseif near then
+					-- a corner of the stepped wall: a pier with a slate pinnacle
+					box("ApsePier", cx - 2, 8, cz - 2, cx + 2, 64, cz + 2, STONE, WHITE_STONE, f)
+					box("ApsePinnacle", cx - 1, 64, cz - 1, cx + 1, 72, cz + 1, ROOF, SLATE, f)
+					box(
+						"ApseGoldTip",
+						cx - 0.5,
+						72,
+						cz - 0.5,
+						cx + 0.5,
+						74,
+						cz + 0.5,
+						GOLDB,
+						nil,
+						f
+					)
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ the roof: slate steps, the ridge, the flèche
+do
+	local f = folder("Roof", cath)
+	for k = 0, 5 do
+		local hw, y = 24 - 4 * k, 60 + 4 * k
+		box("Roof", -hw, y, -166, hw, y + 4, -78, ROOF, SLATE, f)
+		-- the apse end: rows of cells inside the shrinking half-octagon
+		for t = 2, 22, 4 do
+			local m
+			for cx = 2, 22, 4 do
+				if apseR(cx, t) < 24 - 4 * k then
+					m = cx
+				end
+			end
+			if m then
+				box("ApseRoof", -(m + 2), y, -168 - t, m + 2, y + 4, -164 - t, ROOF, SLATE, f)
+			end
+		end
+	end
+	box("Ridge", -2, 84, -168, 2, 86, -78, ROOF, Color3.fromRGB(52, 60, 92), f)
+	for z = -86, -166, -16 do
+		box("RidgeFinial", -0.5, 86, z - 0.5, 0.5, 89, z + 0.5, GOLDB, nil, f)
+	end
+	-- the flèche over the crossing
+	box("Fleche", -4, 84, -150, 4, 96, -142, STONE, WHITE_STONE, f)
+	glass("FlecheGlass", -1, 87, -142, 1, 94, -141.6, GLASS_CYAN, f)
+	glass("FlecheGlass", -1, 87, -150.4, 1, 94, -150, GLASS_CYAN, f)
+	box("FlecheCornice", -5, 96, -151, 5, 98, -141, GREYB, GREY_STONE, f)
+	box("FlecheSpire", -3, 98, -149, 3, 106, -143, ROOF, SLATE, f)
+	box("FlecheSpire", -2, 106, -148, 2, 116, -144, ROOF, SLATE, f)
+	box("FlecheSpire", -1, 116, -147, 1, 126, -145, ROOF, SLATE, f)
+	box("FlecheCross", -0.5, 126, -146.5, 0.5, 134, -145.5, GOLDB, nil, f)
+	box("FlecheCross", -2.5, 130, -146.5, 2.5, 131, -145.5, GOLDB, nil, f)
+end
+task.wait()
+
+-- ================================================================ inside: mosaic, pews, altar, pulpit, organ, light
+do
+	local f = folder("Interior", cath)
+	-- the mosaic: a blue lattice with lapis centres down the aisle and over the crossing and the apse, white elsewhere
+	greedy(-20, 20, -190, -78, 4, function(x, z)
+		if not apseIn(x, -166 - z) then
+			return nil
+		end
+		if math.abs(x) < 8 or z < -138 then
+			local i, j = math.floor((x + 20) / 4), math.floor((-78 - z) / 4)
+			local a, b = (i + j) % 4, (i - j) % 4
+			if (a == 0 and b == 0) or (a == 2 and b == 2) then
+				return "l"
+			end
+			if a == 0 or b == 0 then
+				return "b"
+			end
+		end
+		return "w"
+	end, function(k, xa, xb, za, zb)
+		if k == "w" then
+			box("Mosaic", xa, 8, za, xb, 8.1, zb, SMOOTH, WHITE_STONE, f)
+		elseif k == "b" then
+			box("Mosaic", xa, 8, za, xb, 8.1, zb, "px_terracotta_blue", nil, f)
+		else
+			box("Mosaic", xa, 8, za, xb, 8.1, zb, "px_lapis_block", nil, f)
+		end
+	end)
+	-- pews (a seat, a back and an oak end) on both sides of the aisle
+	for _, sx in ipairs({ -1, 1 }) do
+		for zr = -92, -134, -6 do
+			box("PewSeat", sx * 9, 8, zr - 2, sx * 17, 10, zr + 1, "px_spruce_planks", nil, f)
+			box("PewBack", sx * 9, 10, zr + 1, sx * 17, 13, zr + 2, "px_spruce_planks", nil, f)
+			box("PewEnd", sx * 8, 8, zr - 2, sx * 9, 12, zr + 2, OAK_DARK, nil, f)
+		end
+		-- blue banners with a white cross on the shafts
+		for k = 2, 5 do
+			crossBanner(at(sx * 17.6, 34, PZ[k]) * CFrame.Angles(0, math.pi / 2, 0), 4, 12, f)
+		end
+	end
+	-- candles on dark stands: the entrance, the crossing (lit), by the pulpit and the organ, by the altar (lit)
+	local function stand(x, y0, z, lit)
+		box("CandleStand", x - 2, y0, z - 2, x + 2, y0 + 1, z + 2, "px_blackstone", nil, f)
+		box("CandleStand", x - 1, y0 + 1, z - 1, x + 1, y0 + 6, z + 1, "px_blackstone", nil, f)
+		box(
+			"CandleStand",
+			x - 1.6,
+			y0 + 6,
+			z - 1.6,
+			x + 1.6,
+			y0 + 7,
+			z + 1.6,
+			"px_blackstone",
+			nil,
+			f
+		)
+		candles(x, y0 + 7, z, lit, f)
+	end
+	for _, sx in ipairs({ -1, 1 }) do
+		stand(sx * 14, 8, -84, false)
+		stand(sx * 10, 8, -144, true)
+		stand(sx * 10, 8, -164, false)
+		stand(sx * 10, 9, -176, true)
+	end
+	-- the altar on a two-step dais in the apse: white stone, a gold front, a cloth, a retable with a gold cross
+	box("Dais", -12, 8, -182, 12, 9, -170, SMOOTH, WHITE_STONE, f)
+	box("Dais", -8, 8, -186, 8, 9, -182, SMOOTH, WHITE_STONE, f)
+	box("Dais", -8, 9, -184, 8, 10, -172, "px_terracotta_blue", Color3.fromRGB(220, 226, 255), f)
+	box("Altar", -6, 10, -180, 6, 14, -176, SMOOTH, WHITE_STONE, f)
+	decor(box("AltarFront", -5, 10.6, -176.2, 5, 13.4, -175.8, GOLDB, nil, f))
+	box("AltarCloth", -6.5, 14, -180.5, 6.5, 14.4, -175.5, "px_white_wool", nil, f)
+	decor(box("AltarRunner", -1.5, 14, -180.6, 1.5, 14.5, -175.4, "px_white_wool", BANNER_BLUE, f))
+	box("Retable", -6, 10, -184, 6, 24, -182, STONE, WHITE_STONE, f)
+	box("RetableTop", -2, 24, -184, 2, 28, -182, STONE, WHITE_STONE, f)
+	box("RetableTip", -0.5, 28, -183.5, 0.5, 30, -182.5, GOLDB, nil, f)
+	decor(box("AltarCross", -0.8, 14, -181.9, 0.8, 23, -181.5, GOLDB, nil, f))
+	decor(box("AltarCross", -3.5, 19, -181.9, 3.5, 20.6, -181.5, GOLDB, nil, f))
+	for _, c in ipairs({
+		{ -5, 2.4, true },
+		{ -3, 1.8, false },
+		{ 3, 1.8, false },
+		{ 5, 2.4, true },
+	}) do
+		local flame = candle(c[1], 14.4, -178, c[2], true, f)
+		if c[3] then
+			light(flame, 24, 1.2, FLAME)
+			nLights += 1
+		end
+	end
+	-- the pulpit (west of the crossing): a stone stem, an oak tub, a sounding board, a stair from the north
+	box("PulpitStem", -16, 8, -152, -12, 14, -148, STONE, WHITE_STONE, f)
+	box("PulpitTub", -18, 14, -154, -10, 18, -146, OAK_DARK, nil, f)
+	decor(box("PulpitGold", -18.2, 16.8, -154.2, -9.8, 17.4, -145.8, GOLDB, nil, f))
+	box("PulpitPost", -18, 18, -151, -17, 28, -149, OAK_DARK, nil, f)
+	box("PulpitCanopy", -19, 28, -155, -9, 29, -145, OAK_DARK, nil, f)
+	box("PulpitFinial", -14.5, 29, -150.5, -13.5, 31, -149.5, GOLDB, nil, f)
+	stairs("PulpitStep", -14, -160, -154, 8, 10, 4, OAK_DARK, f)
+	-- the lectern (east of the crossing) with an open book
+	box("LecternBase", 13.5, 8, -141.5, 16.5, 9, -138.5, OAK_DARK, nil, f)
+	box("LecternPost", 14.5, 9, -140.5, 15.5, 13, -139.5, OAK_DARK, nil, f)
+	local top = textured(
+		part(
+			"LecternTop",
+			Vector3.new(3.4, 0.6, 3),
+			at(15, 13.4, -140) * CFrame.Angles(math.rad(-22), 0, 0),
+			nil,
+			nil,
+			f
+		),
+		"px_spruce_planks"
+	)
+	decor(
+		part(
+			"LecternBook",
+			Vector3.new(2.8, 0.3, 2),
+			top.CFrame * CFrame.new(0, 0.45, 0),
+			BANNER_BLUE,
+			Enum.Material.Fabric,
+			f
+		)
+	)
+	decor(
+		part(
+			"LecternPages",
+			Vector3.new(2.5, 0.2, 1.8),
+			top.CFrame * CFrame.new(0, 0.65, 0),
+			WAX,
+			Enum.Material.SmoothPlastic,
+			f
+		)
+	)
+	-- the organ (east, before the fourth lancet): an oak case, a console, two ranks of iron pipes
+	box("OrganCase", 12, 8, -158, 20, 20, -146, OAK_DARK, nil, f)
+	decor(box("OrganGold", 11.8, 19.4, -158.2, 20, 20, -145.8, GOLDB, nil, f))
+	box("OrganConsole", 10, 8, -156, 12, 12, -148, OAK_DARK, nil, f)
+	decor(box("OrganKeys", 10, 12, -155, 11.6, 12.5, -149, "px_white_wool", nil, f))
+	decor(box("OrganKeysBlack", 10.6, 12.5, -155, 11.2, 12.8, -149, "px_blackstone", nil, f))
+	decor(box("OrganMusicStand", 11.4, 12, -154, 12, 15, -150, "px_spruce_planks", nil, f))
+	box("OrganBench", 8, 8, -155, 9.6, 10, -149, "px_spruce_planks", nil, f)
+	for n, h in ipairs({ 8, 12, 16, 16, 12, 8 }) do
+		local z0 = -158 + 2 * (n - 1)
+		box("OrganPipe", 14, 20, z0, 16, 20 + h, z0 + 2, "px_iron_block", nil, f)
+		decor(
+			box("OrganPipeMouth", 13.8, 21.5, z0 + 0.5, 14, 22.5, z0 + 1.5, "px_blackstone", nil, f)
+		)
+	end
+	for n, h in ipairs({ 14, 22, 14 }) do
+		local z0 = -158 + 4 * (n - 1)
+		box("OrganPipe", 16.5, 20, z0, 19.5, 20 + h, z0 + 4, "px_iron_block", nil, f)
+	end
+	-- two iron chandeliers hung from the vault, mid-bay
+	for _, cz in ipairs({ -112, -132 }) do
+		iron("ChandelierChain", -0.3, 46, cz - 0.3, 0.3, 60, cz + 0.3, f)
+		local hub = iron("ChandelierHub", -1, 43, cz - 1, 1, 46, cz + 1, f)
+		for _, s in ipairs({ -1, 1 }) do
+			iron("ChandelierRing", -5.5, 44, cz + s * 5 - 0.5, 5.5, 45, cz + s * 5 + 0.5, f)
+			iron("ChandelierRing", s * 5 - 0.5, 44, cz - 4.5, s * 5 + 0.5, 45, cz + 4.5, f)
+		end
+		iron("ChandelierSpoke", -5, 44.2, cz - 0.3, 5, 44.8, cz + 0.3, f)
+		iron("ChandelierSpoke", -0.3, 44.2, cz - 5, 0.3, 44.8, cz + 5, f)
+		for _, c in ipairs({
+			{ -5, -5 },
+			{ 5, -5 },
+			{ 5, 5 },
+			{ -5, 5 },
+			{ 0, -5 },
+			{ 0, 5 },
+			{ -5, 0 },
+			{ 5, 0 },
+		}) do
+			candle(c[1], 45, cz + c[2], 1.4, true, f)
+		end
+		light(hub, 44, 1.6, FLAME)
+		nLights += 1
+	end
+end
+task.wait()
+
+-- ================================================================ the bell tower: walls, the stair, the belfry, the spire
+do
+	local tw = folder("BellTower", cath)
+	-- a rectangle in a wall face: u along the face, d = depth from the outer face inward (0..4)
+	local function frect(face, u0, u1, d0, d1)
+		if face == "S" then
+			return u0, -70 - d1, u1, -70 - d0
+		elseif face == "N" then
+			return u0, -98 + d0, u1, -98 + d1
+		elseif face == "W" then
+			return 48 + d0, u0, 48 + d1, u1
+		end
+		return 76 - d1, u0, 76 - d0, u1
+	end
+	-- the walls y 0..104 as columns; holes: glass windows (with a sill) or the door
+	local WALLS = {
+		{
+			"S",
+			{
+				{ 48, 52 },
+				{ 52, 58, { 0, 14, "door" } },
+				{ 58, 60 },
+				{ 60, 64, { 14, 26 }, { 44, 58 }, { 76, 90 } },
+				{ 64, 76 },
+			},
+		},
+		{ "N", { { 48, 60 }, { 60, 64, { 18, 30 }, { 52, 62 }, { 84, 98 } }, { 64, 76 } } },
+		{ "W", { { -94, -86 }, { -86, -82, { 36, 50 }, { 68, 80 }, { 86, 100 } }, { -82, -74 } } },
+		{ "E", { { -94, -86 }, { -86, -82, { 18, 30 }, { 48, 60 }, { 80, 94 } }, { -82, -74 } } },
+	}
+	for _, w in ipairs(WALLS) do
+		local face = w[1]
+		for _, c in ipairs(w[2]) do
+			local y = 0
+			for hi = 3, #c do
+				local h = c[hi]
+				local x0, z0, x1, z1 = frect(face, c[1], c[2], 0, 4)
+				if h[1] > y then
+					box("TowerWall", x0, y, z0, x1, h[1], z1, STONE, WHITE_STONE, tw)
+				end
+				if h[3] == "door" then
+					-- a pointed door: full width to y 12, the middle 2 studs to 14
+					local a0, b0, a1, b1 = frect(face, c[1], c[1] + 2, 0, 4)
+					box("TowerDoorHead", a0, 12, b0, a1, 14, b1, STONE, WHITE_STONE, tw)
+					a0, b0, a1, b1 = frect(face, c[2] - 2, c[2], 0, 4)
+					box("TowerDoorHead", a0, 12, b0, a1, 14, b1, STONE, WHITE_STONE, tw)
+					for _, j in ipairs({ { c[1] - 1, c[1] }, { c[2], c[2] + 1 } }) do
+						a0, b0, a1, b1 = frect(face, j[1], j[2], -0.5, 0.5)
+						box("TowerDoorFrame", a0, 0, b0, a1, 15, b1, GREYB, GREY_STONE, tw)
+					end
+					a0, b0, a1, b1 = frect(face, c[1] - 1, c[2] + 1, -0.5, 0.5)
+					box("TowerDoorFrame", a0, 14, b0, a1, 15, b1, GREYB, GREY_STONE, tw)
+				else
+					local g0, g1, g2, g3 = frect(face, c[1], c[2], 1.5, 2.5)
+					glass(
+						"TowerWindow",
+						g0,
+						h[1],
+						g1,
+						g2,
+						h[2],
+						g3,
+						if hi % 2 == 0 then GLASS_CYAN else GLASS_BLUE,
+						tw
+					)
+					local s0, s1, s2, s3 = frect(face, c[1], c[2], -0.6, 3.5)
+					box("TowerSill", s0, h[1] - 1, s1, s2, h[1], s3, SMOOTH, GREY_STONE, tw)
+				end
+				y = h[2]
+			end
+			local x0, z0, x1, z1 = frect(face, c[1], c[2], 0, 4)
+			box("TowerWall", x0, y, z0, x1, 104, z1, STONE, WHITE_STONE, tw)
+		end
+	end
+	-- corner buttresses (two per corner, stepped), string courses, gargoyles at the corners
+	for _, c in ipairs({
+		{ 48, -70, -1, 1 },
+		{ 76, -70, 1, 1 },
+		{ 48, -98, -1, -1 },
+		{ 76, -98, 1, -1 },
+	}) do
+		local cx, cz, dx, dz = c[1], c[2], c[3], c[4]
+		local xa, za = cx - dx * 4, cz - dz * 4
+		box("TowerButtress", xa, 0, cz, cx, 56, cz + dz * 4, STONE, WHITE_STONE, tw)
+		box("TowerButtress", xa, 56, cz, cx, 96, cz + dz * 2, STONE, WHITE_STONE, tw)
+		box("TowerButtressCap", xa, 96, cz, cx, 98, cz + dz * 2.5, GREYB, GREY_STONE, tw)
+		box("TowerButtress", cx, 0, za, cx + dx * 4, 56, cz, STONE, WHITE_STONE, tw)
+		box("TowerButtress", cx, 56, za, cx + dx * 2, 96, cz, STONE, WHITE_STONE, tw)
+		box("TowerButtressCap", cx, 96, za, cx + dx * 2.5, 98, cz, GREYB, GREY_STONE, tw)
+		gargoyle(CFrame.lookAt(V(cx, 96, cz), V(cx + dx * 10, 96, cz + dz * 10)), tw)
+	end
+	for _, y in ipairs({ 32, 64, 102 }) do
+		box("TowerCourse", 47, y, -99, 77, y + 2, -98, GREYB, GREY_STONE, tw)
+		box("TowerCourse", 47, y, -70, 77, y + 2, -69, GREYB, GREY_STONE, tw)
+		box("TowerCourse", 47, y, -98, 48, y + 2, -70, GREYB, GREY_STONE, tw)
+		box("TowerCourse", 76, y, -98, 77, y + 2, -70, GREYB, GREY_STONE, tw)
+	end
+	crossBanner(at(68, 24, -69.6), 4, 10, tw)
+	decor(box("TowerDoorLeaf", 52, 0, -80, 53, 12, -74, OAK_DARK, nil, tw))
+	-- the stair: 13 flights round the pier (S strip east, E north, N west, W south), landings in the corners
+	box("StairPier", 58, 0, -88, 66, 104, -80, STONE, WHITE_STONE, tw)
+	local CORNERS =
+		{ { 66, -80, 72, -74 }, { 66, -94, 72, -88 }, { 52, -94, 58, -88 }, { 52, -80, 58, -74 } }
+	for i = 1, 13 do
+		local s, y0 = (i - 1) % 4, 8 * (i - 1)
+		if s == 0 then
+			stairs("TowerStep", -77, 58, 66, y0, 8, 6, GREYB, tw, "x")
+		elseif s == 1 then
+			stairs("TowerStep", 69, -80, -88, y0, 8, 6, GREYB, tw)
+		elseif s == 2 then
+			stairs("TowerStep", -91, 66, 58, y0, 8, 6, GREYB, tw, "x")
+		else
+			stairs("TowerStep", 55, -88, -80, y0, 8, 6, GREYB, tw)
+		end
+		if i < 13 then
+			local c = CORNERS[s + 1]
+			box("TowerLanding", c[1], y0 + 4, c[2], c[3], y0 + 8, c[4], GREYB, GREY_STONE, tw)
+		end
+	end
+	for _, l in ipairs({
+		{ 57.2, 44, -84, -1, 0 },
+		{ 66.8, 26, -84, 1, 0 },
+		{ 62, 84, -79.2, 0, 1 },
+	}) do
+		iron(
+			"LanternBracket",
+			l[1] - math.abs(l[4]) * 0.8 - 0.3,
+			l[2] + 1,
+			l[3] - math.abs(l[5]) * 0.8 - 0.3,
+			l[1] + math.abs(l[4]) * 0.8 + 0.3,
+			l[2] + 1.5,
+			l[3] + math.abs(l[5]) * 0.8 + 0.3,
+			tw
+		)
+		lantern(V(l[1], l[2], l[3]), tw)
+		nLights += 1
+	end
+	-- the belfry floor (y 104, the SUMMIT): the north and east bands and the pier top; the stairwell (W strip, SW
+	-- corner, S strip) stays open under the sky, railed
+	box("BelfryFloor", 52, 100, -94, 72, 104, -88, SMOOTH, WHITE_STONE, tw)
+	box("BelfryFloor", 66, 100, -88, 72, 104, -74, SMOOTH, WHITE_STONE, tw)
+	box("StairwellRail", 52, 104, -89, 58, 107.5, -88, SMOOTH, GREY_STONE, tw)
+	box("StairwellRail", 58, 104, -88, 59, 107.5, -80, SMOOTH, GREY_STONE, tw)
+	box("StairwellRail", 58, 104, -81, 66, 107.5, -80, SMOOTH, GREY_STONE, tw)
+	-- corner piers and the four open pointed arches with a parapet and an iron rail
+	for _, cx in ipairs({ 48, 72 }) do
+		for _, cz in ipairs({ -98, -74 }) do
+			box("BelfryPier", cx, 104, cz, cx + 4, 136, cz + 4, STONE, WHITE_STONE, tw)
+		end
+	end
+	for _, face in ipairs({ "S", "N", "W", "E" }) do
+		local ua = if face == "S" or face == "N" then 52 else -94
+		local uc = ua + 10
+		greedy(ua, ua + 20, 104, 136, 2, function(u, y)
+			if math.abs(u - uc) > 6 then
+				return "stone"
+			end
+			if y < 108 then
+				return "rail"
+			end
+			return if pointed(u - uc, y, 6, 8, 122) then nil else "stone"
+		end, function(k, u0, u1, y0, y1)
+			if k == "rail" then
+				local x0, z0, x1, z1 = frect(face, u0, u1, 0.5, 3.5)
+				box("BelfryParapet", x0, y0, z0, x1, y1, z1, SMOOTH, GREY_STONE, tw)
+			else
+				local x0, z0, x1, z1 = frect(face, u0, u1, 0, 4)
+				box("BelfryWall", x0, y0, z0, x1, y1, z1, STONE, WHITE_STONE, tw)
+			end
+		end)
+		local x0, z0, x1, z1 = frect(face, uc - 6, uc + 6, 1.7, 2.3)
+		local rail = box("BelfryRail", x0, 109, z0, x1, 109.6, z1, nil, IRON, tw)
+		rail.Material = Enum.Material.Metal
+		for _, u in ipairs({ uc - 5.8, uc, uc + 5.8 }) do
+			x0, z0, x1, z1 = frect(face, u - 0.2, u + 0.2, 1.8, 2.2)
+			iron("BelfryRailPost", x0, 108, z0, x1, 109, z1, tw)
+		end
+		x0, z0, x1, z1 = frect(face, uc - 1, uc + 1, -0.4, 0)
+		box("BelfryKeystone", x0, 129, z0, x1, 132, z1, GOLDB, nil, tw)
+	end
+	box("BelfryCornice", 46, 136, -100, 78, 140, -68, GREYB, GREY_STONE, tw)
+	-- the bronze bell under an oak headstock on a beam through the band above the arches; an iron clapper
+	box("BellBeam", 48, 130, -85.5, 76, 133, -82.5, OAK_DARK, nil, tw)
+	box("BellHeadstock", 58, 127, -86, 66, 130, -82, OAK_DARK, nil, tw)
+	iron("BellStrap", 59.5, 125, -86.2, 60.5, 130, -81.8, tw)
+	iron("BellStrap", 63.5, 125, -86.2, 64.5, 130, -81.8, tw)
+	box("Bell", 56, 112, -90, 68, 114, -78, GOLDB, BRONZE, tw)
+	box("Bell", 57, 114, -89, 67, 120, -79, GOLDB, BRONZE, tw)
+	box("Bell", 58, 120, -88, 66, 124, -80, GOLDB, BRONZE, tw)
+	box("Bell", 59, 124, -87, 65, 126, -81, GOLDB, BRONZE, tw)
+	box("BellCrown", 60, 126, -85, 64, 127, -83, GOLDB, BRONZE, tw)
+	decor(box("BellBand", 56.8, 117, -89.2, 67.2, 118, -78.8, GOLDB, nil, tw))
+	decor(box("BellBand", 55.8, 113, -90.2, 68.2, 113.6, -77.8, GOLDB, nil, tw))
+	iron("BellClapper", 61.6, 109, -84.4, 62.4, 114, -83.6, tw)
+	iron("BellClapperBall", 60.8, 107, -85.2, 63.2, 109.4, -82.8, tw)
+	lantern(V(60, 122, -92), tw, false, BY + 136)
+	nLights += 1
+	-- the slate spire: stepped to y 180, lucarnes on its faces, pinnacles on the cornice corners, a gold cross
+	for i, hw in ipairs({ 12, 10, 8, 6, 4, 2 }) do
+		local y0 = 140 + 6 * (i - 1)
+		box(
+			"Spire",
+			62 - hw,
+			y0,
+			-84 - hw,
+			62 + hw,
+			if hw == 2 then 180 else y0 + 6,
+			-84 + hw,
+			ROOF,
+			SLATE,
+			tw
+		)
+	end
+	for _, l in ipairs({
+		{ 62, -73, 0, 1 },
+		{ 62, -95, 0, -1 },
+		{ 51, -84, -1, 0 },
+		{ 73, -84, 1, 0 },
+	}) do
+		local lx, lz, dx, dz = l[1], l[2], l[3], l[4]
+		local ax, az = if dx == 0 then 3 else 2, if dz == 0 then 3 else 2
+		box("Lucarne", lx - ax, 146, lz - az, lx + ax, 153, lz + az, STONE, WHITE_STONE, tw)
+		-- a dark opening plate on the outward face
+		local ox0, ox1 =
+			if dx == 0 then lx - 1.2 else lx + dx * ax,
+			if dx == 0 then lx + 1.2 else lx + dx * (ax + 0.2)
+		local oz0, oz1 =
+			if dz == 0 then lz - 1.2 else lz + dz * az,
+			if dz == 0 then lz + 1.2 else lz + dz * (az + 0.2)
+		decor(box("LucarneOpening", ox0, 147, oz0, ox1, 151.5, oz1, "px_blackstone", nil, tw))
+		box(
+			"LucarneCap",
+			lx - ax - 0.5,
+			153,
+			lz - az - 0.5,
+			lx + ax + 0.5,
+			155,
+			lz + az + 0.5,
+			ROOF,
+			SLATE,
+			tw
+		)
+	end
+	for _, cx in ipairs({ 46, 74 }) do
+		for _, cz in ipairs({ -100, -72 }) do
+			box("SpirePinnacle", cx, 140, cz, cx + 4, 150, cz + 4, STONE, WHITE_STONE, tw)
+			box("SpirePinnacleTip", cx + 1, 150, cz + 1, cx + 3, 158, cz + 3, ROOF, SLATE, tw)
+			box(
+				"SpirePinnacleGold",
+				cx + 1.5,
+				158,
+				cz + 1.5,
+				cx + 2.5,
+				160,
+				cz + 2.5,
+				GOLDB,
+				nil,
+				tw
+			)
+		end
+	end
+	box("SpireBall", 61, 180, -85, 63, 182, -83, GOLDB, nil, tw)
+	box("SpireCross", 61.5, 182, -84.5, 62.5, 192, -83.5, GOLDB, nil, tw)
+	box("SpireCross", 59, 187, -84.5, 65, 188, -83.5, GOLDB, nil, tw)
+end
+print(("[build-church] cathedral: %d parts, %d point lights"):format(count - partsBefore, nLights))
+
+end
+task.wait()
+-- ================================================================================ church/30-plaza.luau
+do
+-- ================================================================ church: the square round the pit and the south edge
+-- The PLAZA part (zoneOf == "plaza": |x| < 110, z ≥ -40), after the concept (assets/concepts/church/concept-v2.webp,
+-- top-left and top-right): a fence of spruce posts and rails round the brick pit 1 block outside the rim (x ±74,
+-- z -4 and 144), open at the four ladder shafts (N x -24..24 = the axis to the stair, S x -28..28 widened for the
+-- arrival, W/E z 58..82), white stone lantern pillars with blue cross banners at its corners and beside each opening;
+-- lantern pillars along the paving edges (x ±100, z -34); a pair of tall 2×2 pillars framing the axis at z -35;
+-- low white stone planters with bushes, flowers and candles; benches; cypresses round the edges; a fountain with a
+-- golden cross, a noticeboard and a viewpoint with a telescope in the south-east; a pilgrim's cart with crates,
+-- barrels and chests behind the buyer's stall; a low white balustrade with gaps and lantern posts along the south rim;
+-- two angel statues on plinths flanking the way from the arrival to the pit.
+-- Kept clear: the pit and its fence ring, the arrival r 20 (the angels r 16+), the buyer's stall with its crate and
+-- barrel, the zone sign, the axis x -24..24 z -48..-4, the walk mouths x ±96..±110 z -28..0, walkways ≥ 5 blocks.
+local plazaF = folder("Square")
+local startCount = count
+local F = {
+	fence = folder("PitFence", plazaF),
+	pillars = folder("LanternPillars", plazaF),
+	garden = folder("Planters", plazaF),
+	trees = folder("Cypresses", plazaF),
+	props = folder("Props", plazaF),
+	south = folder("SouthEdge", plazaF),
+}
+local COL = {
+	iron = Color3.fromRGB(45, 45, 50),
+	ironCap = Color3.fromRGB(40, 40, 45),
+	wax = Color3.fromRGB(240, 234, 214),
+	flame = Color3.fromRGB(255, 190, 90),
+	paper = Color3.fromRGB(236, 228, 204),
+	paperOld = Color3.fromRGB(214, 196, 156),
+	seal = Color3.fromRGB(170, 40, 40),
+	bush = Color3.fromRGB(205, 228, 190), -- a light tint over px_hedge (already dark green)
+	wood = Color3.fromRGB(110, 80, 50),
+	white = Color3.fromRGB(246, 246, 242),
+	statue = Color3.fromRGB(250, 250, 248),
+	water = Color3.fromRGB(215, 232, 255),
+	stream = Color3.fromRGB(150, 200, 240),
+	soil = Color3.fromRGB(90, 66, 46),
+	stem = Color3.fromRGB(70, 130, 50),
+	book = Color3.fromRGB(46, 62, 140),
+	brass = Color3.fromRGB(196, 160, 90),
+	chest = Color3.fromRGB(196, 146, 96),
+	pot = Color3.fromRGB(240, 220, 210),
+	sack = Color3.fromRGB(205, 182, 140),
+}
+local FLOWERS = {
+	Color3.fromRGB(200, 50, 50),
+	Color3.fromRGB(240, 200, 60),
+	Color3.fromRGB(70, 110, 210),
+	Color3.fromRGB(245, 245, 245),
+	Color3.fromRGB(235, 140, 180),
+	Color3.fromRGB(160, 110, 210),
+}
+local LIGHTS = 16 -- PointLights this part may add (lit lanterns and two candle clusters)
+local lightsLeft = LIGHTS
+local skipped = {}
+
+-- ================================================================ helpers
+-- a frame at local (x, y, z) whose front (-Z) looks along (dx, dz)
+local function fr(x, z, dx, dz, y)
+	return at(x, y or 0, z) * CFrame.Angles(0, math.atan2(-dx, -dz), 0)
+end
+-- a textured box in a frame cf by two local corners
+local function lb(cf, name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
+	local size = Vector3.new(math.abs(x1 - x0), math.abs(y1 - y0), math.abs(z1 - z0))
+	local p = part(
+		name,
+		size,
+		cf * CFrame.new((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2),
+		tint,
+		nil,
+		parent
+	)
+	if variant then
+		textured(p, variant, tint)
+	end
+	return p
+end
+-- a small plain decor piece in a frame cf by size and local centre
+local function lc(cf, name, sx, sy, sz, x, y, z, color, material, parent)
+	return decor(
+		part(name, Vector3.new(sx, sy, sz), cf * CFrame.new(x, y, z), color, material, parent)
+	)
+end
+
+-- footprints: the keep-outs, then everything placed (a rect {x0, z0, x1, z1} must lie on the island, in the plaza
+-- zone, off the keep-outs, the pit with its fence ring, the arrival and everything claimed before)
+local claims = {
+	{ -46, 157, -18, 182 }, -- the buyer's stall, its crate and barrel
+	{ 9, 168, 19, 176 }, -- the zone sign
+	{ -24, -48, 24, -4 }, -- the axis to the cathedral stair
+	{ -110, -28, -96, 0 }, -- the walk mouths
+	{ 96, -28, 110, 0 },
+}
+local function claim(name, x0, z0, x1, z1, opt)
+	opt = opt or {}
+	for _, p in ipairs({
+		{ x0, z0 },
+		{ x1, z0 },
+		{ x0, z1 },
+		{ x1, z1 },
+		{ (x0 + x1) / 2, (z0 + z1) / 2 },
+	}) do
+		if isleOf(p[1], p[2], 10) == nil or zoneOf(p[1], p[2]) ~= "plaza" then
+			table.insert(skipped, name)
+			return false
+		end
+	end
+	local ok = true
+	for _, k in ipairs(claims) do
+		if x0 < k[3] and x1 > k[1] and z0 < k[4] and z1 > k[2] then
+			ok = false
+			break
+		end
+	end
+	if ok and not opt.pit and x0 < 76 and x1 > -76 and z0 < 146 and z1 > -6 then
+		ok = false
+	end
+	local nx, nz = math.clamp(SPAWN.x, x0, x1), math.clamp(SPAWN.z, z0, z1)
+	if ok and math.sqrt((nx - SPAWN.x) ^ 2 + (nz - SPAWN.z) ^ 2) < (opt.spawnR or 20) then
+		ok = false
+	end
+	if not ok then
+		table.insert(skipped, name)
+		return false
+	end
+	table.insert(claims, { x0, z0, x1, z1 })
+	return true
+end
+
+-- a Minecraft lantern scaled by s at world pos; lit = a PointLight while the budget lasts
+local function lamp(pos, s, lit, parent)
+	local function bit(name, sx, sy, sz, ox, oy, oz, color, material)
+		return decor(
+			part(
+				name,
+				Vector3.new(sx, sy, sz) * s,
+				CFrame.new(pos + Vector3.new(ox, oy, oz) * s),
+				color,
+				material or Enum.Material.Metal,
+				parent
+			)
+		)
+	end
+	bit("LanternBase", 1.3, 0.25, 1.3, 0, -0.62, 0, COL.iron)
+	bit("LanternTop", 1.3, 0.25, 1.3, 0, 0.62, 0, COL.iron)
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		bit("LanternBar", 0.2, 1, 0.2, c[1] * 0.55, 0, c[2] * 0.55, COL.iron)
+	end
+	local core = bit("LanternGlow", 0.9, 1, 0.9, 0, 0, 0, LANTERN_GLOW, Enum.Material.Neon)
+	core.Transparency = 0.1
+	bit("LanternCap", 0.7, 0.35, 0.7, 0, 0.9, 0, COL.ironCap)
+	if lit and lightsLeft > 0 then
+		lightsLeft -= 1
+		light(core, 24 + 6 * s, 1.2, LANTERN_GLOW)
+	end
+	return core
+end
+-- a blue banner with a white cross; cf = the cloth centre, the cloth in the frame's XY plane
+local function crossBanner(cf, w, h, parent)
+	lc(cf, "BannerRod", w + 0.6, 0.4, 0.4, 0, h / 2 + 0.2, 0, COL.wood, Enum.Material.Wood, parent)
+	lc(cf, "Banner", w, h, 0.2, 0, 0, 0, BANNER_BLUE, Enum.Material.Fabric, parent)
+	lc(
+		cf,
+		"BannerCross",
+		w * 0.2,
+		h * 0.62,
+		0.28,
+		0,
+		h * 0.04,
+		0,
+		COL.white,
+		Enum.Material.Fabric,
+		parent
+	)
+	lc(
+		cf,
+		"BannerCross",
+		w * 0.62,
+		h * 0.12,
+		0.28,
+		0,
+		h * 0.17,
+		0,
+		COL.white,
+		Enum.Material.Fabric,
+		parent
+	)
+	lc(cf, "BannerHem", w, 0.35, 0.26, 0, -h / 2 + 0.175, 0, GOLD, Enum.Material.Fabric, parent)
+end
+-- a cluster of n candles on a top at local (x, y, z); the first `lit` burn, `glow` gives the first flame a light
+local function candles(x, y, z, n, lit, parent, glow, spread)
+	spread = spread or 1.6
+	for i = 1, n do
+		local ox, oz = (rng:NextNumber() - 0.5) * spread, (rng:NextNumber() - 0.5) * spread
+		local h = 0.8 + rng:NextNumber() * 1
+		decor(
+			part(
+				"Candle",
+				Vector3.new(0.5, h, 0.5),
+				at(x + ox, y + h / 2, z + oz),
+				COL.wax,
+				Enum.Material.SmoothPlastic,
+				parent
+			)
+		)
+		if i <= lit then
+			local fl = decor(
+				part(
+					"CandleFlame",
+					Vector3.new(0.24, 0.42, 0.24),
+					at(x + ox, y + h + 0.21, z + oz),
+					COL.flame,
+					Enum.Material.Neon,
+					parent
+				)
+			)
+			if glow and i == 1 and lightsLeft > 0 then
+				lightsLeft -= 1
+				light(fl, 16, 1, COL.flame)
+			end
+		end
+	end
+end
+-- a flower pot (terracotta) with a flower or a little bush, standing on local y
+local function flowerPot(x, y, z, parent)
+	textured(
+		decor(part("FlowerPot", Vector3.new(1.4, 1.3, 1.4), at(x, y + 0.65, z), nil, nil, parent)),
+		"px_terracotta",
+		COL.pot
+	)
+	decor(
+		part(
+			"PotSoil",
+			Vector3.new(1, 0.1, 1),
+			at(x, y + 1.32, z),
+			COL.soil,
+			Enum.Material.SmoothPlastic,
+			parent
+		)
+	)
+	if rng:NextNumber() < 0.6 then
+		decor(
+			part(
+				"FlowerStem",
+				Vector3.new(0.25, 1.1, 0.25),
+				at(x, y + 1.9, z),
+				COL.stem,
+				Enum.Material.SmoothPlastic,
+				parent
+			)
+		)
+		decor(
+			part(
+				"Flower",
+				Vector3.new(0.8, 0.8, 0.8),
+				at(x, y + 2.75, z),
+				pick(FLOWERS),
+				Enum.Material.SmoothPlastic,
+				parent
+			)
+		)
+	else
+		textured(
+			decor(part("PotBush", Vector3.new(1.3, 1.3, 1.3), at(x, y + 2, z), nil, nil, parent)),
+			"px_hedge",
+			COL.bush
+		)
+	end
+end
+-- a square lantern pillar of white stone: n blocks wide, h blocks tall, a smooth cap (2×2 pillars get a stepped
+-- 1×1 plinth on the cap), a lantern on top, a blue cross banner on every face of faces ({dx, dz} axes)
+local function pillar(cx, cz, n, h, faces, lit, parent)
+	local f = folder("LanternPillar", parent)
+	local w, top = n * B, h * B
+	local hw = w / 2
+	box(
+		"PillarFoot",
+		cx - hw - 0.5,
+		0,
+		cz - hw - 0.5,
+		cx + hw + 0.5,
+		1,
+		cz + hw + 0.5,
+		"px_stone_bricks",
+		GREY_STONE,
+		f
+	)
+	box(
+		"Pillar",
+		cx - hw,
+		1,
+		cz - hw,
+		cx + hw,
+		top,
+		cz + hw,
+		"px_white_stone_bricks",
+		WHITE_STONE,
+		f
+	)
+	box(
+		"PillarCap",
+		cx - hw - 0.5,
+		top,
+		cz - hw - 0.5,
+		cx + hw + 0.5,
+		top + 1,
+		cz + hw + 0.5,
+		"px_smooth_stone",
+		WHITE_STONE,
+		f
+	)
+	local ly = top + 1
+	if n >= 2 then
+		box(
+			"PillarPlinth",
+			cx - 2,
+			ly,
+			cz - 2,
+			cx + 2,
+			ly + B,
+			cz + 2,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box(
+			"PillarCap",
+			cx - 2.5,
+			ly + B,
+			cz - 2.5,
+			cx + 2.5,
+			ly + B + 1,
+			cz + 2.5,
+			"px_smooth_stone",
+			WHITE_STONE,
+			f
+		)
+		ly += B + 1
+	end
+	local s = if n >= 2 then 2 else 1.3
+	lamp(V(cx, ly + 0.75 * s, cz), s, lit, f)
+	local bw = w * 0.7
+	local bh = math.min(top - 3, bw * 2.6)
+	for _, d in ipairs(faces) do
+		local cf =
+			fr(cx + d[1] * (hw + 0.15), cz + d[2] * (hw + 0.15), d[1], d[2], top - 1 - bh / 2)
+		crossBanner(cf, bw, bh, f)
+	end
+	return f, top + 1
+end
+-- a low white stone planter (x0..x1, z0..z1): a block of white stone bricks, a smooth lip, grass, bushes and flowers
+-- along the middle, candle clusters on two corners of the lip
+local function planter(x0, z0, x1, z1, parent)
+	if not claim("Planter", x0, z0, x1, z1) then
+		return nil
+	end
+	local f = folder("Planter", parent)
+	box("PlanterWall", x0, 0, z0, x1, 3.4, z1, "px_white_stone_bricks", WHITE_STONE, f)
+	box("PlanterSoil", x0 + 0.8, 3.4, z0 + 0.8, x1 - 0.8, 3.8, z1 - 0.8, "px_grass_top", GRASS, f)
+	box("PlanterLip", x0, 3.4, z0, x1, 4, z0 + 0.8, "px_smooth_stone", WHITE_STONE, f)
+	box("PlanterLip", x0, 3.4, z1 - 0.8, x1, 4, z1, "px_smooth_stone", WHITE_STONE, f)
+	box("PlanterLip", x0, 3.4, z0 + 0.8, x0 + 0.8, 4, z1 - 0.8, "px_smooth_stone", WHITE_STONE, f)
+	box("PlanterLip", x1 - 0.8, 3.4, z0 + 0.8, x1, 4, z1 - 0.8, "px_smooth_stone", WHITE_STONE, f)
+	local alongX = (x1 - x0) >= (z1 - z0)
+	local len = if alongX then x1 - x0 else z1 - z0
+	local cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+	local slots = math.floor(len / B)
+	for i = 0, slots - 1 do
+		local t = (if alongX then x0 else z0) + (i + 0.5) * (len / slots)
+		local bx, bz = if alongX then t else cx, if alongX then cz else t
+		local roll = rng:NextNumber()
+		if roll < 0.55 then
+			local hgt = if roll < 0.14 then 2 * B else B
+			textured(
+				decor(part("Bush", Vector3.new(B, hgt, B), at(bx, 3.8 + hgt / 2, bz), nil, nil, f)),
+				"px_hedge",
+				COL.bush
+			)
+		else
+			for _, o in ipairs({ -1, 1 }) do
+				local fx = bx + (if alongX then o * 1 else (rng:NextNumber() - 0.5) * 2)
+				local fz = bz + (if alongX then (rng:NextNumber() - 0.5) * 2 else o * 1)
+				decor(
+					part(
+						"FlowerStem",
+						Vector3.new(0.25, 1.2, 0.25),
+						at(fx, 4.4, fz),
+						COL.stem,
+						Enum.Material.SmoothPlastic,
+						f
+					)
+				)
+				decor(
+					part(
+						"Flower",
+						Vector3.new(0.8, 0.8, 0.8),
+						at(fx, 5.3, fz),
+						pick(FLOWERS),
+						Enum.Material.SmoothPlastic,
+						f
+					)
+				)
+			end
+		end
+	end
+	local corners = {
+		{ x0 + 0.45, z0 + 0.45 },
+		{ x1 - 0.45, z1 - 0.45 },
+		{ x1 - 0.45, z0 + 0.45 },
+		{ x0 + 0.45, z1 - 0.45 },
+	}
+	for i = 1, 2 do
+		local c = corners[rng:NextInteger(1, 2) * 2 - (i - 1)]
+		candles(
+			c[1],
+			4,
+			c[2],
+			rng:NextInteger(2, 3),
+			if rng:NextNumber() < 0.35 then 1 else 0,
+			f,
+			false,
+			0.5
+		)
+	end
+	return f
+end
+-- a cypress: a log core with a 2×2 column of leaves, a 1×1 top two blocks high and single blocks stuck to the sides
+-- (a stepped silhouette); h = blocks up to the top of the crown
+local function cypress(cx, cz, h, parent)
+	if not claim("Cypress", cx - 4, cz - 4, cx + 4, cz + 4) then
+		return
+	end
+	local f = folder("Cypress", parent)
+	box("CypressLog", cx - 2, 0, cz - 2, cx + 2, (h - 2) * B, cz + 2, "px_dark_oak_log", nil, f)
+	decor(
+		box("CypressLeaves", cx - 4, B, cz - 4, cx + 4, (h - 2) * B, cz + 4, "px_hedge", CYPRESS, f)
+	)
+	decor(
+		box(
+			"CypressTop",
+			cx - 2,
+			(h - 2) * B,
+			cz - 2,
+			cx + 2,
+			h * B,
+			cz + 2,
+			"px_hedge",
+			CYPRESS,
+			f
+		)
+	)
+	local sides = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	for i = 1, 3 do
+		local d = sides[(rng:NextInteger(0, 3) + i) % 4 + 1]
+		local off = if rng:NextNumber() < 0.5 then -2 else 2
+		local y = rng:NextInteger(2, h - 3) * B
+		local bx = cx + d[1] * 6 + (if d[1] == 0 then off else 0)
+		local bz = cz + d[2] * 6 + (if d[2] == 0 then off else 0)
+		decor(cube("CypressLeaves", bx, y + B / 2, bz, B, B, B, "px_hedge", CYPRESS, f))
+	end
+end
+-- a bench (white stone legs, a spruce seat, a dark backrest) at (cx, cz), its front looking along (dx, dz);
+-- returns the frame (nil when the place is taken)
+local function bench(cx, cz, dx, dz, parent, pots)
+	local len = 2 * B
+	local ex, ez = if dx ~= 0 then 1.3 else len / 2, if dx ~= 0 then len / 2 else 1.3
+	if not claim("Bench", cx - ex, cz - ez, cx + ex, cz + ez) then
+		return nil
+	end
+	local f = folder("Bench", parent)
+	local cf = fr(cx, cz, dx, dz)
+	for _, s in ipairs({ -1, 1 }) do
+		lb(
+			cf,
+			"BenchLeg",
+			s * (len / 2 - 1.4),
+			0,
+			-1,
+			s * (len / 2 - 0.2),
+			1.6,
+			1,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+	end
+	lb(cf, "BenchSeat", -len / 2, 1.6, -1.2, len / 2, 2.2, 1.2, WOOD, nil, f)
+	lb(cf, "BenchBack", -len / 2, 2.2, 0.8, len / 2, 4.2, 1.3, WOOD_DARK, nil, f)
+	if pots then
+		for _, s in ipairs({ -1, 1 }) do
+			local p = (cf * CFrame.new(s * (len / 2 + 1.2), 0, 0)).Position
+			flowerPot(p.X - BX, 0, p.Z - BZ, f)
+		end
+	end
+	return cf, f
+end
+-- a chest (Minecraft-like) on the ground at (x, z), its latch looking along (dx, dz)
+local function chest(x, z, dx, dz, parent)
+	local cf = fr(x, z, dx, dz)
+	lb(cf, "Chest", -1.8, 0, -1.8, 1.8, 2.5, 1.8, WOOD, COL.chest, parent)
+	lb(cf, "ChestLid", -1.8, 2.5, -1.8, 1.8, 3.5, 1.8, WOOD_DARK, nil, parent)
+	lc(cf, "ChestLatch", 0.6, 0.9, 0.3, 0, 2.5, -1.95, COL.iron, Enum.Material.Metal, parent)
+end
+-- a white stone angel on a plinth at (cx, cz) looking south: a stepped robe, hands folded in prayer, a golden halo,
+-- stepped wings rising outward behind the shoulders; candles on the front corners of the plinth
+local function angel(cx, cz, parent)
+	local f = folder("AngelStatue", parent)
+	local cf = fr(cx, cz, 0, 1)
+	lb(cf, "PlinthFoot", -4.5, 0, -4.5, 4.5, 1, 4.5, "px_stone_bricks", GREY_STONE, f)
+	lb(cf, "Plinth", -4, 1, -4, 4, 5, 4, "px_white_stone_bricks", WHITE_STONE, f)
+	lb(cf, "PlinthCap", -4.5, 5, -4.5, 4.5, 6, 4.5, "px_smooth_stone", WHITE_STONE, f)
+	local function fig(name, x0, y0, z0, x1, y1, z1)
+		return decor(lb(cf, name, x0, y0, z0, x1, y1, z1, "px_smooth_stone", COL.statue, f))
+	end
+	lb(cf, "Robe", -2.2, 6, -1.8, 2.2, 7.2, 1.8, "px_smooth_stone", COL.statue, f)
+	lb(cf, "Robe", -1.8, 7.2, -1.4, 1.8, 11, 1.4, "px_smooth_stone", COL.statue, f)
+	fig("Body", -1.8, 11, -1.2, 1.8, 13.4, 1.2)
+	fig("Head", -1.2, 13.4, -1.2, 1.2, 15.8, 1.2)
+	fig("Sleeve", -2.6, 10.4, -1.4, -1.8, 13, 0.6)
+	fig("Sleeve", 1.8, 10.4, -1.4, 2.6, 13, 0.6)
+	fig("Hands", -0.7, 11.2, -2.4, 0.7, 13.2, -1.2)
+	for _, h in ipairs({
+		{ 3, 0.4, 0, -1.3 },
+		{ 3, 0.4, 0, 1.3 },
+		{ 0.4, 2.2, -1.3, 0 },
+		{ 0.4, 2.2, 1.3, 0 },
+	}) do
+		lc(cf, "Halo", h[1], 0.3, h[2], h[3], 16.5, h[4], GOLD, Enum.Material.Metal, f)
+	end
+	for _, s in ipairs({ -1, 1 }) do
+		fig("Wing", s * 1.2, 8, 1.2, s * 3.2, 14.2, 2.2)
+		fig("Wing", s * 3.2, 9.2, 1.4, s * 4.8, 15.4, 2.3)
+		fig("Wing", s * 4.8, 10.6, 1.6, s * 6.2, 16.2, 2.4)
+		fig("Wing", s * 6.2, 12.4, 1.8, s * 7.2, 16.6, 2.5)
+		fig("WingTip", s * 1.6, 6.4, 1.4, s * 3.2, 8, 2.1)
+	end
+	-- the frame is turned half round: local (x, z) is world (cx - x, cz - z)
+	candles(cx - 3.3, 6, cz + 3.3, 3, 2, f, true, 1.2)
+	candles(cx + 3.3, 6, cz + 3.3, 2, 0, f, false, 1.2)
+end
+-- a brass telescope on a wooden tripod at (x, z) looking along (dx, dz) and a little up
+local function telescope(x, z, dx, dz, parent)
+	local f = folder("Telescope", parent)
+	local head = V(x, 4.2, z)
+	for i = 0, 2 do
+		local a = i * 2 * math.pi / 3 + 0.3
+		decor(
+			beam(
+				"TelescopeLeg",
+				head,
+				V(x + math.cos(a) * 1.6, 0, z + math.sin(a) * 1.6),
+				0.35,
+				COL.wood,
+				f,
+				Enum.Material.Wood
+			)
+		)
+	end
+	local mid = head + Vector3.new(0, 0.6, 0)
+	local cf = CFrame.lookAt(mid, mid + Vector3.new(dx, 0.45, dz).Unit)
+	decor(part("TelescopeTube", Vector3.new(0.9, 0.9, 4.4), cf, COL.brass, Enum.Material.Metal, f))
+	decor(
+		part(
+			"TelescopeLens",
+			Vector3.new(1.3, 1.3, 0.8),
+			cf * CFrame.new(0, 0, -2.4),
+			COL.brass,
+			Enum.Material.Metal,
+			f
+		)
+	)
+	decor(
+		part(
+			"TelescopeEye",
+			Vector3.new(0.6, 0.6, 0.9),
+			cf * CFrame.new(0, 0, 2.5),
+			COL.iron,
+			Enum.Material.Metal,
+			f
+		)
+	)
+	decor(
+		part(
+			"TelescopeMount",
+			Vector3.new(0.8, 0.8, 0.8),
+			CFrame.new(head + Vector3.new(0, 0.1, 0)),
+			COL.iron,
+			Enum.Material.Metal,
+			f
+		)
+	)
+end
+-- the southmost z of the island at x (both edges of a 4-stud column 12 studs inside the ragged rim)
+local function rimZ(x)
+	for z = 236, 120, -1 do
+		if isleOf(x - 2, z, 12) and isleOf(x + 2, z, 12) then
+			return z
+		end
+	end
+	return nil
+end
+
+-- ================================================================ 1. the fence round the pit, its lantern pillars
+do
+	local runs = {
+		{ -72, -4, -29, -4 }, -- north, open x -24..24 (the axis to the stair)
+		{ 29, -4, 72, -4 },
+		{ -72, 144, -32, 144 }, -- south, open x -28..28 (wide: the arrival)
+		{ 32, 144, 72, 144 },
+		{ -74, -2, -74, 54 }, -- west, open z 58..82
+		{ -74, 86, -74, 142 },
+		{ 74, -2, 74, 54 }, -- east
+		{ 74, 86, 74, 142 },
+	}
+	for _, r in ipairs(runs) do
+		fence(r[1], r[2], r[3], r[4], F.fence, 0, "px_spruce_planks")
+	end
+	local posts = {}
+	for _, s in ipairs({ -1, 1 }) do
+		table.insert(posts, { s * 74, -4, { { s, 0 }, { 0, -1 } }, false, true }) -- the corners
+		table.insert(posts, { s * 74, 144, { { s, 0 }, { 0, 1 } }, false, true })
+		table.insert(posts, { s * 26.5, -4, { { 0, -1 } }, true }) -- beside the openings
+		table.insert(posts, { s * 30, 144, { { 0, 1 } }, true })
+		table.insert(posts, { s * 74, 56, { { s, 0 } }, true })
+		table.insert(posts, { s * 74, 84, { { s, 0 } }, true })
+	end
+	for _, p in ipairs(posts) do
+		if claim("FencePillar", p[1] - 2.5, p[2] - 2.5, p[1] + 2.5, p[2] + 2.5, { pit = true }) then
+			local f, capY = pillar(p[1], p[2], 1, 2, p[3], p[4], F.fence)
+			if p[5] then
+				-- a few candles on the cap of the corner pillars, beside the lantern
+				local ox = if p[1] > 0 then -1.5 else 1.5
+				candles(p[1] + ox, capY, p[2] + 1.5, 2, if p[2] > 0 then 1 else 0, f, false, 0.6)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 3a. the south edge: a balustrade with gaps and lantern posts
+local cols = {} -- k -> the z of the outer face of the balustrade at column x = -106 + 4k
+do
+	local f = folder("Balustrade", F.south)
+	for k = 0, 53 do
+		local zr = rimZ(-106 + 4 * k)
+		cols[k] = if zr then math.floor(zr / B) * B else nil
+	end
+	for k = 0, 53 do
+		local cx, zb = -106 + 4 * k, cols[k]
+		local gap = (k % 7 == 3 and math.abs(cx - 82) > 10) or math.abs(cx) < 8
+		if zb and zb > 150 and not gap then
+			-- reach down to the neighbours so the stepped line stays joined, at most 3 blocks deep
+			local zlo = zb - B
+			for _, j in ipairs({ k - 1, k + 1 }) do
+				if cols[j] and cols[j] > 150 then
+					zlo = math.min(zlo, cols[j] - B)
+				end
+			end
+			zlo = math.max(zlo, zb - 3 * B)
+			if claim("Balustrade", cx - 2, zlo, cx + 2, zb) then
+				local post = k % 7 == 0
+				local railTop = if post then zb - B else zb
+				if railTop > zlo then
+					box(
+						"BalustradeBase",
+						cx - 2,
+						0,
+						zlo,
+						cx + 2,
+						1.2,
+						railTop,
+						"px_white_stone_bricks",
+						WHITE_STONE,
+						f
+					)
+					box(
+						"BalustradeRail",
+						cx - 2,
+						3,
+						zlo,
+						cx + 2,
+						4,
+						railTop,
+						"px_smooth_stone",
+						WHITE_STONE,
+						f
+					)
+					for z = zlo + 2, railTop - 1, B do
+						box(
+							"Baluster",
+							cx - 0.8,
+							1.2,
+							z - 0.8,
+							cx + 0.8,
+							3,
+							z + 0.8,
+							"px_smooth_stone",
+							WHITE_STONE,
+							f
+						)
+					end
+				end
+				if post then
+					pillar(cx, zb - 2, 1, 1.5, { { 0, -1 } }, false, f)
+				elseif rng:NextNumber() < 0.18 then
+					flowerPot(cx, 4, zb - 2, f)
+				end
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 2a. lantern pillars along the square, the axis pair
+do
+	for _, s in ipairs({ -1, 1 }) do
+		-- the tall pair framing the axis to the cathedral stair (the stair foot at z -48 stays clear)
+		if claim("AxisPillar", s * 30 - 4.5, -39.5, s * 30 + 4.5, -30.5) then
+			local f = pillar(s * 30, -35, 2, 6, { { 0, 1 }, { 0, -1 }, { -s, 0 } }, true, F.pillars)
+			candles(s * 30 - s * 1.5, 1, -30.75, 3, 1, f, false, 0.4)
+			candles(s * 30 + s * 2.8, 1, -30.75, 2, 0, f, false, 0.4)
+		end
+		-- the north edge of the square
+		if claim("EdgePillar", s * 96 - 2.5, -36.5, s * 96 + 2.5, -31.5) then
+			pillar(s * 96, -34, 1, 3, { { 0, 1 } }, false, F.pillars)
+		end
+		-- the west and east edges of the paving, every ~32 studs, a pair flanking the cross path at z 58..82
+		for _, z in ipairs({ 8, 40, 54, 86, 100, 132 }) do
+			if claim("EdgePillar", s * 100 - 2.5, z - 2.5, s * 100 + 2.5, z + 2.5) then
+				pillar(s * 100, z, 1, 3, { { -s, 0 } }, z == 54 or z == 86, F.pillars)
+			end
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 2b. planters, benches, cypresses
+do
+	for _, s in ipairs({ -1, 1 }) do
+		local function xr(a, b) -- a mirrored x range
+			return math.min(s * a, s * b), math.max(s * a, s * b)
+		end
+		-- the north band between the fence and the church zone
+		local a0, a1 = xr(38, 58)
+		planter(a0, -38, a1, -30, F.garden)
+		local b0, b1 = xr(74, 90)
+		planter(b0, -38, b1, -30, F.garden)
+		bench(s * 48, -28.6, 0, 1, F.garden, true)
+		bench(s * 82, -28.6, 0, 1, F.garden, true)
+		-- the west and east edges of the paving
+		local c0, c1 = xr(96, 104)
+		planter(c0, 20, c1, 36, F.garden)
+		planter(c0, 104, c1, 120, F.garden)
+		local cf = bench(s * 100, 47, -s, 0, F.garden)
+		bench(s * 100, 93, -s, 0, F.garden)
+		if cf and s < 0 then
+			-- a lost hymn book left open-face-down on the west bench
+			local f = folder("HymnBook", F.props)
+			local bcf = cf * CFrame.new(1.4, 2.42, 0) * CFrame.Angles(0, 0.45, 0)
+			decor(
+				part("HymnBook", Vector3.new(1.5, 0.45, 2), bcf, COL.book, Enum.Material.Fabric, f)
+			)
+			decor(
+				part(
+					"HymnPages",
+					Vector3.new(1.3, 0.32, 1.85),
+					bcf * CFrame.new(0.15, 0, 0),
+					COL.paper,
+					Enum.Material.SmoothPlastic,
+					f
+				)
+			)
+			decor(
+				part(
+					"HymnCross",
+					Vector3.new(0.22, 0.05, 1.1),
+					bcf * CFrame.new(0, 0.24, 0),
+					GOLD,
+					Enum.Material.Metal,
+					f
+				)
+			)
+			decor(
+				part(
+					"HymnCross",
+					Vector3.new(0.7, 0.05, 0.22),
+					bcf * CFrame.new(0, 0.24, -0.2),
+					GOLD,
+					Enum.Material.Metal,
+					f
+				)
+			)
+		end
+		-- cypresses round the edges
+		cypress(s * 100, 16, rng:NextInteger(6, 8), F.trees)
+		cypress(s * 100, 124, rng:NextInteger(6, 8), F.trees)
+		cypress(s * 66, -34, rng:NextInteger(7, 8), F.trees)
+		cypress(s * 100, 142, rng:NextInteger(5, 7), F.trees)
+	end
+end
+task.wait()
+
+-- ================================================================ 3b. the angels, the fountain, the noticeboard, the viewpoint
+do
+	for _, s in ipairs({ -1, 1 }) do
+		if claim("Angel", s * 21 - 4.5, 146.5, s * 21 + 4.5, 155.5, { spawnR = 16 }) then
+			angel(s * 21, 151, F.south)
+		end
+	end
+	-- a fountain with a golden cross in the south-east
+	local cx, cz = 44, 170
+	if claim("Fountain", cx - 6, cz - 6, cx + 6, cz + 6) then
+		local f = folder("Fountain", F.props)
+		box(
+			"FountainRim",
+			cx - 6,
+			0,
+			cz - 6,
+			cx + 6,
+			3,
+			cz - 4,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box(
+			"FountainRim",
+			cx - 6,
+			0,
+			cz + 4,
+			cx + 6,
+			3,
+			cz + 6,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box(
+			"FountainRim",
+			cx - 6,
+			0,
+			cz - 4,
+			cx - 4,
+			3,
+			cz + 4,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box(
+			"FountainRim",
+			cx + 4,
+			0,
+			cz - 4,
+			cx + 6,
+			3,
+			cz + 4,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		local water = decor(
+			box("FountainWater", cx - 4, 0, cz - 4, cx + 4, 2.3, cz + 4, "px_water", COL.water, f)
+		)
+		water.Transparency = 0.15
+		box(
+			"FountainColumn",
+			cx - 2,
+			0,
+			cz - 2,
+			cx + 2,
+			6,
+			cz + 2,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box("FountainBowl", cx - 3, 6, cz - 3, cx + 3, 7, cz + 3, "px_smooth_stone", WHITE_STONE, f)
+		decor(
+			box(
+				"FountainBowlWater",
+				cx - 2.4,
+				7,
+				cz - 2.4,
+				cx + 2.4,
+				7.3,
+				cz + 2.4,
+				"px_water",
+				COL.water,
+				f
+			)
+		)
+		box("FountainStem", cx - 1, 7, cz - 1, cx + 1, 9, cz + 1, "px_smooth_stone", WHITE_STONE, f)
+		cube("FountainCross", cx, 11.2, cz, 1, 4.4, 1, "px_gold_block", nil, f)
+		cube("FountainCross", cx, 12, cz, 3.2, 1, 1, "px_gold_block", nil, f)
+		for _, d in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+			local st = decor(
+				part(
+					"FountainStream",
+					Vector3.new(0.6, 4.7, 0.6),
+					at(cx + d[1] * 3.2, 4.65, cz + d[2] * 3.2),
+					COL.stream,
+					Enum.Material.SmoothPlastic,
+					f
+				)
+			)
+			st.Transparency = 0.35
+		end
+		candles(cx - 5, 3, cz - 5, 3, 1, f, false, 0.9)
+		candles(cx + 5, 3, cz + 5, 2, 0, f, false, 0.9)
+		bench(54, 170, -1, 0, F.props)
+	end
+	-- a noticeboard facing the arrival
+	local nx, nz = 62, 164
+	if claim("Noticeboard", nx - 1, nz - 5, nx + 1, nz + 5) then
+		local f = folder("Noticeboard", F.props)
+		local cf = fr(nx, nz, -1, 0)
+		for _, s in ipairs({ -1, 1 }) do
+			lb(cf, "BoardPost", s * 4.5 - 0.5, 0, -0.5, s * 4.5 + 0.5, 8.5, 0.5, WOOD_DARK, nil, f)
+		end
+		lb(cf, "Board", -4, 2.5, -0.3, 4, 7.5, 0.3, WOOD, nil, f)
+		lb(cf, "BoardRoof", -5.2, 8.5, -1.2, 5.2, 9.1, 1.2, WOOD_DARK, nil, f)
+		local head = lb(cf, "BoardHeader", -3, 7.6, -0.5, 3, 8.4, -0.3, WOOD_LIGHT, nil, f)
+		boardText(head, "Объявления", nil, { Enum.NormalId.Front })
+		for i, p in ipairs({
+			{ -2.6, 5.7, 1.6, 2 },
+			{ -0.4, 4.7, 1.8, 2.4 },
+			{ 2.2, 5.9, 1.6, 1.8 },
+			{ 1.6, 3.6, 2, 1.4 },
+			{ -2.8, 3.5, 1.4, 1.6 },
+		}) do
+			lc(
+				cf,
+				"Notice",
+				p[3],
+				p[4],
+				0.1,
+				p[1],
+				p[2],
+				-0.36,
+				if i % 2 == 0 then COL.paperOld else COL.paper,
+				Enum.Material.SmoothPlastic,
+				f
+			)
+		end
+		lc(
+			cf,
+			"NoticeSeal",
+			0.45,
+			0.45,
+			0.12,
+			-0.4,
+			5.6,
+			-0.42,
+			COL.seal,
+			Enum.Material.SmoothPlastic,
+			f
+		)
+		flowerPot(nx - 1.5, 0, nz + 6.4, f)
+	end
+	-- the viewpoint on the south-east rim: a telescope at the balustrade, a bench behind it with flower pots
+	local function rimAt(x)
+		local k = math.floor((x + 106) / 4 + 0.5)
+		local z = math.huge
+		for j = k - 1, k + 1 do
+			if cols[j] then
+				z = math.min(z, cols[j])
+			end
+		end
+		return if z < math.huge then z else nil
+	end
+	local tz = rimAt(90)
+	if tz and claim("Telescope", 88, tz - 10, 92, tz - 6) then
+		telescope(90, tz - 8, 0, 1, F.south)
+	end
+	local bz = rimAt(80)
+	if bz then
+		bench(80, bz - 8, 0, 1, F.south, true)
+	end
+	-- a quiet bench over the clouds in the south-west
+	local wz = rimAt(-90)
+	if wz then
+		bench(-90, wz - 8, 0, 1, F.south, true)
+	end
+end
+task.wait()
+
+-- ================================================================ 2c. the pilgrim's cart behind the buyer's stall
+do
+	if claim("PilgrimCart", -74.5, 148, -48, 168) then
+		local f = folder("PilgrimCart", F.props)
+		box("CartBed", -68, 2.6, 156, -60, 3.4, 168, WOOD, nil, f)
+		box("CartSide", -68, 3.4, 156, -67.4, 5.2, 168, WOOD_DARK, nil, f)
+		box("CartSide", -60.6, 3.4, 156, -60, 5.2, 168, WOOD_DARK, nil, f)
+		box("CartBack", -67.4, 3.4, 167.4, -60.6, 5.2, 168, WOOD_DARK, nil, f)
+		box("CartFront", -67.4, 3.4, 156, -60.6, 4.6, 156.6, WOOD_DARK, nil, f)
+		box("CartAxle", -69.4, 2, 161.6, -58.6, 2.6, 162.4, WOOD_DARK, nil, f)
+		box("CartProp", -65, 0, 156.6, -63, 2.6, 157.6, WOOD_DARK, nil, f)
+		for _, s in ipairs({ -1, 1 }) do
+			local wc = at(-64 + s * 4.9, 2.4, 162)
+			textured(
+				decor(part("CartWheel", Vector3.new(0.6, 4.6, 4.6), wc, nil, nil, f)),
+				WOOD_DARK
+			)
+			textured(
+				decor(
+					part(
+						"CartWheel",
+						Vector3.new(0.6, 4.6, 4.6),
+						wc * CFrame.Angles(math.pi / 4, 0, 0),
+						nil,
+						nil,
+						f
+					)
+				),
+				WOOD_DARK
+			)
+			decor(
+				part(
+					"CartHub",
+					Vector3.new(0.9, 1.2, 1.2),
+					wc * CFrame.new(s * 0.2, 0, 0),
+					COL.iron,
+					Enum.Material.Metal,
+					f
+				)
+			)
+			decor(
+				beam(
+					"CartShaft",
+					V(-64 + s * 3, 3, 156),
+					V(-64 + s * 3, 0.4, 149.5),
+					0.6,
+					COL.wood,
+					f,
+					Enum.Material.Wood
+				)
+			)
+		end
+		crate(-65.6, 3.4, 164.6, f, 3.2)
+		crate(-62.4, 3.4, 164.6, f, 3.2, 0.15)
+		crate(-64, 6.6, 164.6, f, 2.6, -0.2)
+		decor(
+			part(
+				"Sack",
+				Vector3.new(2.6, 2.2, 2.6),
+				at(-65.6, 4.5, 159.2),
+				COL.sack,
+				Enum.Material.Fabric,
+				f
+			)
+		)
+		decor(
+			part(
+				"Sack",
+				Vector3.new(2.2, 1.8, 2.2),
+				at(-62.6, 4.3, 158.6),
+				COL.sack,
+				Enum.Material.Fabric,
+				f
+			)
+		)
+		-- a pilgrim's pennant on a pole at the back corner
+		decor(
+			beam(
+				"PennantPole",
+				V(-60.6, 3.4, 167.4),
+				V(-60.6, 13.5, 167.4),
+				0.4,
+				COL.wood,
+				f,
+				Enum.Material.Wood
+			)
+		)
+		crossBanner(fr(-62, 167.4, 0, 1, 10.6), 2.4, 4.4, f)
+		-- chests and barrels round it
+		chest(-52, 159, 1, 0, f)
+		chest(-52, 164.5, 1, 0, f)
+		chest(-56, 154, 0, -1, f)
+		barrel(-72, 0, 155, f)
+		barrel(-72, 0, 159.5, f, "px_hay")
+		barrel(-72, 4, 155, f)
+		crate(-72, 0, 164.5, f, B, 0.2)
+	end
+end
+
+print(
+	("[build-church] square: %d parts, %d lights%s"):format(
+		count - startCount,
+		LIGHTS - lightsLeft,
+		if #skipped > 0 then ", skipped " .. table.concat(skipped, " ") else ""
+	)
+)
+
+end
+task.wait()
+-- ================================================================================ church/40-yard.luau
+do
+-- ================================================================ church: the yard (the YARD part)
+-- Everything of the concept outside the cathedral and the square (assets/concepts/church/concept-v2.webp):
+-- 1. Two graveyards (|x| 112..~190 on the main island, north and south of the WALKS): an inner stone brick wall
+--    with iron fence sections facing the square (a gate onto the square at z 52..68), walls with iron fences along
+--    both sides of each walk and a gate in each (u 132..148) opening onto a 4-block gravel main lane; cross lanes at
+--    z -80..-64 and 52..68; rows of plots (8 × 12 studs: stone crosses — some mossy, leaning or broken —, stepped
+--    headstones, stone chest tombs with candles, cypresses, lantern posts, flowers); at the lane ends a mausoleum
+--    (white stone, pointed door, stepped slate roof: west in the north, east in the south) and a monument cross.
+-- 2. Arched stone bridges over BRIDGES: the gap measured from core's cells, a 6-block deck (top y 0.1) overlapping
+--    both islands, low parapets over the gap only (4 blocks clear between), a stepped arch, a lantern at each end.
+-- 3. The islets: a ruined chapel on WEST_ISLE (broken walls, a pointed window with glass remnants, a fallen slate
+--    roof, an altar with candles; the walkway enters through the breach), a stone arch with a cross on a stepped
+--    rise on EAST_ISLE with graves round it; cypresses and flowers on both.
+-- 4. Three waterfalls (west, east, south-west): a spring basin, a flush stream to the rim, a 40-block column of
+--    water, white wool foam and a slow mist at its foot.
+-- 5. Under every island: white stone stalactites (core's cells and rockDepth), vines and moss on the rim faces.
+-- 6. Floating islets round the cluster (graves, lanterns, cypresses, broken arches, benches), clear of the islands,
+--    the bridge corridors, the falls, the cloud path and the cathedral.
+-- 7. Blocky white wool clouds: a layer under the islands, a few round the edges, a stepping cloud path off the
+--    south-east rim. Everything floating is decor.
+local yard = folder("Yard")
+local c0 = count
+local C = 8 -- core's cell
+local lights = 0
+local MAX_LIGHTS = 18
+local PALE = Color3.fromRGB(226, 226, 228) -- core's rockTopTint
+local ROCK_LOW_T = Color3.fromRGB(198, 200, 208) -- core's rockLowTint
+local SLATE_T = Color3.fromRGB(175, 185, 220) -- a light slate-blue tint over px_blackstone_bricks
+local IRON = Color3.fromRGB(96, 98, 108)
+local FLOWERS = {
+	Color3.fromRGB(245, 245, 240),
+	Color3.fromRGB(250, 215, 70),
+	Color3.fromRGB(110, 140, 235),
+	Color3.fromRGB(235, 120, 160),
+	Color3.fromRGB(200, 150, 235),
+}
+local STONES = { -- grave stone: variant, tint
+	{ "px_stone_bricks", GREY_STONE },
+	{ "px_white_stone_bricks", WHITE_STONE },
+	{ "px_smooth_stone", WHITE_STONE },
+	{ "px_mossy_stone_bricks", nil },
+	{ "px_stone_bricks", nil },
+}
+
+-- the island cell (core's 8-stud grid over x -312..312, z -248..232) holding a point: its island and centre
+local function cellLand(x, z)
+	if x < -312 or x >= 312 or z < -248 or z >= 232 then
+		return nil
+	end
+	local cx = -312 + C * math.floor((x + 312) / C) + C / 2
+	local cz = -248 + C * math.floor((z + 248) / C) + C / 2
+	return isleOf(cx, cz), cx, cz
+end
+-- core's rockDepth (10-core is wrapped in its own do … end, so it is replicated here)
+local function rockDepth(x, z)
+	local isle = isleOf(x, z)
+	local rr, deep
+	if isle == "main" then
+		rr = math.sqrt(((x - ISLAND.x) / ISLAND.rx) ^ 2 + ((z - ISLAND.z) / ISLAND.rz) ^ 2)
+		deep = 150
+	else
+		local c = if isle == "west" then WEST_ISLE else EAST_ISLE
+		rr = math.sqrt((x - c.x) ^ 2 + (z - c.z) ^ 2) / c.r
+		deep = 56
+	end
+	rr = math.clamp(rr, 0, 1)
+	local d = 16 + (1 - rr) ^ 1.2 * deep
+	if rr > 0.82 then
+		d += (n2(x, z, 7.7, 0.09) + 0.5) * 28
+	end
+	return math.max(8, math.floor(d / 16 + 0.5) * 16)
+end
+local function pc(name, size, cf, variant, tint, parent)
+	return textured(part(name, size, cf, nil, nil, parent), variant, tint)
+end
+-- boxes in a local frame: { name, x0, y0, z0, x1, y1, z1, variant, tint } relative to `pivot`
+local function piece(list, pivot, f, dec)
+	for _, e in ipairs(list) do
+		local size =
+			Vector3.new(math.abs(e[5] - e[2]), math.abs(e[6] - e[3]), math.abs(e[7] - e[4]))
+		local cf = pivot * CFrame.new((e[2] + e[5]) / 2, (e[3] + e[6]) / 2, (e[4] + e[7]) / 2)
+		local p = pc(e[1], size, cf, e[8], e[9], f)
+		if dec then
+			decor(p)
+		end
+	end
+end
+-- is the rectangle on `isle` ground (core's cells, `pad` studs in from the rim)?
+local function landRect(isle, x0, z0, x1, z1, pad)
+	local ax, bx = math.min(x0, x1) + 0.5, math.max(x0, x1) - 0.5
+	local az, bz = math.min(z0, z1) + 0.5, math.max(z0, z1) - 0.5
+	for i = 0, 2 do
+		for j = 0, 2 do
+			local x, z = ax + (bx - ax) * i / 2, az + (bz - az) * j / 2
+			if cellLand(x, z) ~= isle or isleOf(x, z, pad or 0) ~= isle then
+				return false
+			end
+		end
+	end
+	return true
+end
+-- the taken ground: { x0, z0, x1, z1 }
+local RES = {}
+local function reserve(x0, z0, x1, z1)
+	table.insert(RES, { math.min(x0, x1), math.min(z0, z1), math.max(x0, x1), math.max(z0, z1) })
+end
+local function isFree(x0, z0, x1, z1, pad)
+	pad = pad or 0
+	local ax0, ax1 = math.min(x0, x1) - pad, math.max(x0, x1) + pad
+	local az0, az1 = math.min(z0, z1) - pad, math.max(z0, z1) + pad
+	for _, r in ipairs(RES) do
+		if ax1 > r[1] and ax0 < r[3] and az1 > r[2] and az0 < r[4] then
+			return false
+		end
+	end
+	return true
+end
+-- a flush path (gravel, cobbles) along one axis, laid block by block where `isle` has ground, runs merged
+local function pave(isle, alongZ, a0, a1, w0, w1, v, t, f)
+	local lo, hi = math.min(a0, a1), math.max(a0, a1)
+	local wl, wh = math.min(w0, w1), math.max(w0, w1)
+	local runA = nil
+	local function flush(aEnd)
+		if runA and aEnd > runA then
+			if alongZ then
+				decor(box("Path", wl, -0.25, runA, wh, 0.05, aEnd, v, t, f))
+			else
+				decor(box("Path", runA, -0.25, wl, aEnd, 0.05, wh, v, t, f))
+			end
+		end
+		runA = nil
+	end
+	local a = lo
+	while a < hi - 0.01 do
+		local ae = math.min(a + B, hi)
+		local ok = true
+		for _, w in ipairs({ wl + 1, wh - 1 }) do
+			local x, z = w, (a + ae) / 2
+			if not alongZ then
+				x, z = z, w
+			end
+			if cellLand(x, z) ~= isle or isleOf(x, z, 1) ~= isle then
+				ok = false
+			end
+		end
+		if ok then
+			runA = runA or a
+		else
+			flush(a)
+		end
+		a = ae
+	end
+	flush(hi)
+end
+-- a lantern standing on the surface y (local): lit = the kit lantern with its light (while the budget lasts),
+-- else a dark iron cage round a dim glass core
+local function lamp(x, y, z, f, lit)
+	if lit and lights < MAX_LIGHTS then
+		lights += 1
+		decor(lantern(V(x, y + 0.75, z), f))
+		return true
+	end
+	local iron = Color3.fromRGB(45, 45, 50)
+	decor(
+		part(
+			"Lantern",
+			Vector3.new(1.3, 0.25, 1.3),
+			at(x, y + 0.13, z),
+			iron,
+			Enum.Material.Metal,
+			f
+		)
+	)
+	local g = decor(
+		part(
+			"LanternGlass",
+			Vector3.new(0.9, 1, 0.9),
+			at(x, y + 0.75, z),
+			Color3.fromRGB(215, 190, 140),
+			Enum.Material.Glass,
+			f
+		)
+	)
+	g.Transparency = 0.25
+	decor(
+		part(
+			"LanternTop",
+			Vector3.new(1.3, 0.4, 1.3),
+			at(x, y + 1.45, z),
+			iron,
+			Enum.Material.Metal,
+			f
+		)
+	)
+	return false
+end
+-- a stone pillar (2 blocks) with a cap and a lantern on top
+local function pillarLamp(x, z, f, lit, y0, dec)
+	y0 = y0 or 0
+	local p =
+		box("LampPillar", x - 2, y0, z - 2, x + 2, y0 + 8, z + 2, "px_stone_bricks", GREY_STONE, f)
+	if dec then
+		decor(p)
+	end
+	decor(
+		box(
+			"LampCap",
+			x - 2.5,
+			y0 + 8,
+			z - 2.5,
+			x + 2.5,
+			y0 + 9,
+			z + 2.5,
+			"px_smooth_stone",
+			WHITE_STONE,
+			f
+		)
+	)
+	return lamp(x, y0 + 9, z, f, lit)
+end
+local function candle(x, y, z, f, h)
+	h = h or 1.2
+	decor(
+		box(
+			"Candle",
+			x - 0.3,
+			y,
+			z - 0.3,
+			x + 0.3,
+			y + h,
+			z + 0.3,
+			"px_white_wool",
+			Color3.fromRGB(245, 240, 225),
+			f
+		)
+	)
+	local fl = decor(
+		part(
+			"CandleFlame",
+			Vector3.new(0.25, 0.45, 0.25),
+			at(x, y + h + 0.22, z),
+			Color3.fromRGB(255, 200, 90),
+			Enum.Material.Neon,
+			f
+		)
+	)
+	fl.CastShadow = false
+end
+-- a cypress: a log core, a 3×3-block hedge column, a plus-shaped upper part and a 1-block tip (leaves decor)
+local function cypress(x, z, h, f, y0, dec)
+	y0 = y0 or 0
+	local cf = folder("Cypress", f)
+	local tint = if rng:NextNumber() < 0.5 then CYPRESS else Color3.fromRGB(186, 212, 176)
+	local top = y0 + h
+	local mid = y0 + B + math.floor((h - 2 * B) * 0.5 / B + 0.5) * B
+	local trunk =
+		box("CypressTrunk", x - 2, y0, z - 2, x + 2, top - B, z + 2, "px_oak_log", nil, cf)
+	if dec then
+		decor(trunk)
+	end
+	decor(box("CypressLeaves", x - 6, y0 + B, z - 6, x + 6, mid, z + 6, "px_hedge", tint, cf))
+	decor(box("CypressLeaves", x - 6, mid, z - 2, x + 6, top - B, z + 2, "px_hedge", tint, cf))
+	decor(box("CypressLeaves", x - 2, mid, z - 6, x + 2, top - B, z + 6, "px_hedge", tint, cf))
+	decor(box("CypressTip", x - 2, top - B, z - 2, x + 2, top, z + 2, "px_hedge", tint, cf))
+end
+local function flower(x, z, f, y0)
+	y0 = y0 or 0
+	decor(box("FlowerStem", x - 0.2, y0, z - 0.2, x + 0.2, y0 + 1.4, z + 0.2, "px_hedge", nil, f))
+	decor(
+		box(
+			"Flower",
+			x - 0.6,
+			y0 + 1.2,
+			z - 0.6,
+			x + 0.6,
+			y0 + 2.1,
+			z + 0.6,
+			"px_white_wool",
+			pick(FLOWERS),
+			f
+		)
+	)
+end
+local function flowers(x, z, f, n, y0)
+	y0 = y0 or 0
+	for _ = 1, n do
+		flower(x + rng:NextInteger(-3, 3), z + rng:NextInteger(-3, 3), f, y0)
+	end
+	if rng:NextNumber() < 0.5 then
+		local t = Color3.fromRGB(200, 225, 180)
+		decor(box("GrassTuft", x - 1.5, y0, z - 1.5, x + 1.5, y0 + 1.5, z + 1.5, "px_hedge", t, f))
+	end
+end
+-- a stone cross (1-block post, a crossbar `arm` studs each side of the centre: 6 = 3 blocks, 4 in the plots) on
+-- the marker block centred (mx, mz); some lean, some are broken with the top lying on the grave (toward dir);
+-- returns "cross" or "broken"
+local function crossMark(mx, mz, f, dir, y0, dec, arm)
+	y0 = y0 or 0
+	arm = arm or 6
+	local st = pick(STONES)
+	local h = pick({ 10, 12, 12, 14 })
+	local pivot = at(mx, y0, mz)
+	local r = rng:NextNumber()
+	if r < 0.2 then
+		local a = math.rad(rng:NextNumber(6, 14)) * (if rng:NextNumber() < 0.5 then -1 else 1)
+		pivot = pivot
+			* (if rng:NextNumber() < 0.5 then CFrame.Angles(a, 0, 0) else CFrame.Angles(0, 0, a))
+	end
+	if r > 0.88 then
+		piece(
+			{ { "CrossStump", -2, -1, -2, 2, rng:NextInteger(1, 2) * B, 2, st[1], st[2] } },
+			pivot,
+			f,
+			dec
+		)
+		local lie = at(mx + rng:NextNumber(-1.5, 1.5), y0, mz + dir * 7)
+			* CFrame.Angles(0, rng:NextNumber(-0.5, 0.5), 0)
+		piece({
+			{ "CrossFallen", -2, -0.6, -5, 2, 3.4, 5, st[1], st[2] },
+			{ "CrossFallen", -arm, -0.6, -3, arm, 3.4, 1, st[1], st[2] },
+		}, lie, f, true)
+		return "broken"
+	end
+	piece({
+		{ "CrossPost", -2, -1, -2, 2, h, 2, st[1], st[2] },
+		{ "CrossArm", -arm, h - 8, -2, arm, h - 4, 2, st[1], st[2] },
+	}, pivot, f, dec)
+	return "cross"
+end
+-- a stepped headstone (a base slab, the stone, a narrower top step), some leaning, some double width (not when
+-- `narrow`, in the 2-block plots)
+local function headstone(mx, mz, f, y0, dec, narrow)
+	y0 = y0 or 0
+	local st = pick(STONES)
+	local pivot = at(mx, y0, mz)
+	if rng:NextNumber() < 0.2 then
+		pivot = pivot
+			* CFrame.Angles(math.rad(rng:NextNumber(-12, 12)), 0, math.rad(rng:NextNumber(-6, 6)))
+	end
+	local w = if not narrow and rng:NextNumber() < 0.25 then 5 else 3
+	piece({
+		{ "GraveBase", -w - 1, -1, -2, w + 1, 1.5, 2, "px_stone_bricks", GREY_STONE },
+		{ "Headstone", -w, 1.5, -1, w, 6.5, 1, st[1], st[2] },
+		{ "HeadstoneTop", -w + 1, 6.5, -1, w - 1, 8, 1, st[1], st[2] },
+	}, pivot, f, dec)
+end
+-- a stone chest tomb (2 × 1 blocks) with a lid and candles
+local function tomb(mx, mz, f, y0)
+	y0 = y0 or 0
+	local st = pick(STONES)
+	box("Tomb", mx - 4, y0, mz - 2, mx + 4, y0 + 3.5, mz + 2, st[1], st[2], f)
+	box(
+		"TombLid",
+		mx - 4.2,
+		y0 + 3.5,
+		mz - 2.5,
+		mx + 4.2,
+		y0 + 4.5,
+		mz + 2.5,
+		"px_smooth_stone",
+		WHITE_STONE,
+		f
+	)
+	if rng:NextNumber() < 0.65 then
+		candle(mx - 3.3, y0 + 4.5, mz, f, 1.4)
+		candle(mx + 3.3, y0 + 4.5, mz, f, 1)
+	end
+end
+-- the grave mound behind a marker (2 blocks long toward dir), now and then a flower on it
+local function mound(mx, mz, dir, f, y0)
+	y0 = y0 or 0
+	local r = rng:NextNumber()
+	local v, t = "px_dirt", nil
+	if r < 0.4 then
+		v, t = "px_grass_top", GRASS
+	elseif r < 0.6 then
+		v = "px_mossy_cobblestone"
+	end
+	decor(box("GraveMound", mx - 2, y0, mz + dir * 2, mx + 2, y0 + 0.8, mz + dir * 10, v, t, f))
+	if rng:NextNumber() < 0.35 then
+		flower(mx + rng:NextNumber(-1, 1), mz + dir * rng:NextInteger(4, 8), f, y0 + 0.8)
+	end
+end
+-- a free block-centred spot on `isle` within rmax of (cx, cz) for a square of half size `half`
+local function spotOn(isle, cx, cz, rmax, half, pad)
+	for _ = 1, 80 do
+		local a, d = rng:NextNumber(0, math.pi * 2), rng:NextNumber(0, rmax)
+		local x, z = snap(cx + math.cos(a) * d) + 2, snap(cz + math.sin(a) * d) + 2
+		if
+			landRect(isle, x - half, z - half, x + half, z + half, pad)
+			and isFree(x - half, z - half, x + half, z + half, 0)
+		then
+			return x, z
+		end
+	end
+	return nil
+end
+-- the waterfalls: a stream along a cell row (axis x: z row..row+8) or column (axis z: x row..row+8) from a spring
+-- at `src` to the rim in direction dir; `face` (the rim) is measured from the cells below
+local WF = {
+	{ name = "WestFall", axis = "x", dir = -1, row = 32, src = -160 },
+	{ name = "EastFall", axis = "x", dir = 1, row = -64, src = 160 },
+	{ name = "SouthWestFall", axis = "z", dir = 1, row = -128, src = 124 },
+}
+local DECK = {} -- per side (-1 west, 1 east): { inner = u of the deck end on the main island, landing = x on the isle }
+-- the walkable ways through the sky (x0, x1, z0, z1, y0, y1) nothing floating may touch
+local CORRIDORS = {}
+for _, b in ipairs(BRIDGES) do
+	table.insert(CORRIDORS, { b[1] - 16, b[3] + 16, b[2] - 16, b[4] + 16, -20, 30 })
+end
+local function inCorridor(x0, x1, z0, z1, y0, y1)
+	for _, c in ipairs(CORRIDORS) do
+		if
+			x1 >= c[1]
+			and x0 <= c[2]
+			and z1 >= c[3]
+			and z0 <= c[4]
+			and y1 >= c[5]
+			and y0 <= c[6]
+		then
+			return true
+		end
+	end
+	-- nothing over the cathedral and the tower
+	return y1 > 0 and x1 > -120 and x0 < 120 and z1 > -260 and z0 < -40
+end
+-- no island cell within `half` + `margin` studs (horizontally) of (x, z)
+local function clearOfIslands(x, z, half, margin)
+	local e = half + margin
+	local n = math.max(1, math.ceil(2 * e / C))
+	for i = 0, n do
+		for j = 0, n do
+			if cellLand(x - e + 2 * e * i / n, z - e + 2 * e * j / n) ~= nil then
+				return false
+			end
+		end
+	end
+	return true
+end
+local taken = {} -- the floating islets: { x, z, half, y0, y1 }
+
+-- the square, the church zone and the walks (with their walls) are not graveyard ground
+reserve(-112, -260, 112, 240)
+for _, w in ipairs(WALKS) do
+	reserve(w[1], w[2] - 4, w[3], w[4] + 4)
+end
+
+-- ================================================================ 2. the arched stone bridges (measured first)
+do
+	local bf = folder("Bridges", yard)
+	for bi, b in ipairs(BRIDGES) do
+		local s = if bi == 1 then -1 else 1
+		local f = folder(if s < 0 then "WestBridge" else "EastBridge", bf)
+		local z0, z1 = b[2], b[4]
+		local zm = (z0 + z1) / 2
+		local lo, hi = math.min(b[1], b[3]), math.max(b[1], b[3])
+		-- the gap: the longest run of open sky along the centre line (core's cells), 1 stud at a time
+		local ga, gb, best, runA = nil, nil, -1, nil
+		for xs = lo - 24, hi + 24 do
+			if cellLand(xs + 0.5, zm) == nil then
+				runA = runA or xs
+				if xs + 1 - runA > best then
+					best, ga, gb = xs + 1 - runA, runA, xs + 1
+				end
+			else
+				runA = nil
+			end
+		end
+		if not ga then
+			ga, gb = lo + 8, hi - 8
+		end
+		-- the deck: 6 blocks wide, 16 studs onto each island's ground
+		local xa, xb = math.min(lo, ga - 16), math.max(hi, gb + 16)
+		box(
+			"BridgeDeck",
+			xa,
+			0.1 - B,
+			z0 - 4,
+			xb,
+			0.1,
+			z1 + 4,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		decor(
+			box(
+				"BridgeRunner",
+				ga - 8,
+				0.1,
+				zm - 4,
+				gb + 8,
+				0.16,
+				zm + 4,
+				"px_smooth_stone",
+				WHITE_STONE,
+				f
+			)
+		)
+		reserve(xa, z0 - 8, xb, z1 + 8)
+		DECK[s] = { inner = if s < 0 then -xb else xa, landing = if s < 0 then xa else xb }
+		-- the stepped arch under the gap: deep spandrels at the island faces, thin in the middle, a grey ring course
+		local under = 0.1 - B
+		local n = math.max(1, math.floor((gb - ga) / B + 0.5))
+		local runs = {}
+		for k = 0, n - 1 do
+			local t = (k + 0.5) / n
+			local dep = 1 + math.floor((2 * t - 1) ^ 2 * 7 + 0.5)
+			local last = runs[#runs]
+			if last and last[3] == dep then
+				last[2] = ga + (k + 1) * B
+			else
+				table.insert(runs, { ga + k * B, ga + (k + 1) * B, dep })
+			end
+		end
+		runs[1][1] -= B -- into the island faces
+		runs[#runs][2] += B
+		for _, r in ipairs(runs) do
+			if r[3] > 1 then
+				decor(
+					box(
+						"BridgeSpandrel",
+						r[1],
+						under - (r[3] - 1) * B,
+						z0,
+						r[2],
+						under,
+						z1,
+						"px_white_stone_bricks",
+						WHITE_STONE,
+						f
+					)
+				)
+			end
+			decor(
+				box(
+					"BridgeArchRing",
+					r[1],
+					under - r[3] * B,
+					z0,
+					r[2],
+					under - (r[3] - 1) * B,
+					z1,
+					"px_stone_bricks",
+					GREY_STONE,
+					f
+				)
+			)
+		end
+		-- low parapets over the gap only (open at the ends), 4 blocks clear between them
+		for si, e in ipairs({ { z0 - 4, z0 }, { z1, z1 + 4 } }) do
+			box("Parapet", ga, 0.1, e[1], gb, 4.1, e[2], "px_white_stone_bricks", WHITE_STONE, f)
+			decor(
+				box(
+					"ParapetCoping",
+					ga,
+					4.1,
+					e[1] - 0.3,
+					gb,
+					4.6,
+					e[2] + 0.3,
+					"px_smooth_stone",
+					WHITE_STONE,
+					f
+				)
+			)
+			-- end pillars, a lantern at each end of the bridge (one lit per end)
+			for gi, px in ipairs({ ga - B, gb }) do
+				box(
+					"BridgePillar",
+					px,
+					0.1,
+					e[1],
+					px + B,
+					8.1,
+					e[2],
+					"px_stone_bricks",
+					GREY_STONE,
+					f
+				)
+				decor(
+					box(
+						"BridgePillarCap",
+						px - 0.5,
+						8.1,
+						e[1] - 0.5,
+						px + B + 0.5,
+						9.1,
+						e[2] + 0.5,
+						"px_smooth_stone",
+						WHITE_STONE,
+						f
+					)
+				)
+				lamp(px + 2, 9.1, (e[1] + e[2]) / 2, f, si == gi)
+			end
+		end
+	end
+end
+task.wait()
+
+-- the waterfalls' rims (measured now, built after the graveyards): reserve their streams, keep the sky clear
+do
+	for _, w in ipairs(WF) do
+		local c = w.row + 4
+		local base = if w.axis == "x" then -312 else -248
+		local cs = base + C * math.floor((w.src - base) / C)
+		for _ = 1, 40 do
+			local isle = if w.axis == "x" then cellLand(cs + C / 2, c) else cellLand(c, cs + C / 2)
+			if isle == nil then
+				break
+			end
+			cs += w.dir * C
+		end
+		w.face = if w.dir > 0 then cs else cs + C
+		local function wr(a0, a1, cA, cB)
+			if w.axis == "x" then
+				reserve(a0, cA, a1, cB)
+			else
+				reserve(cA, a0, cB, a1)
+			end
+		end
+		wr(w.src - 8, w.src + 8, w.row - 4, w.row + 12)
+		wr(w.src, w.face, w.row - 2, w.row + 10)
+		local a0, a1 =
+			math.min(w.face - w.dir * 4, w.face + w.dir * 16),
+			math.max(w.face - w.dir * 4, w.face + w.dir * 16)
+		if w.axis == "x" then
+			table.insert(CORRIDORS, { a0, a1, w.row - 12, w.row + 20, -180, 10 })
+		else
+			table.insert(CORRIDORS, { w.row - 12, w.row + 20, a0, a1, -180, 10 })
+		end
+	end
+end
+
+-- ================================================================ 1. the two graveyards
+do
+	local litPlots = 0
+	local graves = 0
+	for _, s in ipairs({ -1, 1 }) do
+		local f = folder(if s < 0 then "WestGraveyard" else "EastGraveyard", yard)
+		local mausNorth = s < 0 -- the mausoleum: west in the north, east in the south; the monument opposite
+		-- a box in u (= s · x) and z
+		local function ub(name, u0, y0, z0, u1, y1, z1, v, t, dec)
+			local p = box(name, s * u0, y0, z0, s * u1, y1, z1, v, t, f)
+			if dec then
+				decor(p)
+			end
+			return p
+		end
+		-- a wall box: alongZ → a is z and w is u; else a is u and w is z
+		local function ws(alongZ, w0, w1, name, a0, a1, y0, y1, grow, v, t, dec)
+			if alongZ then
+				return ub(name, w0 - grow, y0, a0, w1 + grow, y1, a1, v, t, dec)
+			end
+			return ub(name, a0, y0, w0 - grow, a1, y1, w1 + grow, v, t, dec)
+		end
+		-- a wall line a0..a1 (blocks): a pillar every 5th block, between them full brick or a low wall with iron bars
+		local function wall(alongZ, a0, a1, w0, w1, fenceRule)
+			local blocks, k = {}, 0
+			for a = a0, a1 - B, B do
+				local x, z
+				if alongZ then
+					x, z = s * (w0 + w1) / 2, a + 2
+				else
+					x, z = s * (a + 2), (w0 + w1) / 2
+				end
+				local kind = "gap"
+				if cellLand(x, z) == "main" and isleOf(x, z, 3) == "main" then
+					kind = if k % 5 == 0
+						then "pillar"
+						elseif fenceRule(k // 5) then "fence"
+						else "brick"
+				end
+				table.insert(blocks, { a, kind })
+				k += 1
+			end
+			local i = 1
+			while i <= #blocks do
+				local kind, j = blocks[i][2], i
+				if kind ~= "pillar" then
+					while j < #blocks and blocks[j + 1][2] == kind do
+						j += 1
+					end
+				end
+				local ra, rb = blocks[i][1], blocks[j][1] + B
+				if kind == "pillar" then
+					ws(
+						alongZ,
+						w0,
+						w1,
+						"WallPillar",
+						ra,
+						rb,
+						0,
+						10,
+						0,
+						"px_stone_bricks",
+						GREY_STONE
+					)
+					ws(
+						alongZ,
+						w0,
+						w1,
+						"PillarCap",
+						ra - 0.5,
+						rb + 0.5,
+						10,
+						11,
+						0.5,
+						"px_smooth_stone",
+						WHITE_STONE,
+						true
+					)
+				elseif kind == "brick" then
+					local mossy = rng:NextNumber() < 0.35
+					local v = if mossy then "px_mossy_stone_bricks" else "px_stone_bricks"
+					ws(
+						alongZ,
+						w0,
+						w1,
+						"Wall",
+						ra,
+						rb,
+						0,
+						8,
+						0,
+						v,
+						if mossy then nil else GREY_STONE
+					)
+					ws(
+						alongZ,
+						w0,
+						w1,
+						"WallCoping",
+						ra,
+						rb,
+						8,
+						8.6,
+						0.3,
+						"px_smooth_stone",
+						WHITE_STONE,
+						true
+					)
+				elseif kind == "fence" then
+					ws(alongZ, w0, w1, "FenceBase", ra, rb, 0, 3, 0, "px_stone_bricks", GREY_STONE)
+					ws(alongZ, w0, w1, "FenceRail", ra, rb, 8, 8.6, -1.6, "px_iron_block", IRON)
+					local mid = (w0 + w1) / 2
+					for bar = ra + 1, rb - 1, 2 do
+						ws(
+							alongZ,
+							mid,
+							mid,
+							"IronBar",
+							bar - 0.25,
+							bar + 0.25,
+							3,
+							8,
+							0.25,
+							"px_iron_block",
+							IRON
+						)
+					end
+				end
+				i = j + 1
+			end
+		end
+		-- a gate g0..g1 in a wall line: tall white pillars with lanterns (one lit), an iron arch with a cross
+		local function gate(alongZ, g0, g1, w0, w1)
+			local mid = (w0 + w1) / 2
+			for gi, pa in ipairs({ g0 - B, g1 }) do
+				ws(
+					alongZ,
+					w0,
+					w1,
+					"GatePillar",
+					pa,
+					pa + B,
+					0,
+					13,
+					0,
+					"px_white_stone_bricks",
+					WHITE_STONE
+				)
+				ws(
+					alongZ,
+					w0,
+					w1,
+					"GateCap",
+					pa - 0.5,
+					pa + B + 0.5,
+					13,
+					14,
+					1,
+					"px_smooth_stone",
+					WHITE_STONE,
+					true
+				)
+				if alongZ then
+					lamp(s * mid, 14, pa + 2, f, gi == 1)
+				else
+					lamp(s * (pa + 2), 14, mid, f, gi == 1)
+				end
+			end
+			local gm = (g0 + g1) / 2
+			ws(alongZ, mid, mid, "GateArch", g0, g1, 11, 12, 0.4, "px_iron_block", IRON, true)
+			ws(
+				alongZ,
+				mid,
+				mid,
+				"GateCross",
+				gm - 0.5,
+				gm + 0.5,
+				12,
+				16,
+				0.4,
+				"px_iron_block",
+				IRON,
+				true
+			)
+			ws(
+				alongZ,
+				mid,
+				mid,
+				"GateCross",
+				gm - 1.5,
+				gm + 1.5,
+				14,
+				15,
+				0.4,
+				"px_iron_block",
+				IRON,
+				true
+			)
+		end
+		local inner = function(sec)
+			return sec % 3 == 1
+		end
+		local always = function()
+			return true
+		end
+		-- the inner wall facing the square (open over the walk), a gate onto the square in the south
+		wall(true, -248, -28, 112, 116, inner)
+		wall(true, 0, 48, 112, 116, inner)
+		gate(true, 52, 68, 112, 116)
+		wall(true, 72, 232, 112, 116, inner)
+		-- iron fences along both sides of the walk, a gate in each onto the main lane, stopping short of the deck
+		local uEnd = math.floor((DECK[s].inner - 6) / B) * B
+		for _, wz in ipairs({ { -28, -24 }, { -4, 0 } }) do
+			wall(false, 112, 128, wz[1], wz[2], always)
+			gate(false, 132, 148, wz[1], wz[2])
+			if uEnd > 152 then
+				wall(false, 152, uEnd, wz[1], wz[2], always)
+			end
+		end
+		task.wait()
+
+		-- the lane end (u 124..156): the far face and the near face (toward the walk) of a feature `depth` deep
+		local function laneEnd(isNorth, depth)
+			if isNorth then
+				for zf = -244, -100, B do
+					if
+						landRect("main", s * 124, zf - 4, s * 156, zf + depth + 4, 6)
+						and isFree(s * 124, zf - 4, s * 156, zf + depth + 4, 0)
+					then
+						return zf, zf + depth
+					end
+				end
+			else
+				for zf = 228, 80, -B do
+					if
+						landRect("main", s * 124, zf - depth - 4, s * 156, zf + 4, 6)
+						and isFree(s * 124, zf - depth - 4, s * 156, zf + 4, 0)
+					then
+						return zf, zf - depth
+					end
+				end
+			end
+			return nil
+		end
+		-- the mausoleum: white stone on a plinth, corner pilasters, a pointed door toward the walk, a stepped slate
+		-- roof with a white gable and a cross, lanterns by the door
+		local function mausoleum(isNorth)
+			local zf, zn = laneEnd(isNorth, 20)
+			if not zf then
+				return nil
+			end
+			local m = folder("Mausoleum", f)
+			local dz = if isNorth then 1 else -1
+			local za, zb = math.min(zf, zn), math.max(zf, zn)
+			local function mb(name, u0, y0, z0, u1, y1, z1, v, t, dec)
+				local p = box(name, s * u0, y0, z0, s * u1, y1, z1, v, t, m)
+				if dec then
+					decor(p)
+				end
+			end
+			mb("MausoleumPlinth", 128, 0, za - 2, 152, 1, zb + 2, "px_stone_bricks", GREY_STONE)
+			mb("Mausoleum", 130, 1, za, 150, 13, zb, "px_white_stone_bricks", WHITE_STONE)
+			for _, cu in ipairs({ 130, 146 }) do
+				for _, cz in ipairs({ za, zb - B }) do
+					mb(
+						"MausoleumPilaster",
+						cu - 0.5,
+						1,
+						cz - 0.5,
+						cu + B + 0.5,
+						15,
+						cz + B + 0.5,
+						"px_smooth_stone",
+						WHITE_STONE
+					)
+				end
+			end
+			for _, r in ipairs({
+				{ 128, 152, 13, 15 },
+				{ 132, 148, 15, 17 },
+				{ 136, 144, 17, 19 },
+				{ 138, 142, 19, 20.5 },
+			}) do
+				mb("MausoleumRoof", r[1], r[3], za, r[2], r[4], zb, "px_blackstone_bricks", SLATE_T)
+			end
+			-- the white stepped gable over the door face and a cross on the ridge
+			for _, g in ipairs({ { 132, 148, 13, 15 }, { 136, 144, 15, 17 }, { 138, 142, 17, 19 } }) do
+				mb(
+					"MausoleumGable",
+					g[1],
+					g[3],
+					zn,
+					g[2],
+					g[4],
+					zn + dz * 0.6,
+					"px_white_stone_bricks",
+					WHITE_STONE,
+					true
+				)
+			end
+			mb(
+				"MausoleumCross",
+				139,
+				20.5,
+				zn - dz * 3,
+				141,
+				27,
+				zn - dz * 1,
+				"px_smooth_stone",
+				WHITE_STONE,
+				true
+			)
+			mb(
+				"MausoleumCross",
+				136.5,
+				23.5,
+				zn - dz * 3,
+				143.5,
+				25,
+				zn - dz * 1,
+				"px_smooth_stone",
+				WHITE_STONE,
+				true
+			)
+			-- the pointed door in a white frame
+			mb(
+				"MausoleumDoorFrame",
+				134,
+				1,
+				zn,
+				146,
+				12,
+				zn + dz * 0.8,
+				"px_smooth_stone",
+				WHITE_STONE,
+				true
+			)
+			local dark = Color3.fromRGB(120, 105, 95)
+			for _, d in ipairs({
+				{ 136, 144, 1, 9 },
+				{ 137.5, 142.5, 9, 10.5 },
+				{ 139, 141, 10.5, 11.5 },
+			}) do
+				mb(
+					"MausoleumDoor",
+					d[1],
+					d[3],
+					zn + dz * 0.8,
+					d[2],
+					d[4],
+					zn + dz * 1.1,
+					"px_dark_oak_planks",
+					dark,
+					true
+				)
+			end
+			pillarLamp(s * 130, zn + dz * 6, m, true)
+			pillarLamp(s * 150, zn + dz * 6, m, false)
+			flowers(s * 132, zn + dz * 4, m, 3)
+			flowers(s * 148, zn + dz * 4, m, 3)
+			return za, zb, zn
+		end
+		-- the monument: a big white cross on a stepped plinth with candles
+		local function monument(isNorth)
+			local zf, zn = laneEnd(isNorth, 16)
+			if not zf then
+				return nil
+			end
+			local za, zb = math.min(zf, zn), math.max(zf, zn)
+			local zc = (za + zb) / 2
+			ub("MonumentStep", 132, 0, za, 148, 1.5, zb, "px_stone_bricks", GREY_STONE)
+			ub(
+				"MonumentPlinth",
+				135,
+				1.5,
+				zc - 5,
+				145,
+				5,
+				zc + 5,
+				"px_white_stone_bricks",
+				WHITE_STONE
+			)
+			ub(
+				"MonumentPlinth",
+				136.5,
+				5,
+				zc - 3.5,
+				143.5,
+				7,
+				zc + 3.5,
+				"px_smooth_stone",
+				WHITE_STONE
+			)
+			ub("MonumentCross", 138, 7, zc - 2, 142, 27, zc + 2, "px_smooth_stone", WHITE_STONE)
+			ub("MonumentCross", 132, 19, zc - 2, 148, 23, zc + 2, "px_smooth_stone", WHITE_STONE)
+			for _, cu in ipairs({ 133.5, 146.5 }) do
+				for _, cz in ipairs({ za + 1.5, zb - 1.5 }) do
+					candle(s * cu, 1.5, cz, f, 1.4)
+				end
+			end
+			flowers(s * 128, zc, f, 3)
+			flowers(s * 152, zc, f, 3)
+			return za, zb, zn
+		end
+		-- the main lane (u 132..148) from the walk gate to the feature at its end (or to the rim)
+		for _, isNorth in ipairs({ true, false }) do
+			local za, zb, zn
+			if isNorth == mausNorth then
+				za, zb, zn = mausoleum(isNorth)
+			else
+				za, zb, zn = monument(isNorth)
+			end
+			if za then
+				reserve(s * 128, za - 8, s * 152, zb + 10)
+			end
+			local l0, l1
+			if isNorth then
+				l0, l1 = zn or -248, -24
+			else
+				l0, l1 = -4, zn or 232
+			end
+			pave("main", true, l0, l1, s * 132, s * 148, "px_gravel", nil, f)
+			reserve(s * 132, l0, s * 148, l1)
+		end
+		-- the cross lanes, the south one through the inner gate
+		-- (laid round the main lane so the gravel never doubles up)
+		pave("main", false, s * 116, s * 132, -80, -64, "px_gravel", nil, f)
+		pave("main", false, s * 148, s * 200, -80, -64, "px_gravel", nil, f)
+		reserve(s * 116, -80, s * 200, -64)
+		pave("main", false, s * 112, s * 132, 52, 68, "px_gravel", nil, f)
+		pave("main", false, s * 148, s * 200, 52, 68, "px_gravel", nil, f)
+		reserve(s * 112, 52, s * 200, 68)
+		task.wait()
+
+		-- the plots: 8 (u) × 12 (z), the marker on the block next to the walk side, the mound behind it; no two
+		-- crossbars or tombs side by side, a cypress only after a gap and with a gap after it
+		local nTomb, nCyp = 0, 0
+		local function wide(kind)
+			return kind == "cross" or kind == "broken" or kind == "tomb" or kind == "cypress"
+		end
+		for _, q in ipairs({ { -1, -32 }, { 1, 4 } }) do
+			local dir = q[1]
+			for k = 0, 20 do
+				local zn = q[2] + dir * 12 * k
+				local za, zb = math.min(zn, zn + dir * 12), math.max(zn, zn + dir * 12)
+				if za < -248 or zb > 232 then
+					break
+				end
+				local prev, skipNext = nil, false
+				for _, u0 in ipairs({ 116, 124, 152, 160, 168, 176, 184 }) do
+					local x0, x1 = s * u0, s * (u0 + 8)
+					if landRect("main", x0, za, x1, zb, 2) and isFree(x0, za, x1, zb, 0) then
+						reserve(x0, za, x1, zb)
+						local mx, mz = s * (u0 + 4), zn + dir * 2
+						local r = rng:NextNumber()
+						local kind = nil
+						if skipNext then
+							skipNext = false
+							if r < 0.6 then
+								flowers(mx, mz + dir * 4, f, 2)
+							end
+						elseif r < 0.42 and not wide(prev) then
+							kind = crossMark(mx, mz, f, dir, 0, false, 4)
+						elseif r >= 0.72 and r < 0.8 and nTomb < 8 and not wide(prev) then
+							tomb(mx, mz, f)
+							nTomb += 1
+							kind = "tomb"
+						elseif
+							r >= 0.8
+							and r < 0.87
+							and nCyp < 8
+							and not wide(prev)
+							and prev ~= "stone"
+						then
+							cypress(mx, mz + dir * 4, pick({ 20, 24, 28, 32 }), f)
+							nCyp += 1
+							kind = "cypress"
+							skipNext = true
+						elseif r >= 0.87 and r < 0.92 then
+							if pillarLamp(mx, mz, f, litPlots < 2) then
+								litPlots += 1
+							end
+							kind = "lamp"
+						elseif r >= 0.92 then
+							flowers(mx, mz + dir * 4, f, 3)
+						else
+							headstone(mx, mz, f, 0, false, true)
+							kind = "stone"
+						end
+						if
+							kind == "cross"
+							or kind == "broken"
+							or kind == "stone"
+							or kind == "tomb"
+						then
+							mound(mx, mz, dir, f)
+							graves += 1
+						end
+						prev = kind
+					else
+						prev, skipNext = nil, false
+					end
+				end
+				if k % 3 == 2 then
+					task.wait()
+				end
+			end
+		end
+		-- flowers in the gaps
+		for _ = 1, 10 do
+			local x, z = spotOn("main", s * 150, -14, 120, 2, 4)
+			if x then
+				flowers(x, z, f, rng:NextInteger(2, 4))
+				reserve(x - 2, z - 2, x + 2, z + 2)
+			end
+		end
+	end
+	print(("[build-church] yard: graves %d, lit plot lanterns %d"):format(graves, litPlots))
+end
+task.wait()
+
+-- ================================================================ 3. the islets: the ruined chapel and the arch
+do
+	-- WEST_ISLE: the walkway from the bridge into the chapel's breach
+	local f = folder("WestIsle", yard)
+	local land = DECK[-1].landing
+	reserve(-266, -24, land + 4, -4)
+	pave("west", false, -266, land, -22, -6, "px_cobblestone", nil, f)
+	pave("west", true, -8, 6, -280, -268, "px_cobblestone", nil, f) -- before the door
+	reserve(-288, -38, -260, -6)
+	reserve(-282, -8, -266, 6)
+	local ch = folder("RuinedChapel", f)
+	local function rw(name, x0, y0, z0, x1, y1, z1, v, t)
+		if landRect("west", x0, z0, x1, z1, 1) then
+			return box(
+				name,
+				x0,
+				y0,
+				z0,
+				x1,
+				y1,
+				z1,
+				v or "px_white_stone_bricks",
+				t or WHITE_STONE,
+				ch
+			)
+		end
+		return nil
+	end
+	-- a broken wall line: block heights `hs` (studs, 0 = gone), runs merged, only on the isle's ground
+	local function ruin(alongZ, a0, a1, w0, w1, hs)
+		local k, runA, runH = 0, nil, nil
+		local function flush(aEnd)
+			if runA and runH > 0 then
+				local mossy = rng:NextNumber() < 0.3
+				local v = if mossy then "px_mossy_stone_bricks" else "px_white_stone_bricks"
+				local t = if mossy then nil else WHITE_STONE
+				if alongZ then
+					box("ChapelWall", w0, 0, runA, w1, runH, aEnd, v, t, ch)
+				else
+					box("ChapelWall", runA, 0, w0, aEnd, runH, w1, v, t, ch)
+				end
+			end
+			runA = nil
+		end
+		for a = a0, a1 - B, B do
+			k += 1
+			local h = hs[k] or 0
+			local x, z = (w0 + w1) / 2, a + 2
+			if not alongZ then
+				x, z = a + 2, (w0 + w1) / 2
+			end
+			if cellLand(x, z) ~= "west" or isleOf(x, z, 1) ~= "west" then
+				h = 0
+			end
+			if h ~= runH then
+				flush(a)
+				runA, runH = a, h
+			end
+		end
+		flush(a1)
+	end
+	ruin(true, -36, -8, -286, -282, { 16, 12, 12, 8, 12, 8, 4 }) -- the west wall
+	ruin(true, -36, -8, -266, -262, { 16, 8, 4, 0, 0, 0, 0 }) -- the east wall: the breach toward the bridge
+	-- the north wall with a pointed window, glass remnants and its stepped gable still standing
+	rw("ChapelWall", -282, 0, -36, -278, 16, -32)
+	rw("ChapelWall", -270, 0, -36, -266, 16, -32)
+	rw("ChapelWall", -278, 0, -36, -270, 4, -32)
+	rw("ChapelWall", -278, 10, -36, -276, 16, -32)
+	rw("ChapelWall", -272, 10, -36, -270, 16, -32)
+	rw("ChapelWall", -276, 13, -36, -272, 16, -32)
+	rw("ChapelGable", -280, 16, -36, -268, 20, -32)
+	rw("ChapelGable", -277, 20, -36, -271, 24, -32)
+	if landRect("west", -278, -36, -270, -32, 1) then
+		for _, g in ipairs({ { -278, -274, 4, 8, GLASS_BLUE }, { -274, -272, 4, 6, GLASS_CYAN } }) do
+			local p = decor(
+				part(
+					"ChapelGlass",
+					Vector3.new(g[2] - g[1], g[4] - g[3], 0.4),
+					at((g[1] + g[2]) / 2, (g[3] + g[4]) / 2, -34),
+					g[5],
+					Enum.Material.Glass,
+					ch
+				)
+			)
+			p.Transparency = 0.25
+		end
+	end
+	-- the south wall with the pointed door
+	rw("ChapelWall", -282, 0, -12, -278, 12, -8)
+	rw("ChapelWall", -270, 0, -12, -268, 12, -8)
+	rw("ChapelWall", -268, 0, -12, -266, 6, -8, "px_mossy_stone_bricks", nil)
+	rw("ChapelWall", -278, 8, -12, -276, 12, -8)
+	rw("ChapelWall", -272, 8, -12, -270, 12, -8)
+	rw("ChapelWall", -276, 10, -12, -272, 12, -8)
+	-- the floor, the dais and the altar with candles and a little gold cross
+	decor(box("ChapelFloor", -282, -0.2, -32, -266, 0.04, -12, "px_stone_bricks", GREY_STONE, ch))
+	for _ = 1, 3 do
+		local px, pz = -282 + B * rng:NextInteger(0, 3), -32 + B * rng:NextInteger(0, 4)
+		decor(
+			box("ChapelMoss", px, 0.04, pz, px + B, 0.08, pz + B, "px_mossy_cobblestone", nil, ch)
+		)
+	end
+	box("ChapelDais", -282, 0, -32, -266, 1, -24, "px_stone_bricks", GREY_STONE, ch)
+	box("Altar", -278, 1, -32, -270, 4, -28, "px_white_stone_bricks", WHITE_STONE, ch)
+	box("AltarTop", -278.5, 4, -32.5, -269.5, 5, -27.5, "px_smooth_stone", WHITE_STONE, ch)
+	for i, cx in ipairs({ -277, -275.5, -272.5, -271 }) do
+		candle(cx, 5, -29.5, ch, if i % 2 == 0 then 1.6 else 1.1)
+	end
+	decor(box("AltarCross", -274.5, 5, -31.5, -273.5, 9.5, -30.5, "px_gold_block", GOLD, ch))
+	decor(box("AltarCross", -276, 7.5, -31.5, -272, 8.5, -30.5, "px_gold_block", GOLD, ch))
+	-- the fallen roof: a slate slab leaning on the west wall, slabs and beams on the floor, rubble at the breach
+	pc(
+		"FallenRoof",
+		Vector3.new(16, 1.5, 12),
+		at(-277, 6.5, -20) * CFrame.Angles(0, 0, math.rad(-38)),
+		"px_blackstone_bricks",
+		SLATE_T,
+		ch
+	)
+	pc(
+		"FallenRoof",
+		Vector3.new(10, 1.5, 8),
+		at(-273, 1, -15) * CFrame.Angles(math.rad(6), math.rad(20), math.rad(-5)),
+		"px_blackstone_bricks",
+		SLATE_T,
+		ch
+	)
+	pc(
+		"FallenRoof",
+		Vector3.new(8, 1.5, 10),
+		at(-278, 1.8, -26) * CFrame.Angles(0, -0.3, 0.12),
+		"px_blackstone_bricks",
+		SLATE_T,
+		ch
+	)
+	pc(
+		"FallenBeam",
+		Vector3.new(2, 2, 20),
+		at(-273, 4, -21) * CFrame.Angles(math.rad(-14), math.rad(25), 0),
+		"px_dark_oak_log",
+		nil,
+		ch
+	)
+	pc(
+		"FallenBeam",
+		Vector3.new(2, 2, 14),
+		at(-279, 1, -17) * CFrame.Angles(0, 1.2, 0.1),
+		"px_dark_oak_log",
+		nil,
+		ch
+	)
+	for _, r in ipairs({
+		{ -262, 1.4, -20, 4 },
+		{ -259, 0.8, -14, 2 },
+		{ -264, 1, -11, 3 },
+		{ -258, 0.9, -24, 2 },
+	}) do
+		pc(
+			"Rubble",
+			Vector3.new(r[4], r[4], r[4]),
+			at(r[1], r[2], r[3])
+				* CFrame.Angles(
+					rng:NextNumber(-0.4, 0.4),
+					rng:NextNumber(0, 1.5),
+					rng:NextNumber(-0.4, 0.4)
+				),
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			ch
+		)
+	end
+	for _, d in ipairs(ch:GetChildren()) do
+		if d.Name == "FallenRoof" or d.Name == "FallenBeam" or d.Name == "Rubble" then
+			decor(d)
+		end
+	end
+	-- cypresses, two old graves, flowers
+	for _ = 1, 2 do
+		local x, z = spotOn("west", -266, -14, 28, 6, 2)
+		if x then
+			cypress(x, z, pick({ 20, 24, 28 }), f)
+			reserve(x - 6, z - 6, x + 6, z + 6)
+		end
+	end
+	for _ = 1, 2 do
+		local x, z = spotOn("west", -266, -14, 26, 6, 2)
+		if x then
+			local dir = if z < -14 then -1 else 1
+			if rng:NextNumber() < 0.5 then
+				crossMark(x, z - dir * 4, f, dir)
+			else
+				headstone(x, z - dir * 4, f)
+			end
+			mound(x, z - dir * 4, dir, f)
+			reserve(x - 6, z - 6, x + 6, z + 6)
+		end
+	end
+	for _ = 1, 6 do
+		local x, z = spotOn("west", -266, -14, 28, 2, 1)
+		if x then
+			flowers(x, z, f, 3)
+			reserve(x - 2, z - 2, x + 2, z + 2)
+		end
+	end
+end
+task.wait()
+do
+	-- EAST_ISLE: the walkway up a stepped rise through a stone arch with a cross, graves round it
+	local f = folder("EastIsle", yard)
+	local land = DECK[1].landing
+	reserve(land - 4, -24, 262, -4)
+	pave("east", false, land, 260, -22, -6, "px_cobblestone", nil, f)
+	local tiers = {
+		{ 260, 288, -28, 0, 1, "px_grass_top", GRASS },
+		{ 264, 284, -24, -4, 2, "px_mossy_cobblestone", nil },
+		{ 268, 280, -22, -6, 3, "px_white_stone_bricks", WHITE_STONE },
+	}
+	for i, t in ipairs(tiers) do
+		box("Rise", t[1], t[5] - (if i == 1 then 1.5 else 1), t[3], t[2], t[5], t[4], t[6], t[7], f)
+	end
+	reserve(258, -30, 290, 2)
+	local ay = 3
+	local ar = folder("CrossArch", f)
+	box("ArchPillar", 272, ay, -22, 276, ay + 16, -18, "px_stone_bricks", GREY_STONE, ar)
+	box("ArchPillar", 272, ay, -10, 276, ay + 16, -6, "px_stone_bricks", GREY_STONE, ar)
+	box(
+		"ArchCorbel",
+		272,
+		ay + 13,
+		-18,
+		276,
+		ay + 16,
+		-16,
+		"px_white_stone_bricks",
+		WHITE_STONE,
+		ar
+	)
+	box(
+		"ArchCorbel",
+		272,
+		ay + 13,
+		-12,
+		276,
+		ay + 16,
+		-10,
+		"px_white_stone_bricks",
+		WHITE_STONE,
+		ar
+	)
+	box(
+		"ArchLintel",
+		271.5,
+		ay + 16,
+		-23,
+		276.5,
+		ay + 20,
+		-5,
+		"px_white_stone_bricks",
+		WHITE_STONE,
+		ar
+	)
+	box("ArchCrown", 272, ay + 20, -18, 276, ay + 24, -10, "px_white_stone_bricks", WHITE_STONE, ar)
+	box("ArchCross", 272.5, ay + 24, -16, 275.5, ay + 37, -12, "px_smooth_stone", WHITE_STONE, ar)
+	box("ArchCross", 272.5, ay + 29, -20, 275.5, ay + 33, -8, "px_smooth_stone", WHITE_STONE, ar)
+	if lights < MAX_LIGHTS then
+		lights += 1
+		decor(lantern(V(274, ay + 11, -14), ar, false, BY + ay + 16))
+	end
+	-- graves round the rise, the mound away from it
+	for _, sp in ipairs({
+		{ 250, -36 },
+		{ 262, -38 },
+		{ 274, -38 },
+		{ 286, -36 },
+		{ 294, -14 },
+		{ 290, 6 },
+		{ 278, 10 },
+		{ 266, 10 },
+		{ 254, 8 },
+		{ 296, -26 },
+	}) do
+		local x, z = sp[1], sp[2]
+		local dir = if z < -14 then -1 else 1
+		local za, zb = math.min(z - dir * 2, z + dir * 10), math.max(z - dir * 2, z + dir * 10)
+		if landRect("east", x - 6, za, x + 6, zb, 2) and isFree(x - 6, za, x + 6, zb, 0) then
+			if rng:NextNumber() < 0.55 then
+				crossMark(x, z, f, dir)
+			else
+				headstone(x, z, f)
+			end
+			mound(x, z, dir, f)
+			reserve(x - 6, za, x + 6, zb)
+		end
+	end
+	for _ = 1, 2 do
+		local x, z = spotOn("east", 268, -14, 28, 6, 2)
+		if x then
+			cypress(x, z, pick({ 20, 24, 28 }), f)
+			reserve(x - 6, z - 6, x + 6, z + 6)
+		end
+	end
+	for _ = 1, 6 do
+		local x, z = spotOn("east", 268, -14, 28, 2, 1)
+		if x then
+			flowers(x, z, f, 3)
+			reserve(x - 2, z - 2, x + 2, z + 2)
+		end
+	end
+end
+task.wait()
+
+-- ================================================================ 4. the waterfalls
+do
+	local wfF = folder("Waterfalls", yard)
+	for _, w in ipairs(WF) do
+		local f = folder(w.name, wfF)
+		local r, d, src, face = w.row, w.dir, w.src, w.face
+		local function ab(name, a0, y0, a1, y1, cA, cB, v, t)
+			if w.axis == "x" then
+				return decor(box(name, a0, y0, cA, a1, y1, cB, v, t, f))
+			end
+			return decor(box(name, cA, y0, a0, cB, y1, a1, v, t, f))
+		end
+		local function wpt(a, y, c)
+			return if w.axis == "x" then at(a, y, c) else at(c, y, a)
+		end
+		-- the spring: a low stone basin (open toward the stream) with a mossy spout pillar at the back
+		ab("Basin", src - 6, 0, src + 6, 1, r - 2, r, "px_stone_bricks", GREY_STONE)
+		ab("Basin", src - 6, 0, src + 6, 1, r + 8, r + 10, "px_stone_bricks", GREY_STONE)
+		ab("Basin", src - d * 6, 0, src - d * 4, 1, r, r + 8, "px_stone_bricks", GREY_STONE)
+		ab("Basin", src + d * 4, 0, src + d * 6, 1, r, r + 2, "px_stone_bricks", GREY_STONE)
+		ab("Basin", src + d * 4, 0, src + d * 6, 1, r + 6, r + 8, "px_stone_bricks", GREY_STONE)
+		ab("BasinWater", src - d * 4, -0.3, src + d * 4, 0.6, r, r + 8, "px_water", nil)
+		ab(
+			"SpoutPillar",
+			src - d * 6,
+			0,
+			src - d * 2,
+			8,
+			r + 2,
+			r + 6,
+			"px_mossy_stone_bricks",
+			nil
+		)
+		ab("Spout", src - d * 2, 0.6, src - d * 1.6, 6, r + 3, r + 5, "px_water", nil).Transparency =
+			0.3
+		-- the stream to the rim between mossy banks
+		ab("Stream", src + d * 4, -0.3, face, 0.03, r + 2, r + 6, "px_water", nil)
+		ab("StreamBank", src + d * 6, -0.25, face, 0.06, r, r + 2, "px_mossy_cobblestone", nil)
+		ab("StreamBank", src + d * 6, -0.25, face, 0.06, r + 6, r + 8, "px_mossy_cobblestone", nil)
+		-- the fall: a lip over the edge, a 40-block column, a wider veil lower down
+		ab("FallLip", face - d * 1, -1.5, face + d * 2, 0.03, r + 1.5, r + 6.5, "px_water", nil)
+		ab("Fall", face + d * 0.5, -160, face + d * 3, -1.5, r + 1.5, r + 6.5, "px_water", nil).Transparency =
+			0.3
+		ab("FallVeil", face + d * 1, -172, face + d * 4.5, -110, r + 0.5, r + 7.5, "px_water", nil).Transparency =
+			0.35
+		-- white wool foam at its foot and a slow mist
+		local fa, fc = face + d * 3, r + 4
+		for _, fo in ipairs({ { 8, -176, -170, 7 }, { 5, -170, -166, 4 }, { 11, -179, -175, 10 } }) do
+			ab(
+				"Foam",
+				fa - fo[1],
+				fo[2],
+				fa + fo[1],
+				fo[3],
+				fc - fo[4],
+				fc + fo[4],
+				"px_white_wool",
+				CLOUD
+			).CastShadow =
+				false
+		end
+		local mist = decor(part("FallMist", Vector3.new(12, 1, 12), wpt(fa, -168, fc), nil, nil, f))
+		mist.Transparency = 1
+		emitter(mist, {
+			Rate = 3,
+			Lifetime = NumberRange.new(6, 10),
+			Speed = NumberRange.new(1, 2.5),
+			SpreadAngle = Vector2.new(35, 35),
+			EmissionDirection = Enum.NormalId.Top,
+			Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 3),
+				NumberSequenceKeypoint.new(1, 8),
+			}),
+			Color = ColorSequence.new(Color3.fromRGB(250, 252, 255)),
+			LightEmission = 0.1,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.2, 0.55),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+		})
+	end
+end
+task.wait()
+
+-- ================================================================ 5. under the islands: stalactites, vines, moss
+local stalactites = 0
+do
+	local hang = folder("UnderRock", yard)
+	local cS = count
+	local vines, moss = 0, 0
+	local VINE_T = Color3.fromRGB(175, 210, 150)
+	local DIRS4 = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+	local function nearFall(x, z)
+		for _, w in ipairs(WF) do
+			local fx, fz = w.face, w.row + 4
+			if w.axis == "z" then
+				fx, fz = w.row + 4, w.face
+			end
+			if math.abs(x - fx) < 20 and math.abs(z - fz) < 20 then
+				return true
+			end
+		end
+		return false
+	end
+	local function nearBridge(x, z)
+		for _, b in ipairs(BRIDGES) do
+			if inRect(x, z, b, 14) then
+				return true
+			end
+		end
+		return false
+	end
+	local function column(x0, z0, sz, top, len)
+		local r = rng:NextNumber()
+		local v, t = "px_stone", PALE
+		if r < 0.3 then
+			t = ROCK_LOW_T
+		elseif r < 0.55 then
+			v, t = "px_smooth_stone", WHITE_STONE
+		end
+		decor(box("Stalactite", x0, top - len, z0, x0 + sz, top, z0 + sz, v, t, hang))
+		stalactites += 1
+	end
+	for z = -248, 232 - C, C do
+		for x = -312, 312 - C, C do
+			local cx, cz = x + C / 2, z + C / 2
+			if isleOf(cx, cz) ~= nil and count - cS < 940 then
+				local bottom = -B - rockDepth(cx, cz)
+				local outX, outZ, rim = 0, 0, false
+				for _, d in ipairs(DIRS4) do
+					if isleOf(cx + d[1] * C, cz + d[2] * C) == nil then
+						rim = true
+						outX += d[1]
+						outZ += d[2]
+						local rr = rng:NextNumber()
+						if rr < 0.12 and not nearFall(cx, cz) and not nearBridge(cx, cz) then
+							local a = rng:NextInteger(0, 1) * B
+							if rr < 0.07 then
+								-- a vine hanging down the rim face
+								local len = rng:NextInteger(2, 6) * B
+								if d[1] ~= 0 then
+									local fx = cx + d[1] * 4
+									decor(
+										box(
+											"RimVine",
+											fx + d[1] * 0.2,
+											-0.4 - len,
+											z + a,
+											fx + d[1] * 0.8,
+											-0.4,
+											z + a + B,
+											"px_hedge",
+											VINE_T,
+											hang
+										)
+									)
+								else
+									local fz = cz + d[2] * 4
+									decor(
+										box(
+											"RimVine",
+											x + a,
+											-0.4 - len,
+											fz + d[2] * 0.2,
+											x + a + B,
+											-0.4,
+											fz + d[2] * 0.8,
+											"px_hedge",
+											VINE_T,
+											hang
+										)
+									)
+								end
+								vines += 1
+							else
+								-- a mossy patch on the face just under the grass
+								local h = rng:NextInteger(1, 2) * B
+								if d[1] ~= 0 then
+									local fx = cx + d[1] * 4
+									decor(
+										box(
+											"RimMoss",
+											fx,
+											-0.5 - h,
+											z + a,
+											fx + d[1] * 0.6,
+											-0.5,
+											z + a + B,
+											"px_mossy_cobblestone",
+											nil,
+											hang
+										)
+									)
+								else
+									local fz = cz + d[2] * 4
+									decor(
+										box(
+											"RimMoss",
+											x + a,
+											-0.5 - h,
+											fz,
+											x + a + B,
+											-0.5,
+											fz + d[2] * 0.6,
+											"px_mossy_cobblestone",
+											nil,
+											hang
+										)
+									)
+								end
+								moss += 1
+							end
+						end
+					end
+				end
+				if rng:NextNumber() < (if rim then 0.6 else 0.2) then
+					if not rim and rng:NextNumber() < 0.4 then
+						-- a fat 2×2 column with a 1×1 tip under one quarter
+						local len = rng:NextInteger(2, 7) * B
+						column(x, z, 2 * B, bottom + 2, len + 2)
+						if rng:NextNumber() < 0.7 then
+							column(
+								x + rng:NextInteger(0, 1) * B,
+								z + rng:NextInteger(0, 1) * B,
+								B,
+								bottom - len,
+								rng:NextInteger(1, 3) * B
+							)
+						end
+					else
+						-- 1×1 columns on the outer quarter of a rim cell
+						local qx = if outX > 0
+							then 1
+							elseif outX < 0 then 0
+							else rng:NextInteger(0, 1)
+						local qz = if outZ > 0
+							then 1
+							elseif outZ < 0 then 0
+							else rng:NextInteger(0, 1)
+						local len = if rim then rng:NextInteger(3, 10) else rng:NextInteger(2, 6)
+						column(x + qx * B, z + qz * B, B, bottom + 2, len * B + 2)
+						if rim and len > 3 and rng:NextNumber() < 0.35 then
+							local q2x, q2z = 1 - qx, qz
+							if outX == 0 then
+								q2x, q2z = qx, 1 - qz
+							end
+							column(
+								x + q2x * B,
+								z + q2z * B,
+								B,
+								bottom + 2,
+								rng:NextInteger(1, len - 2) * B + 2
+							)
+						end
+					end
+				end
+			end
+		end
+		if z % 64 == 0 then
+			task.wait()
+		end
+	end
+	print(
+		("[build-church] yard: stalactites %d, vines %d, moss %d, %d parts"):format(
+			stalactites,
+			vines,
+			moss,
+			count - cS
+		)
+	)
+end
+task.wait()
+
+-- ================================================================ 7a. the cloud path off the south-east rim (measured
+-- before the islets so they keep clear of it)
+do
+	local cp = folder("CloudPath", yard)
+	local dx, dz = 0.12, 0.99
+	local m = math.sqrt(dx * dx + dz * dz)
+	dx, dz = dx / m, dz / m
+	local rx, rz = 118, 120
+	for _ = 1, 100 do
+		if cellLand(rx, rz) == nil then
+			break
+		end
+		rx += dx * 2
+		rz += dz * 2
+	end
+	local px, pz = -dz, dx
+	local d = 6
+	local x0, x1, z0, z1 = math.huge, -math.huge, math.huge, -math.huge
+	for i = 1, 7 do
+		local cx, cz, ok = 0, 0, false
+		for _ = 1, 12 do
+			cx = snap(rx + dx * d + px * math.sin(i * 1.3) * 8)
+			cz = snap(rz + dz * d + pz * math.sin(i * 1.3) * 8)
+			ok = clearOfIslands(cx, cz, 6, 0)
+			if ok then
+				break
+			end
+			d += 2
+		end
+		if ok then
+			local y = -1 - (i - 1) * 3
+			local p = decor(
+				box(
+					"PathCloud",
+					cx - 6,
+					y - B,
+					cz - 6,
+					cx + 6,
+					y,
+					cz + 6,
+					"px_white_wool",
+					CLOUD,
+					cp
+				)
+			)
+			p.CastShadow = false
+			if i % 2 == 0 then
+				local q = decor(
+					box(
+						"PathCloud",
+						cx + 6,
+						y - B,
+						cz - 2,
+						cx + 10,
+						y - 1,
+						cz + 6,
+						"px_white_wool",
+						CLOUD,
+						cp
+					)
+				)
+				q.CastShadow = false
+			end
+			x0, x1 = math.min(x0, cx - 10), math.max(x1, cx + 10)
+			z0, z1 = math.min(z0, cz - 10), math.max(z1, cz + 10)
+		end
+		d += 13
+	end
+	if x0 < x1 then
+		table.insert(CORRIDORS, { x0 - 12, x1 + 12, z0 - 12, z1 + 12, -40, 12 })
+	end
+end
+
+-- ================================================================ 6. the floating islets
+local islets = 0
+do
+	local fly = folder("FloatingIslets", yard)
+	local cS = count
+	local litFloat = 0
+	local VINE_T = Color3.fromRGB(175, 210, 150)
+	local function findSpot(half, down, up, yMin, yMax)
+		for attempt = 1, 400 do
+			if attempt % 100 == 0 then
+				task.wait()
+			end
+			local x, z = rng:NextNumber(-420, 420), rng:NextNumber(-360, 340)
+			local y = rng:NextNumber(yMin, yMax)
+			local ok = not inCorridor(x - half, x + half, z - half, z + half, y - down, y + up)
+				and clearOfIslands(x, z, half, 24)
+			if ok then
+				for _, t in ipairs(taken) do
+					local dh = math.sqrt((x - t[1]) ^ 2 + (z - t[2]) ^ 2)
+					if dh < t[3] + half + 10 and y + up + 8 > t[4] and y - down - 8 < t[5] then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				table.insert(taken, { x, z, half, y - down, y + up })
+				return x, y, z
+			end
+		end
+		return nil
+	end
+	-- a broken arch: a tall and a short pillar, a lintel stub, a fallen block
+	local function brokenArch(x, y, z, f)
+		box(
+			"ArchPillar",
+			x - 6,
+			y,
+			z - 2,
+			x - 2,
+			y + 16,
+			z + 2,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		box("ArchPillar", x + 2, y, z - 2, x + 6, y + 8, z + 2, "px_mossy_stone_bricks", nil, f)
+		box(
+			"ArchLintel",
+			x - 6,
+			y + 16,
+			z - 2,
+			x + 2,
+			y + 20,
+			z + 2,
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+		pc(
+			"ArchFallen",
+			Vector3.new(B, B, B),
+			at(x + 3, y + 1.5, z + 5) * CFrame.Angles(0.3, 0.6, 0.2),
+			"px_white_stone_bricks",
+			WHITE_STONE,
+			f
+		)
+	end
+	local function bench(x, y, z, f)
+		box("BenchLeg", x - 6, y, z - 2, x - 3, y + 2, z + 2, "px_stone_bricks", GREY_STONE, f)
+		box("BenchLeg", x + 3, y, z - 2, x + 6, y + 2, z + 2, "px_stone_bricks", GREY_STONE, f)
+		box(
+			"BenchSeat",
+			x - 7,
+			y + 2,
+			z - 2.5,
+			x + 7,
+			y + 3,
+			z + 2.5,
+			"px_smooth_stone",
+			WHITE_STONE,
+			f
+		)
+	end
+	local function islet(x, y, z, w, d, L, kind)
+		local f = folder("Islet", fly)
+		local hx, hz = w * B / 2, d * B / 2
+		box("IsletGrass", x - hx, y - B, z - hz, x + hx, y, z + hz, "px_grass_top", GRASS, f)
+		-- a nub of ground on one edge
+		if rng:NextNumber() < 0.5 and w >= 3 then
+			local nz = if rng:NextNumber() < 0.5 then z - hz - B else z + hz
+			local nx = x - hx + B * rng:NextInteger(0, w - 2)
+			box("IsletGrass", nx, y - B, nz, nx + 2 * B, y, nz + B, "px_grass_top", GRASS, f)
+			box("IsletRock", nx, y - 2 * B, nz, nx + 2 * B, y - B, nz + B, "px_dirt", nil, f)
+		end
+		local lh = if math.max(w, d) >= 6 then 2 * B else B
+		local stepsX, stepsZ =
+			math.max(0, math.floor((hx - 2) / B)), math.max(0, math.floor((hz - 2) / B))
+		local top = y - B
+		local sx, sz = hx, hz
+		for i = 1, L do
+			local v, t = "px_stone", PALE
+			if i == 1 then
+				v, t = "px_dirt", nil
+			elseif rng:NextNumber() < 0.35 then
+				v, t = "px_smooth_stone", WHITE_STONE
+			elseif rng:NextNumber() < 0.3 then
+				t = ROCK_LOW_T
+			end
+			sx = math.max(2, hx - B * math.floor((i - 1) * stepsX / math.max(1, L - 1) + 0.5))
+			sz = math.max(2, hz - B * math.floor((i - 1) * stepsZ / math.max(1, L - 1) + 0.5))
+			local h = if i == 1 then B else lh
+			box("IsletRock", x - sx, top - h, z - sz, x + sx, top, z + sz, v, t, f)
+			top -= h
+		end
+		-- the tip under one quarter of the last layer
+		local tx = x - sx + B * rng:NextInteger(0, math.max(0, math.floor(sx * 2 / B) - 1))
+		local tz = z - sz + B * rng:NextInteger(0, math.max(0, math.floor(sz * 2 / B) - 1))
+		box(
+			"IsletTip",
+			tx,
+			top - rng:NextInteger(1, 3) * B,
+			tz,
+			tx + B,
+			top,
+			tz + B,
+			"px_stone",
+			PALE,
+			f
+		)
+		-- vines over an edge or two
+		for _ = 1, rng:NextInteger(0, 2) do
+			local len = rng:NextInteger(2, 4) * B
+			local side = rng:NextInteger(1, 4)
+			if side <= 2 then
+				local fx = if side == 1 then x - hx - 0.6 else x + hx + 0.1
+				local a = z - hz + B * rng:NextInteger(0, d - 1)
+				box(
+					"IsletVine",
+					fx,
+					y - 0.5 - len,
+					a,
+					fx + 0.5,
+					y - 0.5,
+					a + B,
+					"px_hedge",
+					VINE_T,
+					f
+				)
+			else
+				local fz = if side == 3 then z - hz - 0.6 else z + hz + 0.1
+				local a = x - hx + B * rng:NextInteger(0, w - 1)
+				box(
+					"IsletVine",
+					a,
+					y - 0.5 - len,
+					fz,
+					a + B,
+					y - 0.5,
+					fz + 0.5,
+					"px_hedge",
+					VINE_T,
+					f
+				)
+			end
+		end
+		-- the prop on top
+		if kind == "grave" then
+			if d >= 4 and w >= 3 then
+				crossMark(x, z - 2, f, 1, y)
+				mound(x, z - 2, 1, f, y)
+			else
+				headstone(x, z, f, y)
+			end
+		elseif kind == "graves" then
+			headstone(x - 6, z - 2, f, y)
+			crossMark(x + 5, z - 2, f, 1, y)
+			mound(x + 5, z - 2, 1, f, y)
+			candle(x - 9, y, z + 2, f, 1.3)
+		elseif kind == "lantern" then
+			if pillarLamp(x, z, f, litFloat < 3, y) then
+				litFloat += 1
+			end
+		elseif kind == "cypress" then
+			cypress(x, z, pick({ 16, 20, 24 }), f, y)
+		elseif kind == "arch" then
+			brokenArch(x, y, z, f)
+		elseif kind == "bench" then
+			bench(x, y, z, f)
+		end
+		if w >= 4 and rng:NextNumber() < 0.6 then
+			flowers(x + (if rng:NextNumber() < 0.5 then -1 else 1) * (hx - 3), z + hz - 3, f, 2, y)
+		end
+		-- everything floating is decor
+		for _, p in ipairs(f:GetDescendants()) do
+			if p:IsA("BasePart") then
+				decor(p)
+			end
+		end
+	end
+	local KINDS = { "grave", "lantern", "cypress", "arch", "bench", "graves", "grave", "cypress" }
+	for i = 1, 30 do
+		if islets >= 22 then
+			break
+		end
+		local isBig = i <= 4
+		local w = if isBig then rng:NextInteger(6, 8) else rng:NextInteger(2, 6)
+		local d = math.clamp(w + rng:NextInteger(-1, 1), 2, 8)
+		local L = math.clamp(math.floor(math.max(w, d) / 2) + rng:NextInteger(1, 2), 3, 6)
+		local half = math.max(w, d) * B / 2 + B + 2
+		local lh = if math.max(w, d) >= 6 then 2 * B else B
+		local down = 2 * B + (L - 1) * lh + 3 * B
+		local kind = KINDS[(i % #KINDS) + 1]
+		if
+			kind == "graves" and math.min(w, d) < 5
+			or (kind == "arch" or kind == "bench") and math.min(w, d) < 4
+		then
+			kind = "grave"
+		elseif kind == "cypress" and math.min(w, d) < 3 then
+			kind = "lantern"
+		end
+		local up = if kind == "cypress" or kind == "arch" then 32 else 20
+		local yMin, yMax = -60, 100
+		if not isBig and rng:NextNumber() < 0.6 then
+			yMin, yMax = -40, 40 -- most of them near the eye line of the islands
+		end
+		local x, y, z = findSpot(half, down, up, yMin, yMax)
+		if x then
+			islet(snap(x) + (w % 2) * 2, snap(y), snap(z) + (d % 2) * 2, w, d, L, kind)
+			islets += 1
+		end
+		if i % 5 == 0 then
+			task.wait()
+		end
+	end
+	print(("[build-church] yard: floating islets %d, %d parts"):format(islets, count - cS))
+end
+task.wait()
+
+-- ================================================================ 7. the clouds: a layer under the islands, a few
+-- round the edges
+do
+	local cl = folder("Clouds", yard)
+	local cS = count
+	local nLayer, nEdge = 0, 0
+	local placed = {} -- { x0, x1, z0, z1, y0, y1 }
+	local function cb(x0, y0, z0, x1, y1, z1)
+		local p = decor(box("Cloud", x0, y0, z0, x1, y1, z1, "px_white_wool", CLOUD, cl))
+		p.CastShadow = false
+	end
+	local function cloud(x, y, z, w, d, th)
+		local hx, hz = w * B / 2, d * B / 2
+		cb(x - hx, y, z - hz, x + hx, y + th * B, z + hz)
+		for _ = 1, rng:NextInteger(1, 3) do
+			local pw = rng:NextInteger(math.max(2, w // 3), math.max(2, w - 2))
+			local pd = rng:NextInteger(math.max(2, d // 3), math.max(2, d - 2))
+			local ox = B * rng:NextInteger(0, math.max(0, w - pw)) - hx
+			local oz = B * rng:NextInteger(0, math.max(0, d - pd)) - hz
+			cb(x + ox, y + th * B, z + oz, x + ox + pw * B, y + th * B + B, z + oz + pd * B)
+		end
+		if w >= 8 and rng:NextNumber() < 0.6 then
+			local pw, pd = math.max(2, w // 2), math.max(2, d // 2)
+			local ox = B * rng:NextInteger(0, w - pw) - hx
+			local oz = B * rng:NextInteger(0, d - pd) - hz
+			cb(x + ox, y - B, z + oz, x + ox + pw * B, y, z + oz + pd * B)
+		end
+	end
+	local function overlaps(x0, x1, z0, z1, y0, y1)
+		for _, p in ipairs(placed) do
+			if
+				x1 + 12 > p[1]
+				and x0 - 12 < p[2]
+				and z1 + 12 > p[3]
+				and z0 - 12 < p[4]
+				and y1 + 6 > p[5]
+				and y0 - 6 < p[6]
+			then
+				return true
+			end
+		end
+		for _, t in ipairs(taken) do
+			local e = math.max(x1 - x0, z1 - z0) / 2
+			local dh = math.sqrt(((x0 + x1) / 2 - t[1]) ^ 2 + ((z0 + z1) / 2 - t[2]) ^ 2)
+			if dh < t[3] + e + 8 and y1 + 8 > t[4] and y0 - 8 < t[5] then
+				return true
+			end
+		end
+		return false
+	end
+	-- the highest top a cloud may have under the rock (and its stalactites) of the cells above it
+	local function under(x0, x1, z0, z1)
+		local lim = math.huge
+		local nx, nz =
+			math.max(1, math.ceil((x1 - x0) / 16)), math.max(1, math.ceil((z1 - z0) / 16))
+		for i = 0, nx do
+			for j = 0, nz do
+				local isle, ccx, ccz = cellLand(x0 + (x1 - x0) * i / nx, z0 + (z1 - z0) * j / nz)
+				if isle then
+					lim = math.min(lim, -B - rockDepth(ccx, ccz) - 10 * B - 8)
+				end
+			end
+		end
+		return lim
+	end
+	-- the layer under the islands, y -160..-240
+	for _ = 1, 34 do
+		for _ = 1, 40 do
+			local w = rng:NextInteger(6, 24)
+			local d = math.clamp(math.floor(w * rng:NextNumber(0.5, 0.9)), 4, 18)
+			local th = rng:NextInteger(1, 3)
+			local x, z =
+				snap(rng:NextNumber(-470, 470)) + (w % 2) * 2,
+				snap(rng:NextNumber(-430, 410)) + (d % 2) * 2
+			local y = snap(rng:NextNumber(-236, -168))
+			local hx, hz = w * B / 2, d * B / 2
+			local lim = under(x - hx, x + hx, z - hz, z + hz)
+			if y + (th + 1) * B > lim then
+				y = math.floor((lim - (th + 1) * B) / B) * B
+			end
+			if
+				y - B >= -244
+				and not overlaps(x - hx, x + hx, z - hz, z + hz, y - B, y + (th + 1) * B)
+			then
+				cloud(x, y, z, w, d, th)
+				table.insert(placed, { x - hx, x + hx, z - hz, z + hz, y - B, y + (th + 1) * B })
+				nLayer += 1
+				break
+			end
+		end
+	end
+	task.wait()
+	-- a few round the edges at the islands' height, clear of the islands and the corridors
+	for _ = 1, 12 do
+		for _ = 1, 60 do
+			local w = rng:NextInteger(6, 16)
+			local d = math.clamp(math.floor(w * rng:NextNumber(0.4, 0.8)), 3, 10)
+			local th = rng:NextInteger(1, 2)
+			local x, z =
+				snap(rng:NextNumber(-470, 470)) + (w % 2) * 2,
+				snap(rng:NextNumber(-430, 410)) + (d % 2) * 2
+			local y = snap(rng:NextNumber(-40, 26))
+			local hx, hz = w * B / 2, d * B / 2
+			local y0, y1 = y - B, y + (th + 1) * B
+			if
+				clearOfIslands(x, z, math.max(hx, hz), 16)
+				and not inCorridor(x - hx, x + hx, z - hz, z + hz, y0, y1)
+				and not overlaps(x - hx, x + hx, z - hz, z + hz, y0, y1)
+			then
+				cloud(x, y, z, w, d, th)
+				table.insert(placed, { x - hx, x + hx, z - hz, z + hz, y0, y1 })
+				nEdge += 1
+				break
+			end
+		end
+	end
+	print(
+		("[build-church] yard: clouds %d under, %d at the edges, %d parts"):format(
+			nLayer,
+			nEdge,
+			count - cS
+		)
+	)
+end
+print(("[build-church] yard: %d parts, %d lights"):format(count - c0, lights))
+
+end
+task.wait()
 local total = #root:GetDescendants()
 print(("[build-church] built: %d instances, %d parts"):format(total, count))
 return ("built %d instances, %d parts"):format(total, count)
