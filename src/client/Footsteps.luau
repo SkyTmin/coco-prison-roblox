@@ -16,7 +16,7 @@ local Footsteps = {}
 
 local STRIDE = 7 -- studs per step (≈ 1.75 blocks; Minecraft walks ~2 steps a second)
 local HEAR = 48
-local VOLUME = 0.22
+local VOLUME = 0.066 -- [владелец 27.10: «уменьши звук шагов на 70%»] was 0.22
 
 -- Roblox materials / px_* texture names → Minecraft sound type
 local BY_MATERIAL: { [Enum.Material]: string } = {
