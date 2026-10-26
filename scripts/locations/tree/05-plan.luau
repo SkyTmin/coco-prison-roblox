@@ -30,7 +30,9 @@ local function onRing(x, z, pad)
 	pad = pad or 0
 	local dx, dz = math.abs(x - PIT.x), math.abs(z - PIT.z)
 	local c = math.max(dx, dz)
-	return c > RING.inner - pad and c <= RING.outer + pad and math.sqrt(dx * dx + dz * dz) <= RING.round + pad
+	return c > RING.inner - pad
+		and c <= RING.outer + pad
+		and math.sqrt(dx * dx + dz * dz) <= RING.round + pad
 end
 local function onPath(x, z, pad)
 	pad = pad or 0
@@ -89,14 +91,14 @@ local function freeGround(x, z, pad)
 end
 
 -- palette: an early morning in the sky
-local GRASS = Color3.fromRGB(120, 176, 70)
-local GRASS_DEEP = Color3.fromRGB(92, 150, 58)
+local GRASS = Color3.fromRGB(150, 200, 100)
+local GRASS_DEEP = Color3.fromRGB(120, 178, 84)
 local COARSE = Color3.fromRGB(150, 108, 72) -- coarse dirt paths
-local BARK = Color3.fromRGB(96, 70, 50) -- tints for the bark mix
-local BARK_DARK = Color3.fromRGB(66, 48, 36)
-local OAK_LEAF = Color3.fromRGB(80, 140, 50)
-local AZALEA = Color3.fromRGB(112, 150, 60)
-local BLOSSOM = Color3.fromRGB(214, 120, 190) -- flowering azalea
-local MOSS = Color3.fromRGB(96, 130, 60)
+local BARK = Color3.fromRGB(190, 150, 120) -- tints for the bark mix (over px_*_log, already brown: keep them light)
+local BARK_DARK = Color3.fromRGB(140, 110, 90)
+local OAK_LEAF = Color3.fromRGB(180, 215, 150) -- tints over px_hedge (already dark green): keep them light
+local AZALEA = Color3.fromRGB(205, 230, 150)
+local BLOSSOM = Color3.fromRGB(255, 205, 235) -- flowering azalea: a tint over px_cherry_leaves (already pink)
+local MOSS = Color3.fromRGB(130, 170, 90)
 local SAP = Color3.fromRGB(236, 238, 238) -- white concrete
 local CLOUD = Color3.fromRGB(250, 252, 255)

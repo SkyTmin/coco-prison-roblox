@@ -78,7 +78,11 @@ do
 		goods = { "px_smooth_stone", "px_smooth_stone", "px_smooth_stone" },
 		sign = "Скупка",
 	}, arrive)
-	buyer(cf * CFrame.new(0, 3, 1.4), { shirt = Color3.fromRGB(70, 110, 50), pants = Color3.fromRGB(90, 70, 50) }, arrive)
+	buyer(
+		cf * CFrame.new(0, 3, 1.4),
+		{ shirt = Color3.fromRGB(70, 110, 50), pants = Color3.fromRGB(90, 70, 50) },
+		arrive
+	)
 	crate(BUYER.x + 4, 0, BUYER.z + 10, arrive)
 	barrel(BUYER.x - 2, 0, BUYER.z + 10, arrive)
 	lampPost(BUYER.x - 10, BUYER.z - 6, arrive)
@@ -105,6 +109,9 @@ do
 	net:SetAttribute("LocationId", LOC)
 	CollectionService:AddTag(net, "VoidCatch")
 	-- one box round the whole cluster: the gaps between the islands are open sky (a fall goes back to the arrival)
-	edgeWalls({ { 16, -166, 648, 4 }, { 16, 190, 648, 4 }, { -310, 12, 4, 360 }, { 342, 12, 4, 360 } }, core)
+	edgeWalls(
+		{ { 16, -166, 648, 4 }, { 16, 190, 648, 4 }, { -310, 12, 4, 360 }, { 342, 12, 4, 360 } },
+		core
+	)
 end
 print(("[build-tree] core: island runs %d"):format(islandRuns))
