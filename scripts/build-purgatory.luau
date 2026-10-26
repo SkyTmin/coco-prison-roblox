@@ -892,12 +892,15 @@ end
 
 -- ================================================================ the sunset, the void net, the edge walls
 -- a hazy orange sunset over the mountain (the only lighting volume of this floor)
+-- (Studio 26.10: at ClockTime 17.9 the sky went night-dark and the cypresses black — the sun a little higher, more
+-- light, the sunset colour from a warm Tint)
 lightingVolume("PurgatorySunset", 0, 100, 8, 520, 440, 520, {
-	Ambient = Color3.fromRGB(170, 130, 110),
-	Exposure = 0,
+	Ambient = Color3.fromRGB(200, 160, 130),
+	Exposure = 0.3,
 	Haze = 0.34,
-	ClockTime = 17.9,
-	Brightness = 1.8,
+	ClockTime = 17.35,
+	Tint = Color3.fromRGB(255, 214, 178),
+	Brightness = 2,
 	AtmosphereColor = Color3.fromRGB(240, 170, 120),
 	AtmosphereDecay = Color3.fromRGB(150, 100, 130),
 }, core)
