@@ -52,6 +52,7 @@ for _, name in ipairs({
 end
 
 local AvatarService = require(script.Services.AvatarService)
+local NpcBodyService = require(script.Services.NpcBodyService)
 local ProfileService = require(script.Services.ProfileService)
 local ProfessionService = require(script.Services.ProfessionService)
 local TextureService = require(script.Services.TextureService)
@@ -83,6 +84,7 @@ local CollisionGroups = require(script.Services.CollisionGroups)
 local LeaderboardService = require(script.Services.LeaderboardService)
 
 AvatarService.Start() -- first: the StarterCharacter must exist before anyone spawns
+NpcBodyService.Start() -- the map's R15 NPCs → our block body in their costumes
 HungerService.Start()
 DeathService.Start()
 ProfileService.Start()
