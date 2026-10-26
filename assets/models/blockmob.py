@@ -412,8 +412,10 @@ class Mob:
 
     def render_previews(self, joints, order):
         scene, cam = self.setup_render(900, 600)
-        self.perspective(cam, self.g["PREVIEW_CAMERA"])
-        for clip, frame in self.g["PREVIEWS"]:
+        for spec in self.g["PREVIEWS"]:
+            # (clip, frame[, camera]): a pose far from the origin (the bat's swoop and fall) may take its own camera
+            clip, frame = spec[0], spec[1]
+            self.perspective(cam, spec[2] if len(spec) > 2 else self.g["PREVIEW_CAMERA"])
             self.pose(joints, order, clip, frame)
             scene.render.filepath = os.path.join(self.here, "preview-%s.png" % clip)
             bpy.ops.render.render(write_still=True)

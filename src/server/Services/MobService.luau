@@ -6,7 +6,9 @@
 -- within aggroRange, bites every attackCooldown (CombatService.ApplyDamage: armour counts), gives up past
 -- leashRange from its point and goes home. The killer (LastHitBy, set by CombatService) gets the money if
 -- the mob gives any (× the «Мобы» upgrade of the professions), stats[statKey] +1 and Мастер клинка xp +1
--- [вики: xp за убийства крыс, зомби, мышей]; cfg.drop falls on the ground with cfg.dropChance.
+-- [вики: xp за убийства крыс, зомби, мышей]; cfg.drop falls on the ground with cfg.dropChance. A flying mob (cfg.flying:
+-- the bat) is the same humanoid floated cfg.hipHeight above the floor; it changes course more often (cfg.wanderEvery),
+-- its clips bob and swoop, and on death its root is anchored so only the death clip drops the body to the floor.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -161,9 +163,14 @@ function spawnMob(mob: Mob)
 		local death = mob.cfg.deathSound or { "rat_death", 0.7, 1 }
 		Sfx.broadcast(death[1], root, death[2], death[3])
 		rewardKiller(mob, humanoid)
+		local lootAt = root.Position
+		if mob.cfg.flying then
+			root.Anchored = true -- the death clip drops the body, the root stays where it hovered
+			lootAt -= Vector3.new(0, mob.cfg.hipHeight or 0, 0)
+		end
 		-- loot on the ground like in Minecraft [владелец 22.10: с крысы только плоть нежити, шанс 25 %]
 		if mob.cfg.drop and math.random() < (mob.cfg.dropChance or 1) then
-			ItemDropService.SpawnLoot({ id = mob.cfg.drop, count = 1 }, root.Position)
+			ItemDropService.SpawnLoot({ id = mob.cfg.drop, count = 1 }, lootAt)
 		end
 		mob.model, mob.humanoid, mob.root, mob.target = nil, nil, nil, nil
 		for _, p in ipairs(model:GetDescendants()) do
@@ -246,7 +253,8 @@ local function think(mob: Mob, now: number)
 	if fromHome > (mob.cfg.leashRange or 30) then
 		humanoid:MoveTo(home)
 	elseif now >= mob.nextWanderAt then
-		mob.nextWanderAt = now + math.random(3, 7)
+		local every = mob.cfg.wanderEvery or { 3, 7 }
+		mob.nextWanderAt = now + every[1] + math.random() * (every[2] - every[1])
 		local a, r = math.random() * math.pi * 2, math.random() * mob.wander
 		humanoid:MoveTo(home + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r))
 	end

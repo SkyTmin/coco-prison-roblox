@@ -1937,6 +1937,15 @@ end
 for _, side in ipairs({ -1, 1 }) do
 	mobSpawn("zombie", side * (M1.hole + 8), M1.cz, 3)
 end
+-- bats under the domes [вики 26.10: «здесь обитают зомби и летучие мыши»]: two in each cave off the pit, two in
+-- the tunnel down to the lair (they hover mobs.bat.hipHeight above the floor)
+for _, p in ipairs({ { -50, M1.cz - 14 }, { 50, M1.cz + 14 }, { -38, M2.cz - 18 }, { 38, M2.cz + 22 } }) do
+	mobSpawn("bat", p[1], p[2], 10)
+end
+for _, t in ipairs({ 0.3, 0.75 }) do
+	local x, z = linePoint(SHAPE.tunnel3.pts, t)
+	mobSpawn("bat", x, z, 8)
+end
 -- the lair: a rat at each diagonal (by the rubbish heaps), a zombie at each side
 for _, th in ipairs({ 45, 135, 225, 315 }) do
 	local x, z = polar(math.rad(th), 47)
