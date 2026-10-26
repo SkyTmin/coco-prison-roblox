@@ -180,6 +180,8 @@ local TINTED: { [string]: { base: string, color: Color3 } } = {
 	jack_o_lantern = { base = "hay", color = Color3.fromRGB(255, 170, 60) },
 	-- Врата края: пурпурный цемент [меню]
 	magenta_concrete = { base = "smooth_stone", color = Color3.fromRGB(196, 64, 186) },
+	-- Древо: белый цемент [меню]
+	white_concrete = { base = "smooth_stone", color = Color3.fromRGB(236, 238, 238) },
 }
 
 local function stylePart(part: BasePart, id: string)
