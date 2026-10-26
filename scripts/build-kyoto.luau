@@ -695,7 +695,7 @@ local WEST_STAIR = { x0 = -180, x1 = -164, z0 = 24, z1 = -8 }
 local ARENA_STAIR = { x0 = -96, x1 = -80, z0 = -40, z1 = -72 }
 local TEMPLE = { x0 = 64, x1 = 176, z0 = -124, z1 = -76 }
 local STAGE = { x0 = 72, x1 = 176, z0 = -72, z1 = -16, y = L2_Y }
-local POND = { x = 124, z = 24, r = 36, bed = -8 }
+local POND = { x = 124, z = 24, r = 36, bed = -4 } -- one block deep: a player who falls in can jump out
 local PAGODA = { x = 110, z = -160 }
 local ARENA = { x = -88, z = -128, r = 56 }
 
