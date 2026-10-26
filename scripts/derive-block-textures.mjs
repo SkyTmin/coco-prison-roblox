@@ -259,3 +259,6 @@ await recolor("grass_top.png", "forest_floor.png", [[0, [26, 34, 20]], [0.5, [44
 // [Рынок] red wool: our white wool is nearly flat, tinted red it blurred into a carpet in the game (Studio 26.10) —
 // the higher-contrast pattern of our yellow wool on a red ramp instead
 await recolor("yellow_wool.png", "red_wool.png", [[0, [110, 22, 18]], [0.5, [168, 36, 30]], [1, [214, 64, 54]]]);
+// [Лепреконовая долина] yellow concrete: our smooth stone tinted yellow read as dull mustard tiles with frames (Studio
+// 26.10) — our concrete floor on a bright yellow ramp, like the cyan concrete
+await recolor("concrete_floor.png", "yellow_concrete.png", [[0, [214, 150, 14]], [0.5, [238, 178, 24]], [1, [250, 200, 52]]], 0.7);
