@@ -111,11 +111,17 @@ local function build(key: string, voxels: Voxels, pixel: number, depth: number):
 	local r = voxels.r
 	for i = 1, #r, 5 do
 		local x, y, w, h, pi = r[i], r[i + 1], r[i + 2], r[i + 3], r[i + 4]
+		if voxels.mirror then
+			-- the axe's blade forward: mirror across the handle's diagonal (bottom-left → top-right), so the blade
+			-- changes sides and the handle stays where the grip expects it (a left-right mirror moved the handle out of
+			-- the fist: the axe was held by its head)
+			x, y, w, h = voxels.w - y - h, voxels.h - x - w, h, w
+		end
 		local p = Instance.new("Part")
 		p.Name = "Px"
 		p.Size = Vector3.new(depth, h * pixel, w * pixel)
 		-- centre of the rect in sprite space, origin at the sprite centre
-		local cx = (x + w / 2 - voxels.w / 2) * pixel * (if voxels.mirror then -1 else 1)
+		local cx = (x + w / 2 - voxels.w / 2) * pixel
 		local cy = (voxels.h / 2 - (y + h / 2)) * pixel
 		local offset = CFrame.new(0, cy, cx) -- image right = +Z (checked on the live character)
 		p.CFrame = root.CFrame * offset

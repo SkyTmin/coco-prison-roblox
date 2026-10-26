@@ -216,8 +216,13 @@ local function render(rig: Rig)
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
+	-- our block body's fist is 0.7 × 0.35 × 0.7 studs (R15 hands ≈ 0.3): its grips put the handle end inside the fist so
+	-- the handle comes out of it, and a block hangs under the fist (assets/models/player/hold.py renders both)
+	local block = rig.character:GetAttribute("BlockBody") == true
 	if cube then
-		motor.C0 = CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
+		motor.C0 = if block
+			then CFrame.new(0, -0.62, -0.25) * CFrame.Angles(0, math.rad(25), 0)
+			else CFrame.new(0.2, -0.5, -0.9) * CFrame.Angles(0, math.rad(25), 0)
 	elseif id == "bow" then
 		motor.C0 = CFrame.new(0, -0.15, 0) * BOW_TURN * CFrame.new(-HeldItem.BowGrip(spriteSize))
 	else
@@ -226,7 +231,7 @@ local function render(rig: Rig)
 		-- point the head forward (hand −Z); handle end (bottom-left of the icon) sits in the palm.
 		-- [владелец 22.10, reference: Steve] with the arm relaxed the item points forward and a little
 		-- down, not up: pitch −105° ≈ 25–30° below level (−20° stood 45° up, −90° gave 11° down)
-		motor.C0 = CFrame.new(0.3, -0.3, -0.2)
+		motor.C0 = (if block then CFrame.new(0, 0.1, 0.05) else CFrame.new(0.3, -0.3, -0.2))
 			* CFrame.Angles(math.rad(-105), 0, 0)
 			* CFrame.Angles(0, math.pi, 0)
 			* CFrame.new(0, size * 0.45, size * 0.45)
