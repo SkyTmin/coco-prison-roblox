@@ -1,0 +1,14 @@
+{
+  "source": "[меню 26.10] «Улучшение предмета» — Ножницы, 6 снимков владельца (WEBP), wiki/in-game-wiki/SHEARS-UPGRADES.md",
+  "item": "shears",
+  "maxLevel": 6,
+  "enchant": "efficiency",
+  "materialChanges": false,
+  "upgrades": [
+    { "from": 1, "to": 2, "cost": 3750, "requirements": { "Белая шерсть": 600, "Паутина": 300 }, "enchantAfter": 1 },
+    { "from": 2, "to": 3, "cost": 6000, "requirements": { "Белая шерсть": 1200, "Паутина": 600 }, "enchantAfter": 2 },
+    { "from": 3, "to": 4, "cost": 7500, "requirements": { "Белая шерсть": 2400, "Паутина": 1200 }, "enchantAfter": 3 },
+    { "from": 4, "to": 5, "cost": 9000, "requirements": { "Белая шерсть": 4800, "Паутина": 2400 }, "enchantAfter": 4 },
+    { "from": 5, "to": 6, "cost": 11200, "requirements": { "Белая шерсть": 9550, "Паутина": 4750 }, "enchantAfter": 5 }
+  ]
+}
