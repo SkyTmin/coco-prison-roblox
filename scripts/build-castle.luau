@@ -231,7 +231,13 @@ local SOUL_GLOW = Color3.fromRGB(110, 230, 235)
 -- a Minecraft lantern: a small iron-framed glowing block; hanging = with a chain up to `hangTop` (world y)
 local function lantern(pos, parent, soul, hangTop)
 	local glow = if soul then SOUL_GLOW else LANTERN_GLOW
-	local cage = part("Lantern", Vector3.new(1.3, 1.5, 1.3), CFrame.new(pos), Color3.fromRGB(45, 45, 50), Enum.Material.Metal, parent)
+	-- an open iron frame (base, top, four corner bars) so the glowing core shows through
+	local iron = Color3.fromRGB(45, 45, 50)
+	local cage = part("Lantern", Vector3.new(1.3, 0.25, 1.3), CFrame.new(pos - Vector3.new(0, 0.62, 0)), iron, Enum.Material.Metal, parent)
+	decor(part("LanternTop", Vector3.new(1.3, 0.25, 1.3), CFrame.new(pos + Vector3.new(0, 0.62, 0)), iron, Enum.Material.Metal, parent))
+	for _, c in ipairs({ { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }) do
+		decor(part("LanternBar", Vector3.new(0.2, 1, 0.2), CFrame.new(pos + Vector3.new(c[1] * 0.55, 0, c[2] * 0.55)), iron, Enum.Material.Metal, parent))
+	end
 	local core = decor(part("LanternGlow", Vector3.new(0.9, 1, 0.9), CFrame.new(pos), glow, Enum.Material.Neon, parent))
 	core.Transparency = 0.1
 	decor(part("LanternCap", Vector3.new(0.7, 0.35, 0.7), CFrame.new(pos + Vector3.new(0, 0.9, 0)), Color3.fromRGB(40, 40, 45), Enum.Material.Metal, parent))
