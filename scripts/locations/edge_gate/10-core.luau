@@ -91,9 +91,10 @@ end
 -- ================================================================ the boss, the night, the void net, the edge walls
 bossSpawn("reaper", ARENA.x, ARENA.y + 2, ARENA.z, ARENA.r - 8, core)
 -- the End has no day: a quiet night over the void (the only lighting volume of this floor, as in Пустотная крепость)
+-- (Studio 26.10: exposure up a step — the mine and the paths sank into the night)
 lightingVolume("EndNight", -8, 60, -8, 640, 400, 560, {
 	Ambient = Color3.fromRGB(140, 122, 160),
-	Exposure = -0.05,
+	Exposure = 0.25,
 	Haze = 0.28,
 	ClockTime = 0,
 	Brightness = 1,

@@ -753,6 +753,22 @@
         "ColorMap": "rbxassetid://83681073522884",
         "StudsPerTile": 4
       }
+    },
+    "px_magenta_concrete": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://88342015762475",
+        "StudsPerTile": 4
+      }
+    },
+    "px_white_concrete": {
+      "$className": "MaterialVariant",
+      "$properties": {
+        "BaseMaterial": "Plastic",
+        "ColorMap": "rbxassetid://111857822224684",
+        "StudsPerTile": 4
+      }
     }
   }
 }

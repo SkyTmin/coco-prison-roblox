@@ -350,3 +350,7 @@ await recolor("grass_top.png", "dark_oak_leaves.png", [[0, [22, 50, 20]], [0.5, 
 	await sharp(data, { raw: { width: N * S, height: N * S, channels: 4 } }).png().toFile(path.join(dir, "jack_o_lantern.png"));
 	console.log("wrote jack_o_lantern.png");
 }
+// Врата края / Древо: magenta and white concrete — our concrete floor on their own ramps, like the yellow and cyan
+// concrete (the tinted smooth stone read near-black purple in the End night, Studio 26.10)
+await recolor("concrete_floor.png", "magenta_concrete.png", [[0, [150, 40, 140]], [0.5, [192, 66, 182]], [1, [218, 100, 208]]], 0.7);
+await recolor("concrete_floor.png", "white_concrete.png", [[0, [206, 210, 212]], [0.5, [228, 231, 232]], [1, [244, 246, 246]]], 0.7);
