@@ -16,7 +16,7 @@
 --
 -- THE PLAN (local studs; +X east, +Z south; y 0 = the garden):
 --   island        a rounded square |x|, |z| ≤ 220 (superellipse), ragged
---   the HILL      centre (0, -60): the bank y 0 out to r 82, the ring RIVER r 82..98 (bed y -8, water to y -1.5),
+--   the HILL      centre (0, -60): the bank y 0 out to r 82, the ring RIVER r 82..98 (bed y -4, water to y -0.8),
 --                 L1 y 8 inside r 72, the SUMMIT L2 y 16 inside r 40 with the Tree of Life (trunk r 12) at the centre
 --   rivers        WEST x ≤ -90, EAST x ≥ 90 at z -68..-52, NORTH x -8..8, z ≤ -150: from the ring to the edges
 --   mine          32×12×32 blocks, hole x -104..24, z 64..192 (centre -40, 128), south-west of the hill

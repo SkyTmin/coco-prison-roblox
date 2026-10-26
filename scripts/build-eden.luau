@@ -17,7 +17,7 @@
 --
 -- THE PLAN (local studs; +X east, +Z south; y 0 = the garden):
 --   island        a rounded square |x|, |z| ≤ 220 (superellipse), ragged
---   the HILL      centre (0, -60): the bank y 0 out to r 82, the ring RIVER r 82..98 (bed y -8, water to y -1.5),
+--   the HILL      centre (0, -60): the bank y 0 out to r 82, the ring RIVER r 82..98 (bed y -4, water to y -0.8),
 --                 L1 y 8 inside r 72, the SUMMIT L2 y 16 inside r 40 with the Tree of Life (trunk r 12) at the centre
 --   rivers        WEST x ≤ -90, EAST x ≥ 90 at z -68..-52, NORTH x -8..8, z ≤ -150: from the ring to the edges
 --   mine          32×12×32 blocks, hole x -104..24, z 64..192 (centre -40, 128), south-west of the hill
@@ -679,7 +679,7 @@ end
 -- ================================================================ eden: the plan shared by every part
 local HALF = 220 -- the rounded square island
 local HILL = { x = 0, z = -60, bank = 82, river = 98, l1 = 72, l2 = 40, trunk = 12 }
-local RIVER_BED, RIVER_TOP = -8, -1.5
+local RIVER_BED, RIVER_TOP = -4, -0.8 -- one block deep: a player who falls in can jump out
 local RIVERS = { -- { x0, z0, x1, z1 } straight rivers from the ring to the edges
 	{ -240, -68, -90, -52 }, -- WEST
 	{ 90, -68, 240, -52 }, -- EAST
@@ -743,7 +743,7 @@ local function onPath(x, z, pad)
 	end
 	return false
 end
--- the ground height: the hill steps (y 8, 16), the river beds (y -8), the garden y 0
+-- the ground height: the hill steps (y 8, 16), the river beds (y -4), the garden y 0
 local function groundY(x, z)
 	if not onIsland(x, z) then
 		return nil

@@ -1,7 +1,7 @@
 -- ================================================================ eden: the plan shared by every part
 local HALF = 220 -- the rounded square island
 local HILL = { x = 0, z = -60, bank = 82, river = 98, l1 = 72, l2 = 40, trunk = 12 }
-local RIVER_BED, RIVER_TOP = -8, -1.5
+local RIVER_BED, RIVER_TOP = -4, -0.8 -- one block deep: a player who falls in can jump out
 local RIVERS = { -- { x0, z0, x1, z1 } straight rivers from the ring to the edges
 	{ -240, -68, -90, -52 }, -- WEST
 	{ 90, -68, 240, -52 }, -- EAST
@@ -65,7 +65,7 @@ local function onPath(x, z, pad)
 	end
 	return false
 end
--- the ground height: the hill steps (y 8, 16), the river beds (y -8), the garden y 0
+-- the ground height: the hill steps (y 8, 16), the river beds (y -4), the garden y 0
 local function groundY(x, z)
 	if not onIsland(x, z) then
 		return nil
