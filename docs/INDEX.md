@@ -47,7 +47,7 @@
 
 ## Старые спецификации — `wiki/*.md`
 
-`PROTOTYPE-SPEC.md` (первая глава с фракциями — заменена `docs/GAME-DESIGN.md`), `MECHANICS-CATALOG.md` (64 механики), `RUSSIAN-PRISON-RESEARCH.md` (история режима), `ROBLOX-TECH-NOTES.md` (рекомендации Roblox по серверу и DataStore — актуально), `MINING-AUDIT.md` / `BOMBS-BACKPACKS-AUDIT.md` / `PRESTIGE-SAVE-AUDIT.md` (чужой плагин PrisonTeam — справочно), `EXCLUDED.md` (что не попало в репозиторий и почему).
+`PROTOTYPE-SPEC.md` (первая глава с фракциями — заменена `docs/GAME-DESIGN.md`), `MECHANICS-CATALOG.md` (64 механики), `RUSSIAN-PRISON-RESEARCH.md` (история режима), `ROBLOX-TECH-NOTES.md` (рекомендации Roblox по серверу и DataStore — актуально), `MINING-AUDIT.md` / `BOMBS-BACKPACKS-AUDIT.md` / `PRESTIGE-SAVE-AUDIT.md` (чужой плагин PrisonTeam — справочно), `EXCLUDED.md` (что не попало в репозиторий и почему), `X-PRISON-AUDIT.md` (открытое ядро X-Prison, **не Cristalix**: формулы чар «база × уровень», цены уровней, токены, обновление шахт «50 % или 10 мин», потолок множителей ×10 — образец для наших решений).
 
 ## Наши решения
 
