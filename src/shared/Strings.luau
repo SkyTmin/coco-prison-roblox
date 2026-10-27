@@ -1142,10 +1142,10 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Niveau maximum",
 	},
 	upgrade = {
-		ru = "Улучшить предмет",
-		en = "Upgrade item",
-		es = "Mejorar objeto",
-		fr = "Améliorer l'objet",
+		ru = "Улучшение предмета",
+		en = "Item upgrade",
+		es = "Mejora de objeto",
+		fr = "Amélioration d'objet",
 	},
 	upgraded = {
 		ru = "%s улучшен до %d уровня",

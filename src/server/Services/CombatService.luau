@@ -96,7 +96,7 @@ local function weapon(profile): (number, number)
 	local speed = 4
 	if toolId == "sword" then
 		damage = vanilla.swordDamage[material]
-			+ Config.sharpnessBonus(Config.enchantForLevel("sword", level))
+			+ Config.sharpnessBonus(Config.enchantPower("sword", level))
 		speed = vanilla.attackSpeed.sword
 	elseif vanilla.toolDamage and vanilla.toolDamage[toolId] then
 		damage = vanilla.toolDamage[toolId][material]

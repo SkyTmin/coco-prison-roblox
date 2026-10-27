@@ -9,6 +9,45 @@ local Ui = require(script.Parent.Ui)
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local AchievementsWindow = {}
 
+-- Pictures of what a chain counts [владелец 27.10: «значки блоков … чтобы маленькие игроки понимали», «также с
+-- достижениями»]: the blocks the chain's tool digs (the upgrade-requirement blocks first, one per counter, cheapest
+-- first), the rat for the sword. At most MAX_ICONS.
+local MAX_ICONS = 5
+local function chainIcons(chain: string): { string }
+	if chain == "sword" then
+		local rat = Config.icons.icons.hud_rat
+		return if rat then { rat } else {}
+	end
+	local candidates = {}
+	for id, block in pairs(Config.blocks) do
+		if block.tool == chain and not block.itemOnly and Config.iconFor(id) then
+			table.insert(candidates, { id = id, block = block })
+		end
+	end
+	table.sort(candidates, function(a, b)
+		local ca, cb = a.block.upgradeCounter ~= nil, b.block.upgradeCounter ~= nil
+		if ca ~= cb then
+			return ca
+		end
+		if a.block.basePrice ~= b.block.basePrice then
+			return a.block.basePrice < b.block.basePrice
+		end
+		return a.id < b.id
+	end)
+	local icons, seen = {}, {}
+	for _, c in ipairs(candidates) do
+		local key = c.block.upgradeCounter or c.id
+		if not seen[key] then
+			seen[key] = true
+			table.insert(icons, Config.iconFor(c.id) :: string)
+			if #icons >= MAX_ICONS then
+				break
+			end
+		end
+	end
+	return icons
+end
+
 function AchievementsWindow.build(
 	parent: Instance,
 	profile: Types.Profile?,
@@ -39,15 +78,25 @@ function AchievementsWindow.build(
 			13,
 			Ui.colors.header
 		)
+		for i, image in ipairs(chainIcons(chain)) do
+			local block = Instance.new("ImageLabel")
+			block.Size = UDim2.fromOffset(16, 16)
+			block.Position = UDim2.fromOffset(6 + (i - 1) * 19, 35)
+			block.BackgroundTransparency = 1
+			block.ScaleType = Enum.ScaleType.Fit
+			block.ResampleMode = Enum.ResamplerMode.Pixelated
+			block.Image = image
+			block.Parent = card
+		end
 		local summaryLabel = Ui.label(
 			card,
 			"",
-			UDim2.new(1, -12, 0, 22),
-			UDim2.fromOffset(6, 32),
+			UDim2.fromOffset(70, 22),
+			UDim2.new(1, -76, 0, 32),
 			11,
 			Ui.colors.money
 		)
-		summaryLabel.TextWrapped = true
+		summaryLabel.TextXAlignment = Enum.TextXAlignment.Right
 		table.insert(updates, function(p: Types.Profile?)
 			local claimed = if p then math.clamp(p.achievements[chain] or 0, 0, cfg.tiers) else 0
 			local count = if p then (p.counters[cfg.chains[chain].counter] or 0) else 0

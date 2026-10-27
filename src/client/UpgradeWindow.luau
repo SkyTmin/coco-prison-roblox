@@ -8,6 +8,7 @@
 -- per item (two shovels are two entries, each with its own level), the held tool first; the
 -- requirement counters are the player's.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
@@ -61,52 +62,119 @@ function UpgradeWindow.build(
 	local selectedKey: string? = nil
 	local viewLevel = 1
 	local itemButtons: { [string]: { frame: Frame, icon: ImageLabel } } = {}
-	-- left card
+	-- left card: one big icon, the full name, the level, a rule, the cost on one line, the button
 	local left = Ui.panel(content, UDim2.fromOffset(240, H - 150), UDim2.fromOffset(0, 58))
 	local bigIcon = Instance.new("ImageLabel")
 	bigIcon.AnchorPoint = Vector2.new(0.5, 0)
-	bigIcon.Position = UDim2.new(0.5, 0, 0, 16)
+	bigIcon.Position = UDim2.new(0.5, 0, 0, 18)
 	bigIcon.Size = UDim2.fromOffset(128, 128)
 	bigIcon.BackgroundTransparency = 1
 	bigIcon.ScaleType = Enum.ScaleType.Fit
 	bigIcon.ResampleMode = Enum.ResamplerMode.Pixelated
 	bigIcon.Parent = left
+	-- the enchantment glint: the same picture exactly on top, a purple band sweeping across it
+	-- [владелец 27.10: the old copy was shifted by its anchor and looked like «две кирки рядом»]
 	local glint = bigIcon:Clone()
-	glint.ImageColor3 = Color3.fromRGB(190, 110, 255)
-	glint.ImageTransparency = 0.6
-	glint.Parent = bigIcon
+	glint.AnchorPoint = Vector2.zero
 	glint.Position, glint.Size = UDim2.new(), UDim2.fromScale(1, 1)
+	glint.ImageColor3 = Color3.fromRGB(200, 120, 255)
+	glint.Parent = bigIcon
+	local sweep = Instance.new("UIGradient")
+	sweep.Rotation = 30
+	sweep.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.4, 1),
+		NumberSequenceKeypoint.new(0.5, 0.45),
+		NumberSequenceKeypoint.new(0.6, 1),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	sweep.Offset = Vector2.new(-1, 0)
+	sweep.Parent = glint
+	TweenService:Create(
+		sweep,
+		TweenInfo.new(2.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1),
+		{ Offset = Vector2.new(1, 0) }
+	):Play()
 	local itemName =
-		Ui.label(left, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 152), 15, Ui.colors.header)
+		Ui.label(left, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 158), 15, Ui.colors.header)
 	itemName.TextXAlignment = Enum.TextXAlignment.Center
 	local itemLevel =
-		Ui.label(left, "", UDim2.new(1, -16, 0, 20), UDim2.fromOffset(8, 174), 13, Ui.colors.text)
+		Ui.label(left, "", UDim2.new(1, -16, 0, 20), UDim2.fromOffset(8, 180), 13, Ui.colors.text)
 	itemLevel.TextXAlignment = Enum.TextXAlignment.Center
-	local costLabel = Ui.rich(left, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 210), 14)
+	local rule = Instance.new("Frame")
+	rule.Position, rule.Size = UDim2.new(0, 10, 1, -94), UDim2.new(1, -20, 0, 1)
+	rule.BackgroundColor3, rule.BorderSizePixel = Ui.colors.border, 0
+	rule.Parent = left
+	local costKey =
+		Ui.label(left, t("cost"), UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -82), 14)
+	costKey.TextXAlignment = Enum.TextXAlignment.Left
+	local costLabel = Ui.rich(left, "", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -82), 14)
+	costLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local buy =
-		Ui.button(left, t("upgrade_button"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -44))
-	-- right card
-	local right = Ui.panel(content, UDim2.new(1, -250, 0, H - 150), UDim2.fromOffset(250, 58))
-	local upsHeader =
-		Ui.label(right, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 6), 13, Ui.colors.muted)
-	local upsCount =
-		Ui.label(right, "", UDim2.fromOffset(60, 22), UDim2.new(1, -68, 0, 6), 13, Ui.colors.text)
-	upsCount.TextXAlignment = Enum.TextXAlignment.Right
-	local upsBox = Ui.inset(right, UDim2.new(1, -16, 0, 62), UDim2.fromOffset(8, 30))
-	local upsLines = {
-		Ui.rich(upsBox, "", UDim2.new(1, -16, 0, 24), UDim2.fromOffset(8, 6), 13),
-		Ui.rich(upsBox, "", UDim2.new(1, -16, 0, 24), UDim2.fromOffset(8, 32), 13),
-	}
-	local reqHeader =
-		Ui.label(right, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 100), 13, Ui.colors.muted)
-	local reqCount =
-		Ui.label(right, "", UDim2.fromOffset(60, 22), UDim2.new(1, -68, 0, 100), 13, Ui.colors.text)
-	reqCount.TextXAlignment = Enum.TextXAlignment.Right
-	local reqBox = Ui.inset(right, UDim2.new(1, -16, 1, -132), UDim2.fromOffset(8, 124))
-	local reqLines: { TextLabel } = {}
-	for i = 1, 4 do
-		reqLines[i] =
-			Ui.rich(reqBox, "", UDim2.new(1, -16, 0, 24), UDim2.fromOffset(8, 6 + (i - 1) * 26), 13)
+		Ui.button(left, t("upgrade_button"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -46))
+	-- right: "Улучшения" and "Требования", each a panel of rows: the name on the left, the value on the right
+	local ROW = 28
+	type Row = { name: TextLabel, value: TextLabel, box: Frame, icon: ImageLabel }
+	local function rows(panel: Frame, count: number): { Row }
+		local list: { Row } = {}
+		for i = 1, count do
+			local box = Ui.inset(
+				panel,
+				UDim2.new(1, -16, 0, ROW),
+				UDim2.fromOffset(8, 32 + (i - 1) * (ROW + 4))
+			)
+			local name = Ui.rich(box, "", UDim2.new(1, -16, 1, 0), UDim2.fromOffset(8, 0), 13)
+			name.TextXAlignment = Enum.TextXAlignment.Left
+			local value = Ui.rich(box, "", UDim2.new(1, -16, 1, 0), UDim2.fromOffset(8, 0), 13)
+			value.TextXAlignment = Enum.TextXAlignment.Right
+			-- the block / mob picture before a requirement's name
+			local icon = Instance.new("ImageLabel")
+			icon.Size, icon.Position = UDim2.fromOffset(20, 20), UDim2.fromOffset(6, (ROW - 20) / 2)
+			icon.BackgroundTransparency = 1
+			icon.ScaleType = Enum.ScaleType.Fit
+			icon.ResampleMode = Enum.ResamplerMode.Pixelated
+			icon.Visible = false
+			icon.Parent = box
+			list[i] = { name = name, value = value, box = box, icon = icon }
+		end
+		return list
+	end
+	local function header(panel: Frame): (TextLabel, TextLabel)
+		local title = Ui.rich(panel, "", UDim2.new(1, -16, 0, 26), UDim2.fromOffset(8, 3), 13)
+		title.TextXAlignment = Enum.TextXAlignment.Left
+		local count = Ui.label(
+			panel,
+			"",
+			UDim2.fromOffset(60, 26),
+			UDim2.new(1, -68, 0, 3),
+			13,
+			Ui.colors.text
+		)
+		count.TextXAlignment = Enum.TextXAlignment.Right
+		return title, count
+	end
+	local upsHeight = 32 + 3 * (ROW + 4) + 4
+	local upsPanel = Ui.panel(content, UDim2.new(1, -250, 0, upsHeight), UDim2.fromOffset(250, 58))
+	local upsHeader, upsCount = header(upsPanel)
+	local upsRows = rows(upsPanel, 3)
+	local reqPanel = Ui.panel(
+		content,
+		UDim2.new(1, -250, 0, H - 150 - upsHeight - 8),
+		UDim2.fromOffset(250, 58 + upsHeight + 8)
+	)
+	local reqHeader, reqCount = header(reqPanel)
+	local reqRows = rows(reqPanel, 4)
+	local function setRows(list: { Row }, lines: { { string } }, icons: { string? }?)
+		for i, row in ipairs(list) do
+			local line = lines[i]
+			local image = if icons then icons[i] else nil
+			row.box.Visible = line ~= nil
+			row.name.Text = if line then line[1] else ""
+			row.value.Text = if line then line[2] else ""
+			row.icon.Image = image or ""
+			row.icon.Visible = image ~= nil
+			row.name.Position = UDim2.fromOffset(if image then 32 else 8, 0)
+		end
 	end
 	-- bottom pager
 	local prev = Ui.button(
@@ -211,8 +279,8 @@ function UpgradeWindow.build(
 			viewLevel = if chosen then (chosen.stack.level or 1) else 1
 		end
 		local entry = chosen
-		left.Visible, right.Visible, pager.Visible, prev.Visible, nextB.Visible =
-			entry ~= nil, entry ~= nil, entry ~= nil, entry ~= nil, entry ~= nil
+		left.Visible, upsPanel.Visible, reqPanel.Visible = entry ~= nil, entry ~= nil, entry ~= nil
+		pager.Visible, prev.Visible, nextB.Visible = entry ~= nil, entry ~= nil, entry ~= nil
 		if not entry then
 			return
 		end
@@ -225,88 +293,85 @@ function UpgradeWindow.build(
 		local icon = Config.iconFor(id, shownLevel) or ""
 		bigIcon.Image, glint.Image = icon, icon
 		glint.Visible = Config.isEnchanted(id, shownLevel)
-		itemName.Text = Strings.itemName(id, shownLevel, locale)
+		itemName.Text = Strings.itemFullName(id, shownLevel, locale)
 		itemLevel.Text = string.format("%s %d", t("level"), shownLevel)
+		upsHeader.Text =
+			string.format('<font color="%s">⬆</font> %s', Ui.hex(Ui.colors.money), t("upgrades"))
+		reqHeader.Text = "✓ " .. t("requirements")
+		local function change(before: number, after: number): string
+			return string.format(
+				'%d → <font color="%s">%d</font>',
+				before,
+				Ui.hex(Ui.colors.money),
+				after
+			)
+		end
+		local function named(text: string, color: Color3): string
+			return string.format('<font color="%s">%s</font>', Ui.hex(color), text)
+		end
 		if up then
 			costLabel.Text = string.format(
-				'%s  <font color="%s">%s $</font>',
-				t("cost"),
+				'<font color="%s">%s $</font>',
 				Ui.hex(Ui.colors.money),
 				Strings.big(up.cost)
 			)
-			upsHeader.Text = "⬆ " .. t("upgrades")
-			local enchantBefore = Config.enchantForLevel(id, viewLevel)
-			local enchantAfter = up.enchantAfter
+			-- the row names the item as it is now (its material before the step), like the original
 			local lines = {
-				string.format(
-					'<font color="%s">%s</font>  %d → <font color="%s">%d</font>',
-					Ui.hex(Ui.colors.header),
-					Strings.itemName(id, viewLevel, locale),
-					viewLevel,
-					Ui.hex(Ui.colors.money),
-					up.to
-				),
+				{
+					named(Strings.itemFullName(id, viewLevel, locale), Ui.colors.header),
+					change(viewLevel, up.to),
+				},
 			}
-			if enchantAfter ~= enchantBefore then
-				table.insert(
-					lines,
-					string.format(
-						'<font color="%s">%s</font>  %d → <font color="%s">%d</font>',
-						Ui.hex(Ui.colors.level),
-						enchantName(id, locale),
-						enchantBefore,
-						Ui.hex(Ui.colors.money),
-						enchantAfter
-					)
-				)
+			-- I–III within a material; a material change resets it and the original shows no enchant row there
+			local enchantBefore = Config.enchantForLevel(id, viewLevel)
+			if up.enchantAfter > enchantBefore then
+				table.insert(lines, {
+					named(enchantName(id, locale), Ui.colors.level),
+					change(enchantBefore, up.enchantAfter),
+				})
 			end
 			local flameBefore = Config.flameForLevel(id, viewLevel)
 			if (up.flameAfter or flameBefore) ~= flameBefore then
-				table.insert(
-					lines,
-					string.format(
-						'<font color="%s">%s</font>  %d → <font color="%s">%d</font>',
-						Ui.hex(Ui.colors.level),
-						Strings.t("enchant_flame", locale),
-						flameBefore,
-						Ui.hex(Ui.colors.money),
-						up.flameAfter :: number
-					)
-				)
+				table.insert(lines, {
+					named(Strings.t("enchant_flame", locale), Ui.colors.level),
+					change(flameBefore, up.flameAfter :: number),
+				})
 			end
 			upsCount.Text = tostring(#lines)
-			for i, label in ipairs(upsLines) do
-				label.Text = lines[i] or ""
-			end
-			local met, total = 0, 0
-			local i = 0
+			setRows(upsRows, lines)
+			-- requirements, the biggest first (stone, then coal, then ore — the original's order)
+			local counters = {}
 			for counter, needed in pairs(up.requirements) do
-				i += 1
-				total += 1
-				local have = if p then Config.requirementHave(p, counter) else 0
-				local ok = have >= needed
+				table.insert(counters, { counter = counter, needed = needed })
+			end
+			table.sort(counters, function(a, b)
+				return a.needed > b.needed
+			end)
+			local met = 0
+			local reqLines = {}
+			local reqIcons: { string? } = {}
+			for i, req in ipairs(counters) do
+				reqIcons[i] = Config.counterIcon(req.counter)
+				local have = if p then Config.requirementHave(p, req.counter) else 0
+				local ok = have >= req.needed
 				if ok then
 					met += 1
 				end
-				if reqLines[i] then
-					reqLines[i].Text = string.format(
-						'%s  <font color="%s">%s</font> / <font color="%s">%s</font>%s',
-						Strings.counterName(counter, locale),
+				table.insert(reqLines, {
+					Strings.counterName(req.counter, locale),
+					string.format(
+						'<font color="%s">%s / %s%s</font>',
 						Ui.hex(if ok then Ui.colors.money else Ui.colors.red),
 						Strings.big(have),
-						Ui.hex(Ui.colors.money),
-						Strings.big(needed),
+						Strings.big(req.needed),
 						if ok then " ✓" else ""
-					)
-				end
+					),
+				})
 			end
-			for j = i + 1, #reqLines do
-				reqLines[j].Text = ""
-			end
-			reqHeader.Text = "✓ " .. t("requirements")
-			reqCount.Text = string.format("%d / %d", met, total)
+			setRows(reqRows, reqLines, reqIcons)
+			reqCount.Text = string.format("%d / %d", met, #counters)
 			local affordable = p ~= nil and p.coins >= up.cost * Config.moneyScale
-			local purchasable = viewLevel == current and met == total and affordable
+			local purchasable = viewLevel == current and met == #counters and affordable
 			buy.Text = if viewLevel ~= current then t("upgrade_preview") else t("upgrade_button")
 			buy.BackgroundColor3 = if purchasable
 				then Ui.colors.buttonBlue
@@ -321,15 +386,15 @@ function UpgradeWindow.build(
 			)
 		else
 			costLabel.Text = ""
-			upsHeader.Text = "⬆ " .. t("upgrades")
-			upsCount.Text = "0"
-			upsLines[1].Text = t("upgrade_max")
-			upsLines[2].Text = ""
-			reqHeader.Text = "✓ " .. t("requirements")
+			upsCount.Text = "1"
+			setRows(upsRows, {
+				{
+					named(Strings.itemFullName(id, viewLevel, locale), Ui.colors.header),
+					change(viewLevel, viewLevel),
+				},
+			})
 			reqCount.Text = "0 / 0"
-			for _, label in ipairs(reqLines) do
-				label.Text = ""
-			end
+			setRows(reqRows, {})
 			buy.Text = t("upgrade_max")
 			buy.BackgroundColor3 = Ui.colors.buttonGrey
 			buy.Interactable = false

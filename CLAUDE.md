@@ -121,6 +121,7 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    removes it right after; DigCancel on release; reach = 4.5 blocks eye → hit point, LoS to the hit
    point. Mines keep four 4-wide ladder shafts free forever (`MineService.ladderShaft`).
    Map fixes applied in place after a build: `scripts/fix-map-ladders-zfight.luau`.
+   Runtime map fix: `SignService` cuts sign posts that run through a text board down to its bottom edge at every server start.
    Cases: `CaseService` refuses to open without the matching key (toast names the key), prompts work
    from any side (no line of sight), nickname case grants names from `keys.nicknameCase.nicknames`. Per-mine
    composition: `scripts/design-decisions.json` → `mines.<locationId>_<mineId>.shares` →

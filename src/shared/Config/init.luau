@@ -173,6 +173,40 @@ function Config.requirementHave(profile: any, counter: string): number
 	return (profile.counters and profile.counters[counter]) or 0
 end
 
+-- Picture of a requirement counter [владелец 27.10: «добавляй значки блоков … чтобы маленькие игроки понимали»]:
+-- a dug-block counter shows its block (the ore when the counter has one: «Каменный уголь» → coal ore, «Камень» →
+-- stone), the stat counters their own icons. nil when there is none.
+local COUNTER_ICONS = {
+	["Крысы"] = "hud_rat",
+	["Убийства"] = "sword_iron",
+	["Оружейник"] = "chestplate_iron",
+}
+local counterIconCache: { [string]: string | false } = {}
+function Config.counterIcon(counter: string): string?
+	local cached = counterIconCache[counter]
+	if cached ~= nil then
+		return cached or nil
+	end
+	local icon: string? = nil
+	if COUNTER_ICONS[counter] then
+		icon = Config.icons.icons[COUNTER_ICONS[counter]]
+	else
+		local best: string? = nil
+		for id, block in pairs(Config.blocks) do
+			if block.upgradeCounter == counter then
+				local ore = string.sub(id, -4) == "_ore"
+				local bestOre = best ~= nil and string.sub(best, -4) == "_ore"
+				if not best or (ore and not bestOre) or (ore == bestOre and #id < #best) then
+					best = id
+				end
+			end
+		end
+		icon = if best then Config.iconFor(best) else nil
+	end
+	counterIconCache[counter] = icon or false
+	return icon
+end
+
 -- The bow's Flame level at an item level (0 or 1)
 function Config.flameForLevel(itemId: string, level: number): number
 	local tool = Config.tools[itemId]
@@ -214,12 +248,26 @@ function Config.tierIndex(material: string): number
 	return (table.find(MATERIALS, material) or 1) - 1
 end
 
--- Enchant level (Efficiency/Sharpness/Protection) for an item level.
+-- Enchant level (Efficiency/Sharpness/Protection) an item level shows, as in the original menu: I–III within a
+-- material, back to 0 when the material changes [меню; владелец 27.10: «по факту уровней эффективности 3»].
 function Config.enchantForLevel(itemId: string, level: number): number
 	if level <= 1 then
 		return 0
 	end
-	-- [владелец 22.10] pickaxe / axe Efficiency and sword Sharpness keep growing with the level
+	for _, up in ipairs(Config.tools[itemId].upgrades) do
+		if up.to == level then
+			return up.enchantAfter
+		end
+	end
+	return 0
+end
+
+-- The enchant strength digging and hits use. [владелец 22.10] pickaxe / axe Efficiency and sword Sharpness keep
+-- growing with the level (the maximal diamond pickaxe digs stone instantly); the item still shows the menu level.
+function Config.enchantPower(itemId: string, level: number): number
+	if level <= 1 then
+		return 0
+	end
 	local curve = (
 		Config.rules.digging
 		and Config.rules.digging.efficiencyByLevel
@@ -233,12 +281,7 @@ function Config.enchantForLevel(itemId: string, level: number): number
 	if typeof(curve) == "table" and curve[level] then
 		return curve[level]
 	end
-	for _, up in ipairs(Config.tools[itemId].upgrades) do
-		if up.to == level then
-			return up.enchantAfter
-		end
-	end
-	return 0
+	return Config.enchantForLevel(itemId, level)
 end
 
 -- Extra sword damage of a Sharpness level, Java formula 0.5 × level + 0.5 [ваниль]
@@ -299,7 +342,7 @@ function Config.breakTime(block: Block, toolId: string?, toolLevel: number, hast
 		if toolId == block.tool and toolLevel >= 1 then
 			local material = Config.materialForLevel(toolLevel)
 			speed = Config.vanilla.toolSpeed[material]
-			local enchant = Config.enchantForLevel(toolId :: string, toolLevel)
+			local enchant = Config.enchantPower(toolId :: string, toolLevel)
 			if enchant > 0 then
 				speed += enchant * enchant + 1
 			end

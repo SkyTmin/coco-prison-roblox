@@ -18,8 +18,18 @@
     "eden": "rbxassetid://76596590940266",
     "cherubim": "rbxassetid://120147648912249",
     "gate": "rbxassetid://111247561019796",
-    "paradise": "rbxassetid://83182384904003"
+    "paradise": "rbxassetid://83182384904003",
+    "mountain_foot": "rbxassetid://130368200765865",
+    "underworld": "rbxassetid://89094840165911",
+    "pyramid": "rbxassetid://122028551535688",
+    "royal_garden": "rbxassetid://130659397805681",
+    "sunken_lighthouse": "rbxassetid://89593856244970",
+    "end_castle": "rbxassetid://128366526388399",
+    "spider_lair": "rbxassetid://95022815741223",
+    "snowy_hand": "rbxassetid://102624582476986",
+    "basement": "rbxassetid://132783048616638"
   },
   "_topdown": "[владелец 22.10: «вид с высоты под углом; без чужих объектов и неба; снимать в запущенной игре — там освещение»] prison, quarry, fraction_base, market, leprechaun_valley, castle, inside_out, kyoto, farm, barn, edge_gate, tree, church, purgatory, eden, cherubim, gate, paradise (26.10): Play-mode capture (GUI off, scripted camera, location streamed in, the quarry roof hidden on the client), cropped sky-free by scripts/crop-preview.cjs → assets/previews/topdown-<id>.png, uploaded 22.10.2026",
-  "_removed": "[владелец 22.10: «другие превью у шахт удали»] the Codex art previews of mountain_foot, underworld, pyramid, basement removed (the menu draws its block diorama) until top-down shots of their built maps exist"
+  "_removed": "[владелец 22.10: «другие превью у шахт удали»] the Codex art previews of mountain_foot, underworld, pyramid, basement removed (the menu draws its block diorama) until top-down shots of their built maps exist",
+  "_topdown2": "[владелец 27.10: «не везде есть привью шахты», then «шахта в упор … не видно острова, у тебя же есть хороший пример последние 40 уровни»] mountain_foot, underworld, pyramid, royal_garden, sunken_lighthouse, end_castle, spider_lair, snowy_hand, basement: Play-mode captures 27.10.2026 like the late locations — high behind the mine, the location's landmark in the middle (arena, bastion, pyramid, castle, lighthouse, the End city, the cave, the moon lake shrine, the cellar hall), sky kept; caves shot under their ceiling; cropped 1.9:1 by hand (scratchpad cropman), uploaded 27.10.2026"
 }

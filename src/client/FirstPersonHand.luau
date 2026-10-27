@@ -77,6 +77,35 @@ local function mcBow(k: number, drawnSeconds: number?, blend: number): CFrame
 	return pose * mcDisplay(k)
 end
 
+-- The bare arm [владелец 27.10: «удар от руки ужасное», Java screenshots]: Minecraft Java's renderPlayerArm
+-- [ваниль ItemInHandRenderer] in its units (1 = a block), right hand, swing progress p linear 0..1. At rest the arm
+-- rises from the bottom right corner with the fist towards the centre; the punch darts the fist to the crosshair on a
+-- fast-in √p curve and the arm falls back. The returned frame is the arm model's (pivot at the shoulder, +Y towards
+-- the fist, 1/16 a pixel of the 4×12×4 arm).
+local function mcArm(p: number): CFrame
+	local sq = math.sqrt(p)
+	return CFrame.new(
+		0.64 - 0.3 * math.sin(sq * math.pi),
+		-0.6 + 0.4 * math.sin(sq * math.pi * 2),
+		-0.72 - 0.4 * math.sin(p * math.pi)
+	) * CFrame.Angles(0, math.rad(45 + 70 * math.sin(sq * math.pi)), 0) * CFrame.Angles(
+		0,
+		0,
+		math.rad(-20 * math.sin(p * p * math.pi))
+	) * CFrame.new(-1, 3.6, 3.5) * CFrame.Angles(0, 0, math.rad(120)) * CFrame.Angles(
+		math.rad(200),
+		0,
+		0
+	) * CFrame.Angles(0, math.rad(-135), 0) * CFrame.new(5.6, 0, 0) * CFrame.new(
+		-5 / 16,
+		2 / 16,
+		0
+	)
+end
+-- the arm's two boxes in the arm frame, px: the sleeve at the shoulder (4 px), the skin down to the fist (8 px)
+local SLEEVE_BOX = { centre = Vector3.new(-1, 0, 0) / 16, size = Vector3.new(4, 4, 4) / 16 }
+local SKIN_BOX = { centre = Vector3.new(-1, 6, 0) / 16, size = Vector3.new(4, 8, 4) / 16 }
+
 -- Zoom from the camera focus, not the distance to the head: the head bobs with the walk animation
 -- (0.6..1.3 studs from the camera), which hid the hand every other frame while walking.
 local function isFirstPerson(character: Model?): boolean
@@ -86,8 +115,8 @@ local function isFirstPerson(character: Model?): boolean
 		and (camera.CFrame.Position - camera.Focus.Position).Magnitude < 1.5
 end
 
-local function skinColor(character: Model): Color3
-	for _, name in ipairs({ "RightHand", "RightLowerArm", "Right Arm" }) do
+local function partColor(character: Model, names: { string }): Color3
+	for _, name in ipairs(names) do
 		local part = character:FindFirstChild(name)
 		if part and part:IsA("BasePart") then
 			return part.Color
@@ -111,6 +140,9 @@ function FirstPersonHand.Start()
 	arm.CastShadow = false
 	arm.Material = Enum.Material.SmoothPlastic
 	arm.Parent = model
+	local sleeve = arm:Clone()
+	sleeve.Name = "Sleeve"
+	sleeve.Parent = model
 	local itemKey: string? = nil
 	local item: Instance? = nil
 	local itemPart: BasePart? = nil
@@ -169,11 +201,13 @@ function FirstPersonHand.Start()
 				return
 			end
 			model.Parent = camera
-			arm.Color = skinColor(character)
+			arm.Color = partColor(character, { "RightHand", "RightLowerArm", "Right Arm" })
+			sleeve.Color = partColor(character, { "RightUpperArm", "RightLowerArm", "Right Arm" })
 			local held = character:GetAttribute("HeldItem")
 			local isBow = typeof(held) == "string" and string.sub(held, 1, 4) == "bow:"
 			setItem(held, if isBow then BowState.ModelId(character) else nil)
 			arm.Transparency = if item then 1 else 0
+			sleeve.Transparency = arm.Transparency
 			-- walking bob (Minecraft view bobbing, small) and the swing
 			local speed =
 				Vector3.new(humanoid.MoveDirection.X, 0, humanoid.MoveDirection.Z).Magnitude
@@ -241,6 +275,22 @@ function FirstPersonHand.Start()
 						* CFrame.Angles(math.rad(-80 * f1), 0, 0)
 						* CFrame.Angles(0, math.rad(-45), 0)
 				end
+			end
+			if not item then
+				-- the bare hand: Minecraft's arm, its punch whatever the attack kind; positions deeper by the zoom
+				-- (Minecraft draws the hand with a fixed 70° view), like the held items
+				local depth = math.tan(math.rad(35)) / math.tan(math.rad(camera.FieldOfView) / 2)
+				local frame = mcArm(if progress then math.clamp(progress, 0, 1) else 0)
+				for _, pair in ipairs({ { arm, SKIN_BOX }, { sleeve, SLEEVE_BOX } }) do
+					local part, box = pair[1] :: Part, pair[2] :: { centre: Vector3, size: Vector3 }
+					local at = frame * CFrame.new(box.centre)
+					part.Size = box.size
+					part.CFrame = camera.CFrame
+						* bobOffset
+						* CFrame.new(at.X, at.Y, at.Z * depth)
+						* at.Rotation
+				end
+				return
 			end
 			local handFrame = camera.CFrame * swingShift * REST * bobOffset * swingOffset
 			-- the arm comes from below the screen edge towards the hand point
