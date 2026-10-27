@@ -523,13 +523,19 @@ local function hudLine(y: number, size: number, color: Color3): TextLabel
 	return label
 end
 -- [владелец 21.10] combo above the hearts and food; resets after 30 s without digging (server)
-local combo = hudLine(-72, 14, Ui.colors.muted)
+-- [владелец 28.10: «комбо бар падает на бар с сердечками. Сделай его выше над голодом»] it sits over the food row
+-- (the right half), clear of the heart rows that grow upwards on the left; inside the food row's frame, so it shares
+-- its place and its touch scale
+local combo = hudLine(0, 14, Ui.colors.muted)
+combo.Size = UDim2.fromOffset(240, 18)
+combo.Position = UDim2.new(0.5, 0, 0, -12)
+combo.Parent = drumsticks.group
 local comboMultiplier: number? = nil
 local comboBlocks = 0
 local comboAt = 0 -- os.clock() of the last dug block
 -- [владелец 21.10] combo timer: a bar under the combo text, full after every block, draining over the
 -- idle time (rules.combo.breakAfterIdleSeconds = 30 s) — empty means the combo resets
-local comboBar = Ui.inset(hotbar, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -65))
+local comboBar = Ui.inset(drumsticks.group, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -5))
 comboBar.AnchorPoint = Vector2.new(0.5, 1)
 comboBar.Visible = false
 local comboFill = Instance.new("Frame")

@@ -11,8 +11,12 @@
 --     not set up.
 --   * DonateBuyRobux(itemId) [владелец 28.10: «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»]:
 --     one item straight for Robux through its own Developer Product, checked for room before the prompt; the receipt
---     gives it the same way. No room any more when the receipt comes (the inventory filled meanwhile): the player
---     gets the item's price in crystals instead, never nothing.
+--     gives it the same way.
+--   * No room in the inventory [владелец 28.10: «когда в инвентаре нет мест … отправлять в хранилище, где бустеры, и
+--     уведомление, что туда направлено; потом оттуда кнопка получить»]: whatever does not fit goes to p.stash, shown
+--     in the storage window [B]; StashClaim(index) moves as much as fits back into the inventory. Bought boosters go to
+--     the same storage and the toast says so. Only a full booster storage or the auction-slot limit can still refuse
+--     a receipt that already came — then the item's price comes back in crystals, never nothing.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -53,9 +57,6 @@ local function blocked(p: any, id: string, item: Donate.Item, count: number): st
 	if count < 1 or count > Donate.limit(p, id) then
 		return "donate_limit"
 	end
-	if item.give and not InventoryService.canAdd(p, item.give, count * (item.each or 1)) then
-		return "donate_no_room"
-	end
 	if
 		item.booster
 		and Boosters.storedCount(p) + count * #item.booster.kinds > Config.boosters.maxStored
@@ -65,10 +66,28 @@ local function blocked(p: any, id: string, item: Donate.Item, count: number): st
 	return nil
 end
 
--- the goods into the profile (inside a mutation, after `blocked`)
-local function give(p: any, item: Donate.Item, count: number)
+-- items into the storage (the same id stacks)
+local function stash(p: any, id: string, count: number)
+	p.stash = p.stash or {}
+	for _, entry in ipairs(p.stash) do
+		if entry.id == id then
+			entry.count += count
+			return
+		end
+	end
+	table.insert(p.stash, { id = id, count = count })
+end
+
+-- the goods into the profile (inside a mutation, after `blocked`); where they went: "inventory", "stash" (some or
+-- all did not fit), "boosters" or "auction"
+local function give(p: any, item: Donate.Item, count: number): string
 	if item.give then
-		InventoryService.add(p, item.give, count * (item.each or 1))
+		local left = InventoryService.add(p, item.give, count * (item.each or 1))
+		if left > 0 then
+			stash(p, item.give, left)
+			return "stash"
+		end
+		return "inventory"
 	elseif item.booster then
 		for _ = 1, count do
 			for _, kind in ipairs(item.booster.kinds) do
@@ -77,7 +96,20 @@ local function give(p: any, item: Donate.Item, count: number)
 		end
 	elseif item.auctionSlot then
 		p.auctionSlots = (p.auctionSlots or 0) + count
+		return "auction"
 	end
+	return "boosters"
+end
+
+-- the toast after a purchase: what was bought and, when it is not in the inventory, where it went
+local function bought(player: Player, id: string, count: number, place: string)
+	local locale = Strings.localeOf(player)
+	local text = Strings.t("donate_bought", locale, Donate.name(id, locale), count)
+	if place == "stash" or place == "boosters" then
+		text ..= ". " .. Strings.t("donate_to_" .. place, locale)
+	end
+	Remotes.event("Toast"):FireClient(player, text)
+	Remotes.event("DonateBought"):FireClient(player, id, count)
 end
 
 local function onBuy(player: Player, id: any, rawCount: any)
@@ -100,19 +132,17 @@ local function onBuy(player: Player, id: any, rawCount: any)
 		toast(player, "donate_not_enough", tostring(price - Donate.crystals(profile)))
 		return
 	end
-	local done = false
+	local place: string? = nil
 	ProfileService.Mutate(player, function(p)
 		-- checked again on the profile itself: nothing may change between the checks and the sale
 		if Donate.crystals(p) < price or blocked(p, id, item, count) then
 			return
 		end
 		p.crystals = Donate.crystals(p) - price
-		give(p, item, count)
-		done = true
+		place = give(p, item, count)
 	end)
-	if done then
-		toast(player, "donate_bought", Donate.name(id, Strings.localeOf(player)), count)
-		Remotes.event("DonateBought"):FireClient(player, id, count)
+	if place then
+		bought(player, id, count, place)
 	end
 end
 
@@ -152,16 +182,15 @@ local function onBuyRobux(player: Player, id: any)
 	if item.productId > 0 then
 		MarketplaceService:PromptProductPurchase(player, item.productId)
 	elseif RunService:IsStudio() then
-		local done = false
+		local place: string? = nil
 		ProfileService.Mutate(player, function(p)
 			if not blocked(p, id, item, 1) then
-				give(p, item, 1)
-				done = true
+				place = give(p, item, 1)
 			end
 		end)
-		if done then
+		if place then
 			toast(player, "donate_studio_free_item")
-			Remotes.event("DonateBought"):FireClient(player, id, 1)
+			bought(player, id, 1, place)
 		end
 	else
 		toast(player, "donate_no_product")
@@ -189,13 +218,12 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 			else Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	-- what the receipt gave: the pack's crystals, the item, or (no room for the item) its price in crystals
-	local crystals, gave = 0, false
+	local crystals, place: string? = 0, nil
 	ProfileService.Mutate(player, function(p)
 		if pack then
 			crystals = pack.crystals
 		elseif item and itemId and not blocked(p, itemId, item, 1) then
-			give(p, item, 1)
-			gave = true
+			place = give(p, item, 1)
 		elseif item then
 			crystals = item.price
 		end
@@ -211,9 +239,8 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 		-- kept in memory with its id: a retry on this server sees the id; a lost server loses both and is retried
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
-	if gave and itemId then
-		toast(player, "donate_bought", Donate.name(itemId, Strings.localeOf(player)), 1)
-		Remotes.event("DonateBought"):FireClient(player, itemId, 1)
+	if place and itemId then
+		bought(player, itemId, 1, place)
 	else
 		toast(player, if item then "donate_refund_crystals" else "donate_crystals_added", crystals)
 		Remotes.event("DonateCrystals"):FireClient(player, crystals)
@@ -221,10 +248,40 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
+-- a stored item back into the inventory: as much as fits
+local function onClaim(player: Player, index: any)
+	if typeof(index) ~= "number" or throttled(player) then
+		return
+	end
+	local found, moved, left = false, 0, 0
+	ProfileService.Mutate(player, function(p)
+		local entry = p.stash and p.stash[index]
+		if not entry then
+			return
+		end
+		found = true
+		left = InventoryService.add(p, entry.id, entry.count)
+		moved = entry.count - left
+		if left > 0 then
+			entry.count = left
+		else
+			table.remove(p.stash, index)
+		end
+	end)
+	if not found then
+		return
+	elseif moved == 0 then
+		toast(player, "donate_no_room")
+	elseif left > 0 then
+		toast(player, "donate_claimed_part", moved, left)
+	end
+end
+
 function DonateService.Start()
 	Remotes.event("DonateBuy").OnServerEvent:Connect(onBuy)
 	Remotes.event("DonateTopUp").OnServerEvent:Connect(onTopUp)
 	Remotes.event("DonateBuyRobux").OnServerEvent:Connect(onBuyRobux)
+	Remotes.event("StashClaim").OnServerEvent:Connect(onClaim)
 	MarketplaceService.ProcessReceipt = processReceipt
 	Players.PlayerRemoving:Connect(function(player)
 		lastAction[player] = nil

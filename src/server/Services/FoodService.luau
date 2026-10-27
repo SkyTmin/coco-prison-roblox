@@ -11,7 +11,6 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
-local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HungerService = require(script.Parent.HungerService)
@@ -28,10 +27,6 @@ type Eating = { slot: number, id: string, startedAt: number }
 local FoodService = {}
 local eating: { [Player]: Eating } = {}
 local started = false
-
-local function toast(player: Player, key: string)
-	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player)))
-end
 
 local function setShown(player: Player, id: string?)
 	local character = player.Character
@@ -70,8 +65,8 @@ local function onStart(player: Player, slot: any)
 	if current and current.slot == slot and current.id == stack.id then
 		return -- already eating it
 	end
+	-- full: nothing happens, like Minecraft [владелец 28.10: «уведомление, что игрок теперь не голоден, не нужно»]
 	if profile.hunger >= survival.hunger.max and not EAT.alwaysEdible[stack.id] then
-		toast(player, "eat_full")
 		return
 	end
 	eating[player] = { slot = slot, id = stack.id, startedAt = os.clock() }

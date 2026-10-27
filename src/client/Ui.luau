@@ -2,9 +2,12 @@
 -- UI kit in the style of the original (reference screenshots, wiki/in-game-wiki/JOBS-CASES-SPAWN.md
 -- "Стиль интерфейса"): two looks live side by side, exactly like in the original game:
 --   * "dark" — the server's custom menus: dark translucent panels with a thin grey border, pixel font,
---     orange headers, green money, blue/green buttons, red close square (shops, buyer, trainer, artifacts);
+--     orange headers, green money, blue/green buttons, close cross (shops, buyer, trainer, artifacts);
 --   * "mc"   — vanilla Minecraft container GUIs (chests/cases, inventory): light grey bevelled panel,
 --     bevelled slots, dark grey text. One Minecraft pixel = Ui.MC px.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 
 local Ui = {}
 
@@ -150,7 +153,7 @@ function Ui.button(
 	return b
 end
 
--- Window with a title strip and a red close square; returns the content frame.
+-- Window with a title strip and a close cross; returns the content frame.
 function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> ()): (Frame, Frame)
 	local win = Ui.panel(parent, size, UDim2.new(0.5, -size.X.Offset / 2, 0.5, -size.Y.Offset / 2))
 	win.Name = "Window_" .. title
@@ -158,9 +161,25 @@ function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> 
 	local titleBar = Ui.panel(win, UDim2.new(1, -44, 0, 28), UDim2.fromOffset(6, 6))
 	titleBar.Name = "TitleBar"
 	Ui.label(titleBar, title, UDim2.new(1, -12, 1, 0), UDim2.fromOffset(8, 0), 16, Ui.colors.text)
-	local close =
-		Ui.button(win, "✕", UDim2.fromOffset(28, 28), UDim2.new(1, -34, 0, 6), Ui.colors.close)
+	-- [владелец 28.10: «нарисуй крестик, чтобы меню закрывать, а то там красный квадрат»] the ✕ glyph is missing from
+	-- the font; our pixel cross (Codex → Blender, icon ui_close) grows a little under the mouse
+	local close = Instance.new("ImageButton")
 	close.Name = "Close"
+	close.Size = UDim2.fromOffset(28, 28)
+	close.Position = UDim2.new(1, -34, 0, 6)
+	close.BackgroundTransparency = 1
+	close.Image = Config.icons.icons.ui_close or ""
+	close.ScaleType = Enum.ScaleType.Fit
+	close.ResampleMode = Enum.ResamplerMode.Pixelated
+	close.Parent = win
+	local grow = Instance.new("UIScale")
+	grow.Parent = close
+	close.MouseEnter:Connect(function()
+		TweenService:Create(grow, TweenInfo.new(0.1), { Scale = 1.15 }):Play()
+	end)
+	close.MouseLeave:Connect(function()
+		TweenService:Create(grow, TweenInfo.new(0.15), { Scale = 1 }):Play()
+	end)
 	close.Activated:Connect(onClose)
 	local content = Instance.new("Frame")
 	content.Name = "Content"

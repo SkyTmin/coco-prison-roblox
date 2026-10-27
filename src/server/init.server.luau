@@ -53,6 +53,7 @@ for _, name in ipairs({
 	"DonateBuy",
 	"DonateTopUp",
 	"DonateBuyRobux",
+	"StashClaim",
 	"DonateBought",
 	"DonateCrystals",
 }) do

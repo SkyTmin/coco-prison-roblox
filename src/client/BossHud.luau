@@ -1,6 +1,7 @@
 --!strict
--- Boss bar [владелец 22.10]: while a boss is alive and the player is in its location, a bar at the top of
--- the screen shows its name and health (and "invulnerable" / "stunned" while that lasts). Over the arena a
+-- Boss bar [владелец 22.10]: while a boss is alive and the player is near it [владелец 28.10: «бар, когда появился
+-- босс, давай уберём. Он будет появляться, когда игрок рядом с боссом»] — at its arena (ArenaRadius + 20 studs, the
+-- same floor) — a bar at the top of the screen shows its name and health (and "invulnerable" / "stunned" while that lasts). Over the arena a
 -- board counts down to the next appearance while it is dead. Reads ReplicatedStorage.Bosses.<id>
 -- attributes (BossService), so it works whether or not the arena is streamed in.
 local CollectionService = game:GetService("CollectionService")
@@ -12,7 +13,7 @@ local Strings = require(Shared.Strings)
 local Ui = require(script.Parent.Ui)
 
 local BossHud = {}
-local SHOW_RADIUS = 320 -- studs from the arena: the whole quarry cave
+local NEAR = 20 -- studs beyond the arena wall where the bar shows already
 
 local function nameOf(state: Instance): string
 	local locale = Strings.localeOf(Players.LocalPlayer)
@@ -112,12 +113,14 @@ function BossHud.Start(gui: ScreenGui)
 		local shown: Instance? = nil
 		for _, state in ipairs(if folder then folder:GetChildren() else {}) do
 			local origin = state:GetAttribute("Origin")
+			local radius = tonumber(state:GetAttribute("ArenaRadius")) or 40
 			if
 				state:GetAttribute("Alive") == true
 				and root
 				and root:IsA("BasePart")
 				and typeof(origin) == "Vector3"
-				and (root.Position - origin).Magnitude <= SHOW_RADIUS
+				and ((root.Position - origin) * Vector3.new(1, 0, 1)).Magnitude <= radius + NEAR
+				and math.abs(root.Position.Y - origin.Y) < 30
 			then
 				shown = state
 			end

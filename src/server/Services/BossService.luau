@@ -1245,8 +1245,10 @@ local function register(spawnPart: Instance)
 	state:SetAttribute("NameEn", card.nameEn or card.name)
 	state:SetAttribute("LocationId", card.locationId or "")
 	state:SetAttribute("Origin", spawnPart.Position)
-	state.Parent = folder
 	local arenaRadius = spawnPart:GetAttribute("ArenaRadius")
+	-- the client shows the boss bar only near the arena (BossHud)
+	state:SetAttribute("ArenaRadius", if typeof(arenaRadius) == "number" then arenaRadius else 40)
+	state.Parent = folder
 	local boss: Boss = {
 		id = id,
 		card = card,

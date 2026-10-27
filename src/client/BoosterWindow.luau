@@ -3,10 +3,13 @@
 -- хранилище»]: «Бустеров: N», tabs Все / Блоки / Деньги / Мобы, a card per stored booster (its bottle,
 -- «Локальный Бустер денег», «x1.1 · 30 мин», how many, «Активировать»); empty — «Здесь пока что ничего нет…».
 -- Running and queued boosters show in the HUD plaque (BoosterHud). The server starts or queues (BoosterService).
+-- Also «Хранилище» for bought items that did not fit the inventory [владелец 28.10]: tab «Предметы», a card per
+-- stored item with «Получить» (DonateService.StashClaim moves as much as fits).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
+local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -17,7 +20,7 @@ type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local BoosterWindow = {}
 
 local CARD_W, CARD_H, GAP = 290, 78, 8
-local TABS = { "all", "blocks", "money", "mobs" }
+local TABS = { "all", "blocks", "money", "mobs", "items" }
 
 function BoosterWindow.build(
 	parent: Instance,
@@ -52,8 +55,8 @@ function BoosterWindow.build(
 		local button = Ui.button(
 			content,
 			T("boosters_tab_" .. kind),
-			UDim2.fromOffset(84, 26),
-			UDim2.new(1, -(#TABS - i + 1) * 88, 0, 0),
+			UDim2.fromOffset(78, 26),
+			UDim2.new(1, -(#TABS - i + 1) * 82, 0, 0),
 			Ui.colors.buttonGrey
 		)
 		button.TextSize = 14
@@ -197,6 +200,58 @@ function BoosterWindow.build(
 		end)
 	end
 
+	-- a bought item waiting for room in the inventory
+	local function itemCard(entry: { id: string, count: number }, index: number, order: number)
+		local frame = Ui.card(list, UDim2.fromOffset(CARD_W, CARD_H), UDim2.new())
+		frame.Name = "Stash_" .. index
+		frame.LayoutOrder = order
+		local icon = Instance.new("ImageLabel")
+		icon.Size = UDim2.fromOffset(56, 56)
+		icon.Position = UDim2.fromOffset(6, 11)
+		icon.BackgroundTransparency = 1
+		icon.ScaleType = Enum.ScaleType.Fit
+		icon.ResampleMode = Enum.ResamplerMode.Pixelated
+		icon.Image = Config.iconFor(entry.id) or ""
+		icon.Parent = frame
+		local name = Ui.label(
+			frame,
+			Strings.itemName(entry.id, nil, locale),
+			UDim2.new(1, -76, 0, 20),
+			UDim2.fromOffset(68, 8),
+			14,
+			Ui.colors.white
+		)
+		name.TextTruncate = Enum.TextTruncate.AtEnd
+		Ui.label(
+			frame,
+			T("stash_hint"),
+			UDim2.fromOffset(150, 18),
+			UDim2.fromOffset(68, 30),
+			12,
+			Ui.colors.muted
+		)
+		local count = Ui.label(
+			frame,
+			"×" .. entry.count,
+			UDim2.fromOffset(60, 18),
+			UDim2.new(1, -68, 0, 30),
+			14,
+			Ui.colors.header
+		)
+		count.TextXAlignment = Enum.TextXAlignment.Right
+		local button = Ui.button(
+			frame,
+			T("stash_claim"),
+			UDim2.fromOffset(130, 24),
+			UDim2.new(1, -138, 1, -30),
+			Ui.colors.buttonGreen
+		)
+		button.TextSize = 14
+		button.Activated:Connect(function()
+			Remotes.event("StashClaim"):FireServer(index)
+		end)
+	end
+
 	refresh = function(p: Types.Profile?)
 		current = p
 		for _, child in ipairs(list:GetChildren()) do
@@ -222,6 +277,12 @@ function BoosterWindow.build(
 					index,
 					scopeRank * 100000 + (table.find(Boosters.kinds, s.kind) or 9) * 1000 + index
 				)
+			end
+		end
+		if tab == "all" or tab == "items" then
+			for index, entry in ipairs((if p then p.stash else nil) or {}) do
+				shown += 1
+				itemCard(entry, index, 500000 + index)
 			end
 		end
 		countLabel.Text = T("boosters_count", if p then Boosters.storedCount(p) else 0)
