@@ -120,6 +120,12 @@ local function bindCharacter(player: Player, character: Model)
 	end
 	humanoid.Died:Once(function()
 		died(player, character)
+		-- the respawn is at the prison spawn: the profile must say so, or the old PvP location stayed in force
+		-- there [2-player test 27.10: two players respawned side by side, a sword swung at the pyramid boss hit
+		-- the other at the spawn and «killed» him for $30]
+		ProfileService.Mutate(player, function(p)
+			p.location = "prison"
+		end)
 	end)
 end
 
