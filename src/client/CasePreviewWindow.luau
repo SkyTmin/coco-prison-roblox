@@ -150,18 +150,23 @@ function CasePreviewWindow.build(
 			ItemTooltip.hide()
 			return
 		end
-		local extra: { ItemInfo.Line }? = nil
+		local extra: { ItemInfo.Line } = {}
+		-- the rarity under every item (a book already says its own)
+		if entry.stack.id ~= "ancient_book" then
+			table.insert(extra, {
+				text = t("rarity_" .. entry.rarity),
+				color = ItemInfo.RARITY_COLORS[entry.rarity] or Color3.new(1, 1, 1),
+			})
+		end
 		if entry.money then
-			extra = {
-				{
-					text = t(
-						"case_preview_money",
-						Strings.money(math.floor(entry.money[1] * Config.moneyScale + 0.5)),
-						Strings.money(math.floor(entry.money[2] * Config.moneyScale + 0.5))
-					),
-					color = Ui.colors.green,
-				} :: any,
-			}
+			table.insert(extra, {
+				text = t(
+					"case_preview_money",
+					Strings.money(math.floor(entry.money[1] * Config.moneyScale + 0.5)),
+					Strings.money(math.floor(entry.money[2] * Config.moneyScale + 0.5))
+				),
+				color = Ui.colors.green,
+			})
 		end
 		local anchor: Vector2 | GuiObject = if focus
 			then at

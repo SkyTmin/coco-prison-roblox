@@ -713,6 +713,10 @@ local function bind(part: Instance)
 		more.RequiresLineOfSight = false
 		more.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
 		more:SetAttribute("CaseId", id)
+		-- [владелец 28.10: «кнопка накладывается друг на друга»] the two prompts of one part share a spot: «Открыть»
+		-- moves up, «Подробнее» sits under it
+		prompt.UIOffset = Vector2.new(0, -36)
+		more.UIOffset = Vector2.new(0, 40)
 		more.Parent = part
 		info = more
 	end

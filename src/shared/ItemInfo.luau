@@ -33,6 +33,7 @@ ItemInfo.colors = { name = WHITE, enchanted = AQUA }
 -- Book rarity colours: common white, rare aqua, legendary light purple (Minecraft rarities)
 local RARITY_COLORS: { [string]: Color3 } =
 	{ common = WHITE, rare = AQUA, legendary = LIGHT_PURPLE }
+ItemInfo.RARITY_COLORS = RARITY_COLORS
 local ARMOR_SLOT: { [string]: number } = { helmet = 1, chestplate = 2, leggings = 3, boots = 4 }
 local CASE_NAMES: { [string]: string } = {
 	ordinaryCase = "ordinary_case",

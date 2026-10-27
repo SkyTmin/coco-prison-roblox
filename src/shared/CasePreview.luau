@@ -10,6 +10,7 @@ local Types = require(script.Parent.Types)
 export type Entry = {
 	stack: Types.ItemStack,
 	money: { number }?, -- a money drop: { min, max } in $ (the slot shows a money bag)
+	rarity: string, -- common | rare | legendary: the line under the item [владелец 28.10: «обычный, редкий, легендарный, как на скринах»]
 }
 
 local CasePreview = {}
@@ -19,11 +20,13 @@ local RARITY_ORDER = { common = 1, rare = 2, legendary = 3 }
 
 local function rewardEntries(rewards: { any }): { Entry }
 	local out: { Entry } = {}
+	local rarity = "common"
 	local function add(stack: Types.ItemStack)
-		table.insert(out, { stack = stack })
+		table.insert(out, { stack = stack, rarity = rarity })
 	end
 	for _, reward in ipairs(rewards) do
 		local id = reward.id
+		rarity = reward.rarity or "common"
 		if id == "food" then
 			for _, food in ipairs(reward.items or {}) do
 				add({ id = food, count = 1 })
@@ -36,6 +39,7 @@ local function rewardEntries(rewards: { any }): { Entry }
 					coins = math.floor((reward.max or 0) * Config.moneyScale + 0.5),
 				},
 				money = { reward.min or 0, reward.max or 0 },
+				rarity = rarity,
 			})
 		elseif id == "leather_armor_piece" then
 			for _, piece in ipairs(ARMOR) do
@@ -86,6 +90,7 @@ local function bookEntries(): { Entry }
 				books = { { id = id, level = level } },
 				rarity = entry and entry.rarity or nil,
 			},
+			rarity = entry and entry.rarity or "common",
 		})
 	end
 	return out
