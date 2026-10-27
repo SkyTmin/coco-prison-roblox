@@ -53,6 +53,9 @@ export type Profile = {
 	needs: Needs,
 	hunger: number, -- 0..20
 	saturation: number?, -- 0..hunger, spent before hunger [ваниль]; nil = 0; schema stays v3
+	crystals: number?, -- donate currency (DonateService, bought for Robux); nil = 0; schema stays v3
+	receipts: { string }?, -- the last Robux purchase ids already granted (ProcessReceipt is retried)
+	auctionSlots: number?, -- extra auction slots bought in the donate shop
 	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier
 	dug: { [string]: number }?, -- blocks without an upgrade counter, per block id (achievements); schema stays v3
 	boosters: { { kind: string, mult: number, minutes: number, count: number, scope: string? } }?, -- booster storage; schema stays v3

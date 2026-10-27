@@ -250,6 +250,7 @@ const achievementCards = [];
 }
 write("achievements.json", { source: "[вики] карточки «Копатель» по блокам; [владелец 27.10] появляются с этажами; [решение] награды", ...decisions.achievements, cards: achievementCards });
 write("auction.json", { source: "[вики] аукцион; [решение] цены, задержки", ...decisions.auction });
+write("donate.json", { source: "[меню] донат-магазин; [решение] наборы за Robux", ...decisions.donate });
 write("boosters.json", { source: "[вики] хранилище бустеров; [владелец 27.10] локальные ×1.1", ...decisions.boosters });
 // Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`
 // (all its pictures) and `image` (the first picture, shown in the rarity card and the mosaic).

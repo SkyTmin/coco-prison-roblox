@@ -1855,6 +1855,12 @@ local windowBuilders: { [string]: () -> Frame } = {
 	end,
 	level = buildLevel,
 	jobs = buildJobs,
+	donate = function()
+		local win, refresh =
+			require(script.DonateWindow).build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	achievements = function()
 		local win, refresh = require(script.AchievementsWindow).build(
 			gui,
@@ -2861,6 +2867,7 @@ local menuKeys = {
 	"auction",
 	"artifacts",
 	"factions",
+	"donate",
 	"language_code",
 }
 local function touchIconButton(
@@ -2965,6 +2972,7 @@ for i, kind in ipairs(menuKeys) do
 		then "touch_menu_level"
 		elseif kind == "upgrade" then "touch_menu_upgrade"
 		elseif kind == "factions" then "factions_title"
+		elseif kind == "donate" then "touch_menu_donate"
 		else kind
 	local button = touchIconButton(
 		touchMenuGrid,
@@ -3441,6 +3449,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("level")
 	elseif k == Enum.KeyCode.O then
 		open("jobs")
+	elseif k == Enum.KeyCode.N then
+		open("donate") -- «Донат-магазин» [решение: клавиша]
 	elseif k == Enum.KeyCode.L then
 		open("achievements")
 	elseif k == Enum.KeyCode.B then

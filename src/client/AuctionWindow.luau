@@ -733,7 +733,8 @@ function AuctionWindow.build(
 			)
 			hint.TextXAlignment = Enum.TextXAlignment.Center
 		end
-		slotsLabel.Text = T("auction_slots", used, cfg.slots)
+		slotsLabel.Text =
+			T("auction_slots", used, cfg.slots + (if current then current.auctionSlots or 0 else 0))
 		local returns = if a then a.returns else {}
 		returnsLabel.Text = T("auction_returns", #returns)
 		for i, view in ipairs(returnViews) do

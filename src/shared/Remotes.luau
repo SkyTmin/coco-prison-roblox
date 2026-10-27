@@ -22,6 +22,8 @@
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
 -- Client → server:        EatStart(slot), EatCancel() — hold to eat (FoodService); server → client Ate(itemId)
+-- Client → server:        DonateBuy(itemId, count), DonateTopUp(packId) — the donate shop (DonateService); server →
+--                         client DonateBought(itemId, count) after a purchase, DonateCrystals(amount) after a top-up
 -- Client → server:        SetHudLayout(mode, layout?) — the player's moved HUD buttons (ProfileService, HudLayout.luau)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

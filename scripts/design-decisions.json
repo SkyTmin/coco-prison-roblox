@@ -3118,5 +3118,303 @@
       "money_bag"
     ],
     "_notTradable": "[решение] мешок денег из кейса (это деньги, а не предмет)"
+  },
+  "donate": {
+    "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить, PRIS+, рубины — позже",
+    "boosterMultiplier": 2,
+    "boosterMinutes": 30,
+    "packs": [
+      {
+        "id": "crystals_100",
+        "crystals": 100,
+        "robux": 99,
+        "productId": 0,
+        "icon": "crystal"
+      },
+      {
+        "id": "crystals_550",
+        "crystals": 550,
+        "robux": 499,
+        "productId": 0,
+        "icon": "crystals_550",
+        "bonus": 10
+      },
+      {
+        "id": "crystals_1200",
+        "crystals": 1200,
+        "robux": 999,
+        "productId": 0,
+        "icon": "crystals_1200",
+        "bonus": 20
+      },
+      {
+        "id": "crystals_2600",
+        "crystals": 2600,
+        "robux": 1999,
+        "productId": 0,
+        "icon": "crystals_2600",
+        "bonus": 30
+      },
+      {
+        "id": "crystals_7000",
+        "crystals": 7000,
+        "robux": 4999,
+        "productId": 0,
+        "icon": "crystals_7000",
+        "bonus": 40
+      }
+    ],
+    "tabs": [
+      {
+        "id": "crystals"
+      },
+      {
+        "id": "boosters",
+        "items": [
+          "booster_blocks_local",
+          "booster_money_local",
+          "booster_mobs_local",
+          "booster_set_local",
+          "booster_blocks_faction",
+          "booster_money_faction",
+          "booster_mobs_faction",
+          "booster_set_faction",
+          "booster_blocks_global",
+          "booster_money_global",
+          "booster_mobs_global",
+          "booster_set_global"
+        ]
+      },
+      {
+        "id": "keys",
+        "items": [
+          "improved_ancient_key",
+          "ancient_key",
+          "nickname_key",
+          "ordinary_key",
+          "ancient_star_set",
+          "ancient_star",
+          "ancient_powder",
+          "dispeller"
+        ]
+      },
+      {
+        "id": "needs",
+        "items": [
+          "soap",
+          "sleeping_bag",
+          "toilet_paper"
+        ]
+      },
+      {
+        "id": "auction",
+        "items": [
+          "auction_slot"
+        ]
+      }
+    ],
+    "items": {
+      "booster_blocks_local": {
+        "price": 139,
+        "booster": {
+          "kinds": [
+            "blocks"
+          ],
+          "scope": "local"
+        },
+        "max": 10,
+        "icon": "booster_blocks_local"
+      },
+      "booster_money_local": {
+        "price": 139,
+        "booster": {
+          "kinds": [
+            "money"
+          ],
+          "scope": "local"
+        },
+        "max": 10,
+        "icon": "booster_money_local"
+      },
+      "booster_mobs_local": {
+        "price": 129,
+        "booster": {
+          "kinds": [
+            "mobs"
+          ],
+          "scope": "local"
+        },
+        "max": 10,
+        "icon": "booster_mobs_local"
+      },
+      "booster_set_local": {
+        "price": 399,
+        "booster": {
+          "kinds": [
+            "blocks",
+            "money",
+            "mobs"
+          ],
+          "scope": "local"
+        },
+        "max": 10,
+        "icon": "booster_set"
+      },
+      "booster_blocks_faction": {
+        "price": 199,
+        "booster": {
+          "kinds": [
+            "blocks"
+          ],
+          "scope": "faction"
+        },
+        "max": 10,
+        "icon": "booster_blocks_faction"
+      },
+      "booster_money_faction": {
+        "price": 199,
+        "booster": {
+          "kinds": [
+            "money"
+          ],
+          "scope": "faction"
+        },
+        "max": 10,
+        "icon": "booster_money_faction"
+      },
+      "booster_mobs_faction": {
+        "price": 189,
+        "booster": {
+          "kinds": [
+            "mobs"
+          ],
+          "scope": "faction"
+        },
+        "max": 10,
+        "icon": "booster_mobs_faction"
+      },
+      "booster_set_faction": {
+        "price": 579,
+        "booster": {
+          "kinds": [
+            "blocks",
+            "money",
+            "mobs"
+          ],
+          "scope": "faction"
+        },
+        "max": 10,
+        "icon": "booster_set"
+      },
+      "booster_blocks_global": {
+        "price": 249,
+        "booster": {
+          "kinds": [
+            "blocks"
+          ],
+          "scope": "global"
+        },
+        "max": 10,
+        "icon": "booster_blocks_global"
+      },
+      "booster_money_global": {
+        "price": 249,
+        "booster": {
+          "kinds": [
+            "money"
+          ],
+          "scope": "global"
+        },
+        "max": 10,
+        "icon": "booster_money_global"
+      },
+      "booster_mobs_global": {
+        "price": 239,
+        "booster": {
+          "kinds": [
+            "mobs"
+          ],
+          "scope": "global"
+        },
+        "max": 10,
+        "icon": "booster_mobs_global"
+      },
+      "booster_set_global": {
+        "price": 729,
+        "booster": {
+          "kinds": [
+            "blocks",
+            "money",
+            "mobs"
+          ],
+          "scope": "global"
+        },
+        "max": 10,
+        "icon": "booster_set"
+      },
+      "improved_ancient_key": {
+        "price": 349,
+        "give": "improved_ancient_key",
+        "max": 64
+      },
+      "ancient_key": {
+        "price": 149,
+        "give": "ancient_key",
+        "max": 64
+      },
+      "nickname_key": {
+        "price": 99,
+        "give": "nickname_key",
+        "max": 64
+      },
+      "ordinary_key": {
+        "price": 10,
+        "give": "ordinary_key",
+        "max": 64
+      },
+      "ancient_star_set": {
+        "price": 169,
+        "give": "ancient_star",
+        "each": 10,
+        "max": 6,
+        "icon": "ancient_star"
+      },
+      "ancient_star": {
+        "price": 25,
+        "give": "ancient_star",
+        "max": 64
+      },
+      "ancient_powder": {
+        "price": 17,
+        "give": "ancient_powder",
+        "max": 64
+      },
+      "dispeller": {
+        "price": 199,
+        "give": "dispeller",
+        "max": 64
+      },
+      "soap": {
+        "price": 10,
+        "give": "soap",
+        "max": 64
+      },
+      "sleeping_bag": {
+        "price": 10,
+        "give": "sleeping_bag",
+        "max": 64
+      },
+      "toilet_paper": {
+        "price": 7,
+        "give": "toilet_paper",
+        "max": 64
+      },
+      "auction_slot": {
+        "price": 69,
+        "auctionSlot": true,
+        "max": 50,
+        "icon": "auction_slot"
+      }
+    }
   }
 }

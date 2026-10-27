@@ -50,6 +50,10 @@ for _, name in ipairs({
 	"EatStart",
 	"EatCancel",
 	"Ate",
+	"DonateBuy",
+	"DonateTopUp",
+	"DonateBought",
+	"DonateCrystals",
 }) do
 	Remotes.event(name)
 end
@@ -104,6 +108,7 @@ DigService.Start()
 EconomyService.Start()
 NeedsService.Start()
 require(script.Services.FoodService).Start() -- eating over 1.6 s like Minecraft (client Eating.luau)
+require(script.Services.DonateService).Start() -- the donate shop: crystals for Robux, goods for crystals
 AchievementService.Start()
 GlobalBoosterService.Start()
 AuctionService.Start()

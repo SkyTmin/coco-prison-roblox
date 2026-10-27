@@ -325,6 +325,12 @@ function ItemInfo.knownIds(): { string }
 			and not id:match("^hud_")
 			and not id:match("^top_")
 			and not id:match("^trainer_")
+			and not id:match("^rank_%d$") -- rank emblems, requirement pictures, donate shop pictures
+			and not id:match("^req_")
+			and not id:match("^crystal")
+			and not id:match("^booster_set$")
+			and not id:match("^auction_slot$")
+			and id ~= "heart"
 			and not id:match("_wood$")
 			and not id:match("_stone$")
 			and not id:match("_iron$")

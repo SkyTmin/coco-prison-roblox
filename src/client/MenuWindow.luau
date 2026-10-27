@@ -26,6 +26,7 @@ MenuWindow.ENTRIES = {
 	{ kind = "auction", caption = "auction_title", key = "Y" },
 	{ kind = "artifacts", caption = "artifacts", key = "I" },
 	{ kind = "factions", caption = "factions_title", key = "G" },
+	{ kind = "donate", caption = "donate_title", key = "N" },
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },

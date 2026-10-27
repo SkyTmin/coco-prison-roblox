@@ -613,8 +613,9 @@ local function sell(player: Player, slot: number, amount: number, dollars: numbe
 		return
 	end
 	local a = data(profile)
-	if count(a.lots) + count(a.pendingSells) >= cfg.slots then
-		toast(player, "auction_slots_full", cfg.slots)
+	local slots = cfg.slots + (profile.auctionSlots or 0) -- donate: «Дополнительный слот на Аукционе»
+	if count(a.lots) + count(a.pendingSells) >= slots then
+		toast(player, "auction_slots_full", slots)
 		return
 	end
 	local summary: Summary? = nil
