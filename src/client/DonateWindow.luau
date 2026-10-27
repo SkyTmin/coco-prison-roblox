@@ -5,7 +5,8 @@
 -- item's limit), the total (red when the crystals are short) and «Купить» glowing — or «Пополнить» when short. The
 -- crystals tab sells the packs for Robux (the Roblox prompt; Robux prices carry Roblox's own Robux glyph \u{E002},
 -- our crystal prices our crystal picture). Shared/Donate holds the rules, DonateService decides; built once and
--- updated in place, a purchase flashes the panel and «+N» floats up.
+-- updated in place, a purchase flashes the panel and «+N» floats up. Every item can also be bought straight for Robux,
+-- one piece per purchase (the green button; its own Developer Product, DonateBuyRobux).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -19,7 +20,7 @@ local Kit = require(script.Parent.WindowKit)
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local DonateWindow = {}
 
-local W, H = 790, 540
+local W, H = 790, 600
 local CARD_W, CARD_H, GAP, COLS = 112, 132, 8, 4
 local GRID_W = COLS * CARD_W + (COLS - 1) * GAP + 12
 local ROBUX = utf8.char(0xE002)
@@ -311,24 +312,52 @@ function DonateWindow.build(
 		)
 	)
 	Kit.fit(note)
-	local buy, buyLabel, buyBack =
-		Kit.actionButton(panel, UDim2.new(1, -24, 0, 44), UDim2.new(0, 12, 1, -56), 20)
-	Kit.fit(buyLabel)
-	local buyGradient = Kit.gradient(buyBack, Kit.GOOD, Kit.GOOD, 90)
-	Kit.pressable(buy)
-	local buyGlow = Kit.glow(buy, Kit.GOOD)
-	local buyAction: () -> () = function() end
-	buy.Activated:Connect(function()
-		buyAction()
-	end)
-
-	local function paintButton(color: Color3?, ready: boolean)
-		local c = color or Kit.GREY
-		buyGradient.Color =
-			ColorSequence.new(c:Lerp(Color3.new(1, 1, 1), 0.1), c:Lerp(Color3.new(), 0.4))
-		buyLabel.TextTransparency = if color then 0 else 0.3
-		buyGlow(ready)
+	-- the two buttons: for crystals (blue, any amount) and straight for Robux (green, one piece) [владелец 28.10:
+	-- «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»]
+	type Action = {
+		button: TextButton,
+		label: TextLabel,
+		paint: (Color3?, boolean) -> (),
+		run: () -> (),
+	}
+	local function actionSlot(y: number, glowColor: Color3): Action
+		local button, label, back =
+			Kit.actionButton(panel, UDim2.new(1, -24, 0, 44), UDim2.new(0, 12, 1, y), 20)
+		Kit.fit(label)
+		local gradient = Kit.gradient(back, Kit.GOOD, Kit.GOOD, 90)
+		Kit.pressable(button)
+		local glow = Kit.glow(button, glowColor)
+		local slot: Action
+		slot = {
+			button = button,
+			label = label,
+			paint = function(color: Color3?, ready: boolean)
+				local c = color or Kit.GREY
+				gradient.Color =
+					ColorSequence.new(c:Lerp(Color3.new(1, 1, 1), 0.1), c:Lerp(Color3.new(), 0.4))
+				label.TextTransparency = if color then 0 else 0.3
+				glow(ready)
+			end,
+			run = function() end,
+		}
+		button.Activated:Connect(function()
+			slot.run()
+		end)
+		return slot
 	end
+	local buy = actionSlot(-122, CRYSTAL)
+	local orRobux = centred(
+		Kit.text(
+			panel,
+			t("donate_or_robux"),
+			UDim2.new(1, -20, 0, 16),
+			UDim2.new(0, 10, 1, -74),
+			12,
+			Ui.colors.muted,
+			Kit.BOLD
+		)
+	)
+	local robux = actionSlot(-56, Kit.GOOD)
 
 	-- ------------------------------------------------------------------ one card of the grid
 	local function makeCard(
@@ -506,12 +535,16 @@ function DonateWindow.build(
 			total.TextColor3 = Kit.GOOD
 			note.Text = if pack.bonus then t("donate_pack_bonus", pack.bonus) else ""
 			note.TextColor3 = Kit.GOOD
-			buyLabel.Text = ROBUX .. " " .. grouped(pack.robux)
-			paintButton(Kit.GOOD, true)
-			buyAction = function()
+			buy.button.Visible = false
+			orRobux.Visible = false
+			robux.label.Text = ROBUX .. " " .. grouped(pack.robux)
+			robux.paint(Kit.GOOD, true)
+			robux.run = function()
 				Remotes.event("DonateTopUp"):FireServer(pack.id)
 			end
 		elseif item then
+			buy.button.Visible = true
+			orRobux.Visible = true
 			local limit = Donate.limit(p, id)
 			count = math.clamp(count, 1, math.max(limit, 1))
 			local price = item.price * count
@@ -528,22 +561,31 @@ function DonateWindow.build(
 				note.Text = ""
 			end
 			note.TextColor3 = Ui.colors.muted
+			robux.label.Text = t("donate_robux_buy", ROBUX .. " " .. grouped(item.robux))
 			if limit <= 0 then
-				buyLabel.Text = t("donate_limit")
-				paintButton(nil, false)
-				buyAction = function() end
-			elseif crystals < price then
-				buyLabel.Text = t("donate_top_up")
-				paintButton(CRYSTAL, false)
-				buyAction = function()
-					selectTab("crystals")
-				end
+				buy.label.Text = t("donate_limit")
+				buy.paint(nil, false)
+				buy.run = function() end
+				robux.paint(nil, false)
+				robux.run = function() end
 			else
-				buyLabel.Text = t("donate_buy")
-				paintButton(Kit.GOOD, true)
-				local n = count
-				buyAction = function()
-					Remotes.event("DonateBuy"):FireServer(id, n)
+				robux.paint(Kit.GOOD, false)
+				robux.run = function()
+					Remotes.event("DonateBuyRobux"):FireServer(id)
+				end
+				if crystals < price then
+					buy.label.Text = t("donate_top_up")
+					buy.paint(CRYSTAL:Lerp(Kit.GREY, 0.5), false)
+					buy.run = function()
+						selectTab("crystals")
+					end
+				else
+					buy.label.Text = t("donate_buy")
+					buy.paint(CRYSTAL, true)
+					local n = count
+					buy.run = function()
+						Remotes.event("DonateBuy"):FireServer(id, n)
+					end
 				end
 			end
 		end

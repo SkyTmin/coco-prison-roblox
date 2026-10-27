@@ -253,6 +253,30 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Boutique",
 	},
 	touch_menu_donate = { ru = "Донат", en = "Shop", es = "Tienda", fr = "Boutique" },
+	donate_robux_buy = {
+		ru = "%s  ·  1 шт.",
+		en = "%s  ·  1 pc.",
+		es = "%s  ·  1 ud.",
+		fr = "%s  ·  1 pc.",
+	},
+	donate_or_robux = {
+		ru = "или сразу за Robux",
+		en = "or straight for Robux",
+		es = "o directamente por Robux",
+		fr = "ou directement en Robux",
+	},
+	donate_studio_free_item = {
+		ru = "Studio: предмет выдан бесплатно (тест)",
+		en = "Studio: item given for free (test)",
+		es = "Studio: objeto entregado gratis (prueba)",
+		fr = "Studio : objet donné gratuitement (test)",
+	},
+	donate_refund_crystals = {
+		ru = "Не было места — вместо предмета начислено %d кристаллов",
+		en = "No room — you got %d crystals instead of the item",
+		es = "Sin espacio: recibiste %d cristales en lugar del objeto",
+		fr = "Pas de place — %d cristaux crédités à la place de l'objet",
+	},
 	donate_tab_crystals = {
 		ru = "Кристаллы",
 		en = "Crystals",

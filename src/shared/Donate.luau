@@ -15,6 +15,8 @@ export type Item = {
 	auctionSlot: boolean?,
 	max: number,
 	icon: string?,
+	robux: number, -- the same item straight for Robux, one per purchase (its own Developer Product)
+	productId: number,
 }
 export type Pack = {
 	id: string,
@@ -47,6 +49,24 @@ function Donate.pack(id: any): Pack?
 		end
 	end
 	return nil
+end
+
+-- what a Developer Product sells: a crystal pack or one item
+function Donate.byProduct(productId: number): (Pack?, string?)
+	if productId <= 0 then
+		return nil, nil
+	end
+	for _, pack in ipairs(Donate.packs) do
+		if pack.productId == productId then
+			return pack, nil
+		end
+	end
+	for id, item in pairs(cfg.items :: { [string]: Item }) do
+		if item.productId == productId then
+			return nil, id
+		end
+	end
+	return nil, nil
 end
 
 function Donate.crystals(p: any): number

@@ -1,6 +1,6 @@
 {
   "source": "[меню] донат-магазин; [решение] наборы за Robux",
-  "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить, PRIS+, рубины — позже",
+  "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить, PRIS+, рубины — позже; [решение 28.10, владелец: «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»] каждый товар ещё и напрямую за Robux — 1 шт. за покупку, своя Developer Product (items.<id>.robux = цена в кристаллах, productId, productName); товары создаёт scripts/create-dev-products.mjs",
   "boosterMultiplier": 2,
   "boosterMinutes": 30,
   "packs": [
@@ -9,7 +9,8 @@
       "crystals": 100,
       "robux": 99,
       "productId": 0,
-      "icon": "crystal"
+      "icon": "crystal",
+      "productName": "100 кристаллов"
     },
     {
       "id": "crystals_550",
@@ -17,7 +18,8 @@
       "robux": 499,
       "productId": 0,
       "icon": "crystals_550",
-      "bonus": 10
+      "bonus": 10,
+      "productName": "550 кристаллов"
     },
     {
       "id": "crystals_1200",
@@ -25,7 +27,8 @@
       "robux": 999,
       "productId": 0,
       "icon": "crystals_1200",
-      "bonus": 20
+      "bonus": 20,
+      "productName": "1200 кристаллов"
     },
     {
       "id": "crystals_2600",
@@ -33,7 +36,8 @@
       "robux": 1999,
       "productId": 0,
       "icon": "crystals_2600",
-      "bonus": 30
+      "bonus": 30,
+      "productName": "2600 кристаллов"
     },
     {
       "id": "crystals_7000",
@@ -41,7 +45,8 @@
       "robux": 4999,
       "productId": 0,
       "icon": "crystals_7000",
-      "bonus": 40
+      "bonus": 40,
+      "productName": "7000 кристаллов"
     }
   ],
   "tabs": [
@@ -103,7 +108,10 @@
         "scope": "local"
       },
       "max": 10,
-      "icon": "booster_blocks_local"
+      "icon": "booster_blocks_local",
+      "robux": 139,
+      "productId": 0,
+      "productName": "Локальный бустер блоков ×2"
     },
     "booster_money_local": {
       "price": 139,
@@ -114,7 +122,10 @@
         "scope": "local"
       },
       "max": 10,
-      "icon": "booster_money_local"
+      "icon": "booster_money_local",
+      "robux": 139,
+      "productId": 0,
+      "productName": "Локальный бустер денег ×2"
     },
     "booster_mobs_local": {
       "price": 129,
@@ -125,7 +136,10 @@
         "scope": "local"
       },
       "max": 10,
-      "icon": "booster_mobs_local"
+      "icon": "booster_mobs_local",
+      "robux": 129,
+      "productId": 0,
+      "productName": "Локальный бустер мобов ×2"
     },
     "booster_set_local": {
       "price": 399,
@@ -138,7 +152,10 @@
         "scope": "local"
       },
       "max": 10,
-      "icon": "booster_set"
+      "icon": "booster_set",
+      "robux": 399,
+      "productId": 0,
+      "productName": "Набор бустеров · Локальный"
     },
     "booster_blocks_faction": {
       "price": 199,
@@ -149,7 +166,10 @@
         "scope": "faction"
       },
       "max": 10,
-      "icon": "booster_blocks_faction"
+      "icon": "booster_blocks_faction",
+      "robux": 199,
+      "productId": 0,
+      "productName": "Фракционный бустер блоков ×2"
     },
     "booster_money_faction": {
       "price": 199,
@@ -160,7 +180,10 @@
         "scope": "faction"
       },
       "max": 10,
-      "icon": "booster_money_faction"
+      "icon": "booster_money_faction",
+      "robux": 199,
+      "productId": 0,
+      "productName": "Фракционный бустер денег ×2"
     },
     "booster_mobs_faction": {
       "price": 189,
@@ -171,7 +194,10 @@
         "scope": "faction"
       },
       "max": 10,
-      "icon": "booster_mobs_faction"
+      "icon": "booster_mobs_faction",
+      "robux": 189,
+      "productId": 0,
+      "productName": "Фракционный бустер мобов ×2"
     },
     "booster_set_faction": {
       "price": 579,
@@ -184,7 +210,10 @@
         "scope": "faction"
       },
       "max": 10,
-      "icon": "booster_set"
+      "icon": "booster_set",
+      "robux": 579,
+      "productId": 0,
+      "productName": "Набор бустеров · Фракционный"
     },
     "booster_blocks_global": {
       "price": 249,
@@ -195,7 +224,10 @@
         "scope": "global"
       },
       "max": 10,
-      "icon": "booster_blocks_global"
+      "icon": "booster_blocks_global",
+      "robux": 249,
+      "productId": 0,
+      "productName": "Глобальный бустер блоков ×2"
     },
     "booster_money_global": {
       "price": 249,
@@ -206,7 +238,10 @@
         "scope": "global"
       },
       "max": 10,
-      "icon": "booster_money_global"
+      "icon": "booster_money_global",
+      "robux": 249,
+      "productId": 0,
+      "productName": "Глобальный бустер денег ×2"
     },
     "booster_mobs_global": {
       "price": 239,
@@ -217,7 +252,10 @@
         "scope": "global"
       },
       "max": 10,
-      "icon": "booster_mobs_global"
+      "icon": "booster_mobs_global",
+      "robux": 239,
+      "productId": 0,
+      "productName": "Глобальный бустер мобов ×2"
     },
     "booster_set_global": {
       "price": 729,
@@ -230,70 +268,109 @@
         "scope": "global"
       },
       "max": 10,
-      "icon": "booster_set"
+      "icon": "booster_set",
+      "robux": 729,
+      "productId": 0,
+      "productName": "Набор бустеров · Глобальный"
     },
     "improved_ancient_key": {
       "price": 349,
       "give": "improved_ancient_key",
-      "max": 64
+      "max": 64,
+      "robux": 349,
+      "productId": 0,
+      "productName": "Улучшенный древний ключ"
     },
     "ancient_key": {
       "price": 149,
       "give": "ancient_key",
-      "max": 64
+      "max": 64,
+      "robux": 149,
+      "productId": 0,
+      "productName": "Древний ключ"
     },
     "nickname_key": {
       "price": 99,
       "give": "nickname_key",
-      "max": 64
+      "max": 64,
+      "robux": 99,
+      "productId": 0,
+      "productName": "Ключ от кейса с кличками"
     },
     "ordinary_key": {
       "price": 10,
       "give": "ordinary_key",
-      "max": 64
+      "max": 64,
+      "robux": 10,
+      "productId": 0,
+      "productName": "Ключ от Обычного кейса"
     },
     "ancient_star_set": {
       "price": 169,
       "give": "ancient_star",
       "each": 10,
       "max": 6,
-      "icon": "ancient_star"
+      "icon": "ancient_star",
+      "robux": 169,
+      "productId": 0,
+      "productName": "Набор Древних звёзд ×10"
     },
     "ancient_star": {
       "price": 25,
       "give": "ancient_star",
-      "max": 64
+      "max": 64,
+      "robux": 25,
+      "productId": 0,
+      "productName": "Древняя звезда"
     },
     "ancient_powder": {
       "price": 17,
       "give": "ancient_powder",
-      "max": 64
+      "max": 64,
+      "robux": 17,
+      "productId": 0,
+      "productName": "Древний порошок"
     },
     "dispeller": {
       "price": 199,
       "give": "dispeller",
-      "max": 64
+      "max": 64,
+      "robux": 199,
+      "productId": 0,
+      "productName": "Развеиватель"
     },
     "soap": {
       "price": 10,
       "give": "soap",
-      "max": 64
+      "max": 64,
+      "robux": 10,
+      "productId": 0,
+      "productName": "Мыло"
     },
     "sleeping_bag": {
       "price": 10,
       "give": "sleeping_bag",
-      "max": 64
+      "max": 64,
+      "robux": 10,
+      "productId": 0,
+      "productName": "Спальный мешок"
     },
     "toilet_paper": {
       "price": 7,
       "give": "toilet_paper",
-      "max": 64
+      "max": 64,
+      "robux": 7,
+      "productId": 0,
+      "productName": "Туалетная бумага"
     },
     "auction_slot": {
       "price": 69,
       "auctionSlot": true,
       "max": 50,
-      "icon": "auction_slot"
+      "icon": "auction_slot",
+      "robux": 69,
+      "productId": 0,
+      "productName": "Дополнительный слот на Аукционе"
     }
   }
 }
