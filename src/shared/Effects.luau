@@ -46,6 +46,13 @@ Effects.list = {
 		color = Color3.fromRGB(255, 199, 0),
 		harmful = false,
 	},
+	-- the injection «Без нужд» from the donate shop [владелец 28.10]: needs never drain, for good
+	{
+		id = "needs_free",
+		attribute = "NeedsFree",
+		color = Color3.fromRGB(120, 220, 140),
+		harmful = false,
+	},
 	-- the golden apple's golden hearts [ваниль]
 	{
 		id = "absorption",

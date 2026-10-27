@@ -9,8 +9,9 @@
 //   --dry        show what would be created / changed, touch nothing
 //   --universe N another experience (default: the game's universe 10772144679, place 92594200898716)
 //
-// Safe to run again: products are matched by name; a missing one is created (name, description, price, icon from
-// assets/icons), an existing one with another price gets the price from the config; ids already written stay.
+// Safe to run again: products are matched by the id already in the config, else by name; a missing one is created
+// (name, description, price, icon from assets/icons), an existing one with another name or price gets them from the
+// config (the crystal packs were renamed and repriced 28.10 to match the Robux packages); ids already written stay.
 // Roblox cannot delete Developer Products — a wrong one can only be renamed or taken off sale in the Dashboard.
 // API: Open Cloud developer products v2 (multipart/form-data: name, description, price, isForSale, imageFile;
 // write limit 3 requests a second).
@@ -86,14 +87,17 @@ const idOf = (p) => Number(p.productId ?? p.developerProductId ?? p.id ?? 0);
 const priceOf = (p) =>
 	Number(p.price ?? p.priceInRobux ?? p.priceInformation?.defaultPriceInRobux ?? p.priceConfiguration?.priceInRobux ?? NaN);
 
-// the products the experience already has, by name
+// the products the experience already has, by name (and by id under "#<id>")
 async function existing() {
 	const byName = new Map();
 	let token = "";
 	do {
 		const page = await api(`${base}/creator?pageSize=100${token ? `&pageToken=${encodeURIComponent(token)}` : ""}`);
 		const list = Array.isArray(page) ? page : Object.values(page ?? {}).find(Array.isArray) ?? [];
-		for (const p of list) if (p?.name) byName.set(p.name, p);
+		for (const p of list) {
+			if (p?.name) byName.set(p.name, p);
+			if (idOf(p)) byName.set(`#${idOf(p)}`, p);
+		}
 		token = page?.nextPageToken ?? "";
 	} while (token);
 	return byName;
@@ -119,7 +123,7 @@ for (const good of goods) {
 		console.warn(`skip: no name or price < 1 R$ — ${JSON.stringify(good.entry)}`);
 		continue;
 	}
-	const found = have.get(good.name);
+	const found = (good.entry.productId && have.get(`#${good.entry.productId}`)) || have.get(good.name);
 	if (!found) {
 		console.log(`${dry ? "would create" : "create"}: ${good.name} — ${good.price} R$ (icon ${iconFile(good.icon) ? good.icon : "none"})`);
 		if (dry) continue;
@@ -145,10 +149,14 @@ for (const good of goods) {
 		continue;
 	}
 	good.entry.productId = idOf(found);
-	if (priceOf(found) !== good.price) {
-		console.log(`${dry ? "would set" : "set"} price: ${good.name} ${priceOf(found)} → ${good.price} R$`);
+	if (priceOf(found) !== good.price || found.name !== good.name) {
+		console.log(`${dry ? "would update" : "update"}: ${found.name} ${priceOf(found)} R$ → ${good.name} ${good.price} R$`);
 		if (!dry) {
 			const f = new FormData();
+			if (found.name !== good.name) {
+				f.append("name", good.name);
+				f.append("description", good.description);
+			}
 			f.append("price", String(good.price));
 			f.append("isForSale", "true");
 			await api(`${base}/${good.entry.productId}`, { method: "PATCH", body: f });

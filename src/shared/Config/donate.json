@@ -1,52 +1,52 @@
 {
   "source": "[меню] донат-магазин; [решение] наборы за Robux",
-  "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить, PRIS+, рубины — позже; [решение 28.10, владелец: «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»] каждый товар ещё и напрямую за Robux — 1 шт. за покупку, своя Developer Product (items.<id>.robux = цена в кристаллах, productId, productName); товары создаёт scripts/create-dev-products.mjs",
+  "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить, PRIS+, рубины — позже; [решение 28.10, владелец: «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»] каждый товар ещё и напрямую за Robux — 1 шт. за покупку, своя Developer Product (items.<id>.robux = цена в кристаллах, productId, productName); товары создаёт scripts/create-dev-products.mjs; [решение 28.10, владелец: «в заблуждение вводит … одна цена, в итоге другую сумму вводить надо»] окно Roblox «Buy Robux and item» продаёт наименьший пакет Robux, покрывающий цену (80 / 400 / 800 / 1700 / 4500 …), игра его не меняет и баланс не видит — наборы кристаллов стоят ровно как пакеты: 80 R$ → 80, 400 → 440 (+10 %), 800 → 960 (+20 %), 1700 → 2210 (+30 %), 4500 → 6300 (+40 %); id наборов прежние (crystals_100 … — внутренние); [владелец 28.10] инъекция «Без нужд» (needs_injection) — 399 кристаллов / 399 R$, навсегда [решение]; [владелец 28.10: «в донат добавить авто-продажу … цена 549»] предмет autosell: «Использовать» в руке включает автопродажу навсегда (у оригинала — на сезон [вики]); вскопанный блок сразу продаётся по цене скупщика с множителями, у прицела «+0,057 $»; в Настройках вкл./выкл. и показ дохода у прицела",
   "boosterMultiplier": 2,
   "boosterMinutes": 30,
   "packs": [
     {
       "id": "crystals_100",
-      "crystals": 100,
-      "robux": 99,
+      "crystals": 80,
+      "robux": 80,
       "productId": 3723068679,
       "icon": "crystal",
-      "productName": "100 кристаллов"
+      "productName": "80 кристаллов"
     },
     {
       "id": "crystals_550",
-      "crystals": 550,
-      "robux": 499,
+      "crystals": 440,
+      "robux": 400,
       "productId": 3723068693,
       "icon": "crystals_550",
       "bonus": 10,
-      "productName": "550 кристаллов"
+      "productName": "440 кристаллов"
     },
     {
       "id": "crystals_1200",
-      "crystals": 1200,
-      "robux": 999,
+      "crystals": 960,
+      "robux": 800,
       "productId": 3723068701,
       "icon": "crystals_1200",
       "bonus": 20,
-      "productName": "1200 кристаллов"
+      "productName": "960 кристаллов"
     },
     {
       "id": "crystals_2600",
-      "crystals": 2600,
-      "robux": 1999,
+      "crystals": 2210,
+      "robux": 1700,
       "productId": 3723068712,
       "icon": "crystals_2600",
       "bonus": 30,
-      "productName": "2600 кристаллов"
+      "productName": "2210 кристаллов"
     },
     {
       "id": "crystals_7000",
-      "crystals": 7000,
-      "robux": 4999,
+      "crystals": 6300,
+      "robux": 4500,
       "productId": 3723068729,
       "icon": "crystals_7000",
       "bonus": 40,
-      "productName": "7000 кристаллов"
+      "productName": "6300 кристаллов"
     }
   ],
   "tabs": [
@@ -73,6 +73,7 @@
     {
       "id": "keys",
       "items": [
+        "autosell",
         "improved_ancient_key",
         "ancient_key",
         "nickname_key",
@@ -88,7 +89,8 @@
       "items": [
         "soap",
         "sleeping_bag",
-        "toilet_paper"
+        "toilet_paper",
+        "needs_injection"
       ]
     },
     {
@@ -363,6 +365,14 @@
       "productId": 3723069762,
       "productName": "Туалетная бумага"
     },
+    "needs_injection": {
+      "price": 399,
+      "give": "needs_injection",
+      "max": 64,
+      "robux": 399,
+      "productId": 0,
+      "productName": "Инъекция «Без нужд»"
+    },
     "auction_slot": {
       "price": 69,
       "auctionSlot": true,
@@ -371,6 +381,14 @@
       "robux": 69,
       "productId": 3723069777,
       "productName": "Дополнительный слот на Аукционе"
+    },
+    "autosell": {
+      "price": 549,
+      "give": "autosell",
+      "max": 64,
+      "robux": 549,
+      "productId": 0,
+      "productName": "Авто-продажа"
     }
   }
 }

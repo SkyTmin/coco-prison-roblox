@@ -56,6 +56,8 @@ for _, name in ipairs({
 	"StashClaim",
 	"DonateBought",
 	"DonateCrystals",
+	"AutoSold",
+	"BoosterToItem",
 }) do
 	Remotes.event(name)
 end

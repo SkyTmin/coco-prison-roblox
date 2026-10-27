@@ -259,6 +259,12 @@ local STRINGS: { [string]: Entry } = {
 		es = "%s  ·  1 ud.",
 		fr = "%s  ·  1 pc.",
 	},
+	donate_robux_package_hint = {
+		ru = "Мало Robux? Roblox предложит пакет (80, 400, 800…) — остаток останется на счёте",
+		en = "Short of Robux? Roblox offers a package (80, 400, 800…) — the rest stays on your account",
+		es = "¿Faltan Robux? Roblox ofrece un paquete (80, 400, 800…): el resto queda en tu cuenta",
+		fr = "Pas assez de Robux ? Roblox propose un pack (80, 400, 800…) : le reste reste sur le compte",
+	},
 	donate_or_robux = {
 		ru = "или сразу за Robux",
 		en = "or straight for Robux",
@@ -661,6 +667,48 @@ local STRINGS: { [string]: Entry } = {
 	},
 	settings_shown = { ru = "Показывать", en = "Shown", es = "Visible", fr = "Affiché" },
 	settings_hidden = { ru = "Скрыто", en = "Hidden", es = "Oculto", fr = "Masqué" },
+	settings_autosell = {
+		ru = "Авто-продажа блоков",
+		en = "Auto-sell blocks",
+		es = "Autoventa de bloques",
+		fr = "Vente auto des blocs",
+	},
+	settings_autosell_text = {
+		ru = "Доход у прицела",
+		en = "Income at crosshair",
+		es = "Ingreso en la mira",
+		fr = "Gain au viseur",
+	},
+	settings_autosell_locked = {
+		ru = "Купить в Донат-магазине [N]",
+		en = "Buy in the Donate shop [N]",
+		es = "Comprar en la Tienda [N]",
+		fr = "Acheter en Boutique [N]",
+	},
+	item_autosell = {
+		ru = "Авто-продажа",
+		en = "Auto-sell",
+		es = "Autoventa",
+		fr = "Vente auto",
+	},
+	desc_autosell = {
+		ru = "Навсегда включает автопродажу: каждый вскопанный блок сразу продаётся по цене скупщика — со всеми прокачками и бустерами денег, к скупщику ходить не нужно. У прицела всплывает доход за блок: «+0,057 $». Включается и выключается в Настройках. Возьмите в руку и нажмите «Использовать»; до этого её можно продать на Аукционе.",
+		en = "Turns the auto-sell on for good: every dug block is sold at once at the buyer's price — with all money upgrades and boosters, no trips to the buyer. The income per block pops up at the crosshair: «+0.057 $». Switch it on and off in the Settings. Hold it and press «Use»; until then it can be sold at the Auction.",
+		es = "Activa la autoventa para siempre: cada bloque excavado se vende al instante al precio del comprador, con todas las mejoras y potenciadores de dinero, sin ir al comprador. El ingreso por bloque aparece en la mira: «+0,057 $». Se activa y desactiva en Ajustes. Tómala en la mano y pulsa «Usar»; antes se puede vender en la Subasta.",
+		fr = "Active la vente auto pour toujours : chaque bloc creusé est vendu tout de suite au prix de l'acheteur, avec toutes les améliorations et boosts d'argent, sans aller chez l'acheteur. Le gain par bloc apparaît au viseur : « +0,057 $ ». S'active et se coupe dans les Réglages. Prenez-la en main et appuyez sur « Utiliser » ; avant, elle se vend à l'Enchère.",
+	},
+	autosell_used = {
+		ru = "Авто-продажа включена навсегда: блоки продаются сразу при копании. Выключить — в Настройках",
+		en = "Auto-sell is on for good: blocks sell as you dig. Switch it off in the Settings",
+		es = "Autoventa activada para siempre: los bloques se venden al excavar. Desactívala en Ajustes",
+		fr = "Vente auto activée pour toujours : les blocs se vendent en creusant. Coupez-la dans les Réglages",
+	},
+	autosell_owned = {
+		ru = "Авто-продажа у вас уже есть. Эту можно продать на Аукционе",
+		en = "You already have the auto-sell. Sell this one at the Auction",
+		es = "Ya tienes la autoventa. Puedes vender esta en la Subasta",
+		fr = "Vous avez déjà la vente auto. Vendez celle-ci à l'Enchère",
+	},
 	settings_layout = {
 		ru = "Кнопки и интерфейс: двигать и менять размер",
 		en = "Buttons and HUD: move and resize",
@@ -1207,6 +1255,18 @@ local STRINGS: { [string]: Entry } = {
 		en = "Absorption",
 		es = "Absorción",
 		fr = "Absorption",
+	},
+	effect_needs_free = {
+		ru = "Без нужд",
+		en = "No needs",
+		es = "Sin necesidades",
+		fr = "Sans besoins",
+	},
+	effect_forever = {
+		ru = "навсегда",
+		en = "for good",
+		es = "para siempre",
+		fr = "pour toujours",
 	},
 	effect_until_restored = {
 		ru = "пока нужда на нуле",
@@ -1919,6 +1979,42 @@ local STRINGS: { [string]: Entry } = {
 		es = "Mobs",
 		fr = "Mobs",
 	},
+	booster_to_item = {
+		ru = "Предметом",
+		en = "As item",
+		es = "Como objeto",
+		fr = "En objet",
+	},
+	booster_to_item_done = {
+		ru = "Бустер в инвентаре — его можно выставить на Аукцион. «Использовать» вернёт его в хранилище",
+		en = "The booster is in your inventory — sell it at the Auction. «Use» puts it back into the storage",
+		es = "El potenciador está en el inventario: véndelo en la Subasta. «Usar» lo devuelve al almacén",
+		fr = "Le booster est dans l'inventaire : vendez-le à l'Enchère. « Utiliser » le remet en réserve",
+	},
+	booster_item_stored = {
+		ru = "Бустер в хранилище [B] — запускайте, когда удобно",
+		en = "The booster is in the storage [B] — start it when you like",
+		es = "El potenciador está en el almacén [B]: actívalo cuando quieras",
+		fr = "Le booster est en réserve [B] : lancez-le quand vous voulez",
+	},
+	auction_slot_used = {
+		ru = "Слот на Аукционе добавлен. Докуплено слотов: %d",
+		en = "Auction slot added. Extra slots: %d",
+		es = "Espacio de subasta añadido. Espacios extra: %d",
+		fr = "Emplacement d'enchère ajouté. Emplacements en plus : %d",
+	},
+	item_auction_slot = {
+		ru = "Дополнительный слот на Аукционе",
+		en = "Extra auction slot",
+		es = "Espacio extra en la subasta",
+		fr = "Emplacement d'enchère en plus",
+	},
+	desc_auction_slot = {
+		ru = "Возьмите в руку и нажмите «Использовать»: +1 лот на Аукционе навсегда (до 50). До этого предмет можно продать на Аукционе.",
+		en = "Hold it and press «Use»: +1 Auction lot for good (up to 50). Until then it can be sold at the Auction.",
+		es = "Tómalo en la mano y pulsa «Usar»: +1 lote en la Subasta para siempre (hasta 50). Antes se puede vender en la Subasta.",
+		fr = "Prenez-le en main et appuyez sur « Utiliser » : +1 lot à l'Enchère pour toujours (jusqu'à 50). Avant, il se vend à l'Enchère.",
+	},
 	booster_activate = {
 		ru = "Активировать",
 		en = "Activate",
@@ -2299,6 +2395,30 @@ local STRINGS: { [string]: Entry } = {
 		en = "Toilet paper",
 		es = "Papel higiénico",
 		fr = "Papier toilette",
+	},
+	item_needs_injection = {
+		ru = "Инъекция «Без нужд»",
+		en = "«No needs» injection",
+		es = "Inyección «Sin necesidades»",
+		fr = "Injection « Sans besoins »",
+	},
+	desc_needs_injection = {
+		ru = "Навсегда избавляет от нужд: Грязь, Сон и Туалет сразу полные и больше не убывают. Не нужно ходить в Баню, Спальню и туалет, носить мыло, бумагу и спальник; Тошнота, Бессонница и Медлительность больше не наступают. Возьмите в руку и нажмите «Использовать». Действует один раз и навсегда; до укола её можно продать на Аукционе.",
+		en = "Frees you from needs for good: Dirt, Sleep and Toilet are full at once and never drop again. No more trips to the Bathhouse, the Dormitory or the toilet, no soap, paper or sleeping bag; Nausea, Insomnia and Slowness never come. Hold it and press «Use». Works once, forever; before it is used it can be sold at the Auction.",
+		es = "Te libra de las necesidades para siempre: Suciedad, Sueño y Baño se llenan al instante y nunca bajan. Ya no hace falta ir a la Casa de baños, al Dormitorio ni al baño, ni llevar jabón, papel o saco de dormir; Náusea, Insomnio y Lentitud nunca llegan. Tómala en la mano y pulsa «Usar». Funciona una vez y para siempre; antes de usarla se puede vender en la Subasta.",
+		fr = "Libère des besoins pour toujours : Saleté, Sommeil et Toilettes sont pleins tout de suite et ne baissent plus. Plus besoin d'aller aux Bains, au Dortoir ni aux toilettes, ni de porter savon, papier ou sac de couchage ; Nausée, Insomnie et Lenteur n'arrivent plus. Prenez-la en main et appuyez sur « Utiliser ». Agit une fois, pour toujours ; avant l'usage, elle se vend à l'Enchère.",
+	},
+	needs_injection_used = {
+		ru = "Инъекция подействовала: нужды больше не убывают — навсегда",
+		en = "The injection worked: your needs never drop again — for good",
+		es = "La inyección hizo efecto: tus necesidades ya no bajan, para siempre",
+		fr = "L'injection a agi : vos besoins ne baissent plus, pour toujours",
+	},
+	needs_injection_owned = {
+		ru = "Инъекция уже действует — нужды и так не убывают. Её можно продать на Аукционе",
+		en = "The injection already works on you — sell this one at the Auction",
+		es = "La inyección ya te hace efecto: puedes vender esta en la Subasta",
+		fr = "L'injection agit déjà sur vous : vendez celle-ci à l'Enchère",
 	},
 	item_cooked_chicken = {
 		ru = "Жареная курица",
@@ -3555,6 +3675,21 @@ function Strings.itemName(id: string, level: number?, locale: string?): string
 	local block = Config.block(id)
 	if block then
 		return Strings.blockName(id, block.name, loc)
+	end
+	-- a donate booster taken out as an item: «Локальный бустер денег» (Boosters.itemId)
+	local kind, scope = id:match("^booster_(%a+)_(%a+)$")
+	if
+		kind
+		and scope
+		and Strings.has("donate_kind_" .. kind)
+		and Strings.has("booster_scope_" .. scope)
+	then
+		return Strings.t(
+			"donate_booster_name",
+			loc,
+			Strings.t("booster_scope_" .. scope, loc),
+			Strings.t("donate_kind_" .. kind, loc)
+		) .. " ×2"
 	end
 	local key = "item_" .. id
 	local base = Strings.t(key, loc)

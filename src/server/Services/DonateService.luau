@@ -95,8 +95,13 @@ local function give(p: any, item: Donate.Item, count: number): string
 			end
 		end
 	elseif item.auctionSlot then
-		p.auctionSlots = (p.auctionSlots or 0) + count
-		return "auction"
+		-- an item until used, so it can be sold at the Auction [владелец 28.10]
+		local left = InventoryService.add(p, Donate.AUCTION_SLOT, count)
+		if left > 0 then
+			stash(p, Donate.AUCTION_SLOT, left)
+			return "stash"
+		end
+		return "inventory"
 	end
 	return "boosters"
 end
@@ -277,7 +282,36 @@ local function onClaim(player: Player, index: any)
 	end
 end
 
+-- a donate booster (×Donate.MULT, Donate.MINUTES) out of the storage as an inventory item, for the Auction or a friend
+-- [владелец 28.10: «всё, что можно купить в донат-магазине, можно выставлять на аукционе»]
+local function onBoosterToItem(player: Player, index: any)
+	if typeof(index) ~= "number" or throttled(player) then
+		return
+	end
+	local result = ""
+	ProfileService.Mutate(player, function(p)
+		local stored = p.boosters and p.boosters[index]
+		if not stored or stored.mult ~= Donate.MULT or stored.minutes ~= Donate.MINUTES then
+			return
+		end
+		local id = Boosters.itemId(stored.kind, stored.scope)
+		if not InventoryService.canAdd(p, id, 1) then
+			result = "donate_no_room"
+			return
+		end
+		local taken = Boosters.take(p, index)
+		if taken then
+			InventoryService.add(p, id, 1)
+			result = "booster_to_item_done"
+		end
+	end)
+	if result ~= "" then
+		toast(player, result)
+	end
+end
+
 function DonateService.Start()
+	Remotes.event("BoosterToItem").OnServerEvent:Connect(onBoosterToItem)
 	Remotes.event("DonateBuy").OnServerEvent:Connect(onBuy)
 	Remotes.event("DonateTopUp").OnServerEvent:Connect(onTopUp)
 	Remotes.event("DonateBuyRobux").OnServerEvent:Connect(onBuyRobux)

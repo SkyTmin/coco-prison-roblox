@@ -42,6 +42,21 @@ function Boosters.icon(kind: string, scope: string?): string
 	return icons["booster_" .. kind .. "_" .. (scope or "local")] or icons["booster_" .. kind] or ""
 end
 
+-- a donate booster as an inventory item «booster_<kind>_<scope>» (×Donate.MULT for Donate.MINUTES) [владелец 28.10:
+-- «всё, что можно купить в донат-магазине, можно выставлять на аукционе»]: taken out of the storage with
+-- BoosterToItem, put back with «Использовать»
+function Boosters.itemId(kind: string, scope: string?): string
+	return "booster_" .. kind .. "_" .. (scope or "local")
+end
+
+function Boosters.fromItem(id: string): (string?, string?)
+	local kind, scope = id:match("^booster_(%a+)_(%a+)$")
+	if kind and Boosters.isKind(kind) and Boosters.SCOPE_COLORS[scope :: string] then
+		return kind, scope
+	end
+	return nil, nil
+end
+
 function Boosters.isKind(kind: any): boolean
 	return typeof(kind) == "string" and table.find(Boosters.kinds, kind) ~= nil
 end

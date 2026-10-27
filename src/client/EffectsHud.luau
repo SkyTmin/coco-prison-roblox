@@ -109,7 +109,9 @@ function EffectsHud.start(
 					showToast(
 						if entry.endsAt
 							then name .. " — " .. timeText(entry.endsAt)
-							else name .. " — " .. t("effect_until_restored")
+							else name .. " — " .. t(
+								if effect.harmful then "effect_until_restored" else "effect_forever"
+							)
 					)
 				end
 			end

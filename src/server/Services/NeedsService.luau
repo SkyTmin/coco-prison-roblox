@@ -6,7 +6,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Effects = require(Shared.Effects)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
@@ -112,6 +114,9 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	local event = if activeEvent and os.clock() < activeEvent.endsAt then activeEvent else nil
 	local eventName = if event then event.name else nil
 	local eventEnds = if event then event.endsAtServer else nil
+	-- the injection «Без нужд» [владелец 28.10]: for good, shown as an effect with no timer
+	local profile = ProfileService.Get(player)
+	setEffect(character, "NeedsFree", if profile and profile.needsFree then 1 else nil)
 	-- needs at 0 [вики]: dirt → Nausea, sleep → Insomnia, toilet → Slowness; they last until restored
 	setEffect(character, "Nausea", if needs.hygiene <= 0 then 1 else nil)
 	setEffect(character, "Insomnia", if needs.sleep <= 0 then 1 else nil)
@@ -261,6 +266,101 @@ local function useConsumable(player: Player, slot: any)
 		end
 		return
 	end
+	-- the injection «Без нужд» [владелец 28.10: «избавляет игрока от нужд, ему больше не надо будет ходить в
+	-- туалет и так далее»]: all three needs full and never draining again; the item is gone
+	if stack.id == Config.needs.injection.item then
+		if profile.needsFree then
+			toast(player, "needs_injection_owned")
+			return
+		end
+		local injected = false
+		ProfileService.Mutate(player, function(p)
+			local last = InventoryService.SLOTS
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			injected = InventoryService.remove(p, stack.id, 1) == 1
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			if injected then
+				p.needsFree = true
+				for _, each in ipairs(NEEDS) do
+					p.needs[each] = 100
+				end
+			end
+		end)
+		if injected then
+			local state = states[player]
+			if state then
+				sync(player, state, profile.needs)
+			end
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				Sfx.broadcast("xp", root, 0.8)
+			end
+			toast(player, "needs_injection_used")
+		end
+		return
+	end
+	-- the auto-sell [владелец 28.10]: an item until used (so it can go to the Auction), then the profile's for good
+	if stack.id == Donate.AUTOSELL then
+		if profile.autosell then
+			toast(player, "autosell_owned")
+			return
+		end
+		local unlocked = false
+		ProfileService.Mutate(player, function(p)
+			local last = InventoryService.SLOTS
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			unlocked = InventoryService.remove(p, stack.id, 1) == 1
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			if unlocked then
+				p.autosell = true
+			end
+		end)
+		if unlocked then
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				Sfx.broadcast("xp", root, 0.8)
+			end
+			toast(player, "autosell_used")
+		end
+		return
+	end
+	-- a donate booster as an item → back into the booster storage [B]; the auction slot item → +1 lot slot
+	-- [владелец 28.10: «всё, что можно купить в донат-магазине, можно выставлять на аукционе»]
+	local boosterKind, boosterScope = Boosters.fromItem(stack.id)
+	local slotItem = Donate.item(Donate.AUCTION_SLOT)
+	if boosterKind or (stack.id == Donate.AUCTION_SLOT and slotItem) then
+		if boosterKind and Boosters.storedCount(profile) >= Config.boosters.maxStored then
+			toast(player, "donate_storage_full")
+			return
+		elseif
+			not boosterKind
+			and slotItem
+			and (profile.auctionSlots or 0) >= (slotItem.max or 0)
+		then
+			toast(player, "donate_limit")
+			return
+		end
+		local done = false
+		ProfileService.Mutate(player, function(p)
+			local last = InventoryService.SLOTS
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			done = InventoryService.remove(p, stack.id, 1) == 1
+			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
+			if done and boosterKind then
+				Boosters.store(p, boosterKind, boosterScope, Donate.MULT, Donate.MINUTES)
+			elseif done then
+				p.auctionSlots = (p.auctionSlots or 0) + 1
+			end
+		end)
+		if done then
+			toast(
+				player,
+				if boosterKind then "booster_item_stored" else "auction_slot_used",
+				profile.auctionSlots or 0
+			)
+		end
+		return
+	end
 	if not need then
 		return
 	end
@@ -313,8 +413,9 @@ local function updatePlayers()
 			}
 			states[player] = state
 		end
-		if player:GetAttribute("Creative") then
-			state.nextDecay = now + DECAY_SECONDS -- creative test mode: needs never drain
+		if player:GetAttribute("Creative") or profile.needsFree then
+			-- creative test mode / the injection «Без нужд»: needs never drain
+			state.nextDecay = now + DECAY_SECONDS
 		elseif now >= state.nextDecay then
 			local ticks = math.floor((now - state.nextDecay) / DECAY_SECONDS) + 1
 			state.nextDecay += ticks * DECAY_SECONDS

@@ -7,6 +7,12 @@
 -- our crystal prices our crystal picture). Shared/Donate holds the rules, DonateService decides; built once and
 -- updated in place, a purchase flashes the panel and «+N» floats up. Every item can also be bought straight for Robux,
 -- one piece per purchase (the green button; its own Developer Product, DonateBuyRobux).
+-- [владелец 28.10: «просто в заблуждение вводит … одна цена, в итоге другую сумму вводить надо»] Robux prices are the
+-- ones Roblox really charges this player (MarketplaceService:GetProductInfo on the client — regional pricing may lower
+-- them; the config's number shows until the answer comes), and under the green button a line says what the Roblox
+-- «Buy Robux and item» window does when the balance is short: it sells the smallest Robux package that covers the
+-- price (80, 400, 800 …) — the game can neither change that package nor read the balance; the rest stays on the account.
+local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -32,6 +38,48 @@ local TABS: { [string]: { color: Color3, icon: string } } = {
 	needs = { color = Color3.fromRGB(120, 220, 140), icon = "soap" },
 	auction = { color = Color3.fromRGB(255, 140, 90), icon = "auction_slot" },
 }
+
+-- productId → the price Roblox charges this player; asked once a session
+local livePrices: { [number]: number } = {}
+local asked: { [number]: boolean } = {}
+
+local function robuxPrice(productId: number, fallback: number): number
+	return livePrices[productId] or fallback
+end
+
+-- asks Roblox for every product's price not known yet, then calls done once if anything changed
+local function loadPrices(done: () -> ())
+	local ids = {}
+	for _, pack in ipairs(Donate.packs) do
+		table.insert(ids, pack.productId)
+	end
+	for _, entry in ipairs(Donate.tabs) do
+		for _, id in ipairs(entry.items or {}) do
+			local item = Donate.item(id)
+			if item then
+				table.insert(ids, item.productId)
+			end
+		end
+	end
+	task.spawn(function()
+		local changed = false
+		for _, productId in ipairs(ids) do
+			if productId > 0 and not asked[productId] then
+				asked[productId] = true
+				local ok, info = pcall(function()
+					return MarketplaceService:GetProductInfo(productId, Enum.InfoType.Product)
+				end)
+				if ok and typeof(info) == "table" and typeof(info.PriceInRobux) == "number" then
+					livePrices[productId] = info.PriceInRobux
+					changed = true
+				end
+			end
+		end
+		if changed then
+			done()
+		end
+	end)
+end
 
 -- 1 234 567
 local function grouped(n: number): string
@@ -345,19 +393,32 @@ function DonateWindow.build(
 		end)
 		return slot
 	end
-	local buy = actionSlot(-122, CRYSTAL)
+	local buy = actionSlot(-150, CRYSTAL)
 	local orRobux = centred(
 		Kit.text(
 			panel,
 			t("donate_or_robux"),
 			UDim2.new(1, -20, 0, 16),
-			UDim2.new(0, 10, 1, -74),
+			UDim2.new(0, 10, 1, -102),
 			12,
 			Ui.colors.muted,
 			Kit.BOLD
 		)
 	)
-	local robux = actionSlot(-56, Kit.GOOD)
+	local robux = actionSlot(-84, Kit.GOOD)
+	-- what Roblox does when the Robux are short (its own window, not ours)
+	local packageHint = centred(
+		Kit.text(
+			panel,
+			t("donate_robux_package_hint"),
+			UDim2.new(1, -16, 0, 34),
+			UDim2.new(0, 8, 1, -38),
+			13,
+			Ui.colors.muted,
+			Kit.BOLD
+		)
+	)
+	packageHint.TextWrapped = true
 
 	-- ------------------------------------------------------------------ one card of the grid
 	local function makeCard(
@@ -457,7 +518,7 @@ function DonateWindow.build(
 				local price = centred(
 					Kit.text(
 						f,
-						ROBUX .. " " .. grouped(pack.robux),
+						ROBUX .. " " .. grouped(robuxPrice(pack.productId, pack.robux)),
 						UDim2.new(1, -10, 0, 22),
 						UDim2.fromOffset(5, 102),
 						16,
@@ -531,13 +592,14 @@ function DonateWindow.build(
 			name.Text = t("donate_pack_name", pack.crystals)
 			description.Text = t("donate_hint_crystals")
 			totalIcon.Visible = false
-			total.Text = ROBUX .. " " .. grouped(pack.robux)
+			local packPrice = robuxPrice(pack.productId, pack.robux)
+			total.Text = ROBUX .. " " .. grouped(packPrice)
 			total.TextColor3 = Kit.GOOD
 			note.Text = if pack.bonus then t("donate_pack_bonus", pack.bonus) else ""
 			note.TextColor3 = Kit.GOOD
 			buy.button.Visible = false
 			orRobux.Visible = false
-			robux.label.Text = ROBUX .. " " .. grouped(pack.robux)
+			robux.label.Text = ROBUX .. " " .. grouped(packPrice)
 			robux.paint(Kit.GOOD, true)
 			robux.run = function()
 				Remotes.event("DonateTopUp"):FireServer(pack.id)
@@ -561,7 +623,10 @@ function DonateWindow.build(
 				note.Text = ""
 			end
 			note.TextColor3 = Ui.colors.muted
-			robux.label.Text = t("donate_robux_buy", ROBUX .. " " .. grouped(item.robux))
+			robux.label.Text = t(
+				"donate_robux_buy",
+				ROBUX .. " " .. grouped(robuxPrice(item.productId, item.robux))
+			)
 			if limit <= 0 then
 				buy.label.Text = t("donate_limit")
 				buy.paint(nil, false)
@@ -637,6 +702,15 @@ function DonateWindow.build(
 	end
 	-- no crystals yet: open on the packs
 	selectTab(if Donate.crystals(profile) > 0 then "keys" else "crystals")
+	-- the real prices: redraw once they arrive (the pack cards carry them)
+	loadPrices(function()
+		if win.Parent then
+			if tab == "crystals" then
+				fillGrid()
+			end
+			refreshAll()
+		end
+	end)
 	return win, refresh
 end
 

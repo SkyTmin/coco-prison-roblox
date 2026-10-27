@@ -2190,6 +2190,12 @@ local boosterHud = require(script.BoosterHud).start(
 		open("boosters")
 	end
 )
+-- the auto-sell income at the crosshair («+0,057 $») [владелец 28.10]
+require(script.AutoSellFx).start(gui, function()
+	return profile
+end, function()
+	return locale
+end)
 -- [владелец] no auto-jump on touch: jumping is the jump button only
 player.AutoJumpEnabled = false
 local function disableAutoJump(character: Model)
@@ -2733,6 +2739,19 @@ local function isNeedConsumable(): boolean
 		if Config.needs[need].consumable == stack.id then
 			return true
 		end
+	end
+	-- the injection «Без нужд» too [владелец 28.10]
+	-- and the donate items used from the hand: auto-sell, a booster item, the auction slot
+	-- (required here: the top level of this script is at the 200-locals limit)
+	local Donate = require(Shared.Donate)
+	local Boosters = require(Shared.Boosters)
+	if
+		stack.id == Config.needs.injection.item
+		or stack.id == Donate.AUTOSELL
+		or stack.id == Donate.AUCTION_SLOT
+		or Boosters.fromItem(stack.id) ~= nil
+	then
+		return true
 	end
 	-- a location pass is used the same way (the server opens the location for good) [владелец 22.10]
 	local passFor = stack.id:match("^(.+)_pass$")

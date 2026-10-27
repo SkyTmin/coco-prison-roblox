@@ -296,8 +296,30 @@ local function complete(player: Player, token: number)
 	local artifactNotices: { ArtifactService.Notice } = {}
 	local keyFull = false
 	local overflow = 0
+	local sold = 0
 	ProfileService.Mutate(player, function(p)
-		overflow = InventoryService.add(p, dropId, dropCount)
+		-- the auto-sell [владелец 28.10: «когда игрок копает, предмет сразу продаётся … по центру экрана сумма»;
+		-- вики: «+0,057 $» = цена скупщика с множителями]: the drop goes straight to the buyer's price, the same
+		-- rounding as InventoryService.sellAll; anything the buyer does not take still goes to the bag
+		local sale = Config.block(dropId)
+		if
+			p.autosell
+			and not (p.settings and p.settings.autosellOff)
+			and sale
+			and sale.sellable ~= false
+			and sale.basePrice > 0
+		then
+			sold = math.floor(
+				sale.basePrice
+						* Config.moneyScale
+						* ProfessionService.moneyMultiplier(p)
+						* dropCount
+					+ 0.5
+			)
+			p.coins += sold
+		else
+			overflow = InventoryService.add(p, dropId, dropCount)
+		end
 		local blockMult = (1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks)
 			* Boosters.multiplier(p, "blocks")
 		p.blocksTotal += blockMult * comboMult
@@ -334,6 +356,9 @@ local function complete(player: Player, token: number)
 	end
 	if keyFound then
 		toast(player, "key_found")
+	end
+	if sold > 0 then
+		Remotes.event("AutoSold"):FireClient(player, sold)
 	end
 	sendCombo(player, combo)
 end

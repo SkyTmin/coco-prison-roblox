@@ -698,6 +698,12 @@ function ProfileService.Start()
 		hideBoosters = function(v)
 			return typeof(v) == "boolean"
 		end,
+		autosellOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		autosellTextOff = function(v)
+			return typeof(v) == "boolean"
+		end,
 	}
 	Remotes.event("SetSetting").OnServerEvent:Connect(function(player: Player, key: any, value: any)
 		local check = typeof(key) == "string" and SETTINGS[key]

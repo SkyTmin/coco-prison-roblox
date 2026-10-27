@@ -5,6 +5,8 @@
 -- notifications and the booster bar shown / hidden, and «Кнопки и интерфейс» — the layout editor, where every
 -- element (the notifications and the booster bar too) is moved and resized. Values live in the profile
 -- (profile.settings, SetSetting; the language: SetLocale); the window is rebuilt on every profile change.
+-- [владелец 28.10, вики MENUS-SOCIAL: «Авто-продажа блоков», «Частицы у прицела при автопродаже»] two more rows: auto-sell
+-- on / off and the income at the crosshair shown / hidden (both on by default; locked until the auto-sell is bought).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -28,6 +30,8 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		muted = s.muted == true,
 		hideToasts = s.hideToasts == true,
 		hideBoosters = s.hideBoosters == true,
+		autosellOff = s.autosellOff == true,
+		autosellTextOff = s.autosellTextOff == true,
 	}
 end
 
@@ -47,7 +51,7 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 6
+	local rows = 8
 	local win, content =
 		createWindow(parent, T("settings_title"), UDim2.fromOffset(W, rows * ROW + 56), onClose)
 	win.Name = "Window_Settings"
@@ -178,12 +182,45 @@ function SettingsWindow.build(
 			set("hideBoosters", not settings.hideBoosters)
 		end
 	)
-	-- 6. move and resize the buttons, the notifications, the booster bar
+	-- 6–7. the auto-sell (a donate purchase) and its income at the crosshair
+	local owned = profile ~= nil and profile.autosell == true
+	local function autosellToggle(
+		i: number,
+		caption: string,
+		name: string,
+		key: string,
+		off: boolean
+	)
+		local line = row(i, caption)
+		if not owned then
+			local b = toggle(line, name, false, "", T("settings_autosell_locked"), function() end)
+			b.TextSize = 13
+			return
+		end
+		toggle(line, name, not off, T("settings_on"), T("settings_off"), function()
+			set(key, not off)
+		end)
+	end
+	autosellToggle(
+		6,
+		T("settings_autosell"),
+		"Autosell",
+		"autosellOff",
+		settings.autosellOff == true
+	)
+	autosellToggle(
+		7,
+		T("settings_autosell_text"),
+		"AutosellText",
+		"autosellTextOff",
+		settings.autosellTextOff == true
+	)
+	-- 8. move and resize the buttons, the notifications, the booster bar
 	local layout = Ui.button(
 		content,
 		T("settings_layout"),
 		UDim2.new(1, 0, 0, ROW - 6),
-		UDim2.fromOffset(0, 5 * ROW),
+		UDim2.fromOffset(0, 7 * ROW),
 		Ui.colors.buttonBlue
 	)
 	layout.Name = "Layout"

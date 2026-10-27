@@ -150,4 +150,9 @@ function Donate.description(id: string, locale: string?): string
 	return ""
 end
 
+-- the auto-sell item [владелец 28.10]: used from the hand, it switches the profile's auto-sell on for good
+Donate.AUTOSELL = "autosell"
+-- the extra auction slot: an item too (it can be sold at the Auction), used from the hand → +1 slot
+Donate.AUCTION_SLOT = "auction_slot"
+
 return Donate

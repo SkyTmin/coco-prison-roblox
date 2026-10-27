@@ -10,6 +10,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -198,6 +199,21 @@ function BoosterWindow.build(
 		button.Activated:Connect(function()
 			Remotes.event("ActivateBooster"):FireServer(index)
 		end)
+		-- a donate booster can leave the storage as an item (for the Auction) [владелец 28.10]
+		if stored.mult == Donate.MULT and stored.minutes == Donate.MINUTES then
+			local out = Ui.button(
+				frame,
+				T("booster_to_item"),
+				UDim2.fromOffset(78, 24),
+				UDim2.new(1, -222, 1, -30),
+				Ui.colors.buttonBlue
+			)
+			out.Name = "ToItem"
+			out.TextSize = 12
+			out.Activated:Connect(function()
+				Remotes.event("BoosterToItem"):FireServer(index)
+			end)
+		end
 	end
 
 	-- a bought item waiting for room in the inventory

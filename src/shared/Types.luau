@@ -7,6 +7,8 @@ export type Settings = {
 	muted: boolean?,
 	hideToasts: boolean?,
 	hideBoosters: boolean?,
+	autosellOff: boolean?, -- the bought auto-sell switched off [владелец 28.10]
+	autosellTextOff: boolean?, -- no «+0,057 $» at the crosshair
 }
 
 export type ItemStack = {
@@ -51,6 +53,8 @@ export type Profile = {
 	keys: { [string]: number },
 	passes: { [string]: boolean }, -- basement = true
 	needs: Needs,
+	needsFree: boolean?,
+	autosell: boolean?, -- the auto-sell was bought (used): dug blocks are sold at once [владелец 28.10] -- the injection «Без нужд» was used: needs never drain [владелец 28.10]
 	hunger: number, -- 0..20
 	saturation: number?, -- 0..hunger, spent before hunger [ваниль]; nil = 0; schema stays v3
 	crystals: number?, -- donate currency (DonateService, bought for Robux); nil = 0; schema stays v3

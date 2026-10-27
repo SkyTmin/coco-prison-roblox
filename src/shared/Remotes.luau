@@ -3,12 +3,13 @@
 --
 -- Client → server events:  DigStart(part, hitPoint), DigCancel(), DigFinish(part) [legacy, ignored], Sell(), BuyItem(id), UpgradeItem(id),
 --                           LevelUp(), InventoryMove(from, to, count?), SelectSlot(n), SpendPoint(kind),
---                           ClaimProfessionPoints(job), UseConsumable(slot),
+--                           ClaimProfessionPoints(job), UseConsumable(slot), BoosterToItem(storageIndex),
 --                           CaseOpen(caseId, keyId?), CaseClose(caseId),
 --                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
 --                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?)
 --                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
--- Server → client events:  ProfileUpdated(profile) once, then ProfilePatch(ops) with the changes only, Toast(text), MineReset(mineId, state), Combo(mult, n)
+-- Server → client events:  ProfileUpdated(profile) once, then ProfilePatch(ops) with the changes only, Toast(text), MineReset(mineId, state), Combo(mult, n),
+--                          AutoSold(units) — a dug block sold by the auto-sell (the «+0,057 $» at the crosshair)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
 --                          BlockBrokenFx({ {position, size, color, blockId} }) — unreliable, one batch per
 --                          frame, only to players within FX_RANGE of the block (DigService)
