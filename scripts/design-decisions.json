@@ -3128,7 +3128,7 @@
         "id": "crystals_100",
         "crystals": 100,
         "robux": 99,
-        "productId": 0,
+        "productId": 3723068679,
         "icon": "crystal",
         "productName": "100 кристаллов"
       },
@@ -3136,7 +3136,7 @@
         "id": "crystals_550",
         "crystals": 550,
         "robux": 499,
-        "productId": 0,
+        "productId": 3723068693,
         "icon": "crystals_550",
         "bonus": 10,
         "productName": "550 кристаллов"
@@ -3145,7 +3145,7 @@
         "id": "crystals_1200",
         "crystals": 1200,
         "robux": 999,
-        "productId": 0,
+        "productId": 3723068701,
         "icon": "crystals_1200",
         "bonus": 20,
         "productName": "1200 кристаллов"
@@ -3154,7 +3154,7 @@
         "id": "crystals_2600",
         "crystals": 2600,
         "robux": 1999,
-        "productId": 0,
+        "productId": 3723068712,
         "icon": "crystals_2600",
         "bonus": 30,
         "productName": "2600 кристаллов"
@@ -3163,7 +3163,7 @@
         "id": "crystals_7000",
         "crystals": 7000,
         "robux": 4999,
-        "productId": 0,
+        "productId": 3723068729,
         "icon": "crystals_7000",
         "bonus": 40,
         "productName": "7000 кристаллов"
@@ -3230,7 +3230,7 @@
         "max": 10,
         "icon": "booster_blocks_local",
         "robux": 139,
-        "productId": 0,
+        "productId": 3723068746,
         "productName": "Локальный бустер блоков ×2"
       },
       "booster_money_local": {
@@ -3244,7 +3244,7 @@
         "max": 10,
         "icon": "booster_money_local",
         "robux": 139,
-        "productId": 0,
+        "productId": 3723068753,
         "productName": "Локальный бустер денег ×2"
       },
       "booster_mobs_local": {
@@ -3258,7 +3258,7 @@
         "max": 10,
         "icon": "booster_mobs_local",
         "robux": 129,
-        "productId": 0,
+        "productId": 3723068768,
         "productName": "Локальный бустер мобов ×2"
       },
       "booster_set_local": {
@@ -3274,7 +3274,7 @@
         "max": 10,
         "icon": "booster_set",
         "robux": 399,
-        "productId": 0,
+        "productId": 3723068788,
         "productName": "Набор бустеров · Локальный"
       },
       "booster_blocks_faction": {
@@ -3288,7 +3288,7 @@
         "max": 10,
         "icon": "booster_blocks_faction",
         "robux": 199,
-        "productId": 0,
+        "productId": 3723068808,
         "productName": "Фракционный бустер блоков ×2"
       },
       "booster_money_faction": {
@@ -3302,7 +3302,7 @@
         "max": 10,
         "icon": "booster_money_faction",
         "robux": 199,
-        "productId": 0,
+        "productId": 3723068827,
         "productName": "Фракционный бустер денег ×2"
       },
       "booster_mobs_faction": {
@@ -3316,7 +3316,7 @@
         "max": 10,
         "icon": "booster_mobs_faction",
         "robux": 189,
-        "productId": 0,
+        "productId": 3723068838,
         "productName": "Фракционный бустер мобов ×2"
       },
       "booster_set_faction": {
@@ -3332,7 +3332,7 @@
         "max": 10,
         "icon": "booster_set",
         "robux": 579,
-        "productId": 0,
+        "productId": 3723068850,
         "productName": "Набор бустеров · Фракционный"
       },
       "booster_blocks_global": {
@@ -3346,7 +3346,7 @@
         "max": 10,
         "icon": "booster_blocks_global",
         "robux": 249,
-        "productId": 0,
+        "productId": 3723068864,
         "productName": "Глобальный бустер блоков ×2"
       },
       "booster_money_global": {
@@ -3360,7 +3360,7 @@
         "max": 10,
         "icon": "booster_money_global",
         "robux": 249,
-        "productId": 0,
+        "productId": 3723068889,
         "productName": "Глобальный бустер денег ×2"
       },
       "booster_mobs_global": {
@@ -3374,7 +3374,7 @@
         "max": 10,
         "icon": "booster_mobs_global",
         "robux": 239,
-        "productId": 0,
+        "productId": 3723068910,
         "productName": "Глобальный бустер мобов ×2"
       },
       "booster_set_global": {
@@ -3390,7 +3390,7 @@
         "max": 10,
         "icon": "booster_set",
         "robux": 729,
-        "productId": 0,
+        "productId": 3723068930,
         "productName": "Набор бустеров · Глобальный"
       },
       "improved_ancient_key": {
@@ -3398,7 +3398,7 @@
         "give": "improved_ancient_key",
         "max": 64,
         "robux": 349,
-        "productId": 0,
+        "productId": 3723068946,
         "productName": "Улучшенный древний ключ"
       },
       "ancient_key": {
@@ -3406,7 +3406,7 @@
         "give": "ancient_key",
         "max": 64,
         "robux": 149,
-        "productId": 0,
+        "productId": 3723068966,
         "productName": "Древний ключ"
       },
       "nickname_key": {
@@ -3414,7 +3414,7 @@
         "give": "nickname_key",
         "max": 64,
         "robux": 99,
-        "productId": 0,
+        "productId": 3723068980,
         "productName": "Ключ от кейса с кличками"
       },
       "ordinary_key": {
@@ -3422,7 +3422,7 @@
         "give": "ordinary_key",
         "max": 64,
         "robux": 10,
-        "productId": 0,
+        "productId": 3723068990,
         "productName": "Ключ от Обычного кейса"
       },
       "ancient_star_set": {
@@ -3432,7 +3432,7 @@
         "max": 6,
         "icon": "ancient_star",
         "robux": 169,
-        "productId": 0,
+        "productId": 3723069004,
         "productName": "Набор Древних звёзд ×10"
       },
       "ancient_star": {
@@ -3440,7 +3440,7 @@
         "give": "ancient_star",
         "max": 64,
         "robux": 25,
-        "productId": 0,
+        "productId": 3723069014,
         "productName": "Древняя звезда"
       },
       "ancient_powder": {
@@ -3448,7 +3448,7 @@
         "give": "ancient_powder",
         "max": 64,
         "robux": 17,
-        "productId": 0,
+        "productId": 3723069700,
         "productName": "Древний порошок"
       },
       "dispeller": {
@@ -3456,7 +3456,7 @@
         "give": "dispeller",
         "max": 64,
         "robux": 199,
-        "productId": 0,
+        "productId": 3723069713,
         "productName": "Развеиватель"
       },
       "soap": {
@@ -3464,7 +3464,7 @@
         "give": "soap",
         "max": 64,
         "robux": 10,
-        "productId": 0,
+        "productId": 3723069732,
         "productName": "Мыло"
       },
       "sleeping_bag": {
@@ -3472,7 +3472,7 @@
         "give": "sleeping_bag",
         "max": 64,
         "robux": 10,
-        "productId": 0,
+        "productId": 3723069749,
         "productName": "Спальный мешок"
       },
       "toilet_paper": {
@@ -3480,7 +3480,7 @@
         "give": "toilet_paper",
         "max": 64,
         "robux": 7,
-        "productId": 0,
+        "productId": 3723069762,
         "productName": "Туалетная бумага"
       },
       "auction_slot": {
@@ -3489,7 +3489,7 @@
         "max": 50,
         "icon": "auction_slot",
         "robux": 69,
-        "productId": 0,
+        "productId": 3723069777,
         "productName": "Дополнительный слот на Аукционе"
       }
     }

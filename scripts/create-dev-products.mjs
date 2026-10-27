@@ -123,7 +123,20 @@ for (const good of goods) {
 	if (!found) {
 		console.log(`${dry ? "would create" : "create"}: ${good.name} — ${good.price} R$ (icon ${iconFile(good.icon) ? good.icon : "none"})`);
 		if (dry) continue;
-		const made = await api(base, { method: "POST", body: form(good, true) });
+		// a 5xx / 429 may still have created it (the 504 «upstream request timeout» of 28.10): look it up by name
+		// before trying again, so no product is made twice
+		let made = null;
+		for (let attempt = 1; !made; attempt++) {
+			try {
+				made = await api(base, { method: "POST", body: form(good, true) });
+			} catch (err) {
+				const status = Number(/^HTTP (\d+)/.exec(err.message)?.[1] ?? 0);
+				if (attempt >= 4 || !(status >= 500 || status === 429)) throw err;
+				console.log(`  ${err.message.slice(0, 80)} — retry ${attempt} in ${attempt * 5} s`);
+				await sleep(attempt * 5000);
+				made = (await existing()).get(good.name) ?? null;
+			}
+		}
 		good.entry.productId = idOf(made);
 		if (!good.entry.productId) throw new Error(`no product id in the answer: ${JSON.stringify(made)}`);
 		save(); // after every product: a stop half-way keeps the ids made so far
