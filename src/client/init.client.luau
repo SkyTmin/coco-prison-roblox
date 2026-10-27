@@ -64,6 +64,7 @@ AmbientMotion.Start()
 require(Shared.Sfx).listen() -- sounds the server asks for (hurt, chests, eating, level up…)
 ArmorVisual.Start()
 BlockBreak.Start()
+require(script.Nameplates).Start() -- «lvl N [кличка] Ник» over the other players
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale
