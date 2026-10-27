@@ -475,7 +475,7 @@ local function readBuy(id: string, op: string): (string?, Lot?)
 end
 
 local function notifySeller(seller: number?, id: string)
-	if not seller or seller <= 0 then
+	if not seller or seller <= -1000 then -- QA fakes; Studio test players are −1, −2…
 		return
 	end
 	local local_ = Players:GetPlayerByUserId(seller)
@@ -990,13 +990,13 @@ local function debugHook()
 		if op == "fail" then
 			failNext[a] = b or 1
 			return true
-		elseif op == "seed" then -- a lot from a fake seller (userId −1): ("seed", itemId, count, dollars, level?)
+		elseif op == "seed" then -- a lot from a fake seller (userId −1000): ("seed", itemId, count, dollars, level?)
 			local now = os.time()
 			local lot: Lot = {
 				id = HttpService:GenerateGUID(false),
 				item = { id = a, count = b or 1, level = d, books = if d then {} else nil },
 				price = (c or 10) * Config.moneyScale,
-				seller = -1,
+				seller = -1000,
 				sellerName = "QA_Seller",
 				createdAt = now,
 				expiresAt = now + cfg.lotDays * 86400,
@@ -1026,12 +1026,12 @@ local function debugHook()
 			end)
 			indexRemove(a)
 			return done
-		elseif op == "buyas" then -- a fake buyer (userId −2) buys the lot: the seller's payout path
+		elseif op == "buyas" then -- a fake buyer (userId −1001) buys the lot: the seller's payout path
 			local seller: number? = nil
 			lotUpdate(a, function(old: any)
 				if typeof(old) == "table" and old.status == "active" then
 					old.status = "sold"
-					old.buyer = -2
+					old.buyer = -1001
 					old.buyerName = "QA_Buyer"
 					old.buyOp = HttpService:GenerateGUID(false)
 					old.soldAt = os.time()

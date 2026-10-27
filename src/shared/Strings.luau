@@ -334,6 +334,10 @@ local STRINGS: { [string]: Entry } = {
 		es = "Restablecer",
 		fr = "Réinitialiser",
 	},
+	-- optional buttons in the layout editor [владелец 27.10: «кнопки удара на старте не было, но в меню, где можно
+	-- двигать интерфейс, добавить возможность добавить или убрать эту кнопку»]
+	layout_hide = { ru = "Убрать", en = "Remove", es = "Quitar", fr = "Retirer" },
+	layout_show = { ru = "Добавить", en = "Add", es = "Añadir", fr = "Ajouter" },
 	sb_title = {
 		ru = "PRISON CLASSIC",
 		en = "PRISON CLASSIC",

@@ -625,8 +625,15 @@ function ProfileService.Start()
 	-- [владелец 22.10: «настройка в меню, чтобы двигать кнопки»] the player's HUD layout (src/client/HudLayout.luau):
 	-- per mode ("mobile" / "desktop") element id → {x, y}, the anchor point as a fraction of the screen; nil
 	-- for a mode resets it. Only known ids and positions on the screen are kept; one save a second.
-	local HUD_IDS =
-		{ attack = true, eat = true, menu = true, inventory = true, stats = true, effects = true }
+	local HUD_IDS = {
+		attack = true,
+		eat = true,
+		menu = true,
+		inventory = true,
+		stats = true,
+		effects = true,
+		jump = true,
+	}
 	local lastLayoutAt: { [Player]: number } = {}
 	Players.PlayerRemoving:Connect(function(player)
 		lastLayoutAt[player] = nil
@@ -655,9 +662,11 @@ function ProfileService.Start()
 						and pos[2] >= 0
 						and pos[2] <= 1
 					then
+						-- the third number: an optional button shown (1) or removed (0)
 						(clean :: any)[id] = {
 							math.floor(pos[1] * 10000) / 10000,
 							math.floor(pos[2] * 10000) / 10000,
+							if pos[3] == 0 or pos[3] == 1 then pos[3] else nil,
 						}
 					end
 				end

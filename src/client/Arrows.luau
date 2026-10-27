@@ -4,7 +4,8 @@
 -- the first block in its way or when ArrowEnded says the server's arrow is done. Our own shot starts at once
 -- (FireLocal) and takes the server's exact start and spread when its ArrowFired arrives. A critical arrow leaves a
 -- trail of crit stars, a Flame arrow burns. Stuck arrows are server parts tagged StuckArrow; each gets the arrow
--- model with its head in the block.
+-- model with its head in the block. Arrows in a body: a player's or mob's attribute ArrowsInBody (BowService) = how
+-- many short arrows stick out of its torso and limbs, welded there [ваниль].
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -227,6 +228,125 @@ local function stuckAdded(part: Instance)
 	end
 end
 
+-- arrows stuck in a body: the model → the arrow models on it
+local BODY_SIZE = SIZE * 0.75
+local BODY_LENGTH = BODY_SIZE * 11 / 16 * math.sqrt(2)
+local BODY_PARTS = {
+	"UpperTorso",
+	"LowerTorso",
+	"Torso",
+	"LeftUpperArm",
+	"RightUpperArm",
+	"LeftUpperLeg",
+	"RightUpperLeg",
+	"Head",
+}
+local bodies: { [Model]: { Model } } = {}
+local watched: { [Model]: boolean } = {}
+local random = Random.new()
+
+local function bodyPart(model: Model): BasePart?
+	local list: { BasePart } = {}
+	for _, name in ipairs(BODY_PARTS) do
+		local part = model:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			table.insert(list, part)
+		end
+	end
+	if #list == 0 then
+		for _, part in ipairs(model:GetDescendants()) do
+			if
+				part:IsA("BasePart")
+				and part.Name ~= "HumanoidRootPart"
+				and part.Transparency < 1
+				and part.Size.Magnitude > 1
+			then
+				table.insert(list, part)
+			end
+		end
+	end
+	return if #list > 0 then list[random:NextInteger(1, #list)] else nil
+end
+
+local function addBodyArrow(model: Model): Model?
+	local part = bodyPart(model)
+	local arrow = part and ItemModels.get("arrow", nil, BODY_SIZE)
+	if not part or not arrow then
+		return nil
+	end
+	-- a random point on the front, back or a side of the part; the head goes 40 % in, a little slanted
+	local size = part.Size
+	local axis = random:NextInteger(1, 4)
+	local normal = ({ Vector3.zAxis, -Vector3.zAxis, Vector3.xAxis, -Vector3.xAxis })[axis]
+	local u, v = random:NextNumber(-0.4, 0.4), random:NextNumber(-0.4, 0.4)
+	local surface = if axis <= 2
+		then Vector3.new(u * size.X, v * size.Y, normal.Z * size.Z / 2)
+		else Vector3.new(normal.X * size.X / 2, v * size.Y, u * size.Z)
+	local inward = (-normal + Vector3.new(
+		random:NextNumber(-0.4, 0.4),
+		random:NextNumber(-0.4, 0.4),
+		random:NextNumber(-0.4, 0.4)
+	)).Unit
+	local centre = surface - inward * (BODY_LENGTH * 0.1)
+	arrow:PivotTo(part.CFrame * CFrame.lookAt(centre, centre + inward) * TURN)
+	for _, p in ipairs(arrow:GetDescendants()) do
+		if p:IsA("BasePart") then
+			p.Anchored = false
+			p.Massless = true
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.CastShadow = false
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0, weld.Part1 = part, p
+			weld.Parent = p
+		end
+	end
+	arrow.Parent = folder
+	return arrow
+end
+
+local function syncBody(model: Model)
+	local count = model:GetAttribute("ArrowsInBody")
+	local want = if typeof(count) == "number" and model.Parent then math.clamp(count, 0, 12) else 0
+	local list = bodies[model] or {}
+	while #list > want do
+		table.remove(list, random:NextInteger(1, #list)):Destroy()
+	end
+	while #list < want do
+		local arrow = addBodyArrow(model)
+		if not arrow then
+			break
+		end
+		table.insert(list, arrow)
+	end
+	bodies[model] = if #list > 0 then list else nil
+end
+
+local function watchBody(model: Instance)
+	if not model:IsA("Model") or watched[model] then
+		return
+	end
+	watched[model] = true
+	syncBody(model)
+	local changed = model:GetAttributeChangedSignal("ArrowsInBody"):Connect(function()
+		syncBody(model)
+	end)
+	model.AncestryChanged:Connect(function()
+		if not model:IsDescendantOf(workspace) then
+			changed:Disconnect()
+			watched[model] = nil
+			local list = bodies[model]
+			if list then
+				for _, arrow in ipairs(list) do
+					arrow:Destroy()
+				end
+				bodies[model] = nil
+			end
+		end
+	end)
+end
+
 local function stuckRemoved(part: Instance)
 	local model = stuckVisuals[part]
 	if model then
@@ -283,6 +403,22 @@ function Arrows.Start()
 	end
 	CollectionService:GetInstanceAddedSignal("StuckArrow"):Connect(stuckAdded)
 	CollectionService:GetInstanceRemovedSignal("StuckArrow"):Connect(stuckRemoved)
+	local function watchPlayer(player: Player)
+		if player.Character then
+			watchBody(player.Character)
+		end
+		player.CharacterAdded:Connect(watchBody)
+	end
+	for _, player in ipairs(Players:GetPlayers()) do
+		watchPlayer(player)
+	end
+	Players.PlayerAdded:Connect(watchPlayer)
+	for _, tag in ipairs({ "Mob", "Boss" }) do
+		for _, model in ipairs(CollectionService:GetTagged(tag)) do
+			watchBody(model)
+		end
+		CollectionService:GetInstanceAddedSignal(tag):Connect(watchBody)
+	end
 end
 
 return Arrows

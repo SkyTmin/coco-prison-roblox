@@ -11,6 +11,8 @@
 --     mob rewards go through CombatService.HitModel like a sword blow.
 --   A miss sticks in the block it hit (a part tagged StuckArrow, drawn by the clients): picked up by walking over it,
 --     gone after 60 s or when its block goes; arrows shot in Creative are never picked up.
+--   An arrow that hits a player or a mob is spent [владелец 27.10: «когда попадаешь в игрока, стрелы теряются»]; as
+--     in vanilla it shows stuck in the body (model attribute ArrowsInBody) and one falls out every 30 − count s.
 -- Clients draw the flight: ArrowFired (unreliable, nearby players) with the same start and velocity, ArrowEnded when
 -- the server's arrow is done (src/client/Arrows.luau).
 
@@ -55,6 +57,7 @@ type Stuck = { part: BasePart, on: BasePart, at: number, pickup: boolean }
 local drawing: { [Player]: number } = {} -- os.clock() of the draw start
 local flying: { Flying } = {}
 local stuck: { Stuck } = {}
+local inBody: { [Model]: number } = {} -- os.clock() when the next body arrow falls out
 local burning: { [Humanoid]: { untilAt: number, nextAt: number, by: Player?, model: Model } } = {}
 local nextId = 0
 local folder: Folder
@@ -296,6 +299,30 @@ raycast.FilterType = Enum.RaycastFilterType.Exclude
 raycast.RespectCanCollide = true
 
 -- one Minecraft tick of a flying arrow; false when it is done
+-- [ваниль] LivingEntity arrow count: +1 a hit, one less every 20 × (30 − count) ticks
+local MAX_IN_BODY = 12
+local function addInBody(model: Model)
+	local count = model:GetAttribute("ArrowsInBody")
+	local n = math.min(MAX_IN_BODY, (if typeof(count) == "number" then count else 0) + 1)
+	model:SetAttribute("ArrowsInBody", n)
+	if not inBody[model] then
+		inBody[model] = os.clock() + (30 - n)
+	end
+end
+
+local function shedInBody()
+	local now = os.clock()
+	for model, at in pairs(inBody) do
+		local count = model:GetAttribute("ArrowsInBody")
+		if not model.Parent or typeof(count) ~= "number" or count <= 0 then
+			inBody[model] = nil
+		elseif now >= at then
+			model:SetAttribute("ArrowsInBody", if count > 1 then count - 1 else nil)
+			inBody[model] = if count > 1 then now + (30 - (count - 1)) else nil
+		end
+	end
+end
+
 local function step(arrow: Flying): boolean
 	arrow.ticks += 1
 	local shooter = arrow.shooter
@@ -342,6 +369,9 @@ local function step(arrow: Flying): boolean
 			CombatService.HitModel(shooter, profile, best, damage, arrow.crit, arrow.velocity.Unit)
 		if arrow.flame and (result == "hit" or result == "killed") then
 			ignite(best, shooter)
+		end
+		if result == "hit" then
+			addInBody(best)
 		end
 		local root = best:FindFirstChild("HumanoidRootPart") or best.PrimaryPart
 		if root and root:IsA("BasePart") then
@@ -461,6 +491,7 @@ function BowService.Start()
 			sinceSweep = 0
 			pickUp()
 			burn()
+			shedInBody()
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player)

@@ -62,18 +62,19 @@ def sprite(state):
     """{(x, y): (hex, depth)} on the 16×16 grid, y down; depth 1 = one voxel thick, 3 = the grip."""
     px = {}
     if state == "arrow":
-        # the arrow item: tail at the lower left, head at the upper right
-        pts = line((2, 13), (13, 2))
-        for i, (x, y) in enumerate(pts):
-            if i >= len(pts) - 3:
-                px[(x, y)] = (HEAD_HI if i == len(pts) - 1 else HEAD[i % 2], 1)
-            else:
-                px[(x, y)] = (SHAFT[i % 2], 1)
-        # the head's barbs and the fletching on both sides of the tail
-        px[(11, 2)] = (HEAD[0], 1)
-        px[(13, 4)] = (HEAD[0], 1)
-        for i, (x, y) in enumerate(((2, 11), (3, 12), (4, 13), (1, 12), (3, 10), (5, 12))):
-            px[(x, y)] = (FLETCH[i % 2] if i < 3 else FLETCH_LO, 1)
+        # the arrow item, tail at the lower left, head at the upper right [владелец 27.10: «иконки стрелы и лука
+        # сделать надо»]: a two-pixel staircase shaft (light top edge, dark lower edge) so it reads as one line in a
+        # slot, a filled triangular flint head in the corner and white feathers on both sides of the tail
+        for i, (x, y) in enumerate(line((2, 13), (11, 4))):
+            px[(x, y)] = (SHAFT[0], 1)
+            px[(x + 1, y)] = (SHAFT[1] if i % 2 else "#7a5a32", 1)
+        for x, y in ((11, 1), (12, 1), (13, 1), (14, 1), (12, 2), (13, 2), (14, 2), (13, 3), (14, 3), (14, 4)):
+            edge = x == 14 or y == 1
+            px[(x, y)] = (HEAD_HI if (x, y) in ((14, 1), (13, 1), (14, 2)) else HEAD[0] if edge else HEAD[1], 1)
+        px[(12, 3)] = (HEAD[0], 1)  # where the head is bound to the shaft
+        for i, (x, y) in enumerate(((1, 12), (2, 11), (3, 10), (3, 14), (4, 13), (5, 12))):
+            px[(x, y)] = (FLETCH[i % 2] if i % 3 < 2 else FLETCH_LO, 1)
+        px[(1, 13)] = ("#4a3420", 1)  # the nock
         return px
     pull = PULL[state]
     nock = (REST_NOCK[0] + pull, REST_NOCK[1] + pull)

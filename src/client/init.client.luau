@@ -3029,11 +3029,14 @@ do
 	button.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
 	button.BackgroundTransparency = 0.25
 	button.AutoButtonColor = true
-	button.Image = Config.iconFor("iron_sword") or ""
+	button.Image = Config.iconFor("sword", 10) or ""
 	button.ScaleType = Enum.ScaleType.Fit
 	button.ResampleMode = Enum.ResamplerMode.Pixelated
 	button.Parent = touchActions
 	HudLayout.register("attack", button, true, false)
+	-- off at the start; «Добавить» in the layout editor puts it on the screen [владелец 27.10]
+	HudLayout.setOptional("attack", false)
+	button.Visible = false
 	local round = Instance.new("UICorner")
 	round.CornerRadius = UDim.new(1, 0)
 	round.Parent = button
@@ -3083,6 +3086,68 @@ do
 		local _, duration = heldKind()
 		local left = math.clamp(1 - (os.clock() - attackState.lastAt) / (duration * 0.85), 0, 1)
 		cooldown.Size = UDim2.fromScale(left * 1.4, left * 1.4)
+	end)
+end
+-- [владелец 27.10: «кнопка прыгать с меню не двигается»] Roblox's own jump button (PlayerModule's TouchGui) follows
+-- an invisible stand-in the layout editor moves; with no saved place it stays where Roblox puts it and the
+-- stand-in follows it instead.
+do
+	local jumpProxy = Instance.new("Frame")
+	jumpProxy.Name = "Touch_jump"
+	jumpProxy.BackgroundTransparency = 1
+	jumpProxy.Size = UDim2.fromOffset(70, 70)
+	jumpProxy.Position = UDim2.new(1, -95, 1, -90)
+	jumpProxy.Parent = touchActions
+	HudLayout.register("jump", jumpProxy, true, false)
+	-- while the layout is edited the real button is hidden (a tap on it would jump instead of dragging
+	-- [владелец 27.10]) and the stand-in shows its picture
+	local jumpLook = Instance.new("ImageLabel")
+	jumpLook.Name = "Look"
+	jumpLook.Size = UDim2.fromScale(1, 1)
+	jumpLook.BackgroundTransparency = 1
+	jumpLook.Visible = false
+	jumpLook.Parent = jumpProxy
+	local jumpMoved, jumpHidden = false, false
+	local function robloxJumpButton(): GuiObject?
+		local touchGui = player.PlayerGui:FindFirstChild("TouchGui")
+		local frame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
+		local button = frame and frame:FindFirstChild("JumpButton")
+		return if button and button:IsA("GuiObject") then button else nil
+	end
+	RunService.RenderStepped:Connect(function()
+		local button = robloxJumpButton()
+		local frame = button and button.Parent
+		if not button or not frame or not frame:IsA("GuiObject") or not touchActions.Visible then
+			return
+		end
+		jumpProxy.Size = UDim2.fromOffset(button.AbsoluteSize.X, button.AbsoluteSize.Y)
+		local editing = HudLayout.isEditing()
+		if editing and not jumpHidden and button.Visible then
+			if button:IsA("ImageButton") then
+				jumpLook.Image, jumpLook.ImageRectOffset, jumpLook.ImageRectSize =
+					button.Image, button.ImageRectOffset, button.ImageRectSize
+			end
+			button.Visible, jumpHidden = false, true
+		elseif not editing and jumpHidden then
+			button.Visible, jumpHidden = true, false
+		end
+		jumpLook.Visible = editing
+		if HudLayout.moved("jump") or editing then
+			local at = jumpProxy.AbsolutePosition - frame.AbsolutePosition
+			button.Position = UDim2.fromOffset(at.X, at.Y)
+			jumpMoved = true
+			return
+		end
+		if jumpMoved then -- back to Roblox's own place (TouchJump's formula)
+			local small = math.min(frame.AbsoluteSize.X, frame.AbsoluteSize.Y) <= 500
+			local size = if small then 70 else 120
+			button.Position = if small
+				then UDim2.new(1, -(size * 1.5 - 10), 1, -size - 20)
+				else UDim2.new(1, -(size * 1.5 - 10), 1, -size * 1.75)
+			jumpMoved = false
+		end
+		local at = button.AbsolutePosition - touchActions.AbsolutePosition
+		jumpProxy.Position = UDim2.fromOffset(at.X, at.Y)
 	end)
 end
 local function useConsumable()
@@ -3203,16 +3268,19 @@ openHudEditor = function()
 	end
 	closeWindow()
 	local mode = if isMobile() then "mobile" else "desktop"
-	HudLayout.edit(
-		gui,
-		mode,
-		{ title = T("layout_title"), done = T("layout_done"), reset = T("layout_reset") },
-		function(layout)
-			hudOverride[mode] = if layout then layout else false
-			Remotes.event("SetHudLayout"):FireServer(mode, layout)
-			updateLayout()
-		end
-	)
+	local edited = hudOverride[mode]
+	local saved = if profile and profile.hudLayout then profile.hudLayout[mode] else nil
+	HudLayout.edit(gui, mode, if edited ~= nil then (if edited then edited else nil) else saved, {
+		title = T("layout_title"),
+		done = T("layout_done"),
+		reset = T("layout_reset"),
+		hide = T("layout_hide"),
+		show = T("layout_show"),
+	}, function(layout)
+		hudOverride[mode] = if layout then layout else false
+		Remotes.event("SetHudLayout"):FireServer(mode, layout)
+		updateLayout()
+	end)
 end
 local viewportConnection: RBXScriptConnection? = nil
 local function watchViewport()

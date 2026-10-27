@@ -109,7 +109,7 @@
 - Окно: подсказка лота, вопрос покупки, форма продажи, «Личные товары».
 
 QA (Studio): `ServerStorage.AuctionDebug`:
-- `("seed", id, count, dollars, level?)` — лот от QA_Seller;
+- `("seed", id, count, dollars, level?)` — лот от QA_Seller (userId −1000; «покупатель» `buyas` — −1001; тестовые игроки Studio «Server & Clients» — −1, −2, с ними идут настоящие уведомления продавцу);
 - `("fail", "save"|"lot"|"lotAfter"|"index", n)`;
 - `("expire", lotId)`;
 - `("buyas", lotId)`;

@@ -4,7 +4,8 @@
 -- (menu «Кнопки» on a phone, key H on a computer) outlines them, lets the player drag them with a finger or the
 -- mouse (kept on screen) and returns the layout: element id → {x, y}, the element's anchor point as a fraction of
 -- its parent (a full-screen frame), separately for "mobile" and "desktop". The server keeps it in the profile
--- (SetHudLayout); apply() puts the saved positions over the default layout.
+-- (SetHudLayout); apply() puts the saved positions over the default layout. Optional elements (the attack button
+-- [владелец 27.10]) carry a third number: 1 shown, 0 removed; the editor gives them «Убрать» / «Добавить».
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -19,10 +20,13 @@ type Entry = {
 	mobile: boolean,
 	desktop: boolean,
 	default: UDim2, -- its place at registration: back there when the layout is reset
+	optional: boolean,
+	shownByDefault: boolean,
 }
 
 local entries: { Entry } = {}
 local editing = false
+local moved: { [string]: boolean } = {} -- elements the applied layout puts at the player's own place
 
 -- grip: the part the player grabs (the menu button of the whole touch menu); the object moves
 function HudLayout.register(
@@ -39,7 +43,27 @@ function HudLayout.register(
 		mobile = mobile,
 		desktop = desktop,
 		default = object.Position,
+		optional = false,
+		shownByDefault = true,
 	})
+end
+
+-- the player may remove the element (or add it back) in the editor; shownByDefault = its state with no layout
+function HudLayout.setOptional(id: string, shownByDefault: boolean)
+	for _, e in ipairs(entries) do
+		if e.id == id then
+			e.optional, e.shownByDefault = true, shownByDefault
+		end
+	end
+end
+
+-- whether an optional element is on the screen under this layout
+local function shownIn(e: Entry, layout: Layout?): boolean
+	local pos = layout and layout[e.id]
+	if pos and pos[3] ~= nil then
+		return pos[3] == 1
+	end
+	return e.shownByDefault
 end
 
 -- the default place of an element the default layout repositions itself (call before apply)
@@ -64,12 +88,20 @@ end
 function HudLayout.apply(mode: string, layout: Layout?)
 	for _, e in ipairs(entries) do
 		local pos = layout and layout[e.id]
+		moved[e.id] = inMode(e, mode) and pos ~= nil
 		if inMode(e, mode) and pos then
 			e.object.Position = UDim2.fromScale(pos[1], pos[2])
 		else
 			e.object.Position = e.default
 		end
+		if e.optional then
+			e.object.Visible = shownIn(e, if inMode(e, mode) then layout else nil)
+		end
 	end
+end
+
+function HudLayout.moved(id: string): boolean
+	return moved[id] == true
 end
 
 function HudLayout.isEditing(): boolean
@@ -89,11 +121,17 @@ local function fractionOf(object: GuiObject): (number, number)
 		anchor.Y / math.max(1, parent.AbsoluteSize.Y)
 end
 
-type Texts = { title: string, done: string, reset: string }
+type Texts = { title: string, done: string, reset: string, hide: string, show: string }
 
 -- Opens the edit mode over gui; onDone(layout) with every movable element's position, or onDone(nil) for
 -- «Сбросить» (back to the defaults).
-function HudLayout.edit(gui: ScreenGui, mode: string, texts: Texts, onDone: (Layout?) -> ())
+function HudLayout.edit(
+	gui: ScreenGui,
+	mode: string,
+	layout: Layout?,
+	texts: Texts,
+	onDone: (Layout?) -> ()
+)
 	if editing then
 		return
 	end
@@ -150,6 +188,26 @@ function HudLayout.edit(gui: ScreenGui, mode: string, texts: Texts, onDone: (Lay
 	local resetButton = button(texts.reset, Color3.fromRGB(70, 70, 78), -102)
 	-- a handle over every movable element of this mode
 	local handles: { [Frame]: Entry } = {}
+	-- optional elements: shown while editing, the toggle says whether they stay
+	local toggles: { [Frame]: TextButton } = {}
+	local shown: { [Entry]: boolean } = {}
+	local function paint(h: Frame, e: Entry)
+		local on = shown[e] ~= false
+		local colour = if on then Color3.fromRGB(255, 220, 80) else Color3.fromRGB(150, 150, 150)
+		h.BackgroundColor3 = colour
+		h.BackgroundTransparency = if on then 0.8 else 0.35
+		local stroke = h:FindFirstChildOfClass("UIStroke")
+		if stroke then
+			stroke.Color = colour
+		end
+		local t = toggles[h]
+		if t then
+			t.Text = if on then texts.hide else texts.show
+			t.BackgroundColor3 = if on
+				then Color3.fromRGB(170, 50, 50)
+				else Color3.fromRGB(40, 150, 70)
+		end
+	end
 	for _, e in ipairs(entries) do
 		if inMode(e, mode) and parentOf(e.object) then
 			local h = Instance.new("Frame")
@@ -164,6 +222,26 @@ function HudLayout.edit(gui: ScreenGui, mode: string, texts: Texts, onDone: (Lay
 			stroke.Thickness = 2
 			stroke.Parent = h
 			handles[h] = e
+			if e.optional then
+				shown[e] = shownIn(e, layout)
+				e.object.Visible = true
+				local t = Instance.new("TextButton")
+				t.Name = "Toggle_" .. e.id
+				t.Size = UDim2.fromOffset(84, 28)
+				t.AnchorPoint = Vector2.new(0.5, 1)
+				t.Font = Enum.Font.Code
+				t.TextSize = 14
+				t.TextColor3 = Color3.new(1, 1, 1)
+				t.ZIndex = 54
+				t.Parent = overlay
+				Instance.new("UICorner").Parent = t
+				toggles[h] = t
+				t.Activated:Connect(function()
+					shown[e] = not shown[e]
+					paint(h, e)
+				end)
+			end
+			paint(h, e)
 		end
 	end
 	local function sync()
@@ -174,6 +252,17 @@ function HudLayout.edit(gui: ScreenGui, mode: string, texts: Texts, onDone: (Lay
 				UDim2.fromOffset(g.AbsolutePosition.X - origin.X, g.AbsolutePosition.Y - origin.Y)
 			h.Size =
 				UDim2.fromOffset(math.max(24, g.AbsoluteSize.X), math.max(24, g.AbsoluteSize.Y))
+			local t = toggles[h]
+			if t then -- above the element, or below it when it sits at the top
+				local above = g.AbsolutePosition.Y - origin.Y > 36
+				t.AnchorPoint = Vector2.new(0.5, if above then 1 else 0)
+				t.Position = UDim2.fromOffset(
+					g.AbsolutePosition.X - origin.X + g.AbsoluteSize.X / 2,
+					if above
+						then g.AbsolutePosition.Y - origin.Y - 4
+						else g.AbsolutePosition.Y - origin.Y + g.AbsoluteSize.Y + 4
+				)
+			end
 		end
 	end
 	local syncConnection = RunService.RenderStepped:Connect(sync)
@@ -266,12 +355,15 @@ function HudLayout.edit(gui: ScreenGui, mode: string, texts: Texts, onDone: (Lay
 		onDone(result)
 	end
 	doneButton.Activated:Connect(function()
-		local layout: Layout = {}
+		local result: Layout = {}
 		for _, e in pairs(handles) do
 			local x, y = fractionOf(e.object)
-			layout[e.id] = { math.clamp(x, 0, 1), math.clamp(y, 0, 1) }
+			result[e.id] = { math.clamp(x, 0, 1), math.clamp(y, 0, 1) }
+			if e.optional then
+				table.insert(result[e.id], if shown[e] then 1 else 0)
+			end
 		end
-		close(layout)
+		close(result)
 	end)
 	resetButton.Activated:Connect(function()
 		close(nil)
