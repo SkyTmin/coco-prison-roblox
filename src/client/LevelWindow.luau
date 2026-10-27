@@ -20,6 +20,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
+local Kit = require(script.Parent.WindowKit)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 type Rank = Ranks.Rank
@@ -27,105 +28,13 @@ type Rank = Ranks.Rank
 local LevelWindow = {}
 
 local W, H = 720, 476
-local GOOD = Color3.fromRGB(90, 220, 110)
-local BAD = Color3.fromRGB(255, 95, 95)
-local CARD = Color3.fromRGB(24, 26, 34)
-local CARD_HOVER = Color3.fromRGB(34, 37, 48)
-local EDGE = Color3.fromRGB(52, 54, 66)
-local TRACK = Color3.fromRGB(10, 10, 14)
-local SLIDE = TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-local BOLD = Enum.Font.GothamBold
-local TEXT = Enum.Font.GothamMedium
-
-local function corner(parent: Instance, radius: number)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, radius)
-	c.Parent = parent
-end
-
-local function stroke(
-	parent: Instance,
-	color: Color3,
-	thickness: number,
-	transparency: number?
-): UIStroke
-	local s = Instance.new("UIStroke")
-	s.Color = color
-	s.Thickness = thickness
-	s.Transparency = transparency or 0
-	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	s.Parent = parent
-	return s
-end
-
-local function frame(parent: Instance, size: UDim2, position: UDim2, color: Color3): Frame
-	local f = Instance.new("Frame")
-	f.Size, f.Position = size, position
-	f.BackgroundColor3 = color
-	f.BorderSizePixel = 0
-	f.Parent = parent
-	return f
-end
-
-local function text(
-	parent: Instance,
-	value: string,
-	size: UDim2,
-	position: UDim2,
-	textSize: number,
-	color: Color3,
-	font: Enum.Font?
-): TextLabel
-	local l = Instance.new("TextLabel")
-	l.BackgroundTransparency = 1
-	l.Size, l.Position = size, position
-	l.Font = font or TEXT
-	l.TextSize = textSize
-	l.TextColor3 = color
-	l.TextXAlignment = Enum.TextXAlignment.Left
-	l.RichText = true
-	l.Text = value
-	l.Parent = parent
-	return l
-end
-
-local function colored(value: string, color: Color3): string
-	return '<font color="' .. Ui.hex(color) .. '">' .. value .. "</font>"
-end
-
-local function gradient(parent: Instance, a: Color3, b: Color3, rotation: number): UIGradient
-	local g = Instance.new("UIGradient")
-	g.Color = ColorSequence.new(a, b)
-	g.Rotation = rotation
-	g.Parent = parent
-	return g
-end
-
--- a progress bar: the dark track and its fill (0..1, slid by set)
-type Bar = { fill: Frame, set: (number) -> () }
-local function bar(parent: Instance, size: UDim2, position: UDim2, color: Color3): Bar
-	local track = frame(parent, size, position, TRACK)
-	corner(track, 5)
-	stroke(track, EDGE, 1, 0.3)
-	local fill = frame(track, UDim2.fromScale(0, 1), UDim2.new(), color)
-	corner(fill, 5)
-	local shine = Instance.new("UIGradient")
-	shine.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(170, 170, 170))
-	shine.Rotation = 90
-	shine.Parent = fill
-	local shown = -1
-	return {
-		fill = fill,
-		set = function(k: number)
-			k = math.clamp(k, 0, 1)
-			if math.abs(k - shown) < 1e-4 then
-				return
-			end
-			shown = k
-			TweenService:Create(fill, SLIDE, { Size = UDim2.fromScale(k, 1) }):Play()
-		end,
-	}
-end
+local GOOD, BAD = Kit.GOOD, Kit.BAD
+local CARD, EDGE, TRACK = Kit.CARD, Kit.EDGE, Kit.TRACK
+local SLIDE = Kit.SLIDE
+local BOLD = Kit.BOLD
+local corner, stroke, frame, text = Kit.corner, Kit.stroke, Kit.frame, Kit.text
+local colored, gradient, bar, hoverable = Kit.colored, Kit.gradient, Kit.bar, Kit.hoverable
+type Bar = Kit.Bar
 
 -- the rank's emblem: its icon (Codex sheet → Blender like every item picture); until the icon is uploaded a shield
 -- drawn in the rank's colours
@@ -175,16 +84,6 @@ local function emblem(parent: Instance, rank: Rank, size: number, position: UDim
 	gradient(gem, Color3.new(1, 1, 1), rank.color, -45)
 	stroke(gem, rank.dark, math.max(1, 1.5 * k))
 	return holder
-end
-
--- a card that lights up under the mouse
-local function hoverable(f: GuiObject)
-	f.MouseEnter:Connect(function()
-		TweenService:Create(f, TweenInfo.new(0.12), { BackgroundColor3 = CARD_HOVER }):Play()
-	end)
-	f.MouseLeave:Connect(function()
-		TweenService:Create(f, TweenInfo.new(0.2), { BackgroundColor3 = CARD }):Play()
-	end)
 end
 
 function LevelWindow.build(
@@ -415,24 +314,10 @@ function LevelWindow.build(
 	noRewards.Visible = false
 
 	-- ---------------------------------------------------------------- the button
-	local button = Instance.new("TextButton")
+	local button, buttonLabel, buttonBack =
+		Kit.actionButton(content, UDim2.new(1, -8, 0, 48), UDim2.new(0, 4, 1, -52), 20)
 	button.Name = "LevelUp"
-	button.AutoButtonColor = false
-	button.Size = UDim2.new(1, -8, 0, 48)
-	button.Position = UDim2.new(0, 4, 1, -52)
-	button.BackgroundColor3 = Color3.new(1, 1, 1)
-	button.Font = BOLD
-	button.TextSize = 20
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.Text = ""
-	button.Parent = content
-	corner(button, 10)
-	local buttonGradient = gradient(button, Color3.new(), Color3.new(), 90)
-	local buttonText = Instance.new("UIStroke")
-	buttonText.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-	buttonText.Thickness = 1.5
-	buttonText.Transparency = 0.5
-	buttonText.Parent = button
+	local buttonGradient = gradient(buttonBack, Color3.new(), Color3.new(), 90)
 	local glow = stroke(button, Color3.new(1, 1, 1), 0)
 	local pressScale = Instance.new("UIScale")
 	pressScale.Parent = button
@@ -694,9 +579,9 @@ function LevelWindow.build(
 		)
 		ready = met == 2
 		if ready then
-			button.Text = string.upper(T("level_up"))
+			buttonLabel.Text = string.upper(T("level_up"))
 			buttonGradient.Color = ColorSequence.new(rank.color, rank.dark)
-			button.TextColor3 = Color3.new(1, 1, 1)
+			buttonLabel.TextColor3 = Color3.new(1, 1, 1)
 		else
 			local missing = {}
 			if kBlocks < 1 then
@@ -705,10 +590,10 @@ function LevelWindow.build(
 			if kMoney < 1 then
 				table.insert(missing, T("level_missing_money"))
 			end
-			button.Text = T("level_missing", table.concat(missing, ", "))
+			buttonLabel.Text = T("level_missing", table.concat(missing, ", "))
 			buttonGradient.Color =
 				ColorSequence.new(Color3.fromRGB(70, 72, 84), Color3.fromRGB(40, 42, 50))
-			button.TextColor3 = Color3.fromRGB(215, 215, 225)
+			buttonLabel.TextColor3 = Color3.fromRGB(215, 215, 225)
 		end
 		if profile.level ~= shownLevel then
 			shownLevel = profile.level

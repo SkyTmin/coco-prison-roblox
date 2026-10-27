@@ -1189,96 +1189,11 @@ local function buildLevel(): Frame
 	return win
 end
 
--- Jobs [O]: three professions + three boosters, spend points.
+-- Jobs [O]: JobsWindow, updated in place while it is open
 local function buildJobs(): Frame
-	local win, content = createWindow(gui, T("jobs"), UDim2.fromOffset(560, 300), closeWindow)
-	if profile then
-		local pro = profile.professions
-		local jobs = { "mason", "surveyor", "blademaster" }
-		for i, job in ipairs(jobs) do
-			local card = Ui.panel(
-				content,
-				UDim2.fromOffset(176, 110),
-				UDim2.fromOffset((i - 1) * 184 + 4, 4)
-			)
-			Ui.label(
-				card,
-				T("job_" .. job),
-				UDim2.new(1, -8, 0, 20),
-				UDim2.fromOffset(4, 4),
-				14,
-				Ui.colors.header
-			)
-			Ui.label(
-				card,
-				T("level")
-					.. " "
-					.. tostring(pro.level[job] or 0)
-					.. " / "
-					.. tostring(Config.professions.levels),
-				UDim2.new(1, -8, 0, 20),
-				UDim2.fromOffset(4, 28),
-				13
-			)
-			local base = Config.professions.xpThresholds.base[job] or 100
-			local need = math.floor(base * 1.6 ^ (pro.level[job] or 0))
-			Ui.label(
-				card,
-				string.format("XP %s / %s", Strings.big(pro.xp[job] or 0), Strings.big(need)),
-				UDim2.new(1, -8, 0, 20),
-				UDim2.fromOffset(4, 50),
-				13,
-				Ui.colors.money
-			)
-		end
-		Ui.label(
-			content,
-			T("claim_points", pro.points),
-			UDim2.new(1, -8, 0, 20),
-			UDim2.fromOffset(4, 124),
-			14,
-			Ui.colors.level
-		)
-		local kinds = { "blocks", "money", "mobs" }
-		for i, kind in ipairs(kinds) do
-			local card = Ui.panel(
-				content,
-				UDim2.fromOffset(176, 96),
-				UDim2.fromOffset((i - 1) * 184 + 4, 150)
-			)
-			Ui.label(
-				card,
-				T("booster_" .. kind),
-				UDim2.new(1, -8, 0, 20),
-				UDim2.fromOffset(4, 4),
-				14,
-				Ui.colors.header
-			)
-			local lvl = (pro.upgrades :: any)[kind] :: number
-			Ui.label(
-				card,
-				string.format(
-					"%d / %d   ×%.2f",
-					lvl,
-					Config.professions.upgrades.maxLevel,
-					1 + lvl * 0.01
-				),
-				UDim2.new(1, -8, 0, 20),
-				UDim2.fromOffset(4, 28),
-				13
-			)
-			local btn = Ui.button(
-				card,
-				"+1",
-				UDim2.new(1, -8, 0, 26),
-				UDim2.new(0, 4, 1, -30),
-				if pro.points > 0 then Ui.colors.buttonBlue else Ui.colors.buttonGrey
-			)
-			btn.Activated:Connect(function()
-				Remotes.event("SpendPoint"):FireServer(kind)
-			end)
-		end
-	end
+	local win, refresh =
+		require(script.JobsWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
 	return win
 end
 

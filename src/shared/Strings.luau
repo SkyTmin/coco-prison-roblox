@@ -182,6 +182,69 @@ local STRINGS: { [string]: Entry } = {
 		fr = "Conditions non remplies",
 	},
 	train = { ru = "Прокачать", en = "Train", es = "Mejorar", fr = "Entraîner" },
+	-- what a trainer level gives (TrainerWindow: «now → next»)
+	trainer_bonus_strength = {
+		ru = "Урон +%d%%",
+		en = "Damage +%d%%",
+		es = "Daño +%d%%",
+		fr = "Dégâts +%d%%",
+	},
+	trainer_bonus_agility = {
+		ru = "Уклонение %d%%",
+		en = "Dodge %d%%",
+		es = "Esquiva %d%%",
+		fr = "Esquive %d%%",
+	},
+	trainer_bonus_needs = {
+		ru = "Нужды −%d%%",
+		en = "Needs −%d%%",
+		es = "Necesidades −%d%%",
+		fr = "Besoins −%d%%",
+	},
+	-- JobsWindow
+	jobs_how_mason = {
+		ru = "Опыт: блоки, вскопанные киркой",
+		en = "XP: blocks mined with a pickaxe",
+		es = "XP: bloques picados con pico",
+		fr = "XP : blocs minés à la pioche",
+	},
+	jobs_how_surveyor = {
+		ru = "Опыт: блоки, вскопанные лопатой",
+		en = "XP: blocks dug with a shovel",
+		es = "XP: bloques cavados con pala",
+		fr = "XP : blocs creusés à la pelle",
+	},
+	jobs_how_blademaster = {
+		ru = "Опыт: крысы, зомби, летучие мыши",
+		en = "XP: rats, zombies, bats",
+		es = "XP: ratas, zombis, murciélagos",
+		fr = "XP : rats, zombies, chauves-souris",
+	},
+	jobs_xp = { ru = "%s / %s опыта", en = "%s / %s XP", es = "%s / %s XP", fr = "%s / %s XP" },
+	jobs_points = {
+		ru = "Очки улучшений",
+		en = "Upgrade points",
+		es = "Puntos de mejora",
+		fr = "Points d'amélioration",
+	},
+	jobs_points_hint = {
+		ru = "1 очко за каждый уровень работы — вложи в бустер",
+		en = "1 point per job level — put it into a booster",
+		es = "1 punto por nivel de trabajo: inviértelo en un potenciador",
+		fr = "1 point par niveau de métier — investis-le dans un booster",
+	},
+	jobs_boosters = {
+		ru = "Пассивные бустеры",
+		en = "Passive boosters",
+		es = "Potenciadores pasivos",
+		fr = "Boosters passifs",
+	},
+	jobs_no_points = {
+		ru = "Нет очков",
+		en = "No points",
+		es = "Sin puntos",
+		fr = "Aucun point",
+	},
 	trained = {
 		ru = "%s: уровень %d",
 		en = "%s: level %d",
