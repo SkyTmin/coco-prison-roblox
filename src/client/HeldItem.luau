@@ -265,6 +265,13 @@ local function render(rig: Rig)
 			* CFrame.Angles(math.rad(-105), 0, 0)
 			* CFrame.Angles(0, math.pi, 0)
 			* CFrame.new(0, size * 0.45, size * 0.45)
+			-- [владелец 27.10: «переверни топор, чтобы вниз смотрел»] the axe turns half round its handle (the icon's
+			-- diagonal): the blade faces the ground, ready to chop
+			* (
+				if id == "axe"
+					then CFrame.fromAxisAngle(Vector3.new(0, 1, 1).Unit, math.pi)
+					else CFrame.identity
+			)
 	end
 	visual.CFrame = hand.CFrame * motor.C0
 	motor.Parent = visual

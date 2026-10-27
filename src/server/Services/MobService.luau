@@ -172,7 +172,7 @@ function spawnMob(mob: Mob)
 		end
 		-- loot on the ground like in Minecraft [владелец 22.10: с крысы только плоть нежити, шанс 25 %]
 		if mob.cfg.drop and math.random() < (mob.cfg.dropChance or 1) then
-			ItemDropService.SpawnLoot({ id = mob.cfg.drop, count = 1 }, lootAt)
+			ItemDropService.SpawnLoot({ id = mob.cfg.drop, count = 1 }, lootAt, true)
 		end
 		mob.model, mob.humanoid, mob.root, mob.target = nil, nil, nil, nil
 		for _, p in ipairs(model:GetDescendants()) do

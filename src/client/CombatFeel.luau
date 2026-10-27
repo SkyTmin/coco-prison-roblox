@@ -10,7 +10,8 @@
 --     the server (HitConfirm);
 --   * health bars over mobs (shown when hurt, gone 4 s after the last hit); a rat about to bite flashes a
 --     red outline (its wind-up); a shielded boss glows with a pale blue outline;
---   * when we get hurt: a red flash at the screen edges.
+--   * no red flash at the screen edges when we get hurt: Minecraft has none [владелец 27.10: «эффект получения урона
+--     как в майне»] — the tilt (EffectsHud), the red model (HurtService) and the blinking hearts do it.
 -- No vibration and no camera punch [владелец 22.10: «выключи вибрацию в игре»].
 
 local CollectionService = game:GetService("CollectionService")
@@ -433,57 +434,6 @@ local function watchBoss(model: Instance)
 	update()
 end
 
--- ---------------------------------------------------------------- our own hurt
-local function watchSelf(gui: ScreenGui)
-	-- four red strips along the screen edges, fading inwards (a vignette made of gradients)
-	local edges: { Frame } = {}
-	for _, e in ipairs({
-		{ UDim2.new(1, 0, 0, 90), UDim2.fromScale(0, 0), 90 },
-		{ UDim2.new(1, 0, 0, 90), UDim2.new(0, 0, 1, -90), -90 },
-		{ UDim2.new(0, 90, 1, 0), UDim2.fromScale(0, 0), 0 },
-		{ UDim2.new(0, 90, 1, 0), UDim2.new(1, -90, 0, 0), 180 },
-	}) do
-		local f = Instance.new("Frame")
-		f.Name = "HurtEdge"
-		f.Size, f.Position = e[1], e[2]
-		f.BackgroundColor3 = Color3.fromRGB(220, 20, 20)
-		f.BackgroundTransparency = 1
-		f.BorderSizePixel = 0
-		f.ZIndex = 50
-		f.Active = false
-		f.Parent = gui
-		local g = Instance.new("UIGradient")
-		g.Rotation = e[3]
-		g.Transparency = NumberSequence.new(0, 1)
-		g.Parent = f
-		table.insert(edges, f)
-	end
-	local function bind(character: Model)
-		local humanoid = character:WaitForChild("Humanoid", 10)
-		if not humanoid or not humanoid:IsA("Humanoid") then
-			return
-		end
-		local last = humanoid.Health
-		humanoid.HealthChanged:Connect(function(health)
-			if health < last - 0.01 then
-				for _, f in ipairs(edges) do
-					f.BackgroundTransparency = 0.35
-					TweenService:Create(
-						f,
-						TweenInfo.new(0.45, Enum.EasingStyle.Quad),
-						{ BackgroundTransparency = 1 }
-					):Play()
-				end
-			end
-			last = health
-		end)
-	end
-	player.CharacterAdded:Connect(bind)
-	if player.Character then
-		task.spawn(bind, player.Character)
-	end
-end
-
 function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: () -> string)
 	if started then
 		return
@@ -564,7 +514,6 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 		watchBoss(m)
 	end
 	CollectionService:GetInstanceAddedSignal("Boss"):Connect(watchBoss)
-	watchSelf(gui)
 end
 
 return CombatFeel

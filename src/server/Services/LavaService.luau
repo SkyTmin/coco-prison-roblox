@@ -11,6 +11,7 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local HurtService = require(script.Parent.HurtService)
 
 local LAVA_DAMAGE = 4 -- [ваниль] per 0.5 s in lava
 local LAVA_PERIOD = 0.5
@@ -92,7 +93,7 @@ function LavaService.Start()
 				root.AssemblyLinearVelocity = Vector3.zero
 				root.CFrame = (spawn :: BasePart).CFrame + Vector3.new(0, 4, 0)
 				humanoid:SetAttribute("LastHitBy", nil)
-				humanoid:TakeDamage(VOID_DAMAGE)
+				HurtService.Damage(humanoid, VOID_DAMAGE)
 			end
 			rescuing[player] = nil
 		end)
@@ -135,7 +136,7 @@ function LavaService.Start()
 				if inLava(root, params) then
 					burnUntil[player] = now + BURN_SECONDS
 					humanoid:SetAttribute("LastHitBy", nil)
-					humanoid:TakeDamage(LAVA_DAMAGE)
+					HurtService.Damage(humanoid, LAVA_DAMAGE)
 					setFire(root, true)
 				elseif burnUntil[player] then
 					if now >= (burnUntil[player] :: number) then
@@ -143,7 +144,7 @@ function LavaService.Start()
 						setFire(root, false)
 					elseif tick % 2 == 0 then
 						humanoid:SetAttribute("LastHitBy", nil)
-						humanoid:TakeDamage(BURN_DAMAGE)
+						HurtService.Damage(humanoid, BURN_DAMAGE)
 					end
 				end
 			end

@@ -47,6 +47,9 @@ for _, name in ipairs({
 	"FactionChestMove",
 	"FactionChestClose",
 	"SetHudLayout",
+	"EatStart",
+	"EatCancel",
+	"Ate",
 }) do
 	Remotes.event(name)
 end
@@ -100,6 +103,7 @@ MineService.Start()
 DigService.Start()
 EconomyService.Start()
 NeedsService.Start()
+require(script.Services.FoodService).Start() -- eating over 1.6 s like Minecraft (client Eating.luau)
 AchievementService.Start()
 GlobalBoosterService.Start()
 AuctionService.Start()
@@ -125,19 +129,53 @@ NameplateService.Start()
 LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
--- Hearts by level on spawn
-game:GetService("Players").PlayerAdded:Connect(function(player)
+-- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character
+-- (the profile may load after the first spawn) starts full, a level-up adds the new hearts full [2-player test 27.10:
+-- the first spawn came before the profile, a level 50 player had 10 hearts]
+local freshCharacters: { [Model]: boolean } = {}
+local function watchPlayer(player: Player)
 	player.AutoJumpEnabled = false -- [владелец] no auto-jump on touch
-	player.CharacterAdded:Connect(function(character)
+	local function added(character: Model)
+		freshCharacters[character] = true
 		local humanoid = character:WaitForChild("Humanoid") :: Humanoid
 		humanoid.AutoJumpEnabled = false
-		task.defer(function()
+	end
+	player.CharacterAdded:Connect(added)
+	if player.Character then
+		task.spawn(added, player.Character)
+	end
+end
+game:GetService("Players").PlayerAdded:Connect(watchPlayer)
+for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+	watchPlayer(player)
+end
+task.spawn(function()
+	while true do
+		task.wait(1)
+		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
 			local profile = ProfileService.Get(player)
-			local rule = if profile then Config.levelRule(profile.level) else nil
-			humanoid.MaxHealth = (if rule then rule.hearts else 10) * 2
-			humanoid.Health = humanoid.MaxHealth
-		end)
-	end)
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if not profile or not character or not humanoid or humanoid.Health <= 0 then
+				continue
+			end
+			local rule = Config.levelRule(profile.level)
+			local target = (if rule then rule.hearts else 10) * 2
+			if humanoid.MaxHealth ~= target then
+				local gained = target - humanoid.MaxHealth
+				humanoid.MaxHealth = target
+				humanoid.Health = if freshCharacters[character]
+					then target
+					else math.clamp(humanoid.Health + math.max(0, gained), 0, target)
+			end
+			freshCharacters[character] = nil
+		end
+		for character in pairs(freshCharacters) do
+			if not character.Parent then
+				freshCharacters[character] = nil
+			end
+		end
+	end
 end)
 
 print("[coco-prison] server started, locations:", #Config.locationsFile.locations)

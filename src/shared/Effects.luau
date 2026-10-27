@@ -46,6 +46,13 @@ Effects.list = {
 		color = Color3.fromRGB(255, 199, 0),
 		harmful = false,
 	},
+	-- the golden apple's golden hearts [ваниль]
+	{
+		id = "absorption",
+		attribute = "Absorption",
+		color = Color3.fromRGB(37, 82, 165),
+		harmful = false,
+	},
 } :: { Effect }
 
 -- Vanilla movement modifiers [ваниль]: Slowness −15 % and Speed +20 % per level.

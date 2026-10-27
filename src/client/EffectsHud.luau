@@ -168,9 +168,13 @@ function EffectsHud.start(
 	-- screen effects, run right after Roblox's camera update; the previous frame's roll is removed first
 	-- so a stationary camera never accumulates it
 	local nausea = 0 -- 0..1, ramps in and out
-	-- hurt camera like Minecraft: a quick roll when the player loses health, gone in 0.5 s
+	-- hurt camera like Minecraft Java [ваниль GameRenderer.bobHurt, владелец 27.10: «эффект получения урона должен
+	-- быть как в майне»]: hurtTime 10 ticks (0.5 s), tilt = sin(f⁴·π) · 14° with f = time left / 0.5 s (a quick kick, a
+	-- slow return), about an axis turned by hurtDir: towards the one who hit us; with no attacker the last direction
+	-- again, our left at first (minecraft.wiki/w/Damage). Knockback tells us where the blow came from.
 	local HURT_SECONDS = 0.5
 	local hurtAt = -math.huge
+	local hurtDir = 0 -- degrees, Minecraft's: 0 = from the left, 90 = from the front, 180 = from the right
 	local function watchHealth(character: Model)
 		local humanoid = character:WaitForChild("Humanoid", 10)
 		if not humanoid or not humanoid:IsA("Humanoid") then
@@ -198,6 +202,16 @@ function EffectsHud.start(
 			and root:IsA("BasePart")
 		then
 			root.AssemblyLinearVelocity = velocity
+			local camera = workspace.CurrentCamera
+			local from = -Vector3.new(velocity.X, 0, velocity.Z) -- towards the attacker
+			if camera and from.Magnitude > 0.01 then
+				local look = camera.CFrame.LookVector * Vector3.new(1, 0, 1)
+				if look.Magnitude > 0.01 then
+					look = look.Unit
+					local right = look:Cross(Vector3.yAxis)
+					hurtDir = 90 + math.deg(math.atan2(from.Unit:Dot(right), from.Unit:Dot(look)))
+				end
+			end
 		end
 	end)
 	local fovFactor = 1
@@ -230,8 +244,9 @@ function EffectsHud.start(
 			local target = (math.max(0, speed) + 1) / 2 * (1 - 0.15 * drawn * drawn)
 			fovFactor += (target - fovFactor) * math.min(1, dt * 6)
 			local hurtAge = os.clock() - hurtAt
-			local hurt = if hurtAge < HURT_SECONDS then 1 - hurtAge / HURT_SECONDS else 0
-			if nausea <= 0 and hurt <= 0 and math.abs(fovFactor - 1) < 0.002 then
+			local hurtLeft = if hurtAge < HURT_SECONDS then 1 - hurtAge / HURT_SECONDS else 0
+			local hurt = math.sin(hurtLeft ^ 4 * math.pi)
+			if nausea <= 0 and hurtLeft <= 0 and math.abs(fovFactor - 1) < 0.002 then
 				if fovApplied then
 					camera.FieldOfView = BASE_FOV
 					fovApplied = false
@@ -242,16 +257,19 @@ function EffectsHud.start(
 			local now = os.clock()
 			camera.FieldOfView = BASE_FOV * fovFactor + 10 * nausea * math.sin(now * 2.4)
 			fovApplied = true
-			if nausea > 0 or hurt > 0 then
+			if nausea > 0 or hurtLeft > 0 then
 				local base = camera.CFrame
+				local dir = math.rad(hurtDir)
 				local rolled = base
 					* CFrame.Angles(
 						0,
 						0,
 						math.rad(6) * nausea * math.sin(now * 1.6)
 							+ math.rad(2) * nausea * math.sin(now * 3.7)
-							+ math.rad(10) * hurt * hurt
 					)
+					* CFrame.Angles(0, -dir, 0)
+					* CFrame.Angles(0, 0, math.rad(14) * hurt)
+					* CFrame.Angles(0, dir, 0)
 				rolledCamera, baseCFrame, appliedCFrame = camera, base, rolled
 				camera.CFrame = rolled
 			end

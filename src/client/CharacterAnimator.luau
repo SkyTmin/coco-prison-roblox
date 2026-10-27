@@ -19,6 +19,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Remotes = require(Shared.Remotes)
 local SwingAnimations = require(Shared.SwingAnimations)
 local BowState = require(script.Parent:WaitForChild("BowState"))
+local Eating = require(script.Parent:WaitForChild("Eating"))
 local Motion = require(script.Parent:WaitForChild("Motion"))
 
 local CharacterAnimator = {}
@@ -128,6 +129,19 @@ local function bowPose(pitch: number): { [string]: CFrame }
 		RightShoulder = CFrame.Angles(math.rad(90) + pitch, 0, math.rad(-4)),
 		RightElbow = CFrame.identity,
 		LeftShoulder = CFrame.Angles(math.rad(90) + pitch, 0, math.rad(30)),
+	}
+end
+
+-- Eating [ваниль, владелец 27.10: «добавь анимации для еды»]: the main arm comes up to the mouth in the first ticks
+-- and bobs with every bite (each 4 ticks, from tick 7 on, with the chewing sound), turned in towards the face.
+local function eatPose(seconds: number): { [string]: CFrame }
+	local up = math.clamp(seconds / 0.15, 0, 1)
+	up = up * up * (3 - 2 * up)
+	local ticks = seconds / 0.05
+	local bite = if ticks >= 6.4 then math.abs(math.cos(ticks / 4 * math.pi)) else 0
+	return {
+		RightShoulder = CFrame.Angles(math.rad(112 - 10 * bite) * up, 0, math.rad(-38) * up),
+		RightElbow = CFrame.identity,
 	}
 end
 
@@ -284,6 +298,11 @@ local function apply(dt: number)
 					pitch = math.asin(math.clamp(camera.CFrame.LookVector.Y, -1, 1))
 				end
 				pose = bowPose(pitch)
+			else
+				local eaten = Eating.Progress(character)
+				if eaten then
+					pose = eatPose(eaten)
+				end
 			end
 			applyTo(
 				character,

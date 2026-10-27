@@ -30,6 +30,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local CombatService = require(script.Parent.CombatService)
 local MotionService = require(script.Parent.MotionService)
+local HurtService = require(script.Parent.HurtService)
 
 local BowService = {}
 local started = false
@@ -450,7 +451,7 @@ local function burn()
 			elseif by then
 				humanoid:SetAttribute("LastHitBy", by.UserId)
 				humanoid:SetAttribute("LastHitAt", now)
-				humanoid:TakeDamage(BOW.flameDamagePerSecond)
+				HurtService.Damage(humanoid, BOW.flameDamagePerSecond)
 			end
 		end
 	end

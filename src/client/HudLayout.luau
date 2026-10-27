@@ -6,6 +6,9 @@
 -- its parent (a full-screen frame), separately for "mobile" and "desktop". The server keeps it in the profile
 -- (SetHudLayout); apply() puts the saved positions over the default layout. Optional elements (the attack button
 -- [владелец 27.10]) carry a third number: 1 shown, 0 removed; the editor gives them «Убрать» / «Добавить».
+-- The fourth number is the player's size for the element [владелец 27.10: «в редакторе … увеличивать или
+-- уменьшать кнопки»]: 0.5–2, set with «−» / «+» by the element picked last; it multiplies the element's base
+-- scale (setBaseScale — e.g. the smaller stats panel on a phone) through its UIScale.
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -22,7 +25,10 @@ type Entry = {
 	default: UDim2, -- its place at registration: back there when the layout is reset
 	optional: boolean,
 	shownByDefault: boolean,
+	base: number, -- the layout's own scale for the element (setBaseScale), before the player's size
 }
+
+local MIN_SCALE, MAX_SCALE, SCALE_STEP = 0.5, 2, 0.1
 
 local entries: { Entry } = {}
 local editing = false
@@ -45,6 +51,7 @@ function HudLayout.register(
 		default = object.Position,
 		optional = false,
 		shownByDefault = true,
+		base = 1,
 	})
 end
 
@@ -75,6 +82,35 @@ function HudLayout.setDefault(object: GuiObject)
 	end
 end
 
+-- the element's own scale under the default layout (its UIScale gets base × the player's size)
+function HudLayout.setBaseScale(object: GuiObject, base: number)
+	for _, e in ipairs(entries) do
+		if e.object == object then
+			e.base = base
+		end
+	end
+end
+
+local function uiScale(object: GuiObject): UIScale
+	local existing = object:FindFirstChildOfClass("UIScale")
+	if existing then
+		return existing
+	end
+	local created = Instance.new("UIScale")
+	created.Parent = object
+	return created
+end
+
+local function sizeIn(pos: { number }?): number
+	local n = pos and pos[4]
+	return if typeof(n) == "number" then math.clamp(n, MIN_SCALE, MAX_SCALE) else 1
+end
+
+-- the player's size for an element under this layout (1 when unchanged)
+function HudLayout.sizeOf(id: string, layout: Layout?): number
+	return sizeIn(layout and layout[id])
+end
+
 local function inMode(e: Entry, mode: string): boolean
 	return if mode == "mobile" then e.mobile else e.desktop
 end
@@ -93,6 +129,10 @@ function HudLayout.apply(mode: string, layout: Layout?)
 			e.object.Position = UDim2.fromScale(pos[1], pos[2])
 		else
 			e.object.Position = e.default
+		end
+		local size = if inMode(e, mode) then sizeIn(pos) else 1
+		if size ~= 1 or e.base ~= 1 or e.object:FindFirstChildOfClass("UIScale") then
+			uiScale(e.object).Scale = e.base * size
 		end
 		if e.optional then
 			e.object.Visible = shownIn(e, if inMode(e, mode) then layout else nil)
@@ -122,6 +162,19 @@ local function fractionOf(object: GuiObject): (number, number)
 end
 
 type Texts = { title: string, done: string, reset: string, hide: string, show: string }
+
+local function sizeButton(text: string): TextButton
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.fromOffset(32, 28)
+	b.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+	b.Font = Enum.Font.Code
+	b.TextSize = 20
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Text = text
+	b.ZIndex = 55
+	Instance.new("UICorner").Parent = b
+	return b
+end
 
 -- Opens the edit mode over gui; onDone(layout) with every movable element's position, or onDone(nil) for
 -- «Сбросить» (back to the defaults).
@@ -191,6 +244,55 @@ function HudLayout.edit(
 	-- optional elements: shown while editing, the toggle says whether they stay
 	local toggles: { [Frame]: TextButton } = {}
 	local shown: { [Entry]: boolean } = {}
+	local sizes: { [Entry]: number } = {}
+	local selected: Entry? = nil
+	-- «−  100%  +» by the element picked last
+	local sizer = Instance.new("Frame")
+	sizer.Name = "Sizer"
+	sizer.Size = UDim2.fromOffset(124, 32)
+	sizer.AnchorPoint = Vector2.new(0.5, 0)
+	sizer.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+	sizer.BackgroundTransparency = 0.1
+	sizer.Visible = false
+	sizer.ZIndex = 54
+	sizer.Parent = overlay
+	Instance.new("UICorner").Parent = sizer
+	local minus, plus = sizeButton("−"), sizeButton("+")
+	minus.Name, plus.Name = "Smaller", "Bigger"
+	minus.Position, plus.Position = UDim2.fromOffset(2, 2), UDim2.new(1, -34, 0, 2)
+	minus.Parent, plus.Parent = sizer, sizer
+	local percent = Instance.new("TextLabel")
+	percent.Size = UDim2.new(1, -72, 1, 0)
+	percent.Position = UDim2.fromOffset(36, 0)
+	percent.BackgroundTransparency = 1
+	percent.Font = Enum.Font.Code
+	percent.TextSize = 14
+	percent.TextColor3 = Color3.new(1, 1, 1)
+	percent.ZIndex = 55
+	percent.Parent = sizer
+	local function showPercent(e: Entry)
+		percent.Text = string.format("%d%%", math.floor((sizes[e] or 1) * 100 + 0.5))
+	end
+	local function resize(e: Entry, size: number)
+		sizes[e] = math.clamp(math.floor(size * 10 + 0.5) / 10, MIN_SCALE, MAX_SCALE)
+		uiScale(e.object).Scale = e.base * sizes[e]
+		showPercent(e)
+	end
+	local function choose(e: Entry)
+		selected = e
+		sizer.Visible = true
+		showPercent(e)
+	end
+	minus.Activated:Connect(function()
+		if selected then
+			resize(selected, (sizes[selected] or 1) - SCALE_STEP)
+		end
+	end)
+	plus.Activated:Connect(function()
+		if selected then
+			resize(selected, (sizes[selected] or 1) + SCALE_STEP)
+		end
+	end)
 	local function paint(h: Frame, e: Entry)
 		local on = shown[e] ~= false
 		local colour = if on then Color3.fromRGB(255, 220, 80) else Color3.fromRGB(150, 150, 150)
@@ -222,6 +324,7 @@ function HudLayout.edit(
 			stroke.Thickness = 2
 			stroke.Parent = h
 			handles[h] = e
+			sizes[e] = sizeIn(layout and layout[e.id])
 			if e.optional then
 				shown[e] = shownIn(e, layout)
 				e.object.Visible = true
@@ -246,6 +349,23 @@ function HudLayout.edit(
 	end
 	local function sync()
 		local origin = overlay.AbsolutePosition
+		local pick = selected
+		if pick then -- under the element, or above it when it sits at the bottom
+			local g = pick.grip
+			local below = g.AbsolutePosition.Y + g.AbsoluteSize.Y - origin.Y + 40
+				< overlay.AbsoluteSize.Y
+			sizer.AnchorPoint = Vector2.new(0.5, if below then 0 else 1)
+			sizer.Position = UDim2.fromOffset(
+				math.clamp(
+					g.AbsolutePosition.X - origin.X + g.AbsoluteSize.X / 2,
+					64,
+					math.max(64, overlay.AbsoluteSize.X - 64)
+				),
+				if below
+					then g.AbsolutePosition.Y - origin.Y + g.AbsoluteSize.Y + 4
+					else g.AbsolutePosition.Y - origin.Y - 4
+			)
+		end
 		for h, e in pairs(handles) do
 			local g = e.grip
 			h.Position =
@@ -280,6 +400,7 @@ function HudLayout.edit(
 						or input.UserInputType == Enum.UserInputType.MouseButton1
 					)
 				then
+					choose(e)
 					local parent = parentOf(e.object) :: GuiBase2d
 					local anchor = e.object.AbsolutePosition
 						+ e.object.AnchorPoint * e.object.AbsoluteSize
@@ -358,10 +479,13 @@ function HudLayout.edit(
 		local result: Layout = {}
 		for _, e in pairs(handles) do
 			local x, y = fractionOf(e.object)
-			result[e.id] = { math.clamp(x, 0, 1), math.clamp(y, 0, 1) }
-			if e.optional then
-				table.insert(result[e.id], if shown[e] then 1 else 0)
-			end
+			-- {x, y, shown (1 for elements that cannot be removed), size}
+			result[e.id] = {
+				math.clamp(x, 0, 1),
+				math.clamp(y, 0, 1),
+				if not e.optional or shown[e] then 1 else 0,
+				sizes[e] or 1,
+			}
 		end
 		close(result)
 	end)

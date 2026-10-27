@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Sfx = require(Shared.Sfx)
 local Cobweb = require(Shared.Cobweb)
+local HurtService = require(script.Parent.HurtService)
 
 local BLOCK = 4
 local SAFE_BLOCKS = 3
@@ -57,7 +58,7 @@ local function step()
 			track.apex = nil
 			if damage >= 1 then
 				humanoid:SetAttribute("LastHitBy", nil)
-				humanoid:TakeDamage(damage)
+				HurtService.Damage(humanoid, damage)
 				Sfx.broadcast("player_fall", root :: BasePart, 0.8)
 			end
 		end

@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 
 local HeldItem = require(script.Parent.HeldItem)
 local BowState = require(script.Parent.BowState)
+local Eating = require(script.Parent.Eating)
 
 local FirstPersonHand = {}
 
@@ -52,6 +53,22 @@ local function mcDisplay(k: number): CFrame
 		* CFrame.Angles(0, math.rad(-90), math.rad(25))
 		* MC_TO_MODEL
 end
+-- [ваниль ItemInHandRenderer.applyEatTransform] eating: in the first ticks the food swings in to the middle of the
+-- view, turned to face it, and while eating bobs up once every 4 ticks; then the usual arm transform. f = the ticks
+-- left, g = f / 32 (1 → 0). In Minecraft units (k studs each), applied outside the arm transform.
+local function mcEat(k: number, seconds: number): CFrame
+	local duration = Eating.SECONDS / 0.05
+	local f = math.max(0, duration - seconds / 0.05)
+	local g = f / duration
+	local bob = if g < 0.8 then math.abs(math.cos(f / 4 * math.pi) * 0.1) else 0
+	local h = 1 - g ^ 27
+	return CFrame.new(0, bob * k, 0)
+		* CFrame.new(h * 0.6 * k, -h * 0.5 * k, 0)
+		* CFrame.Angles(0, math.rad(h * 90), 0)
+		* CFrame.Angles(math.rad(h * 10), 0, 0)
+		* CFrame.Angles(0, 0, math.rad(h * 30))
+end
+
 local function mcBow(k: number, drawnSeconds: number?, blend: number): CFrame
 	local function at(x: number, y: number, z: number): CFrame
 		return CFrame.new(x * k, y * k, z * k)
@@ -317,7 +334,10 @@ function FirstPersonHand.Start()
 				-- tools and other items [владелец 27.10, Java screenshots]: Minecraft's hold like the bow's — along the
 				-- right edge, the head nearest at the upper right, the handle out of the bottom
 				local k = itemPart.Size.Y / 0.68
-				local pose = CFrame.new(0.56 * k, -0.52 * k, -0.72 * k) * mcDisplay(k)
+				local eaten = Eating.Progress(character)
+				local pose = (if eaten then mcEat(k, eaten) else CFrame.identity)
+					* CFrame.new(0.56 * k, -0.52 * k, -0.72 * k)
+					* mcDisplay(k)
 				local depth = math.tan(math.rad(35)) / math.tan(math.rad(camera.FieldOfView) / 2)
 				local rest = CFrame.new(pose.X, pose.Y, pose.Z * depth)
 				local shift, turn = CFrame.identity, CFrame.identity

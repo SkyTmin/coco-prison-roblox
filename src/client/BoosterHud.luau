@@ -103,6 +103,8 @@ function BoosterHud.start(
 		end
 		nextAt = clock + 0.2
 		local p = getProfile()
+		-- the player may hide the bar in the settings [владелец 27.10]
+		frame.Visible = not (p and p.settings and p.settings.hideBoosters == true)
 		local now = Boosters.now()
 		local running = if p then Boosters.runningAll(p, now) else {}
 		for i, row in ipairs(rows) do

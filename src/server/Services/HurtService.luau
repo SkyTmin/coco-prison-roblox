@@ -15,7 +15,9 @@ local Sfx = require(Shared.Sfx)
 
 local HurtService = {}
 
-local FLASH_SECONDS = 0.3
+-- [ваниль] the red wash lasts the whole hurtTime (10 ticks) and does not fade; OverlayTexture mixes 30 % red
+-- over the skin (alpha 0xB2) — a Highlight fill shows a bit weaker, so 0.4 here
+local FLASH_SECONDS = 0.5
 local KNOCKBACK_SPEED = 26 -- studs/s horizontal (0.4 block/tick × 20 ticks/s × 4 studs/block ÷ ~1.2 drag)
 local KNOCKBACK_LIFT = 14
 local watched: { [Humanoid]: boolean } = {}
@@ -29,7 +31,7 @@ local function flash(model: Model)
 	local highlight = Instance.new("Highlight")
 	highlight.Name = "HurtFlash"
 	highlight.FillColor = Color3.fromRGB(255, 0, 0)
-	highlight.FillTransparency = 0.45
+	highlight.FillTransparency = 0.6
 	highlight.OutlineTransparency = 1
 	highlight.DepthMode = Enum.HighlightDepthMode.Occluded
 	highlight.Adornee = model
@@ -48,7 +50,7 @@ local function playHurt(model: Model)
 	if not root or not root:IsA("BasePart") then
 		return
 	end
-	local pitch = 0.9 + math.random() * 0.2
+	local pitch = (math.random() - math.random()) * 0.2 + 1 -- [ваниль] 0.8 … 1.2, mostly near 1
 	local mobId = model:GetAttribute("MobId")
 	local mob = if typeof(mobId) == "string" then Config.mobs.mobs[mobId] else nil
 	if mob and mob.hurtSound then
@@ -90,6 +92,33 @@ local function watchModel(model: Instance)
 			watch(humanoid)
 		end
 	end
+end
+
+-- Every damage goes through here [ваниль]: Absorption's golden health (character attribute AbsorptionHealth, the
+-- golden apple — NeedsService.GiveEffect) takes it before the health does; a blow it soaks up whole still flashes
+-- and sounds. A ForceField (creative mode, a casting boss) still blocks everything, as TakeDamage does.
+function HurtService.Damage(humanoid: Humanoid, amount: number)
+	local model = humanoid.Parent
+	if amount <= 0 or not model or model:FindFirstChildOfClass("ForceField") then
+		return
+	end
+	local golden = model:GetAttribute("AbsorptionHealth")
+	if typeof(golden) == "number" and golden > 0 then
+		local soaked = math.min(golden, amount)
+		model:SetAttribute(
+			"AbsorptionHealth",
+			if golden - soaked > 1e-3 then golden - soaked else nil
+		)
+		amount -= soaked
+		if amount <= 1e-3 then
+			if model:IsA("Model") and humanoid.Health > 0 then
+				flash(model)
+				playHurt(model)
+			end
+			return
+		end
+	end
+	humanoid:TakeDamage(amount)
 end
 
 -- Melee knockback away from the attacker. Players own their character physics, so their client

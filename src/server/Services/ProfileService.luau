@@ -633,6 +633,8 @@ function ProfileService.Start()
 		stats = true,
 		effects = true,
 		jump = true,
+		toasts = true,
+		boosters = true,
 	}
 	local lastLayoutAt: { [Player]: number } = {}
 	Players.PlayerRemoving:Connect(function(player)
@@ -662,11 +664,16 @@ function ProfileService.Start()
 						and pos[2] >= 0
 						and pos[2] <= 1
 					then
-						-- the third number: an optional button shown (1) or removed (0)
+						-- the third number: an optional button shown (1) or removed (0); the fourth: the
+						-- player's size for it, 0.5–2 (HudLayout)
+						local size = if typeof(pos[4]) == "number" and pos[4] == pos[4]
+							then pos[4]
+							else 1
 						(clean :: any)[id] = {
 							math.floor(pos[1] * 10000) / 10000,
 							math.floor(pos[2] * 10000) / 10000,
-							if pos[3] == 0 or pos[3] == 1 then pos[3] else nil,
+							if pos[3] == 0 then 0 else 1,
+							math.floor(math.clamp(size, 0.5, 2) * 100 + 0.5) / 100,
 						}
 					end
 				end
@@ -677,6 +684,35 @@ function ProfileService.Start()
 				(p :: any).hudLayout = all
 			end)
 		end)
+	-- the settings window: one value at a time, checked by its key
+	local SETTINGS: { [string]: (any) -> boolean } = {
+		volume = function(v)
+			return typeof(v) == "number" and v == v and v >= 0 and v <= 1
+		end,
+		muted = function(v)
+			return typeof(v) == "boolean"
+		end,
+		hideToasts = function(v)
+			return typeof(v) == "boolean"
+		end,
+		hideBoosters = function(v)
+			return typeof(v) == "boolean"
+		end,
+	}
+	Remotes.event("SetSetting").OnServerEvent:Connect(function(player: Player, key: any, value: any)
+		local check = typeof(key) == "string" and SETTINGS[key]
+		if not check or not check(value) then
+			return
+		end
+		if typeof(value) == "number" then
+			value = math.floor(value * 20 + 0.5) / 20
+		end
+		ProfileService.Mutate(player, function(p)
+			local settings: any = table.clone(p.settings or {}) -- a new table: the profile diff sees the change
+			settings[key] = value
+			p.settings = settings
+		end)
+	end)
 	Remotes.event("SetLocale").OnServerEvent:Connect(function(player: Player, locale: any)
 		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then
 			return

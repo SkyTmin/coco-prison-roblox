@@ -28,6 +28,7 @@ MenuWindow.ENTRIES = {
 	{ kind = "factions", caption = "factions_title", key = "G" },
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
+	{ kind = "settings", caption = "settings_title", key = "P" },
 } :: { Entry }
 
 function MenuWindow.build(

@@ -23,6 +23,8 @@ type State = {
 	movementMultiplier: number,
 }
 type Event = { name: string, endsAt: number, endsAtServer: number }
+-- an effect with its own timer (food: the golden apple) [ваниль]
+type Timed = { level: number, endsAt: number, endsAtServer: number }
 
 local NEEDS: { Need } = { "hygiene", "sleep", "toilet" }
 local RESTORE_TAGS: { [string]: Need } = {
@@ -37,6 +39,10 @@ local PROMPT_DISTANCE = 8
 local NeedsService = {}
 local states: { [Player]: State } = {}
 local activeEvent: Event? = nil
+local timed: { [Player]: { [string]: Timed } } = {}
+-- [ваниль] Absorption: 4 golden HP per level, taken before health (DamageService); gone when the effect ends
+local ABSORPTION_PER_LEVEL = 4
+NeedsService.ABSORPTION = "AbsorptionHealth"
 local started = false
 
 local function toast(player: Player, key: string, ...: any)
@@ -110,11 +116,34 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	setEffect(character, "Nausea", if needs.hygiene <= 0 then 1 else nil)
 	setEffect(character, "Insomnia", if needs.sleep <= 0 then 1 else nil)
 	setEffect(character, "Slowness", if needs.toilet <= 0 then 1 else nil)
-	-- random events: a vanilla level-I effect for everyone [сеть, вики-скриншот]
+	-- random events: a vanilla level-I effect for everyone [сеть, вики-скриншот]; an effect of the player's own
+	-- (food) wins when it is stronger
+	local own = timed[player] or {}
+	local now = os.clock()
+	for attribute, entry in pairs(own) do
+		if now >= entry.endsAt then
+			own[attribute] = nil
+			if attribute == "Absorption" then
+				character:SetAttribute(NeedsService.ABSORPTION, nil)
+			end
+		end
+	end
 	for _, name in ipairs(EVENTS) do
 		local attribute = string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2)
-		setEffect(character, attribute, if eventName == name then 1 else nil, eventEnds)
+		local mine = own[attribute]
+		if mine and (eventName ~= name or mine.level > 1) then
+			setEffect(character, attribute, mine.level, mine.endsAtServer)
+		else
+			setEffect(character, attribute, if eventName == name then 1 else nil, eventEnds)
+		end
 	end
+	local absorption = own.Absorption
+	setEffect(
+		character,
+		"Absorption",
+		if absorption then absorption.level else nil,
+		if absorption then absorption.endsAtServer else nil
+	)
 	updateParticles(character)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if not humanoid then
@@ -207,7 +236,7 @@ local function useConsumable(player: Player, slot: any)
 			break
 		end
 	end
-	local food = Config.rules.survival.food[stack.id]
+	-- food is eaten over time by FoodService (EatStart), not used at once
 	-- a location pass (<location>_pass) is used like food [владелец 22.10: «кнопка использовать, как еду есть»]:
 	-- it opens the location for good and is gone
 	local passFor = stack.id:match("^(.+)_pass$")
@@ -232,7 +261,7 @@ local function useConsumable(player: Player, slot: any)
 		end
 		return
 	end
-	if not need and not food then
+	if not need then
 		return
 	end
 	local matchingNeed = need
@@ -248,28 +277,16 @@ local function useConsumable(player: Player, slot: any)
 			if matchingNeed then
 				p.needs[matchingNeed] = 100
 			end
-			if food then
-				p.hunger = math.min(Config.rules.survival.hunger.max, p.hunger + food)
-			end
 		end
 	end)
 	if consumed then
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then
-			-- eating bites like Minecraft; soap splashes, a sleeping bag / paper rustles
-			Sfx.broadcast(
-				if food then "eat" elseif matchingNeed == "hygiene" then "water_step" else "wool",
-				root,
-				0.7
-			)
+			-- soap splashes, a sleeping bag / paper rustles
+			Sfx.broadcast(if matchingNeed == "hygiene" then "water_step" else "wool", root, 0.7)
 		end
 		if matchingNeed then
 			restored(player, matchingNeed)
-		elseif food then
-			toast(player, "hunger_restored")
-		end
-		if stack.id == "golden_apple" then
-			humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 4 * 2)
 		end
 	end
 end
@@ -364,6 +381,63 @@ local function startEvent()
 	end)
 end
 
+-- a timed effect of the player's own [ваниль]: drinking the same effect again keeps the longer / stronger one;
+-- Absorption gives its golden health at once (at least 4 per level, more is kept)
+function NeedsService.GiveEffect(player: Player, effect: string, level: number, seconds: number)
+	local character = player.Character
+	local state = states[player]
+	local profile = ProfileService.Get(player)
+	if not character or not state or not profile then
+		return
+	end
+	local attribute = string.upper(string.sub(effect, 1, 1)) .. string.sub(effect, 2)
+	local own = timed[player] or {}
+	timed[player] = own
+	local old = own[attribute]
+	if
+		not old
+		or level > old.level
+		or (level == old.level and os.clock() + seconds > old.endsAt)
+	then
+		own[attribute] = {
+			level = level,
+			endsAt = os.clock() + seconds,
+			endsAtServer = workspace:GetServerTimeNow() + seconds,
+		}
+	end
+	if attribute == "Absorption" then
+		local current = character:GetAttribute(NeedsService.ABSORPTION)
+		local now = if typeof(current) == "number" then current else 0
+		character:SetAttribute(NeedsService.ABSORPTION, math.max(now, ABSORPTION_PER_LEVEL * level))
+	end
+	applyEffects(player, state, profile.needs)
+end
+
+-- [ваниль] Regeneration heals 1 HP every 50 >> (level − 1) ticks: level I 2,5 s, II 1,25 s
+local function regenerate()
+	local clocks: { [Player]: number } = {}
+	while true do
+		task.wait(0.25)
+		local now = os.clock()
+		for player, own in pairs(timed) do
+			local entry = own.Regeneration
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if not entry or now >= entry.endsAt or not humanoid or humanoid.Health <= 0 then
+				clocks[player] = nil
+				continue
+			end
+			local every = 2.5 / 2 ^ (entry.level - 1)
+			local last = clocks[player] or now
+			clocks[player] = last
+			if now - last >= every then
+				clocks[player] = now
+				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 1)
+			end
+		end
+	end
+end
+
 function NeedsService.Start()
 	if started then
 		return
@@ -380,7 +454,19 @@ function NeedsService.Start()
 	Remotes.event("UseConsumable").OnServerEvent:Connect(useConsumable)
 	Players.PlayerRemoving:Connect(function(player)
 		states[player] = nil
+		timed[player] = nil
 	end)
+	task.spawn(regenerate)
+	-- [ваниль] effects end with death
+	local function clearOnRespawn(player: Player)
+		player.CharacterAdded:Connect(function()
+			timed[player] = nil
+		end)
+	end
+	Players.PlayerAdded:Connect(clearOnRespawn)
+	for _, player in ipairs(Players:GetPlayers()) do
+		clearOnRespawn(player)
+	end
 	task.spawn(function()
 		while true do
 			updatePlayers()

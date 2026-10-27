@@ -9,15 +9,20 @@ local PhysicsService = game:GetService("PhysicsService")
 local CollisionGroups = {}
 local started = false
 
-local PLAYERS, MOBS = "Players", "Mobs"
+local PLAYERS, MOBS, DROPS = "Players", "Mobs", "ItemDrops"
+CollisionGroups.DROPS = DROPS
 
 local function register()
-	for _, name in ipairs({ PLAYERS, MOBS }) do
+	for _, name in ipairs({ PLAYERS, MOBS, DROPS }) do
 		if not PhysicsService:IsCollisionGroupRegistered(name) then
 			PhysicsService:RegisterCollisionGroup(name)
 		end
 	end
 	PhysicsService:CollisionGroupSetCollidable(PLAYERS, MOBS, false)
+	-- items on the ground lie on the world only: walked through, not pushed, not stacked on each other [ваниль]
+	for _, other in ipairs({ PLAYERS, MOBS, DROPS }) do
+		PhysicsService:CollisionGroupSetCollidable(DROPS, other, false)
+	end
 end
 
 -- puts the model's parts (now and later) into a group

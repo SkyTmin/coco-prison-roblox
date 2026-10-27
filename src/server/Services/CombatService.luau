@@ -71,7 +71,7 @@ function CombatService.ApplyDamage(
 		)
 		humanoid:SetAttribute("LastHitAt", os.clock())
 	end
-	humanoid:TakeDamage(amount)
+	HurtService.Damage(humanoid, amount)
 end
 
 function CombatService.remainingSeconds(player: Player): number
@@ -268,7 +268,7 @@ function CombatService.HitModel(
 	target:SetAttribute("LastHitBy", player.UserId)
 	target:SetAttribute("LastHitAt", os.clock())
 	local before = target.Health
-	target:TakeDamage(damage)
+	HurtService.Damage(target, damage)
 	HurtService.Knockback(model, look)
 	local dealt = before - target.Health
 	local result = if target.Health <= 0 then "killed" else "hit"

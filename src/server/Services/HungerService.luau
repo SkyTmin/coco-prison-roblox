@@ -1,5 +1,6 @@
 --!strict
--- Server-owned hunger and natural recovery. Food is consumed by NeedsService.
+-- Server-owned hunger, saturation and natural recovery like Minecraft's FoodData [ваниль]. Food is eaten through
+-- FoodService (HungerService.Feed).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -11,14 +12,36 @@ local ProfileService = require(script.Parent.ProfileService)
 local rules = Config.rules.survival.hunger
 local HungerService = {}
 local started = false
+-- seconds since the last regeneration heal, per player (vanilla foodTickTimer)
+local regenTimers: { [Player]: number } = {}
 
+-- exhaustion in food points: saturation goes first, then hunger [ваниль]
 local function drain(player: Player, amount: number)
 	local profile = ProfileService.Get(player)
-	if not profile or profile.hunger <= 0 or amount <= 0 or player:GetAttribute("Creative") then
+	if
+		not profile
+		or amount <= 0
+		or player:GetAttribute("Creative")
+		or (profile.hunger <= 0 and (profile.saturation or 0) <= 0)
+	then
 		return -- creative test mode: no hunger at all
 	end
 	ProfileService.Mutate(player, function(p)
-		p.hunger = math.max(0, p.hunger - amount)
+		local saturation = p.saturation or 0
+		local fromSaturation = math.min(saturation, amount)
+		p.saturation = if saturation - fromSaturation > 1e-3
+			then saturation - fromSaturation
+			else nil
+		p.hunger = math.max(0, p.hunger - (amount - fromSaturation))
+	end)
+end
+
+-- eating: hunger + food, saturation + its value, saturation never above the hunger level [ваниль FoodData.eat]
+function HungerService.Feed(player: Player, food: number, saturation: number)
+	ProfileService.Mutate(player, function(p)
+		p.hunger = math.min(rules.max, p.hunger + food)
+		local value = math.min(p.hunger, (p.saturation or 0) + saturation)
+		p.saturation = if value > 0 then math.floor(value * 100 + 0.5) / 100 else nil
 	end)
 end
 
@@ -63,11 +86,29 @@ local function update(dt: number)
 		end
 		drain(player, cost)
 		local hunger = profile.hunger
-		if hunger >= rules.regenHealthAbove then
-			local before = humanoid.Health
-			humanoid.Health = math.min(humanoid.MaxHealth, before + rules.regenHealthPerSecond * dt)
-			drain(player, (humanoid.Health - before) * rules.drainPerHealthRegen)
-		elseif hunger <= 0 and humanoid.Health > rules.starveMinHealth then
+		local saturation = profile.saturation or 0
+		local hurt = humanoid.Health < humanoid.MaxHealth
+		local timer = (regenTimers[player] or 0) + dt
+		if hurt and saturation > 0 and hunger >= rules.max then
+			-- full and saturated: fast regeneration, paid from the saturation [ваниль]
+			if timer >= rules.fastRegenEverySeconds then
+				timer = 0
+				local spent = math.min(saturation, 6)
+				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + spent / 6)
+				drain(player, spent / 4)
+			end
+		elseif hurt and hunger >= rules.regenHealthAbove then
+			-- 1 HP every 4 s for 6 exhaustion = 1.5 points [ваниль]
+			if timer >= rules.regenEverySeconds then
+				timer = 0
+				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 1)
+				drain(player, rules.drainPerHealthRegen)
+			end
+		else
+			timer = 0
+		end
+		regenTimers[player] = timer
+		if hunger <= 0 and humanoid.Health > rules.starveMinHealth then
 			humanoid.Health =
 				math.max(rules.starveMinHealth, humanoid.Health - rules.starveDamagePerSecond * dt)
 		end
@@ -88,6 +129,9 @@ function HungerService.Start()
 		end
 	end
 	Players.PlayerAdded:Connect(added)
+	Players.PlayerRemoving:Connect(function(player)
+		regenTimers[player] = nil
+	end)
 	for _, player in ipairs(Players:GetPlayers()) do
 		added(player)
 	end
@@ -101,7 +145,7 @@ function HungerService.Start()
 	local elapsed = 0
 	RunService.Heartbeat:Connect(function(dt)
 		elapsed += dt
-		if elapsed < 1 then
+		if elapsed < 0.25 then -- the fast regeneration heals every 0.5 s
 			return
 		end
 		local step = elapsed

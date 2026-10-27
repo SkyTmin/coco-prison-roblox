@@ -20,52 +20,36 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Ui)
 local DragDrop = require(script.DragDrop)
-local ChestWindow = require(script.ChestWindow)
-local AchievementsWindow = require(script.AchievementsWindow)
-local BoosterWindow = require(script.BoosterWindow)
-local AuctionWindow = require(script.AuctionWindow)
 local MenuWindow = require(script.MenuWindow)
-local BoosterHud = require(script.BoosterHud)
 local ExchangeWindow = require(script.ExchangeWindow)
-local ArtifactWindow = require(script.ArtifactWindow)
-local SellWindow = require(script.SellWindow)
 local ShopWindow = require(script.ShopWindow)
 local CreativeWindow = require(script.CreativeWindow)
-local BossHud = require(script.BossHud)
-local BossAnimator = require(script.BossAnimator)
-local MobAnimator = require(script.MobAnimator)
 local TopBoards = require(script.TopBoards)
 local HudLayout = require(script.HudLayout)
-local IndoorLighting = require(script.IndoorLighting)
-local CharacterAnimator = require(script.CharacterAnimator)
 local Combat = require(ReplicatedStorage.Shared.Combat)
-CharacterAnimator.Start() -- keyframed swings on every character (ours and the relayed ones)
-local TrainerWindow = require(script.TrainerWindow)
-local FactionWindow = require(script.FactionWindow)
+require(script.CharacterAnimator).Start() -- keyframed swings on every character (ours and the relayed ones)
 local CombatFeel = require(script.CombatFeel)
-local UpgradeWindow = require(script.UpgradeWindow)
 local HeldItem = require(script.HeldItem)
 local BowController = require(script.BowController)
-local ArmorVisual = require(script.ArmorVisual)
+local Eating = require(script.Eating)
+local LevelWindow = require(script.LevelWindow)
 local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
-local FirstPersonHand = require(script.FirstPersonHand)
-local Footsteps = require(script.Footsteps)
-local AmbientMotion = require(script.AmbientMotion)
-local CobwebStuck = require(script.CobwebStuck)
-local ItemInfo = require(Shared.ItemInfo)
+local SettingsWindow = require(script.SettingsWindow)
 local Wire = require(Shared.Wire)
 local BlockColors = require(Shared.BlockColors)
 HeldItem.Start()
-FirstPersonHand.Start()
-Footsteps.Start()
-CobwebStuck.Start()
-AmbientMotion.Start()
+require(script.FirstPersonHand).Start()
+require(script.Footsteps).Start()
+require(script.CobwebStuck).Start()
+require(script.AmbientMotion).Start()
 require(Shared.Sfx).listen() -- sounds the server asks for (hurt, chests, eating, level up…)
-ArmorVisual.Start()
+require(script.ArmorVisual).Start()
 BlockBreak.Start()
 require(script.Nameplates).Start() -- «lvl N [кличка] Ник» over the other players
+require(script.GroundItems).Start() -- items on the ground drawn like Minecraft (ItemDropService keeps the boxes)
 require(script.Motion).Start() -- other players drawn from our own fast movement snapshots
+require(script.Audio).Start() -- the master volume (SettingsWindow)
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale
@@ -276,7 +260,8 @@ local function showToast(text: string)
 	toastToken += 1
 	local token = toastToken
 	toastText.Text = text
-	toast.Visible = true
+	-- the player may have turned the notifications off (SettingsWindow) [владелец 27.10]
+	toast.Visible = not SettingsWindow.of(profile).hideToasts
 	task.delay(3, function()
 		if toastToken == token then
 			toast.Visible = false
@@ -314,7 +299,12 @@ survivalHud.Parent = hotbar
 local survivalScale = Instance.new("UIScale")
 survivalScale.Parent = survivalHud
 type SurvivalMeter = { group: Frame, fills: { Frame }, tooltip: TextLabel }
-local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): SurvivalMeter
+local function buildMeter(
+	rightAligned: boolean,
+	glyph: string,
+	color: Color3,
+	count: number?
+): SurvivalMeter
 	local group = Instance.new("Frame")
 	group.BackgroundTransparency = 1
 	group.Size = UDim2.fromOffset(190, 24)
@@ -422,11 +412,12 @@ local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): 
 		tooltip.Visible = false
 	end)
 	local fills: { Frame } = {}
-	for i = 1, 10 do
+	for i = 1, count or 10 do
 		local cell = Instance.new("Frame")
 		cell.Size = UDim2.fromOffset(18, 24)
-		-- the food row fills from the right like Minecraft's: icon 1 is the rightmost
-		cell.Position = UDim2.fromOffset((if rightAligned then 10 - i else i - 1) * 19, 0)
+		-- the food row fills from the right like Minecraft's: icon 1 is the rightmost; more than 10 icons go on in
+		-- rows of 10 (the hearts: renderSurvival stacks the rows)
+		cell.Position = UDim2.fromOffset((if rightAligned then 10 - i else (i - 1) % 10) * 19, 0)
 		cell.BackgroundTransparency = 1
 		cell.Parent = group
 		drawIcon(cell, false)
@@ -452,11 +443,38 @@ local function buildMeter(rightAligned: boolean, glyph: string, color: Color3): 
 	end
 	return { group = group, fills = fills, tooltip = tooltip }
 end
-local hearts = buildMeter(false, "♥", Color3.fromRGB(235, 55, 55))
+-- every heart of the level (10 + 0.5 a level, 34.5 at 50): rows of 10 stacked upwards like Minecraft's extra hearts
+local hearts = buildMeter(false, "♥", Color3.fromRGB(235, 55, 55), 40)
 local drumsticks = buildMeter(true, "🍗", Color3.fromRGB(225, 150, 65))
 -- Minecraft's armor row over the hearts [владелец 27.10: «иконки брони как в майне»], hidden without armor
 local armorMeter = buildMeter(false, "armor", Color3.new())
 armorMeter.group.Position = UDim2.fromOffset(0, -22)
+-- Absorption's golden hearts (the golden apple) [ваниль]: a row of their own over the red ones, only the hearts there
+-- are; the armor row moves up over it
+-- [ваниль Gui.renderHearts, minecraft.wiki/w/Damage; владелец 27.10: «эффект получения урона как в майне»] after a
+-- loss the heart row blinks for 1 s (white outlines every 3 ticks) and shows the health just lost as pale hearts; at
+-- 2 hearts or less the hearts jitter every tick; with Regeneration a lifted heart runs along the row
+local HEART_WHITE = Color3.fromRGB(255, 255, 255)
+local heartsBlinkUntil, heartsLost = 0, 0
+local lastHealthShown: number? = nil
+local paleHearts: { Frame } = {}
+for i, fill in ipairs(hearts.fills) do
+	local pale = fill:Clone()
+	pale.Name = "Lost"
+	for _, d in ipairs(pale:GetDescendants()) do
+		if d:IsA("TextLabel") then
+			d.TextColor3 = Color3.fromRGB(255, 225, 225)
+		end
+	end
+	pale.ZIndex = 2
+	fill.ZIndex = 3
+	pale.Visible = false
+	pale.Parent = fill.Parent
+	paleHearts[i] = pale
+end
+local goldenHearts = buildMeter(false, "♥", Color3.fromRGB(255, 205, 40))
+goldenHearts.group.Position = UDim2.fromOffset(0, -22)
+goldenHearts.group.Visible = false
 
 -- Minecraft's experience bar between the meters and the hotbar [владелец 27.10]: the number is the player's level, the
 -- green fill how close the next level is (the blocks since the last level and the money it costs, the lower of the two)
@@ -538,7 +556,7 @@ local trackedHumanoid: Humanoid? = nil
 local healthConnections: { RBXScriptConnection } = {}
 local function fillMeter(meter: SurvivalMeter, value: number)
 	-- Any partially filled icon is a half; full icons require both points.
-	local points = math.clamp(value, 0, 20)
+	local points = math.clamp(value, 0, #meter.fills * 2)
 	local fullPoints = math.floor(points / 2) * 2
 	local halves = fullPoints + (if points > fullPoints then 1 else 0)
 	for i, fill in ipairs(meter.fills) do
@@ -564,8 +582,47 @@ local function renderSurvival()
 	local humanoid = trackedHumanoid
 	local health = if humanoid then humanoid.Health else 0
 	local maxHealth = if humanoid then humanoid.MaxHealth else 20
-	fillMeter(hearts, if maxHealth > 0 then health / maxHealth * 20 else 0)
+	-- [ваниль Gui.renderHearts] one heart per 2 HP of the max, rows of 10 going up; with many rows they close in
+	-- (row step max(10 − (rows − 2), 3) of the heart's 10 px)
+	local shownHearts = math.clamp(math.ceil(maxHealth / 2), 1, #hearts.fills)
+	local heartRows = math.ceil(shownHearts / 10)
+	local rowStep = 24 * math.max(10 - (heartRows - 2), 3) / 10
+	if heartRows <= 1 then
+		rowStep = 24
+	end
+	for i, fill in ipairs(hearts.fills) do
+		local cell = fill.Parent
+		if cell and cell:IsA("Frame") then
+			cell.Visible = i <= shownHearts
+			cell:SetAttribute("BaseY", -math.floor((i - 1) / 10) * rowStep)
+		end
+	end
+	local heartsTop = (heartRows - 1) * rowStep
+	fillMeter(hearts, health)
 	hearts.tooltip.Text = T("health_tooltip", health, maxHealth)
+	if humanoid and lastHealthShown and health < lastHealthShown - 0.01 then
+		local now = os.clock()
+		heartsLost = math.max(lastHealthShown, if now < heartsBlinkUntil then heartsLost else 0)
+		heartsBlinkUntil = now + 1
+		local halves = math.ceil(math.clamp(heartsLost, 0, #paleHearts * 2))
+		for i, pale in ipairs(paleHearts) do
+			pale.Size = UDim2.fromScale(math.clamp(halves - (i - 1) * 2, 0, 2) / 2, 1)
+		end
+	end
+	lastHealthShown = if humanoid then health else nil
+	local character = humanoid and humanoid.Parent
+	local golden = character and character:GetAttribute("AbsorptionHealth")
+	local absorbed = if typeof(golden) == "number" then math.clamp(golden, 0, 20) else 0
+	goldenHearts.group.Visible = absorbed > 0
+	fillMeter(goldenHearts, absorbed)
+	for i, fill in ipairs(goldenHearts.fills) do
+		local cell = fill.Parent
+		if cell and cell:IsA("Frame") then
+			cell.Visible = i <= math.ceil(absorbed / 2)
+		end
+	end
+	goldenHearts.group.Position = UDim2.fromOffset(0, -heartsTop - 22)
+	armorMeter.group.Position = UDim2.fromOffset(0, -heartsTop - (if absorbed > 0 then 44 else 22))
 	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
 	fillMeter(drumsticks, hunger / Config.rules.survival.hunger.max * 20)
 	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
@@ -591,6 +648,10 @@ local function watchHealth(character: Model)
 	table.insert(healthConnections, humanoid.HealthChanged:Connect(renderSurvival))
 	table.insert(
 		healthConnections,
+		character:GetAttributeChangedSignal("AbsorptionHealth"):Connect(renderSurvival)
+	)
+	table.insert(
+		healthConnections,
 		humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(renderSurvival)
 	)
 	renderSurvival()
@@ -599,6 +660,46 @@ player.CharacterAdded:Connect(watchHealth)
 if player.Character then
 	task.spawn(watchHealth, player.Character)
 end
+local heartsTick = -1
+RunService.Heartbeat:Connect(function()
+	local now = os.clock()
+	local tick = math.floor(now / 0.05)
+	if tick == heartsTick then
+		return
+	end
+	heartsTick = tick
+	local humanoid = trackedHumanoid
+	local health = if humanoid then humanoid.Health else 0
+	local character = humanoid and humanoid.Parent
+	local regen = character ~= nil and typeof(character:GetAttribute("Regeneration")) == "number"
+	local blinking = now < heartsBlinkUntil and math.floor((heartsBlinkUntil - now) / 0.15) % 2 == 1
+	for i, fill in ipairs(hearts.fills) do
+		local cell = fill.Parent
+		if not cell or not cell:IsA("Frame") then
+			continue
+		end
+		local outline = cell:FindFirstChildOfClass("TextLabel")
+		if outline then
+			outline.TextColor3 = if blinking then HEART_WHITE else Ui.colors.border
+		end
+		paleHearts[i].Visible = blinking
+		if not cell.Visible then
+			continue
+		end
+		local base = cell:GetAttribute("BaseY")
+		local y = if typeof(base) == "number" then base else 0
+		if health > 0 and health <= 4 then
+			y += math.random(0, 1) * 2
+		end
+		if
+			regen
+			and i - 1 == tick % math.ceil((if humanoid then humanoid.MaxHealth else 20) + 5)
+		then
+			y -= 2
+		end
+		cell.Position = UDim2.fromOffset(cell.Position.X.Offset, y)
+	end
+end)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 renderSurvival()
 
@@ -755,7 +856,7 @@ local function showHeldName(stack: Types.ItemStack?)
 		heldName.Visible = false
 		return
 	end
-	local first = ItemInfo.lines(stack, locale)[1]
+	local first = require(Shared.ItemInfo).lines(stack, locale)[1]
 	heldName.Text = first.text
 	heldName.TextColor3 = first.color
 	heldName.TextTransparency, heldName.TextStrokeTransparency = 0, 0.4
@@ -788,6 +889,7 @@ end
 local openWindow: Frame? = nil
 local currentWindowKind: string? = nil
 local refreshLocations: (() -> ())? = nil
+local refreshLevel: (() -> ())? = nil
 local refreshInventory: (() -> ())? = nil
 local refreshChest: (() -> ())? = nil
 local refreshMenu: ((Types.Profile?) -> ())? = nil
@@ -797,6 +899,7 @@ local function closeWindow()
 		Remotes.event("CaseClose"):FireServer(openedCaseId)
 	end
 	refreshLocations = nil
+	refreshLevel = nil
 	refreshMenu = nil
 	refreshInventory, refreshChest = nil, nil
 	if openWindow then
@@ -1077,50 +1180,12 @@ local function buildInventory(): Frame
 	return win
 end
 
--- Level [U]
+-- Level [U]: LevelWindow, updated in place while it is open
 local function buildLevel(): Frame
-	local win, content = createWindow(gui, T("level_up"), UDim2.fromOffset(360, 180), closeWindow)
-	if profile then
-		local rule = Config.levelRule(profile.level + 1)
-		Ui.label(
-			content,
-			T("level")
-				.. " "
-				.. tostring(profile.level)
-				.. (if rule then " → " .. tostring(rule.level) else ""),
-			UDim2.new(1, -8, 0, 24),
-			UDim2.fromOffset(4, 0),
-			16,
-			Ui.colors.level
-		)
-		if rule then
-			Ui.label(
-				content,
-				T("level_need_blocks", Strings.big(profile.blocksTotal), Strings.big(rule.blocks)),
-				UDim2.new(1, -8, 0, 22),
-				UDim2.fromOffset(4, 30),
-				14,
-				if profile.blocksTotal >= rule.blocks then Ui.colors.money else Ui.colors.text
-			)
-			Ui.label(
-				content,
-				T("level_need_money", Strings.money(profile.coins), Strings.big(rule.money)),
-				UDim2.new(1, -8, 0, 22),
-				UDim2.fromOffset(4, 54),
-				14,
-				if profile.coins >= rule.money * Config.moneyScale
-					then Ui.colors.money
-					else Ui.colors.text
-			)
-			local btn =
-				Ui.button(content, T("level_up"), UDim2.new(1, -8, 0, 30), UDim2.new(0, 4, 1, -32))
-			btn.Activated:Connect(function()
-				Remotes.event("LevelUp"):FireServer()
-			end)
-		else
-			Ui.label(content, T("level_max"), UDim2.new(1, -8, 0, 22), UDim2.fromOffset(4, 30), 14)
-		end
-	end
+	local win, refresh = LevelWindow.build(gui, locale, function()
+		return profile
+	end, createWindow, closeWindow)
+	refreshLevel = refresh
 	return win
 end
 
@@ -1218,7 +1283,7 @@ local function buildJobs(): Frame
 end
 
 local function buildCase(): Frame
-	local win, refresh = ChestWindow.build(gui, openedCaseId, function()
+	local win, refresh = require(script.ChestWindow).build(gui, openedCaseId, function()
 		return profile
 	end, locale, closeWindow, createWindow)
 	refreshChest = refresh
@@ -1844,7 +1909,8 @@ end
 local windowBuilders: { [string]: () -> Frame } = {
 	inventory = buildInventory,
 	sell = function()
-		local win, refresh = SellWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.SellWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
@@ -1861,30 +1927,39 @@ local windowBuilders: { [string]: () -> Frame } = {
 		return win
 	end,
 	trainer = function()
-		local win, refresh = TrainerWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.TrainerWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
 	upgrade = function()
-		local win, refresh = UpgradeWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.UpgradeWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
 	level = buildLevel,
 	jobs = buildJobs,
 	achievements = function()
-		local win, refresh =
-			AchievementsWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh = require(script.AchievementsWindow).build(
+			gui,
+			profile,
+			locale,
+			closeWindow,
+			createWindow
+		)
 		refreshMenu = refresh
 		return win
 	end,
 	boosters = function()
-		local win, refresh = BoosterWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.BoosterWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
 	auction = function()
-		local win, refresh = AuctionWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.AuctionWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
@@ -1894,7 +1969,8 @@ local windowBuilders: { [string]: () -> Frame } = {
 		return win
 	end,
 	artifacts = function()
-		local win, refresh = ArtifactWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.ArtifactWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
@@ -1913,7 +1989,8 @@ local windowBuilders: { [string]: () -> Frame } = {
 	case = buildCase,
 	locations = buildLocations,
 	factions = function()
-		local win, refresh = FactionWindow.build(gui, profile, locale, closeWindow, createWindow)
+		local win, refresh =
+			require(script.FactionWindow).build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
 		return win
 	end,
@@ -1949,6 +2026,10 @@ local function refreshWindow(force: boolean?)
 	end
 	if not force and currentWindowKind == "locations" and refreshLocations then
 		refreshLocations()
+		return
+	end
+	if not force and currentWindowKind == "level" and refreshLevel then
+		refreshLevel()
 		return
 	end
 	if currentWindowKind and openWindow then
@@ -2031,11 +2112,23 @@ windowBuilders.menu = function()
 		end
 	end)
 end
+-- «Настройки» [P]: language, volume, notifications, booster bar, the layout editor [владелец 27.10]
+windowBuilders.settings = function()
+	return SettingsWindow.build(gui, locale, profile, closeWindow, createWindow, function()
+		closeWindow()
+		currentWindowKind = nil
+		openHudEditor()
+	end)
+end
 local shownHudLayout = ""
 local function render(p: Types.Profile)
 	local nextLocale = p.locale or Config.defaultLocale
 	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
+	local previousLevel = if profile then profile.level else nil
 	profile = p
+	if previousLevel and p.level > previousLevel then
+		LevelWindow.celebrate(gui, nextLocale, p.level, previousLevel)
+	end
 	locale = nextLocale
 	if rebuild then
 		localizeWorld()
@@ -2043,6 +2136,13 @@ local function render(p: Types.Profile)
 	end
 	languageButton.Text = T("language_code")
 	renderCameraButton()
+	do -- the settings window's values [владелец 27.10]
+		local settings = SettingsWindow.of(p)
+		require(script.Audio).set(settings.volume :: number, settings.muted == true)
+		if settings.hideToasts then
+			toast.Visible = false
+		end
+	end
 	local hudJson = HttpService:JSONEncode(p.hudLayout or {})
 	if hudJson ~= shownHudLayout then
 		shownHudLayout = hudJson
@@ -2153,7 +2253,7 @@ end)
 -- Minecraft-like screen effects live in EffectsHud; it is placed next to the stats panel in updateLayout.
 local effectsHud = EffectsHud.start(gui, T, showToast)
 -- running local boosters, top left under the artifacts button (placed in updateLayout)
-local boosterHud = BoosterHud.start(
+local boosterHud = require(script.BoosterHud).start(
 	gui,
 	function()
 		return profile
@@ -2636,13 +2736,25 @@ BowController.Start(function()
 end, function()
 	return currentWindowKind ~= nil
 end, renderCameraButton)
+-- Eating [ваниль, владелец 27.10]: hold the right mouse button / L2 / F (or the «Съесть» button, a resting finger)
+Eating.Start(function()
+	return profile
+end, function()
+	return currentWindowKind ~= nil or HudLayout.isEditing()
+end)
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	if
 		not processed
-		and (input.UserInputType == Enum.UserInputType.MouseButton2 or input.KeyCode == Enum.KeyCode.ButtonL2)
-		and BowController.InHand()
+		and (
+			input.UserInputType == Enum.UserInputType.MouseButton2
+			or input.KeyCode == Enum.KeyCode.ButtonL2
+		)
 	then
-		BowController.Begin()
+		if BowController.InHand() then
+			BowController.Begin()
+		elseif Eating.InHand() then
+			Eating.Hold("mouse", true)
+		end
 	end
 end)
 UserInputService.InputEnded:Connect(function(input: InputObject)
@@ -2651,6 +2763,14 @@ UserInputService.InputEnded:Connect(function(input: InputObject)
 		or input.KeyCode == Enum.KeyCode.ButtonL2
 	then
 		BowController.Release()
+		Eating.Hold("mouse", false)
+	elseif input.KeyCode == Enum.KeyCode.F then
+		Eating.Hold("key", false)
+	elseif
+		input.UserInputType == Enum.UserInputType.Touch
+		or input.UserInputType == Enum.UserInputType.MouseButton1
+	then
+		Eating.Hold("button", false) -- let go anywhere, also off the button
 	end
 end)
 
@@ -2740,6 +2860,7 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 		local wasDigging = holding
 		cancelDigInput()
 		touchAim = nil
+		Eating.Hold("touch", false)
 		if touchBow then
 			touchBow = false
 			BowController.Release()
@@ -2777,16 +2898,17 @@ RunService.Heartbeat:Connect(function()
 		touchBow = true
 		BowController.Begin()
 	end
-	-- hold with food and nothing under the crosshair → eat once per hold
+	-- hold with food and nothing under the crosshair → eat while the finger rests (Eating)
 	if
 		activeTouch
 		and not digging
 		and not touchAte
+		and not touchDragged
 		and isFood()
 		and os.clock() - touchHeldSince >= EAT_HOLD
 	then
 		touchAte = true
-		Remotes.event("UseConsumable"):FireServer(profile and profile.selectedSlot or 1)
+		Eating.Hold("touch", true)
 	end
 end)
 UserInputService.WindowFocusReleased:Connect(function()
@@ -2972,9 +3094,9 @@ end
 -- the 9th grid cell: creative test mode, only for players CreativeService allows
 do
 	CreativeWindow.Listen()
-	BossHud.Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
-	BossAnimator.Start() -- smooth boss joints from its Action attributes
-	MobAnimator.Start() -- Blender clips on the rats (idle, walk, bite, hurt, death)
+	require(script.BossHud).Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
+	require(script.BossAnimator).Start() -- smooth boss joints from its Action attributes
+	require(script.MobAnimator).Start() -- Blender clips on the rats (idle, walk, bite, hurt, death)
 	TopBoards.Start(function() -- the spawn top boards
 		return locale
 	end)
@@ -2984,7 +3106,7 @@ do
 	end, function()
 		return locale
 	end)
-	IndoorLighting.Start() -- brighter ambient light under the quarry cave roof
+	require(script.IndoorLighting).Start() -- brighter ambient light under the quarry cave roof
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
 	button.Position =
@@ -3002,6 +3124,27 @@ do
 	local caption = button:FindFirstChild("Caption")
 	if caption and caption:IsA("TextLabel") then
 		localizedLabels[caption] = "creative"
+	end
+end
+-- the grid cell after the layout one: the settings [владелец 27.10] (key P on a computer)
+do
+	local button = touchIconButton(
+		touchMenuGrid,
+		Config.icons.icons["menu_settings"] or "",
+		"",
+		56,
+		T("settings_title")
+	)
+	button.Position =
+		UDim2.fromOffset(((#menuKeys + 3) % 6) * 60, math.floor((#menuKeys + 3) / 6) * 60)
+	button.Name = "Touch_settings"
+	button.Activated:Connect(function()
+		setTouchMenuOpen(false)
+		open("settings")
+	end)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "settings_title"
 	end
 end
 -- the 11th grid cell: move the HUD buttons [владелец 22.10] (HudLayout; key H on a computer)
@@ -3128,7 +3271,14 @@ do
 		if not button or not frame or not frame:IsA("GuiObject") or not touchActions.Visible then
 			return
 		end
-		jumpProxy.Size = UDim2.fromOffset(button.AbsoluteSize.X, button.AbsoluteSize.Y)
+		-- Roblox's size (TouchJump: 70 on small screens, else 120) × the player's size; the stand-in keeps
+		-- Roblox's size and its own UIScale (HudLayout) makes it match
+		local small = math.min(frame.AbsoluteSize.X, frame.AbsoluteSize.Y) <= 500
+		local base = if small then 70 else 120
+		local userScale = jumpProxy:FindFirstChildOfClass("UIScale")
+		local scaled = base * (if userScale then userScale.Scale else 1)
+		button.Size = UDim2.fromOffset(scaled, scaled)
+		jumpProxy.Size = UDim2.fromOffset(base, base)
 		local editing = HudLayout.isEditing()
 		if editing and not jumpHidden and button.Visible then
 			if button:IsA("ImageButton") then
@@ -3147,8 +3297,7 @@ do
 			return
 		end
 		if jumpMoved then -- back to Roblox's own place (TouchJump's formula)
-			local small = math.min(frame.AbsoluteSize.X, frame.AbsoluteSize.Y) <= 500
-			local size = if small then 70 else 120
+			local size = base
 			button.Position = if small
 				then UDim2.new(1, -(size * 1.5 - 10), 1, -size - 20)
 				else UDim2.new(1, -(size * 1.5 - 10), 1, -size * 1.75)
@@ -3180,7 +3329,24 @@ if eatCaption and eatCaption:IsA("TextLabel") then
 end
 eatButton.Position = UDim2.new(1, -180, 1, -200)
 eatButton.Visible = false
-eatButton.Activated:Connect(useConsumable)
+-- food: eaten while the button is held (Eating); soap and the rest: used on a tap
+eatButton.InputBegan:Connect(function(input: InputObject)
+	if
+		(
+			input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1
+		)
+		and Eating.InHand()
+		and not HudLayout.isEditing()
+	then
+		Eating.Hold("button", true)
+	end
+end)
+eatButton.Activated:Connect(function()
+	if not Eating.InHand() then
+		useConsumable()
+	end
+end)
 local inventoryButton = touchIconButton(touchActions, nil, "•••", 40)
 inventoryButton.Name = "TouchInventory"
 inventoryButton.TextSize = 20
@@ -3191,9 +3357,12 @@ HudLayout.register("eat", eatButton, true, false)
 HudLayout.register("menu", touchMenus, true, false, menuToggle)
 HudLayout.register("inventory", inventoryButton, true, false)
 HudLayout.register("stats", stats, true, true)
+-- [владелец 27.10: «уменьшить … уведомления, переместить их … тоже самое с баром бустеров»]: moved and resized
+-- here, shown or hidden in the settings
+HudLayout.register("toasts", toast, true, true)
+HudLayout.register("boosters", boosterHud, true, true)
 
-local statsScale = Instance.new("UIScale")
-statsScale.Parent = stats
+Instance.new("UIScale").Parent = stats -- HudLayout sets it: the mode's base × the player's size
 local hotbarScale = Instance.new("UIScale")
 hotbarScale.Parent = hotbar
 local effectsScale = Instance.new("UIScale")
@@ -3213,7 +3382,7 @@ local function updateLayout()
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
 	menuButton.Visible = not mobile
-	statsScale.Scale = if mobile then 0.65 else 1
+	HudLayout.setBaseScale(stats, if mobile then 0.65 else 1) -- × the player's size (HudLayout.apply)
 	stats.Position = if mobile then UDim2.new(1, -148, 0, 64) else UDim2.new(1, -224, 0.4, 0)
 	-- effect icons sit left of the stats panel, top-aligned with it
 	effectsHud.Position = if mobile then UDim2.new(1, -152, 0, 64) else UDim2.new(1, -230, 0.4, 0)
@@ -3256,6 +3425,8 @@ local function updateLayout()
 	local layout = if edited ~= nil then (if edited then edited else nil) else saved
 	HudLayout.setDefault(stats)
 	HudLayout.setDefault(inventoryButton)
+	HudLayout.setDefault(toast)
+	HudLayout.setDefault(boosterHud)
 	HudLayout.apply(mode, layout)
 	-- the status effect icons stay just left of the stats panel wherever it goes
 	if layout and layout.stats then
@@ -3275,6 +3446,9 @@ openHudEditor = function()
 		return
 	end
 	closeWindow()
+	toastToken += 1 -- a sample in the notification panel while it is placed (no pending hide)
+	toastText.Text = T("layout_toasts")
+	toast.Visible = true
 	local mode = if isMobile() then "mobile" else "desktop"
 	local edited = hudOverride[mode]
 	local saved = if profile and profile.hudLayout then profile.hudLayout[mode] else nil
@@ -3287,6 +3461,7 @@ openHudEditor = function()
 	}, function(layout)
 		hudOverride[mode] = if layout then layout else false
 		Remotes.event("SetHudLayout"):FireServer(mode, layout)
+		toast.Visible = false
 		updateLayout()
 	end)
 end
@@ -3359,6 +3534,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("auction") -- «Аукцион» [решение: клавиша; в оригинале /ah]
 	elseif k == Enum.KeyCode.X then
 		open("menu") -- the main menu [вики: клавиша X]
+	elseif k == Enum.KeyCode.P then
+		open("settings") -- [решение: клавиша]
 	elseif k == Enum.KeyCode.G then
 		open("factions") -- [клиент] /fraction
 	elseif k == Enum.KeyCode.I then
@@ -3372,7 +3549,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	elseif k == Enum.KeyCode.V or k == Enum.KeyCode.F5 then
 		toggleFirstPerson()
 	elseif k == Enum.KeyCode.F then
-		useConsumable()
+		if Eating.InHand() then
+			Eating.Hold("key", true)
+		else
+			useConsumable()
+		end
 	elseif k == Enum.KeyCode.Q then
 		throwSelected(
 			UserInputService:IsKeyDown(Enum.KeyCode.LeftControl)
@@ -3460,6 +3641,10 @@ if RunService:IsStudio() then
 			end
 			BowController.Release()
 			return true
+		elseif action == "eat" then
+			-- true holds the use button with the selected item, false lets it go
+			Eating.Hold("key", arg == true)
+			return Eating.InHand()
 		elseif action == "holdDig" then
 			holding = arg == true
 			if not holding then

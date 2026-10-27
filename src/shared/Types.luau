@@ -1,6 +1,14 @@
 --!strict
 -- Profile schema v3 (docs/GAME-DESIGN.md, docs/PLAN.md stage 1).
 
+-- [владелец 27.10: «в меню настройки общие … скрыть уведомления … бар бустеров … языки … уменьшить звук, выключить»]
+export type Settings = {
+	volume: number?, -- 0..1, default 1
+	muted: boolean?,
+	hideToasts: boolean?,
+	hideBoosters: boolean?,
+}
+
 export type ItemStack = {
 	id: string, -- item id: block id ("dirt"), tool id ("pickaxe"), consumable ("apple"), key ("ordinary_key")
 	count: number,
@@ -44,6 +52,7 @@ export type Profile = {
 	passes: { [string]: boolean }, -- basement = true
 	needs: Needs,
 	hunger: number, -- 0..20
+	saturation: number?, -- 0..hunger, spent before hunger [ваниль]; nil = 0; schema stays v3
 	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier
 	dug: { [string]: number }?, -- blocks without an upgrade counter, per block id (achievements); schema stays v3
 	boosters: { { kind: string, mult: number, minutes: number, count: number, scope: string? } }?, -- booster storage; schema stays v3
@@ -64,7 +73,8 @@ export type Profile = {
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3
 	factionChanges: number?, -- «Смен фракций» [клиент]; schema stays v3
-	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y} screen fractions (HudLayout); schema stays v3
+	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y, shown, size} (HudLayout); schema stays v3
+	settings: Settings?, -- the settings window (SettingsWindow); nil = the defaults; schema stays v3
 	location: string,
 	operationIds: { [string]: boolean },
 }
