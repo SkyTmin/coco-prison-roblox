@@ -11,6 +11,7 @@ local Remotes = require(Shared.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
+local MotionService = require(script.Parent.MotionService)
 local Combat = require(Shared.Combat)
 local Types = require(Shared.Types)
 
@@ -112,12 +113,17 @@ end
 -- [ваниль, Better Combat]. Every target inside the arc is hit; the combo picks the attack of the set.
 local combos: { [Player]: Combat.ComboState } = {}
 
-function CombatService.targetBox(model: Model): (CFrame, Vector3)
+-- `at`: the server time the attacker was looking at (MotionService.viewTime) — players are tested where they were
+-- drawn then (lag compensation); nil = their newest reported place.
+function CombatService.targetBox(model: Model, at: number?): (CFrame, Vector3)
 	local humanoid = model:FindFirstChildOfClass("Humanoid")
 	local root = model:FindFirstChild("HumanoidRootPart")
-	if humanoid and root and root:IsA("BasePart") and Players:GetPlayerFromCharacter(model) then
-		-- a player: the standard character box around the root (accessories would inflate the bounds)
-		return root.CFrame * CFrame.new(0, -0.5, 0), Vector3.new(4, 5.5, 2)
+	local player = Players:GetPlayerFromCharacter(model)
+	if humanoid and root and root:IsA("BasePart") and player then
+		-- a player: the standard character box around the root (accessories would inflate the bounds), where
+		-- their own client put it (MotionService) at that moment, when its reports are fresh
+		local cf = MotionService.rootAt(player, at) or root.CFrame
+		return cf * CFrame.new(0, -0.5, 0), Vector3.new(4, 5.5, 2)
 	end
 	return model:GetBoundingBox()
 end
@@ -270,7 +276,7 @@ function CombatService.HitModel(
 	return result
 end
 
-local function onAttack(player: Player, direction: any, falling: any, hint: any)
+local function onAttack(player: Player, direction: any, falling: any, hint: any, viewTime: any)
 	if
 		typeof(direction) ~= "Vector3"
 		or direction ~= direction
@@ -307,6 +313,9 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 		baseDamage *= Config.rules.combat.crit.multiplier
 	end
 	local look = direction.Unit
+	-- lag compensation: the blow lands upswing seconds after the moment the attacker was looking at
+	local seen = MotionService.viewTime(viewTime)
+	local at = if seen then seen + duration * attack.upswing else nil
 	task.delay(duration * attack.upswing, function()
 		local head = character:FindFirstChild("Head")
 		if not character.Parent or humanoid.Health <= 0 or not head or not head:IsA("BasePart") then
@@ -319,7 +328,7 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 		if typeof(hint) == "Instance" and hint:IsA("Model") and hint:IsDescendantOf(workspace) then
 			local th = hint:FindFirstChildOfClass("Humanoid")
 			if th and th.Health > 0 and hint ~= character then
-				local hcf, hsize = CombatService.targetBox(hint)
+				local hcf, hsize = CombatService.targetBox(hint, at)
 				local toCentre = hcf.Position - eye
 				if
 					(closestPoint(hcf, hsize, eye) - eye).Magnitude <= range + 3
@@ -345,7 +354,7 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any)
 		for _, model in ipairs(candidates) do
 			local target = model:FindFirstChildOfClass("Humanoid")
 			if target and target.Health > 0 then
-				local cf, size = CombatService.targetBox(model)
+				local cf, size = CombatService.targetBox(model, at)
 				if insideArc(attack, eye, look, cf, size, range) then
 					if crit then
 						CombatService.critBurst(cf.Position)

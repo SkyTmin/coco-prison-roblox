@@ -65,6 +65,7 @@ require(Shared.Sfx).listen() -- sounds the server asks for (hurt, chests, eating
 ArmorVisual.Start()
 BlockBreak.Start()
 require(script.Nameplates).Start() -- «lvl N [кличка] Ник» over the other players
+require(script.Motion).Start() -- other players drawn from our own fast movement snapshots
 
 local player = Players.LocalPlayer
 local locale = Config.defaultLocale
@@ -2570,7 +2571,13 @@ local function attack()
 		and humanoid.FloorMaterial == Enum.Material.Air
 		and root.AssemblyLinearVelocity.Y < -1
 	CombatFeel.OnAttack(target, duration * blow.upswing, falling)
-	Remotes.event("Attack"):FireServer(aimed or currentCamera.CFrame.LookVector, falling, target)
+	-- the server time the other players are drawn at here: the server tests the blow there (lag compensation)
+	Remotes.event("Attack"):FireServer(
+		aimed or currentCamera.CFrame.LookVector,
+		falling,
+		target,
+		require(script.Motion).viewTime()
+	)
 end
 -- holding the attack (mouse with nothing to dig, the touch attack button) keeps swinging at the weapon's pace
 local attackHeld = false

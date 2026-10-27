@@ -15,6 +15,7 @@ local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
 local BowState = require(script.Parent.BowState)
 local Arrows = require(script.Parent.Arrows)
+local Motion = require(script.Parent.Motion)
 
 local BOW = Config.vanilla.bow
 local BLOCK = Config.rules.combat.blockStuds :: number
@@ -141,7 +142,7 @@ function BowController.Release()
 		return
 	end
 	local direction = aim(head)
-	Remotes.event("BowRelease"):FireServer(direction)
+	Remotes.event("BowRelease"):FireServer(direction, Motion.viewTime()) -- the arrow tests players where we see them
 	local level = stack.level or 1
 	Arrows.FireLocal(
 		head.Position + direction * 1.2,

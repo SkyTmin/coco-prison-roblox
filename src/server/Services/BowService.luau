@@ -29,6 +29,7 @@ local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local CombatService = require(script.Parent.CombatService)
+local MotionService = require(script.Parent.MotionService)
 
 local BowService = {}
 local started = false
@@ -51,6 +52,7 @@ type Flying = {
 	flame: boolean,
 	creative: boolean,
 	ticks: number,
+	lag: number, -- s the shooter sees players behind the server clock: players are tested that far back
 }
 type Stuck = { part: BasePart, on: BasePart, at: number, pickup: boolean }
 
@@ -118,7 +120,7 @@ local function gaussian(random: Random): number
 end
 local random = Random.new()
 
-local function onRelease(player: Player, direction: any)
+local function onRelease(player: Player, direction: any, viewTime: any)
 	local startedAt = drawing[player]
 	stopDraw(player)
 	if
@@ -175,6 +177,8 @@ local function onRelease(player: Player, direction: any)
 		flame = Config.flameForLevel("bow", level) > 0,
 		creative = isCreative,
 		ticks = 0,
+		lag = workspace:GetServerTimeNow()
+			- (MotionService.viewTime(viewTime) or workspace:GetServerTimeNow()),
 	}
 	table.insert(flying, arrow)
 	Sfx.broadcast("swing", head, 0.8, 1.6)
@@ -347,7 +351,8 @@ local function step(arrow: Flying): boolean
 	for _, model in ipairs(candidates) do
 		local humanoid = model:FindFirstChildOfClass("Humanoid")
 		if humanoid and humanoid.Health > 0 then
-			local cf, size = CombatService.targetBox(model)
+			local cf, size =
+				CombatService.targetBox(model, workspace:GetServerTimeNow() - arrow.lag)
 			if (cf.Position - from).Magnitude < reach + size.Magnitude then
 				local t = segmentBox(from, delta, cf, size + Vector3.one * ENTITY_MARGIN * 2)
 				if t and t < bestT then

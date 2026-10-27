@@ -19,6 +19,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Remotes = require(Shared.Remotes)
 local SwingAnimations = require(Shared.SwingAnimations)
 local BowState = require(script.Parent:WaitForChild("BowState"))
+local Motion = require(script.Parent:WaitForChild("Motion"))
 
 local CharacterAnimator = {}
 
@@ -152,7 +153,8 @@ local function stance(
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	local speed = 0
 	if root and root:IsA("BasePart") then
-		local v = root.AssemblyLinearVelocity
+		-- another player drawn by Motion walks with the velocity it is drawn with, not Roblox's late one
+		local v = Motion.velocity(character) or root.AssemblyLinearVelocity
 		speed = Vector3.new(v.X, 0, v.Z).Magnitude
 	end
 	local ticks = dt * 20
