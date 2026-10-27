@@ -30,6 +30,7 @@ Config.itemModels = load("itemmodels")
 Config.armor = load("armor")
 Config.effects = load("effects")
 Config.achievementsCfg = load("achievements")
+Config.boosters = load("boosters")
 Config.artifacts = load("artifacts")
 Config.market = load("market")
 

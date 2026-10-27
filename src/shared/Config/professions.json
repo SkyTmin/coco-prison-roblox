@@ -31,10 +31,5 @@
     "money": 0.01,
     "mobs": 0.01,
     "maxLevel": 50
-  },
-  "boosters": {
-    "_source": "[меню] награда достижения: локальный бустер денег 30 минут; [клиент] +100 % к множителю",
-    "durationMinutes": 30,
-    "multiplierBonus": 1
   }
 }

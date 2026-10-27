@@ -8,8 +8,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
-local InventoryService = require(script.Parent.InventoryService)
-local AchievementService = require(script.Parent.AchievementService)
 local ItemDropService = require(script.Parent.ItemDropService)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -59,14 +57,9 @@ local function died(player: Player, character: Model)
 	then
 		local killer = Players:GetPlayerByUserId(userId)
 		if killer and killer ~= player and ProfileService.Get(killer) then
-			local swordHeld = false
 			ProfileService.Mutate(killer, function(p)
 				p.stats.kills = (p.stats.kills or 0) + 1
-				swordHeld = InventoryService.heldTool(p) == "sword"
 			end)
-			if swordHeld then
-				AchievementService.AddProgress(killer, "sword", 1)
-			end
 			-- [владелец 22.10] the killer gets as many dollars as the victim's level, taken from the victim
 			-- (no more than the victim has)
 			local loss = math.min(profile.coins, profile.level * Config.moneyScale)

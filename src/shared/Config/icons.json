@@ -96,7 +96,10 @@
     "hud_rat": "rbxassetid://111665412119345",
     "hud_kd": "rbxassetid://100085081985372",
     "top_crown": "rbxassetid://132695456454870",
-    "menu_layout": "rbxassetid://88567271908859"
+    "menu_layout": "rbxassetid://88567271908859",
+    "booster_blocks": "rbxassetid://86790380223721",
+    "booster_mobs": "rbxassetid://114107272470362",
+    "menu_boosters": "rbxassetid://83208846338314"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }

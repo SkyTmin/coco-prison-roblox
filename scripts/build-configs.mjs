@@ -221,7 +221,34 @@ write("keys.json", { source: "[решение]; цены ключей у обм�
 write("books.json", { source: "лимиты [вики]; остальное [решение]", ...decisions.books });
 write("rules.json", { source: "[решение]; телепорт и UI — [владелец]", death: decisions.death, combo: decisions.combo, money: decisions.money, teleport: decisions.teleport, ui: decisions.ui, digging: decisions.digging, survival: decisions.survival, creative: decisions.creative, combat: decisions.combat, factions: decisions.factions });
 write("effects.json", { source: "assets/cracks/ids.json + assets/sounds/ids.json — трещины и звуки блоков", cracks: read("assets/cracks/ids.json"), sounds: read("assets/sounds/ids.json") });
-write("achievements.json", { source: "[меню] ступени; [владелец] цепочки по инструменту", ...decisions.achievements });
+// «Копатель (<блок>)» cards: one per upgrade counter (Камень = cobblestone + stone) or per block without one, in the
+// order the floors open; a card shows once the first location selling or mining its blocks is open (unlockLevel).
+const achievementCards = [];
+{
+	const byKey = {};
+	for (const loc of [...locations].sort((a, b) => a.unlockLevel - b.unlockLevel)) {
+		const ids = new Set([...(loc.sellList ?? []), ...Object.keys(loc.mine?.shares ?? {})]);
+		for (const m of Object.values(loc.mines ?? {})) for (const id of Object.keys(m.shares ?? {})) ids.add(id);
+		for (const id of ids) {
+			const block = blocks[id];
+			if (!block || block.itemOnly) continue;
+			const key = block.upgradeCounter ?? id;
+			if (!byKey[key]) {
+				byKey[key] = { id: key, counter: block.upgradeCounter ?? null, blocks: [], unlockLevel: loc.unlockLevel, location: loc.id };
+				achievementCards.push(byKey[key]);
+			}
+			if (!byKey[key].blocks.includes(id)) byKey[key].blocks.push(id);
+		}
+	}
+	// the card's price (reward) and icon: the dearest of its blocks (iron ore over stone in a shared counter)
+	for (const card of achievementCards) {
+		card.blocks.sort((a, b) => blocks[b].basePrice - blocks[a].basePrice || a.localeCompare(b));
+		card.icon = card.blocks[0];
+		card.price = Math.min(...card.blocks.map((id) => blocks[id].basePrice));
+	}
+}
+write("achievements.json", { source: "[вики] карточки «Копатель» по блокам; [владелец 27.10] появляются с этажами; [решение] награды", ...decisions.achievements, cards: achievementCards });
+write("boosters.json", { source: "[вики] хранилище бустеров; [владелец 27.10] локальные ×1.1", ...decisions.boosters });
 // Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`
 // (all its pictures) and `image` (the first picture, shown in the rarity card and the mosaic).
 const artifactImages = read("assets/artifacts/ids.json").images;
@@ -262,4 +289,4 @@ write("previews.json", { source: "assets/previews/ids.json — Codex image gen +
 	writeFileSync(join(root, "src", "materials.project.json"), JSON.stringify({ name: "materials", tree }, null, 2) + "\n");
 	console.log("wrote src/materials.project.json");
 }
-write("professions.json", { source: "[меню] Работы/Прокачки; формула опыта [решение]", ...decisions.professions, boosters: decisions.boosters });
+write("professions.json", { source: "[меню] Работы/Прокачки; формула опыта [решение]", ...decisions.professions });

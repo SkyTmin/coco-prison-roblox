@@ -1,29 +1,636 @@
 {
-  "source": "[меню] ступени; [владелец] цепочки по инструменту",
-  "_source": "[меню] пять карточек «Копатель» с 12 ступенями, 64 на 2-й и 2050 на 7–8-й ступени (×1.7); [владелец] 21.10: объединить в 4 цепочки по инструменту, первая награда 5 $, остальные меньше, авто-выдача, прогресс сохранить",
-  "tiers": 12,
-  "thresholdBase": 64,
-  "thresholdGrowth": 1.7,
-  "rewardFirst": 10,
-  "_rewardFirst": "[владелец 21.10] награды за достижения «скопать N блоков» ×2 (было 5 $), цены продажи блоков — как в вики",
-  "rewardGrowth": 1.3,
-  "chains": {
-    "pickaxe": {
-      "counter": "pickaxe_blocks",
-      "_what": "блоки, добытые киркой (камень, руды)"
-    },
-    "shovel": {
-      "counter": "shovel_blocks",
-      "_what": "блоки, добытые лопатой (земля, песок, гравий)"
-    },
-    "axe": {
-      "counter": "axe_blocks",
-      "_what": "блоки, добытые топором (дерево, арбуз)"
-    },
-    "sword": {
-      "counter": "sword_kills",
-      "_what": "убийства мечом: мобы, боссы, игроки"
-    }
+  "source": "[вики] карточки «Копатель» по блокам; [владелец 27.10] появляются с этажами; [решение] награды",
+  "_source": "[вики 26.10, JOBS-CASES-SPAWN «Достижения»] карточка «Копатель (<блок>)» на каждый блок шахт: значок, 10 звёзд, «НАКОПАЙТЕ N», полоса, «НАГРАДА»; пороги удваиваются (дерево 64 → 128 → 256, 7-я ступень 2.05K); прогресс между ступенями не сбрасывается; награда — денежный чек, зачисляется сам (дерево 3 / 5 / 10 $, песок 7-я 30 $, земля 50 $); уголь 8-я — «Локальный Бустер денег на 30 минут»; [владелец 27.10: «дают деньги за определённые блоки накопанные и достижения появляются когда открываются этажи», «там локальные бустеры … 1.10»]",
+  "tiers": 10,
+  "thresholdBase": 32,
+  "thresholdGrowth": 2,
+  "rewardFactor": 1.15,
+  "_rewardFactor": "[решение] чек = порог × цена блока × 1.15, округление до $ (не меньше 1 $): дерево 32 / 64 / 128 → 3 / 5 / 10 $ как в оригинале, песок 7-я ступень 27 $ (в оригинале 30 $)",
+  "rewardMin": 1,
+  "boosterTiers": {
+    "4": "blocks",
+    "6": "mobs",
+    "8": "money"
   },
-  "legacy": "старые ключи digger_<block> переносятся: прогресс блоков суммируется в цепочку по инструменту блока, выданные ступени не выдаются повторно"
+  "_boosterTiers": "[вики] уголь 8-я ступень — локальный бустер денег 30 мин вместо чека; [решение] то же на 8-й у всех карточек, на 4-й — бустер блоков, на 6-й — бустер мобов",
+  "cards": [
+    {
+      "id": "Песок",
+      "counter": "Песок",
+      "blocks": [
+        "sand"
+      ],
+      "unlockLevel": 1,
+      "location": "prison",
+      "icon": "sand",
+      "price": 0.0115
+    },
+    {
+      "id": "Гравий",
+      "counter": "Гравий",
+      "blocks": [
+        "gravel"
+      ],
+      "unlockLevel": 1,
+      "location": "prison",
+      "icon": "gravel",
+      "price": 0.0115
+    },
+    {
+      "id": "Земля",
+      "counter": "Земля",
+      "blocks": [
+        "dirt"
+      ],
+      "unlockLevel": 1,
+      "location": "prison",
+      "icon": "dirt",
+      "price": 0.0135
+    },
+    {
+      "id": "Дерево",
+      "counter": "Дерево",
+      "blocks": [
+        "oak_log"
+      ],
+      "unlockLevel": 1,
+      "location": "prison",
+      "icon": "oak_log",
+      "price": 0.07
+    },
+    {
+      "id": "Арбуз",
+      "counter": "Арбуз",
+      "blocks": [
+        "melon"
+      ],
+      "unlockLevel": 1,
+      "location": "prison",
+      "icon": "melon",
+      "price": 1.4
+    },
+    {
+      "id": "Камень",
+      "counter": "Камень",
+      "blocks": [
+        "stone",
+        "cobblestone"
+      ],
+      "unlockLevel": 3,
+      "location": "quarry",
+      "icon": "stone",
+      "price": 0.045
+    },
+    {
+      "id": "Каменный уголь",
+      "counter": "Каменный уголь",
+      "blocks": [
+        "coal_ore"
+      ],
+      "unlockLevel": 3,
+      "location": "quarry",
+      "icon": "coal_ore",
+      "price": 0.088
+    },
+    {
+      "id": "Железная руда",
+      "counter": "Железная руда",
+      "blocks": [
+        "iron_ore"
+      ],
+      "unlockLevel": 3,
+      "location": "quarry",
+      "icon": "iron_ore",
+      "price": 0.15
+    },
+    {
+      "id": "coal_block",
+      "counter": null,
+      "blocks": [
+        "coal_block"
+      ],
+      "unlockLevel": 3,
+      "location": "quarry",
+      "icon": "coal_block",
+      "price": 1
+    },
+    {
+      "id": "red_sand",
+      "counter": null,
+      "blocks": [
+        "red_sand"
+      ],
+      "unlockLevel": 5,
+      "location": "mountain_foot",
+      "icon": "red_sand",
+      "price": 0.071
+    },
+    {
+      "id": "Золотая руда",
+      "counter": "Золотая руда",
+      "blocks": [
+        "gold_ore"
+      ],
+      "unlockLevel": 5,
+      "location": "mountain_foot",
+      "icon": "gold_ore",
+      "price": 0.403
+    },
+    {
+      "id": "lapis_block",
+      "counter": null,
+      "blocks": [
+        "lapis_block"
+      ],
+      "unlockLevel": 5,
+      "location": "basement",
+      "icon": "lapis_block",
+      "price": 0.15
+    },
+    {
+      "id": "iron_block",
+      "counter": null,
+      "blocks": [
+        "iron_block"
+      ],
+      "unlockLevel": 5,
+      "location": "basement",
+      "icon": "iron_block",
+      "price": 0.3
+    },
+    {
+      "id": "gold_block",
+      "counter": null,
+      "blocks": [
+        "gold_block"
+      ],
+      "unlockLevel": 5,
+      "location": "basement",
+      "icon": "gold_block",
+      "price": 0.5
+    },
+    {
+      "id": "diamond_block",
+      "counter": null,
+      "blocks": [
+        "diamond_block"
+      ],
+      "unlockLevel": 5,
+      "location": "basement",
+      "icon": "diamond_block",
+      "price": 1
+    },
+    {
+      "id": "netherite",
+      "counter": null,
+      "blocks": [
+        "netherite"
+      ],
+      "unlockLevel": 7,
+      "location": "underworld",
+      "icon": "netherite",
+      "price": 0.09
+    },
+    {
+      "id": "soul_sand",
+      "counter": null,
+      "blocks": [
+        "soul_sand"
+      ],
+      "unlockLevel": 7,
+      "location": "underworld",
+      "icon": "soul_sand",
+      "price": 0.15
+    },
+    {
+      "id": "quartz_ore",
+      "counter": null,
+      "blocks": [
+        "quartz_ore"
+      ],
+      "unlockLevel": 7,
+      "location": "underworld",
+      "icon": "quartz_ore",
+      "price": 0.2
+    },
+    {
+      "id": "sandstone",
+      "counter": null,
+      "blocks": [
+        "sandstone"
+      ],
+      "unlockLevel": 9,
+      "location": "pyramid",
+      "icon": "sandstone",
+      "price": 0.21
+    },
+    {
+      "id": "red_sandstone",
+      "counter": null,
+      "blocks": [
+        "red_sandstone"
+      ],
+      "unlockLevel": 9,
+      "location": "pyramid",
+      "icon": "red_sandstone",
+      "price": 0.21
+    },
+    {
+      "id": "wisteria_leaves",
+      "counter": null,
+      "blocks": [
+        "wisteria_leaves"
+      ],
+      "unlockLevel": 11,
+      "location": "royal_garden",
+      "icon": "wisteria_leaves",
+      "price": 0.27
+    },
+    {
+      "id": "cherry_log",
+      "counter": null,
+      "blocks": [
+        "cherry_log"
+      ],
+      "unlockLevel": 11,
+      "location": "royal_garden",
+      "icon": "cherry_log",
+      "price": 0.36
+    },
+    {
+      "id": "cyan_concrete",
+      "counter": null,
+      "blocks": [
+        "cyan_concrete"
+      ],
+      "unlockLevel": 13,
+      "location": "sunken_lighthouse",
+      "icon": "cyan_concrete",
+      "price": 0.32
+    },
+    {
+      "id": "prismarine",
+      "counter": null,
+      "blocks": [
+        "prismarine"
+      ],
+      "unlockLevel": 13,
+      "location": "sunken_lighthouse",
+      "icon": "prismarine",
+      "price": 0.45
+    },
+    {
+      "id": "prismarine_bricks",
+      "counter": null,
+      "blocks": [
+        "prismarine_bricks"
+      ],
+      "unlockLevel": 13,
+      "location": "sunken_lighthouse",
+      "icon": "prismarine_bricks",
+      "price": 0.45
+    },
+    {
+      "id": "end_stone_bricks",
+      "counter": null,
+      "blocks": [
+        "end_stone_bricks"
+      ],
+      "unlockLevel": 15,
+      "location": "end_castle",
+      "icon": "end_stone_bricks",
+      "price": 0.6
+    },
+    {
+      "id": "purpur",
+      "counter": null,
+      "blocks": [
+        "purpur"
+      ],
+      "unlockLevel": 15,
+      "location": "end_castle",
+      "icon": "purpur",
+      "price": 0.65
+    },
+    {
+      "id": "Белая шерсть",
+      "counter": "Белая шерсть",
+      "blocks": [
+        "white_wool"
+      ],
+      "unlockLevel": 17,
+      "location": "spider_lair",
+      "icon": "white_wool",
+      "price": 0.7
+    },
+    {
+      "id": "Паутина",
+      "counter": "Паутина",
+      "blocks": [
+        "cobweb"
+      ],
+      "unlockLevel": 17,
+      "location": "spider_lair",
+      "icon": "cobweb",
+      "price": 1
+    },
+    {
+      "id": "ice",
+      "counter": null,
+      "blocks": [
+        "ice"
+      ],
+      "unlockLevel": 19,
+      "location": "snowy_hand",
+      "icon": "ice",
+      "price": 0.75
+    },
+    {
+      "id": "packed_ice",
+      "counter": null,
+      "blocks": [
+        "packed_ice"
+      ],
+      "unlockLevel": 19,
+      "location": "snowy_hand",
+      "icon": "packed_ice",
+      "price": 0.75
+    },
+    {
+      "id": "yellow_wool",
+      "counter": null,
+      "blocks": [
+        "yellow_wool"
+      ],
+      "unlockLevel": 21,
+      "location": "market",
+      "icon": "yellow_wool",
+      "price": 0.76
+    },
+    {
+      "id": "red_wool",
+      "counter": null,
+      "blocks": [
+        "red_wool"
+      ],
+      "unlockLevel": 21,
+      "location": "market",
+      "icon": "red_wool",
+      "price": 0.76
+    },
+    {
+      "id": "lime_wool",
+      "counter": null,
+      "blocks": [
+        "lime_wool"
+      ],
+      "unlockLevel": 21,
+      "location": "market",
+      "icon": "lime_wool",
+      "price": 0.8
+    },
+    {
+      "id": "orange_concrete",
+      "counter": null,
+      "blocks": [
+        "orange_concrete"
+      ],
+      "unlockLevel": 23,
+      "location": "leprechaun_valley",
+      "icon": "orange_concrete",
+      "price": 0.82
+    },
+    {
+      "id": "yellow_concrete",
+      "counter": null,
+      "blocks": [
+        "yellow_concrete"
+      ],
+      "unlockLevel": 23,
+      "location": "leprechaun_valley",
+      "icon": "yellow_concrete",
+      "price": 0.82
+    },
+    {
+      "id": "lime_concrete",
+      "counter": null,
+      "blocks": [
+        "lime_concrete"
+      ],
+      "unlockLevel": 23,
+      "location": "leprechaun_valley",
+      "icon": "lime_concrete",
+      "price": 0.82
+    },
+    {
+      "id": "purple_concrete",
+      "counter": null,
+      "blocks": [
+        "purple_concrete"
+      ],
+      "unlockLevel": 23,
+      "location": "leprechaun_valley",
+      "icon": "purple_concrete",
+      "price": 0.82
+    },
+    {
+      "id": "red_concrete",
+      "counter": null,
+      "blocks": [
+        "red_concrete"
+      ],
+      "unlockLevel": 23,
+      "location": "leprechaun_valley",
+      "icon": "red_concrete",
+      "price": 0.82
+    },
+    {
+      "id": "quartz_block",
+      "counter": null,
+      "blocks": [
+        "quartz_block"
+      ],
+      "unlockLevel": 25,
+      "location": "castle",
+      "icon": "quartz_block",
+      "price": 0.85
+    },
+    {
+      "id": "chiseled_quartz",
+      "counter": null,
+      "blocks": [
+        "chiseled_quartz"
+      ],
+      "unlockLevel": 25,
+      "location": "castle",
+      "icon": "chiseled_quartz",
+      "price": 0.92
+    },
+    {
+      "id": "dark_oak_leaves",
+      "counter": null,
+      "blocks": [
+        "dark_oak_leaves"
+      ],
+      "unlockLevel": 27,
+      "location": "inside_out",
+      "icon": "dark_oak_leaves",
+      "price": 0.9
+    },
+    {
+      "id": "pink_wool",
+      "counter": null,
+      "blocks": [
+        "pink_wool"
+      ],
+      "unlockLevel": 29,
+      "location": "kyoto",
+      "icon": "pink_wool",
+      "price": 0.95
+    },
+    {
+      "id": "sea_lantern",
+      "counter": null,
+      "blocks": [
+        "sea_lantern"
+      ],
+      "unlockLevel": 29,
+      "location": "kyoto",
+      "icon": "sea_lantern",
+      "price": 0.97
+    },
+    {
+      "id": "pumpkin",
+      "counter": null,
+      "blocks": [
+        "pumpkin"
+      ],
+      "unlockLevel": 31,
+      "location": "farm",
+      "icon": "pumpkin",
+      "price": 1.4
+    },
+    {
+      "id": "green_wool",
+      "counter": null,
+      "blocks": [
+        "green_wool"
+      ],
+      "unlockLevel": 31,
+      "location": "farm",
+      "icon": "green_wool",
+      "price": 1.7
+    },
+    {
+      "id": "jack_o_lantern",
+      "counter": null,
+      "blocks": [
+        "jack_o_lantern"
+      ],
+      "unlockLevel": 33,
+      "location": "barn",
+      "icon": "jack_o_lantern",
+      "price": 1.65
+    },
+    {
+      "id": "magenta_concrete",
+      "counter": null,
+      "blocks": [
+        "magenta_concrete"
+      ],
+      "unlockLevel": 35,
+      "location": "edge_gate",
+      "icon": "magenta_concrete",
+      "price": 1.63
+    },
+    {
+      "id": "black_glass",
+      "counter": null,
+      "blocks": [
+        "black_glass"
+      ],
+      "unlockLevel": 35,
+      "location": "edge_gate",
+      "icon": "black_glass",
+      "price": 2.67
+    },
+    {
+      "id": "white_concrete",
+      "counter": null,
+      "blocks": [
+        "white_concrete"
+      ],
+      "unlockLevel": 37,
+      "location": "tree",
+      "icon": "white_concrete",
+      "price": 1.8
+    },
+    {
+      "id": "clay",
+      "counter": null,
+      "blocks": [
+        "clay"
+      ],
+      "unlockLevel": 39,
+      "location": "church",
+      "icon": "clay",
+      "price": 1.88
+    },
+    {
+      "id": "chiseled_sandstone",
+      "counter": null,
+      "blocks": [
+        "chiseled_sandstone"
+      ],
+      "unlockLevel": 41,
+      "location": "purgatory",
+      "icon": "chiseled_sandstone",
+      "price": 1.96
+    },
+    {
+      "id": "brown_mushroom_block",
+      "counter": null,
+      "blocks": [
+        "brown_mushroom_block"
+      ],
+      "unlockLevel": 43,
+      "location": "eden",
+      "icon": "brown_mushroom_block",
+      "price": 2.05
+    },
+    {
+      "id": "snow",
+      "counter": null,
+      "blocks": [
+        "snow"
+      ],
+      "unlockLevel": 45,
+      "location": "cherubim",
+      "icon": "snow",
+      "price": 2.2
+    },
+    {
+      "id": "smooth_sandstone",
+      "counter": null,
+      "blocks": [
+        "smooth_sandstone"
+      ],
+      "unlockLevel": 47,
+      "location": "gate",
+      "icon": "smooth_sandstone",
+      "price": 2.3
+    },
+    {
+      "id": "red_mushroom_block",
+      "counter": null,
+      "blocks": [
+        "red_mushroom_block"
+      ],
+      "unlockLevel": 49,
+      "location": "paradise",
+      "icon": "red_mushroom_block",
+      "price": 2.4
+    }
+  ],
+  "legacy": "цепочки по инструменту (pickaxe / shovel / axe / sword, 21.10) убраны: прогресс блоков берётся из счётчиков улучшений, ступени, уже набранные к переходу, отмечаются выданными без выплаты"
 }

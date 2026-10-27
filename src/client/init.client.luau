@@ -22,6 +22,8 @@ local Ui = require(script.Ui)
 local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
 local AchievementsWindow = require(script.AchievementsWindow)
+local BoosterWindow = require(script.BoosterWindow)
+local BoosterHud = require(script.BoosterHud)
 local ExchangeWindow = require(script.ExchangeWindow)
 local ArtifactWindow = require(script.ArtifactWindow)
 local SellWindow = require(script.SellWindow)
@@ -1867,6 +1869,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	boosters = function()
+		local win, refresh = BoosterWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	creative = function()
 		local win, refresh = CreativeWindow.build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
@@ -2106,6 +2113,17 @@ end)
 -- Status effects (Nausea / Insomnia / Slowness from needs, event effects): HUD icons and the
 -- Minecraft-like screen effects live in EffectsHud; it is placed next to the stats panel in updateLayout.
 local effectsHud = EffectsHud.start(gui, T, showToast)
+-- running local boosters, top left under the artifacts button (placed in updateLayout)
+local boosterHud = BoosterHud.start(
+	gui,
+	function()
+		return profile
+	end,
+	T,
+	function()
+		open("boosters")
+	end
+)
 -- [владелец] no auto-jump on touch: jumping is the jump button only
 player.AutoJumpEnabled = false
 local function disableAutoJump(character: Model)
@@ -2757,6 +2775,7 @@ local menuKeys = {
 	"upgrade",
 	"level",
 	"achievements",
+	"boosters",
 	"artifacts",
 	"factions",
 	"language_code",
@@ -3087,6 +3106,7 @@ local function updateLayout()
 	-- effect icons sit left of the stats panel, top-aligned with it
 	effectsHud.Position = if mobile then UDim2.new(1, -152, 0, 64) else UDim2.new(1, -230, 0.4, 0)
 	effectsScale.Scale = if mobile then 0.75 else 1
+	boosterHud.Position = if mobile then UDim2.fromOffset(72, 64) else UDim2.fromOffset(8, 116)
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8
 	hotbar.Size = UDim2.fromOffset(width, size + 12)
@@ -3218,6 +3238,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("jobs")
 	elseif k == Enum.KeyCode.L then
 		open("achievements")
+	elseif k == Enum.KeyCode.B then
+		open("boosters") -- «Хранилище бустеров» [решение: клавиша]
 	elseif k == Enum.KeyCode.G then
 		open("factions") -- [клиент] /fraction
 	elseif k == Enum.KeyCode.I then

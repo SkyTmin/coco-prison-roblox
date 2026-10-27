@@ -20,7 +20,7 @@ for _, name in ipairs({
 	"EquipArmor",
 	"UseConsumable",
 	"OpenCase",
-	"ClaimAchievement",
+	"ActivateBooster",
 	"CaseOpened",
 	"CaseUpdated",
 	"CaseOpen",
@@ -62,6 +62,7 @@ local DigService = require(script.Services.DigService)
 local EconomyService = require(script.Services.EconomyService)
 local NeedsService = require(script.Services.NeedsService)
 local AchievementService = require(script.Services.AchievementService)
+local BoosterService = require(script.Services.BoosterService)
 local CaseService = require(script.Services.CaseService)
 local ArtifactService = require(script.Services.ArtifactService)
 local LocationService = require(script.Services.LocationService)
@@ -98,6 +99,7 @@ DigService.Start()
 EconomyService.Start()
 NeedsService.Start()
 AchievementService.Start()
+BoosterService.Start()
 CaseService.Start()
 ArtifactService.Start()
 CombatService.Start()

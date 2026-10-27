@@ -44,7 +44,10 @@ export type Profile = {
 	passes: { [string]: boolean }, -- basement = true
 	needs: Needs,
 	hunger: number, -- 0..20
-	achievements: { [string]: number }, -- digger_dirt = claimed tier
+	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier
+	dug: { [string]: number }?, -- blocks without an upgrade counter, per block id (achievements); schema stays v3
+	boosters: { { kind: string, mult: number, minutes: number, count: number } }?, -- booster storage; schema stays v3
+	activeBoosters: { { kind: string, mult: number, startsAt: number, endsAt: number } }?, -- running + queued; schema stays v3
 	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3

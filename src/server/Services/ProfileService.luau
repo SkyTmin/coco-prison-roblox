@@ -12,6 +12,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Types = require(Shared.Types)
 local Remotes = require(Shared.Remotes)
 local Wire = require(Shared.Wire)
+local Achievements = require(Shared.Achievements)
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 
 type Profile = Types.Profile
@@ -176,36 +178,35 @@ local function migrate(data: any): Profile
 	end
 	split(profile.inventory, 36, profile.enderChest)
 	split(profile.enderChest, chestSlots)
-	-- v3 remains compatible. Seed absent chain counters once, without paying legacy progress.
-	local seeds: { [string]: number } = { pickaxe = 0, shovel = 0, axe = 0, sword = 0 }
-	local seen: { [string]: boolean } = {}
-	for _, block in pairs(Config.blocks) do
-		local counter = block.upgradeCounter
-		local chain = block.tool
-		if counter and seeds[chain] ~= nil and not seen[counter] then
-			seen[counter] = true
-			seeds[chain] += profile.counters[counter] or 0
-		end
-	end
-	local cfg = Config.achievementsCfg
-	for chain, definition in pairs(cfg.chains) do
-		if profile.counters[definition.counter] == nil then
-			local count = seeds[chain] or 0
-			profile.counters[definition.counter] = count
-			local satisfied = 0
-			for tier = 1, cfg.tiers do
-				if count < math.round(cfg.thresholdBase * cfg.thresholdGrowth ^ (tier - 1)) then
-					break
-				end
-				satisfied = tier
-			end
-			profile.achievements[chain] = math.max(profile.achievements[chain] or 0, satisfied)
-		end
+	-- v3 remains compatible. «Копатель (<блок>)» cards [27.10] replace the tool chains (21.10) and the digger_*
+	-- keys: tiers the block counters already reach are marked claimed without paying them out.
+	for _, old in ipairs({ "pickaxe", "shovel", "axe", "sword" }) do
+		profile.achievements[old] = nil
+		profile.counters[old .. (if old == "sword" then "_kills" else "_blocks")] = nil
 	end
 	for id in pairs(profile.achievements) do
 		if string.sub(id, 1, 7) == "digger_" then
 			profile.achievements[id] = nil
 		end
+	end
+	for _, card in ipairs(Achievements.cards) do
+		if profile.achievements[card.id] == nil then
+			local satisfied = Achievements.satisfied(Achievements.progress(profile, card))
+			if satisfied > 0 then
+				profile.achievements[card.id] = satisfied
+			end
+		end
+	end
+	if typeof(profile.dug) ~= "table" then
+		profile.dug = nil
+	end
+	if typeof(profile.boosters) ~= "table" then
+		profile.boosters = nil
+	end
+	if typeof(profile.activeBoosters) ~= "table" then
+		profile.activeBoosters = nil
+	else
+		Boosters.prune(profile)
 	end
 	local hunger = profile.hunger
 	profile.hunger = if typeof(hunger) == "number" and hunger == hunger

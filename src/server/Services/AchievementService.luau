@@ -1,76 +1,88 @@
 --!strict
--- Config-driven chains. Counter changes and ordered automatic rewards share one mutation.
+-- «Копатель (<блок>)» achievements (shared/Achievements): every dug block moves its card; each reached tier pays at
+-- once, like the original's auto-credited money checks, or puts a local booster into the storage. Toasts as in the
+-- original: «Вы выполнили достижение … ! Поздравляем!», then «Вы получили награду …».
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Achievements = require(Shared.Achievements)
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 
-local cfg = Config.achievementsCfg
 local AchievementService = {}
-local started = false
 
-local function grant(player: Player, chain: string, increment: number, limit: number)
-	local definition = cfg.chains[chain]
-	if not definition or not ProfileService.Get(player) then
+function AchievementService.cardName(card: Achievements.Card, locale: string): string
+	local what = if card.counter
+		then Strings.counterName(card.counter, locale)
+		else Strings.blockName(card.id, Config.blocks[card.id].name, locale)
+	return Strings.t("digger_card", locale, what)
+end
+
+function AchievementService.rewardText(reward: Achievements.Reward, locale: string): string
+	if reward.booster then
+		return Strings.t(
+			"booster_for_minutes",
+			locale,
+			Strings.t("booster_local_" .. reward.booster, locale),
+			Config.boosters.minutes
+		)
+	end
+	return Strings.t(
+		"money_check",
+		locale,
+		Strings.grouped((reward.money or 0) / Config.moneyScale, 0)
+	)
+end
+
+-- After DigService counted the block (p.counters for counter cards); blocks without a counter count here.
+function AchievementService.OnDug(player: Player, blockId: string)
+	local card = Achievements.cardFor(blockId)
+	if not card or not ProfileService.Get(player) then
 		return
 	end
-	local rewards: { { tier: number, money: number } } = {}
+	local rewards: { Achievements.Reward } = {}
 	ProfileService.Mutate(player, function(p)
-		local counter = definition.counter
-		p.counters[counter] = (p.counters[counter] or 0) + increment
-		local progress = p.counters[counter]
-		for tier = (p.achievements[chain] or 0) + 1, limit do
-			local threshold = math.round(cfg.thresholdBase * cfg.thresholdGrowth ^ (tier - 1))
-			if progress < threshold then
+		if not card.counter then
+			p.dug = p.dug or {}
+			p.dug[card.id] = (p.dug[card.id] or 0) + 1
+		end
+		local progress = Achievements.progress(p, card)
+		for tier = Achievements.claimed(p, card) + 1, Achievements.tiers do
+			if progress < Achievements.threshold(tier) then
 				break
 			end
-			local money =
-				math.round(cfg.rewardFirst * cfg.rewardGrowth ^ (tier - 1) * Config.moneyScale)
-			p.coins += money
-			p.achievements[chain] = tier
-			table.insert(rewards, { tier = tier, money = money })
+			local reward = Achievements.reward(card, tier)
+			if reward.booster then
+				Boosters.store(p, reward.booster)
+			else
+				p.coins += reward.money or 0
+			end
+			p.achievements[card.id] = tier
+			table.insert(rewards, reward)
 		end
 	end)
+	if #rewards == 0 then
+		return
+	end
 	local locale = Strings.localeOf(player)
+	local name = AchievementService.cardName(card, locale)
+	local toast = Remotes.event("Toast")
 	for _, reward in ipairs(rewards) do
-		Remotes.event("Toast"):FireClient(
+		toast:FireClient(player, Strings.t("achievement_done", locale, name))
+		toast:FireClient(
 			player,
 			Strings.t(
-				"achievement_claimed",
+				"achievement_reward",
 				locale,
-				Strings.t("item_" .. chain, locale),
-				reward.tier,
-				Strings.money(reward.money)
+				AchievementService.rewardText(reward, locale),
+				name
 			)
 		)
 	end
 end
 
-function AchievementService.AddProgress(player: Player, chain: string, amount: number)
-	if amount > 0 and amount < math.huge and amount == math.floor(amount) then
-		grant(player, chain, amount, cfg.tiers)
-	end
-end
-
-local function claim(player: Player, chain: any, tier: any)
-	if typeof(chain) ~= "string" or typeof(tier) ~= "number" then
-		return
-	end
-	if tier ~= tier or tier < 1 or tier > cfg.tiers or tier ~= math.floor(tier) then
-		return
-	end
-	-- Compatibility intent: only eligible, unclaimed tiers up to the requested tier, in order.
-	grant(player, chain, 0, tier)
-end
-
-function AchievementService.Start()
-	if started then
-		return
-	end
-	started = true
-	Remotes.event("ClaimAchievement").OnServerEvent:Connect(claim)
-end
+function AchievementService.Start() end
 
 return AchievementService

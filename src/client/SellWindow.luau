@@ -6,6 +6,7 @@
 -- green price with $ and "за 1 блок"; a full-width green "Продать всё" button at the bottom.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -26,7 +27,8 @@ end
 
 local function moneyMultiplier(profile: Types.Profile?): number
 	return if profile
-		then 1 + profile.professions.upgrades.money * Config.professions.upgrades.money
+		then (1 + profile.professions.upgrades.money * Config.professions.upgrades.money)
+			* Boosters.multiplier(profile, "money")
 		else 1
 end
 

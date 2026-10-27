@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -270,7 +271,8 @@ local function complete(player: Player, token: number)
 	local overflow = 0
 	ProfileService.Mutate(player, function(p)
 		overflow = InventoryService.add(p, dropId, dropCount)
-		local blockMult = 1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks
+		local blockMult = (1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks)
+			* Boosters.multiplier(p, "blocks")
 		p.blocksTotal += blockMult * comboMult
 		-- «чистые» блоки: one per block, no multipliers (sidebar in brackets, the spawn top) [сеть: blocks_clean]
 		p.stats.blocksClean = (p.stats.blocksClean or 0) + 1
@@ -298,10 +300,7 @@ local function complete(player: Player, token: number)
 		artifactNotices = ArtifactService.RollDig(p)
 	end)
 	HungerService.OnBlockDug(player)
-	local chain = if block.tool == "any" then (toolNow or "shovel") else block.tool
-	if chain == "pickaxe" or chain == "shovel" or chain == "axe" then
-		AchievementService.AddProgress(player, chain, 1)
-	end
+	AchievementService.OnDug(player, blockId)
 	ArtifactService.Notify(player, artifactNotices)
 	if overflow > 0 or keyFull then
 		toast(player, "bag_full")

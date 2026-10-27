@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -111,7 +112,8 @@ local function rewardKiller(mob: Mob, humanoid: Humanoid)
 	end
 	local money = 0
 	ProfileService.Mutate(player, function(p)
-		local mult = 1 + p.professions.upgrades.mobs * Config.professions.upgrades.mobs
+		local mult = (1 + p.professions.upgrades.mobs * Config.professions.upgrades.mobs)
+			* Boosters.multiplier(p, "mobs")
 		money = math.floor((mob.cfg.money or 0) * mult * Config.moneyScale + 0.5)
 		p.coins += money
 		if mob.cfg.statKey then
