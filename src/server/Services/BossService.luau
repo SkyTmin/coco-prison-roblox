@@ -33,6 +33,7 @@ local Strings = require(Shared.Strings)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
+local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
@@ -945,6 +946,55 @@ end
 -- ---------------------------------------------------------------- life cycle
 local spawnBoss: (boss: Boss, saved: Saved?) -> ()
 
+-- [вики BOSS-CARDS: «Дроп — Древняя звезда, шанс 100 %», «За последний удар — Древний порошок / Лунная сталь /
+-- Огненный осколок»] the items of a kill: stars to everyone with a reward share (the card's range), and to the last
+-- hitter the powder (chance from the card's «1–N %», higher with a bigger damage share [решение]) and the shard of the
+-- late bosses. Items that do not fit go to the storage [B] (p.stash).
+local random = Random.new()
+local LAST_HIT_SHARDS: { [string]: { string } } = {
+	forest_spirit = { "moon_steel" }, -- Лесной дух
+	ent = { "moon_steel" }, -- Грут
+	the_lovers = { "fire_shard" }, -- Самурай
+}
+local function grant(p: any, id: string, count: number)
+	local left = InventoryService.add(p, id, count)
+	if left > 0 then
+		local stash = table.clone(p.stash or {})
+		local merged = false
+		for _, entry in ipairs(stash) do
+			if entry.id == id then
+				entry.count += left
+				merged = true
+			end
+		end
+		if not merged then
+			table.insert(stash, { id = id, count = left })
+		end
+		p.stash = stash
+	end
+end
+local function killItems(boss: Boss, share: number, isLast: boolean): { [string]: number }
+	local items: { [string]: number } = {}
+	local stars = boss.card.ancientStars
+	if typeof(stars) == "table" and #stars == 2 then
+		items.ancient_star = random:NextInteger(stars[1], stars[2])
+	end
+	if isLast then
+		local powder = boss.card.powderChance
+		local q = typeof(powder) == "table" and powder.percentQualifier or nil
+		if q and typeof(q.min) == "number" and typeof(q.max) == "number" then
+			local chance = (q.min + (q.max - q.min) * math.clamp(share, 0, 1)) / 100
+			if random:NextNumber() < chance then
+				items.ancient_powder = 1
+			end
+		end
+		for _, shard in ipairs(LAST_HIT_SHARDS[boss.card.id] or {}) do
+			items[shard] = (items[shard] or 0) + 1
+		end
+	end
+	return items
+end
+
 local function reward(boss: Boss, lastHit: number?)
 	local total = 0
 	for _, dealt in pairs(boss.damageBy) do
@@ -986,11 +1036,19 @@ local function reward(boss: Boss, lastHit: number?)
 					bank * share * (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
 				)
 			)
+			local items = killItems(boss, share, lastHit == player.UserId)
 			ProfileService.Mutate(player, function(p)
 				p.coins += amount
 				p.stats.bosses = (p.stats.bosses or 0) + 1
+				for id, count in pairs(items) do
+					grant(p, id, count)
+				end
 			end)
 			toast(player, "boss_reward", Strings.money(amount), math.floor(share * 100 + 0.5))
+			local locale = Strings.localeOf(player)
+			for id, count in pairs(items) do
+				toast(player, "boss_item", Strings.itemName(id, nil, locale), count)
+			end
 		elseif dealt > 0 then
 			toast(player, "boss_no_reward", math.floor(rules.minDamageShare * 100))
 		end

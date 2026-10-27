@@ -1914,6 +1914,10 @@ local windowBuilders: { [string]: () -> Frame } = {
 		return win
 	end,
 	case = buildCase,
+	-- «Подробнее» at a case: what it can give, read only [владелец 28.10]
+	casePreview = function()
+		return require(script.CasePreviewWindow).build(gui, locale, closeWindow, createWindow)
+	end,
 	locations = buildLocations,
 	factions = function()
 		local win, refresh =
@@ -1938,6 +1942,13 @@ local function open(kind: string)
 	-- Roblox hides its touch controls and stops touch camera panning while a menu is open
 	UserInputService.ModalEnabled = true
 end
+require(script.CasePreviewWindow).listen(function()
+	if currentWindowKind == "casePreview" then
+		closeWindow()
+		currentWindowKind = nil
+	end
+	open("casePreview")
+end)
 local function refreshWindow(force: boolean?)
 	if not force and refreshMenu then
 		refreshMenu(profile)

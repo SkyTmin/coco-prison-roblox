@@ -18,11 +18,14 @@ local InventoryService = {}
 InventoryService.SLOTS = SLOTS
 
 function InventoryService.isStackable(id: string): boolean
-	-- location passes are single items [владелец 22.10: «пропуск в подвал не должен стакаться»]
+	-- location passes are single items [владелец 22.10: «пропуск в подвал не должен стакаться»], so are the
+	-- auto-sell and the injection [владелец 28.10: «автопродажа и инъекция не должны стакаться»]
 	return Config.tools[id] == nil
 		and id ~= "ancient_book"
 		and id ~= "money_bag"
 		and not id:match("_pass$")
+		and id ~= "autosell"
+		and id ~= "needs_injection"
 end
 
 -- Adds `count` of item; returns the amount that did not fit.

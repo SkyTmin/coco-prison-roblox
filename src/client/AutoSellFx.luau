@@ -2,7 +2,8 @@
 -- The auto-sell's income at the crosshair [владелец 28.10: «по центру экрана сумма, как на скриншоте»; вики
 -- MENUS-SOCIAL: green «+0,057 $» next to the crosshair for each sold block, «Частицы у прицела при автопродаже»]:
 -- every AutoSold from the server floats a green «+0,057 $» up from just right of the screen centre and fades it out;
--- sales close together stack a little lower so they do not cover each other. Hidden by settings.autosellTextOff.
+-- [владелец 28.10: «пусть появляется в разных местах, то справа, то слева»] each one on the other side of the
+-- crosshair from the last, a little higher or lower at random. Hidden by settings.autosellTextOff.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -15,8 +16,8 @@ local AutoSellFx = {}
 
 local LIFE = 1.1 -- s on screen
 local RISE = 34 -- px it floats up
-local STEP = 16 -- px between labels shown at the same time
 local MAX = 4
+local SPREAD = 22 -- px up / down at random
 
 function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, locale: () -> string)
 	local layer = Instance.new("Frame")
@@ -26,6 +27,8 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 	layer.ZIndex = 5
 	layer.Parent = gui
 	local live: { { label: TextLabel, at: number } } = {}
+	local right = true
+	local random = Random.new()
 
 	Remotes.event("AutoSold").OnClientEvent:Connect(function(units: number)
 		local p = getProfile()
@@ -50,11 +53,17 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 			layer,
 			text,
 			UDim2.fromOffset(120, 20),
-			UDim2.new(0.5, 14, 0.5, -10 + #live * STEP),
+			UDim2.new(
+				0.5,
+				if right then 14 else -134,
+				0.5,
+				-10 + random:NextInteger(-SPREAD, SPREAD)
+			),
 			17,
 			Ui.colors.green
 		)
-		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.TextXAlignment = if right then Enum.TextXAlignment.Left else Enum.TextXAlignment.Right
+		right = not right
 		label.TextStrokeTransparency = 0.35
 		label.ZIndex = 5
 		table.insert(live, { label = label, at = now })

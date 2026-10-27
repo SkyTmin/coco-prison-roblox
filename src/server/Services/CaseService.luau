@@ -24,6 +24,7 @@ type Reward = {
 	max: number?,
 }
 type Binding = {
+	info: ProximityPrompt?, -- «Подробнее» (cases only)
 	prompt: ProximityPrompt,
 	connection: RBXScriptConnection,
 	attribute: RBXScriptConnection,
@@ -678,6 +679,9 @@ local function unbind(part: Instance)
 		binding.connection:Disconnect()
 		binding.attribute:Disconnect()
 		binding.prompt:Destroy()
+		if binding.info then
+			binding.info:Destroy()
+		end
 		bindings[part] = nil
 	end
 end
@@ -695,13 +699,38 @@ local function bind(part: Instance)
 	prompt.RequiresLineOfSight = false -- usable from any side of the chest model
 	prompt.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
 	prompt.Parent = part
+	-- «Подробнее» under it [владелец 28.10]: the client opens the read-only list of drops (CasePreviewWindow)
+	local info: ProximityPrompt? = nil
+	if CASES[id] then
+		local more = Instance.new("ProximityPrompt")
+		more.Name = "CaseInfo"
+		more.ActionText = Strings.t("case_info")
+		more.ObjectText = Strings.t(containerTitle(id))
+		more.KeyboardKeyCode = Enum.KeyCode.R
+		more.GamepadKeyCode = Enum.KeyCode.ButtonY
+		more.HoldDuration = 0
+		more.MaxActivationDistance = RANGE
+		more.RequiresLineOfSight = false
+		more.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
+		more:SetAttribute("CaseId", id)
+		more.Parent = part
+		info = more
+	end
 	bindings[part] = {
 		prompt = prompt,
+		info = info,
 		attribute = part:GetAttributeChangedSignal("CaseId"):Connect(function()
 			local current = caseId(part)
 			prompt.Enabled = current ~= nil
 			if current then
 				prompt.ActionText = Strings.t(containerTitle(current))
+			end
+			if info then
+				info.Enabled = current ~= nil and CASES[current] ~= nil
+				if current and CASES[current] then
+					info:SetAttribute("CaseId", current)
+					info.ObjectText = Strings.t(containerTitle(current))
+				end
 			end
 		end),
 		connection = prompt.Triggered:Connect(function(player)

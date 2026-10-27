@@ -92,6 +92,19 @@ local STRINGS: { [string]: Entry } = {
 		es = "Ya tienes todos los apodos",
 		fr = "Vous avez déjà tous les surnoms",
 	},
+	case_info = { ru = "Подробнее", en = "Details", es = "Detalles", fr = "Détails" },
+	case_preview_hint = {
+		ru = "Может выпасть · только просмотр",
+		en = "Possible drops · view only",
+		es = "Puede tocar · solo vista",
+		fr = "Gains possibles · lecture seule",
+	},
+	case_preview_money = {
+		ru = "Деньги: от %s до %s $",
+		en = "Money: %s to %s $",
+		es = "Dinero: de %s a %s $",
+		fr = "Argent : de %s à %s $",
+	},
 	case_contents_title = {
 		ru = "Кейс с предметами",
 		en = "Case with items",
@@ -2205,6 +2218,12 @@ local STRINGS: { [string]: Entry } = {
 		en = "Boss reward: %s $ (your damage %d%%)",
 		es = "Recompensa del jefe: %s $ (tu daño %d%%)",
 		fr = "Récompense du boss : %s $ (vos dégâts %d%%)",
+	},
+	boss_item = {
+		ru = "С босса: %s ×%d",
+		en = "From the boss: %s ×%d",
+		es = "Del jefe: %s ×%d",
+		fr = "Du boss : %s ×%d",
 	},
 	boss_no_reward = {
 		ru = "Нет награды: нужно нанести хотя бы %d%% урона",
