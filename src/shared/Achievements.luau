@@ -15,7 +15,7 @@ export type Card = {
 	icon: string, -- block id
 	price: number, -- $ per block, for the money check
 }
-export type Reward = { money: number?, booster: string? }
+export type Reward = { money: number?, booster: string?, scope: string? }
 
 local Achievements = {}
 local cfg = Config.achievementsCfg
@@ -38,11 +38,11 @@ function Achievements.threshold(tier: number): number
 	return math.round(cfg.thresholdBase * cfg.thresholdGrowth ^ (tier - 1))
 end
 
--- money in 1/moneyScale units, or a booster kind (blocks / money / mobs)
+-- money in 1/moneyScale units, or a booster: kind (blocks / money / mobs) and scope (nil = local)
 function Achievements.reward(card: Card, tier: number): Reward
 	local booster = cfg.boosterTiers[tostring(tier)]
 	if booster then
-		return { booster = booster }
+		return { booster = booster.kind, scope = booster.scope }
 	end
 	local dollars = math.max(
 		cfg.rewardMin,

@@ -8,8 +8,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => JSON.parse(readFileSync(join(root, p), "utf8"));
 const outDir = join(root, "src", "shared", "Config");
 mkdirSync(outDir, { recursive: true });
-const write = (name, data) => {
-	writeFileSync(join(outDir, name), JSON.stringify(data, null, 2) + "\n");
+// compact = one line: big generated data (a ModuleScript holds at most 200 000 characters)
+const write = (name, data, compact) => {
+	writeFileSync(join(outDir, name), JSON.stringify(data, null, compact ? 0 : 2) + "\n");
 	console.log("wrote", name);
 };
 
@@ -248,6 +249,7 @@ const achievementCards = [];
 	}
 }
 write("achievements.json", { source: "[вики] карточки «Копатель» по блокам; [владелец 27.10] появляются с этажами; [решение] награды", ...decisions.achievements, cards: achievementCards });
+write("auction.json", { source: "[вики] аукцион; [решение] цены, задержки", ...decisions.auction });
 write("boosters.json", { source: "[вики] хранилище бустеров; [владелец 27.10] локальные ×1.1", ...decisions.boosters });
 // Artifact pictures: assets/artifacts/ids.json maps picture name → asset id; each tier gets `images`
 // (all its pictures) and `image` (the first picture, shown in the rarity card and the mosaic).
@@ -275,7 +277,7 @@ write("armor.json", {
 });
 write("itemvoxels.json", { source: "assets/icons/voxels.json — 3D extruded item sprites (16×16 rectangles)", ...read("assets/icons/voxels.json") });
 // a ModuleScript holds at most 200 000 characters: the Blender item models get their own file
-write("itemmodels.json", { source: "assets/icons/models3d.json — Blender voxel item models (assets/models/*/<item>.py -- export)", ...read("assets/icons/models3d.json") });
+write("itemmodels.json", { source: "assets/icons/models3d.json — Blender voxel item models (assets/models/*/<item>.py -- export)", ...read("assets/icons/models3d.json") }, true);
 write("icons.json", { source: "assets/icons/ids.json — Codex image gen + Studio upload; lookup: <id>_<material>, then <id>, then block texture", ...read("assets/icons/ids.json") });
 write("textures.json", { source: "assets/textures/ids.json — Codex image gen + Studio upload", ...read("assets/textures/ids.json") });
 write("previews.json", { source: "assets/previews/ids.json — Codex image gen + Studio upload; пусто = процедурная диорама", ...read("assets/previews/ids.json") });

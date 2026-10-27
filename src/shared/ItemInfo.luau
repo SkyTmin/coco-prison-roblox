@@ -320,6 +320,7 @@ function ItemInfo.knownIds(): { string }
 			typeof(value) == "string"
 			and not NOT_ITEMS[id]
 			and not id:match("^menu_")
+			and not id:match("^booster_%a+_%a+$") -- storage pictures per scope (Boosters.icon), not items
 			and not id:match("^effect_")
 			and not id:match("^hud_")
 			and not id:match("^top_")

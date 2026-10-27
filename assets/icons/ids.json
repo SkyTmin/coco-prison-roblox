@@ -98,7 +98,18 @@
     "menu_layout": "rbxassetid://88567271908859",
     "booster_blocks": "rbxassetid://86790380223721",
     "booster_mobs": "rbxassetid://114107272470362",
-    "menu_boosters": "rbxassetid://83208846338314"
+    "menu_boosters": "rbxassetid://83208846338314",
+    "booster_mobs_faction": "rbxassetid://111157698607957",
+    "booster_mobs_global": "rbxassetid://72496694366662",
+    "menu_auction": "rbxassetid://100090416574540",
+    "booster_blocks_faction": "rbxassetid://118327669796862",
+    "menu_inventory": "rbxassetid://137253098136995",
+    "booster_blocks_global": "rbxassetid://140136148020162",
+    "booster_money_faction": "rbxassetid://83237140623517",
+    "booster_money_global": "rbxassetid://111565366396649",
+    "booster_money_local": "rbxassetid://120615752763309",
+    "booster_blocks_local": "rbxassetid://83695483970436",
+    "booster_mobs_local": "rbxassetid://134594323698550"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }

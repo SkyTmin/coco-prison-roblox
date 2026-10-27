@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local BlockColors = require(Shared.BlockColors)
 local Cobweb = require(Shared.Cobweb)
 local TextureService = require(script.Parent.TextureService)
 
@@ -156,51 +157,14 @@ local function styleCobweb(part: BasePart, web: boolean)
 	end
 end
 
--- Wool colours we have no texture of: our white wool texture tinted (Рынок: red and lime wool [меню, вики 26.10])
-local TINTED: { [string]: { base: string, color: Color3 } } = {
-	red_wool = { base = "white_wool", color = Color3.fromRGB(196, 46, 40) },
-	lime_wool = { base = "white_wool", color = Color3.fromRGB(120, 196, 52) },
-	-- concrete: our smooth stone tinted (Лепреконовая долина: жёлтый цемент [меню]; the справочник adds four colours)
-	yellow_concrete = { base = "smooth_stone", color = Color3.fromRGB(240, 200, 40) },
-	orange_concrete = { base = "smooth_stone", color = Color3.fromRGB(235, 120, 30) },
-	lime_concrete = { base = "smooth_stone", color = Color3.fromRGB(110, 190, 40) },
-	purple_concrete = { base = "smooth_stone", color = Color3.fromRGB(130, 50, 180) },
-	red_concrete = { base = "smooth_stone", color = Color3.fromRGB(180, 40, 40) },
-	-- quartz (Замок: кварцевый блок [меню]; резной кварцевый блок [вики 26.10])
-	quartz_block = { base = "smooth_stone", color = Color3.fromRGB(240, 237, 230) },
-	chiseled_quartz_block = { base = "white_stone_bricks", color = Color3.fromRGB(240, 237, 230) },
-	-- leaves (Изнанка: листья мрачного дуба [меню]): our clipped hedge texture darkened to dark oak green
-	dark_oak_leaves = { base = "hedge", color = Color3.fromRGB(150, 170, 130) },
-	-- pink wool (Киото: розовая шерсть [меню])
-	pink_wool = { base = "white_wool", color = Color3.fromRGB(244, 160, 196) },
-	-- Ферма: тыква, зелёная шерсть [меню] (the melon has its own texture)
-	pumpkin = { base = "hay", color = Color3.fromRGB(240, 140, 40) },
-	green_wool = { base = "white_wool", color = Color3.fromRGB(96, 140, 40) },
-	-- Амбар: светильник Джека [меню] — has its own lit-face texture now; this is the fallback
-	jack_o_lantern = { base = "pumpkin", color = Color3.fromRGB(255, 226, 170) },
-	-- Врата края: пурпурный цемент [меню]
-	magenta_concrete = { base = "smooth_stone", color = Color3.fromRGB(196, 64, 186) },
-	-- Древо: белый цемент [меню]
-	white_concrete = { base = "smooth_stone", color = Color3.fromRGB(236, 238, 238) },
-	-- Церковь: глина [меню] (blue-grey, as in vanilla)
-	clay = { base = "smooth_stone", color = Color3.fromRGB(160, 166, 180) },
-	-- Чистилище: резной песчаник [меню] (our cut sandstone, a little warmer)
-	chiseled_sandstone = { base = "cut_sandstone", color = Color3.fromRGB(250, 238, 205) },
-	-- Эдем: гриб (коричневый) [меню] (a fallback: it has its own drawn texture now, TextureService wins)
-	brown_mushroom_block = { base = "terracotta", color = Color3.fromRGB(205, 165, 135) },
-	-- Херувимы: снег [меню] (a fallback: its own texture now)
-	snow = { base = "smooth_stone", color = Color3.fromRGB(246, 248, 252) },
-	-- Рай: гриб (красный) [меню] (a fallback: its own drawn texture now)
-	red_mushroom_block = { base = "terracotta", color = Color3.fromRGB(210, 48, 44) },
-	-- Врата: гладкий песчаник [меню] (a fallback: its own texture now, warmer than the paving)
-	smooth_sandstone = { base = "sandstone", color = Color3.fromRGB(250, 242, 220) },
-}
+-- tinted look of blocks we have no texture of: shared/BlockColors.TINTED (the UI icons use it too)
+local TINTED = BlockColors.TINTED
 
 local function stylePart(part: BasePart, id: string)
 	local variant = TextureService.variantName(id)
 	local tint = Color3.new(1, 1, 1)
 	local tinted = TINTED[id]
-	if not variant and tinted then
+	if not variant and tinted and not tinted.iconOnly then
 		variant = TextureService.variantName(tinted.base)
 		tint = tinted.color
 	end

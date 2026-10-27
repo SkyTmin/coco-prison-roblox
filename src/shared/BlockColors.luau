@@ -5,6 +5,8 @@
 
 local BlockColors = {}
 
+export type Tint = { base: string, color: Color3, iconOnly: boolean? }
+
 local KNOWN: { [string]: Color3 } = {
 	dirt = Color3.fromRGB(121, 85, 58),
 	sand = Color3.fromRGB(219, 207, 163),
@@ -64,6 +66,65 @@ local GUESS: { { word: string, color: Color3 } } = {
 }
 
 local DEFAULT = Color3.fromRGB(110, 110, 118)
+
+-- Wool colours we have no texture of: our white wool texture tinted (Рынок: red and lime wool [меню, вики 26.10])
+local TINTED: { [string]: Tint } = {
+	red_wool = { base = "white_wool", color = Color3.fromRGB(196, 46, 40) },
+	lime_wool = { base = "white_wool", color = Color3.fromRGB(120, 196, 52) },
+	-- concrete: our smooth stone tinted (Лепреконовая долина: жёлтый цемент [меню]; the справочник adds four colours)
+	yellow_concrete = { base = "smooth_stone", color = Color3.fromRGB(240, 200, 40) },
+	orange_concrete = { base = "smooth_stone", color = Color3.fromRGB(235, 120, 30) },
+	lime_concrete = { base = "smooth_stone", color = Color3.fromRGB(110, 190, 40) },
+	purple_concrete = { base = "smooth_stone", color = Color3.fromRGB(130, 50, 180) },
+	red_concrete = { base = "smooth_stone", color = Color3.fromRGB(180, 40, 40) },
+	-- quartz (Замок: кварцевый блок [меню]; резной кварцевый блок [вики 26.10])
+	quartz_block = { base = "smooth_stone", color = Color3.fromRGB(240, 237, 230) },
+	chiseled_quartz = { base = "white_stone_bricks", color = Color3.fromRGB(240, 237, 230) },
+	-- leaves (Изнанка: листья мрачного дуба [меню]): our clipped hedge texture darkened to dark oak green
+	dark_oak_leaves = { base = "hedge", color = Color3.fromRGB(150, 170, 130) },
+	-- pink wool (Киото: розовая шерсть [меню])
+	pink_wool = { base = "white_wool", color = Color3.fromRGB(244, 160, 196) },
+	-- Ферма: тыква, зелёная шерсть [меню] (the melon has its own texture)
+	pumpkin = { base = "hay", color = Color3.fromRGB(240, 140, 40) },
+	green_wool = { base = "white_wool", color = Color3.fromRGB(96, 140, 40) },
+	-- Амбар: светильник Джека [меню] — has its own lit-face texture now; this is the fallback
+	jack_o_lantern = { base = "pumpkin", color = Color3.fromRGB(255, 226, 170) },
+	-- Врата края: пурпурный цемент [меню]
+	magenta_concrete = { base = "smooth_stone", color = Color3.fromRGB(196, 64, 186) },
+	-- Древо: белый цемент [меню]
+	white_concrete = { base = "smooth_stone", color = Color3.fromRGB(236, 238, 238) },
+	-- Церковь: глина [меню] (blue-grey, as in vanilla)
+	clay = { base = "smooth_stone", color = Color3.fromRGB(160, 166, 180) },
+	-- Чистилище: резной песчаник [меню] (our cut sandstone, a little warmer)
+	chiseled_sandstone = { base = "cut_sandstone", color = Color3.fromRGB(250, 238, 205) },
+	-- Эдем: гриб (коричневый) [меню] (a fallback: it has its own drawn texture now, TextureService wins)
+	brown_mushroom_block = { base = "terracotta", color = Color3.fromRGB(205, 165, 135) },
+	-- Херувимы: снег [меню] (a fallback: its own texture now)
+	snow = { base = "smooth_stone", color = Color3.fromRGB(246, 248, 252) },
+	-- Рай: гриб (красный) [меню] (a fallback: its own drawn texture now)
+	red_mushroom_block = { base = "terracotta", color = Color3.fromRGB(210, 48, 44) },
+	-- Врата: гладкий песчаник [меню] (a fallback: its own texture now, warmer than the paving)
+	smooth_sandstone = { base = "sandstone", color = Color3.fromRGB(250, 242, 220) },
+	-- Врата края: чёрное стекло — the mine uses dark Roblox glass; the UI icon is smooth stone tinted dark
+	black_glass = { base = "smooth_stone", color = Color3.fromRGB(52, 44, 64), iconOnly = true },
+}
+BlockColors.TINTED = TINTED
+
+-- A block picture for the UI when the block has no icon of its own: its tinted base texture (wool, concrete,
+-- quartz …), like the mine draws it. Returns the image and the colour to set as ImageColor3.
+function BlockColors.icon(id: string): (string?, Color3)
+	local Config = require(script.Parent.Config) :: any
+	local own = Config.iconFor(id)
+	if own then
+		return own, Color3.new(1, 1, 1)
+	end
+	local tint = BlockColors.TINTED[id]
+	local base = if tint then Config.textures.textures[tint.base] else nil
+	if base then
+		return base, tint.color
+	end
+	return nil, BlockColors.of(id)
+end
 
 function BlockColors.of(id: string): Color3
 	local known = KNOWN[id]

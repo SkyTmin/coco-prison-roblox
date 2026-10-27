@@ -124,8 +124,13 @@ function DragDrop.new(
 			return
 		end
 		local icon = Config.iconFor(stack.id, stack.level)
+		local tint = Color3.new(1, 1, 1)
+		if not icon then
+			icon, tint = BlockColors.icon(stack.id)
+		end
 		local tile = if not icon then BlockColors.of(stack.id) else nil
 		ghostIcon.Image, ghostIcon.Visible = icon or "", true
+		ghostIcon.ImageColor3 = tint
 		ghostIcon.BackgroundColor3 = tile or Color3.new()
 		ghostIcon.BackgroundTransparency = if tile then 0 else 1
 		ghostName.Text =

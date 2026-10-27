@@ -1,9 +1,14 @@
 --!strict
 -- Player profiles (schema v3). In-memory per player, saved on leave / close / every AUTOSAVE_SECONDS.
 -- Rules: failed load => session never saved; all mutations via Mutate(); client gets copies only.
--- TODO before public test: session locking, per-key save queue, bounded retries with jitter.
+-- Session lock [27.10, before the auction]: the record carries _lock = {job, at}; only the server holding it loads
+-- and saves the profile, so a player who hops servers can never act on an old copy (the classic trade dupe: sell on
+-- server A, rejoin B before A saved, still own the item). A live lock is asked to let go (MessagingService) and
+-- waited for; a lock older than LOCK_STALE_SECONDS (its server died) is taken over; if the lock is stolen anyway,
+-- this server stops saving and kicks the player. Autosave refreshes the lock even when nothing changed.
 
 local DataStoreService = game:GetService("DataStoreService")
+local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -22,10 +27,15 @@ type Session = { profile: Profile, loadFailed: boolean, dirty: boolean, saving: 
 local STORE_NAME = "PlayerProfiles_v3"
 local SCHEMA_VERSION = 3
 local AUTOSAVE_SECONDS = 120
+local LOCK_STALE_SECONDS = 300 -- > 2 autosaves: a lock this old belongs to a dead server
+local LOCK_WAIT_SECONDS = 20 -- how long a join waits for another server to let go
+local RELEASE_TOPIC = "ProfileRelease"
+local JOB_ID = if game.JobId == "" then "studio" else game.JobId
 
 local ProfileService = {}
 local sessions: { [Player]: Session } = {}
 local onLoaded: ((Player) -> ())? = nil -- set in Start: puts the character back at the logout spot
+local loadedHooks: { (Player) -> () } = {} -- ProfileService.OnLoaded: settle pending boosters / auction steps
 local store: DataStore? = nil
 -- The whole profile goes to the client at most every REPLICATE_SECONDS: one dug block mutates it
 -- 2–3 times (inventory, hunger, achievements), and sending each copy at 20 blocks a second flooded
@@ -203,6 +213,18 @@ local function migrate(data: any): Profile
 	if typeof(profile.boosters) ~= "table" then
 		profile.boosters = nil
 	end
+	if typeof(profile.auction) ~= "table" then
+		profile.auction = nil
+	else
+		for _, field in ipairs({ "lots", "pendingSells", "pendingBuys", "returns" }) do
+			if typeof((profile.auction :: any)[field]) ~= "table" then
+				(profile.auction :: any)[field] = {}
+			end
+		end
+	end
+	if typeof(profile.pendingBoosters) ~= "table" then
+		profile.pendingBoosters = nil
+	end
 	if typeof(profile.activeBoosters) ~= "table" then
 		profile.activeBoosters = nil
 	else
@@ -221,12 +243,67 @@ local function migrate(data: any): Profile
 	return profile
 end
 
+-- Takes the profile's session lock and returns the stored data. Retries while another live server holds it (asking
+-- it to let go); false + "locked" when it never does.
+local function acquire(player: Player): (boolean, any)
+	local deadline = os.clock() + LOCK_WAIT_SECONDS
+	local asked = false
+	while true do
+		local lockedBy: string? = nil
+		local data: any = nil
+		local ok, err = pcall(function()
+			(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+				local lock = if typeof(old) == "table" then old._lock else nil
+				if
+					typeof(lock) == "table"
+					and lock.job ~= JOB_ID
+					and os.time() - (tonumber(lock.at) or 0) < LOCK_STALE_SECONDS
+				then
+					lockedBy = lock.job
+					return nil -- leave it as it is
+				end
+				lockedBy = nil
+				data = old
+				local new = if typeof(old) == "table" then old else {}
+				new._lock = { job = JOB_ID, at = os.time() }
+				return new
+			end)
+		end)
+		if not ok then
+			return false, err
+		end
+		if not lockedBy then
+			if typeof(data) == "table" then
+				data._lock = nil
+			end
+			return true, data
+		end
+		if not player.Parent or os.clock() > deadline then
+			return false, "locked"
+		end
+		if not asked then
+			asked = true
+			pcall(function()
+				MessagingService:PublishAsync(
+					RELEASE_TOPIC,
+					{ userId = player.UserId, job = lockedBy }
+				)
+			end)
+		end
+		task.wait(2)
+	end
+end
+
 local function load(player: Player)
 	local ok, result = false, nil
 	if store then
-		ok, result = pcall(function()
-			return (store :: DataStore):GetAsync(keyFor(player))
-		end)
+		ok, result = acquire(player)
+		if not ok and result == "locked" then
+			player:Kick(
+				"Профиль ещё открыт на другом сервере. Зайдите через минуту. / Your profile is still open on another server, rejoin in a minute."
+			)
+			return
+		end
 	end
 	local session: Session = {
 		profile = migrate(if ok then result else nil),
@@ -243,18 +320,44 @@ local function load(player: Player)
 			)
 		)
 	end
+	if not player.Parent then
+		-- left while the lock was being taken: give it back at once
+		if ok and store then
+			pcall(function()
+				(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+					if
+						typeof(old) == "table"
+						and typeof(old._lock) == "table"
+						and old._lock.job == JOB_ID
+					then
+						old._lock = nil
+						return old
+					end
+					return nil
+				end)
+			end)
+		end
+		return
+	end
 	sessions[player] = session
 	ProfileService.Replicate(player)
 	if onLoaded then
 		onLoaded(player)
 	end
+	if not session.loadFailed then
+		for _, hook in ipairs(loadedHooks) do
+			task.spawn(hook, player)
+		end
+	end
 end
 
-local function save(player: Player, session: Session)
+local function save(player: Player, session: Session, release: boolean?): boolean
 	if session.loadFailed or session.saving or not store then
-		return
+		return false
 	end
 	session.saving = true
+	local dirtyBefore = session.dirty
+	session.dirty = false -- a Mutate during the write marks it dirty again
 	local snapshot = table.clone(session.profile) :: any
 	snapshot.inventory = encodeInventory(session.profile.inventory)
 	snapshot.enderChest = encodeInventory(session.profile.enderChest)
@@ -274,17 +377,61 @@ local function save(player: Player, session: Session)
 	for id, contents in pairs(session.profile.caseContents) do
 		snapshot.caseContents[id] = encodeInventory(contents)
 	end
+	local stolen = false
 	local ok, err = pcall(function()
-		(store :: DataStore):UpdateAsync(keyFor(player), function()
+		(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+			local lock = if typeof(old) == "table" then old._lock else nil
+			if typeof(lock) == "table" and lock.job ~= JOB_ID then
+				stolen = true
+				return nil
+			end
+			snapshot._lock = if release then nil else { job = JOB_ID, at = os.time() }
 			return snapshot
 		end)
 	end)
 	session.saving = false
-	if ok then
-		session.dirty = false
-	else
-		warn(string.format("[ProfileService] save failed for %s: %s", player.Name, tostring(err)))
+	if ok and stolen then
+		-- another server took the profile over (this one stalled past LOCK_STALE_SECONDS): never write again
+		session.loadFailed = true
+		warn(string.format("[ProfileService] %s: session lock lost, saves stopped", player.Name))
+		if player.Parent then
+			player:Kick(
+				"Профиль открыт на другом сервере. / Your profile was opened on another server."
+			)
+		end
+		return false
 	end
+	if not ok then
+		session.dirty = session.dirty or dirtyBefore
+		warn(string.format("[ProfileService] save failed for %s: %s", player.Name, tostring(err)))
+		return false
+	end
+	return true
+end
+
+-- Writes the profile now and waits for it (an autosave in flight first). Steps that touch shared stores (the auction,
+-- global boosters) call it after recording their pending step in the profile and before the outside write, so a
+-- crash can never leave the outside effect without the profile change. false = not saved: abort the step.
+function ProfileService.SaveNow(player: Player): boolean
+	local session = sessions[player]
+	if not session or session.loadFailed then
+		return false
+	end
+	if not store then
+		return RunService:IsStudio() -- Studio without API access: nothing is ever saved, let the steps run
+	end
+	while session.saving do
+		task.wait(0.1)
+	end
+	if sessions[player] ~= session then
+		return false
+	end
+	return save(player, session)
+end
+
+-- Runs fn(player) after each successful profile load (pending booster / auction steps are settled there).
+function ProfileService.OnLoaded(fn: (Player) -> ())
+	table.insert(loadedHooks, fn)
 end
 
 function ProfileService.Get(player: Player): Profile?
@@ -630,25 +777,53 @@ function ProfileService.Start()
 			while session.saving do
 				task.wait(0.1) -- let an autosave in flight finish, then write the final state
 			end
-			save(player, session)
+			save(player, session, true)
 		end
+	end)
+	-- another server waits for a profile this server holds: the player joined there (a double login or a hop
+	-- before this server noticed the leave) — kick here, PlayerRemoving saves and lets go of the lock
+	task.spawn(function()
+		pcall(function()
+			MessagingService:SubscribeAsync(RELEASE_TOPIC, function(message)
+				local data = message.Data
+				if typeof(data) ~= "table" or data.job ~= JOB_ID then
+					return
+				end
+				local player = Players:GetPlayerByUserId(tonumber(data.userId) or 0)
+				if player and sessions[player] then
+					player:Kick(
+						"Вы зашли на другой сервер. / You joined another server."
+					)
+				end
+			end)
+		end)
 	end)
 	game:BindToClose(function()
 		if RunService:IsStudio() and not store then
 			return
 		end
+		-- every profile in parallel (BindToClose gives 30 s), each after its autosave in flight
+		local left = 0
 		for player, session in pairs(sessions) do
 			rememberPosition(player) -- shutdown may skip PlayerRemoving: keep the exact logout spot
-			save(player, session)
+			left += 1
+			task.spawn(function()
+				while session.saving do
+					task.wait(0.1)
+				end
+				save(player, session, true)
+				left -= 1
+			end)
+		end
+		while left > 0 do
+			task.wait(0.1)
 		end
 	end)
 	task.spawn(function()
 		while true do
 			task.wait(AUTOSAVE_SECONDS)
 			for player, session in pairs(sessions) do
-				if session.dirty then
-					save(player, session)
-				end
+				save(player, session) -- also when unchanged: it keeps the session lock fresh
 			end
 		end
 	end)

@@ -46,8 +46,17 @@ export type Profile = {
 	hunger: number, -- 0..20
 	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier
 	dug: { [string]: number }?, -- blocks without an upgrade counter, per block id (achievements); schema stays v3
-	boosters: { { kind: string, mult: number, minutes: number, count: number } }?, -- booster storage; schema stays v3
-	activeBoosters: { { kind: string, mult: number, startsAt: number, endsAt: number } }?, -- running + queued; schema stays v3
+	boosters: { { kind: string, mult: number, minutes: number, count: number, scope: string? } }?, -- booster storage; schema stays v3
+	activeBoosters: { { kind: string, mult: number, startsAt: number, endsAt: number } }?, -- local, running + queued; schema stays v3
+	pendingBoosters: {
+		[string]: { kind: string, mult: number, minutes: number, count: number, scope: string? },
+	}?, -- shared activations between their steps (BoosterService); schema stays v3
+	auction: {
+		lots: { [string]: any }, -- lot id → Auction.Summary of the player's listed lots
+		pendingSells: { [string]: any }, -- listings not confirmed yet (AuctionService outbox)
+		pendingBuys: { [string]: { price: number, op: string, at: number, seller: number? } },
+		returns: { ItemStack }, -- items that did not fit («Забрать»)
+	}?, -- the auction; schema stays v3
 	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3

@@ -6,6 +6,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Achievements = require(Shared.Achievements)
+local Boosters = require(Shared.Boosters)
+local BlockColors = require(Shared.BlockColors)
 local Config = require(Shared.Config)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -46,13 +48,14 @@ local function rewardView(
 ): (string, string?, Color3)
 	local reward = Achievements.reward(card, tier)
 	if reward.booster then
+		local scope = reward.scope or "local"
 		return string.format(
 			"%s x%s",
 			Strings.t("booster_" .. reward.booster, locale),
 			tostring(Config.boosters.localMultiplier)
 		),
-			Config.icons.icons["booster_" .. reward.booster],
-			Ui.colors.cyan
+			Boosters.icon(reward.booster, scope),
+			Boosters.SCOPE_COLORS[scope]
 	end
 	return Strings.grouped((reward.money or 0) / Config.moneyScale, 0) .. " $",
 		Config.icons.icons.money,
@@ -120,7 +123,8 @@ function AchievementsWindow.build(
 		frame.Name = "Card_" .. card.id
 		frame.LayoutOrder = index
 		frame.Visible = false
-		image(frame, 40, UDim2.fromOffset(8, 8), Config.iconFor(card.icon))
+		local picture, tint = BlockColors.icon(card.icon)
+		image(frame, 40, UDim2.fromOffset(8, 8), picture).ImageColor3 = tint
 		local name = Ui.label(
 			frame,
 			cardName(card, locale),

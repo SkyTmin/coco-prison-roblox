@@ -4,13 +4,14 @@
 -- «Локальный Бустер денег», «x1.1 · 30 мин», how many, «Активировать»); empty — «Здесь пока что ничего нет…».
 -- Running and queued boosters show in the HUD plaque (BoosterHud). The server starts or queues (BoosterService).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
-local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
+local ItemModels = require(script.Parent.ItemModels)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local BoosterWindow = {}
@@ -94,24 +95,69 @@ function BoosterWindow.build(
 	)
 	empty.TextXAlignment = Enum.TextXAlignment.Center
 
+	-- the booster's 3D bottle (assets/models/booster, Blender) turning in its card; the picture if the model is missing
+	local spinning: { Model } = {}
+	local function bottle(parent: Frame, stored: Boosters.Stored)
+		local scope = Boosters.scopeOf(stored)
+		local model = ItemModels.get("booster_" .. stored.kind .. "_" .. scope, nil, 3)
+		if not model then
+			local icon = Instance.new("ImageLabel")
+			icon.Size = UDim2.fromOffset(56, 56)
+			icon.Position = UDim2.fromOffset(6, 11)
+			icon.BackgroundTransparency = 1
+			icon.ScaleType = Enum.ScaleType.Fit
+			icon.Image = Boosters.icon(stored.kind, scope)
+			icon.Parent = parent
+			return
+		end
+		local view = Instance.new("ViewportFrame")
+		view.Size = UDim2.fromOffset(60, 66)
+		view.Position = UDim2.fromOffset(4, 6)
+		view.BackgroundTransparency = 1
+		view.Ambient = Color3.fromRGB(190, 190, 200)
+		view.LightColor = Color3.fromRGB(255, 245, 230)
+		view.LightDirection = Vector3.new(-1, -1.5, -1)
+		view.Parent = parent
+		local camera = Instance.new("Camera")
+		camera.FieldOfView = 30
+		camera.CFrame = CFrame.lookAt(Vector3.new(0, 0.6, 7.5), Vector3.new(0, 0, 0))
+		camera.Parent = view
+		view.CurrentCamera = camera
+		model:PivotTo(CFrame.new())
+		model.Parent = view
+		table.insert(spinning, model)
+	end
+	local spin = RunService.RenderStepped:Connect(function()
+		local turn = CFrame.Angles(0, os.clock() * 1.2, 0)
+		for _, model in ipairs(spinning) do
+			if model.Parent then
+				model:PivotTo(turn)
+			end
+		end
+	end)
+	win.Destroying:Connect(function()
+		spin:Disconnect()
+	end)
+
 	local function card(stored: Boosters.Stored, index: number, order: number)
+		local scope = Boosters.scopeOf(stored)
+		local color = Boosters.SCOPE_COLORS[scope]
 		local frame = Ui.card(list, UDim2.fromOffset(CARD_W, CARD_H), UDim2.new())
 		frame.Name = "Booster_" .. index
 		frame.LayoutOrder = order
-		local icon = Instance.new("ImageLabel")
-		icon.Size = UDim2.fromOffset(48, 48)
-		icon.Position = UDim2.fromOffset(10, 15)
-		icon.BackgroundTransparency = 1
-		icon.ScaleType = Enum.ScaleType.Fit
-		icon.ResampleMode = Enum.ResamplerMode.Pixelated
-		icon.Image = Config.icons.icons["booster_" .. stored.kind] or ""
-		icon.Parent = frame
+		-- the frame colour of the original shop: blue local, orange faction, red global
+		local stroke = frame:FindFirstChildOfClass("UIStroke")
+		if stroke then
+			stroke.Color = color
+			stroke.Thickness = 2
+		end
+		bottle(frame, stored)
 		local name = Ui.rich(
 			frame,
 			string.format(
 				'<font color="%s"><b>%s</b></font> %s',
-				Ui.hex(Ui.colors.yellow),
-				T("booster_local"),
+				Ui.hex(color),
+				T("booster_scope_" .. scope),
 				T("booster_" .. stored.kind)
 			),
 			UDim2.new(1, -76, 0, 20),
@@ -158,6 +204,7 @@ function BoosterWindow.build(
 				child:Destroy()
 			end
 		end
+		table.clear(spinning)
 		for kind, button in pairs(tabButtons) do
 			button.BackgroundColor3 = if kind == tab
 				then Ui.colors.buttonBlue
@@ -168,8 +215,13 @@ function BoosterWindow.build(
 		for index, s in ipairs(stored) do
 			if tab == "all" or s.kind == tab then
 				shown += 1
-				-- kinds in the tab order, then as stored
-				card(s, index, (table.find(Boosters.kinds, s.kind) or 9) * 1000 + index)
+				-- global first, then faction, then local; kinds in the tab order
+				local scopeRank = 4 - (table.find(Boosters.scopes, Boosters.scopeOf(s)) or 1)
+				card(
+					s,
+					index,
+					scopeRank * 100000 + (table.find(Boosters.kinds, s.kind) or 9) * 1000 + index
+				)
 			end
 		end
 		countLabel.Text = T("boosters_count", if p then Boosters.storedCount(p) else 0)

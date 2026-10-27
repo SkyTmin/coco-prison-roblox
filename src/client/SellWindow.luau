@@ -7,6 +7,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
+local BlockColors = require(Shared.BlockColors)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -143,8 +144,9 @@ function SellWindow.build(
 			local row = Ui.inset(list, UDim2.new(1, -24, 0, ROW - 4), UDim2.fromOffset(12, y))
 			local slot, _, _, icon = Ui.slot(row, 36)
 			slot.Position = UDim2.fromOffset(6, 5)
-			local image = Config.iconFor(blockId)
+			local image, tint = BlockColors.icon(blockId)
 			icon.Image, icon.Visible = image or "", image ~= nil
+			icon.ImageColor3 = tint
 			Ui.label(
 				row,
 				Strings.itemName(blockId, nil, locale),

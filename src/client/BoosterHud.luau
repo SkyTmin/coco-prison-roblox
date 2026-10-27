@@ -1,18 +1,30 @@
 --!strict
--- The running local boosters in the top-left HUD, like the original's «$ x1.1 Локальный» [вики 26.10]: a row per
--- kind with its bottle, the multiplier, «Локальный» and the time left (queued boosters of the kind included);
--- a click opens the storage. Refreshed twice a second from the profile the client holds.
+-- The running boosters in the top-left HUD, like the original's «$ x1.1 Локальный» [вики 26.10; владелец 27.10:
+-- «когда бустер работает сверху слева плашку … если кто-то активировал бустер для всех, там его ник … плашка как
+-- загрузка, только в обратную сторону»]: a row per running booster — its bottle, the multiplier, the scope (and who
+-- started a faction / global one), the time left — over a bar in the scope's colour that drains as the booster runs
+-- out; «+N в очереди» when more of that line wait. A click opens the storage. Refreshed a few times a second.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
-local Config = require(Shared.Config)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
 
 local BoosterHud = {}
 
-local SYMBOL = { money = "$ " } -- other kinds: the bottle icon says which
+local ROW_W, ROW_H = 250, 42
+local MAX_ROWS = 6
+local SYMBOL = { money = "$ " } -- other kinds: the bottle says which
+
+type Row = {
+	button: TextButton,
+	icon: ImageLabel,
+	text: TextLabel,
+	sub: TextLabel, -- who started a shared booster / how many wait
+	time: TextLabel,
+	fill: Frame,
+}
 
 function BoosterHud.start(
 	gui: Instance,
@@ -23,7 +35,7 @@ function BoosterHud.start(
 	local frame = Instance.new("Frame")
 	frame.Name = "Boosters"
 	frame.BackgroundTransparency = 1
-	frame.Size = UDim2.fromOffset(230, 0)
+	frame.Size = UDim2.fromOffset(ROW_W, 0)
 	frame.AutomaticSize = Enum.AutomaticSize.Y
 	frame.Parent = gui
 	local layout = Instance.new("UIListLayout")
@@ -31,38 +43,56 @@ function BoosterHud.start(
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = frame
 
-	local rows: { [string]: { button: TextButton, text: TextLabel } } = {}
-	for i, kind in ipairs(Boosters.kinds) do
+	local rows: { Row } = {}
+	for i = 1, MAX_ROWS do
 		local button = Instance.new("TextButton")
-		button.Name = "Booster_" .. kind
+		button.Name = "Booster_" .. i
 		button.Text = ""
 		button.AutoButtonColor = false
-		button.Size = UDim2.fromOffset(0, 26)
-		button.AutomaticSize = Enum.AutomaticSize.X
+		button.Size = UDim2.fromOffset(ROW_W, ROW_H)
 		button.BackgroundColor3 = Ui.colors.panel
-		button.BackgroundTransparency = 0.35
+		button.BackgroundTransparency = 0.3
 		button.BorderSizePixel = 0
 		button.LayoutOrder = i
 		button.Visible = false
+		button.ClipsDescendants = true
 		button.Parent = frame
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 4)
 		corner.Parent = button
-		local padding = Instance.new("UIPadding")
-		padding.PaddingLeft = UDim.new(0, 4)
-		padding.PaddingRight = UDim.new(0, 8)
-		padding.Parent = button
 		local icon = Instance.new("ImageLabel")
-		icon.Size = UDim2.fromOffset(22, 22)
-		icon.Position = UDim2.fromOffset(0, 2)
+		icon.Size = UDim2.fromOffset(32, 32)
+		icon.Position = UDim2.fromOffset(3, 3)
 		icon.BackgroundTransparency = 1
-		icon.ResampleMode = Enum.ResamplerMode.Pixelated
-		icon.Image = Config.icons.icons["booster_" .. kind] or ""
+		icon.ScaleType = Enum.ScaleType.Fit
 		icon.Parent = button
-		local text = Ui.rich(button, "", UDim2.fromOffset(0, 26), UDim2.fromOffset(26, 0), 14)
-		text.AutomaticSize = Enum.AutomaticSize.X
+		local text = Ui.rich(button, "", UDim2.new(1, -92, 0, 18), UDim2.fromOffset(40, 3), 13)
+		text.TextTruncate = Enum.TextTruncate.AtEnd
+		local sub = Ui.rich(button, "", UDim2.new(1, -92, 0, 15), UDim2.fromOffset(40, 20), 12)
+		sub.TextTruncate = Enum.TextTruncate.AtEnd
+		local time = Ui.label(
+			button,
+			"",
+			UDim2.fromOffset(48, 36),
+			UDim2.new(1, -52, 0, 1),
+			13,
+			Ui.colors.white
+		)
+		time.TextXAlignment = Enum.TextXAlignment.Right
+		-- the bar: full when the booster starts, empty when it ends (a loading bar run backwards)
+		local track = Instance.new("Frame")
+		track.Size = UDim2.new(1, 0, 0, 4)
+		track.Position = UDim2.new(0, 0, 1, -4)
+		track.BackgroundColor3 = Color3.new(0, 0, 0)
+		track.BackgroundTransparency = 0.4
+		track.BorderSizePixel = 0
+		track.Parent = button
+		local fill = Instance.new("Frame")
+		fill.BorderSizePixel = 0
+		fill.Size = UDim2.fromScale(1, 1)
+		fill.Parent = track
 		button.Activated:Connect(onClick)
-		rows[kind] = { button = button, text = text }
+		rows[i] = { button = button, icon = icon, text = text, sub = sub, time = time, fill = fill }
 	end
 
 	local nextAt = 0
@@ -71,23 +101,52 @@ function BoosterHud.start(
 		if clock < nextAt then
 			return
 		end
-		nextAt = clock + 0.5
+		nextAt = clock + 0.2
 		local p = getProfile()
 		local now = Boosters.now()
-		for kind, row in pairs(rows) do
-			local running = if p then Boosters.running(p, kind, now) else nil
-			row.button.Visible = running ~= nil
-			if running and p then
-				local left = math.floor(Boosters.remaining(p, kind, now))
+		local running = if p then Boosters.runningAll(p, now) else {}
+		for i, row in ipairs(rows) do
+			local a = running[i]
+			row.button.Visible = a ~= nil
+			if a and p then
+				local scope = Boosters.scopeOf(a)
+				local color = Boosters.SCOPE_COLORS[scope]
+				local left = math.max(0, math.floor(a.endsAt - now))
+				local waiting = Boosters.queueAfter(p, a)
+				row.icon.Image = Boosters.icon(a.kind, scope)
+				-- second line: who started a faction / global one (never cut by the scope word), then the queue
+				local parts = {}
+				if a.by and scope ~= "local" then
+					table.insert(
+						parts,
+						string.format('<font color="%s">%s</font>', Ui.hex(Ui.colors.white), a.by)
+					)
+				end
+				if waiting > 0 then
+					table.insert(
+						parts,
+						string.format(
+							'<font color="%s">%s</font>',
+							Ui.hex(Ui.colors.muted),
+							t("booster_queue_more", waiting)
+						)
+					)
+				end
 				row.text.Text = string.format(
-					'<font color="%s">%sx%s</font> <font color="%s">%s</font> %d:%02d',
+					'<font color="%s">%sx%s</font> <font color="%s">%s</font>',
 					Ui.hex(Ui.colors.green),
-					SYMBOL[kind] or "",
-					tostring(running.mult),
-					Ui.hex(Ui.colors.yellow),
-					t("booster_local"),
-					left // 60,
-					left % 60
+					SYMBOL[a.kind] or "",
+					tostring(a.mult),
+					Ui.hex(color),
+					t("booster_scope_" .. scope)
+				)
+				row.sub.Text = table.concat(parts, "  ")
+				row.text.Position = UDim2.fromOffset(40, if #parts > 0 then 3 else 11)
+				row.time.Text = string.format("%d:%02d", left // 60, left % 60)
+				row.fill.BackgroundColor3 = color
+				row.fill.Size = UDim2.fromScale(
+					math.clamp((a.endsAt - now) / math.max(1, a.endsAt - a.startsAt), 0, 1),
+					1
 				)
 			end
 		end

@@ -197,8 +197,13 @@ function ChestWindow.build(
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
 			local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
+			local tint = Color3.new(1, 1, 1)
+			if stack and not icon then
+				icon, tint = BlockColors.icon(stack.id)
+			end
 			local tile = if stack and not icon then BlockColors.of(stack.id) else nil
 			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil or tile ~= nil
+			view.icon.ImageColor3 = tint
 			view.icon.BackgroundColor3 = tile or Color3.new()
 			view.icon.BackgroundTransparency = if tile then 0 else 1
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""

@@ -23,6 +23,8 @@ local DragDrop = require(script.DragDrop)
 local ChestWindow = require(script.ChestWindow)
 local AchievementsWindow = require(script.AchievementsWindow)
 local BoosterWindow = require(script.BoosterWindow)
+local AuctionWindow = require(script.AuctionWindow)
+local MenuWindow = require(script.MenuWindow)
 local BoosterHud = require(script.BoosterHud)
 local ExchangeWindow = require(script.ExchangeWindow)
 local ArtifactWindow = require(script.ArtifactWindow)
@@ -678,8 +680,13 @@ local function renderSlot(
 )
 	local n, c = stackLabel(stack)
 	local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
+	local tint = Color3.new(1, 1, 1)
+	if stack and not icon then
+		icon, tint = BlockColors.icon(stack.id)
+	end
 	name.Text, count.Text = n, c
 	image.Image = icon or ""
+	image.ImageColor3 = tint
 	-- [владелец 21.10] no text on items/blocks: without a picture the slot shows a tile of the block colour
 	local tile = if stack and not icon then BlockColors.of(stack.id) else nil
 	image.Visible = icon ~= nil or tile ~= nil
@@ -1874,6 +1881,11 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	auction = function()
+		local win, refresh = AuctionWindow.build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	creative = function()
 		local win, refresh = CreativeWindow.build(gui, profile, locale, closeWindow, createWindow)
 		refreshMenu = refresh
@@ -1954,6 +1966,19 @@ localizedButtons[artifactButton] = "artifacts_hotkey"
 artifactButton.Activated:Connect(function()
 	open("artifacts")
 end)
+-- «Меню [X]» next to it: every window in one place [владелец 27.10]
+local menuButton = Ui.button(
+	gui,
+	T("menu_hotkey"),
+	UDim2.fromOffset(130, 44),
+	UDim2.fromOffset(204, 64),
+	Ui.colors.buttonBlue
+)
+menuButton.Name = "MenuButton"
+localizedButtons[menuButton] = "menu_hotkey"
+menuButton.Activated:Connect(function()
+	open("menu")
+end)
 
 -- ---------------------------------------------------------------- world signs in the player's language
 -- Signs are built in Russian; the original text is kept in the "RuText" attribute and re-rendered
@@ -1992,6 +2017,18 @@ task.defer(localizeWorld)
 -- the movable HUD (HudLayout): set up with the touch controls below
 local relayoutHud: () -> () = function() end
 local openHudEditor: () -> () = function() end
+-- «Меню» [X]: a tile for every window (MenuWindow)
+windowBuilders.menu = function()
+	return MenuWindow.build(gui, locale, closeWindow, createWindow, function(kind: string)
+		if kind == "layout" then
+			closeWindow()
+			currentWindowKind = nil
+			openHudEditor()
+		else
+			open(kind)
+		end
+	end)
+end
 local shownHudLayout = ""
 local function render(p: Types.Profile)
 	local nextLocale = p.locale or Config.defaultLocale
@@ -2765,7 +2802,7 @@ touchMenus.Parent = gui
 local touchMenuGrid = Instance.new("Frame")
 touchMenuGrid.Name = "Grid"
 touchMenuGrid.Position = UDim2.fromOffset(60, 0)
-touchMenuGrid.Size = UDim2.fromOffset(6 * 60, 2 * 60)
+touchMenuGrid.Size = UDim2.fromOffset(6 * 60, 3 * 60)
 touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
@@ -2776,6 +2813,7 @@ local menuKeys = {
 	"level",
 	"achievements",
 	"boosters",
+	"auction",
 	"artifacts",
 	"factions",
 	"language_code",
@@ -3101,6 +3139,7 @@ local function updateLayout()
 	touchMenus.Visible, touchActions.Visible = mobile, mobile
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
+	menuButton.Visible = not mobile
 	statsScale.Scale = if mobile then 0.65 else 1
 	stats.Position = if mobile then UDim2.new(1, -148, 0, 64) else UDim2.new(1, -224, 0.4, 0)
 	-- effect icons sit left of the stats panel, top-aligned with it
@@ -3240,6 +3279,10 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("achievements")
 	elseif k == Enum.KeyCode.B then
 		open("boosters") -- «Хранилище бустеров» [решение: клавиша]
+	elseif k == Enum.KeyCode.Y then
+		open("auction") -- «Аукцион» [решение: клавиша; в оригинале /ah]
+	elseif k == Enum.KeyCode.X then
+		open("menu") -- the main menu [вики: клавиша X]
 	elseif k == Enum.KeyCode.G then
 		open("factions") -- [клиент] /fraction
 	elseif k == Enum.KeyCode.I then

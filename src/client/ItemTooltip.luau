@@ -77,19 +77,32 @@ local function keyOf(stack: Types.ItemStack, locale: string): string
 end
 
 -- Shows the tooltip for `stack`. `anchor` is a screen point (mouse) or the slot frame (touch).
--- Cheap to call every frame: the lines are rebuilt only when the stack or the language changes.
-function ItemTooltip.show(stack: Types.ItemStack, anchor: Vector2 | GuiObject)
+-- Cheap to call every frame: the lines are rebuilt only when the stack or the language changes. `extra` lines go
+-- under the item's own after a gap (the auction: seller, price, time left).
+function ItemTooltip.show(
+	stack: Types.ItemStack,
+	anchor: Vector2 | GuiObject,
+	extra: { ItemInfo.Line }?
+)
 	local frame = ensure()
 	local locale = Strings.localeOf(Players.LocalPlayer)
 	local key = keyOf(stack, locale)
+	for _, line in ipairs(extra or {}) do
+		key ..= "|" .. line.text
+	end
 	if key ~= builtKey then
 		builtKey = key
-		builtSize = ItemTooltip._build(frame, stack, locale)
+		builtSize = ItemTooltip._build(frame, stack, locale, extra)
 	end
 	ItemTooltip._place(frame, builtSize, anchor)
 end
 
-function ItemTooltip._build(frame: Frame, stack: Types.ItemStack, locale: string): Vector2
+function ItemTooltip._build(
+	frame: Frame,
+	stack: Types.ItemStack,
+	locale: string,
+	extra: { ItemInfo.Line }?
+): Vector2
 	for _, child in ipairs(frame:GetChildren()) do
 		if child:IsA("TextLabel") then
 			child:Destroy()
@@ -97,7 +110,14 @@ function ItemTooltip._build(frame: Frame, stack: Types.ItemStack, locale: string
 	end
 	local y = PAD
 	local width = 0
-	for index, line in ipairs(ItemInfo.lines(stack, locale)) do
+	local lines = ItemInfo.lines(stack, locale)
+	if extra and #extra > 0 then
+		table.insert(lines, { text = "", color = Ui.colors.white })
+		for _, line in ipairs(extra) do
+			table.insert(lines, line)
+		end
+	end
+	for index, line in ipairs(lines) do
 		local size = if line.small then SMALL else TEXT
 		local text = if line.text == "" then " " else line.text
 		local bounds = TextService:GetTextSize(text, size, Ui.font, Vector2.new(MAX_WIDTH, 1000))

@@ -25,7 +25,7 @@ function AchievementService.rewardText(reward: Achievements.Reward, locale: stri
 		return Strings.t(
 			"booster_for_minutes",
 			locale,
-			Strings.t("booster_local_" .. reward.booster, locale),
+			Strings.boosterName(reward.booster, reward.scope, locale),
 			Config.boosters.minutes
 		)
 	end
@@ -55,7 +55,7 @@ function AchievementService.OnDug(player: Player, blockId: string)
 			end
 			local reward = Achievements.reward(card, tier)
 			if reward.booster then
-				Boosters.store(p, reward.booster)
+				Boosters.store(p, reward.booster, reward.scope)
 			else
 				p.coins += reward.money or 0
 			end
