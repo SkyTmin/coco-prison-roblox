@@ -219,6 +219,33 @@ local function queueBreakFx(
 	end
 end
 
+-- Other players see the cracks grow on the block being dug, like in Minecraft [2-player test 27.10: only the
+-- break burst reached them]: { userId, part | false, needed, pause } to those within FX_RANGE; their
+-- BlockBreak animates the stages itself, false (or the time running out) clears them.
+local CRACK_MIN = 0.25 -- s: faster digs break before a crack could be seen
+local function relayCrack(digger: Player, part: BasePart?, needed: number?, pause: number?)
+	local own = digger.Character and digger.Character:FindFirstChild("HumanoidRootPart")
+	local at = if part
+		then part.Position
+		elseif own and own:IsA("BasePart") then own.Position
+		else nil
+	if not at then
+		return
+	end
+	local remote = Remotes.unreliable("DigCrackFx")
+	for _, other in ipairs(Players:GetPlayers()) do
+		local root = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if
+			other ~= digger
+			and root
+			and root:IsA("BasePart")
+			and (root.Position - at).Magnitude <= FX_RANGE
+		then
+			remote:FireClient(other, { digger.UserId, part or false, needed or 0, pause or 0 })
+		end
+	end
+end
+
 local function complete(player: Player, token: number)
 	local dig = digs[player]
 	if not dig or dig.token ~= token then
@@ -348,6 +375,9 @@ local function onDigStart(player: Player, part: any, hit: any)
 		if typeof(part) == "Instance" then
 			Remotes.event("DigRejected"):FireClient(player, part) -- show it again now, not after a timeout
 		end
+		if previous and previous.needed >= CRACK_MIN then
+			relayCrack(player, nil)
+		end
 		return
 	end
 	local profile = ProfileService.Get(player)
@@ -372,15 +402,25 @@ local function onDigStart(player: Player, part: any, hit: any)
 		toolLevel = toolLevel,
 	}
 	Remotes.event("DigAccepted"):FireClient(player, part, needed, pause)
+	if needed >= CRACK_MIN then
+		relayCrack(player, part, needed, pause)
+	elseif previous and previous.needed >= CRACK_MIN then
+		relayCrack(player, nil)
+	end
 	task.delay(needed + pause, complete, player, token)
 end
 
 local function onDigCancel(player: Player)
+	local dig = digs[player]
 	digs[player] = nil
+	if dig and dig.needed >= CRACK_MIN then
+		relayCrack(player, nil)
+	end
 end
 
 function DigService.Start()
 	local fxRemote = Remotes.unreliable("BlockBrokenFx") -- created up front so clients can listen
+	Remotes.unreliable("DigCrackFx")
 	RunService.Heartbeat:Connect(function()
 		for other, queue in pairs(fxQueue) do
 			if other.Parent then

@@ -9,11 +9,13 @@
 -- Every audio file holds several variants (Config.effects.sounds.files[*].segments); one is picked at
 -- random and played with TimePosition, then stopped after its length.
 -- The server still owns the dig (DigService); this module only reacts to the local dig state and to
--- "BlockBrokenFx" batches for blocks other players destroy nearby.
+-- "BlockBrokenFx" batches for blocks other players destroy nearby and to "DigCrackFx" (the cracks, crumbs
+-- and hit sounds of the block another player is digging).
 
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -215,6 +217,18 @@ local function blockIdOf(part: BasePart): string?
 	return if typeof(id) == "string" then id else nil
 end
 
+local function crackDecals(part: BasePart, texture: string, into: { Decal })
+	for _, face in ipairs(FACES) do
+		local d = Instance.new("Decal")
+		d.Name = "Crack"
+		d.Face = face
+		d.Texture = texture
+		d.ZIndex = 2
+		d.Parent = part
+		table.insert(into, d)
+	end
+end
+
 -- Called every frame while digging with progress k in [0, 1].
 function BlockBreak.Update(part: BasePart, k: number)
 	local list = stages()
@@ -223,15 +237,7 @@ function BlockBreak.Update(part: BasePart, k: number)
 		current = part
 		lastHit = 0
 		if #list > 0 then
-			for _, face in ipairs(FACES) do
-				local d = Instance.new("Decal")
-				d.Name = "Crack"
-				d.Face = face
-				d.Texture = list[1]
-				d.ZIndex = 2
-				d.Parent = part
-				table.insert(decals, d)
-			end
+			crackDecals(part, list[1], decals)
 		end
 	end
 	if #list > 0 then
@@ -269,6 +275,59 @@ function BlockBreak.Break(part: BasePart)
 	clearDecals()
 	current = nil
 	breakEffects(part.CFrame, part.Size, part.Color, blockIdOf(part))
+end
+
+-- Other players' digs nearby (server "DigCrackFx"): userId → their block, its cracks and timing; the
+-- stages, crumbs and hit sounds run here from the dig time, like for our own block.
+type OtherDig = {
+	part: BasePart,
+	decals: { Decal },
+	stage: number,
+	from: number,
+	needed: number,
+	lastHit: number,
+}
+local others: { [number]: OtherDig } = {}
+
+local function dropOther(userId: number)
+	local dig = others[userId]
+	if dig then
+		for _, d in ipairs(dig.decals) do
+			d:Destroy()
+		end
+		others[userId] = nil
+	end
+end
+
+local function stepOthers()
+	if next(others) == nil then
+		return
+	end
+	local list = stages()
+	local now = os.clock()
+	for userId, dig in pairs(others) do
+		local k = (now - dig.from) / dig.needed
+		if not dig.part.Parent or k >= 1.1 then
+			dropOther(userId) -- broken (the break burst comes by BlockBrokenFx), or the cancel got lost
+		elseif k >= 0 and #list > 0 then
+			local s = math.clamp(math.floor(k * #list) + 1, 1, #list)
+			if s ~= dig.stage then
+				dig.stage = s
+				if #dig.decals == 0 then
+					crackDecals(dig.part, list[s], dig.decals)
+				end
+				for _, d in ipairs(dig.decals) do
+					d.Texture = list[s]
+				end
+			end
+			if now - dig.lastHit >= HIT_INTERVAL then
+				dig.lastHit = now
+				local blockId = blockIdOf(dig.part)
+				play(materialOf(blockId), "hit", dig.part.Position, HIT_VOLUME, HIT_PITCH)
+				emit(dig.part.CFrame, dig.part.Size, dig.part.Color, blockId, 5, false)
+			end
+		end
+	end
 end
 
 -- Preload the audio so the first hit is not silent, and listen for other players' breaks.
@@ -323,6 +382,31 @@ function BlockBreak.Start()
 			end
 		end
 	end)
+	-- { userId, part | false, needed, pause }: false = that player stopped digging
+	Remotes.unreliable("DigCrackFx").OnClientEvent:Connect(function(msg: any)
+		if typeof(msg) ~= "table" or typeof(msg[1]) ~= "number" then
+			return
+		end
+		local userId, part, needed, pause = msg[1], msg[2], msg[3], msg[4]
+		dropOther(userId)
+		if
+			typeof(part) == "Instance"
+			and part:IsA("BasePart")
+			and typeof(needed) == "number"
+			and needed > 0
+			and typeof(pause) == "number"
+		then
+			others[userId] = {
+				part = part,
+				decals = {},
+				stage = 0,
+				from = os.clock() + pause,
+				needed = needed,
+				lastHit = 0,
+			}
+		end
+	end)
+	RunService.Heartbeat:Connect(stepOthers)
 end
 
 return BlockBreak
