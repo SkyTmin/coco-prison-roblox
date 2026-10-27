@@ -231,7 +231,7 @@ function JobsWindow.build(
 		)
 		local icon = Kit.image(
 			f,
-			Config.icons.icons["booster_" .. booster.id],
+			Config.icons.icons["booster_" .. booster.id .. "_local"],
 			UDim2.fromOffset(52, 52),
 			UDim2.fromOffset(12, 10)
 		)

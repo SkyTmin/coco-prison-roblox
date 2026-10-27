@@ -4,6 +4,7 @@
 -- bars that slide, buttons that sink when pressed and glow when they can be pressed, pops, flashes and «+1» that
 -- floats up. Everything is updated in place: a window built once stays alive while the profile changes.
 local RunService = game:GetService("RunService")
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 local Ui = require(script.Parent.Ui)
 
@@ -199,12 +200,40 @@ end
 
 -- the text shrinks to its box when it would not fit (long names, other languages, two-digit numbers), never grows
 -- above its own size
+-- (measured on one line: TextScaled would wrap a long word instead of shrinking it — «Заключён / ный»)
 function Kit.fit(label: TextLabel)
-	local limit = Instance.new("UITextSizeConstraint")
-	limit.MaxTextSize = label.TextSize
-	limit.MinTextSize = 8
-	limit.Parent = label
-	label.TextScaled = true
+	local max = label.TextSize
+	label.TextWrapped = false
+	local function refit()
+		-- the box in the label's own pixels: AbsoluteSize already carries every UIScale above it (window fitting,
+		-- pop-ins), the text size does not
+		local k = 1
+		local node: Instance? = label
+		while node do
+			local s = node:FindFirstChildOfClass("UIScale")
+			if s then
+				k *= s.Scale
+			end
+			node = node.Parent
+		end
+		local width = label.AbsoluteSize.X / math.max(k, 1e-3)
+		if width <= 0 then
+			return
+		end
+		local plain = string.gsub(label.Text, "<[^>]->", "")
+		local size = max
+		while
+			size > 8
+			and TextService:GetTextSize(plain, size, label.Font, Vector2.new(1e5, 1e5)).X
+				> width
+		do
+			size -= 1
+		end
+		label.TextSize = size
+	end
+	label:GetPropertyChangedSignal("Text"):Connect(refit)
+	label:GetPropertyChangedSignal("AbsoluteSize"):Connect(refit)
+	refit()
 end
 
 -- a short bounce: bigger, then back

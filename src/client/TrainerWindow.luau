@@ -27,8 +27,9 @@ local STAT_COLORS = {
 	needs = Color3.fromRGB(255, 196, 70),
 }
 local REQ_ORDER = { "zombies", "kills", "bats", "money" }
--- the counters' pictures (existing HUD icons); the others get a coloured letter
-local REQ_ICONS = { kills = "hud_kd", money = "money" }
+-- the counters' pictures (Codex → Blender like every icon); a coloured letter only if one is missing
+local REQ_ICONS =
+	{ zombies = "req_zombies", kills = "req_kills", bats = "req_bats", money = "money" }
 local CARD_W, CARD_H, GAP = 290, 446, 10
 local PIPS = 20
 

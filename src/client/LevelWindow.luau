@@ -116,7 +116,7 @@ function LevelWindow.build(
 	local rankName = text(
 		header,
 		"",
-		UDim2.fromOffset(300, 34),
+		UDim2.fromOffset(254, 34),
 		UDim2.fromOffset(120, 16),
 		28,
 		Color3.new(1, 1, 1),
@@ -129,16 +129,19 @@ function LevelWindow.build(
 	local levelLine = text(
 		header,
 		"",
-		UDim2.fromOffset(300, 26),
+		UDim2.fromOffset(254, 26),
 		UDim2.fromOffset(122, 54),
 		18,
 		Ui.colors.text,
 		BOLD
 	)
+	-- the texts end before the rank track and shrink when longer [владелец 27.10: «текст выходит снова»]
+	Kit.fit(rankName)
+	Kit.fit(levelLine)
 	local rankSpan =
-		text(header, "", UDim2.fromOffset(300, 18), UDim2.fromOffset(122, 80), 13, Ui.colors.muted)
+		text(header, "", UDim2.fromOffset(254, 18), UDim2.fromOffset(122, 80), 13, Ui.colors.muted)
 	-- the rank track
-	-- the last stop, ringed and ×1.3, still ends inside the header (≈ 702 wide)
+	-- the last stop, ringed and ×1.22, still ends inside the header (≈ 702 wide)
 	local trackX, trackStep = 386, 62
 	local line =
 		frame(header, UDim2.fromOffset(trackStep * 4, 4), UDim2.fromOffset(trackX + 23, 40), TRACK)
@@ -172,7 +175,7 @@ function LevelWindow.build(
 			header,
 			string.format("%d–%d", rank.from, rank.to),
 			UDim2.fromOffset(60, 16),
-			UDim2.fromOffset(trackX + (i - 1) * trackStep - 7, 76),
+			UDim2.fromOffset(trackX + (i - 1) * trackStep - 7, 81),
 			12,
 			Ui.colors.muted,
 			BOLD
@@ -218,7 +221,7 @@ function LevelWindow.build(
 
 	-- ---------------------------------------------------------------- right: the requirements
 	local x0 = 266
-	local rightW = innerW - x0 + 16
+	local rightW = innerW - x0 + 10 -- ends with the header (content − 4)
 	local reqHeader = text(
 		content,
 		"",
@@ -290,6 +293,48 @@ function LevelWindow.build(
 	local textures = Config.textures and Config.textures.textures
 	local blocksCard = card(1, textures and textures.cobblestone, "▦")
 	local moneyCard = card(2, Config.icons.icons.money, "$")
+	-- at the last level the requirement cards make way for the peak: the rank emblem large and the totals
+	-- [владелец 27.10: the max-level window stood half empty]
+	local peak =
+		frame(content, UDim2.fromOffset(rightW, 128), UDim2.fromOffset(x0, bodyY + 22), CARD)
+	corner(peak, 10)
+	local peakEdge = stroke(peak, EDGE, 1.5)
+	local peakWash = frame(peak, UDim2.fromScale(1, 1), UDim2.new(), Color3.new(1, 1, 1))
+	corner(peakWash, 10)
+	local peakGradient = gradient(peakWash, Color3.new(), Color3.new(), 0)
+	peakWash.BackgroundTransparency = 0.75
+	local peakEmblemHolder =
+		frame(peak, UDim2.fromOffset(96, 96), UDim2.fromOffset(14, 16), Color3.new())
+	peakEmblemHolder.BackgroundTransparency = 1
+	local peakTitle = text(
+		peak,
+		T("level_peak_title"),
+		UDim2.new(1, -134, 0, 30),
+		UDim2.fromOffset(122, 18),
+		22,
+		Color3.new(1, 1, 1),
+		BOLD
+	)
+	Kit.fit(peakTitle)
+	local peakRanks = text(
+		peak,
+		"",
+		UDim2.new(1, -134, 0, 20),
+		UDim2.fromOffset(122, 54),
+		14,
+		Ui.colors.text,
+		BOLD
+	)
+	local peakBlocks = text(
+		peak,
+		"",
+		UDim2.new(1, -134, 0, 20),
+		UDim2.fromOffset(122, 78),
+		14,
+		Ui.colors.muted,
+		BOLD
+	)
+	peak.Visible = false
 
 	-- ---------------------------------------------------------------- the rewards
 	local rewardsY = bodyY + 160
@@ -354,6 +399,7 @@ function LevelWindow.build(
 		order: number,
 		width: number,
 		picture: string?,
+		icon: string?,
 		glyph: string,
 		glyphColor: Color3,
 		caption: string
@@ -378,10 +424,22 @@ function LevelWindow.build(
 			g.Transparency = NumberSequence.new(0.1, 0.8)
 			g.Parent = shade
 		end
-		local g =
-			text(f, glyph, UDim2.fromOffset(40, 60), UDim2.fromOffset(8, 0), 26, glyphColor, BOLD)
-		g.TextXAlignment = Enum.TextXAlignment.Center
-		g.ZIndex = 2
+		if icon then
+			local i = Kit.image(f, icon, UDim2.fromOffset(36, 36), UDim2.fromOffset(10, 12))
+			i.ZIndex = 2
+		else
+			local g = text(
+				f,
+				glyph,
+				UDim2.fromOffset(40, 60),
+				UDim2.fromOffset(8, 0),
+				26,
+				glyphColor,
+				BOLD
+			)
+			g.TextXAlignment = Enum.TextXAlignment.Center
+			g.ZIndex = 2
+		end
 		local t = text(
 			f,
 			caption,
@@ -391,7 +449,11 @@ function LevelWindow.build(
 			Color3.new(1, 1, 1),
 			BOLD
 		)
-		t.TextWrapped = true
+		-- a one-word caption (a rank name) never breaks inside the word: it shrinks instead
+		t.TextWrapped = string.find(caption, " ") ~= nil
+		if not t.TextWrapped then
+			Kit.fit(t)
+		end
 		t.ZIndex = 2
 		-- the tiles pop in one after another
 		local s = Instance.new("UIScale")
@@ -410,7 +472,13 @@ function LevelWindow.build(
 				child:Destroy()
 			end
 		end
-		type Reward = { picture: string?, glyph: string, color: Color3, caption: string }
+		type Reward = {
+			picture: string?,
+			icon: string?,
+			glyph: string,
+			color: Color3,
+			caption: string,
+		}
 		local items: { Reward } = {}
 		for _, location in ipairs(Config.locationsFile.locations) do
 			if location.unlockLevel == rule.level and location.id ~= "prison" then
@@ -429,6 +497,8 @@ function LevelWindow.build(
 		local heartsBefore = if before then before.hearts else 10
 		if rule.hearts and rule.hearts ~= heartsBefore then
 			table.insert(items, {
+				-- every picture is a Codex sprite rendered in Blender [владелец 27.10]; the glyph is only a fallback
+				icon = Config.icons.icons.heart,
 				glyph = "♥",
 				color = Color3.fromRGB(235, 55, 55),
 				caption = T(
@@ -440,6 +510,7 @@ function LevelWindow.build(
 		end
 		if (rule.skillPoints or 0) > 0 then
 			table.insert(items, {
+				icon = Config.icons.icons.ancient_star,
 				glyph = "★",
 				color = Ui.colors.yellow,
 				caption = T("level_reward_points", rule.skillPoints),
@@ -448,14 +519,15 @@ function LevelWindow.build(
 		local nextRank, ourRank = Ranks.of(rule.level), Ranks.of(level)
 		if nextRank.index ~= ourRank.index then
 			table.insert(items, 1, {
+				icon = Config.icons.icons[Ranks.icon(nextRank)],
 				glyph = "♛",
 				color = nextRank.color,
 				caption = T("level_reward_rank", T("rank_" .. nextRank.index)),
 			})
 		end
-		local width = if #items > 0 then (innerW + 16 - 8 * (#items - 1)) / #items else 0
+		local width = if #items > 0 then (innerW + 6 - 8 * (#items - 1)) / #items else 0
 		for i, item in ipairs(items) do
-			chip(i, width, item.picture, item.glyph, item.color, item.caption)
+			chip(i, width, item.picture, item.icon, item.glyph, item.color, item.caption)
 		end
 		upHeader.Text = T("level_upgrades", #items)
 	end
@@ -486,7 +558,7 @@ function LevelWindow.build(
 			local other = Ranks.list[i]
 			stop.ring.Color = if here then other.color elseif passed then other.color else EDGE
 			stop.ring.Transparency = if here then 0 elseif passed then 0.5 else 0
-			stop.scale.Scale = if here then 1.3 else 1
+			stop.scale.Scale = if here then 1.22 else 1
 			stop.caption.TextColor3 = if here then other.color else Ui.colors.muted
 			for _, d in ipairs(stop.holder:GetDescendants()) do
 				if d:IsA("ImageLabel") then
@@ -527,19 +599,46 @@ function LevelWindow.build(
 				.. colored(T("level_max"), rank.color)
 			percent.Text = "100%"
 			totalBar.set(1)
-			reqHeader.Text = ""
+			reqHeader.Text = T("level_peak_header")
 			blocksCard.frame.Visible, moneyCard.frame.Visible = false, false
-			upHeader.Text = ""
-			for _, child in ipairs(rewards:GetChildren()) do
-				if child:IsA("Frame") then
-					child:Destroy()
+			peak.Visible = true
+			peakGradient.Color = ColorSequence.new(rank.color, rank.dark)
+			peakEdge.Color = rank.color
+			peakRanks.Text = T("level_peak_ranks", #Ranks.list, #Ranks.list)
+			peakBlocks.Text = T("level_peak_blocks", Strings.big(profile.blocksTotal))
+			if profile.level ~= shownLevel then
+				peakEmblemHolder:ClearAllChildren()
+				local e = emblem(peakEmblemHolder, rank, 96, UDim2.new())
+				Kit.bob(e, 3)
+				-- the five ranks in a row, the whole way walked
+				upHeader.Text = T("level_ranks_title")
+				for _, child in ipairs(rewards:GetChildren()) do
+					if child:IsA("Frame") then
+						child:Destroy()
+					end
+				end
+				local width = (innerW + 6 - 8 * (#Ranks.list - 1)) / #Ranks.list
+				for i, r in ipairs(Ranks.list) do
+					chip(
+						i,
+						width,
+						nil,
+						Config.icons.icons[Ranks.icon(r)],
+						"",
+						r.color,
+						T("rank_" .. r.index)
+					)
 				end
 			end
-			button.Visible = false
+			button.Visible = true
+			buttonLabel.Text = T("level_max")
+			buttonLabel.TextColor3 = Color3.new(1, 1, 1)
+			buttonGradient.Color = ColorSequence.new(rank.color, rank.dark)
 			ready = false
 			shownLevel = profile.level
 			return
 		end
+		peak.Visible = false
 		blocksCard.frame.Visible, moneyCard.frame.Visible, button.Visible = true, true, true
 		levelLine.Text = T("level_number", profile.level)
 			.. "  "

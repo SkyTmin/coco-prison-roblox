@@ -1345,6 +1345,32 @@ local STRINGS: { [string]: Entry } = {
 		es = "Nivel %d",
 		fr = "Niveau %d",
 	},
+	-- LevelWindow at the last level
+	level_peak_header = { ru = "Вершина", en = "The peak", es = "La cima", fr = "Le sommet" },
+	level_peak_title = {
+		ru = "Вершина достигнута",
+		en = "Peak reached",
+		es = "Cima alcanzada",
+		fr = "Sommet atteint",
+	},
+	level_peak_ranks = {
+		ru = "Пройдено рангов: %d из %d",
+		en = "Ranks completed: %d of %d",
+		es = "Rangos completados: %d de %d",
+		fr = "Rangs terminés : %d sur %d",
+	},
+	level_peak_blocks = {
+		ru = "Всего блоков: %s",
+		en = "Blocks in total: %s",
+		es = "Bloques en total: %s",
+		fr = "Blocs au total : %s",
+	},
+	level_ranks_title = {
+		ru = "Все ранги",
+		en = "All ranks",
+		es = "Todos los rangos",
+		fr = "Tous les rangs",
+	},
 	level_max = {
 		ru = "Максимальный уровень",
 		en = "Maximum level",
