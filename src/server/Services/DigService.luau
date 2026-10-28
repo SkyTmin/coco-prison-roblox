@@ -30,6 +30,7 @@ local ProfessionService = require(script.Parent.ProfessionService)
 local HungerService = require(script.Parent.HungerService)
 local AchievementService = require(script.Parent.AchievementService)
 local ArtifactService = require(script.Parent.ArtifactService)
+local GangService = require(script.Parent.GangService)
 
 local REACH = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
 -- The client digs at 4.5 blocks; the server accepts up to 6 like the vanilla server [ваниль]: it sees the
@@ -301,6 +302,8 @@ local function complete(player: Player, token: number)
 	local overflow = 0
 	local sold = 0
 	ProfileService.Mutate(player, function(p)
+		-- the gang perk Фарт: the block drops one more item [решение: +1 % за уровень]
+		dropCount += if math.random() < GangService.perk(p, "luck") then 1 else 0
 		-- the auto-sell [владелец 28.10: «когда игрок копает, предмет сразу продаётся … по центру экрана сумма»;
 		-- вики: «+0,057 $» = цена скупщика с множителями]: the drop goes straight to the buyer's price, the same
 		-- rounding as InventoryService.sellAll; anything the buyer does not take still goes to the bag
@@ -325,11 +328,13 @@ local function complete(player: Player, token: number)
 		end
 		local blockMult = (1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks)
 			* Boosters.multiplier(p, "blocks")
-		p.blocksTotal += blockMult * comboMult
+		-- the gang perk Конверсия: the block counts twice in the stats [решение: +1 % за уровень]
+		local counted = if math.random() < GangService.perk(p, "conversion") then 2 else 1
+		p.blocksTotal += blockMult * comboMult * counted
 		-- «чистые» блоки: one per block, no multipliers (sidebar in brackets, the spawn top) [сеть: blocks_clean]
 		p.stats.blocksClean = (p.stats.blocksClean or 0) + 1
 		if block.upgradeCounter then
-			p.counters[block.upgradeCounter] = (p.counters[block.upgradeCounter] or 0) + 1
+			p.counters[block.upgradeCounter] = (p.counters[block.upgradeCounter] or 0) + counted
 		end
 		local toolId = InventoryService.heldTool(p)
 		if toolId == "pickaxe" then
@@ -353,6 +358,8 @@ local function complete(player: Player, token: number)
 		artifactNotices = ArtifactService.RollDig(p)
 	end)
 	HungerService.OnBlockDug(player)
+	GangService.progress(player, "dig", 1) -- gang quests: blocks
+	GangService.progress(player, "sell", sold / Config.moneyScale) -- gang quests: the auto-sell is selling too
 	AchievementService.OnDug(player, blockId)
 	ArtifactService.Notify(player, artifactNotices)
 	if overflow > 0 or keyFull then

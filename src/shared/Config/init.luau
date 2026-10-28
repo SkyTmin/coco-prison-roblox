@@ -35,6 +35,7 @@ Config.boosters = load("boosters")
 Config.auction = load("auction")
 Config.artifacts = load("artifacts")
 Config.market = load("market")
+Config.gangs = load("gangs") -- gangs (Shared/Gangs, GangService)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

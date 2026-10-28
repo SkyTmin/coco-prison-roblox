@@ -17,6 +17,7 @@ local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local SkillService = require(script.Parent.SkillService)
 
@@ -478,7 +479,15 @@ local function updatePlayers()
 						/ (Config.needs[need].minutesToZero * 6)
 						* math.max(0.1, 1 - trained * Config.trainer.needs.perLevel)
 						* math.max(0, 1 - Books.worn(p, "neat"))
+						* math.max(0, 1 - GangService.perk(p, "stamina")) -- the gang perk Выносливость
 					local value = math.clamp(p.needs[need] - decay * ticks, 0, 100)
+					-- the gang perk Каратель: with its chance a draining need is restored in full [решение: 1 % за уровень]
+					if
+						value < p.needs[need]
+						and math.random() < GangService.perk(p, "punisher")
+					then
+						value = 100
+					end
 					-- Floating-point residue must not postpone a zero effect by another tick.
 					p.needs[need] = if value < 1e-9 then 0 else value
 				end

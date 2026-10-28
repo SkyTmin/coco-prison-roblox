@@ -254,6 +254,7 @@ const achievementCards = [];
 	}
 }
 write("achievements.json", { source: "[вики] карточки «Копатель» по блокам; [владелец 27.10] появляются с этажами; [решение] награды", ...decisions.achievements, cards: achievementCards });
+write("gangs.json", { source: "[вики, сеть, клиент] банды; числа — [решение] (docs/research/remaining-features-design.md §1)", ...decisions.gangs });
 write("auction.json", { source: "[вики] аукцион; [решение] цены, задержки", ...decisions.auction });
 write("donate.json", { source: "[меню] донат-магазин; [решение] наборы за Robux", ...decisions.donate });
 write("boosters.json", { source: "[вики] хранилище бустеров; [владелец 27.10] локальные ×1.1", ...decisions.boosters });

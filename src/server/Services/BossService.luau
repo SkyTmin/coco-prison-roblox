@@ -34,6 +34,7 @@ local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 local BlockRig = require(Shared.BlockRig)
@@ -1190,6 +1191,7 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		local by = humanoid:GetAttribute("LastHitBy")
 		if delta > 0 and typeof(by) == "number" then
 			boss.damageBy[by] = (boss.damageBy[by] or 0) + delta
+			GangService.progressByUserId(by, "boss", delta) -- gang quests: boss damage
 			boss.lastTargetAt = os.clock()
 			-- stunned after a ram: every hit lands ×stunDamageMultiplier (the extra counts for the hitter)
 			if os.clock() < boss.stunnedUntil and not bonusing and health > 0 then

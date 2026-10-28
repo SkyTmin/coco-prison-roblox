@@ -10,6 +10,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local BookService = require(script.Parent.BookService)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
 local MotionService = require(script.Parent.MotionService)
@@ -260,9 +261,11 @@ function CombatService.HitModel(
 		local theirs = ProfileService.Get(victim)
 		local other = theirs and Config.location(theirs.location)
 		-- players of one faction do not fight [сеть, патч 2022; клиент: удар без урона]
+		-- and members of one gang with its PvP setting off [клиент gang.settings.pvp]
 		local sameFaction = theirs ~= nil
-			and profile.faction ~= nil
-			and theirs.faction == profile.faction
+				and profile.faction ~= nil
+				and theirs.faction == profile.faction
+			or GangService.allies(player, victim)
 		if mine and mine.pvp and other and other.pvp and not sameFaction then
 			local before = target.Health
 			CombatService.ApplyDamage(target, damage, "player", player)

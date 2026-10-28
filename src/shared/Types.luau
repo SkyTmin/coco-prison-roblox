@@ -85,6 +85,11 @@ export type Profile = {
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3
 	factionChanges: number?, -- «Смен фракций» [клиент]; schema stays v3
+	-- the gang (GangService; the gang document in DataStore Gangs_v1 is the truth, this is the player's side):
+	-- id = the gang, leftAt = os.time() of the last voluntary leave (rejoin cooldown); schema stays v3
+	gang: { id: string?, leftAt: number? }?,
+	-- gang steps that move money or membership between the profile and the gang document, settled on load
+	gangOps: { [string]: { kind: string, gang: string, amount: number?, tag: string?, at: number } }?,
 	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y, shown, size} (HudLayout); schema stays v3
 	settings: Settings?, -- the settings window (SettingsWindow); nil = the defaults; schema stays v3
 	location: string,

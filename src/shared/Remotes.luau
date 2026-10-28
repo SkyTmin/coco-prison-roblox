@@ -33,6 +33,11 @@
 -- Client → server:        PotionBrew(kind, effectIds, upgraded) — brew at the potion stand; UseConsumable(slot, aim) drinks
 --                         or throws a potion (PotionService); server → client PotionResult("brewed")
 -- Client → server:        SetHudLayout(mode, layout?) — the player's moved HUD buttons (ProfileService, HudLayout.luau)
+-- Client → server:        GangAction(op, arg) — gangs (GangService): "state" | "invites" | "create" {name, tag, desc, color,
+--                         icon} | "invite" name | "accept" / "decline" gangId | "leave" | "kick" / "promote" / "demote" /
+--                         "transfer" userId | "disband" | "deposit" / "withdraw" dollars | "upgrade" upgradeId |
+--                         "settings" {pvp?, color?, icon?, desc?}; server → client GangState(view | false) — the gang
+--                         document without op ids + `you` (role) + `now`; GangInvites({ {gang, name, tag, from, expires} })
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

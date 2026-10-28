@@ -8,6 +8,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 local ItemDropService = require(script.Parent.ItemDropService)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -60,6 +61,7 @@ local function died(player: Player, character: Model)
 			ProfileService.Mutate(killer, function(p)
 				p.stats.kills = (p.stats.kills or 0) + 1
 			end)
+			GangService.progress(killer, "pvp", 1) -- gang quests: players
 			-- [владелец 22.10] the killer gets as many dollars as the victim's level, taken from the victim
 			-- (no more than the victim has)
 			local loss = math.min(profile.coins, profile.level * Config.moneyScale)

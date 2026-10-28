@@ -13,6 +13,7 @@ local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfessionService = require(script.Parent.ProfessionService)
 
@@ -128,6 +129,7 @@ local function sell(player: Player)
 		total = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
 		p.coins += total
 	end)
+	GangService.progress(player, "sell", total / Config.moneyScale) -- gang quests: selling
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
 		Sfx.toPlayer(player, "xp", 0.5)

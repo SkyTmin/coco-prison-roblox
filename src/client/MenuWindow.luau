@@ -28,6 +28,13 @@ MenuWindow.ENTRIES = {
 	{ kind = "skills", caption = "skills", key = "T" }, -- «Умения» (древо навыков) [вики]
 	{ kind = "potions", caption = "potions", key = "Z" }, -- «Зельеварка» [вики POTIONS.md]
 	{ kind = "factions", caption = "factions_title", key = "G" },
+	-- «Банда» [клиент gang.gui; клавиша — решение]; the crown until our Blender icon menu_gangs is uploaded
+	{
+		kind = "gangs",
+		caption = "gangs",
+		key = "R",
+		icon = if Config.icons.icons.menu_gangs then nil else "top_crown",
+	},
 	{ kind = "donate", caption = "donate_title", key = "N" },
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },

@@ -1,0 +1,7 @@
+# Банды (28.10, Claude): assets/icons/items3d/<id>.png → upload_image → assets/icons/ids.json → node scripts/build-configs.mjs
+menu_gangs
+gang_points
+gang_treasury
+gang_upgrades
+gang_quests
+gang_members

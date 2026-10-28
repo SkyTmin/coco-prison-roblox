@@ -29,6 +29,7 @@ local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
 local BookService = require(script.Parent.BookService)
 local ItemDropService = require(script.Parent.ItemDropService)
+local GangService = require(script.Parent.GangService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 
 local MobService = {}
@@ -122,13 +123,18 @@ local function rewardKiller(mob: Mob, humanoid: Humanoid)
 			-- stats[statKey] = «чистые» (one per kill: trainer, spawn top); statKey.."Total" counts with the
 			-- «Мобы» upgrade, like blocksTotal with «Блоки» [сеть: rats / rats_clean; множитель — решение]
 			-- Охотник: with its chance the kill counts as two [меню 26.10: «засчитает как двух в статистике»]
-			local kills = if math.random() < Skills.doubleKillChance(p) then 2 else 1
+			-- + the gang perk Охотник (adds to the skill) [решение: +2 % за уровень]
+			local kills = if math.random()
+					< Skills.doubleKillChance(p) + GangService.perk(p, "hunter")
+				then 2
+				else 1
 			p.stats[mob.cfg.statKey] = (p.stats[mob.cfg.statKey] or 0) + kills
 			local total = mob.cfg.statKey .. "Total"
 			p.stats[total] = (p.stats[total] or p.stats[mob.cfg.statKey] - kills) + mult * kills
 		end
 		ProfessionService.addXp(p, "blademaster", 1)
 	end)
+	GangService.progress(player, "mobs", 1) -- gang quests: mobs
 	if money > 0 then
 		toast(
 			player,

@@ -1959,6 +1959,12 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	gangs = function() -- «Банда» [R] (GangWindow, GangService)
+		local win, refresh =
+			require(script.GangWindow).build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 }
 local function open(kind: string)
 	local builder = windowBuilders[kind]
@@ -2971,6 +2977,7 @@ local menuKeys = {
 	"skills",
 	"potions",
 	"factions",
+	"gangs",
 	"donate",
 }
 local function touchIconButton(
@@ -3070,6 +3077,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 end)
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
+		or (if kind == "gangs" then Config.icons.icons.top_crown else nil) -- until menu_gangs is uploaded
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
@@ -3570,6 +3578,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("settings") -- [решение: клавиша]
 	elseif k == Enum.KeyCode.G then
 		open("factions") -- [клиент] /fraction
+	elseif k == Enum.KeyCode.R then
+		open("gangs") -- «Банда» [решение: клавиша; в оригинале /gang]
 	elseif k == Enum.KeyCode.I then
 		open("artifacts")
 	elseif k == Enum.KeyCode.M then

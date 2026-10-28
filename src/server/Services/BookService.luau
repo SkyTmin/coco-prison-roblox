@@ -26,6 +26,7 @@ local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
 local NeedsService = require(script.Parent.NeedsService)
 local ProfileService = require(script.Parent.ProfileService)
+local GangService = require(script.Parent.GangService)
 
 local BookService = {}
 
@@ -206,6 +207,7 @@ local function mayHurt(attacker: Player, model: Model): boolean
 	end
 	local a, b = Config.location(mine.location), Config.location(theirs.location)
 	local sameFaction = mine.faction ~= nil and theirs.faction == mine.faction
+		or GangService.allies(attacker, victim) -- one gang with its PvP off
 	return a ~= nil and a.pvp == true and b ~= nil and b.pvp == true and not sameFaction
 end
 

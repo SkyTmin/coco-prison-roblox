@@ -61,6 +61,9 @@ for _, name in ipairs({
 	"BookUse",
 	"BookResult",
 	"AncientRoll",
+	"GangAction",
+	"GangState",
+	"GangInvites",
 }) do
 	Remotes.event(name)
 end
@@ -118,6 +121,7 @@ require(script.Services.FoodService).Start() -- eating over 1.6 s like Minecraft
 require(script.Services.DonateService).Start() -- the donate shop: crystals for Robux, goods for crystals
 AchievementService.Start()
 GlobalBoosterService.Start()
+require(script.Services.GangService).Start() -- gangs: shared documents, invites, quests, treasury, upgrades
 AuctionService.Start()
 BoosterService.Start()
 CaseService.Start()

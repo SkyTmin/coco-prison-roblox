@@ -3,7 +3,8 @@
 -- игроков) … 1.10 … нужно им и хранилище», «если кто-то активировал бустер для всех, там его ник»]: rewards land in
 -- the storage (p.boosters, same boosters stacked) and run only when the player activates them. Three scopes like
 -- the original shop: local (only you; p.activeBoosters), faction (every member of your faction online) and global
--- (everyone online) — the last two live in a list shared by all servers (GlobalBoosterService, MemoryStore) and
+-- (everyone online), plus gang (every member of a gang online: the gang quest reward, never stored; GangService) —
+-- the shared ones live in a list shared by all servers (GlobalBoosterService, MemoryStore) and
 -- reach the clients through ReplicatedStorage.SharedBoosters. A booster of a kind and scope that already runs waits
 -- in the queue and starts when the one before it ends. Times are workspace:GetServerTimeNow() seconds (the client
 -- counts down the same clock) and run on while the player is offline [решение]. Kinds: blocks (dug blocks), money
@@ -20,6 +21,7 @@ export type Active = {
 	endsAt: number,
 	scope: string?, -- nil = local
 	faction: string?, -- faction scope: whose members it boosts
+	gang: string?, -- gang scope: the gang id whose members it boosts (quest rewards, GangService)
 	by: string?, -- shared boosters: who started it (shown in the HUD)
 	id: string?, -- shared boosters: the activation id
 }
@@ -34,6 +36,7 @@ Boosters.SCOPE_COLORS = {
 	["local"] = Color3.fromRGB(80, 180, 255),
 	faction = Color3.fromRGB(255, 154, 42),
 	global = Color3.fromRGB(255, 70, 70),
+	gang = Color3.fromRGB(90, 210, 90), -- [решение] green: the gang quest reward
 } :: { [string]: Color3 }
 
 -- the bottle picture (assets/models/booster, Blender) of a kind and scope; the flat sprite until it is uploaded
@@ -90,6 +93,8 @@ local function applies(p: any, a: Active): boolean
 		return true
 	elseif scope == "faction" then
 		return a.faction ~= nil and p.faction == a.faction
+	elseif scope == "gang" then
+		return a.gang ~= nil and p.gang ~= nil and p.gang.id == a.gang
 	end
 	return true -- local ones come from the player's own profile
 end
@@ -132,7 +137,7 @@ function Boosters.multiplier(p: any, kind: string, now: number?): number
 	return total
 end
 
--- queued after `a` in the same line (kind, scope, faction): how many wait and the seconds till the last one ends
+-- queued after `a` in the same line (kind, scope, faction / gang): how many wait and the seconds till the last one ends
 function Boosters.queueAfter(p: any, a: Active): (number, number)
 	local list = if Boosters.scopeOf(a) == "local"
 		then p.activeBoosters or {}
@@ -144,6 +149,7 @@ function Boosters.queueAfter(p: any, a: Active): (number, number)
 			and b.kind == a.kind
 			and Boosters.scopeOf(b) == Boosters.scopeOf(a)
 			and b.faction == a.faction
+			and b.gang == a.gang
 		then
 			if b.startsAt >= a.endsAt then
 				waiting += 1
@@ -221,17 +227,22 @@ function Boosters.take(p: any, index: number): Stored?
 	}
 end
 
--- start time for a new booster in a line: now, or when the last one of that line ends
+-- whose line a shared booster is in: its faction or its gang (nil for local and global ones)
+function Boosters.ownerOf(a: { faction: string?, gang: string? }): string?
+	return a.faction or a.gang
+end
+
+-- start time for a new booster in a line: now, or when the last one of that line ends (owner: faction or gang id)
 function Boosters.queueStart(
 	list: { Active },
 	kind: string,
 	scope: string,
-	faction: string?,
+	owner: string?,
 	now: number
 ): number
 	local startsAt = now
 	for _, a in ipairs(list) do
-		if a.kind == kind and Boosters.scopeOf(a) == scope and a.faction == faction then
+		if a.kind == kind and Boosters.scopeOf(a) == scope and Boosters.ownerOf(a) == owner then
 			startsAt = math.max(startsAt, a.endsAt)
 		end
 	end

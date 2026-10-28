@@ -1,0 +1,239 @@
+{
+  "source": "[вики, сеть, клиент] банды; числа — [решение] (docs/research/remaining-features-design.md §1)",
+  "_source": "docs/research/remaining-features-design.md §1.1–1.4; факты — docs/research/remaining-features-facts.md §1. [вики HANDBOOK-WIKI] 15 000 $, роли, казна; [сеть TG/25, S7] 5 уровень, вступление через 1 ч; [клиент gang.*] тег «ровно %s», очки банды, поручения «Ежедневные / Еженедельные / Цель», первые через 6 ч, казна с потолком и историей, 11 улучшений; всё остальное — [решение]",
+  "createCost": 15000,
+  "_createCost": "[вики HANDBOOK-WIKI; handbook json gangs.createCost] 15 000 $",
+  "minLevel": 5,
+  "_minLevel": "[сеть TG/25; S7] создание и вступление с 5 уровня",
+  "tagLength": 3,
+  "_tagLength": "[клиент gang.gui.create «ровно %s символа»; вики MENUS-SOCIAL: теги GST, DOP в TAB] 3 символа A–Z / 0–9",
+  "bannedTags": [
+    "ADM",
+    "MOD",
+    "GOD",
+    "DEV",
+    "SEX",
+    "XXX",
+    "NAZ",
+    "KKK",
+    "WTF",
+    "FCK",
+    "FUK",
+    "ASS"
+  ],
+  "_bannedTags": "[клиент: «есть запрещённые теги»; список — решение]",
+  "nameMax": 16,
+  "descMax": 60,
+  "_lengths": "[решение] название ≤ 16, описание ≤ 60 символов; оба фильтруются Roblox (TextService)",
+  "colors": [
+    [
+      235,
+      64,
+      52
+    ],
+    [
+      255,
+      150,
+      40
+    ],
+    [
+      255,
+      220,
+      60
+    ],
+    [
+      90,
+      210,
+      90
+    ],
+    [
+      60,
+      200,
+      220
+    ],
+    [
+      70,
+      120,
+      255
+    ],
+    [
+      240,
+      240,
+      240
+    ],
+    [
+      140,
+      140,
+      150
+    ]
+  ],
+  "_colors": "[решение] 8 цветов банды (красный, оранжевый, жёлтый, зелёный, бирюзовый, синий, белый, серый)",
+  "emblems": [
+    "sword_diamond",
+    "pickaxe_diamond",
+    "bow",
+    "golden_apple",
+    "moon_blade",
+    "fire_shard",
+    "ancient_star",
+    "top_crown"
+  ],
+  "_emblems": "[решение] 8 значков — иконки предметов (Config.icons)",
+  "deputiesMax": 2,
+  "_deputiesMax": "[решение] до 2 заместителей",
+  "baseSlots": 5,
+  "_baseSlots": "[решение] 5 слотов + улучшение «Участники»",
+  "rejoinCooldownSeconds": 3600,
+  "_rejoinCooldownSeconds": "[сеть S7] повторное вступление после выхода — через 1 час; после исключения и роспуска — без ожидания [решение]",
+  "inviteSeconds": 300,
+  "_inviteSeconds": "[решение] приглашение живёт 5 минут (MemoryStore GangInvites_v1)",
+  "invitesMax": 10,
+  "_invitesMax": "[решение] у игрока не больше 10 приглашений сразу",
+  "flushSeconds": 30,
+  "_flushSeconds": "[решение: бюджет DataStore] прогресс поручений сбрасывается в документ банды раз в 30 с одним UpdateAsync",
+  "pvpDefault": false,
+  "_pvpDefault": "[клиент gang.settings.pvp; по умолчанию — решение] урон по своим выкл.",
+  "treasury": {
+    "base": 50000,
+    "perLevel": 50000,
+    "minDeposit": 1,
+    "log": 30
+  },
+  "_treasury": "[клиент gang.treasury.*] минимум 1 $, выводят Заместитель и Лидер, история транзакций; [решение] потолок 50 000 $ + 50 000 $ за уровень «Казны», 30 записей",
+  "quests": {
+    "firstAfterHours": 6,
+    "dayOffsetHours": 3,
+    "daily": 3,
+    "weekly": 2,
+    "goal": 1,
+    "levelDivisor": 25,
+    "targets": {
+      "dig": 2000,
+      "mobs": 60,
+      "boss": 1500,
+      "sell": 5000,
+      "pvp": 10
+    },
+    "weeklyMultiplier": 5,
+    "goalMultiplier": 3,
+    "points": {
+      "daily": 20,
+      "weekly": 60,
+      "goal": 40
+    },
+    "booster": {
+      "mult": 1.5,
+      "minutes": 15
+    },
+    "boosterKind": {
+      "dig": "blocks",
+      "mobs": "mobs",
+      "boss": "mobs",
+      "sell": "money",
+      "pvp": "money"
+    }
+  },
+  "_quests": "[клиент gang.quests.*] виды заданий и типы «Ежедневные / Еженедельные / Цель», первые через 6 ч; [решение] 3 ежедневных (00:00 МСК = UTC+3), 2 еженедельных (понедельник), 1 цель (новая сразу); ежедневные: блоки 2 000·k, мобы 60·k, урон боссам 1 500·k, продажи 5 000 $·k, убийства игроков 10·k, k = 1 + средний уровень / 25; еженедельные ×5, цель ×3; награда 20 / 60 / 40 очков и бустер банды ×1,5 на 15 мин (вид — по заданию: блоки → блоки, мобы и боссы → мобы, продажи и игроки → деньги) [клиент: бустеры поручений слабее магазинных]",
+  "upgrades": [
+    {
+      "id": "members",
+      "tab": "boosts",
+      "max": 10,
+      "currency": "points",
+      "cost": 40,
+      "effect": 1,
+      "icon": "gang_members",
+      "fallback": "hud_faction"
+    },
+    {
+      "id": "treasury",
+      "tab": "boosts",
+      "max": 10,
+      "currency": "points",
+      "cost": 30,
+      "effect": 50000,
+      "icon": "gang_treasury",
+      "fallback": "money_bag"
+    },
+    {
+      "id": "chests",
+      "tab": "boosts",
+      "max": 16,
+      "start": 1,
+      "currency": "points",
+      "cost": 25,
+      "effect": 27,
+      "icon": "ordinaryCase"
+    },
+    {
+      "id": "library",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "treasury",
+      "cost": 5000,
+      "icon": "ancient_book"
+    },
+    {
+      "id": "forge",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "treasury",
+      "cost": 10000,
+      "icon": "skill_anvil"
+    },
+    {
+      "id": "ghetto",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "treasury",
+      "cost": 1500,
+      "icon": "menu_locations"
+    },
+    {
+      "id": "luck",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 60,
+      "effect": 0.01,
+      "icon": "skill_lucky"
+    },
+    {
+      "id": "conversion",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 60,
+      "effect": 0.01,
+      "icon": "hud_blocks"
+    },
+    {
+      "id": "stamina",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 50,
+      "effect": 0.06,
+      "icon": "trainer_needs"
+    },
+    {
+      "id": "punisher",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 50,
+      "effect": 0.01,
+      "icon": "soap"
+    },
+    {
+      "id": "hunter",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 60,
+      "effect": 0.02,
+      "icon": "skill_hunter"
+    }
+  ],
+  "_upgrades": "[клиент gang.upgrades.*: 11 улучшений, вкладки «Прокачки» и «Перки»] названия; [сеть S7] у «Сундуков» до 32 двойных сундуков (у нас 16 уровней по 27 слотов, 1 дан сразу — решение); [вики] Гетто 1 500 $ (из казны — решение); [решение] остальные уровни, цены (cost × следующий уровень очков, разовые — $ из казны) и эффекты: Участники +1 слот, Казна +50 000 $, Фарт +1 % дубль предмета, Конверсия +1 % дубль блока в статистике, Выносливость −6 % убывания нужд, Каратель 1 % полностью восстановить нужду при убывании, Охотник +2 % двойного убийства моба; покупают Лидер и Заместитель [сеть TG/24]"
+}

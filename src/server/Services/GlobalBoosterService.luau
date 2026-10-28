@@ -1,5 +1,5 @@
 --!strict
--- Faction and global boosters, shared by every server [вики: «действует на Вашу фракцию / на всех онлайн игроков»;
+-- Faction, gang and global boosters, shared by every server [вики: «действует на Вашу фракцию / на всех онлайн игроков»;
 -- владелец 27.10: «если кто-то активировал бустер для всех, там его ник»]. One MemoryStore sorted-map key holds the
 -- list of running and queued shared boosters plus the ids of recent activations (`ops`, kept a day after the end):
 -- UpdateAsync appends atomically, so two servers starting boosters at once queue them correctly, and an activation
@@ -105,7 +105,7 @@ function GlobalBoosterService.add(entry: Boosters.Active, minutes: number): Boos
 				record.list,
 				entry.kind,
 				Boosters.scopeOf(entry),
-				entry.faction,
+				Boosters.ownerOf(entry),
 				now
 			)
 			local new = table.clone(entry)
@@ -142,7 +142,14 @@ local function announce(a: Boosters.Active)
 	local minutes = math.floor((a.endsAt - a.startsAt) / 60 + 0.5)
 	for _, player in ipairs(Players:GetPlayers()) do
 		local p = ProfileService.Get(player)
-		if p and (scope == "global" or (scope == "faction" and p.faction == a.faction)) then
+		if
+			p
+			and (
+				scope == "global"
+				or (scope == "faction" and p.faction == a.faction)
+				or (scope == "gang" and p.gang ~= nil and p.gang.id == a.gang)
+			)
+		then
 			local locale = Strings.localeOf(player)
 			Remotes.event("Toast"):FireClient(
 				player,
