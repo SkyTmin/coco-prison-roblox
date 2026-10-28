@@ -300,7 +300,7 @@ local function useConsumable(player: Player, slot: any)
 		return
 	end
 	-- potions: PotionService listens to UseConsumable itself
-	if Potions.isPotion(stack.id) then
+	if Potions.isUsable(stack.id) then
 		return
 	end
 	-- the oblivion scroll resets the skill tree [меню 26.10: «для сброса Ваших текущих навыков, чтобы обучиться новым»]

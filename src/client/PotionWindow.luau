@@ -2,12 +2,14 @@
 -- «Зельеварка» [вики POTIONS.md]: the Зельевар level, the modifiers in use and the stand's charge on top; the
 -- «Питьевое / Взрывное» switch (splash from Зельевар III); good and bad effects with their durations (only the
 -- column of the chosen kind works); «Улучшить» (×1.7, one modifier) and «Создать» (PotionBrew). Rules: Shared/Potions.
--- Built once, updated in place; the charge bar ticks every second while the window is open.
+-- Built once, updated in place; the charge bar ticks every second while the window is open. While the stand charges,
+-- «Перезарядить» uses a «Перезарядка стойки» from the inventory or buys one for crystals (a second tap confirms).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Effects = require(Shared.Effects)
 local Potions = require(Shared.Potions)
 local Remotes = require(Shared.Remotes)
@@ -75,14 +77,40 @@ function PotionWindow.build(
 	local chargeLabel = Kit.text(
 		head,
 		"",
-		UDim2.fromOffset(250, 20),
-		UDim2.new(1, -262, 0, 7),
+		UDim2.fromOffset(210, 20),
+		UDim2.new(1, -222, 0, 7),
 		13,
 		Color3.new(1, 1, 1),
 		Kit.BOLD
 	)
 	chargeLabel.TextXAlignment = Enum.TextXAlignment.Right
-	local chargeBar = Kit.bar(head, UDim2.fromOffset(250, 14), UDim2.new(1, -262, 0, 32), CHARGE)
+	local chargeBar = Kit.bar(head, UDim2.fromOffset(210, 14), UDim2.new(1, -222, 0, 32), CHARGE)
+	-- «Перезарядка стойки» [вики: 39 кристаллов]: uses the item from the inventory, or buys one (two taps)
+	local recharge = Instance.new("TextButton")
+	recharge.AutoButtonColor = false
+	recharge.Text = ""
+	recharge.BackgroundColor3 = Color3.fromRGB(70, 52, 18)
+	recharge.Size = UDim2.fromOffset(140, 34)
+	recharge.Position = UDim2.new(1, -372, 0, 12)
+	recharge.Parent = head
+	Kit.corner(recharge, 8)
+	Kit.stroke(recharge, CHARGE, 1.5, 0.2)
+	Kit.pressable(recharge)
+	Kit.hoverable(recharge, Color3.fromRGB(70, 52, 18), Color3.fromRGB(96, 72, 24))
+	Kit.image(recharge, icons.stand_recharge, UDim2.fromOffset(26, 26), UDim2.fromOffset(6, 4)).Active =
+		false
+	local rechargeLabel = Kit.text(
+		recharge,
+		"",
+		UDim2.new(1, -40, 1, 0),
+		UDim2.fromOffset(36, 0),
+		13,
+		Color3.new(1, 1, 1),
+		Kit.BOLD
+	)
+	rechargeLabel.Active = false
+	Kit.fit(rechargeLabel)
+	local confirmUntil = 0
 
 	-- the kind switch
 	local kindButtons: { [string]: { button: TextButton, stroke: UIStroke, lock: ImageLabel } } = {}
@@ -341,8 +369,36 @@ function PotionWindow.build(
 		end
 		Remotes.event("PotionBrew"):FireServer(mode, ids(), upgraded)
 	end)
+	local function rechargeSlot(): number?
+		local inventory = profile and profile.inventory
+		if not inventory then
+			return nil
+		end
+		for slot, stack in pairs(inventory) do
+			if stack.id == Potions.RECHARGE then
+				return slot
+			end
+		end
+		return nil
+	end
+	recharge.Activated:Connect(function()
+		local slot = rechargeSlot()
+		if slot then
+			Remotes.event("UseConsumable"):FireServer(slot)
+		elseif os.clock() < confirmUntil then
+			confirmUntil = 0
+			Remotes.event("DonateBuy"):FireServer(Potions.RECHARGE, 1)
+		else
+			confirmUntil = os.clock() + 3
+		end
+		refresh(profile)
+	end)
 	local result = Remotes.event("PotionResult").OnClientEvent:Connect(function(what: string)
-		if what == "brewed" then
+		if what == "recharged" then
+			Kit.flash(head, CHARGE)
+			Kit.pop(standIcon, 1.25)
+			refresh(profile)
+		elseif what == "brewed" then
 			chosen[mode] = {}
 			upgraded = false
 			warning = nil
@@ -372,6 +428,19 @@ function PotionWindow.build(
 		local free = creative()
 		local charge = if free then 1 else Potions.charge(p, now)
 		chargeBar.set(charge)
+		recharge.Visible = charge < 1 and level > 0
+		if recharge.Visible then
+			local slot = rechargeSlot()
+			local stack = slot and p and p.inventory[slot]
+			local price = Donate.item(Potions.RECHARGE)
+			rechargeLabel.Text = if stack
+				then t("potions_recharge_use", stack.count)
+				elseif os.clock() < confirmUntil then t(
+					"potions_recharge_confirm",
+					price and price.price or 0
+				)
+				else t("potions_recharge_buy", price and price.price or 0)
+		end
 		chargeLabel.Text = if charge >= 1
 			then t("potions_charge", 100)
 			else t(

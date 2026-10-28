@@ -2825,7 +2825,7 @@ local function isNeedConsumable(): boolean
 		or stack.id == Donate.AUTOSELL
 		or stack.id == Donate.AUCTION_SLOT
 		or stack.id == "oblivion_scroll" -- resets the skill tree (SkillService)
-		or require(Shared.Potions).isPotion(stack.id) -- drink / throw (PotionService)
+		or require(Shared.Potions).isUsable(stack.id) -- drink / throw / charge the stand (PotionService)
 		or Boosters.fromItem(stack.id) ~= nil
 	then
 		return true

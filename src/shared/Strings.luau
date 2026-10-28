@@ -1283,6 +1283,48 @@ local STRINGS: { [string]: Entry } = {
 		es = "¡%s lista!",
 		fr = "%s est prête !",
 	},
+	item_stand_recharge = {
+		ru = "Перезарядка стойки",
+		en = "Stand recharge",
+		es = "Recarga del alambique",
+		fr = "Recharge de l'alambic",
+	},
+	desc_stand_recharge = {
+		ru = "Мгновенно заряжает зельеварку [Z]. Нужен навык Зельевар. Возьмите в руку и нажмите «Использовать» — или кнопка «Перезарядить» в окне зельеварки.",
+		en = "Charges the potion stand [Z] at once. Needs the Brewer skill. Hold it and press «Use» — or the «Recharge» button in the stand window.",
+		es = "Carga el alambique [Z] al instante. Requiere la habilidad Alquimista. Tómala en la mano y pulsa «Usar», o el botón «Recargar» del alambique.",
+		fr = "Charge l'alambic [Z] tout de suite. Nécessite la compétence Alchimiste. Prenez-la en main et appuyez sur « Utiliser », ou le bouton « Recharger » de l'alambic.",
+	},
+	potions_recharged = {
+		ru = "Стойка заряжена!",
+		en = "The stand is charged!",
+		es = "¡Alambique cargado!",
+		fr = "L'alambic est chargé !",
+	},
+	potions_already_charged = {
+		ru = "Стойка уже заряжена",
+		en = "The stand is already charged",
+		es = "El alambique ya está cargado",
+		fr = "L'alambic est déjà chargé",
+	},
+	potions_recharge_use = {
+		ru = "Перезарядить (%d)",
+		en = "Recharge (%d)",
+		es = "Recargar (%d)",
+		fr = "Recharger (%d)",
+	},
+	potions_recharge_buy = {
+		ru = "Купить · %d",
+		en = "Buy · %d",
+		es = "Comprar · %d",
+		fr = "Acheter · %d",
+	},
+	potions_recharge_confirm = {
+		ru = "Точно? %d",
+		en = "Sure? %d",
+		es = "¿Seguro? %d",
+		fr = "Sûr ? %d",
+	},
 	item_potion_drink = {
 		ru = "Питьевое зелье",
 		en = "Drinkable potion",

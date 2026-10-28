@@ -27,6 +27,14 @@ function Potions.isPotion(id: string): boolean
 	return id == Potions.ITEMS.drink or id == Potions.ITEMS.splash
 end
 
+-- «Перезарядка стойки» from the donate shop [вики DONATE-SHOP-BOOSTERS.md]: used from the hand, charges the stand
+Potions.RECHARGE = "stand_recharge"
+
+-- items PotionService uses from the hand (UseConsumable)
+function Potions.isUsable(id: string): boolean
+	return Potions.isPotion(id) or id == Potions.RECHARGE
+end
+
 function Potions.list(kind: Kind): { Entry }
 	return if kind == "splash" then Potions.negative else Potions.positive
 end

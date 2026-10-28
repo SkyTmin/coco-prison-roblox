@@ -2,7 +2,8 @@
 -- The potion stand [вики POTIONS.md] (rules: Shared/Potions). PotionBrew(kind, effectIds, upgraded) brews one potion
 -- into the inventory and empties the stand (profile.potionBrewedAt); Creative skips the charge. A potion in the hand
 -- is used with UseConsumable(slot, aim): a drinkable one gives its effects to the drinker (NeedsService.GiveEffect),
--- a splash one flies along `aim` (the camera's look) and bursts where it lands (BookService.Splash).
+-- a splash one flies along `aim` (the camera's look) and bursts where it lands (BookService.Splash). The donate item
+-- «Перезарядка стойки» (stand_recharge) used the same way charges the stand at once.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -224,6 +225,41 @@ local function throw(player: Player, slot: number, aim: any)
 	end)
 end
 
+-- «Перезарядка стойки» [вики]: needs Зельевар, one item charges the stand at once; a charged stand keeps the item
+local function recharge(player: Player, slot: number)
+	local profile = ProfileService.Get(player)
+	if Potions.modifiers(profile) < 1 then
+		toast(player, "potions_need_skill")
+		return
+	end
+	if Potions.charge(profile, workspace:GetServerTimeNow()) >= 1 then
+		toast(player, "potions_already_charged")
+		return
+	end
+	local done = false
+	ProfileService.Mutate(player, function(p)
+		local stack = p.inventory[slot]
+		if not stack or stack.id ~= Potions.RECHARGE then
+			return
+		end
+		if stack.count > 1 then
+			stack.count -= 1
+		else
+			p.inventory[slot] = nil
+		end
+		p.potionBrewedAt = nil
+		done = true
+	end)
+	if done then
+		local root = rootOf(player)
+		if root then
+			Sfx.broadcast("xp", root, 0.8, 1.5)
+		end
+		toast(player, "potions_recharged")
+		Remotes.event("PotionResult"):FireClient(player, "recharged")
+	end
+end
+
 local function onUse(player: Player, slot: any, aim: any)
 	if not InventoryService.isSlot(slot) then
 		return
@@ -231,10 +267,14 @@ local function onUse(player: Player, slot: any, aim: any)
 	local profile = ProfileService.Get(player)
 	local stack = profile and profile.inventory[slot]
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	if not stack or not Potions.isPotion(stack.id) or not humanoid or humanoid.Health <= 0 then
+	if not stack or not Potions.isUsable(stack.id) or not humanoid or humanoid.Health <= 0 then
 		return
 	end
 	if busy(player) then
+		return
+	end
+	if stack.id == Potions.RECHARGE then
+		recharge(player, slot)
 		return
 	end
 	if stack.id == Potions.ITEMS.splash then
