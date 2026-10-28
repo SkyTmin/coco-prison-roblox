@@ -43,6 +43,7 @@ write("levels.json", {
 	moneySpent: true,
 	levels,
 	skills: decisions.skills, // the skill tree [меню 26.10, SKILL-TREE.md] (Shared/Skills)
+	potions: decisions.potions, // the potion stand [вики POTIONS.md] (Shared/Potions)
 });
 
 // ---------------------------------------------------------------- blocks + locations

@@ -11,6 +11,7 @@ local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
 local Effects = require(Shared.Effects)
+local Potions = require(Shared.Potions)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -158,6 +159,13 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 			setEffect(character, attribute, if eventName == name then 1 else nil, eventEnds)
 		end
 	end
+	local fireproof = own.FireResistance
+	setEffect(
+		character,
+		"FireResistance",
+		if fireproof then fireproof.level else nil,
+		if fireproof then fireproof.endsAtServer else nil
+	)
 	local absorption = own.Absorption
 	setEffect(
 		character,
@@ -289,6 +297,10 @@ local function useConsumable(player: Player, slot: any)
 		if used then
 			toast(player, "location_pass_used")
 		end
+		return
+	end
+	-- potions: PotionService listens to UseConsumable itself
+	if Potions.isPotion(stack.id) then
 		return
 	end
 	-- the oblivion scroll resets the skill tree [меню 26.10: «для сброса Ваших текущих навыков, чтобы обучиться новым»]
@@ -523,7 +535,10 @@ function NeedsService.GiveEffect(player: Player, effect: string, level: number, 
 	if not character or not state or not profile then
 		return
 	end
-	local attribute = string.upper(string.sub(effect, 1, 1)) .. string.sub(effect, 2)
+	local known = Effects.byId(effect)
+	local attribute = if known
+		then known.attribute
+		else string.upper(string.sub(effect, 1, 1)) .. string.sub(effect, 2)
 	local own = timed[player] or {}
 	timed[player] = own
 	local old = own[attribute]

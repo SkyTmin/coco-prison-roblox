@@ -16,6 +16,7 @@ local Books = require(Shared.Books)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
+local Potions = require(Shared.Potions)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -62,6 +63,7 @@ local STATUSES = {
 	"Glowing",
 	"Dazed",
 	"Slowed",
+	"Hunger", -- a splash potion's (PotionService)
 }
 local DOTS = { "Poison", "Wither", "Burning" }
 
@@ -306,6 +308,49 @@ local function fireZone(attacker: Player, model: Model)
 	end)
 end
 
+-- A splash potion bursts at `center` [вики POTIONS.md, ванильный радиус]: its bad effects on everyone in the radius
+-- that the thrower may hurt (players under the PvP rules, mobs; not the thrower); the closer, the longer [ваниль]
+function BookService.Splash(
+	attacker: Player,
+	center: Vector3,
+	radius: number,
+	effects: { { id: string, seconds: number } }
+)
+	for _, model in ipairs(livingModels()) do
+		local root = rootOf(model)
+		local humanoid = humanoidOf(model)
+		if
+			model == attacker.Character
+			or not root
+			or not humanoid
+			or humanoid.Health <= 0
+			or not mayHurt(attacker, model)
+		then
+			continue
+		end
+		local distance = (root.Position - center).Magnitude
+		if distance > radius * BLOCK then
+			continue
+		end
+		local share = 1 - 0.75 * distance / (radius * BLOCK)
+		local player = Players:GetPlayerFromCharacter(model)
+		for _, effect in ipairs(effects) do
+			local seconds = effect.seconds * share
+			if effect.id == "slowness" then
+				playerEffect(model, "slowness", 1, seconds)
+			elseif effect.id == "hunger" then
+				if player then
+					setStatus(model, "Hunger", 1, seconds, attacker)
+				end
+			elseif effect.id == "blindness" then
+				setStatus(model, "Blindness", 1, seconds, attacker)
+			elseif effect.id == "weakness" then
+				setStatus(model, "Weakness", 1, seconds, attacker)
+			end
+		end
+	end
+end
+
 -- ---------------------------------------------------------------- combat: blows given
 export type Hit = { boxer: boolean }
 
@@ -320,6 +365,8 @@ function BookService.outgoing(
 	local hit: Hit = { boxer = false }
 	local character = attacker.Character
 	local humanoid = character and humanoidOf(character)
+	-- Сила: +3 per level [ваниль] (a potion, the random event)
+	damage += Potions.STRENGTH_DAMAGE * Effects.level(character, "Strength")
 	if character and BookService.active(character, "Weakness") > 0 then
 		damage *= 1 - Effects.WEAKNESS
 	end
@@ -748,7 +795,11 @@ local function tickModel(model: Model, t: number)
 	end
 	if humanoid.Health > 0 then
 		for _, status in ipairs(DOTS) do
-			if BookService.active(model, status) > 0 then
+			-- Огнестойкость: no burning [ваниль]
+			if
+				BookService.active(model, status) > 0
+				and not (status == "Burning" and Effects.level(model, "FireResistance") > 0)
+			then
 				local due = ticks[status] or (t + DOT_EVERY)
 				ticks[status] = due
 				if t >= due then

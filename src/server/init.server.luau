@@ -129,6 +129,7 @@ BowService.Start()
 LocationService.Start()
 TrainerService.Start()
 require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
+require(script.Services.PotionService).Start() -- the potion stand: brewing, drinking, splash potions
 FallService.Start()
 LavaService.Start()
 LightingService.Start()

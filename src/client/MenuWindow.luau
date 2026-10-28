@@ -26,6 +26,7 @@ MenuWindow.ENTRIES = {
 	{ kind = "auction", caption = "auction_title", key = "Y" },
 	{ kind = "artifacts", caption = "artifacts", key = "I" },
 	{ kind = "skills", caption = "skills", key = "T" }, -- «Умения» (древо навыков) [вики]
+	{ kind = "potions", caption = "potions", key = "Z" }, -- «Зельеварка» [вики POTIONS.md]
 	{ kind = "factions", caption = "factions_title", key = "G" },
 	{ kind = "donate", caption = "donate_title", key = "N" },
 	{ kind = "inventory", caption = "inventory", key = "E" },

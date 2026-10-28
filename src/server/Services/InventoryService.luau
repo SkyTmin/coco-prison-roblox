@@ -26,6 +26,8 @@ function InventoryService.isStackable(id: string): boolean
 		and not id:match("_pass$")
 		and id ~= "autosell"
 		and id ~= "needs_injection"
+		and id ~= "potion_drink" -- every potion has its own effects and brewer
+		and id ~= "potion_splash"
 end
 
 -- Adds `count` of item; returns the amount that did not fit.

@@ -7,6 +7,8 @@ local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Effects = require(Shared.Effects)
+local Potions = require(Shared.Potions)
 local ProfileService = require(script.Parent.ProfileService)
 
 local rules = Config.rules.survival.hunger
@@ -84,6 +86,8 @@ local function update(dt: number)
 				then rules.drainPerSprintSecond
 				else rules.drainPerWalkSecond) * dt
 		end
+		-- Голод from a splash potion [решение: hungerPerSecond]
+		cost += Potions.HUNGER_PER_SECOND * Effects.level(character, "Hunger") * dt
 		drain(player, cost)
 		local hunger = profile.hunger
 		local saturation = profile.saturation or 0

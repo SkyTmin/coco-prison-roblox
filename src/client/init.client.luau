@@ -1874,6 +1874,12 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	potions = function() -- «Зельеварка» [Z]
+		local win, refresh =
+			require(script.PotionWindow).build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	upgrade = function()
 		local win, refresh =
 			require(script.UpgradeWindow).build(gui, profile, locale, closeWindow, createWindow)
@@ -2819,6 +2825,7 @@ local function isNeedConsumable(): boolean
 		or stack.id == Donate.AUTOSELL
 		or stack.id == Donate.AUCTION_SLOT
 		or stack.id == "oblivion_scroll" -- resets the skill tree (SkillService)
+		or require(Shared.Potions).isPotion(stack.id) -- drink / throw (PotionService)
 		or Boosters.fromItem(stack.id) ~= nil
 	then
 		return true
@@ -2962,6 +2969,7 @@ local menuKeys = {
 	"auction",
 	"artifacts",
 	"skills",
+	"potions",
 	"factions",
 	"donate",
 }
@@ -3322,7 +3330,9 @@ local function useConsumable()
 			open("book")
 			return
 		end
-		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
+		-- a splash potion flies where the camera looks (PotionService)
+		Remotes.event("UseConsumable")
+			:FireServer(profile.selectedSlot, workspace.CurrentCamera.CFrame.LookVector)
 	end
 end
 -- Throw the held item like Minecraft: Q one item, Ctrl+Q the whole stack; on a phone hold a hotbar
@@ -3547,6 +3557,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("boosters") -- «Хранилище бустеров» [решение: клавиша]
 	elseif k == Enum.KeyCode.T then
 		open("skills") -- «Умения» [решение: клавиша; в оригинале /skills]
+	elseif k == Enum.KeyCode.Z then
+		open("potions") -- «Зельеварка» [решение: клавиша]
 	elseif k == Enum.KeyCode.Y then
 		open("auction") -- «Аукцион» [решение: клавиша; в оригинале /ah]
 	elseif k == Enum.KeyCode.X then

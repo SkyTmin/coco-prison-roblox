@@ -9,6 +9,8 @@
 -- Colours are Minecraft's formatting codes.
 
 local Config = require(script.Parent.Config)
+local Effects = require(script.Parent.Effects)
+local Potions = require(script.Parent.Potions)
 local Strings = require(script.Parent.Strings)
 local Types = require(script.Parent.Types)
 
@@ -281,6 +283,23 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			end
 		end
 	end
+	-- a brewed potion [вики POTIONS.md: «Регенерация (0:12) / Создано игроком …»]: good effects blue, bad red
+	local potion = stack.potion
+	if potion then
+		for _, entry in ipairs(potion.effects) do
+			local effect = Effects.byId(entry.id)
+			add(
+				t("tip_potion_effect", t("effect_" .. entry.id), Potions.clock(entry.seconds)),
+				if effect and effect.harmful then RED else BLUE
+			)
+		end
+		if potion.upgraded then
+			add(t("tip_potion_upgraded", number(Potions.UPGRADE, locale)), GOLD)
+		end
+		if potion.by then
+			add(t("tip_potion_by", potion.by), DARK_GRAY)
+		end
+	end
 	local descKey = "desc_" .. id
 	if Strings.has(descKey, locale) then
 		add(t(descKey), GRAY)
@@ -296,6 +315,7 @@ end
 local NOT_ITEMS: { [string]: boolean } = {
 	money = true,
 	potion = true,
+	potion_upgrade = true, -- the «Улучшить» picture of the potion stand
 	key_ordinary = true,
 	ordinaryCase = true,
 	ordinary_case = true,

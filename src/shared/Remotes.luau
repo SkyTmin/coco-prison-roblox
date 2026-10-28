@@ -29,6 +29,8 @@
 -- Client → server:        DonateBuy(itemId, count), DonateTopUp(packId), DonateBuyRobux(itemId), StashClaim(index) — the donate shop (DonateService); server →
 --                         client DonateBought(itemId, count) after a purchase, DonateCrystals(amount) after a top-up
 -- Client → server:        SkillBuy(branchId) — the next level of a skill-tree branch (SkillService)
+-- Client → server:        PotionBrew(kind, effectIds, upgraded) — brew at the potion stand; UseConsumable(slot, aim) drinks
+--                         or throws a potion (PotionService); server → client PotionResult("brewed")
 -- Client → server:        SetHudLayout(mode, layout?) — the player's moved HUD buttons (ProfileService, HudLayout.luau)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

@@ -3,7 +3,7 @@
 -- for a while after leaving it, 1 damage a second. Lava parts are tagged Lava (scripts/build-underworld.luau:
 -- the lava sea, the river, the pools, the lavafalls). The check is a box at the feet against the tagged parts
 -- only; a Fire on the root shows the burning to everyone. Creative players do not burn. Lava deaths are not
--- player/mob/boss deaths (LastHitBy cleared, stats untouched).
+-- player/mob/boss deaths (LastHitBy cleared, stats untouched). Огнестойкость (a potion) protects like Creative.
 -- The void net: parts tagged VoidCatch (attribute LocationId) lie under floating locations (Пустотная крепость:
 -- scripts/build-end-castle.luau); a player who falls into one is put back on that location's arrival point with
 -- VOID_DAMAGE [решение] instead of falling for kilometres.
@@ -11,6 +11,8 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Effects = require(ReplicatedStorage:WaitForChild("Shared").Effects)
 local HurtService = require(script.Parent.HurtService)
 
 local LAVA_DAMAGE = 4 -- [ваниль] per 0.5 s in lava
@@ -128,7 +130,11 @@ function LavaService.Start()
 					burnUntil[player] = nil
 					continue
 				end
-				if player:GetAttribute("Creative") == true then
+				-- Огнестойкость (a potion): lava and fire do nothing [ваниль]
+				if
+					player:GetAttribute("Creative") == true
+					or Effects.level(character, "FireResistance") > 0
+				then
 					burnUntil[player] = nil
 					setFire(root, false)
 					continue

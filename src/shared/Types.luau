@@ -19,6 +19,8 @@ export type ItemStack = {
 	rarity: string?, -- rolled ancient book rarity
 	applyChance: number?, -- ancient book application percentage
 	coins: number?, -- unclaimed case money bag, in 1/moneyScale
+	-- a brewed potion (Shared/Potions): effects with their seconds, «Улучшить», the brewer's name
+	potion: { effects: { { id: string, seconds: number } }, upgraded: boolean?, by: string? }?,
 }
 
 export type ArtifactTier = {
@@ -78,6 +80,7 @@ export type Profile = {
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
 	skills: { [string]: number }?, -- the skill tree: branch id → bought levels (Shared/Skills); schema stays v3
+	potionBrewedAt: number?, -- server time of the last brew: the potion stand charges from it (Shared/Potions)
 	nickname: string?, -- shown as a prefix of the display name
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3

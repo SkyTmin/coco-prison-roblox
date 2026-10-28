@@ -78,6 +78,14 @@ Effects.list = {
 		color = Color3.fromRGB(31, 31, 35),
 		harmful = true,
 	},
+	-- the potion stand's effects (PotionService) [вики POTIONS.md; цвета — ваниль]
+	{
+		id = "fire_resistance",
+		attribute = "FireResistance",
+		color = Color3.fromRGB(228, 154, 58),
+		harmful = false,
+	},
+	{ id = "hunger", attribute = "Hunger", color = Color3.fromRGB(88, 118, 83), harmful = true },
 	{ id = "cursed", attribute = "Cursed", color = Color3.fromRGB(120, 40, 140), harmful = true },
 	{ id = "glowing", attribute = "Glowing", color = Color3.fromRGB(148, 160, 97), harmful = true },
 } :: { Effect }
@@ -91,6 +99,28 @@ Effects.HULK_SLOWNESS = 0.15
 -- Vanilla movement modifiers [ваниль]: Slowness −15 % and Speed +20 % per level.
 Effects.SLOWNESS_PER_LEVEL = 0.15
 Effects.SPEED_PER_LEVEL = 0.2
+
+function Effects.byId(id: string): Effect?
+	for _, effect in ipairs(Effects.list) do
+		if effect.id == id then
+			return effect
+		end
+	end
+	return nil
+end
+
+-- the level of an effect on a model now (0 = none); no <attribute>Until = it lasts while its cause lasts
+function Effects.level(model: Instance?, attribute: string): number
+	local level = model and model:GetAttribute(attribute)
+	if typeof(level) ~= "number" or level <= 0 then
+		return 0
+	end
+	local ends = (model :: Instance):GetAttribute(attribute .. Effects.UNTIL)
+	if typeof(ends) == "number" and ends <= workspace:GetServerTimeNow() then
+		return 0
+	end
+	return level
+end
 
 -- Active effects on a character, in display order.
 function Effects.active(

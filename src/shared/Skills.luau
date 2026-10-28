@@ -5,7 +5,7 @@
 --   * Оружейник III / V — armor upgrades 13 → 14 / 14 → 15 (Config.requirementHave "Оружейник");
 --   * Счастливчик — +keyChanceBonus × level to the ordinary key chance while digging (DigService);
 --   * Охотник — doubleKill[level] chance that a mob kill counts twice in the stats (MobService);
---   * Зельевар — no potion stand yet: the levels are bought and wait for it.
+--   * Зельевар — the potion stand's modifiers, faster recharge, splash potions from III (Shared/Potions).
 local Config = require(script.Parent.Config)
 local Types = require(script.Parent.Types)
 
