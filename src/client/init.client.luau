@@ -1918,6 +1918,13 @@ local windowBuilders: { [string]: () -> Frame } = {
 	casePreview = function()
 		return require(script.CasePreviewWindow).build(gui, locale, closeWindow, createWindow)
 	end,
+	-- a book / powder / dispeller in the hand → «Использовать»: pick the item [владелец 28.10]
+	book = function()
+		local win, refresh =
+			require(script.BookWindow).build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	locations = buildLocations,
 	factions = function()
 		local win, refresh =
@@ -2757,7 +2764,8 @@ local function isNeedConsumable(): boolean
 	local Donate = require(Shared.Donate)
 	local Boosters = require(Shared.Boosters)
 	if
-		stack.id == Config.needs.injection.item
+		require(Shared.Books).isUsable(stack.id) -- an ancient book, powder, a dispeller: the book window
+		or stack.id == Config.needs.injection.item
 		or stack.id == Donate.AUTOSELL
 		or stack.id == Donate.AUCTION_SLOT
 		or Boosters.fromItem(stack.id) ~= nil
@@ -3268,6 +3276,12 @@ do
 end
 local function useConsumable()
 	if profile then
+		local stack = profile.inventory[profile.selectedSlot]
+		if stack and require(Shared.Books).isUsable(stack.id) then
+			require(script.BookWindow).sourceSlot = profile.selectedSlot
+			open("book")
+			return
+		end
 		Remotes.event("UseConsumable"):FireServer(profile.selectedSlot)
 	end
 end

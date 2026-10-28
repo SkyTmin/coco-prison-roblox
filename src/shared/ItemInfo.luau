@@ -86,7 +86,7 @@ function ItemInfo.bookName(bookId: string, level: number, locale: string): strin
 	return name .. " " .. roman(level)
 end
 
-local function bookDescription(bookId: string, level: number, locale: string): string?
+function ItemInfo.bookDescription(bookId: string, level: number, locale: string): string?
 	local key = "book_desc_" .. bookId
 	if not Strings.has(key, locale) then
 		return nil
@@ -151,7 +151,7 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 		end
 		for _, book in ipairs(books) do
 			add(ItemInfo.bookName(book.id, book.level, locale), LIGHT_PURPLE)
-			local description = bookDescription(book.id, book.level, locale)
+			local description = ItemInfo.bookDescription(book.id, book.level, locale)
 			if description then
 				add("  " .. description, DARK_GRAY, true)
 			end
@@ -213,7 +213,7 @@ function ItemInfo.lines(stack: Types.ItemStack, locale: string): { Line }
 			if Strings.has("rarity_" .. rarity, locale) then
 				add(t("rarity_" .. rarity), RARITY_COLORS[rarity] or WHITE)
 			end
-			local description = bookDescription(book.id, book.level, locale)
+			local description = ItemInfo.bookDescription(book.id, book.level, locale)
 			if description then
 				add(description, GRAY)
 			end

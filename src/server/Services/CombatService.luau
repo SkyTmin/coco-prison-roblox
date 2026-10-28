@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local BookService = require(script.Parent.BookService)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
@@ -36,12 +37,14 @@ function CombatService.MarkHit(player: Player, source: "player" | "boss" | "mob"
 	player:SetAttribute("LastCombatAt", now)
 end
 
--- Validated combat callers use this entry point so attribution precedes a lethal hit.
+-- Validated combat callers use this entry point so attribution precedes a lethal hit. attackerModel (a mob or a
+-- boss; a player's character by default) is who the armor books answer (BookService.afterHurt).
 function CombatService.ApplyDamage(
 	humanoid: Humanoid,
 	amount: number,
 	source: "player" | "boss" | "mob",
-	attacker: Player?
+	attacker: Player?,
+	attackerModel: Model?
 )
 	if amount ~= amount or amount <= 0 or amount == math.huge or humanoid.Health <= 0 then
 		return
@@ -64,6 +67,15 @@ function CombatService.ApplyDamage(
 		-- worn armor and Protection soften blows from players, mobs and bosses [ваниль]
 		local profile = ProfileService.Get(victim)
 		amount = Combat.armorReduce(amount, profile and profile.armor)
+		if profile then
+			-- the armor's ancient books: Шныр, Халк, and the answers to the attacker
+			local by = attackerModel or (if attacker then attacker.Character else nil)
+			amount = BookService.incoming(victim, profile, amount, source, by)
+			local before = humanoid.Health
+			HurtService.Damage(humanoid, amount)
+			BookService.afterHurt(victim, profile, before - humanoid.Health, by)
+			return
+		end
 	else
 		humanoid:SetAttribute(
 			"LastHitBy",
@@ -228,8 +240,14 @@ function CombatService.HitModel(
 	model: Model,
 	damage: number,
 	crit: boolean,
-	look: Vector3
+	look: Vector3,
+	weapon: Types.ItemStack?, -- the bow an arrow left (melee: the held item)
+	ranged: boolean?
 ): string
+	-- the weapon's ancient books (BookService): Берсерк, Боксёр, Ярость before the blow, the rest after it
+	weapon = weapon or profile.inventory[profile.selectedSlot]
+	local bookHit
+	damage, bookHit = BookService.outgoing(player, weapon, model, damage)
 	local target = model:FindFirstChildOfClass("Humanoid")
 	if not target or target.Health <= 0 then
 		return "blocked"
@@ -255,6 +273,16 @@ function CombatService.HitModel(
 				elseif dealt > 0 then "hit"
 				else "blocked"
 			confirm:FireClient(player, model, dealt, crit, result)
+			BookService.afterHit(
+				player,
+				profile,
+				weapon,
+				model,
+				dealt,
+				look,
+				ranged == true,
+				bookHit
+			)
 			return result
 		end
 		local result = if sameFaction then "ally" else "nopvp"
@@ -273,6 +301,7 @@ function CombatService.HitModel(
 	local dealt = before - target.Health
 	local result = if target.Health <= 0 then "killed" else "hit"
 	confirm:FireClient(player, model, dealt, crit, result)
+	BookService.afterHit(player, profile, weapon, model, dealt, look, ranged == true, bookHit)
 	return result
 end
 

@@ -30,6 +30,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
+local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
@@ -664,7 +665,7 @@ local function hurt(
 	amount: number,
 	from: Vector3
 )
-	CombatService.ApplyDamage(f.humanoid, amount, "boss")
+	CombatService.ApplyDamage(f.humanoid, amount, "boss", nil, boss.model)
 	HurtService.Knockback(
 		f.player.Character :: Model,
 		(f.root.Position - from) * Vector3.new(1, 0, 1)
@@ -1030,13 +1031,27 @@ local function reward(boss: Boss, lastHit: number?)
 		if share >= rules.minDamageShare then
 			-- [меню] the card says «0–350 $»: a share of the bank, the last hit +20 %, never above the bank
 			-- (a solo kill used to pay 350 × 1.2 = 420)
+			-- the weapon books Общак (a bigger share of the bank) and Старатель (more stars) at 35 % of the damage
+			local profile = ProfileService.Get(player)
+			local bankMult, starMult = 1, 1
+			if profile then
+				bankMult, starMult = BookService.bossBonus(profile, share)
+			end
 			local amount = math.min(
-				bank,
+				bank * bankMult,
 				math.floor(
-					bank * share * (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
+					bank
+						* share
+						* bankMult
+						* (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
 				)
 			)
 			local items = killItems(boss, share, lastHit == player.UserId)
+			if items.ancient_star and starMult > 1 then
+				local stars = items.ancient_star * starMult
+				items.ancient_star = math.floor(stars)
+					+ (if random:NextNumber() < stars % 1 then 1 else 0)
+			end
 			ProfileService.Mutate(player, function(p)
 				p.coins += amount
 				p.stats.bosses = (p.stats.bosses or 0) + 1

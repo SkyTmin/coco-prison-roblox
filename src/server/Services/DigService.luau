@@ -24,6 +24,7 @@ local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
+local BookService = require(script.Parent.BookService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local HungerService = require(script.Parent.HungerService)
 local AchievementService = require(script.Parent.AchievementService)
@@ -274,7 +275,8 @@ local function complete(player: Player, token: number)
 	end
 	queueBreakFx(player, brokenCFrame.Position, brokenSize, brokenColor, blockId)
 	local block = Config.block(blockId) :: Config.Block
-	local dropId = block.dropsAs or blockId
+	-- Шёлковое касание: the block drops itself
+	local dropId = if BookService.silkTouch(profileNow) then blockId else block.dropsAs or blockId
 	local dropCount = 1
 	local range = (block :: any).dropCount
 	if typeof(range) == "table" and #range == 2 then
@@ -361,6 +363,8 @@ local function complete(player: Player, token: number)
 		Remotes.event("AutoSold"):FireClient(player, sold)
 	end
 	sendCombo(player, combo)
+	-- the tool's ancient books: Барыга, Археолог, Молот, Пластолом
+	BookService.onDug(player, mine, i, dig.hit - brokenCFrame.Position, dropId, dropCount)
 end
 
 -- Token bucket per player [docs/research/server-scaling.md]: instant mining is 20 blocks a second, a

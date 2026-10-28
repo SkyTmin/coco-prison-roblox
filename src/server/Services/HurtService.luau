@@ -125,13 +125,15 @@ end
 -- applies it (remote Knockback); mobs and bosses are pushed here.
 -- Bosses are not pushed at all (every hit used to shove the golem out of reach), mobs a little less than
 -- players so a rat stays within reach of the next blow.
-function HurtService.Knockback(model: Model, direction: Vector3)
+-- strength / lift scale the push and the hop (the books Боксёр and Вихрь throw harder).
+function HurtService.Knockback(model: Model, direction: Vector3, strength: number?, lift: number?)
 	local flat = Vector3.new(direction.X, 0, direction.Z)
 	if flat.Magnitude < 0.01 or CollectionService:HasTag(model, "Boss") then
 		return
 	end
 	local scale = if CollectionService:HasTag(model, "Mob") then 0.6 else 1
-	local push = flat.Unit * KNOCKBACK_SPEED * scale + Vector3.new(0, KNOCKBACK_LIFT * scale, 0)
+	local push = flat.Unit * KNOCKBACK_SPEED * scale * (strength or 1)
+		+ Vector3.new(0, KNOCKBACK_LIFT * scale * (lift or 1), 0)
 	local victim = Players:GetPlayerFromCharacter(model)
 	if victim then
 		Remotes.event("Knockback"):FireClient(victim, push)

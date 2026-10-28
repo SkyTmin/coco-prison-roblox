@@ -28,6 +28,7 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local MotionService = require(script.Parent.MotionService)
 local HurtService = require(script.Parent.HurtService)
@@ -52,6 +53,8 @@ type Flying = {
 	crit: boolean,
 	flame: boolean,
 	creative: boolean,
+	saved: boolean, -- Экономия kept the arrow in the bag: the stuck one cannot be picked up
+	weapon: Types.ItemStack?, -- the bow it left (its ancient books: Мороз, Пожар, Вампиризм …)
 	ticks: number,
 	lag: number, -- s the shooter sees players behind the server clock: players are tested that far back
 }
@@ -155,15 +158,20 @@ local function onRelease(player: Player, direction: any, viewTime: any)
 		return
 	end
 	local isCreative = creative(player)
+	local saved = false
 	if not isCreative then
 		if InventoryService.count(profile, "arrow") <= 0 then
 			Remotes.event("Toast")
 				:FireClient(player, Strings.t("bow_no_arrows", Strings.localeOf(player)))
 			return
 		end
-		ProfileService.Mutate(player, function(p)
-			InventoryService.remove(p, "arrow", 1)
-		end)
+		-- Экономия: a chance the arrow is not used up [вики BOOKS-SYSTEM]
+		saved = BookService.saveArrow(profile)
+		if not saved then
+			ProfileService.Mutate(player, function(p)
+				InventoryService.remove(p, "arrow", 1)
+			end)
+		end
 	end
 	local dir = direction.Unit
 	dir = (dir + Vector3.new(gaussian(random), gaussian(random), gaussian(random)) * SPREAD).Unit
@@ -177,6 +185,8 @@ local function onRelease(player: Player, direction: any, viewTime: any)
 		crit = f >= 1,
 		flame = Config.flameForLevel("bow", level) > 0,
 		creative = isCreative,
+		saved = saved,
+		weapon = profile.inventory[profile.selectedSlot],
 		ticks = 0,
 		lag = workspace:GetServerTimeNow()
 			- (MotionService.viewTime(viewTime) or workspace:GetServerTimeNow()),
@@ -292,7 +302,10 @@ local function stick(arrow: Flying, at: Vector3, on: BasePart)
 	part:SetAttribute("Flame", arrow.flame or nil)
 	CollectionService:AddTag(part, "StuckArrow")
 	part.Parent = folder
-	table.insert(stuck, { part = part, on = on, at = os.clock(), pickup = not arrow.creative })
+	table.insert(
+		stuck,
+		{ part = part, on = on, at = os.clock(), pickup = not arrow.creative and not arrow.saved }
+	)
 	if #stuck > MAX_STUCK then
 		table.remove(stuck, 1).part:Destroy()
 	end
@@ -371,8 +384,16 @@ local function step(arrow: Flying): boolean
 			damage += random:NextInteger(0, math.floor(damage / 2) + 1)
 			CombatService.critBurst(from + delta * bestT)
 		end
-		local result =
-			CombatService.HitModel(shooter, profile, best, damage, arrow.crit, arrow.velocity.Unit)
+		local result = CombatService.HitModel(
+			shooter,
+			profile,
+			best,
+			damage,
+			arrow.crit,
+			arrow.velocity.Unit,
+			arrow.weapon,
+			true
+		)
 		if arrow.flame and (result == "hit" or result == "killed") then
 			ignite(best, shooter)
 		end

@@ -26,6 +26,7 @@ local Models = Shared:WaitForChild("Models")
 local ProfileService = require(script.Parent.ProfileService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local CombatService = require(script.Parent.CombatService)
+local BookService = require(script.Parent.BookService)
 local ItemDropService = require(script.Parent.ItemDropService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 
@@ -215,6 +216,11 @@ local function think(mob: Mob, now: number)
 	if now < mob.staggerUntil then
 		return -- staggered by a hit
 	end
+	if BookService.active(mob.model, "Dazed") > 0 then
+		humanoid:MoveTo(root.Position) -- dazed by a book (Замешательство, Вихрь, Слепота)
+		mob.windupAt = nil
+		return
+	end
 	local player, targetRoot = nearestPlayer(mob, mob.cfg.aggroRange or 18)
 	if player and targetRoot and fromHome < (mob.cfg.leashRange or 30) then
 		local d = (targetRoot.Position - root.Position).Magnitude
@@ -226,7 +232,7 @@ local function think(mob: Mob, now: number)
 				mob.nextBiteAt = now + (mob.cfg.attackCooldown or 1.2)
 				local h = targetRoot.Parent and targetRoot.Parent:FindFirstChildOfClass("Humanoid")
 				if h and d <= reach + 1 then
-					CombatService.ApplyDamage(h, mob.cfg.damage or 2, "mob")
+					CombatService.ApplyDamage(h, mob.cfg.damage or 2, "mob", nil, mob.model)
 				end
 			end
 			return

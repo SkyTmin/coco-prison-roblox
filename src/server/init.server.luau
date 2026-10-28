@@ -58,6 +58,8 @@ for _, name in ipairs({
 	"DonateCrystals",
 	"AutoSold",
 	"BoosterToItem",
+	"BookUse",
+	"BookResult",
 }) do
 	Remotes.event(name)
 end
@@ -121,6 +123,7 @@ CaseService.Start()
 ArtifactService.Start()
 require(script.Services.MotionService).Start() -- fast movement snapshots between players (client Motion.luau)
 CombatService.Start()
+require(script.Services.BookService).Start() -- ancient books: applying from the hand, the 32 effects
 BowService.Start()
 LocationService.Start()
 TrainerService.Start()
@@ -169,7 +172,9 @@ task.spawn(function()
 				continue
 			end
 			local rule = Config.levelRule(profile.level)
+			-- + the armor book Танк
 			local target = (if rule then rule.hearts else 10) * 2
+				+ require(script.Services.BookService).bonusHealth(profile)
 			if humanoid.MaxHealth ~= target then
 				local gained = target - humanoid.MaxHealth
 				humanoid.MaxHealth = target

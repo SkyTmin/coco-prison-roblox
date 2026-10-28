@@ -4,6 +4,7 @@
 -- Client → server events:  DigStart(part, hitPoint), DigCancel(), DigFinish(part) [legacy, ignored], Sell(), BuyItem(id), UpgradeItem(id),
 --                           LevelUp(), InventoryMove(from, to, count?), SelectSlot(n), SpendPoint(kind),
 --                           ClaimProfessionPoints(job), UseConsumable(slot), BoosterToItem(storageIndex),
+--                           BookUse(sourceSlot, "inv" | "armor", slot | piece) — a book / powder / dispeller on an item,
 --                           CaseOpen(caseId, keyId?), CaseClose(caseId),
 --                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
 --                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?)
@@ -22,6 +23,7 @@
 -- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
+-- Server → client:        BookResult(stringsKey) — the outcome of a BookUse (the book window closes on success)
 -- Client → server:        EatStart(slot), EatCancel() — hold to eat (FoodService); server → client Ate(itemId)
 -- Client → server:        DonateBuy(itemId, count), DonateTopUp(packId), DonateBuyRobux(itemId), StashClaim(index) — the donate shop (DonateService); server →
 --                         client DonateBought(itemId, count) after a purchase, DonateCrystals(amount) after a top-up

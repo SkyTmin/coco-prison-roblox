@@ -60,7 +60,33 @@ Effects.list = {
 		color = Color3.fromRGB(37, 82, 165),
 		harmful = false,
 	},
+	-- the ancient books' effects on the one they hit (BookService) [вики BOOKS-SYSTEM; цвета — ваниль, кроме
+	-- горения, проклятия и мороза — решение 28.10]
+	{ id = "poison", attribute = "Poison", color = Color3.fromRGB(78, 147, 49), harmful = true },
+	{ id = "wither", attribute = "Wither", color = Color3.fromRGB(53, 42, 39), harmful = true },
+	{ id = "burning", attribute = "Burning", color = Color3.fromRGB(255, 120, 30), harmful = true },
+	{ id = "frost", attribute = "Frost", color = Color3.fromRGB(150, 210, 255), harmful = true },
+	{
+		id = "weakness",
+		attribute = "Weakness",
+		color = Color3.fromRGB(72, 77, 72),
+		harmful = true,
+	},
+	{
+		id = "blindness",
+		attribute = "Blindness",
+		color = Color3.fromRGB(31, 31, 35),
+		harmful = true,
+	},
+	{ id = "cursed", attribute = "Cursed", color = Color3.fromRGB(120, 40, 140), harmful = true },
+	{ id = "glowing", attribute = "Glowing", color = Color3.fromRGB(148, 160, 97), harmful = true },
 } :: { Effect }
+
+-- [решение 28.10] the books' numbers that the wiki does not give: Frost slows 6 % per arrow (the description says
+-- it), Weakness makes the blows 25 % weaker, Hulk 15 % slower (its description)
+Effects.FROST_PER_STACK = 0.06
+Effects.WEAKNESS = 0.25
+Effects.HULK_SLOWNESS = 0.15
 
 -- Vanilla movement modifiers [ваниль]: Slowness −15 % and Speed +20 % per level.
 Effects.SLOWNESS_PER_LEVEL = 0.15

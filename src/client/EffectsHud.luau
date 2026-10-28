@@ -221,6 +221,15 @@ function EffectsHud.start(
 	local rolledCamera: Camera? = nil
 	local baseCFrame: CFrame? = nil
 	local appliedCFrame: CFrame? = nil
+	local blind = 0
+	local darkness = Instance.new("Frame")
+	darkness.Name = "Blindness"
+	darkness.BackgroundColor3 = Color3.new()
+	darkness.BorderSizePixel = 0
+	darkness.Size = UDim2.fromScale(1, 1)
+	darkness.ZIndex = -10
+	darkness.Visible = false
+	darkness.Parent = gui
 	RunService:BindToRenderStep(
 		"PrisonEffects",
 		Enum.RenderPriority.Camera.Value + 1,
@@ -239,6 +248,11 @@ function EffectsHud.start(
 				return if typeof(value) == "number" then value else 0
 			end
 			nausea = math.clamp(nausea + (if level("Nausea") > 0 then dt / 3 else -dt / 1.5), 0, 1)
+			-- Blindness (the book Слепота): the screen goes dark under the HUD [ваниль: тёмный туман]
+			blind =
+				math.clamp(blind + (if level("Blindness") > 0 then dt / 0.4 else -dt / 0.8), 0, 1)
+			darkness.Visible = blind > 0
+			darkness.BackgroundTransparency = 1 - 0.85 * blind
 			local speed = (1 - Effects.SLOWNESS_PER_LEVEL * level("Slowness"))
 				* (1 + Effects.SPEED_PER_LEVEL * level("Speed"))
 			-- [ваниль] drawing a bow zooms in: FOV × (1 − 0.15 · f), f = (t / 1 s)², at most 1

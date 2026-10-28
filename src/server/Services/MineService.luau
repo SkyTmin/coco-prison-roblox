@@ -371,6 +371,15 @@ function MineService.breakBlock(mine: Mine, i: number): string?
 	return id
 end
 
+-- cell index ↔ grid coordinates (x right, y down from the top layer, z) — the books Молот / Пластолом
+function MineService.coords(mine: Mine, i: number): (number, number, number)
+	return coords(mine, i)
+end
+
+function MineService.index(mine: Mine, x: number, y: number, z: number): number
+	return index(mine, x, y, z)
+end
+
 function MineService.get(id: string): Mine?
 	return mines[id]
 end

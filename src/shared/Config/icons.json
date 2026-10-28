@@ -133,7 +133,15 @@
     "ui_close": "rbxassetid://111234228707211",
     "needs_injection": "rbxassetid://111778964746437",
     "effect_needs_free": "rbxassetid://111778964746437",
-    "autosell": "rbxassetid://106101053533479"
+    "autosell": "rbxassetid://106101053533479",
+    "effect_glowing": "rbxassetid://104737733851644",
+    "effect_burning": "rbxassetid://98885261412013",
+    "effect_blindness": "rbxassetid://119284748034134",
+    "effect_weakness": "rbxassetid://77399081262092",
+    "effect_frost": "rbxassetid://128885874130776",
+    "effect_poison": "rbxassetid://108953547705398",
+    "effect_cursed": "rbxassetid://91541470522924",
+    "effect_wither": "rbxassetid://125088420916746"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }

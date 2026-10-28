@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Books = require(Shared.Books)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
@@ -117,12 +118,6 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	-- the injection «Без нужд» [владелец 28.10]: for good, shown as an effect with no timer
 	local profile = ProfileService.Get(player)
 	setEffect(character, "NeedsFree", if profile and profile.needsFree then 1 else nil)
-	-- needs at 0 [вики]: dirt → Nausea, sleep → Insomnia, toilet → Slowness; they last until restored
-	setEffect(character, "Nausea", if needs.hygiene <= 0 then 1 else nil)
-	setEffect(character, "Insomnia", if needs.sleep <= 0 then 1 else nil)
-	setEffect(character, "Slowness", if needs.toilet <= 0 then 1 else nil)
-	-- random events: a vanilla level-I effect for everyone [сеть, вики-скриншот]; an effect of the player's own
-	-- (food) wins when it is stronger
 	local own = timed[player] or {}
 	local now = os.clock()
 	for attribute, entry in pairs(own) do
@@ -133,6 +128,26 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 			end
 		end
 	end
+	-- needs at 0 [вики]: dirt → Nausea, sleep → Insomnia, toilet → Slowness; they last until restored. A book's
+	-- Nausea / Slowness of a few seconds (Замешательство, Вихрь, Бульдозер) shows with its timer otherwise
+	local function needOrOwn(attribute: string, atZero: boolean)
+		local entry = own[attribute]
+		if atZero then
+			setEffect(character, attribute, 1)
+		else
+			setEffect(
+				character,
+				attribute,
+				if entry then entry.level else nil,
+				if entry then entry.endsAtServer else nil
+			)
+		end
+	end
+	needOrOwn("Nausea", needs.hygiene <= 0)
+	setEffect(character, "Insomnia", if needs.sleep <= 0 then 1 else nil)
+	needOrOwn("Slowness", needs.toilet <= 0)
+	-- random events: a vanilla level-I effect for everyone [сеть, вики-скриншот]; an effect of the player's own
+	-- (food) wins when it is stronger
 	for _, name in ipairs(EVENTS) do
 		local attribute = string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2)
 		local mine = own[attribute]
@@ -158,8 +173,17 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 		state.humanoid = humanoid
 		state.movementMultiplier = 1
 	end
-	local multiplier = (if needs.toilet <= 0 then 1 - Effects.SLOWNESS_PER_LEVEL else 1)
-		* (if eventName == "speed" then 1 + Effects.SPEED_PER_LEVEL else 1)
+	-- Slowness / Speed levels [ваниль], the books' Frost stacks and Hulk's weight [вики BOOKS-SYSTEM]
+	local slow =
+		math.max(if needs.toilet <= 0 then 1 else 0, if own.Slowness then own.Slowness.level else 0)
+	local fast =
+		math.max(if eventName == "speed" then 1 else 0, if own.Speed then own.Speed.level else 0)
+	local frost = tonumber(character:GetAttribute("Frost")) or 0
+	local hulk = profile ~= nil and Books.worn(profile, "hulk") > 0
+	local multiplier = math.max(0.1, 1 - Effects.SLOWNESS_PER_LEVEL * slow)
+		* (1 + Effects.SPEED_PER_LEVEL * fast)
+		* math.max(0.1, 1 - Effects.FROST_PER_STACK * frost)
+		* (if hulk then 1 - Effects.HULK_SLOWNESS else 1)
 	if multiplier ~= state.movementMultiplier then
 		humanoid.WalkSpeed = humanoid.WalkSpeed / state.movementMultiplier * multiplier
 		state.movementMultiplier = multiplier
@@ -423,9 +447,11 @@ local function updatePlayers()
 				for _, need in ipairs(NEEDS) do
 					-- Trainer "needs" levels slow the drain (Config.trainer.needs.perLevel per level) [решение]
 					local trained = if p.trainer then (p.trainer.needs or 0) else 0
+					-- the helmet book «Чистюля» slows them by its share [вики BOOKS-SYSTEM]
 					local decay = 100
 						/ (Config.needs[need].minutesToZero * 6)
 						* math.max(0.1, 1 - trained * Config.trainer.needs.perLevel)
+						* math.max(0, 1 - Books.worn(p, "neat"))
 					local value = math.clamp(p.needs[need] - decay * ticks, 0, 100)
 					-- Floating-point residue must not postpone a zero effect by another tick.
 					p.needs[need] = if value < 1e-9 then 0 else value
@@ -512,6 +538,15 @@ function NeedsService.GiveEffect(player: Player, effect: string, level: number, 
 		character:SetAttribute(NeedsService.ABSORPTION, math.max(now, ABSORPTION_PER_LEVEL * level))
 	end
 	applyEffects(player, state, profile.needs)
+end
+
+-- re-applies the effects and the walk speed now (BookService: Frost stacks, Hulk armor)
+function NeedsService.Refresh(player: Player)
+	local state = states[player]
+	local profile = ProfileService.Get(player)
+	if state and profile then
+		applyEffects(player, state, profile.needs)
+	end
 end
 
 -- [ваниль] Regeneration heals 1 HP every 50 >> (level − 1) ticks: level I 2,5 s, II 1,25 s

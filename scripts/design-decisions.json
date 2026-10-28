@@ -2473,6 +2473,115 @@
         0.05,
         0.1,
         0.15
+      ],
+      "neat": [
+        0.25,
+        0.5
+      ],
+      "fired": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "frost": [
+        0.18,
+        0.36,
+        0.54
+      ],
+      "thor": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "boxer": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "confusion": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "fire": [
+        0.05,
+        0.07,
+        0.09
+      ],
+      "bulldozer": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "fortification": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "saving": [
+        0.25,
+        0.5,
+        0.75
+      ],
+      "wither": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "vortex": [
+        0.05,
+        0.08,
+        0.12
+      ],
+      "blindness": [
+        0.05,
+        0.1,
+        0.15
+      ],
+      "hulk": [
+        0.2
+      ],
+      "glutton": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "ninja": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "snitch": [
+        5
+      ],
+      "shnyr": [
+        0.05,
+        0.1
+      ],
+      "curse": [
+        0.1,
+        0.15,
+        0.2
+      ],
+      "rage": [
+        0.02,
+        0.03,
+        0.04
+      ],
+      "plastolom": [
+        0.003,
+        0.006,
+        0.009
+      ],
+      "prospector": [
+        0.25,
+        0.5,
+        0.75
+      ],
+      "obshak": [
+        0.1,
+        0.2,
+        0.3
       ]
     },
     "catalog": {
@@ -2555,8 +2664,168 @@
           "shovel",
           "shears"
         ]
+      },
+      "neat": {
+        "rarity": "common",
+        "items": [
+          "helmet"
+        ]
+      },
+      "fired": {
+        "rarity": "common",
+        "items": [
+          "leggings"
+        ]
+      },
+      "frost": {
+        "rarity": "common",
+        "items": [
+          "bow"
+        ],
+        "conflicts": [
+          "fire"
+        ]
+      },
+      "thor": {
+        "rarity": "common",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "boxer": {
+        "rarity": "common",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "confusion": {
+        "rarity": "common",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "fire": {
+        "rarity": "common",
+        "items": [
+          "bow"
+        ],
+        "conflicts": [
+          "frost"
+        ]
+      },
+      "bulldozer": {
+        "rarity": "common",
+        "items": [
+          "boots"
+        ]
+      },
+      "fortification": {
+        "rarity": "common",
+        "items": [
+          "chestplate"
+        ],
+        "conflicts": [
+          "hulk"
+        ]
+      },
+      "saving": {
+        "rarity": "common",
+        "items": [
+          "bow"
+        ]
+      },
+      "wither": {
+        "rarity": "rare",
+        "items": [
+          "leggings"
+        ]
+      },
+      "vortex": {
+        "rarity": "rare",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "blindness": {
+        "rarity": "rare",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "hulk": {
+        "rarity": "rare",
+        "items": [
+          "chestplate"
+        ],
+        "conflicts": [
+          "fortification"
+        ]
+      },
+      "glutton": {
+        "rarity": "rare",
+        "items": [
+          "helmet"
+        ]
+      },
+      "ninja": {
+        "rarity": "rare",
+        "items": [
+          "boots"
+        ]
+      },
+      "snitch": {
+        "rarity": "rare",
+        "items": [
+          "helmet"
+        ]
+      },
+      "shnyr": {
+        "rarity": "rare",
+        "items": [
+          "boots"
+        ]
+      },
+      "curse": {
+        "rarity": "rare",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "rage": {
+        "rarity": "legendary",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "plastolom": {
+        "rarity": "legendary",
+        "items": [
+          "pickaxe"
+        ]
+      },
+      "prospector": {
+        "rarity": "legendary",
+        "items": [
+          "sword",
+          "bow"
+        ]
+      },
+      "obshak": {
+        "rarity": "legendary",
+        "items": [
+          "sword",
+          "bow"
+        ]
       }
-    }
+    },
+    "_effects": "[вики BOOKS-SYSTEM / HANDBOOK-WIKI] 32 книги: редкость, предметы, уровни; числа Мороз/Пожар/Экономия — патчноут Prison Quick 20.08.2022 [сеть]; Пластолом 0,3/0,6/0,9 % [владелец 26.10]; остальные значения [решение 28.10]. Конфликты: Халк × Укрепление [сеть], Мороз × Пожар [сеть]"
   },
   "death": {
     "cashLossFraction": 0.05,
@@ -3050,7 +3319,9 @@
       "multiplier": 1.5,
       "_source": "[ваниль, владелец 22.10] удар в падении (после прыжка, не на земле, не на лестнице и не в воде) — ×1,5"
     },
-    "_armor": "[ваниль, владелец 22.10] урон по игроку от игроков, мобов и боссов: броня по формуле Java — урон × (1 − min(20, max(броня/5, броня − урон/(2 + прочность/4)))/25), затем Защита −4 % за уровень каждой части, максимум 20 (80 %); очки брони и прочность — tools.json vanilla"
+    "_armor": "[ваниль, владелец 22.10] урон по игроку от игроков, мобов и боссов: броня по формуле Java — урон × (1 − min(20, max(броня/5, броня − урон/(2 + прочность/4)))/25), затем Защита −4 % за уровень каждой части, максимум 20 (80 %); очки брони и прочность — tools.json vanilla",
+    "jumpBlocks": 1.05,
+    "_jump": "[владелец 28.10: «сделай обычный прыжок не выше 1 блока»] высота прыжка в блоках (1 блок = 4 стада); 1,05 — чтобы ещё запрыгивать на блок [решение]; книга Пружины добавляет +1/+2/+3 блока [вики]"
   },
   "factions": {
     "_source": "[клиент] ru_RU-prison.json fraction.*: 4 фракции, вступление с 5-го уровня, «слишком много людей — вступите в %a», «покинуть фракцию за %s»; цена выхода 2500 $ [меню, скрин 084]; запас балансировки [решение]",
