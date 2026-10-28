@@ -78,6 +78,7 @@ export type Profile = {
 	}?, -- the auction; schema stays v3
 	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
+	lastSeen: number?, -- os.time() of that spot; older than rules.teleport.rejoinReturnSeconds = back to the spawn
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
 	skills: { [string]: number }?, -- the skill tree: branch id → bought levels (Shared/Skills); schema stays v3
 	potionBrewedAt: number?, -- server time of the last brew: the potion stand charges from it (Shared/Potions)

@@ -779,6 +779,7 @@ function ProfileService.Start()
 					math.floor(p.Y * 10) / 10,
 					math.floor(p.Z * 10) / 10,
 				}
+				session.profile.lastSeen = os.time()
 				session.dirty = true
 			end
 		end
@@ -790,8 +791,24 @@ function ProfileService.Start()
 			return
 		end
 		restored[player] = true
-		local pos = session.profile.lastPosition
+		local profile = session.profile
+		local pos = profile.lastPosition
 		if typeof(pos) ~= "table" or #pos ~= 3 then
+			return
+		end
+		-- [сеть R1] the spot is kept for 20 min after leaving, then the join starts at the spawn (no profile.lastSeen =
+		-- a spot saved before this rule: still restored once). A spot with nothing under it was in a copy that is
+		-- gone (a gang house lives only while its gang is inside): the spawn too
+		local seen = profile.lastSeen
+		local expired = typeof(seen) == "number"
+			and os.time() - seen > Config.rules.teleport.rejoinReturnSeconds
+		local floor =
+			workspace:Raycast(Vector3.new(pos[1], pos[2] + 2, pos[3]), Vector3.new(0, -60, 0))
+		if expired or not floor then
+			profile.lastPosition = nil
+			profile.location = "prison"
+			session.dirty = true
+			ProfileService.Replicate(player)
 			return
 		end
 		local root = character:WaitForChild("HumanoidRootPart", 10)
