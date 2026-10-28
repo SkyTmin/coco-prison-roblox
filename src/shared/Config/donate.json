@@ -425,6 +425,15 @@
       "productId": 0,
       "productName": "Удаление комиссии на Аукционе"
     },
+    "auction_announce": {
+      "price": 10,
+      "announce": true,
+      "max": 10,
+      "icon": "auction_slot",
+      "robux": 10,
+      "productId": 0,
+      "productName": "Объявление на аукционе"
+    },
     "rubies_100": {
       "price": 100,
       "rubies": 100,

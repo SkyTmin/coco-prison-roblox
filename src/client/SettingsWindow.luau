@@ -11,10 +11,10 @@
 -- computer), moved here from the menu grid together with the language.
 -- Этап 8 [сеть TG/40: «эффекты чар можно выключить в /settings» — for subscribers]: the «Эффекты чар PRIS+» row (the
 -- particles of Вихрь / Ярость / Бульдозер, EnchantFx), locked without PRIS+; the same switch is in the /pp window.
--- The «Чат» section (docs/research/chat-ux-spec.md) [владелец 28.10: «МАКСИМУМ УСИЛИЙ К ЧАТУ»]: the chat on / off, its
--- size, the feed backing, how the feed hides, bubbles over heads, global lines in the feed, tips, the chat button on a
--- computer — the same profile settings as the gear in the open chat (ChatWindow). The rows scroll (the window stays
--- the size of 12 rows); the scroll position survives the rebuild after every change.
+-- The «Чат» section [владелец 28.10: «МАКСИМУМ УСИЛИЙ К ЧАТУ»; вечер: чат Roblox]: the chat on / off, the size of Roblox's
+-- chat window (not the text — Roblox takes that from the player's own settings), its background, bubbles over heads,
+-- tips (ChatWindow applies them). The rows scroll (the window stays the size of 12 rows); the scroll position
+-- survives the rebuild after every change.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -51,11 +51,9 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		enchantFxOff = s.enchantFxOff == true,
 		chatSize = if s.chatSize == 1 or s.chatSize == 3 then s.chatSize else 2,
 		chatBack = if s.chatBack == 1 or s.chatBack == 3 then s.chatBack else 2,
-		chatFade = if s.chatFade == 2 or s.chatFade == 3 then s.chatFade else 1,
 		bubblesOff = s.bubblesOff == true,
-		chatGlobalOff = s.chatGlobalOff == true,
 		chatOff = s.chatOff == true,
-		chatButton = s.chatButton == true,
+		auctionAdsOff = s.auctionAdsOff == true,
 	}
 end
 
@@ -79,7 +77,7 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 23 -- 2 section titles, 12 general rows + the layout button, 8 chat rows
+	local rows = 21 -- 2 section titles, 12 general rows + the layout button, 6 chat rows
 	local win, content = createWindow(
 		parent,
 		T("settings_title"),
@@ -364,7 +362,7 @@ function SettingsWindow.build(
 			b.TextSize = 13
 		end
 	end
-	-- 13. move and resize the buttons, the notifications, the booster bar, the chat
+	-- 13. move and resize the buttons, the notifications, the booster bar
 	local layout = Ui.button(
 		scroll,
 		T("settings_layout"),
@@ -375,7 +373,7 @@ function SettingsWindow.build(
 	layout.Name = "Layout"
 	layout.Activated:Connect(openLayout)
 
-	-- «Чат» (slots 14…): the same values as the gear in the open chat
+	-- «Чат» (slots 14…)
 	section(14, T("settings_chat_section"))
 	local function choice(
 		i: number,
@@ -416,9 +414,8 @@ function SettingsWindow.build(
 	)
 	choice(16, T("chat_size"), "ChatSize", "chatSize", settings.chatSize :: number, "chat_size_")
 	choice(17, T("chat_back"), "ChatBack", "chatBack", settings.chatBack :: number, "chat_back_")
-	choice(18, T("chat_fade"), "ChatFade", "chatFade", settings.chatFade :: number, "chat_fade_")
 	flag(
-		19,
+		18,
 		T("chat_bubbles"),
 		"Bubbles",
 		"bubblesOff",
@@ -427,16 +424,7 @@ function SettingsWindow.build(
 		T("settings_off")
 	)
 	flag(
-		20,
-		T("chat_global_feed"),
-		"GlobalFeed",
-		"chatGlobalOff",
-		not settings.chatGlobalOff,
-		T("settings_shown"),
-		T("settings_hidden")
-	)
-	flag(
-		21,
+		19,
 		T("settings_tips"),
 		"Tips",
 		"tipsOff",
@@ -444,18 +432,17 @@ function SettingsWindow.build(
 		T("settings_shown"),
 		T("settings_hidden")
 	)
-	-- the chat button on a computer (a phone always has it)
-	toggle(
-		row(22, T("chat_button_option")),
-		"ChatButton",
-		settings.chatButton == true,
-		T("settings_on"),
-		T("settings_off"),
-		function()
-			set("chatButton", not settings.chatButton)
-		end
+	-- the paid auction announcements of other players (AuctionBanner + their chat line)
+	flag(
+		20,
+		T("settings_auction_ads"),
+		"AuctionAds",
+		"auctionAdsOff",
+		not settings.auctionAdsOff,
+		T("settings_shown"),
+		T("settings_hidden")
 	)
-	scroll.CanvasSize = UDim2.fromOffset(0, 23 * ROW)
+	scroll.CanvasSize = UDim2.fromOffset(0, rows * ROW)
 	return win
 end
 

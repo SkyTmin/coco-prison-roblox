@@ -71,7 +71,7 @@ for _, name in ipairs({
 	"GhettoBuy",
 	"TreasureReset",
 	"Favorite",
-	"ChatGlobal",
+	"ChatClient",
 	"ChatSystem",
 	"ChatCommand",
 	"Rubbish",
@@ -164,8 +164,8 @@ MobService.Start()
 NameplateService.Start()
 LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
 require(script.Services.ReferralService).Start() -- inviting friends (Referrals_v1), play time, the «Избранное» card
-require(script.Services.ChatService).Start() -- the chat: faction / gang TextChannels, the global chat, announcements
-require(script.Services.ChatCommandService).Start() -- /pay, /gift, /thx and the bin (Rubbish)
+require(script.Services.ChatService).Start() -- the chat (Roblox draws it): faction / gang TextChannels, announcements
+require(script.Services.ChatCommandService).Start() -- every chat command (TextChatCommands) and the bin (Rubbish)
 require(script.Services.DailyService).Start() -- the canteen portion and the daily rewards (/daily)
 require(script.Services.PrisService).Start() -- PRIS+: the PrisPlus attribute, the mine respawn board (PrisQuery)
 require(script.Services.NicknameService).Start() -- клички: «Ваши клички» (NicknameSet), the shown name (этап 9)

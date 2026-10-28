@@ -1,22 +1,21 @@
 --!strict
--- The chat (docs/research/remaining-features-design.md, этап 3) [владелец 28.10: «у нас вообще никакого чата нет,
--- надо не только фракционный чат делать»]. Our own window (src/client/ChatWindow.luau) over TextChatService:
---   * Общий = RBXGeneral (Roblox's default channel, everyone on this server). Фракция «@» = TextChannel
---     Faction_<id>, Банда «#» = TextChannel Gang_<gangId>, both under TextChatService.CocoChat: the server keeps each
---     player a TextSource of his faction's and his gang's channel (player attributes Faction / GangId). Roblox filters
---     these messages for every receiver and applies the age / privacy settings and blocks itself; the client sends
---     with TextChannel:SendAsync and draws what TextChatService.MessageReceived hands it.
---   * Глобальный «!» [клиент advice.48] crosses servers: ChatGlobal(text) → the account may chat (CanUserChatAsync,
---     attribute ChatAllowed), one line per Config.chat.globalCooldownSeconds, TextService:FilterStringAsync
---     (PublicChat) → GetNonChatStringForBroadcastAsync (the strictest result: a receiver on another server has no
---     filter result of his own) → this server's players and MessagingService Chat_v1 → the other servers. A receiver
---     gets it only when TextChatService:CanUsersChatAsync(sender, receiver) allows (cached for PAIR_TTL).
---   * System lines ChatSystem(text, kind) with kind "announce" | "reply" | "error": ChatService.announce* for
---     everyone (this server or all of them), ChatService.reply / .fail for one player (command answers).
+-- The chat (docs/research/remaining-features-design.md, этап 3) on Roblox's own chat [владелец 28.10, вечер: «Давай
+-- тогда переводить на чат в роблокс»; docs/research/mobile-chat-research.md §0: platform-integrated chat is required from
+-- May 2027 — code never reads message text, custom UIs never draw messages]. Roblox draws and filters every message
+-- in its default window (ChatWindow sets it up per player); the server owns only:
+--   * Channels: Общий = RBXGeneral (Roblox's default, everyone on this server). Фракция and Банда = TextChannels under
+--     TextChatService.CocoChat, one per faction / gang (attributes ChatKind = "faction" | "gang", ChatId = the id;
+--     Name = Chat.FALLBACK_NAME, the client renames its copy into its language — the tab shows the Name). The server
+--     keeps each player a TextSource (AddUserAsync) in his faction's and his gang's channel, moved when the player
+--     attributes Faction / GangId change. Roblox applies the age / privacy settings, blocks and the region rules
+--     itself (a player whose account may not chat gets no source or a read-only one — nothing works around it).
+--   * System lines ChatSystem(text, kind) with kind "announce" | "reply" | "error" (the client shows them with
+--     TextChannel:DisplaySystemMessage in RBXSystem): ChatService.announce* for everyone (this server or, via
+--     MessagingService Chat_v1, every server), ChatService.reply / .fail for one player (command answers).
+--   No player text crosses servers any more (the old «!» global chat was our own rendering).
 -- QA (Studio): ServerStorage.ChatDebug:Invoke(op, …) — ("announce", key, …) this server; ("announceAll", key, …) every
--- server; ("global", userId, text) a global line from that player without the cooldown → the filtered text or nil;
--- ("members") → JSON channel name → userIds; ("allowed", userId) → the ChatAllowed attribute; ("command", userId,
--- text) runs a typed server command (/pay, /gift, /thx) as that player → true when it was one.
+-- server; ("members") → JSON "kind:id" → userIds; ("command", userId, text) runs a typed command (/pay, /gift, /hide …)
+-- as that player through ChatCommandService → true when it was one.
 local HttpService = game:GetService("HttpService")
 local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
@@ -24,32 +23,23 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 local TextChatService = game:GetService("TextChatService")
-local TextService = game:GetService("TextService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Chat = require(Shared.Chat)
-local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
-local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
-local ProfileService = require(script.Parent.ProfileService)
 
 local ChatService = {}
-local cfg = Config.chat
-local PAIR_TTL = 300 -- [решение] s a CanUsersChatAsync answer is trusted
-local PAIR_CAP = 5000 -- cached answers before the cache is dropped
 local MESSAGE_BYTES = 950 -- MessagingService takes ≤ 1 kB a message
 
-type Member = { names: { [string]: string? }, sources: { [string]: TextSource } }
+type Member = { keys: { [string]: string? }, sources: { [string]: TextSource } }
 local started = false
 local folder: Folder? = nil
+local channels: { [string]: TextChannel } = {} -- "faction:<id>" / "gang:<id>" → its channel
 local members: { [Player]: Member } = {}
-local lastGlobal: { [Player]: number } = {}
-local pairCache: { [string]: { allowed: boolean, at: number } } = {}
-local pairCount = 0
 
--- a server command typed in the chat (ChatCommandService sets it): (player, name, args) → true when it was one
-ChatService.commandHandler = nil :: ((Player, string, { string }) -> boolean)?
+-- a command typed in the chat (ChatCommandService sets it): (player, text) → true when it was one of ours
+ChatService.commandHandler = nil :: ((Player, string) -> boolean)?
 
 -- ── system lines ────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -104,103 +94,74 @@ end
 
 -- ── channels ────────────────────────────────────────────────────────────────────────────────────────────────────
 
-local function channelFor(name: string): TextChannel
-	local parent = folder :: Folder
-	local existing = parent:FindFirstChild(name)
-	if existing and existing:IsA("TextChannel") then
+local function channelFor(kind: Chat.Kind, id: string): TextChannel
+	local key = kind .. ":" .. id
+	local existing = channels[key]
+	if existing and existing.Parent then
 		return existing
 	end
 	local channel = Instance.new("TextChannel")
-	channel.Name = name
-	channel.Parent = parent
+	channel.Name = Chat.FALLBACK_NAME[kind]
+	channel:SetAttribute(Chat.KIND_ATTRIBUTE, kind)
+	channel:SetAttribute(Chat.ID_ATTRIBUTE, id)
+	channel.Parent = folder
+	channels[key] = channel
 	return channel
 end
 
--- the player's TextSource in the channel of this slot ("faction" / "gang"): moved when his side changes; the add
--- yields, so a stale answer (left, changed sides again meanwhile) is undone
-local function setChannel(player: Player, slot: string, name: string?)
+-- the player's TextSource in the channel of this kind: moved when his side changes; the add yields, so a stale answer
+-- (left, changed sides again meanwhile) is undone
+local function setChannel(player: Player, kind: Chat.Kind, id: string?)
 	local m = members[player]
-	if not m or m.names[slot] == name then
+	local key = if id then kind .. ":" .. id else nil
+	if not m or m.keys[kind] == key then
 		return
 	end
-	m.names[slot] = name
-	local old = m.sources[slot]
-	m.sources[slot] = nil
+	m.keys[kind] = key
+	local old = m.sources[kind]
+	m.sources[kind] = nil
 	if old then
 		old:Destroy()
 	end
-	if not name then
+	if not id then
 		return
 	end
-	local channel = channelFor(name)
+	local channel = channelFor(kind, id)
 	local ok, source = pcall(function()
 		return (channel:AddUserAsync(player.UserId))
 	end)
 	if not ok then
-		warn("[ChatService] AddUserAsync " .. name .. ": " .. tostring(source))
+		warn("[ChatService] AddUserAsync " .. kind .. ":" .. id .. ": " .. tostring(source))
 		return
 	end
 	if not source then
-		return -- Roblox refused (the account may not chat): he reads nothing there either
+		return -- Roblox refused (the account may not chat here): he reads nothing there either
 	end
-	if members[player] ~= m or m.names[slot] ~= name then
+	if members[player] ~= m or m.keys[kind] ~= key then
 		source:Destroy()
 		return
 	end
-	local previous = m.sources[slot]
+	local previous = m.sources[kind]
 	if previous and previous ~= source then
 		previous:Destroy()
 	end
-	m.sources[slot] = source
+	m.sources[kind] = source
+end
+
+local function idOf(value: any): string?
+	return if typeof(value) == "string" and value ~= "" then value else nil
 end
 
 local function sync(player: Player)
-	local faction = player:GetAttribute("Faction")
-	local gang = player:GetAttribute("GangId")
-	task.spawn(
-		setChannel,
-		player,
-		"faction",
-		if typeof(faction) == "string" and faction ~= "" then Chat.factionChannel(faction) else nil
-	)
-	task.spawn(
-		setChannel,
-		player,
-		"gang",
-		if typeof(gang) == "string" and gang ~= "" then Chat.gangChannel(gang) else nil
-	)
-end
-
--- may this account chat at all (age / parental settings): the attribute the client and the global chat read
-local checking: { [Player]: boolean } = {}
-local function checkAllowed(player: Player)
-	if checking[player] then
-		return
-	end
-	checking[player] = true
-	for attempt = 1, 3 do
-		local ok, allowed = pcall(function()
-			return TextChatService:CanUserChatAsync(player.UserId)
-		end)
-		if ok then
-			player:SetAttribute("ChatAllowed", allowed == true)
-			checking[player] = nil
-			return
-		end
-		task.wait(2 * attempt)
-	end
-	checking[player] = nil
-	if RunService:IsStudio() then
-		player:SetAttribute("ChatAllowed", true) -- the call needs a live server
-	end
+	task.spawn(setChannel, player, "faction", idOf(player:GetAttribute("Faction")))
+	task.spawn(setChannel, player, "gang", idOf(player:GetAttribute("GangId")))
 end
 
 local function watch(player: Player)
 	if members[player] then
 		return
 	end
-	members[player] = { names = {}, sources = {} }
-	task.spawn(checkAllowed, player)
+	members[player] = { keys = {}, sources = {} }
 	player:GetAttributeChangedSignal("Faction"):Connect(function()
 		sync(player)
 	end)
@@ -210,128 +171,28 @@ local function watch(player: Player)
 	sync(player)
 end
 
+-- the channel the player talks in now ("faction" / "gang"), nil when he has none (the /f and /g commands)
+function ChatService.channelOf(player: Player, kind: Chat.Kind): TextChannel?
+	local m = members[player]
+	local source = m and m.sources[kind]
+	local channel = source and source.Parent
+	return if channel and channel:IsA("TextChannel") then channel else nil
+end
+
 -- empty gang / faction channels go away (a minute later: an add may be on its way)
 local function sweepChannels()
-	for _, channel in ipairs((folder :: Folder):GetChildren()) do
-		if channel:IsA("TextChannel") and not channel:FindFirstChildWhichIsA("TextSource") then
+	for key, channel in pairs(channels) do
+		if not channel.Parent then
+			channels[key] = nil
+		elseif not channel:FindFirstChildWhichIsA("TextSource") then
 			if channel:GetAttribute("EmptySince") then
+				channels[key] = nil
 				channel:Destroy()
 			else
 				channel:SetAttribute("EmptySince", os.time())
 			end
-		elseif channel:IsA("TextChannel") then
-			channel:SetAttribute("EmptySince", nil)
-		end
-	end
-end
-
--- ── the global chat ─────────────────────────────────────────────────────────────────────────────────────────────
-
-local function mayRead(from: number, to: number): boolean
-	if from == to then
-		return true
-	end
-	local key = from .. ":" .. to
-	local cached = pairCache[key]
-	if cached and os.clock() - cached.at < PAIR_TTL then
-		return cached.allowed
-	end
-	local ok, allowed = pcall(function()
-		return TextChatService:CanUsersChatAsync(from, to)
-	end)
-	if not ok then
-		return RunService:IsStudio() -- unknown on a live server: not shown
-	end
-	if pairCount >= PAIR_CAP then
-		table.clear(pairCache)
-		pairCount = 0
-	end
-	if not cached then
-		pairCount += 1
-	end
-	pairCache[key] = { allowed = allowed == true, at = os.clock() }
-	return allowed == true
-end
-
--- a filtered global line → every player on this server who may read the sender
-local function deliverGlobal(data: { [string]: any })
-	local remote = Remotes.event("ChatGlobal")
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player:GetAttribute("ChatAllowed") ~= false then
-			task.spawn(function()
-				if mayRead(data.u, player.UserId) and player.Parent then
-					remote:FireClient(player, data)
-				end
-			end)
-		end
-	end
-end
-
--- (sent, the filtered text or the Strings key of the refusal)
-local function sendGlobal(player: Player, raw: any, skipCooldown: boolean?): (boolean, string)
-	if typeof(raw) ~= "string" then
-		return false, "chat_send_failed"
-	end
-	local text = Chat.clean(raw)
-	if text == "" then
-		return false, "chat_send_failed"
-	end
-	local allowed = player:GetAttribute("ChatAllowed")
-	if allowed == false then
-		return false, "chat_unavailable"
-	end
-	local profile = ProfileService.Get(player)
-	if allowed ~= true or not profile then
-		if allowed == nil then
-			task.spawn(checkAllowed, player) -- Roblox did not answer at the join: ask again
-		end
-		return false, "chat_not_ready"
-	end
-	local since = os.clock() - (lastGlobal[player] or -math.huge)
-	if not skipCooldown and since < cfg.globalCooldownSeconds then
-		return false, "chat_global_wait"
-	end
-	lastGlobal[player] = os.clock()
-	local ok, result = pcall(function()
-		local filtered =
-			TextService:FilterStringAsync(text, player.UserId, Enum.TextFilterContext.PublicChat)
-		return filtered:GetNonChatStringForBroadcastAsync()
-	end)
-	if not ok or typeof(result) ~= "string" or result == "" then
-		lastGlobal[player] = nil
-		return false, "chat_filter_failed"
-	end
-	local faction = player:GetAttribute("Faction")
-	local data = {
-		ev = "global",
-		u = player.UserId,
-		n = player.DisplayName,
-		l = profile.level,
-		f = if typeof(faction) == "string" then faction else "",
-		g = player:GetAttribute("GangTag") or "",
-		c = player:GetAttribute("GangColor") or 0,
-		k = if typeof(profile.nickname) == "string" then profile.nickname else "",
-		p = if PrisPlus.active(profile) then 1 else nil, -- the [PRIS+] prefix (этап 8)
-		t = result,
-	}
-	deliverGlobal(data)
-	publish(data)
-	return true, result
-end
-
-local function onGlobal(player: Player, raw: any)
-	local ok, result = sendGlobal(player, raw)
-	if not ok then
-		if result == "chat_global_wait" then
-			local left = cfg.globalCooldownSeconds - (os.clock() - (lastGlobal[player] or 0))
-			ChatService.fail(
-				player,
-				result,
-				cfg.globalCooldownSeconds,
-				math.max(1, math.ceil(left))
-			)
 		else
-			ChatService.fail(player, result)
+			channel:SetAttribute("EmptySince", nil)
 		end
 	end
 end
@@ -341,16 +202,7 @@ local function onMessage(message: any)
 	if typeof(data) ~= "table" or data.server == game.JobId then
 		return
 	end
-	if data.ev == "global" then
-		if
-			typeof(data.u) == "number"
-			and typeof(data.t) == "string"
-			and #data.t <= cfg.maxLength * 4
-			and typeof(data.n) == "string"
-		then
-			deliverGlobal(data)
-		end
-	elseif data.ev == "say" and typeof(data.key) == "string" and Strings.has(data.key) then
+	if data.ev == "say" and typeof(data.key) == "string" and Strings.has(data.key) then
 		local args = if typeof(data.args) == "table" then data.args else {}
 		pcall(ChatService.announce, data.key, table.unpack(args)) -- a bad argument list never stops the loop
 	end
@@ -371,33 +223,22 @@ local function debugHook()
 		elseif op == "announceAll" then
 			ChatService.announceAll(a, ...)
 			return true
-		elseif op == "global" then
-			local player = Players:GetPlayerByUserId(a)
-			if not player then
-				return nil
-			end
-			local ok, result = sendGlobal(player, (...), true)
-			return if ok then result else nil
 		elseif op == "members" then
 			local out = {}
-			for _, channel in ipairs((folder :: Folder):GetChildren()) do
+			for key, channel in pairs(channels) do
 				local ids = {}
 				for _, source in ipairs(channel:GetChildren()) do
 					if source:IsA("TextSource") then
 						table.insert(ids, source.UserId)
 					end
 				end
-				out[channel.Name] = ids
+				out[key] = ids
 			end
 			return HttpService:JSONEncode(out)
-		elseif op == "allowed" then
-			local player = Players:GetPlayerByUserId(a)
-			return if player then player:GetAttribute("ChatAllowed") else nil
 		elseif op == "command" then
 			local player = Players:GetPlayerByUserId(a)
-			local name, args = Chat.command(tostring((...)))
 			local handler = ChatService.commandHandler
-			return player ~= nil and name ~= nil and handler ~= nil and handler(player, name, args)
+			return player ~= nil and handler ~= nil and handler(player, tostring((...)))
 		end
 		return nil
 	end
@@ -412,12 +253,12 @@ function ChatService.Start()
 	-- the ChatVersion property can read LegacyChatService in a place where TextChatService runs anyway (legacy chat is
 	-- retired), so the check is whether Roblox created its default channels
 	task.delay(10, function()
-		local channels = TextChatService:FindFirstChild("TextChannels")
-		if not (channels and channels:FindFirstChild(Chat.GENERAL)) then
+		local defaults = TextChatService:FindFirstChild("TextChannels")
+		if not (defaults and defaults:FindFirstChild(Chat.GENERAL)) then
 			warn(
 				"[ChatService] TextChatService.TextChannels."
 					.. Chat.GENERAL
-					.. " has not appeared 10 s after the start: the chat cannot send"
+					.. " has not appeared 10 s after the start: the chat cannot work"
 			)
 		end
 	end)
@@ -430,7 +271,6 @@ function ChatService.Start()
 		created.Parent = TextChatService
 		folder = created
 	end
-	Remotes.event("ChatGlobal").OnServerEvent:Connect(onGlobal)
 	Remotes.event("ChatSystem")
 	Players.PlayerAdded:Connect(watch)
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -439,8 +279,6 @@ function ChatService.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		local m = members[player]
 		members[player] = nil
-		lastGlobal[player] = nil
-		checking[player] = nil
 		if m then
 			for _, source in pairs(m.sources) do
 				source:Destroy()

@@ -1,6 +1,11 @@
 --!strict
--- Chat commands that change the profile (этап 3; the window commands and /balance, /hide … run on the client, see
--- src/client/ChatCommands.luau). The client sends ChatCommand(name, args) for:
+-- Every chat command (этап 3; moved to Roblox's own chat 28.10 [владелец 28.10: «Давай тогда переводить на чат в
+-- роблокс»]): platform-integrated chat lets code see a typed line only through a TextChatCommand, so each command is a
+-- server TextChatCommand under TextChatService.CocoCommands (Primary/SecondaryAlias; more aliases = more instances).
+-- Triggered(textSource, text) runs here; Roblox never sends a matched command to the chat. Answers are system lines
+-- (ChatService.reply / .fail). Windows open on the client through OpenMenu(kind); teleports, the gang subcommands and
+-- the channel switch go back to the client as ChatClient(action, …), so the usual remotes (Teleport, GangAction,
+-- GangHome — their services check everything) and the input bar (TargetTextChannel) do the rest.
 --   * /pay ник сумма [клиент pay.*]: from 1 $, not to yourself, the receiver may refuse transfers in the settings
 --     (settings.payOff). Both players must be on this server with real profiles (a transfer to another server or an
 --     offline player is refused: it would need an outside outbox). The check and both Mutates run without a yield
@@ -14,19 +19,29 @@
 --     100 $ × your level / 10 [решение: Config.chat.thxPerLevel]; once per booster.
 --   * /rubb ник N [вики; клиент pay.rubies.*] (этап 8): whole rubies from Config.pris.rubbMin, the same rules and saves
 --     as /pay (the receiver's «Переводы» switch refuses rubies too).
---   * /stats ник [сеть S6] (этап 8): another player's stats (on this server) only for a PRIS+ player; /stats alone is
---     answered on the client from the own profile.
+--   * /stats [ник] [сеть S6] (этап 8): your own numbers; another player's (on this server) only for a PRIS+ player.
+--   * /balance, /blocks, /hide (settings.hidePlayers; H is the HUD editor here), /help, /spawn, /warzone, /gang …, the
+--     window commands [вики HANDBOOK-WIKI «Команды»; клиент wiki.short, advice.*; сеть TG/15], /f /g /l — write in the
+--     faction / gang / general channel (like Roblox's /team). The commands of systems not built yet answer «скоро».
+--     Roblox's own /help is switched off: ours lists our commands and Roblox's /w, /mute.
+-- Under platform-integrated chat `text` may come empty (undocumented): a command with arguments then answers with its
+-- usage line — the owner checks /pay with the setting on (docs/research/floors-evening-checklist.md).
+-- Players Roblox does not let chat (the region, age, parental settings) cannot type commands at all: every command has
+-- a button too (menu tiles, the player card, Settings).
 -- Rubbish(list) — «Урна» [клиент garbage.*] closed: list = { {slot, id, count} }; the stacks that still match go away.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
+local Chat = require(Shared.Chat)
 local Config = require(Shared.Config)
 local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local Warzone = require(Shared.Warzone)
 local ChatService = require(script.Parent.ChatService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
@@ -197,7 +212,21 @@ end
 
 local function stats(player: Player, args: { string })
 	local profile = ProfileService.Get(player)
-	if not args[1] or not profile then
+	if not profile then
+		return
+	end
+	local who = args[1] and Strings.lower(args[1])
+	if not who or who == Strings.lower(player.Name) or who == Strings.lower(player.DisplayName) then
+		local own = profile.stats
+		ChatService.reply(
+			player,
+			"chat_stats",
+			profile.level,
+			Strings.big(profile.blocksTotal),
+			own.rats or 0,
+			own.kills or 0,
+			own.deaths or 0
+		)
 		return
 	end
 	if not PrisPlus.active(profile) then
@@ -460,30 +489,231 @@ local function rubbish(player: Player, list: any)
 	ChatService.reply(player, "rubbish_done", n)
 end
 
--- ── start ───────────────────────────────────────────────────────────────────────────────────────────────────────
+-- ── the other commands ──────────────────────────────────────────────────────────────────────────────────────────
 
-local COMMANDS: { [string]: (Player, { string }) -> () } =
-	{ pay = pay, gift = gift, thx = thx, rubb = rubb, stats = stats }
+-- /hide: the other players hidden on this screen (the client acts on settings.hidePlayers)
+local function hide(player: Player, _args: { string })
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return
+	end
+	local on = not (profile.settings and profile.settings.hidePlayers == true)
+	ProfileService.Mutate(player, function(p)
+		local settings: any = table.clone(p.settings or {}) -- a new table: the profile diff sees the change
+		settings.hidePlayers = on
+		p.settings = settings
+	end)
+	ChatService.reply(player, if on then "chat_hide_on" else "chat_hide_off")
+end
 
-local function run(player: Player, name: string, args: { string }): boolean
-	local command = COMMANDS[name]
+local function balance(player: Player, _args: { string })
+	local profile = ProfileService.Get(player) :: Types.Profile
+	ChatService.reply(
+		player,
+		"chat_balance",
+		Strings.money(profile.coins),
+		profile.crystals or 0,
+		PrisPlus.rubies(profile)
+	)
+end
+
+local function blocks(player: Player, _args: { string })
+	local profile = ProfileService.Get(player) :: Types.Profile
+	ChatService.reply(player, "chat_blocks", Strings.big(profile.blocksTotal))
+end
+
+-- at the prison already: to its spawn spot; elsewhere: the trip to the prison lands on the spawn
+local function spawn(player: Player, _args: { string })
+	local profile = ProfileService.Get(player) :: Types.Profile
+	if profile.location == "prison" then
+		Remotes.event("ChatClient"):FireClient(player, "teleport", "prison", "spawn")
+	else
+		Remotes.event("ChatClient"):FireClient(player, "teleport", "prison")
+	end
+end
+
+local function warzone(player: Player, _args: { string })
+	Remotes.event("ChatClient"):FireClient(player, "teleport", Warzone.LOCATION)
+end
+
+local GANG_SUB = { invite = true, leave = true, deposit = true, withdraw = true, home = true }
+local function gang(player: Player, args: { string })
+	local sub = args[1] and args[1]:lower()
+	if not sub then
+		Remotes.event("OpenMenu"):FireClient(player, "gangs")
+		return
+	end
+	local amount = tonumber(args[2] and (args[2]:gsub(",", ".")) or nil)
+	if
+		not GANG_SUB[sub]
+		or (sub == "invite" and not args[2])
+		or ((sub == "deposit" or sub == "withdraw") and not (amount and amount > 0))
+	then
+		ChatService.fail(player, "chat_gang_usage")
+		return
+	end
+	Remotes.event("ChatClient")
+		:FireClient(player, "gang", sub, if sub == "invite" then args[2] else amount)
+end
+
+-- /f, /g, /l: the input bar writes into that channel from now on (the tab switches with it)
+local function channel(kind: Chat.Kind?): (Player, { string }) -> ()
+	return function(player: Player, _args: { string })
+		if not kind then
+			Remotes.event("ChatClient"):FireClient(player, "channel", nil)
+			return
+		end
+		local target = ChatService.channelOf(player, kind)
+		if not target then
+			ChatService.fail(
+				player,
+				if kind == "faction" then "chat_no_faction" else "chat_no_gang"
+			)
+			return
+		end
+		Remotes.event("ChatClient"):FireClient(player, "channel", target)
+	end
+end
+
+local function help(player: Player, _args: { string })
+	ChatService.reply(player, "chat_help")
+end
+
+local function soon(player: Player, _args: { string })
+	ChatService.reply(player, "chat_soon")
+end
+
+local function window(kind: string): (Player, { string }) -> ()
+	return function(player: Player, _args: { string })
+		Remotes.event("OpenMenu"):FireClient(player, kind)
+	end
+end
+
+-- ── the command table ───────────────────────────────────────────────────────────────────────────────────────────
+
+type Command = {
+	aliases: { string }, -- without «/»; the first is shown in the autocomplete
+	run: (Player, { string }) -> (),
+	cooldown: boolean?, -- changes a profile or asks another one: one per Config.chat.commandCooldownSeconds
+	profile: boolean?, -- needs the loaded profile
+}
+
+local COMMANDS: { [string]: Command } = {
+	pay = { aliases = { "pay" }, run = pay, cooldown = true, profile = true },
+	gift = { aliases = { "gift" }, run = gift, cooldown = true, profile = true },
+	thx = { aliases = { "thx" }, run = thx, cooldown = true, profile = true },
+	rubb = { aliases = { "rubb" }, run = rubb, cooldown = true, profile = true },
+	stats = { aliases = { "stats" }, run = stats, cooldown = true, profile = true },
+	hide = { aliases = { "hide" }, run = hide, cooldown = true, profile = true },
+	balance = { aliases = { "balance", "bal", "money" }, run = balance, profile = true },
+	blocks = { aliases = { "blocks" }, run = blocks, profile = true },
+	help = { aliases = { "help", "commands" }, run = help },
+	spawn = { aliases = { "spawn" }, run = spawn, profile = true },
+	warzone = { aliases = { "warzone" }, run = warzone },
+	gang = { aliases = { "gang" }, run = gang },
+	factionChat = { aliases = { "f" }, run = channel("faction") },
+	gangChat = { aliases = { "g" }, run = channel("gang") },
+	localChat = { aliases = { "l" }, run = channel(nil) },
+	soon = { aliases = { "autosell", "wiki", "quests", "skipguide" }, run = soon },
+	-- the windows (init.client windowBuilders kinds; the same windows as the keys and the menu)
+	menu = { aliases = { "menu" }, run = window("menu") },
+	auction = { aliases = { "ah", "auction" }, run = window("auction") },
+	potions = { aliases = { "potion", "potions" }, run = window("potions") },
+	skills = { aliases = { "skills" }, run = window("skills") },
+	factions = { aliases = { "fraction", "frac" }, run = window("factions") },
+	donate = { aliases = { "donate" }, run = window("donate") },
+	settings = { aliases = { "settings" }, run = window("settings") },
+	boosters = { aliases = { "booster", "boosters" }, run = window("boosters") },
+	locations = { aliases = { "mines" }, run = window("locations") },
+	upgrade = { aliases = { "up", "upgrade" }, run = window("upgrade") },
+	level = { aliases = { "level" }, run = window("level") },
+	achievements = { aliases = { "achievements" }, run = window("achievements") },
+	artifacts = { aliases = { "artifacts" }, run = window("artifacts") },
+	rubbish = { aliases = { "rubbish" }, run = window("rubbish") },
+	daily = { aliases = { "daily" }, run = window("daily") }, -- «Ежедневные награды» (этап 7)
+	pris = { aliases = { "pp", "mining" }, run = window("pris") }, -- PRIS+ (этап 8; the auto-dig switch lives there)
+	names = { aliases = { "names", "titles", "nickname" }, run = window("names") }, -- «Ваши клички» (этап 9)
+	players = { aliases = { "players", "list" }, run = window("players") }, -- the TAB list (этап 9)
+}
+-- the commands the player card also sends as ChatCommand(id, args) (players who may not chat have only the buttons)
+local BUTTONS = { pay = true, gift = true, thx = true, rubb = true }
+local BY_ALIAS: { [string]: string } = {}
+for id, command in pairs(COMMANDS) do
+	for _, alias in ipairs(command.aliases) do
+		BY_ALIAS[alias] = id
+	end
+end
+
+-- the command `id` with its arguments → true when it was one of ours
+local function runArgs(player: Player, id: string, typed: { string }): boolean
+	local command = COMMANDS[id]
 	if not command then
 		return false
 	end
-	if os.clock() - (lastCommand[player] or -math.huge) < cfg.commandCooldownSeconds then
-		ChatService.fail(player, "chat_wait")
-		return true
+	local args = {}
+	for i = 1, math.min(#typed, 4) do
+		args[i] = typed[i]:sub(1, 64) -- a name or a number never needs more
 	end
-	lastCommand[player] = os.clock()
-	if not ProfileService.Get(player) then
+	if command.cooldown then
+		if os.clock() - (lastCommand[player] or -math.huge) < cfg.commandCooldownSeconds then
+			ChatService.fail(player, "chat_wait")
+			return true
+		end
+		lastCommand[player] = os.clock()
+	end
+	if command.profile and not ProfileService.Get(player) then
 		ChatService.fail(player, "chat_not_ready")
 		return true
 	end
-	local ok, err = pcall(command, player, args)
+	local ok, err = pcall(command.run, player, args)
 	if not ok then
-		warn("[ChatCommandService] /" .. name .. ": " .. tostring(err))
+		warn("[ChatCommandService] /" .. id .. ": " .. tostring(err))
 	end
 	return true
+end
+
+-- the command `id` typed as `text` (the alias first, then the arguments)
+local function run(player: Player, id: string, text: string): boolean
+	local _, typed = Chat.command(text)
+	return runArgs(player, id, typed)
+end
+
+-- a typed line (QA ChatDebug "command") → the command by its alias
+local function runText(player: Player, text: string): boolean
+	local name = Chat.command(text)
+	local id = name and BY_ALIAS[name]
+	return id ~= nil and run(player, id, text)
+end
+
+local function createCommands()
+	local folder = Instance.new("Folder")
+	folder.Name = Chat.COMMANDS
+	for id, command in pairs(COMMANDS) do
+		local aliases = command.aliases
+		for i = 1, #aliases, 2 do
+			local instance = Instance.new("TextChatCommand")
+			instance.Name = id .. (if i > 1 then tostring((i + 1) // 2) else "")
+			instance.PrimaryAlias = "/" .. aliases[i]
+			instance.SecondaryAlias = if aliases[i + 1] then "/" .. aliases[i + 1] else ""
+			instance.AutocompleteVisible = i == 1
+			instance.Triggered:Connect(function(source: TextSource, text: string)
+				local player = Players:GetPlayerByUserId(source.UserId)
+				if player then
+					run(player, id, if typeof(text) == "string" then text else "")
+				end
+			end)
+			instance.Parent = folder
+		end
+	end
+	folder.Parent = TextChatService
+	-- Roblox's own /help gives way to ours (the default commands appear a moment after the start)
+	task.spawn(function()
+		local defaults = TextChatService:WaitForChild("TextChatCommands", 30)
+		local rbxHelp = defaults and defaults:WaitForChild("RBXHelpCommand", 30)
+		if rbxHelp and rbxHelp:IsA("TextChatCommand") then
+			rbxHelp.Enabled = false
+		end
+	end)
 end
 
 function ChatCommandService.Start()
@@ -491,23 +721,24 @@ function ChatCommandService.Start()
 		return
 	end
 	started = true
-	Remotes.event("ChatCommand").OnServerEvent
-		:Connect(function(player: Player, name: any, args: any)
-			if typeof(name) ~= "string" or typeof(args) ~= "table" or #name > 16 then
+	Remotes.event("ChatClient")
+	createCommands()
+	-- the player card's buttons (PlayerListWindow: transfer, gift, thanks) — the same checks as the typed commands
+	Remotes.event("ChatCommand").OnServerEvent:Connect(function(player: Player, id: any, args: any)
+		if typeof(id) ~= "string" or not BUTTONS[id] or typeof(args) ~= "table" then
+			return
+		end
+		local clean = {}
+		for i = 1, math.min(#args, 4) do
+			if typeof(args[i]) ~= "string" then
 				return
 			end
-			local clean = {}
-			for i = 1, math.min(#args, 4) do
-				local value = args[i]
-				if typeof(value) ~= "string" or #value > 64 then
-					return
-				end
-				clean[i] = value
-			end
-			run(player, name, clean)
-		end)
+			clean[i] = args[i]
+		end
+		runArgs(player, id, clean)
+	end)
 	Remotes.event("Rubbish").OnServerEvent:Connect(rubbish)
-	ChatService.commandHandler = run
+	ChatService.commandHandler = runText
 	Players.PlayerRemoving:Connect(function(player)
 		lastCommand[player] = nil
 	end)

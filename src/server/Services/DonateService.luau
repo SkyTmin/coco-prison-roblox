@@ -20,6 +20,8 @@
 --   * Этап 8 (the «PRIS+» tab): pris_plus adds days to p.prisPlusUntil (PrisService publishes the attribute),
 --     auction_no_fee sets p.noAuctionFee, rubies_100 adds p.rubies. Every purchase for crystals takes the rubies first
 --     (Donate.pay), except rubies themselves; a crystal purchase is saved at once (SaveNow) like a receipt.
+--   * auction_announce adds an announcement credit (p.announceCredits); it is sold from the auction's offer card
+--     (AuctionService calls BuyRobux / BuyCrystals), not from a shop tab; OnBought tells AuctionService it came.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -37,6 +39,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local DonateService = {}
 local RECEIPTS_KEPT = 50
 local lastAction: { [Player]: number } = {}
+local boughtHooks: { (Player, string) -> () } = {}
 
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
@@ -107,6 +110,9 @@ local function give(p: any, item: Donate.Item, count: number): string
 	elseif item.rubies then
 		p.rubies = Donate.rubies(p) + item.rubies * count
 		return "rubies"
+	elseif item.announce then
+		p.announceCredits = (p.announceCredits or 0) + count
+		return "announce"
 	elseif item.auctionSlot then
 		-- an item until used, so it can be sold at the Auction [владелец 28.10]
 		local left = InventoryService.add(p, Donate.AUCTION_SLOT, count)
@@ -128,6 +134,9 @@ local function bought(player: Player, id: string, count: number, place: string)
 	end
 	Remotes.event("Toast"):FireClient(player, text)
 	Remotes.event("DonateBought"):FireClient(player, id, count)
+	for _, hook in ipairs(boughtHooks) do
+		task.spawn(hook, player, id)
+	end
 end
 
 local function onBuy(player: Player, id: any, rawCount: any)
@@ -322,6 +331,20 @@ local function onBoosterToItem(player: Player, index: any)
 	if result ~= "" then
 		toast(player, result)
 	end
+end
+
+-- fn(player, itemId) after every purchase that gave the item (crystals, a Robux receipt, the free Studio test)
+function DonateService.OnBought(fn: (Player, string) -> ())
+	table.insert(boughtHooks, fn)
+end
+
+-- the same purchases from another service (the auction's announcement card)
+function DonateService.BuyCrystals(player: Player, id: string, count: number)
+	onBuy(player, id, count)
+end
+
+function DonateService.BuyRobux(player: Player, id: string)
+	onBuyRobux(player, id)
 end
 
 function DonateService.Start()

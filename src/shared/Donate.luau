@@ -19,6 +19,7 @@ export type Item = {
 	prisDays: number?, -- PRIS+ for this many days
 	noFee: boolean?, -- «Удаление комиссии на Аукционе», for good
 	rubies: number?, -- this many rubies
+	announce: boolean?, -- one paid auction announcement (a credit, AuctionService)
 	max: number,
 	icon: string?,
 	robux: number, -- the same item straight for Robux, one per purchase (its own Developer Product)
@@ -160,6 +161,8 @@ function Donate.name(id: string, locale: string?): string
 		return t("donate_nofee_name")
 	elseif item.rubies then
 		return t("donate_rubies_name", item.rubies)
+	elseif item.announce then
+		return t("donate_announce_name")
 	elseif item.give and (item.each or 1) > 1 then
 		return t("donate_star_set_name")
 	elseif item.give then
@@ -195,6 +198,8 @@ function Donate.description(id: string, locale: string?): string
 		return t("donate_desc_nofee")
 	elseif item.rubies then
 		return t("donate_desc_rubies", item.rubies)
+	elseif item.announce then
+		return t("donate_desc_announce")
 	elseif item.give and (item.each or 1) > 1 then
 		return t("donate_desc_stars", item.each or 1)
 	elseif item.give then

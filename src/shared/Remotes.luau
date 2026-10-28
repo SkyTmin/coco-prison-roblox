@@ -48,19 +48,22 @@
 -- Client → server:        GangHome() — «Домой» in the «Банда» window: to the gang's own house (GangHouseService)
 -- Server → client:        TreasureReset() — damage broke the treasure chest capture: the client lets the prompt go
 -- Client → server:        Favorite("done" | "later") — the «Избранное» card's outcome (ReferralService; no reward ever)
--- Client → server:        ChatGlobal(text) — a «!» line for every server (ChatService filters it; the local, faction and
---                         gang lines go through TextChatService TextChannels, not a remote); ChatCommand(name, {args})
---                         — /pay, /gift, /thx (ChatCommandService); Rubbish({ {slot, id, count} }) — the «Урна» closed
--- Server → client:        ChatGlobal({u, n, l, f, g, c, k, t}) — a filtered global line (user id, display name, level,
---                         faction, gang tag, gang colour, nickname, text); ChatSystem(text, "announce" | "reply" | "error")
+-- Server → client:        ChatSystem(text, "announce" | "reply" | "error") — a system line in Roblox's chat (ChatWindow:
+--                         TextChannel:DisplaySystemMessage in RBXSystem); ChatClient(action, …) — a chat command's
+--                         client part (ChatCommandService → ChatCommands): "teleport" location spot? | "gang" sub arg |
+--                         "channel" TextChannel? (nil = Общий); window commands use OpenMenu(kind)
+-- Client → server:        ChatCommand(id, {args}) — the player card's buttons: "pay" / "gift" / "thx" / "rubb", the same
+--                         checks as the typed commands (ChatCommandService); Rubbish({ {slot, id, count} }) — the «Урна» closed
 -- Client → server:        DailyClaim() — take today's card of «Ежедневные награды» (DailyService; the window opens by
 --                         /daily, the menu tile or the NPC's prompt → OpenMenu("daily"))
 -- Этап 8 (PRIS+, рубины):  RemoteFunction PrisQuery("mines") → { now, mines = { {id, location, left, cycle} } } or nil
 --                         (PrisService: PRIS+ players only, once a second); server → client EnchantFx(kind, position,
 --                         power) — unreliable, a PRIS+ player's Вихрь / Ярость / Бульдозер worked nearby (BookService);
 --                         AuctionSell(slot, amount, price, currency?) — currency "rubies" = whole rubies, else dollars;
---                         ChatGlobal carries p = 1 for the [PRIS+] prefix; ChatCommand also takes "rubb" (/rubb ник N)
---                         and "stats" (/stats ник, PRIS+ only)
+-- Paid announcements:     server → client AuctionListed(lotId) — the offer card after a listing; RemoteFunction
+--                         AuctionAnnounceInfo() → {wait, maxWait, credits, busy, crystals, robux}; AuctionAnnounce(lotId,
+--                         "credit" | "robux" | "crystals"); server → client AuctionAnnounced({lot, item, price, cur, seller})
+--                         — the banner (AuctionService, client AuctionBanner)
 -- Этап 9 (клички, TAB):    NicknameSet(name | "") — make an owned nickname active / take it off (NicknameService);
 --                         RemoteFunction PlayerCard(userId) → { u, level, faction, gang, tag, color, nick, pris, blocks,
 --                         rats, kills, deaths, canInvite } or nil — the TAB list / chat player card (PlayerCardService)

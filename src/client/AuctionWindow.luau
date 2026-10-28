@@ -31,6 +31,8 @@ type Summary = Auction.Summary
 type SlotView = { frame: Frame, icon: ImageLabel, count: TextLabel, button: TextButton }
 
 local AuctionWindow = {}
+-- the next window opens with this in the search (the «Открыть» of an announcement banner, AuctionBanner)
+AuctionWindow.pendingSearch = nil :: string?
 
 local SLOT, GAP, COLS, ROWS = 46, 4, 10, 6
 local LEFT_W = 196
@@ -326,6 +328,10 @@ function AuctionWindow.build(
 		UDim2.fromOffset(0, y)
 	)
 	search.Name = "Search"
+	if AuctionWindow.pendingSearch then
+		search.Text = AuctionWindow.pendingSearch
+		AuctionWindow.pendingSearch = nil
+	end
 	for _, box in ipairs({ minPrice, maxPrice, minLevel, maxLevel, search }) do
 		box.FocusLost:Connect(function()
 			page = 1

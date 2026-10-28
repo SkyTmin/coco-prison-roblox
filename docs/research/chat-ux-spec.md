@@ -1,5 +1,7 @@
 # Chat UX spec — «чат не мешает играть» (28.10.2026)
 
+> **Superseded 28.10 evening**: the game moved to Roblox's own chat window [владелец: «Давай тогда переводить на чат в роблокс»]. Our feed / panel / gear are gone; see docs/GAME-DESIGN.md §11.5. Kept for the reasoning only.
+
 Owner [28.10, evening]: «МАКСИМУМ УСИЛИЙ К ЧАТУ. Как сделать так, чтобы не мешало игрокам, расположение чата,
 размеры». The first version (`src/client/ChatWindow.luau`, stage 3) is a permanent 300×220 dark panel bottom-left
 with tabs; in Studio it covered the hotkey hints and the top-left buttons. This spec replaces its look and

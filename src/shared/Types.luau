@@ -21,16 +21,13 @@ export type Settings = {
 	night: boolean?,
 	appleSkinOff: boolean?,
 	enchantFxOff: boolean?,
-	-- the chat's look (docs/research/chat-ux-spec.md): size 1–3 (Маленький / Средний / Большой, default 2), the feed
-	-- backing 1–3 (Тёмный / Обычный / Без фона, default 2), the feed hides 1 after 10 s (default) / 2 never / 3 always,
-	-- no bubbles over heads, no global lines in the feed, the whole chat off, the optional chat button on a computer
+	-- the chat (Roblox's chat window, ChatWindow): window size 1–3 (Маленький / Средний / Большой, default 2), the
+	-- background 1–3 (Тёмный / Обычный / Без фона, default 2), no bubbles over heads, the whole chat off
 	chatSize: number?,
 	chatBack: number?,
-	chatFade: number?,
 	bubblesOff: boolean?,
-	chatGlobalOff: boolean?,
 	chatOff: boolean?,
-	chatButton: boolean?,
+	auctionAdsOff: boolean?, -- other players' paid auction announcements hidden (banner + chat line)
 }
 
 export type ItemStack = {
@@ -91,6 +88,9 @@ export type Profile = {
 	-- rubies [вики DONATE-SHOP-BOOSTERS] — whole, never negative
 	prisPlusUntil: number?,
 	noAuctionFee: boolean?,
+	-- paid auction announcements (AuctionService): credits bought and not used yet; the one waiting in the shared queue
+	announceCredits: number?,
+	announcePending: { lot: string, at: number }?,
 	rubies: number?,
 	stash: { { id: string, count: number } }?, -- bought items that did not fit the inventory, claimed from storage [B]
 	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier

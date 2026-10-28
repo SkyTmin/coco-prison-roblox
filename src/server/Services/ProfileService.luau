@@ -188,6 +188,10 @@ local function migrate(data: any): Profile
 	end
 	if typeof(profile.settings) ~= "table" then
 		profile.settings = nil
+	else
+		-- the chat's own feed is gone (Roblox's chat since 28.10): its old switches are dropped
+		local settings = profile.settings :: any
+		settings.chatFade, settings.chatGlobalOff, settings.chatButton = nil, nil, nil
 	end
 	-- PRIS+ and the rubies (этап 8, Shared/PrisPlus)
 	if
@@ -198,6 +202,20 @@ local function migrate(data: any): Profile
 	end
 	if profile.noAuctionFee ~= true then
 		profile.noAuctionFee = nil
+	end
+	-- paid auction announcements (AuctionService): whole credits; the queued one {lot, at}
+	if typeof(profile.announceCredits) ~= "number" or profile.announceCredits < 1 then
+		profile.announceCredits = nil
+	else
+		profile.announceCredits = math.floor(profile.announceCredits)
+	end
+	local pending = profile.announcePending
+	if
+		typeof(pending) ~= "table"
+		or typeof(pending.lot) ~= "string"
+		or typeof(pending.at) ~= "number"
+	then
+		profile.announcePending = nil
 	end
 	local rubies = profile.rubies
 	profile.rubies = if typeof(rubies) == "number"
@@ -810,26 +828,20 @@ function ProfileService.Start()
 		enchantFxOff = function(v)
 			return typeof(v) == "boolean"
 		end,
-		-- the chat's look (ChatWindow, docs/research/chat-ux-spec.md): three-step choices and switches
+		-- the chat (ChatWindow sets Roblox's chat window up with them): three-step choices and switches
 		chatSize = function(v)
 			return v == 1 or v == 2 or v == 3
 		end,
 		chatBack = function(v)
 			return v == 1 or v == 2 or v == 3
 		end,
-		chatFade = function(v)
-			return v == 1 or v == 2 or v == 3
-		end,
 		bubblesOff = function(v)
-			return typeof(v) == "boolean"
-		end,
-		chatGlobalOff = function(v)
 			return typeof(v) == "boolean"
 		end,
 		chatOff = function(v)
 			return typeof(v) == "boolean"
 		end,
-		chatButton = function(v)
+		auctionAdsOff = function(v)
 			return typeof(v) == "boolean"
 		end,
 	}

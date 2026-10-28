@@ -6,7 +6,7 @@
 --     prison_plus.gui.*]: the timers live only on the server (MineService.timers), so only a PRIS+ player gets them,
 --     at most once a second; the boss board reads ReplicatedStorage.Bosses on the client (BossService).
 -- Bought in the donate shop (DonateService: pris_plus adds days, auction_no_fee). What it changes elsewhere:
--- AuctionService (10 slots, 0 %), ChatService (the prefix of a global line), ChatCommandService (/stats Ник, /rubb),
+-- AuctionService (10 slots, 0 %), ChatCommandService (/stats Ник, /rubb),
 -- BookService (EnchantFx), the client (auto-dig, night, AppleSkin).
 -- QA (Studio): ServerStorage.PrisDebug:Invoke(op, userId, n) — ("give", id, days) adds days (0 or less = ends now),
 -- ("fee", id, true|false) the «Удаление комиссии», ("rubies", id, n) sets the rubies, ("state", id) → JSON.

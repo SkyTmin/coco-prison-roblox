@@ -35,10 +35,12 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Auction = require(Shared.Auction)
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
 local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local DonateService = require(script.Parent.DonateService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
 
@@ -723,6 +725,7 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 		end)
 		indexSet(s)
 		toast(player, "auction_listed", itemText(player, s.item), priceText(player, s.cur, s.price))
+		Remotes.event("AuctionListed"):FireClient(player, s.id) -- the announcement offer
 	else
 		-- not confirmed: read the key again at once (tombstone if missing → the item comes back)
 		local state = settleSell(player, s.id)
@@ -733,6 +736,7 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 				itemText(player, s.item),
 				priceText(player, s.cur, s.price)
 			)
+			Remotes.event("AuctionListed"):FireClient(player, s.id)
 		elseif state == "void" then
 			toast(player, "auction_try_later")
 		else
@@ -905,6 +909,339 @@ local function isInt(v: any, lo: number, hi: number): boolean
 	return typeof(v) == "number" and v == v and v == math.floor(v) and v >= lo and v <= hi
 end
 
+-- ── paid announcements [владелец 28.10: «уведомления за 10 роблокосов … уведомить весь сервер, что такой-то предмет,
+-- с такими качества и по такой цене и количество выставлено на аукционе»; «все серверы»] ─────────────────────────
+-- One announcement = one credit (p.announceCredits), bought for Robux or crystals (the donate item
+-- cfg.announce.item). All servers share one queue: the MemoryStore hash AuctionAnnounce_v1 key "tail" is the earliest
+-- time the next one may air, every announcement moves it on by gapSeconds; a wait over maxWaitSeconds is refused
+-- before any money is taken. The credit is spent when the slot is reserved (p.announcePending = {lot, at}, saved); at
+-- that time the server that reserved it re-reads the lot: still active → MessagingService AuctionAnnounce to every
+-- server (banner + a system chat line for each player who did not hide auction ads), gone → the credit comes back.
+-- Its outcome is noted under "done_<lot>" so a player who left (or whose server shut down) is settled on the next
+-- join: aired = spent, anything else = the credit back.
+local ANNOUNCE_MAP = "AuctionAnnounce_v1"
+local ANNOUNCE_TOPIC = "AuctionAnnounce"
+local TAIL_CACHE_SECONDS = 5
+local announceMap: MemoryStoreHashMap? = nil
+local memoryAnnounce: { [string]: any } = {} -- Studio without MemoryStore: the same keys on this server
+local tailCache, tailCacheAt = 0, -math.huge
+local wantLot: { [Player]: string } = {} -- the lot a credit being bought right now is for
+
+local function announceCfg(): any
+	return cfg.announce or {}
+end
+
+local function credits(p: any): number
+	return if typeof(p.announceCredits) == "number" then p.announceCredits else 0
+end
+
+-- when the next announcement could air (cached a few seconds: the offer card asks often)
+local function queueTail(): number
+	if os.clock() - tailCacheAt < TAIL_CACHE_SECONDS then
+		return tailCache
+	end
+	local tail: any = memoryAnnounce.tail
+	local map = announceMap
+	if map then
+		local ok, value = pcall(function()
+			return map:GetAsync("tail")
+		end)
+		tail = if ok then value else tailCache
+	end
+	tailCache, tailCacheAt = if typeof(tail) == "number" then tail else 0, os.clock()
+	return tailCache
+end
+
+-- the seconds a new announcement would wait now
+local function queueWait(): number
+	return math.max(0, queueTail() - os.time())
+end
+
+-- a slot in the shared queue: the time it airs, or nil (the queue is too long or the store failed)
+local function reserveSlot(): number?
+	local gap = announceCfg().gapSeconds or 60
+	local maxWait = announceCfg().maxWaitSeconds or 600
+	local at: number? = nil
+	local function step(old: any): any
+		local now = os.time()
+		local slot = math.max(now + 2, if typeof(old) == "number" then old else 0)
+		if slot - now > maxWait then
+			at = nil
+			return nil
+		end
+		at = slot
+		return slot + gap
+	end
+	local map = announceMap
+	if map then
+		local ok, err = pcall(function()
+			map:UpdateAsync("tail", step, maxWait + gap * 2)
+		end)
+		if not ok then
+			warn("[AuctionService] announce queue: " .. tostring(err))
+			return nil
+		end
+	else
+		local new = step(memoryAnnounce.tail)
+		if new then
+			memoryAnnounce.tail = new
+		end
+	end
+	if at then
+		tailCache, tailCacheAt = at + gap, os.clock()
+	end
+	return at
+end
+
+local function setDone(lotId: string, outcome: string)
+	local map = announceMap
+	if map then
+		pcall(function()
+			map:SetAsync("done_" .. lotId, outcome, 7 * 86400)
+		end)
+	else
+		memoryAnnounce["done_" .. lotId] = outcome
+	end
+end
+
+local function getDone(lotId: string): string?
+	local map = announceMap
+	if not map then
+		return memoryAnnounce["done_" .. lotId]
+	end
+	local ok, value = pcall(function()
+		return map:GetAsync("done_" .. lotId)
+	end)
+	return if ok and typeof(value) == "string" then value else nil
+end
+
+-- the message every server gets (MessagingService takes 1 KB: the item is cut to what the banner shows)
+local function announcePayload(s: Summary): { [string]: any }
+	local item = s.item
+	local books = {}
+	for i, book in ipairs(item.books or {}) do
+		if i > 8 then
+			break
+		end
+		table.insert(books, { id = book.id, level = book.level })
+	end
+	return {
+		lot = s.id,
+		item = {
+			id = item.id,
+			count = item.count,
+			level = item.level,
+			books = books,
+			rarity = item.rarity,
+		},
+		price = s.price,
+		cur = s.cur,
+		seller = s.sellerName,
+	}
+end
+
+-- an announcement reached this server: the banner and a chat line for everyone who did not hide auction ads
+local function deliverAnnounce(m: any)
+	if
+		typeof(m) ~= "table"
+		or not isId(m.lot)
+		or typeof(m.item) ~= "table"
+		or typeof(m.item.id) ~= "string"
+		or typeof(m.item.count) ~= "number"
+		or typeof(m.price) ~= "number"
+		or typeof(m.seller) ~= "string"
+	then
+		return
+	end
+	for _, player in ipairs(Players:GetPlayers()) do
+		local p = ProfileService.Get(player)
+		local settings = p and (p :: any).settings
+		if p and not (settings and settings.auctionAdsOff) then
+			Remotes.event("AuctionAnnounced"):FireClient(player, m)
+			local locale = Strings.localeOf(player)
+			local name = Strings.itemName(m.item.id, m.item.level, locale)
+			Remotes.event("ChatSystem"):FireClient(
+				player,
+				Strings.t(
+					"auction_announce_chat",
+					locale,
+					m.seller,
+					if m.item.count > 1 then name .. " ×" .. m.item.count else name,
+					Auction.priceText({ cur = m.cur }, m.price, locale)
+				),
+				"announce"
+			)
+		end
+	end
+end
+
+local function publishAnnounce(m: { [string]: any })
+	local ok = pcall(function()
+		MessagingService:PublishAsync(ANNOUNCE_TOPIC, m)
+	end)
+	if not ok then
+		deliverAnnounce(m) -- at least this server (the service is down)
+	end
+end
+
+-- the reserved time came: air it if the lot is still on sale, otherwise give the credit back
+local function airAnnounce(userId: number, s: Summary)
+	local active = false
+	local read = lotUpdate(s.id, function(old: any)
+		active = typeof(old) == "table" and old.status == "active"
+		return nil
+	end)
+	active = active and read
+	setDone(s.id, if active then "aired" else "gone")
+	if active then
+		publishAnnounce(announcePayload(s))
+	end
+	local player = Players:GetPlayerByUserId(userId)
+	if not player then
+		return -- settled on the next join from the "done" note
+	end
+	local refunded = false
+	ProfileService.Mutate(player, function(p)
+		local pending = (p :: any).announcePending
+		if typeof(pending) == "table" and pending.lot == s.id then
+			(p :: any).announcePending = nil
+			if not active then
+				(p :: any).announceCredits = credits(p) + 1
+				refunded = true
+			end
+		end
+	end)
+	if refunded then
+		toast(player, "auction_announce_refund")
+		task.spawn(ProfileService.SaveNow, player)
+	end
+end
+
+-- spend a credit on the player's own active lot
+local function announce(player: Player, lotId: string)
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return
+	end
+	local s = data(profile).lots[lotId]
+	if not s then
+		toast(player, "auction_announce_no_lot")
+		return
+	elseif (profile :: any).announcePending then
+		toast(player, "auction_announce_busy")
+		return
+	elseif credits(profile) < 1 then
+		return
+	end
+	local at = reserveSlot()
+	if not at then
+		toast(player, "auction_announce_queue_full", credits(profile))
+		return
+	end
+	local slot = at :: number
+	local taken = false
+	ProfileService.Mutate(player, function(p)
+		if credits(p) >= 1 and not (p :: any).announcePending then
+			local left = credits(p) - 1
+			(p :: any).announceCredits = if left > 0 then left else nil
+			(p :: any).announcePending = { lot = lotId, at = slot }
+			taken = true
+		end
+	end)
+	if not taken then
+		return
+	end
+	saveNow(player)
+	local wait = math.max(0, slot - os.time())
+	if wait <= 5 then
+		toast(player, "auction_announce_now")
+	else
+		toast(player, "auction_announce_queued", wait)
+	end
+	task.delay(wait, airAnnounce, player.UserId, deepCopy(s))
+end
+
+-- a pending announcement found on join: wait until its time has surely passed, then settle it from the note
+local function settleAnnounce(player: Player)
+	local p = ProfileService.Get(player)
+	local pending = p and (p :: any).announcePending
+	if
+		typeof(pending) ~= "table"
+		or typeof(pending.lot) ~= "string"
+		or typeof(pending.at) ~= "number"
+	then
+		return
+	end
+	task.delay(math.max(0, pending.at + 90 - os.time()), function()
+		if not player.Parent then
+			return
+		end
+		local outcome = getDone(pending.lot)
+		local refunded = false
+		ProfileService.Mutate(player, function(q)
+			local now = (q :: any).announcePending
+			if typeof(now) == "table" and now.lot == pending.lot and now.at == pending.at then
+				(q :: any).announcePending = nil
+				if outcome ~= "aired" then
+					(q :: any).announceCredits = credits(q) + 1
+					refunded = true
+				end
+			end
+		end)
+		if refunded then
+			toast(player, "auction_announce_refund")
+			task.spawn(ProfileService.SaveNow, player)
+		end
+	end)
+end
+
+-- the offer card asks: how long the queue is, how many credits the player has, what one costs
+local function announceInfo(player: Player): any
+	local p = ProfileService.Get(player)
+	if not p then
+		return nil
+	end
+	local item = Donate.item(announceCfg().item)
+	return {
+		wait = queueWait(),
+		maxWait = announceCfg().maxWaitSeconds or 600,
+		credits = credits(p),
+		busy = (p :: any).announcePending ~= nil,
+		crystals = if item then item.price else 0,
+		robux = if item then item.robux else 0,
+	}
+end
+
+-- AuctionAnnounce(lotId, pay): "credit" spends one now; "robux" / "crystals" buy one first (DonateService), the
+-- purchase then announces this lot. Everything that would refuse the announcement is checked before the money.
+local function onAnnounce(player: Player, lotId: string, pay: string)
+	local p = ProfileService.Get(player)
+	if not p then
+		return
+	end
+	if not data(p).lots[lotId] then
+		toast(player, "auction_announce_no_lot")
+		return
+	elseif (p :: any).announcePending then
+		toast(player, "auction_announce_busy")
+		return
+	end
+	if pay == "credit" then
+		announce(player, lotId)
+		return
+	end
+	if queueWait() > (announceCfg().maxWaitSeconds or 600) then
+		toast(player, "auction_announce_queue_full", credits(p))
+		return
+	end
+	wantLot[player] = lotId
+	if pay == "robux" then
+		DonateService.BuyRobux(player, announceCfg().item)
+	else
+		DonateService.BuyCrystals(player, announceCfg().item, 1)
+	end
+end
+
 -- ── browsing ────────────────────────────────────────────────────────────────────────────────────────────────────
 
 type Query = {
@@ -1036,6 +1373,12 @@ local function connectStores()
 		warn("[AuctionService] MemoryStore unavailable: " .. tostring(map))
 		return false
 	end
+	if indexMap then
+		local okHash, hash = pcall(function()
+			return MemoryStoreService:GetHashMap(ANNOUNCE_MAP)
+		end)
+		announceMap = if okHash then hash else nil
+	end
 	return true
 end
 
@@ -1156,6 +1499,27 @@ function AuctionService.Start()
 		settleLocked(player)
 	end)
 	Remotes.func("AuctionQuery").OnServerInvoke = query
+	Remotes.event("AuctionAnnounced")
+	Remotes.event("AuctionListed")
+	Remotes.event("AuctionAnnounce").OnServerEvent
+		:Connect(action(onAnnounce, function(id: any, pay: any)
+			return isId(id) and (pay == "credit" or pay == "robux" or pay == "crystals")
+		end))
+	Remotes.func("AuctionAnnounceInfo").OnServerInvoke = announceInfo
+	-- a credit bought for the lot the offer card was about: announce it now
+	DonateService.OnBought(function(player: Player, itemId: string)
+		local lotId = wantLot[player]
+		if itemId ~= announceCfg().item or not lotId then
+			return
+		end
+		wantLot[player] = nil
+		task.spawn(function()
+			if lock(player, true) then
+				pcall(announce, player, lotId)
+				unlock(player)
+			end
+		end)
+	end)
 
 	ProfileService.OnLoaded(function(player)
 		task.spawn(function()
@@ -1163,6 +1527,7 @@ function AuctionService.Start()
 				task.wait(1)
 			end
 			settleLocked(player, true)
+			settleAnnounce(player)
 		end)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
@@ -1170,6 +1535,7 @@ function AuctionService.Start()
 		lastAction[player] = nil
 		lastQuery[player] = nil
 		lastOpenSettle[player] = nil
+		wantLot[player] = nil
 	end)
 	debugHook()
 
@@ -1179,6 +1545,11 @@ function AuctionService.Start()
 			return
 		end
 		refreshCache()
+		pcall(function()
+			MessagingService:SubscribeAsync(ANNOUNCE_TOPIC, function(message)
+				deliverAnnounce(message.Data)
+			end)
+		end)
 		pcall(function()
 			MessagingService:SubscribeAsync(SOLD_TOPIC, function(message)
 				local m = message.Data

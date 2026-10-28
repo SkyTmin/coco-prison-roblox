@@ -178,7 +178,7 @@ end
 -- [владелец 21.10] no hygiene / sleep / toilet bars: NeedsService sends a message when a need runs out
 -- and the effect icon (EffectsHud) shows while it lasts
 
--- Bottom-left beside the hotbar (wrapped into lines), clear of the armor row and the meters over the hotbar.
+-- Right of the hotbar (wrapped into lines; updateLayout places it): Roblox's chat window owns the bottom-left corner.
 local hints = Ui.label(
 	gui,
 	T("keys_hint"),
@@ -2081,20 +2081,16 @@ windowBuilders.names = function()
 	refreshMenu = refresh
 	return win
 end
--- the TAB list with the player card (Tab, the menu tile, the phone grid, a click on a chat line; этап 9)
+-- the TAB list with the player card (Tab, the menu tile, the phone grid; этап 9)
 windowBuilders.players = function()
 	local win, refresh =
 		require(script.PlayerListWindow).build(gui, profile, locale, closeWindow, createWindow)
 	refreshMenu = refresh
 	return win
 end
--- the chat (этап 3, docs/research/chat-ux-spec.md): our own feed and panel over TextChatService, the commands,
--- «[Совет]», /hide (ChatWindow); the HUD it keeps clear of is handed over below the touch controls
+-- the chat (этап 3): Roblox's own chat window set up for our HUD, the system lines, «[Совет]», /hide, the client part of
+-- the commands (ChatWindow); the hotbar it keeps clear of is handed over below the touch controls
 require(script.ChatWindow).start({
-	open = function(kind: string)
-		closeWindow()
-		open(kind)
-	end,
 	profile = function()
 		return profile
 	end,
@@ -2102,9 +2098,6 @@ require(script.ChatWindow).start({
 		return locale
 	end,
 	toast = showToast,
-	windowOpen = function()
-		return currentWindowKind ~= nil
-	end,
 })
 require(script.CasePreviewWindow).profile = function() -- the nickname case shows the chances without owned names
 	return profile
@@ -2356,6 +2349,14 @@ Remotes.event("OpenMenu").OnClientEvent:Connect(function(kind: string, tab: stri
 	end
 	closeWindow()
 	open(kind)
+end)
+-- paid auction announcements: the banner and the offer after listing; «Открыть» = the auction with the item searched
+require(script.AuctionBanner).start(function()
+	return locale
+end, function(search: string?)
+	require(script.AuctionWindow).pendingSearch = search
+	closeWindow()
+	open("auction")
 end)
 Remotes.event("CaseOpened").OnClientEvent:Connect(function(id: string)
 	-- The server has already replaced the session; closing the old UI must not close it.
@@ -3587,26 +3588,8 @@ HudLayout.register("boosters", boosterHud, true, true)
 -- [владелец 28.10] the status effect icons move too; the phone's «Бег» button (Sprint)
 HudLayout.register("effects", effectsHud, true, true)
 HudLayout.register("sprint", require(script.Sprint).start(touchActions), true, false)
--- the chat keeps clear of these (real rects; ChatLayout); the hotbar counts with the meters drawn over it
-require(script.ChatWindow).hud({
-	hotbar = hotbar,
-	hints = hints,
-	artifacts = artifactButton,
-	menu = menuButton,
-	boosters = boosterHud,
-	stats = stats,
-	effects = effectsHud,
-	toast = toast,
-	language = languageButton,
-	teleport = teleportCountdown,
-	touchMenu = menuToggle,
-	inventory = inventoryButton,
-	eat = eatButton,
-	sprint = touchActions:FindFirstChild("Touch_sprint") :: GuiObject,
-	attack = touchActions:FindFirstChild("Touch_attack") :: GuiObject,
-	jump = touchActions:FindFirstChild("Touch_jump") :: GuiObject,
-	view = gui:FindFirstChild("HudView") :: GuiObject,
-})
+-- Roblox's chat window stays left of the hotbar band (the meters are drawn over the hotbar, as wide as it)
+require(script.ChatWindow).hud({ hotbar = hotbar })
 
 Instance.new("UIScale").Parent = stats -- HudLayout sets it: the mode's base × the player's size
 local hotbarScale = Instance.new("UIScale")
@@ -3640,6 +3623,10 @@ local function updateLayout()
 	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
 	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
 	survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
+	-- the key hints right of the hotbar, short of the language button: Roblox's chat window owns the bottom-left corner
+	local hintsLeft = width / 2 * hotbarScale.Scale + 12
+	hints.Position = UDim2.new(0.5, hintsLeft, 1, -10)
+	hints.Size = UDim2.new(0.5, -hintsLeft - 84, 0, 0)
 	inventoryButton.Position = UDim2.new(0.5, width / 2 * hotbarScale.Scale + 6, 1, -8 - size - 4)
 	inventoryButton.AnchorPoint = Vector2.new(0, 0)
 	for i, slot in ipairs(hotbarSlots) do
@@ -3884,7 +3871,7 @@ if RunService:IsStudio() then
 		elseif action == "close" then
 			closeWindow()
 			return true
-		elseif action:sub(1, 4) == "chat" then -- chatLayout / chatLive / chatSpam / chatOpen / chatState
+		elseif action:sub(1, 4) == "chat" then -- chatState / chatSystem
 			return require(script.ChatWindow).debug(action, arg)
 		elseif action == "hudEdit" then
 			openHudEditor()
