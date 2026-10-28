@@ -13,7 +13,7 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 ## Layout
 
 - `src/shared/Config/*.json` — **generated**. Edit `scripts/design-decisions.json` (our choices) or the wiki JSON (confirmed data), then `node scripts/build-configs.mjs`. Never hand-edit the output.
-- `src/shared/` — `Config.luau` (typed access), `Strings.luau` (ru/en/es/fr, ru default), `Remotes.luau`, `Types.luau`.
+- `src/shared/` — `Config.luau` (typed access), `Strings/` (init.luau = functions, Part1..N.luau = the tables, ru/en/es/fr, ru default; a ModuleScript holds at most 200 000 characters — new strings into the last part, a new part when it nears that), `Remotes.luau`, `Types.luau`.
 - `src/server/Services/` — Profile (DataStore `PlayerProfiles_v3`), Inventory, Mine, Dig, Economy, Profession, Needs, Hunger, Death (PvP drops), Achievement, Case (cases + ender chest), Location (teleport channel + spots), Combat (lock), Texture.
 - `src/client/init.client.luau` — HUD, windows, dig input (mouse/touch/first person), mobile layout; modules `Ui`, `ChestWindow` + `DragDrop` (cases, ender chest, inventory), `HeldItem` (attribute `HeldItem`), `ArmorVisual` (attribute `Armor`).
 - World markup: CollectionService tags + attributes (`WorkNode`: `Resource`, `Generation`, `Depleted`; `SellPoint`).

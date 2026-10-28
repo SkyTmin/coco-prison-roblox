@@ -12,7 +12,7 @@ Rules that bite:
   fields go into `Types.Profile` and the defaults/load fix in `ProfileService`.
 - Numbers live in `scripts/design-decisions.json` → `node scripts/build-configs.mjs` (never hand-edit
   `src/shared/Config/*.json`); add the block to build-configs output if needed.
-- Every player-facing string in `src/shared/Strings.luau` in ru/en/es/fr. A literal `%` in a string with args is `%%`.
+- Every player-facing string in `src/shared/Strings/` (new strings go into the last `PartN.luau`; a part stays under 200 000 characters, start a new part when it grows) in ru/en/es/fr. A literal `%` in a string with args is `%%`.
   New items need `item_<id>` (+ `desc_<id>`).
 - Player-typed text (names, descriptions) must be filtered with `TextService:FilterStringAsync` +
   `GetNonChatStringForBroadcastAsync` before it is stored or shown to others.
