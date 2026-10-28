@@ -3384,12 +3384,14 @@ HudLayout.register("stats", stats, true, true)
 -- here, shown or hidden in the settings
 HudLayout.register("toasts", toast, true, true)
 HudLayout.register("boosters", boosterHud, true, true)
+-- [владелец 28.10] the status effect icons move too; the phone's «Бег» button (Sprint)
+HudLayout.register("effects", effectsHud, true, true)
+HudLayout.register("sprint", require(script.Sprint).start(touchActions), true, false)
 
 Instance.new("UIScale").Parent = stats -- HudLayout sets it: the mode's base × the player's size
 local hotbarScale = Instance.new("UIScale")
 hotbarScale.Parent = hotbar
-local effectsScale = Instance.new("UIScale")
-effectsScale.Parent = effectsHud
+Instance.new("UIScale").Parent = effectsHud -- HudLayout sets it: the mode's base × the player's size
 local slotScales: { UIScale } = {}
 for i, slot in ipairs(hotbarSlots) do
 	local scale = Instance.new("UIScale")
@@ -3409,7 +3411,7 @@ local function updateLayout()
 	stats.Position = if mobile then UDim2.new(1, -148, 0, 64) else UDim2.new(1, -224, 0.4, 0)
 	-- effect icons sit left of the stats panel, top-aligned with it
 	effectsHud.Position = if mobile then UDim2.new(1, -152, 0, 64) else UDim2.new(1, -230, 0.4, 0)
-	effectsScale.Scale = if mobile then 0.75 else 1
+	HudLayout.setBaseScale(effectsHud, if mobile then 0.75 else 1)
 	boosterHud.Position = if mobile then UDim2.fromOffset(72, 64) else UDim2.fromOffset(8, 116)
 	local size = if mobile and viewport.X <= 700 then 40 else SLOT
 	local width = 9 * (size + 4) + 8
@@ -3450,9 +3452,10 @@ local function updateLayout()
 	HudLayout.setDefault(inventoryButton)
 	HudLayout.setDefault(toast)
 	HudLayout.setDefault(boosterHud)
+	HudLayout.setDefault(effectsHud)
 	HudLayout.apply(mode, layout)
-	-- the status effect icons stay just left of the stats panel wherever it goes
-	if layout and layout.stats then
+	-- the status effect icons stay just left of the stats panel wherever it goes, unless moved themselves
+	if layout and layout.stats and not layout.effects then
 		effectsHud.Position = UDim2.new(
 			stats.Position.X.Scale,
 			stats.Position.X.Offset - 4,

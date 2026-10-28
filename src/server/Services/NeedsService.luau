@@ -26,6 +26,7 @@ type State = {
 	previous: Types.Needs,
 	humanoid: Humanoid?,
 	movementMultiplier: number,
+	sprinting: boolean, -- the client asks (Sprint); applied while the hunger allows it
 }
 type Event = { name: string, endsAt: number, endsAtServer: number }
 -- an effect with its own timer (food: the golden apple) [ваниль]
@@ -189,7 +190,13 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 		math.max(if eventName == "speed" then 1 else 0, if own.Speed then own.Speed.level else 0)
 	local frost = tonumber(character:GetAttribute("Frost")) or 0
 	local hulk = profile ~= nil and Books.worn(profile, "hulk") > 0
+	-- sprinting [ваниль; владелец 28.10: «как в майнкрафте быстрее бежать»]: ×1.3, not at 6 hunger or less
+	local sprint = state.sprinting
+		and profile ~= nil
+		and (profile.hunger > Effects.SPRINT_MIN_HUNGER or player:GetAttribute("Creative") == true)
+	character:SetAttribute("Sprinting", if sprint then true else nil)
 	local multiplier = math.max(0.1, 1 - Effects.SLOWNESS_PER_LEVEL * slow)
+		* (if sprint then Effects.SPRINT else 1)
 		* (1 + Effects.SPEED_PER_LEVEL * fast)
 		* math.max(0.1, 1 - Effects.FROST_PER_STACK * frost)
 		* (if hulk then 1 - Effects.HULK_SLOWNESS else 1)
@@ -452,6 +459,7 @@ local function updatePlayers()
 				previous = table.clone(profile.needs),
 				humanoid = nil,
 				movementMultiplier = 1,
+				sprinting = false,
 			}
 			states[player] = state
 		end
@@ -609,6 +617,16 @@ function NeedsService.Start()
 		end)
 	end
 	Remotes.event("UseConsumable").OnServerEvent:Connect(useConsumable)
+	-- Sprint(on): the client's intent; the walk speed and the Sprinting attribute come from here
+	Remotes.event("Sprint").OnServerEvent:Connect(function(player: Player, on: any)
+		local state = states[player]
+		local profile = ProfileService.Get(player)
+		if typeof(on) ~= "boolean" or not state or not profile or state.sprinting == on then
+			return
+		end
+		state.sprinting = on
+		applyEffects(player, state, profile.needs)
+	end)
 	Players.PlayerRemoving:Connect(function(player)
 		states[player] = nil
 		timed[player] = nil

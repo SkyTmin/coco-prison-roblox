@@ -2229,7 +2229,8 @@
       "everySeconds": 1200,
       "effect": "haste",
       "level": 1,
-      "durationSeconds": 300
+      "durationSeconds": 15,
+      "_duration": "[владелец 28.10: «эффекты которые случайные события. Пусть они длятся 15 секунд»]"
     },
     "injection": {
       "item": "needs_injection",

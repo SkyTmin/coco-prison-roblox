@@ -99,6 +99,9 @@ Effects.HULK_SLOWNESS = 0.15
 -- Vanilla movement modifiers [ваниль]: Slowness −15 % and Speed +20 % per level.
 Effects.SLOWNESS_PER_LEVEL = 0.15
 Effects.SPEED_PER_LEVEL = 0.2
+-- Sprinting [ваниль]: ×1.3 (4.3 → 5.6 blocks/s); no sprinting at 6 hunger or less
+Effects.SPRINT = 1.3
+Effects.SPRINT_MIN_HUNGER = 6
 
 function Effects.byId(id: string): Effect?
 	for _, effect in ipairs(Effects.list) do

@@ -639,6 +639,8 @@ function ProfileService.Start()
 		jump = true,
 		toasts = true,
 		boosters = true,
+		view = true,
+		sprint = true,
 	}
 	local lastLayoutAt: { [Player]: number } = {}
 	Players.PlayerRemoving:Connect(function(player)

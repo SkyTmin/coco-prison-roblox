@@ -28,6 +28,7 @@
 -- Client → server:        EatStart(slot), EatCancel() — hold to eat (FoodService); server → client Ate(itemId)
 -- Client → server:        DonateBuy(itemId, count), DonateTopUp(packId), DonateBuyRobux(itemId), StashClaim(index) — the donate shop (DonateService); server →
 --                         client DonateBought(itemId, count) after a purchase, DonateCrystals(amount) after a top-up
+-- Client → server:        Sprint(on) — sprint intent; NeedsService sets the speed and the character's Sprinting attribute
 -- Client → server:        SkillBuy(branchId) — the next level of a skill-tree branch (SkillService)
 -- Client → server:        PotionBrew(kind, effectIds, upgraded) — brew at the potion stand; UseConsumable(slot, aim) drinks
 --                         or throws a potion (PotionService); server → client PotionResult("brewed")

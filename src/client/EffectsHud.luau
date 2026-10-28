@@ -15,6 +15,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
+local HudLayout = require(script.Parent.HudLayout)
 local Remotes = require(Shared.Remotes)
 local Ui = require(script.Parent.Ui)
 local BowState = require(script.Parent.BowState)
@@ -49,7 +50,7 @@ function EffectsHud.start(
 	frame.Name = "Effects"
 	frame.BackgroundTransparency = 1
 	frame.AnchorPoint = Vector2.new(1, 0)
-	frame.Size = UDim2.fromOffset(#Effects.list * (BOX + GAP), 2 * ROW)
+	frame.Size = UDim2.fromOffset(6 * (BOX + GAP), 2 * ROW)
 	frame.Parent = gui
 
 	local boxes: { [string]: Box } = {}
@@ -122,6 +123,15 @@ function EffectsHud.start(
 
 	local function render()
 		local active = Effects.active(player.Character)
+		-- the layout editor [владелец 28.10: «возможность передвигать иконки с эффектами»]: two sample icons to grab
+		if #active == 0 and HudLayout.isEditing() then
+			for _, id in ipairs({ "speed", "regeneration" }) do
+				local effect = Effects.byId(id)
+				if effect then
+					table.insert(active, { effect = effect, level = 1, endsAt = nil })
+				end
+			end
+		end
 		local shown: { [string]: boolean } = {}
 		local anyBeneficial = false
 		for _, entry in ipairs(active) do
@@ -255,6 +265,7 @@ function EffectsHud.start(
 			darkness.BackgroundTransparency = 1 - 0.85 * blind
 			local speed = (1 - Effects.SLOWNESS_PER_LEVEL * level("Slowness"))
 				* (1 + Effects.SPEED_PER_LEVEL * level("Speed"))
+				* (if character:GetAttribute("Sprinting") == true then Effects.SPRINT else 1)
 			-- [ваниль] drawing a bow zooms in: FOV × (1 − 0.15 · f), f = (t / 1 s)², at most 1
 			local drawn = math.min(BowState.Drawn(character) / Config.vanilla.bow.drawSeconds, 1)
 			local target = (math.max(0, speed) + 1) / 2 * (1 - 0.15 * drawn * drawn)

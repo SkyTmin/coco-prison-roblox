@@ -82,7 +82,7 @@ local function update(dt: number)
 		end
 		local cost = rules.drainPerMinuteIdle * dt / 60
 		if humanoid.MoveDirection.Magnitude > 0 then
-			cost += (if humanoid.WalkSpeed > 16
+			cost += (if character and character:GetAttribute("Sprinting") == true
 				then rules.drainPerSprintSecond
 				else rules.drainPerWalkSecond) * dt
 		end
