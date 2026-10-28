@@ -329,6 +329,7 @@ function ItemInfo.knownIds(): { string }
 			and not id:match("^rank_%d$") -- rank emblems, requirement pictures, donate shop pictures
 			and not id:match("^req_")
 			and not id:match("^ui_")
+			and not id:match("^skill_") -- skill-tree emblems (SkillWindow)
 			and not id:match("^crystal")
 			and not id:match("^booster_set$")
 			and not id:match("^auction_slot$")

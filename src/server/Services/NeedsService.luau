@@ -17,6 +17,7 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
+local SkillService = require(script.Parent.SkillService)
 
 type Need = "hygiene" | "sleep" | "toilet"
 type State = {
@@ -288,6 +289,11 @@ local function useConsumable(player: Player, slot: any)
 		if used then
 			toast(player, "location_pass_used")
 		end
+		return
+	end
+	-- the oblivion scroll resets the skill tree [меню 26.10: «для сброса Ваших текущих навыков, чтобы обучиться новым»]
+	if stack.id == "oblivion_scroll" then
+		SkillService.Reset(player, slot)
 		return
 	end
 	-- the injection «Без нужд» [владелец 28.10: «избавляет игрока от нужд, ему больше не надо будет ходить в

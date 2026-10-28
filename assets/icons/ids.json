@@ -140,7 +140,15 @@
     "effect_frost": "rbxassetid://128885874130776",
     "effect_poison": "rbxassetid://108953547705398",
     "effect_cursed": "rbxassetid://91541470522924",
-    "effect_wither": "rbxassetid://125088420916746"
+    "effect_wither": "rbxassetid://125088420916746",
+    "skill_anvil": "rbxassetid://76527470746957",
+    "skill_hunter": "rbxassetid://92705015838772",
+    "skill_point": "rbxassetid://124193729899347",
+    "skill_lucky": "rbxassetid://129793586340625",
+    "skill_armorer": "rbxassetid://137084596029374",
+    "skill_brewer": "rbxassetid://129660149988782",
+    "menu_skills": "rbxassetid://106647411420989",
+    "ui_lock": "rbxassetid://99037711880296"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }

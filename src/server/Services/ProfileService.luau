@@ -70,6 +70,7 @@ function ProfileService.defaultProfile(): Profile
 		achievements = {},
 		stats = {},
 		nicknames = {},
+		skills = {},
 		trainer = { strength = 0, agility = 0, needs = 0 },
 		location = "prison",
 		operationIds = {},
@@ -127,6 +128,9 @@ local function migrate(data: any): Profile
 	profile.schemaVersion = SCHEMA_VERSION
 	if typeof(profile.nicknames) ~= "table" then
 		profile.nicknames = {}
+	end
+	if typeof(profile.skills) ~= "table" then
+		profile.skills = {}
 	end
 	if typeof(profile.trainer) ~= "table" then
 		profile.trainer = { strength = 0, agility = 0, needs = 0 }

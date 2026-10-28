@@ -31,7 +31,10 @@ const levels = levelsWiki.levels.map((l) => ({
 	money: l.money,
 	blocks: l.blocks,
 	hearts: decisions.hearts.base + decisions.hearts.perLevel * (l.level - 1),
-	skillPoints: l.level >= decisions.skillPoints.firstLevel ? decisions.skillPoints.perLevel : 0,
+	skillPoints:
+		l.level >= decisions.skillPoints.firstLevel && (l.level - decisions.skillPoints.firstLevel) % decisions.skillPoints.every === 0
+			? decisions.skillPoints.perLevel
+			: 0,
 }));
 write("levels.json", {
 	source: "wiki/in-game-wiki/levels.json [вики]; сердца и очки навыков — [решение]",
@@ -39,6 +42,7 @@ write("levels.json", {
 	blocksSpent: false,
 	moneySpent: true,
 	levels,
+	skills: decisions.skills, // the skill tree [меню 26.10, SKILL-TREE.md] (Shared/Skills)
 });
 
 // ---------------------------------------------------------------- blocks + locations

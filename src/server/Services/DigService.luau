@@ -19,6 +19,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local Skills = require(Shared.Skills)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
@@ -336,7 +337,8 @@ local function complete(player: Player, token: number)
 		elseif toolId == "shovel" then
 			ProfessionService.addXp(p, "surveyor", 1)
 		end
-		local chance = Config.keys.ordinaryKeyChancePerBlock
+		-- Счастливчик raises the key chance [меню 26.10; +20 % за уровень — решение]
+		local chance = Config.keys.ordinaryKeyChancePerBlock * Skills.keyChanceMultiplier(p)
 		p.counters["_keyPity"] = (p.counters["_keyPity"] or 0) + 1
 		if math.random() < chance or p.counters["_keyPity"] >= Config.keys.ordinaryKeyPity then
 			if InventoryService.canAdd(p, "ordinary_key", 1) then

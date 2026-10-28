@@ -19,6 +19,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local Skills = require(Shared.Skills)
 local Strings = require(Shared.Strings)
 local Sfx = require(Shared.Sfx)
 local BlockRig = require(Shared.BlockRig)
@@ -120,9 +121,11 @@ local function rewardKiller(mob: Mob, humanoid: Humanoid)
 		if mob.cfg.statKey then
 			-- stats[statKey] = «чистые» (one per kill: trainer, spawn top); statKey.."Total" counts with the
 			-- «Мобы» upgrade, like blocksTotal with «Блоки» [сеть: rats / rats_clean; множитель — решение]
-			p.stats[mob.cfg.statKey] = (p.stats[mob.cfg.statKey] or 0) + 1
+			-- Охотник: with its chance the kill counts as two [меню 26.10: «засчитает как двух в статистике»]
+			local kills = if math.random() < Skills.doubleKillChance(p) then 2 else 1
+			p.stats[mob.cfg.statKey] = (p.stats[mob.cfg.statKey] or 0) + kills
 			local total = mob.cfg.statKey .. "Total"
-			p.stats[total] = (p.stats[total] or p.stats[mob.cfg.statKey] - 1) + mult
+			p.stats[total] = (p.stats[total] or p.stats[mob.cfg.statKey] - kills) + mult * kills
 		end
 		ProfessionService.addXp(p, "blademaster", 1)
 	end)

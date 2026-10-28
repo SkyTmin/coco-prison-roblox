@@ -128,6 +128,7 @@ require(script.Services.BookService).Start() -- ancient books: applying from the
 BowService.Start()
 LocationService.Start()
 TrainerService.Start()
+require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
 FallService.Start()
 LavaService.Start()
 LightingService.Start()

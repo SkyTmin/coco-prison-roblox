@@ -165,7 +165,9 @@ local STAT_COUNTERS = {
 }
 function Config.requirementHave(profile: any, counter: string): number
 	if counter == "Оружейник" then
-		return 0 -- the skill tree's Оружейник is not in the game yet
+		-- the skill tree's Оружейник level (Shared/Skills) [меню 26.10: III → броня 14, V → 15]
+		local skills = profile.skills
+		return if typeof(skills) == "table" then tonumber(skills.armorer) or 0 else 0
 	end
 	local stat = STAT_COUNTERS[counter]
 	if stat then
@@ -182,7 +184,7 @@ end
 local COUNTER_ICONS = {
 	["Крысы"] = "hud_rat",
 	["Убийства"] = "sword_iron",
-	["Оружейник"] = "chestplate_iron",
+	["Оружейник"] = "skill_anvil", -- the skill-tree branch (Shared/Skills)
 }
 local counterIconCache: { [string]: string | false } = {}
 function Config.counterIcon(counter: string): string?

@@ -1868,6 +1868,12 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	skills = function() -- «Древо навыков» [T]
+		local win, refresh =
+			require(script.SkillWindow).build(gui, profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 	upgrade = function()
 		local win, refresh =
 			require(script.UpgradeWindow).build(gui, profile, locale, closeWindow, createWindow)
@@ -2812,6 +2818,7 @@ local function isNeedConsumable(): boolean
 		or stack.id == Config.needs.injection.item
 		or stack.id == Donate.AUTOSELL
 		or stack.id == Donate.AUCTION_SLOT
+		or stack.id == "oblivion_scroll" -- resets the skill tree (SkillService)
 		or Boosters.fromItem(stack.id) ~= nil
 	then
 		return true
@@ -2954,6 +2961,7 @@ local menuKeys = {
 	"boosters",
 	"auction",
 	"artifacts",
+	"skills",
 	"factions",
 	"donate",
 }
@@ -3537,6 +3545,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("achievements")
 	elseif k == Enum.KeyCode.B then
 		open("boosters") -- «Хранилище бустеров» [решение: клавиша]
+	elseif k == Enum.KeyCode.T then
+		open("skills") -- «Умения» [решение: клавиша; в оригинале /skills]
 	elseif k == Enum.KeyCode.Y then
 		open("auction") -- «Аукцион» [решение: клавиша; в оригинале /ah]
 	elseif k == Enum.KeyCode.X then
