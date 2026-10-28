@@ -61,11 +61,12 @@ local function died(player: Player, character: Model)
 			ProfileService.Mutate(killer, function(p)
 				p.stats.kills = (p.stats.kills or 0) + 1
 			end)
-			GangService.progress(killer, "pvp", 1) -- gang quests: players
 			-- [владелец 22.10] the killer gets as many dollars as the victim's level, taken from the victim
 			-- (no more than the victim has)
 			local loss = math.min(profile.coins, profile.level * Config.moneyScale)
 			if loss > 0 then
+				-- gang quests «Заработать N $ на убийствах игроков»
+				GangService.progress(killer, "pvpMoney", loss / Config.moneyScale)
 				ProfileService.Mutate(player, function(p)
 					p.coins -= loss
 				end)

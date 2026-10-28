@@ -2,14 +2,15 @@
 -- The NPCs of the База банды [вики HANDBOOK-WIKI: «склад, библиотекарь и кузнец»; клиент npc.gang.*: Шнырь,
 -- Библиотекарь, Кузнец; docs/research/remaining-features-design.md §1.5]. They stand there for everyone, they work
 -- for members whose gang bought the upgrade (Gangs.level via GangService.level):
---   * Библиотекарь (tag GangLibrarian, upgrade «Библиотека»): an ancient book handed in (from any bag slot) gives the
---     gang Config.gangs.base.library.rarityPoints[rarity] × the book's level points [решение]. The book leaves the
---     profile first, then GangService.addPoints writes the document; a refused write gives the book back.
+--   * Библиотекарь (tag GangLibrarian, upgrade «Библиотека»): an ancient book handed in (from any bag slot) adds
+--     Config.gangs.base.library.rarityPoints[rarity] × the book's level to the gang's bar (gang.library, up to goal 4000
+--     [владелец 28.10]); a full bar → «Забрать награду» (reward.points gang points). The book leaves the profile
+--     first, then GangService.addLibrary writes the document; a refused write gives the book back.
 --   * Кузнец (tag GangForge, upgrade «Кузница»): two identical books (one effect, one level) + starsPerLevel × the new
 --     level ancient stars → the level + 1 with chances[level] (70 / 50 / 30 %) [решение; 2021: II+II=III за 30 звёзд];
 --     a failure keeps one book, the other and the stars are gone. One Mutate: inputs and outputs change together.
 --   * Шнырь (tag GangShnyr): the trip to the Гетто through LocationService (its checks: gang + the «Гетто» upgrade).
--- Client → server GangNpc(op, a, b): "library" slot | "forge" slotA slotB. The windows: client GangNpcWindow.
+-- Client → server GangNpc(op, a, b): "library" slot | "libraryClaim" | "forge" slotA slotB. The windows: client GangNpcWindow.
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -150,11 +151,13 @@ local function library(player: Player, slot: any)
 		toast(player, "gang_library_need_book")
 		return
 	end
-	if GangService.addPoints(player, points) then
-		toast(player, "gang_library_done", points)
+	local err = GangService.addLibrary(player, points)
+	if not err then
+		toast(player, "gang_library_added", points, base.library.goal)
 		Sfx.toPlayer(player, "xp", 0.5)
 		return
 	end
+	toast(player, err)
 	-- the gang document was not written: the book comes back (its old slot if still free, else the first free one)
 	local back = false
 	ProfileService.Mutate(player, function(p)
@@ -243,6 +246,13 @@ local function onNpc(player: Player, op: any, a: any, b: any)
 		library(player, a)
 	elseif op == "forge" then
 		forge(player, a, b)
+	elseif op == "libraryClaim" and nearTag(player, "GangLibrarian") then
+		local refusal, arg = upgradeRefusal(player, base.library.upgrade)
+		if refusal then
+			toast(player, refusal, arg)
+		else
+			GangService.claimLibrary(player)
+		end
 	end
 end
 

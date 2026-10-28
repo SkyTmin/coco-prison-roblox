@@ -125,15 +125,15 @@ local function sell(player: Player)
 		toast(player, "too_far")
 		return
 	end
-	local total, locked = 0, 0
+	local total, locked, count = 0, 0, 0
 	ProfileService.Mutate(player, function(p)
-		total, locked = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
+		total, locked, count = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
 		p.coins += total
 	end)
 	if locked > 0 then
 		toast(player, "block_locked_sell", locked)
 	end
-	GangService.progress(player, "sell", total / Config.moneyScale) -- gang quests: selling
+	GangService.progress(player, "sellItems", count) -- gang quests: «Продать N предметов Надзирателю»
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
 		Sfx.toPlayer(player, "xp", 0.5)

@@ -224,11 +224,14 @@ function GangChestService.Page(id: string?, page: any): Slots?
 	return chest.pages[page]
 end
 
--- pages a gang has: two per level of «Сундуки» (the first level is given at creation)
+-- pages a gang has: two per level of «Сундуки»; level 0 (a new gang) = none [владелец 28.10]
 function GangChestService.PageCount(gang: any): number
+	if not gang then
+		return 0
+	end
 	return math.clamp(
 		Gangs.level(gang, "chests") * GangChestService.PAGES_PER_LEVEL,
-		GangChestService.PAGES_PER_LEVEL,
+		0,
 		GangChestService.MAX_PAGES
 	)
 end

@@ -1,8 +1,9 @@
 --!strict
 -- Sprinting like Minecraft [ваниль; владелец 28.10: «как в майнкрафте быстрее бежать. Чекни как на телефоне можно
 -- сделать удобнее»]. Computer: W twice quickly or Ctrl while walking; it stops when the player stops. Phone: the
--- joystick pushed to its edge for a moment sprints by itself [решение: как в популярных Roblox-играх], and the «Бег»
--- button keeps sprinting on (a toggle, movable in the layout editor). The client only sends the intent (Sprint); the
+-- joystick pushed to its edge for a moment sprints by itself [решение: как в популярных Roblox-играх; владелец 28.10:
+-- «если джостик потянут сильно, бег будет быстрым»], and the optional «Бег» button (off at the start, «Добавить» in the
+-- layout editor) keeps sprinting on (a toggle). The client only sends the intent (Sprint); the
 -- server sets the speed and the character's Sprinting attribute (no sprint at 6 hunger or less).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

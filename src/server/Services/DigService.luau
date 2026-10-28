@@ -322,7 +322,7 @@ local function complete(player: Player, token: number)
 	local artifactNotices: { ArtifactService.Notice } = {}
 	local keyFull = false
 	local overflow = 0
-	local sold = 0
+	local sold, soldItems = 0, 0
 	ProfileService.Mutate(player, function(p)
 		-- the gang perk Фарт: the block drops one more item [решение: +1 % за уровень]
 		dropCount += if math.random() < GangService.perk(p, "luck") then 1 else 0
@@ -345,6 +345,7 @@ local function complete(player: Player, token: number)
 					+ 0.5
 			)
 			p.coins += sold
+			soldItems = dropCount
 		else
 			overflow = InventoryService.add(p, dropId, dropCount)
 		end
@@ -381,7 +382,7 @@ local function complete(player: Player, token: number)
 	end)
 	HungerService.OnBlockDug(player)
 	GangService.progress(player, "dig", 1) -- gang quests: blocks
-	GangService.progress(player, "sell", sold / Config.moneyScale) -- gang quests: the auto-sell is selling too
+	GangService.progress(player, "sellItems", soldItems) -- gang quests: the auto-sell is selling too [решение]
 	AchievementService.OnDug(player, blockId)
 	WarzoneService.OnDug(player, mine.id) -- the Дворы: a block of a point's pad is a capture point
 	ArtifactService.Notify(player, artifactNotices)

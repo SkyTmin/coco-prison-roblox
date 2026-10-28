@@ -4,20 +4,24 @@
 -- (DataStore Gangs_v1, key = id); this module only reads and changes such a table — the storing, the races and the
 -- money live in GangService. Every number comes from Config.gangs (scripts/design-decisions.json → gangs).
 --   * roles [вики]: leader (everything), deputy (invites, kicks members, withdraws, buys upgrades), member;
---   * upgrades [клиент: 11]: points bought per level (cost × next level), one-time ones paid in $ from the treasury;
---     `Gangs.level(gang, id)` is the API the base / library / forge / ghetto stages read;
---   * quests [клиент: «Ежедневные», «Еженедельные», «Цель»]: generated inside the document's UpdateAsync with
---     `Gangs.refreshQuests`, progress added with `Gangs.addProgress`.
+--   * upgrades [владелец 28.10, скрины оригинала]: «Прокачки» cost $ (the buyer's own money or the treasury), «Перки»
+--     cost gang points (cost × next level); `Gangs.level(gang, id)` is the API the base / library / forge / ghetto read;
+--   * quests [владелец 28.10: «Ежедневные», «Еженедельные», «Задания»]: 5 daily and 5 weekly generated inside the
+--     document's UpdateAsync with `Gangs.refreshQuests`, progress added with `Gangs.addProgress`; the «Задания» tab is
+--     the day's goal (every member's own blocks, `Gangs.addGoal`) whose share of finishers multiplies the points.
 local Config = require(script.Parent.Config)
+local Strings = require(script.Parent.Strings)
 
 export type Role = "leader" | "deputy" | "member"
 export type Member = { role: Role, name: string, joinedAt: number, level: number? }
 export type Quest = {
 	uid: string,
-	type: string, -- daily / weekly / goal
-	kind: string, -- dig / mobs / boss / sell / pvp
+	type: string, -- daily / weekly
+	kind: string, -- Config.gangs.quests.kinds: dig / sellItems / pvpMoney / pvpDamage / bossKill / bossDamage / mobKill / heal
+	what: string?, -- bossKill: the boss id, mobKill: the mob id
 	target: number,
 	progress: number,
+	points: number?, -- the reward (gang points before the goal multiplier)
 	done: boolean?,
 }
 export type LogEntry = { at: number, by: string, kind: string, amount: number, what: string? }
@@ -36,6 +40,10 @@ export type Gang = {
 	treasuryLog: { LogEntry },
 	pvp: boolean,
 	quests: { day: number, week: number, seq: number, list: { Quest } }?,
+	goal: { day: number, by: { [string]: number } }?, -- the «Задания» tab: today's blocks per member
+	v2: boolean?, -- created after the changes (no flag = a legacy gang)
+	newIcon: boolean?, -- a legacy gang that picked an icon from the new set (cfg.emblems)
+	library: number?, -- Библиотекарь: points of the books handed in towards Config.gangs.base.library.goal
 	ops: { [string]: number }?, -- recent operation ids (money steps are applied once)
 	createdAt: number,
 	version: number?, -- +1 on every write: a server never replaces its copy with an older read
@@ -46,8 +54,10 @@ export type Upgrade = {
 	tab: string, -- boosts / perks
 	max: number,
 	start: number?,
-	currency: string, -- points / treasury
+	currency: string, -- money ($: the buyer or the treasury) / points
 	cost: number,
+	step: number?, -- levelled $ upgrades with a step: cost + step × level (Сундуки)
+	legacyStart: number?, -- the level a legacy gang (Gangs.legacy) starts with
 	effect: number?,
 	icon: string,
 	fallback: string?,
@@ -57,8 +67,17 @@ local Gangs = {}
 local cfg = Config.gangs
 Gangs.cfg = cfg
 Gangs.upgrades = cfg.upgrades :: { Upgrade }
-Gangs.QUEST_KINDS = { "dig", "mobs", "boss", "sell", "pvp" }
-Gangs.QUEST_TYPES = { "daily", "weekly", "goal" }
+Gangs.QUEST_KINDS = {
+	"dig",
+	"sellItems",
+	"pvpMoney",
+	"pvpDamage",
+	"bossKill",
+	"bossDamage",
+	"mobKill",
+	"heal",
+}
+Gangs.QUEST_TYPES = { "daily", "weekly" }
 Gangs.ROLE_RANK = { leader = 3, deputy = 2, member = 1 } :: { [string]: number }
 
 local byId: { [string]: Upgrade } = {}
@@ -70,17 +89,26 @@ function Gangs.upgrade(id: string): Upgrade?
 	return byId[id]
 end
 
--- the current level of an upgrade (a «start» level counts from the creation: Сундуки 1)
+-- a gang made before the changes after the original's screenshots (old emblems, Сундуки from level 1)
+function Gangs.legacy(gang: Gang?): boolean
+	return gang ~= nil and gang.v2 ~= true
+end
+
+-- the current level of an upgrade; a new gang has nothing [владелец 28.10: «с 0 уровня ничего нет»]
 function Gangs.level(gang: Gang?, id: string): number
 	local u = byId[id]
 	if not gang or not u then
 		return 0
 	end
 	local level = gang.upgrades and gang.upgrades[id]
-	return math.clamp(if typeof(level) == "number" then level else (u.start or 0), 0, u.max)
+	if typeof(level) ~= "number" then
+		level = if u.legacyStart and Gangs.legacy(gang) then u.legacyStart else 0
+	end
+	return math.clamp(level :: number, 0, u.max)
 end
 
--- the price of the next level: points (cost × next level) or dollars from the treasury (one-time upgrades)
+-- the price of the next level: $ (one-time = cost; with a step = cost + step × level; else cost × next level) or
+-- gang points (cost × next level); nil at the top
 function Gangs.nextCost(gang: Gang?, id: string): number?
 	local u = byId[id]
 	if not u then
@@ -90,10 +118,17 @@ function Gangs.nextCost(gang: Gang?, id: string): number?
 	if level >= u.max then
 		return nil
 	end
-	return if u.currency == "treasury" then u.cost else u.cost * (level + 1)
+	if u.currency == "money" then
+		if u.max == 1 then
+			return u.cost
+		elseif u.step then
+			return u.cost + u.step * level
+		end
+	end
+	return u.cost * (level + 1)
 end
 
--- a perk's chance or share for its level (Фарт, Конверсия, Выносливость, Каратель, Охотник)
+-- a perk's chance or share for its level (Фарт, Конверсия, Выносливость, Охотник)
 function Gangs.perk(gang: Gang?, id: string): number
 	local u = byId[id]
 	return if u then Gangs.level(gang, id) * (u.effect or 0) else 0
@@ -221,9 +256,18 @@ function Gangs.color(index: number?): Color3
 	return Color3.fromRGB(c[1], c[2], c[3])
 end
 
-function Gangs.emblem(index: number?): string
-	local id = cfg.emblems[index or 1] or cfg.emblems[1]
-	return Config.icons.icons[id] or ""
+-- the emblem picture: index into cfg.emblems (a legacy gang: into cfg.legacyEmblems); our Blender icon, else its
+-- stand-in item icon until it is uploaded
+function Gangs.emblem(index: number?, legacy: boolean?): string
+	local list = if legacy and cfg.legacyEmblems then cfg.legacyEmblems else cfg.emblems
+	local id = list[index or 1] or list[1]
+	local icons = Config.icons.icons
+	return icons[id] or icons[(cfg.emblemFallbacks or {})[id] or ""] or ""
+end
+
+-- the emblem of a gang: a legacy gang keeps its old picture until it picks a new one in the settings
+function Gangs.gangEmblem(gang: Gang): string
+	return Gangs.emblem(gang.icon, Gangs.legacy(gang) and not gang.newIcon)
 end
 
 -- the picture of an upgrade (our Blender icon, else the fallback item icon until it is uploaded)
@@ -267,22 +311,43 @@ function Gangs.averageLevel(gang: Gang): number
 	return if n > 0 then sum / n else 1
 end
 
--- k = 1 + average level / levelDivisor [решение]
-function Gangs.questTarget(kind: string, questType: string, averageLevel: number): number
-	local k = 1 + averageLevel / q.levelDivisor
-	local mult = if questType == "weekly"
-		then q.weeklyMultiplier
-		elseif questType == "goal" then q.goalMultiplier
-		else 1
-	return math.max(1, math.floor(q.targets[kind] * k * mult + 0.5))
+-- the target of a new quest: the original's number for a gang of one [владелец 28.10] × (1 + memberFactor × (members − 1))
+-- × a random spread [решение]
+function Gangs.questTarget(kind: string, questType: string, members: number, rng: Random?): number
+	local k = q.kinds[kind]
+	local base = if k then (if questType == "weekly" then k.weekly else k.daily) else 1
+	local spread = if rng then 1 + (rng:NextNumber() * 2 - 1) * (q.spread or 0) else 1
+	return math.max(
+		1,
+		math.floor(base * (1 + q.memberFactor * math.max(0, members - 1)) * spread + 0.5)
+	)
 end
 
-function Gangs.questPoints(questType: string): number
-	return q.points[questType] or 0
+function Gangs.questPoints(quest: Quest): number
+	if typeof(quest.points) == "number" then
+		return quest.points
+	end
+	local k = q.kinds[quest.kind]
+	return if k then k.points[if quest.type == "weekly" then 2 else 1] or 1 else 1
 end
 
-function Gangs.questBoosterKind(kind: string): string
-	return q.boosterKind[kind] or "blocks"
+-- the bosses a gang can reach: card level ≤ its average level (at least the lowest one)
+local function bossChoices(gang: Gang): { string }
+	local out, lowest, lowestLevel = {}, nil, math.huge
+	local average = Gangs.averageLevel(gang)
+	for _, card in ipairs(Config.bosses.bosses or {}) do
+		local level = card.unlockLevel or 1
+		if level <= average then
+			table.insert(out, card.id)
+		end
+		if level < lowestLevel then
+			lowest, lowestLevel = card.id, level
+		end
+	end
+	if #out == 0 and lowest then
+		table.insert(out, lowest)
+	end
+	return out
 end
 
 local function pickKinds(count: number, rng: Random): { string }
@@ -294,7 +359,7 @@ local function pickKinds(count: number, rng: Random): { string }
 	return out
 end
 
--- new day / week / finished goal → fresh quests; returns whether the list changed (call inside the UpdateAsync)
+-- new day / week → fresh quests (and a fresh goal); returns whether anything changed (call inside the UpdateAsync)
 function Gangs.refreshQuests(gang: Gang, now: number, rng: Random): boolean
 	if now < Gangs.questsOpenAt(gang) then
 		return false
@@ -302,16 +367,26 @@ function Gangs.refreshQuests(gang: Gang, now: number, rng: Random): boolean
 	local state = gang.quests or { day = -1, week = -1, seq = 0, list = {} }
 	gang.quests = state
 	local changed = false
-	local average = Gangs.averageLevel(gang)
+	local members = Gangs.memberCount(gang)
 	local function add(questType: string, kind: string)
 		state.seq += 1
-		table.insert(state.list, {
+		local what: string? = nil
+		if kind == "bossKill" then
+			local bosses = bossChoices(gang)
+			what = bosses[rng:NextInteger(1, math.max(1, #bosses))]
+		elseif kind == "mobKill" then
+			what = q.mobs[rng:NextInteger(1, #q.mobs)]
+		end
+		local quest: Quest = {
 			uid = tostring(state.seq),
 			type = questType,
 			kind = kind,
-			target = Gangs.questTarget(kind, questType, average),
+			what = what,
+			target = Gangs.questTarget(kind, questType, members, rng),
 			progress = 0,
-		})
+		}
+		quest.points = Gangs.questPoints(quest)
+		table.insert(state.list, quest)
 		changed = true
 	end
 	local function replace(questType: string, count: number)
@@ -328,58 +403,119 @@ function Gangs.refreshQuests(gang: Gang, now: number, rng: Random): boolean
 	if state.day ~= day then
 		state.day = day
 		replace("daily", q.daily)
+		gang.goal = { day = day, by = {} }
 	end
 	if state.week ~= week then
 		state.week = week
 		replace("weekly", q.weekly)
 	end
-	-- a goal is replaced as soon as it is done [клиент: «Цель»; решение: сразу]
-	local goals = 0
+	-- the old «Цель» quests are gone (the goal is the «Задания» tab now)
 	for i = #state.list, 1, -1 do
-		local quest = state.list[i]
-		if quest.type == "goal" then
-			if quest.done then
-				table.remove(state.list, i)
-				changed = true
-			else
-				goals += 1
-			end
+		if state.list[i].type ~= "daily" and state.list[i].type ~= "weekly" then
+			table.remove(state.list, i)
+			changed = true
 		end
-	end
-	for _, kind in ipairs(pickKinds(q.goal - goals, rng)) do
-		add("goal", kind)
 	end
 	return changed
 end
 
--- adds progress of a kind to the open quests; returns the quests it finished (their points are already added)
-function Gangs.addProgress(gang: Gang, kind: string, amount: number): { Quest }
+-- the «Задания» tab: today's blocks of a member, the finishers' share and the points multiplier x1.0 … x1.6
+function Gangs.goalOf(gang: Gang?, key: string, now: number): number
+	local goal = gang and gang.goal
+	if not goal or goal.day ~= Gangs.dayIndex(now) then
+		return 0
+	end
+	return goal.by[key] or 0
+end
+
+function Gangs.goalMultiplier(gang: Gang?, now: number): number
+	if not gang then
+		return 1
+	end
+	local members, done = 0, 0
+	for key in pairs(gang.members) do
+		members += 1
+		if Gangs.goalOf(gang, key, now) >= q.goal.blocks then
+			done += 1
+		end
+	end
+	if members == 0 then
+		return 1
+	end
+	return 1 + (q.goal.maxMultiplier - 1) * done / members
+end
+
+function Gangs.addGoal(gang: Gang, key: string, amount: number, now: number)
+	local day = Gangs.dayIndex(now)
+	if not gang.goal or gang.goal.day ~= day then
+		gang.goal = { day = day, by = {} }
+	end
+	local goal = gang.goal :: { day: number, by: { [string]: number } }
+	if gang.members[key] then
+		goal.by[key] = math.min(q.goal.blocks, (goal.by[key] or 0) + amount)
+	end
+end
+
+-- adds progress of a kind (and its boss / mob id) to the open quests; returns the quests it finished with the points
+-- added (× the goal multiplier, rounded)
+function Gangs.addProgress(
+	gang: Gang,
+	kind: string,
+	amount: number,
+	what: string?,
+	now: number?
+): { { quest: Quest, points: number } }
 	local finished = {}
 	local state = gang.quests
 	if not state or amount <= 0 then
 		return finished
 	end
 	for _, quest in ipairs(state.list) do
-		if quest.kind == kind and not quest.done then
+		if quest.kind == kind and quest.what == what and not quest.done then
 			quest.progress = math.min(quest.target, quest.progress + amount)
 			if quest.progress >= quest.target then
 				quest.done = true
-				gang.points += Gangs.questPoints(quest.type)
-				table.insert(finished, quest)
+				local points = math.floor(
+					Gangs.questPoints(quest) * Gangs.goalMultiplier(gang, now or 0) + 0.5
+				)
+				gang.points += points
+				table.insert(finished, { quest = quest, points = points })
 			end
 		end
 	end
 	return finished
 end
 
--- whether a kind of progress would count now (the server skips collecting it otherwise)
-function Gangs.wants(gang: Gang?, kind: string): boolean
+-- the line of a quest in a locale: «Убить босса Скелетон ×2» (a boss by its card name, a mob by mob_<id>)
+function Gangs.questText(quest: Quest, locale: string): string
+	local target = Strings.grouped(quest.target, 0)
+	if quest.kind == "bossKill" then
+		local name = quest.what or "?"
+		for _, card in ipairs(Config.bosses.bosses or {}) do
+			if card.id == quest.what then
+				name = if locale == "ru" or not card.nameEn then card.name else card.nameEn
+			end
+		end
+		return Strings.t("gang_quest_bossKill", locale, name, target)
+	elseif quest.kind == "mobKill" then
+		return Strings.t(
+			"gang_quest_mobKill",
+			locale,
+			Strings.t("mob_" .. (quest.what or "zombie"), locale),
+			target
+		)
+	end
+	return Strings.t("gang_quest_" .. quest.kind, locale, target)
+end
+
+-- whether a kind of progress (with its boss / mob id) would count now (the server skips collecting it otherwise)
+function Gangs.wants(gang: Gang?, kind: string, what: string?): boolean
 	local state = gang and gang.quests
 	if not state then
 		return false
 	end
 	for _, quest in ipairs(state.list) do
-		if quest.kind == kind and not quest.done then
+		if quest.kind == kind and quest.what == what and not quest.done then
 			return true
 		end
 	end

@@ -26,7 +26,13 @@
         "rare": 10,
         "legendary": 20
       },
-      "_points": "[решение; справочник «сдача книг»] очки банде = очки редкости × уровень книги; в дизайне 5 / 10 / 20 / 40 на 4 редкости — у нас 3 (обычная, редкая, легендарная), четвёртой нет"
+      "_points": "[решение; справочник «сдача книг»] очки банде = очки редкости × уровень книги; в дизайне 5 / 10 / 20 / 40 на 4 редкости — у нас 3 (обычная, редкая, легендарная), четвёртой нет",
+      "goal": 4000,
+      "_goal": "[владелец 28.10, скрины оригинала] Библиотекарь: полоса «0 / 4000», «Забрать награду»; награда — решение (см. base.library.reward)",
+      "reward": {
+        "points": 10
+      },
+      "_reward": "[решение] полная полоса 4000 → 10 очков банды (перк Выносливость стоит 10); забрать может любой участник"
     },
     "forge": {
       "upgrade": "forge",
@@ -60,67 +66,109 @@
     "ASS"
   ],
   "_bannedTags": "[клиент: «есть запрещённые теги»; список — решение]",
-  "nameMax": 16,
-  "descMax": 60,
-  "_lengths": "[решение] название ≤ 16, описание ≤ 60 символов; оба фильтруются Roblox (TextService)",
+  "nameMax": 15,
+  "descMax": 300,
+  "_lengths": "[владелец 28.10, скрины оригинала] название ≤ 15 символов, описание ≤ 300; оба фильтруются Roblox (TextService)",
   "colors": [
     [
-      235,
-      64,
-      52
-    ],
-    [
-      255,
-      150,
+      170,
+      25,
       40
     ],
     [
-      255,
-      220,
-      60
+      30,
+      170,
+      80
     ],
     [
-      90,
-      210,
-      90
+      40,
+      100,
+      190
     ],
     [
-      60,
-      200,
-      220
+      235,
+      170,
+      0
+    ],
+    [
+      100,
+      40,
+      200
+    ],
+    [
+      85,
+      15,
+      65
     ],
     [
       70,
+      220,
+      120
+    ],
+    [
+      0,
+      185,
+      185
+    ],
+    [
+      225,
       120,
+      20
+    ],
+    [
+      235,
+      30,
+      170
+    ],
+    [
+      115,
+      115,
+      115
+    ],
+    [
+      0,
+      75,
+      25
+    ],
+    [
+      25,
+      215,
+      215
+    ],
+    [
+      255,
+      200,
+      70
+    ],
+    [
+      255,
+      255,
       255
-    ],
-    [
-      240,
-      240,
-      240
-    ],
-    [
-      140,
-      140,
-      150
     ]
   ],
-  "_colors": "[решение] 8 цветов банды (красный, оранжевый, жёлтый, зелёный, бирюзовый, синий, белый, серый)",
+  "_colors": "[владелец 28.10, скрины оригинала] 15 цветов (3 × 5), сняты со скрина окна создания",
   "emblems": [
-    "sword_diamond",
-    "pickaxe_diamond",
-    "bow",
-    "golden_apple",
-    "moon_blade",
-    "fire_shard",
-    "ancient_star",
-    "top_crown"
+    "gang_icon_shield",
+    "gang_icon_sword",
+    "gang_icon_crown",
+    "gang_icon_trophy",
+    "gang_icon_star",
+    "gang_icon_lightning",
+    "gang_icon_skull",
+    "gang_icon_potion",
+    "gang_icon_diamond",
+    "gang_icon_gold",
+    "gang_icon_clock",
+    "gang_icon_fire",
+    "gang_icon_heart",
+    "gang_icon_flag",
+    "gang_icon_block"
   ],
-  "_emblems": "[решение] 8 значков — иконки предметов (Config.icons)",
+  "_emblems": "[владелец 28.10, скрины оригинала] 15 значков (3 × 5): щит, меч, корона, кубок, звезда, молния, череп, зелье, алмаз, золото, будильник, огонь, разбитое сердце, флаг, блок — свои иконки (Codex → Blender); пока не загружены — emblemFallbacks; legacyEmblems — старые 8 значков (индексы банд, созданных до 28.10, остаются)",
   "deputiesMax": 2,
   "_deputiesMax": "[решение] до 2 заместителей",
   "baseSlots": 5,
-  "_baseSlots": "[решение] 5 слотов + улучшение «Участники»",
+  "_baseSlots": "[владелец 28.10, скрины оригинала] «Участники 1 / 5», после улучшения «Участники» — 1 / 10",
   "rejoinCooldownSeconds": 3600,
   "_rejoinCooldownSeconds": "[сеть S7] повторное вступление после выхода — через 1 час; после исключения и роспуска — без ожидания [решение]",
   "inviteSeconds": 300,
@@ -141,45 +189,130 @@
   "quests": {
     "firstAfterHours": 6,
     "dayOffsetHours": 3,
-    "daily": 3,
-    "weekly": 2,
-    "goal": 1,
-    "levelDivisor": 25,
-    "targets": {
-      "dig": 2000,
-      "mobs": 60,
-      "boss": 1500,
-      "sell": 5000,
-      "pvp": 10
+    "daily": 5,
+    "weekly": 5,
+    "memberFactor": 0.5,
+    "spread": 0.2,
+    "kinds": {
+      "dig": {
+        "daily": 40250,
+        "weekly": 200000,
+        "points": [
+          2,
+          6
+        ]
+      },
+      "sellItems": {
+        "daily": 12420,
+        "weekly": 13800,
+        "points": [
+          3,
+          3
+        ]
+      },
+      "pvpMoney": {
+        "daily": 11,
+        "weekly": 48,
+        "points": [
+          1,
+          6
+        ]
+      },
+      "pvpDamage": {
+        "daily": 351,
+        "weekly": 1750,
+        "points": [
+          1,
+          3
+        ]
+      },
+      "bossKill": {
+        "daily": 2,
+        "weekly": 10,
+        "points": [
+          2,
+          6
+        ]
+      },
+      "bossDamage": {
+        "daily": 900,
+        "weekly": 4500,
+        "points": [
+          1,
+          4
+        ]
+      },
+      "mobKill": {
+        "daily": 60,
+        "weekly": 225,
+        "points": [
+          1,
+          3
+        ]
+      },
+      "heal": {
+        "daily": 300,
+        "weekly": 1356,
+        "points": [
+          1,
+          6
+        ]
+      }
     },
-    "weeklyMultiplier": 5,
-    "goalMultiplier": 3,
-    "points": {
-      "daily": 20,
-      "weekly": 60,
-      "goal": 40
-    },
-    "booster": {
-      "mult": 1.5,
-      "minutes": 15
-    },
-    "boosterKind": {
-      "dig": "blocks",
-      "mobs": "mobs",
-      "boss": "mobs",
-      "sell": "money",
-      "pvp": "money"
+    "mobs": [
+      "zombie",
+      "rat",
+      "bat"
+    ],
+    "goal": {
+      "blocks": 25000,
+      "maxMultiplier": 1.6
     }
   },
-  "_quests": "[клиент gang.quests.*] виды заданий и типы «Ежедневные / Еженедельные / Цель», первые через 6 ч; [решение] 3 ежедневных (00:00 МСК = UTC+3), 2 еженедельных (понедельник), 1 цель (новая сразу); ежедневные: блоки 2 000·k, мобы 60·k, урон боссам 1 500·k, продажи 5 000 $·k, убийства игроков 10·k, k = 1 + средний уровень / 25; еженедельные ×5, цель ×3; награда 20 / 60 / 40 очков и бустер банды ×1,5 на 15 мин (вид — по заданию: блоки → блоки, мобы и боссы → мобы, продажи и игроки → деньги) [клиент: бустеры поручений слабее магазинных]",
+  "_quests": "[владелец 28.10, скрины оригинала] задания берутся сами; 5 ежедневных и 5 еженедельных, награда — только очки банды. Виды и числа со скринов (банда из 1, ур. 12): накопать 40 250 блоков (2 очка), продать 12 420 предметов Надзирателю (3), заработать 11 $ на убийствах игроков (1), нанести 351 урона игрокам (1), убить босса ×2 (2); неделя: продать 13 800 (3), убить моба ×225 (3), восстановить 1 356 здоровья (6), заработать 48 $ на игроках (6), нанести 4 500 урона боссам. Остальные числа — решение. [решение] цель × (1 + 0,5 × (участников − 1)) × случайно 0,8–1,2; босс — из тех, чей уровень ≤ среднего уровня банды; моб — zombie / rat / bat. Вкладка «Задания» (цель): у каждого участника 25 000 блоков за день [владелец], множитель x1.0 … x1.6 [владелец] = 1 + 0,6 × доля выполнивших — им умножаются очки заданий этого дня (смысл в оригинале ❓, решение)",
   "upgrades": [
+    {
+      "id": "forge",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "money",
+      "cost": 6000,
+      "icon": "skill_anvil"
+    },
+    {
+      "id": "library",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "money",
+      "cost": 3750,
+      "icon": "ancient_book"
+    },
+    {
+      "id": "ghetto",
+      "tab": "boosts",
+      "max": 1,
+      "currency": "money",
+      "cost": 750,
+      "icon": "menu_locations"
+    },
+    {
+      "id": "chests",
+      "tab": "boosts",
+      "max": 32,
+      "currency": "money",
+      "cost": 1000,
+      "step": 200,
+      "legacyStart": 1,
+      "effect": 54,
+      "icon": "ordinaryCase"
+    },
     {
       "id": "members",
       "tab": "boosts",
-      "max": 10,
-      "currency": "points",
-      "cost": 40,
-      "effect": 1,
+      "max": 1,
+      "currency": "money",
+      "cost": 3100,
+      "effect": 5,
       "icon": "gang_members",
       "fallback": "hud_faction"
     },
@@ -187,52 +320,36 @@
       "id": "treasury",
       "tab": "boosts",
       "max": 10,
-      "currency": "points",
-      "cost": 30,
+      "currency": "money",
+      "cost": 6000,
       "effect": 50000,
       "icon": "gang_treasury",
       "fallback": "money_bag"
     },
     {
-      "id": "chests",
-      "tab": "boosts",
-      "max": 32,
-      "start": 1,
+      "id": "stamina",
+      "tab": "perks",
+      "max": 5,
       "currency": "points",
-      "cost": 25,
-      "effect": 54,
-      "icon": "ordinaryCase"
+      "cost": 10,
+      "effect": 0.06,
+      "icon": "trainer_needs"
     },
     {
-      "id": "library",
-      "tab": "boosts",
-      "max": 1,
-      "currency": "treasury",
-      "cost": 5000,
-      "icon": "ancient_book"
-    },
-    {
-      "id": "forge",
-      "tab": "boosts",
-      "max": 1,
-      "currency": "treasury",
-      "cost": 10000,
-      "icon": "skill_anvil"
-    },
-    {
-      "id": "ghetto",
-      "tab": "boosts",
-      "max": 1,
-      "currency": "treasury",
-      "cost": 1500,
-      "icon": "menu_locations"
+      "id": "hunter",
+      "tab": "perks",
+      "max": 5,
+      "currency": "points",
+      "cost": 17,
+      "effect": 0.02,
+      "icon": "skill_hunter"
     },
     {
       "id": "luck",
       "tab": "perks",
       "max": 5,
       "currency": "points",
-      "cost": 60,
+      "cost": 20,
       "effect": 0.01,
       "icon": "skill_lucky"
     },
@@ -241,37 +358,40 @@
       "tab": "perks",
       "max": 5,
       "currency": "points",
-      "cost": 60,
+      "cost": 20,
       "effect": 0.01,
       "icon": "hud_blocks"
-    },
-    {
-      "id": "stamina",
-      "tab": "perks",
-      "max": 5,
-      "currency": "points",
-      "cost": 50,
-      "effect": 0.06,
-      "icon": "trainer_needs"
-    },
-    {
-      "id": "punisher",
-      "tab": "perks",
-      "max": 5,
-      "currency": "points",
-      "cost": 50,
-      "effect": 0.01,
-      "icon": "soap"
-    },
-    {
-      "id": "hunter",
-      "tab": "perks",
-      "max": 5,
-      "currency": "points",
-      "cost": 60,
-      "effect": 0.02,
-      "icon": "skill_hunter"
     }
   ],
-  "_upgrades": "[клиент gang.upgrades.*: 11 улучшений, вкладки «Прокачки» и «Перки»] названия; [сеть S7, форум 08.05.2026: «Хранилище банды до 32 уровня = 32 двойных сундука»] «Сундуки» — 32 уровня, уровень = двойной сундук на 54 слота (1 уровень дан сразу; цена 25 × уровень — решение); [вики] Гетто 1 500 $ (из казны — решение); [решение] остальные уровни, цены (cost × следующий уровень очков, разовые — $ из казны) и эффекты: Участники +1 слот, Казна +50 000 $, Фарт +1 % дубль предмета, Конверсия +1 % дубль блока в статистике, Выносливость −6 % убывания нужд, Каратель 1 % полностью восстановить нужду при убывании, Охотник +2 % двойного убийства моба; покупают Лидер и Заместитель [сеть TG/24]"
+  "_upgrades": "[владелец 28.10, скрины оригинала] «Прокачки» за $ (6 шт., порядок как в окне): Кузница 6 000, Библиотека 3 750, Гетто 750 (разовые), Сундуки 0 → 1 за 1 000 и 1 → 2 за 1 200 (cost + step × уровень, до 32 [сеть S7]; банды, созданные до 28.10, начинают с 1 — legacyStart), Участники 3 100 (разовое, 5 → 10), Казна 6 000 (уровни: cost × следующий уровень, +50 000 $ — решение); [владелец 28.10: «можно добавить и из казны прокачку»] платит сам покупатель или казна. «Перки» за очки банды: Выносливость 10, Охотник 17, Фарт 20 на 1-й уровень, Конверсия 20 [решение]; дальше cost × следующий уровень, до 5 [решение]; Каратель в оригинале нет — убран. Эффекты: Выносливость −6 % убывания нужд, Охотник +2 % двойного моба, Фарт +1 % лишнего блока, Конверсия +1 % блока в статистике [решение]",
+  "createCrystals": 499,
+  "_createCrystals": "[владелец 28.10, скрины оригинала] «Создать за 499» кристаллов — второй способ создать банду",
+  "emblemFallbacks": {
+    "gang_icon_shield": "chestplate",
+    "gang_icon_sword": "sword_diamond",
+    "gang_icon_crown": "top_crown",
+    "gang_icon_trophy": "top_crown",
+    "gang_icon_star": "ancient_star",
+    "gang_icon_lightning": "fire_shard",
+    "gang_icon_skull": "menu_deaths",
+    "gang_icon_potion": "potion",
+    "gang_icon_diamond": "diamond",
+    "gang_icon_gold": "gold_ingot",
+    "gang_icon_clock": "clock",
+    "gang_icon_fire": "fire_shard",
+    "gang_icon_heart": "golden_apple",
+    "gang_icon_flag": "menu_locations",
+    "gang_icon_block": "stone"
+  },
+  "legacyEmblems": [
+    "sword_diamond",
+    "pickaxe_diamond",
+    "bow",
+    "golden_apple",
+    "moon_blade",
+    "fire_shard",
+    "ancient_star",
+    "top_crown"
+  ],
+  "_legacy": "банды, созданные до правок по скринам оригинала (28.10; в документе нет флага v2), сохраняют старые значки и 1 уровень Сундуков [решение]"
 }

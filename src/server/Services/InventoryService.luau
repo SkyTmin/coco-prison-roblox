@@ -229,8 +229,9 @@ end
 
 -- Sells every block stack; returns money units earned.
 -- blocks from mines far above the player stay in the bag [сеть TG/25]; the second result counts them
-function InventoryService.sellAll(profile: Profile, multiplier: number): (number, number)
-	local total, locked = 0, 0
+-- sells every sellable block: (money, items kept because their block is locked, items sold)
+function InventoryService.sellAll(profile: Profile, multiplier: number): (number, number, number)
+	local total, locked, count = 0, 0, 0
 	for slot, stack in pairs(profile.inventory) do
 		local block = Config.block(stack.id)
 		if block and block.sellable ~= false and Config.blockLocked(stack.id, profile.level) then
@@ -239,10 +240,11 @@ function InventoryService.sellAll(profile: Profile, multiplier: number): (number
 			total += math.floor(
 				block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5
 			)
+			count += stack.count
 			profile.inventory[slot] = nil
 		end
 	end
-	return total, locked
+	return total, locked, count
 end
 
 return InventoryService

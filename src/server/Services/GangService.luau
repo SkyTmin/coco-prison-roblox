@@ -31,7 +31,6 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
-local GlobalBoosterService = require(script.Parent.GlobalBoosterService)
 
 type Gang = Gangs.Gang
 type Profile = Types.Profile
@@ -47,7 +46,7 @@ local STALE_TAG_SECONDS = 600 -- a tag reserved by a creation that never finishe
 local ACTION_GAP = 0.4
 -- steps that save the profile: DataStore writes one key at most every 6 s [решение: не упираться в лимит ключа]
 local SAVING_GAP = 6
-local SAVING_OPS = { create = true, accept = true, deposit = true, withdraw = true }
+local SAVING_OPS = { create = true, accept = true, deposit = true, withdraw = true, upgrade = true }
 
 local cfg = Gangs.cfg
 local GangService = {}
@@ -61,8 +60,11 @@ local memoryTags: { [string]: any }? = nil
 local memoryInvites: { [string]: any }? = nil
 
 type Cached = { doc: Gang?, readAt: number }
-type Pending =
-	{ kinds: { [string]: number }, levels: { [string]: { level: number, name: string } } }
+type Pending = {
+	kinds: { [string]: number }, -- "kind|what" → amount
+	levels: { [string]: { level: number, name: string } },
+	goal: { [string]: number }, -- member key → blocks towards the «Задания» goal
+}
 local cache: { [string]: Cached } = {}
 local pending: { [string]: Pending } = {}
 local busy: { [Player]: boolean } = {}
@@ -70,6 +72,8 @@ local lastAction: { [Player]: number } = {}
 local lastSaving: { [Player]: number } = {}
 local refreshQueued: { [string]: boolean } = {}
 local rng = Random.new()
+-- called with (gangId, doc?) whenever this server sees a new copy of a gang (GangHouseService: chest / NPCs by upgrades)
+local changedHooks: { (string, Gang?) -> () } = {}
 
 -- ── helpers ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -94,6 +98,9 @@ end
 
 -- arguments of a localized message: a {t = key, a = {...}} table is translated for each reader
 local function render(arg: any, locale: string): any
+	if typeof(arg) == "table" and typeof(arg.quest) == "table" then
+		return Gangs.questText(arg.quest, locale)
+	end
 	if typeof(arg) == "table" and typeof(arg.t) == "string" then
 		local inner = {}
 		for i, v in ipairs(arg.a or {}) do
@@ -365,6 +372,9 @@ local function setCache(id: string, doc: Gang?)
 	end
 	cache[id] = { doc = doc, readAt = os.clock() }
 	pushState(id)
+	for _, fn in ipairs(changedHooks) do
+		task.spawn(fn, id, doc)
+	end
 end
 
 local function refreshGang(id: string)
@@ -462,6 +472,10 @@ end
 
 -- ── perks and the shared API ───────────────────────────────────────────────────────────────────────────────────
 
+function GangService.OnChanged(fn: (string, Gang?) -> ())
+	table.insert(changedHooks, fn)
+end
+
 -- the player's gang as this server knows it (nil = none)
 function GangService.gangOf(p: any): Gang?
 	local id = gangIdOf(p)
@@ -491,75 +505,143 @@ function GangService.allies(a: Player, b: Player): boolean
 	return doc ~= nil and doc.pvp ~= true
 end
 
--- gang points from outside the quests (the Библиотекарь on the base, §1.5): one UpdateAsync; the caller has already
--- taken what was paid (the book), so a failed write loses the points, never doubles anything. Returns success.
-function GangService.addPoints(player: Player, amount: number): boolean
+-- the Библиотекарь on the base [владелец 28.10: «Перерабатывайте книги в очки и при достижении определённого количества
+-- банда получит награду», полоса 0 / 4000]: a book's points fill gang.library up to the goal (one UpdateAsync; the caller
+-- has taken the book and gives it back on an error). Returns the error key, nil = written.
+function GangService.addLibrary(player: Player, amount: number): string?
 	local id = gangIdOf(ProfileService.Get(player))
-	if not id or amount <= 0 or amount ~= amount or amount >= math.huge then
-		return false
+	if not id then
+		return "gang_err_no_gang"
 	end
+	if amount <= 0 or amount ~= amount or amount >= math.huge then
+		return "gang_library_need_book"
+	end
+	local goal = cfg.base.library.goal
+	return (
+		edit(id, function(gang)
+			if not gang.members[tostring(player.UserId)] then
+				return "gang_err_no_gang"
+			end
+			local have = gang.library or 0
+			if have >= goal then
+				return "gang_library_full"
+			end
+			gang.library = math.min(goal, have + math.floor(amount))
+			return nil
+		end)
+	)
+end
+
+-- «Забрать награду»: a full bar becomes the reward (gang points) and starts again from 0; any member may take it
+-- [решение]
+function GangService.claimLibrary(player: Player)
+	local id = gangIdOf(ProfileService.Get(player))
+	if not id then
+		toast(player, "gang_err_no_gang")
+		return
+	end
+	local lib = cfg.base.library
 	local err = edit(id, function(gang)
 		if not gang.members[tostring(player.UserId)] then
 			return "gang_err_no_gang"
 		end
-		gang.points += math.floor(amount)
+		if (gang.library or 0) < lib.goal then
+			return "gang_library_not_full"
+		end
+		gang.library = 0
+		gang.points += lib.reward.points
 		return nil
 	end)
-	return err == nil
+	if err then
+		toast(player, err)
+		return
+	end
+	say(id, "gang_library_claimed", player.Name, lib.reward.points)
 end
 
--- quest progress of a member: dig (blocks), mobs (kills), boss (damage), sell ($), pvp (kills) — written by the flush
-function GangService.progress(player: Player?, kind: string, amount: number)
-	if not player or amount <= 0 or amount ~= amount then
+-- quest progress of a member (Gangs.QUEST_KINDS; `what` = the boss / mob id of bossKill / mobKill), written by the
+-- flush; dig also counts towards the member's own goal of the «Задания» tab
+function GangService.progress(player: Player?, kind: string, amount: number, what: string?)
+	if not player or amount <= 0 or amount ~= amount or amount >= math.huge then
 		return
 	end
 	local p = ProfileService.Get(player)
 	local id = gangIdOf(p)
 	local doc = GangService.gangOf(p)
-	if not id or not doc or not Gangs.wants(doc, kind) then
+	if not id or not doc then
 		return
 	end
-	local pend = pending[id] or { kinds = {}, levels = {} }
+	local key = tostring(player.UserId)
+	local wants = Gangs.wants(doc, kind, what)
+	local goal = kind == "dig"
+		and now() >= Gangs.questsOpenAt(doc)
+		and Gangs.goalOf(doc, key, now()) < cfg.quests.goal.blocks
+	if not wants and not goal then
+		return
+	end
+	local pend = pending[id] or { kinds = {}, levels = {}, goal = {} }
 	pending[id] = pend
-	pend.kinds[kind] = (pend.kinds[kind] or 0) + amount
+	if wants then
+		local slot = kind .. "|" .. (what or "")
+		pend.kinds[slot] = (pend.kinds[slot] or 0) + amount
+	end
+	if goal then
+		pend.goal[key] = (pend.goal[key] or 0) + amount
+	end
 end
 
-function GangService.progressByUserId(userId: any, kind: string, amount: number)
+function GangService.progressByUserId(userId: any, kind: string, amount: number, what: string?)
 	if typeof(userId) == "number" then
-		GangService.progress(Players:GetPlayerByUserId(userId), kind, amount)
+		GangService.progress(Players:GetPlayerByUserId(userId), kind, amount, what)
 	end
+end
+
+-- one count per gang for an event several members share (a boss kill: every gang that hit it counts it once)
+function GangService.progressOnce(userIds: { any }, kind: string, amount: number, what: string?)
+	local seen: { [string]: boolean } = {}
+	for _, userId in ipairs(userIds) do
+		local player = if typeof(userId) == "number" then Players:GetPlayerByUserId(userId) else nil
+		local id = player and gangIdOf(ProfileService.Get(player))
+		if player and id and not seen[id] then
+			seen[id] = true
+			GangService.progress(player, kind, amount, what)
+		end
+	end
+end
+
+-- «Нанести N урона игрокам» and «Восстановить N ❤ здоровья» from the player's own Humanoid: a drop with a fresh
+-- LastHitBy of another player is that player's damage, a rise while alive is healing
+local function watchHealth(player: Player, character: Model)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not humanoid or not humanoid:IsA("Humanoid") then
+		return
+	end
+	local last = humanoid.Health
+	humanoid.HealthChanged:Connect(function(health)
+		local delta = health - last
+		last = health
+		if delta > 0 and health > 0 then
+			GangService.progress(player, "heal", delta)
+		elseif delta < 0 then
+			local by = humanoid:GetAttribute("LastHitBy")
+			local at = humanoid:GetAttribute("LastHitAt")
+			if
+				typeof(by) == "number"
+				and by ~= player.UserId
+				and typeof(at) == "number"
+				and os.clock() - at <= 1
+			then
+				GangService.progressByUserId(by, "pvpDamage", -delta)
+			end
+		end
+	end)
 end
 
 -- ── quests: rewards and the flush ──────────────────────────────────────────────────────────────────────────────
 
-local function questText(quest: Gangs.Quest): any
-	return { t = "gang_quest_" .. quest.kind, a = { Strings.big(quest.target) } }
-end
-
--- a finished quest: points are in the document already; the gang booster ×1.5 / 15 min for every member online
--- (shared through GlobalBoosterService, the id makes it once only)
-local function reward(doc: Gang, quest: Gangs.Quest)
-	local qcfg = cfg.quests
-	say(doc.id, "gang_announce_quest", questText(quest), Gangs.questPoints(quest.type))
-	task.spawn(function()
-		local entry: any = {
-			id = "gang_" .. doc.id .. "_" .. quest.uid,
-			kind = Gangs.questBoosterKind(quest.kind),
-			mult = qcfg.booster.mult,
-			scope = "gang",
-			gang = doc.id,
-			by = "#" .. doc.tag,
-			startsAt = 0,
-			endsAt = 0,
-		}
-		for try = 1, 3 do
-			if GlobalBoosterService.add(entry, qcfg.booster.minutes) then
-				return
-			end
-			task.wait(5 * try)
-		end
-		warn("[GangService] gang booster not started: " .. entry.id)
-	end)
+-- a finished quest: the points (× the «Задания» multiplier) are in the document already, members are told
+local function reward(doc: Gang, quest: Gangs.Quest, points: number)
+	say(doc.id, "gang_announce_quest", { quest = quest }, points)
 end
 
 local function needsQuests(doc: Gang, t: number): boolean
@@ -567,22 +649,17 @@ local function needsQuests(doc: Gang, t: number): boolean
 		return false
 	end
 	local state = doc.quests
-	if not state or state.day ~= Gangs.dayIndex(t) or state.week ~= Gangs.weekIndex(t) then
-		return true
-	end
-	local goals = 0
-	for _, quest in ipairs(state.list) do
-		if quest.type == "goal" and not quest.done then
-			goals += 1
-		end
-	end
-	return goals < cfg.quests.goal
+	return not state or state.day ~= Gangs.dayIndex(t) or state.week ~= Gangs.weekIndex(t)
+end
+
+local function newPending(): Pending
+	return { kinds = {}, levels = {}, goal = {} }
 end
 
 local function flushGang(id: string)
 	local pend = pending[id]
 	pending[id] = nil
-	local finished: { Gangs.Quest } = {}
+	local finished: { { quest: Gangs.Quest, points: number } } = {}
 	local announce = false
 	local err, doc = edit(id, function(gang)
 		finished = {}
@@ -595,22 +672,35 @@ local function flushGang(id: string)
 					m.level, m.name = info.level, info.name
 				end
 			end
-			for kind, amount in pairs(pend.kinds) do
-				for _, quest in ipairs(Gangs.addProgress(gang, kind, amount)) do
-					table.insert(finished, quest)
+			-- the goal first: a member who reaches it lifts the multiplier for the quests finished in this flush
+			for key, amount in pairs(pend.goal) do
+				Gangs.addGoal(gang, key, amount, t)
+				changed = true
+			end
+			for slot, amount in pairs(pend.kinds) do
+				local kind, what = string.match(slot, "^([^|]*)|(.*)$")
+				if kind then
+					local list =
+						Gangs.addProgress(gang, kind, amount, if what == "" then nil else what, t)
+					for _, done in ipairs(list) do
+						table.insert(finished, done)
+					end
+					changed = true
 				end
 			end
 		end
-		changed = Gangs.refreshQuests(gang, t, rng) or changed -- a finished goal gets its successor at once
 		announce = changed or #finished > 0
 		return nil
 	end, true)
 	if err == "gang_err_try_later" and pend then
 		-- the store did not answer: the progress waits for the next flush
-		local back = pending[id] or { kinds = {}, levels = {} }
+		local back = pending[id] or newPending()
 		pending[id] = back
-		for kind, amount in pairs(pend.kinds) do
-			back.kinds[kind] = (back.kinds[kind] or 0) + amount
+		for slot, amount in pairs(pend.kinds) do
+			back.kinds[slot] = (back.kinds[slot] or 0) + amount
+		end
+		for key, amount in pairs(pend.goal) do
+			back.goal[key] = (back.goal[key] or 0) + amount
 		end
 		for key, info in pairs(pend.levels) do
 			back.levels[key] = back.levels[key] or info
@@ -621,8 +711,8 @@ local function flushGang(id: string)
 		if announce then
 			publish({ ev = "refresh", id = id })
 		end
-		for _, quest in ipairs(finished) do
-			reward(doc, quest)
+		for _, done in ipairs(finished) do
+			reward(doc, done.quest, done.points)
 		end
 	end
 end
@@ -641,7 +731,7 @@ local function tick()
 			local key = tostring(player.UserId)
 			local m = doc.members[key]
 			if m and (m.level ~= p.level or m.name ~= player.Name) then
-				local pend = pending[id] or { kinds = {}, levels = {} }
+				local pend = pending[id] or { kinds = {}, levels = {}, goal = {} }
 				pending[id] = pend
 				pend.levels[key] = { level = p.level, name = player.Name }
 			end
@@ -665,6 +755,15 @@ local function tick()
 end
 
 -- ── the profile side: settling crashed steps ───────────────────────────────────────────────────────────────────
+
+-- puts money back by a note: $ (coins) or, for a creation paid with crystals (cur = "crystals"), the crystals
+local function refund(q: Profile, amount: number, cur: string?)
+	if cur == "crystals" then
+		q.crystals = (q.crystals or 0) + amount
+	else
+		q.coins += amount
+	end
+end
 
 local function clearNote(player: Player, op: string, apply: ((Profile) -> ())?)
 	ProfileService.Mutate(player, function(q)
@@ -699,7 +798,7 @@ local function settle(player: Player)
 				if member then
 					q.gang = { id = note.gang, leftAt = q.gang and q.gang.leftAt }
 				elseif doc == nil then
-					q.coins += amount -- the gang was never written: the money comes back
+					refund(q, amount, note.cur) -- the gang was never written: the money comes back
 				end
 			end)
 			if doc == nil and note.tag then
@@ -711,7 +810,7 @@ local function settle(player: Player)
 					q.gang = { id = note.gang, leftAt = q.gang and q.gang.leftAt }
 				end
 			end)
-		elseif note.kind == "deposit" then
+		elseif note.kind == "deposit" or note.kind == "upgrade" then
 			clearNote(player, op, function(q)
 				if not applied then
 					q.coins += amount
@@ -769,10 +868,16 @@ end
 local function note(player: Player, op: string, entry: any, take: number?): boolean
 	local done = false
 	ProfileService.Mutate(player, function(q)
-		if take and q.coins < take then
+		local crystals = entry.cur == "crystals"
+		local have = if crystals then q.crystals or 0 else q.coins
+		if take and have < take then
 			return
 		end
-		q.coins -= take or 0
+		if crystals then
+			q.crystals = have - (take or 0)
+		else
+			q.coins -= take or 0
+		end
 		q.gangOps = q.gangOps or {}
 		(q.gangOps :: any)[op] = entry
 		done = true
@@ -790,9 +895,18 @@ local function create(player: Player, form: any, force: boolean?)
 		toast(player, err, arg)
 		return
 	end
-	local cost = if force then 0 else coins(cfg.createCost)
-	if p.coins < cost then
-		toast(player, "gang_err_money", Strings.money(cost))
+	-- 15 000 $ or 499 crystals [владелец 28.10: «Создать за 15,000 $» / «Создать за 499 💎»]
+	local cur = if form.pay == "crystals" then "crystals" else nil
+	local cost = if force then 0 elseif cur then cfg.createCrystals else coins(cfg.createCost)
+	local function short()
+		if cur then
+			toast(player, "gang_err_crystals", Strings.big(cost))
+		else
+			toast(player, "gang_err_money", Strings.money(cost))
+		end
+	end
+	if (if cur then p.crystals or 0 else p.coins) < cost then
+		short()
 		return
 	end
 	local tag, tagErr = Gangs.checkTag(form.tag)
@@ -866,17 +980,17 @@ local function create(player: Player, form: any, force: boolean?)
 		not note(
 			player,
 			op,
-			{ kind = "create", gang = id, amount = cost, tag = tag, at = now() },
+			{ kind = "create", gang = id, amount = cost, cur = cur, tag = tag, at = now() },
 			cost
 		)
 	then
 		releaseTag(tag, id)
-		toast(player, "gang_err_money", Strings.money(cost))
+		short()
 		return
 	end
 	if not ProfileService.SaveNow(player) then
 		clearNote(player, op, function(q)
-			q.coins += cost
+			refund(q, cost, cur)
 		end)
 		releaseTag(tag, id)
 		toast(player, "gang_err_try_later")
@@ -907,6 +1021,7 @@ local function create(player: Player, form: any, force: boolean?)
 		pvp = cfg.pvpDefault == true,
 		ops = { [op] = t },
 		createdAt = t,
+		v2 = true,
 		version = 1,
 	}
 	local written, stored = gangUpdate(id, function(old: Gang?): Gang?
@@ -920,7 +1035,7 @@ local function create(player: Player, form: any, force: boolean?)
 		if created then
 			q.gang = { id = id, leftAt = q.gang and q.gang.leftAt }
 		else
-			q.coins += cost
+			refund(q, cost, cur)
 		end
 	end)
 	if not created then
@@ -1382,9 +1497,16 @@ local function withdraw(player: Player, raw: any)
 	toast(player, "gang_withdrew", Strings.money(amount))
 end
 
-local function buyUpgrade(player: Player, upgradeId: any)
-	local _, id = cachedGang(player)
-	if not id then
+-- «Прокачки» are bought for $ — from the buyer's own money as in the original, or from the treasury [владелец 28.10:
+-- «можно добавить и из казны прокачку»]; «Перки» for gang points. a = upgrade id or { id, pay = "self" | "treasury" }.
+-- Own money goes in the deposit steps: note + save, the document records the op, clear the note (refund on a refusal).
+local function buyUpgrade(player: Player, a: any)
+	local upgradeId, pay = a, nil
+	if typeof(a) == "table" then
+		upgradeId, pay = a.id, a.pay
+	end
+	local p, id, doc = cachedGang(player)
+	if not p or not id or not doc then
 		toast(player, "gang_err_no_gang")
 		return
 	end
@@ -1393,9 +1515,47 @@ local function buyUpgrade(player: Player, upgradeId: any)
 		return
 	end
 	local upgrade = u :: Gangs.Upgrade
+	if not Gangs.can(Gangs.roleOf(doc, player.UserId), "upgrade") then
+		toast(player, Gangs.rightsError("upgrade"))
+		return
+	end
+	local money = upgrade.currency == "money"
+	local fromSelf = money and pay ~= "treasury"
+	local seenCost = Gangs.nextCost(doc, upgrade.id)
+	if not seenCost then
+		toast(player, "gang_err_max")
+		return
+	end
+	local price = if money then coins(seenCost) else seenCost
+	local op: string? = nil
+	if fromSelf then
+		if p.coins < price then
+			toast(player, "gang_err_money", Strings.money(price))
+			return
+		end
+		local stepId = HttpService:GenerateGUID(false)
+		op = stepId
+		local entry = { kind = "upgrade", gang = id, amount = price, what = upgrade.id, at = now() }
+		if not note(player, stepId, entry, price) then
+			toast(player, "gang_err_money", Strings.money(price))
+			return
+		end
+		if not ProfileService.SaveNow(player) then
+			clearNote(player, stepId, function(q)
+				q.coins += price
+			end)
+			toast(player, "gang_err_try_later")
+			return
+		end
+	end
 	local key = tostring(player.UserId)
 	local from = 0
 	local err = edit(id, function(gang)
+		local ops = gang.ops or {}
+		gang.ops = ops
+		if op and ops[op] then
+			return "_done"
+		end
 		local m = gang.members[key]
 		if not Gangs.can(m and m.role, "upgrade") then
 			return Gangs.rightsError("upgrade")
@@ -1404,8 +1564,17 @@ local function buyUpgrade(player: Player, upgradeId: any)
 		if not cost then
 			return "gang_err_max"
 		end
-		if upgrade.currency == "treasury" then
-			local price = coins(cost)
+		if (if money then coins(cost) else cost) ~= price then
+			return "gang_err_price" -- someone bought a level a moment ago: the price moved, nothing is taken
+		end
+		if not money then
+			if gang.points < price then
+				return "gang_err_points" -- [клиент gang.error.not_enough_points]
+			end
+			gang.points -= price
+		elseif fromSelf then
+			ops[op :: string] = now() -- own money: not a treasury transaction, no history line
+		else
 			if gang.treasury < price then
 				return "gang_err_treasury_money"
 			end
@@ -1414,16 +1583,27 @@ local function buyUpgrade(player: Player, upgradeId: any)
 				gang,
 				{ at = now(), by = player.Name, kind = "buy", amount = price, what = upgrade.id }
 			)
-		else
-			if gang.points < cost then
-				return "gang_err_points" -- [клиент gang.error.not_enough_points]
-			end
-			gang.points -= cost
 		end
 		from = Gangs.level(gang, upgrade.id)
 		gang.upgrades[upgrade.id] = from + 1
 		return nil
 	end)
+	if op then
+		local stepId = op
+		if err == "gang_err_try_later" then
+			local done = landed(id, stepId)
+			if done == nil then
+				toast(player, "gang_err_try_later") -- settled on the next load
+				return
+			end
+			err = if done then nil else err
+		end
+		clearNote(player, stepId, function(q)
+			if err then
+				q.coins += price
+			end
+		end)
+	end
 	if err then
 		toast(player, err)
 		return
@@ -1468,6 +1648,7 @@ local function settings(player: Player, form: any)
 		end
 		if typeof(form.icon) == "number" and cfg.emblems[form.icon] then
 			gang.icon = form.icon
+			gang.newIcon = true -- the index is into the new set from now on
 		end
 		if desc then
 			gang.desc = desc
@@ -1671,6 +1852,18 @@ function GangService.Start()
 	ProfileService.OnLoaded(function(player)
 		task.spawn(onLoaded, player)
 	end)
+	local function watch(player: Player)
+		player.CharacterAdded:Connect(function(character)
+			watchHealth(player, character)
+		end)
+		if player.Character then
+			task.spawn(watchHealth, player, player.Character)
+		end
+	end
+	Players.PlayerAdded:Connect(watch)
+	for _, player in ipairs(Players:GetPlayers()) do
+		watch(player)
+	end
 	Players.PlayerRemoving:Connect(function(player)
 		busy[player] = nil
 		lastAction[player] = nil

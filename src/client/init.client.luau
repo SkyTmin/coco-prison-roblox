@@ -3587,7 +3587,15 @@ HudLayout.register("toasts", toast, true, true)
 HudLayout.register("boosters", boosterHud, true, true)
 -- [владелец 28.10] the status effect icons move too; the phone's «Бег» button (Sprint)
 HudLayout.register("effects", effectsHud, true, true)
-HudLayout.register("sprint", require(script.Sprint).start(touchActions), true, false)
+do
+	local sprintButton = require(script.Sprint).start(touchActions)
+	HudLayout.register("sprint", sprintButton, true, false)
+	-- the joystick pushed to its edge sprints by itself, so the «Бег» button is off at the start; «Добавить» in the
+	-- layout editor brings it back [владелец 28.10: «кнопка быстрого бега стоит не там … если джостик потянут сильно,
+	-- бег будет быстрым»]
+	HudLayout.setOptional("sprint", false)
+	sprintButton.Visible = false
+end
 -- Roblox's chat window stays left of the hotbar band (the meters are drawn over the hotbar, as wide as it)
 require(script.ChatWindow).hud({ hotbar = hotbar })
 

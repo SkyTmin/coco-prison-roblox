@@ -307,6 +307,15 @@ local function openChest(player: Player, part: BasePart)
 			toast(player, "gang_plot_foreign") -- the chest in another gang's house
 			return
 		end
+		if GangChest.PageCount(GangService.gangOf(profile)) < 1 then
+			-- «Сундуки» level 0: no storage yet [владелец 28.10: «с 0 уровня ничего нет»]
+			toast(
+				player,
+				"gang_npc_need_upgrade",
+				Strings.t("gang_up_chests", Strings.localeOf(player))
+			)
+			return
+		end
 		local ok, refusal = GangChest.Open(gang)
 		if not ok then
 			toast(player, refusal or "gang_chest_unavailable")

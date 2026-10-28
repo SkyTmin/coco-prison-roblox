@@ -1,9 +1,10 @@
 --!strict
 -- The windows of the База банды NPCs [клиент npc.gang.librarian / blacksmith; docs/research/remaining-features-design.md
 -- §1.5] in the dark inventory style (Ui.card, Ui.invSlot, SlotView):
---   * «Библиотекарь»: every ancient book of the bag with the gang points it gives (rarity × level) and «Сдать»;
---   * «Кузнец»: the books grouped by effect and level; a group of two or more shows the chance, the star price and
---     «Выковать» (two books of the group go to the server).
+--   * «Библиотекарь» [владелец 28.10]: «Предметов: N», the bar a / 4000 of the gang (GangState.library) with
+--     «Забрать награду», every ancient book of the bag with its points (rarity × level) and «Сдать»;
+--   * «Кузнец» [владелец 28.10]: two book slots «+» → «?», the books of the bag to pick from, the button «Выберите две
+--     книги одного типа» until the pair is valid, then the chance and the star price (the pair goes to the server).
 -- The server decides (GangBaseService, GangNpc remote). Also: the gang location check of the locations menu
 -- (`locationRefusal`) and the treasure chest capture broken by damage (`listen`: TreasureReset lets the prompt go).
 local Players = game:GetService("Players")
@@ -16,11 +17,12 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
+local Kit = require(script.Parent.WindowKit)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local GangNpcWindow = {}
 
-local W, H = 560, 440
+local W, H = 560, 480
 local ROW = 60
 local base = Config.gangs.base
 local listening = false
@@ -123,15 +125,6 @@ function GangNpcWindow.build(
 	)
 	win.Name = if isForge then "Window_GangForge" else "Window_GangLibrary"
 	Ui.titleColor(win, Ui.colors.header)
-	local hint = Ui.label(
-		content,
-		T(if isForge then "gang_forge_hint" else "gang_library_hint"),
-		UDim2.new(1, -56, 0, 36),
-		UDim2.fromOffset(48, 2),
-		13,
-		Ui.colors.muted
-	)
-	hint.TextWrapped = true
 	-- the NPC picture (Codex → Blender, menu_librarian / menu_forge; a book / anvil until it is uploaded)
 	local icons = Config.icons.icons
 	local picture = Instance.new("ImageLabel")
@@ -143,9 +136,29 @@ function GangNpcWindow.build(
 		then icons.menu_forge or icons.skill_anvil or ""
 		else icons.menu_librarian or icons.ancient_book or ""
 	picture.Parent = content
+	local itemsLabel = Ui.label(
+		content,
+		"",
+		UDim2.fromOffset(200, 18),
+		UDim2.fromOffset(48, 0),
+		14,
+		Ui.colors.header
+	)
+	local hint = Ui.label(
+		content,
+		T(if isForge then "gang_forge_hint" else "gang_library_text"),
+		UDim2.new(1, -56, 0, 30),
+		UDim2.fromOffset(48, 18),
+		12,
+		Ui.colors.muted
+	)
+	hint.TextWrapped = true
+	-- the top block: the library bar or the two forge slots
+	local TOP = if isForge then 150 else 104
+	local top = Ui.card(content, UDim2.new(1, -8, 0, TOP - 58), UDim2.fromOffset(4, 52))
 	local list = Instance.new("ScrollingFrame")
-	list.Size = UDim2.new(1, -8, 1, -48)
-	list.Position = UDim2.fromOffset(4, 44)
+	list.Size = UDim2.new(1, -8, 1, -(TOP + 4))
+	list.Position = UDim2.fromOffset(4, TOP)
 	list.BackgroundTransparency = 1
 	list.BorderSizePixel = 0
 	list.ScrollBarThickness = 4
@@ -156,6 +169,10 @@ function GangNpcWindow.build(
 	layout.Padding = UDim.new(0, 6)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Parent = list
+
+	local gang: any = nil -- the last GangState (the library bar)
+	local pair: { number } = {} -- forge: the chosen bag slots
+	local refresh: (Types.Profile?) -> ()
 
 	local function row(
 		order: number,
@@ -208,13 +225,142 @@ function GangNpcWindow.build(
 		l.TextXAlignment = Enum.TextXAlignment.Center
 	end
 
-	local function refresh(p: Types.Profile?)
-		profile = p
-		for _, child in ipairs(list:GetChildren()) do
+	local function clear(frame: Instance)
+		for _, child in ipairs(frame:GetChildren()) do
 			if child:IsA("GuiObject") then
 				child:Destroy()
 			end
 		end
+	end
+
+	-- «Библиотекарь»: the bar a / 4000 and «Забрать награду» [владелец 28.10]
+	local function drawLibraryTop()
+		clear(top)
+		local goal = base.library.goal
+		local have = if typeof(gang) == "table" then gang.library or 0 else 0
+		local bar =
+			Kit.bar(top, UDim2.new(1, -20, 0, 14), UDim2.fromOffset(10, 8), Ui.colors.purple)
+		bar.set(have / goal)
+		local text = Ui.label(
+			top,
+			string.format("%s / %s", Strings.big(have), Strings.big(goal)),
+			UDim2.new(1, -20, 0, 14),
+			UDim2.fromOffset(10, 8),
+			12,
+			Ui.colors.white
+		)
+		text.TextXAlignment = Enum.TextXAlignment.Center
+		local full = have >= goal
+		local claim = Ui.button(
+			top,
+			T("gang_library_claim", base.library.reward.points),
+			UDim2.new(1, -20, 0, 18),
+			UDim2.fromOffset(10, 26),
+			if full then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+		)
+		claim.Name = "Claim"
+		claim.TextSize = 13
+		claim.Activated:Connect(function()
+			if full then
+				Remotes.event("GangNpc"):FireServer("libraryClaim")
+			end
+		end)
+	end
+
+	-- «Кузнец»: two book slots «+», the result «?», the button
+	local function drawForgeTop(p: Types.Profile)
+		clear(top)
+		local function slotAt(
+			x: number,
+			stack: Types.ItemStack?,
+			mark: string,
+			onClick: (() -> ())?
+		)
+			local slot, name, count, icon = Ui.invSlot(top, 56)
+			slot.Position = UDim2.fromOffset(x, 8)
+			if stack then
+				SlotView.render(name, count, icon, stack)
+			end
+			if not stack or mark == "?" then
+				local l =
+					Ui.label(slot, mark, UDim2.fromScale(1, 1), UDim2.new(), 26, Ui.colors.muted)
+				l.TextXAlignment = Enum.TextXAlignment.Center
+				l.Font = Kit.BOLD
+			end
+			if onClick then
+				local hit = Instance.new("TextButton")
+				hit.Text = ""
+				hit.BackgroundTransparency = 1
+				hit.Size = UDim2.fromScale(1, 1)
+				hit.Parent = slot
+				hit.Activated:Connect(onClick)
+			end
+		end
+		local a, b = p.inventory[pair[1] or 0], p.inventory[pair[2] or 0]
+		local cx = (W - 8) / 2
+		slotAt(cx - 150, a, "+", function()
+			table.remove(pair, 1)
+			refresh(profile)
+		end)
+		local plus = Ui.label(
+			top,
+			"+",
+			UDim2.fromOffset(30, 56),
+			UDim2.fromOffset(cx - 90, 8),
+			22,
+			Ui.colors.muted
+		)
+		plus.TextXAlignment = Enum.TextXAlignment.Center
+		slotAt(cx - 56, b, "+", function()
+			table.remove(pair, 2)
+			refresh(profile)
+		end)
+		local arrow = Ui.label(
+			top,
+			"→",
+			UDim2.fromOffset(40, 56),
+			UDim2.fromOffset(cx + 6, 8),
+			22,
+			Ui.colors.muted
+		)
+		arrow.TextXAlignment = Enum.TextXAlignment.Center
+		slotAt(cx + 50, a, "?")
+		local ea, la = bookOf(a)
+		local eb, lb = bookOf(b)
+		local chance, price = nil, nil
+		if ea and la and ea == eb and la == lb then
+			chance, price = forgeOffer(ea, la)
+		end
+		local stars = starCount(p)
+		local ok = chance ~= nil and price ~= nil and stars >= price
+		local text = if not a
+				or not b
+				or not chance
+			then T("gang_forge_pick")
+			else T("gang_forge_button") .. " · " .. T(
+				"gang_forge_chance",
+				math.floor(chance * 100 + 0.5)
+			) .. " · " .. T("gang_forge_cost", price :: number)
+		local go = Ui.button(
+			top,
+			text,
+			UDim2.new(1, -20, 0, 18),
+			UDim2.fromOffset(10, 70),
+			if ok then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+		)
+		go.Name = "Forge"
+		go.TextSize = 13
+		go.Activated:Connect(function()
+			if ok then
+				Remotes.event("GangNpc"):FireServer("forge", pair[1], pair[2])
+				pair = {}
+			end
+		end)
+	end
+
+	refresh = function(p: Types.Profile?)
+		profile = p
+		clear(list)
 		if not p then
 			return
 		end
@@ -224,18 +370,29 @@ function GangNpcWindow.build(
 				table.insert(slots, slot)
 			end
 		end
+		itemsLabel.Text = T("gang_npc_items", #slots)
+		for i = #pair, 1, -1 do
+			if not bookOf(p.inventory[pair[i]]) then
+				table.remove(pair, i) -- the book left this slot
+			end
+		end
+		if isForge then
+			drawForgeTop(p)
+		else
+			drawLibraryTop()
+		end
 		if #slots == 0 then
 			empty()
 			return
 		end
-		if not isForge then
-			for i, slot in ipairs(slots) do
-				local stack = p.inventory[slot]
-				local effect, level = bookOf(stack)
-				if not effect or not level or not stack then
-					continue
-				end
-				local rarity = stack.rarity or "common"
+		for i, slot in ipairs(slots) do
+			local stack = p.inventory[slot] :: Types.ItemStack
+			local effect, level = bookOf(stack)
+			if not effect or not level then
+				continue
+			end
+			local rarity = stack.rarity or "common"
+			if not isForge then
 				local card = row(
 					i,
 					stack,
@@ -250,56 +407,38 @@ function GangNpcWindow.build(
 				actionButton(card, T("gang_library_give"), true, function()
 					Remotes.event("GangNpc"):FireServer("library", slot)
 				end)
-			end
-			return
-		end
-		-- the forge: one row per effect + level, the first two slots of a group are the pair
-		type Group = { effect: string, level: number, slots: { number } }
-		local groups: { Group } = {}
-		local byKey: { [string]: Group } = {}
-		for _, slot in ipairs(slots) do
-			local effect, level = bookOf(p.inventory[slot])
-			if effect and level then
-				local key = effect .. "#" .. level
-				local g = byKey[key]
-				if not g then
-					g = { effect = effect, level = level, slots = {} }
-					byKey[key] = g
-					table.insert(groups, g)
-				end
-				table.insert(g.slots, slot)
-			end
-		end
-		local stars = starCount(p)
-		for i, g in ipairs(groups) do
-			local chance, price = forgeOffer(g.effect, g.level)
-			local sub: string
-			local color: Color3? = nil
-			local ok = false
-			if not chance or not price then
-				sub = T("gang_forge_max")
-			elseif #g.slots < 2 then
-				sub = T("gang_forge_no_pair")
 			else
-				sub = T("gang_forge_chance", math.floor(chance * 100 + 0.5))
-					.. " · "
-					.. T("gang_forge_cost", price)
-				ok = stars >= price
-				color = if ok then Ui.colors.text else Ui.colors.red
-			end
-			local card = row(
-				i,
-				p.inventory[g.slots[1]] :: Types.ItemStack,
-				ItemInfo.bookName(g.effect, g.level, locale) .. " ×" .. #g.slots,
-				sub,
-				color
-			)
-			if chance and #g.slots >= 2 then
-				actionButton(card, T("gang_forge_button"), ok, function()
-					Remotes.event("GangNpc"):FireServer("forge", g.slots[1], g.slots[2])
-				end)
+				local chosen = table.find(pair, slot) ~= nil
+				local card = row(
+					i,
+					stack,
+					ItemInfo.bookName(effect, level, locale),
+					"",
+					ItemInfo.RARITY_COLORS[rarity]
+				)
+				actionButton(
+					card,
+					if chosen then "✔" else "+",
+					not chosen and #pair < 2,
+					function()
+						if not chosen and #pair < 2 then
+							table.insert(pair, slot)
+							refresh(profile)
+						end
+					end
+				)
 			end
 		end
+	end
+	if not isForge then
+		local connection = Remotes.event("GangState").OnClientEvent:Connect(function(view: any)
+			gang = view
+			refresh(profile)
+		end)
+		win.Destroying:Once(function()
+			connection:Disconnect()
+		end)
+		Remotes.event("GangAction"):FireServer("state")
 	end
 	refresh(profile)
 	return win, refresh

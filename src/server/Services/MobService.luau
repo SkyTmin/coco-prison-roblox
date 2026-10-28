@@ -134,7 +134,7 @@ local function rewardKiller(mob: Mob, humanoid: Humanoid)
 		end
 		ProfessionService.addXp(p, "blademaster", 1)
 	end)
-	GangService.progress(player, "mobs", 1) -- gang quests: mobs
+	GangService.progress(player, "mobKill", 1, mob.id) -- gang quests: «Убить моба X»
 	if money > 0 then
 		toast(
 			player,

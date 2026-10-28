@@ -122,7 +122,17 @@ export type Profile = {
 	-- id = the gang, leftAt = os.time() of the last voluntary leave (rejoin cooldown); schema stays v3
 	gang: { id: string?, leftAt: number? }?,
 	-- gang steps that move money or membership between the profile and the gang document, settled on load
-	gangOps: { [string]: { kind: string, gang: string, amount: number?, tag: string?, at: number } }?,
+	gangOps: {
+		[string]: {
+			kind: string,
+			gang: string,
+			amount: number?,
+			cur: string?,
+			what: string?,
+			tag: string?,
+			at: number,
+		},
+	}?,
 	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y, shown, size} (HudLayout); schema stays v3
 	settings: Settings?, -- the settings window (SettingsWindow); nil = the defaults; schema stays v3
 	-- «Пригласить друга» (ReferralService): by = the inviter's userId, set once on a brand-new profile that joined

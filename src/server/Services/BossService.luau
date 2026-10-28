@@ -1089,6 +1089,12 @@ local function died(boss: Boss)
 	end
 	local lastHit = humanoid:GetAttribute("LastHitBy")
 	reward(boss, if typeof(lastHit) == "number" then lastHit else nil)
+	-- gang quests «Убить босса X ×N»: every gang that hit it counts the kill once
+	local hitters = {}
+	for userId in pairs(boss.damageBy) do
+		table.insert(hitters, userId)
+	end
+	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
 	boss.model, boss.humanoid, boss.root = nil, nil, nil
 	table.clear(boss.damageBy)
 	boss.state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + boss.card.respawnSeconds)
@@ -1201,7 +1207,7 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		local by = humanoid:GetAttribute("LastHitBy")
 		if delta > 0 and typeof(by) == "number" then
 			boss.damageBy[by] = (boss.damageBy[by] or 0) + delta
-			GangService.progressByUserId(by, "boss", delta) -- gang quests: boss damage
+			GangService.progressByUserId(by, "bossDamage", delta) -- gang quests: «Нанести N урона боссам»
 			boss.lastTargetAt = os.clock()
 			-- stunned after a ram: every hit lands ×stunDamageMultiplier (the extra counts for the hitter)
 			if os.clock() < boss.stunnedUntil and not bonusing and health > 0 then

@@ -1611,12 +1611,6 @@ return {
 		es = "Aguante",
 		fr = "Endurance",
 	},
-	gang_up_punisher = {
-		ru = "Каратель",
-		en = "Punisher",
-		es = "Castigador",
-		fr = "Justicier",
-	},
 	gang_up_hunter = { ru = "Охотник", en = "Hunter", es = "Cazador", fr = "Chasseur" },
 	gang_up_desc_members = {
 		ru = "Слотов в банде: %s",
@@ -1671,12 +1665,6 @@ return {
 		en = "Needs drain %s%% slower",
 		es = "Las necesidades bajan un %s%% más despacio",
 		fr = "Les besoins baissent %s%% moins vite",
-	},
-	gang_up_desc_punisher = {
-		ru = "Шанс %s%%: убывающая нужда восстанавливается полностью",
-		en = "%s%% chance: a draining need refills completely",
-		es = "%s%% de probabilidad: la necesidad se rellena por completo",
-		fr = "%s%% de chance : un besoin se remplit entièrement",
 	},
 	gang_up_desc_hunter = {
 		ru = "Шанс %s%%: убитый моб засчитывается дважды",

@@ -10,7 +10,9 @@
 -- cloned into a free cell of a grid far below the courtyard (CELL studs apart), banners (attribute HouseBanner)
 -- recoloured, the «[TAG] name» sign (TextLabel GangTagLabel) filled, attribute GangId / HouseOf on the copy and its
 -- parts; then the player is streamed in and put on the house arrival (a LocationSpawn of gang_base with HouseSpawn).
--- In the house: the gang chest, Библиотекарь, Кузнец (their upgrades apply), the Restore* zones and the exit door
+-- In the house: the gang chest, Библиотекарь, Кузнец — each only once its upgrade is bought (FEATURES: a new gang's
+-- house is empty [владелец 28.10: «с 0 уровня ничего нет, ни сундуков, ни библиотекаря, ни кузницы»]; a purchase shows
+-- it at once through GangService.OnChanged), the Restore* zones and the exit door
 -- (GangHouseExit → back to the courtyard). A non-member found inside the house box (part HouseBounds) is put back in
 -- the courtyard; members inside get the character attribute NoPvp (no PvP in the house, CombatService/BookService).
 -- A copy with no member inside for EMPTY_SECONDS is destroyed and its cell reused [решение].
@@ -41,8 +43,13 @@ local COLUMNS = houseCfg.columns
 local ORIGIN = Vector3.new(houseCfg.x, houseCfg.y, houseCfg.z)
 local DOOR_RANGE = 10
 
+-- the parts an upgrade brings into the house: model name in the template → upgrade id
+local FEATURES: { [string]: string } =
+	{ GangChestModel = "chests", GangLibrarian = "library", GangSmith = "forge" }
+
 type House = {
 	model: Model,
+	features: { { root: Instance, parent: Instance, upgrade: string } },
 	gang: string,
 	cell: number,
 	bounds: BasePart?,
@@ -94,6 +101,31 @@ local function paint(house: House, doc: any)
 	end
 end
 
+-- the CollectionService tags of a copy (kept in the attribute HouseTags): added only in the workspace
+local function tagAll(root: Instance)
+	for _, d in ipairs(root:GetDescendants()) do
+		local list = d:GetAttribute("HouseTags")
+		if typeof(list) == "string" then
+			for tag in string.gmatch(list, "[^,%s]+") do
+				CollectionService:AddTag(d, tag)
+			end
+		end
+	end
+end
+
+-- shows the chests / Библиотекарь / Кузнец the gang has bought and takes away the rest (parented to nil, kept)
+local function fit(house: House, doc: any)
+	for _, f in ipairs(house.features) do
+		local has = Gangs.level(doc, f.upgrade) >= 1
+		if has and f.root.Parent == nil then
+			f.root.Parent = f.parent
+			tagAll(f.root)
+		elseif not has and f.root.Parent ~= nil then
+			f.root.Parent = nil
+		end
+	end
+end
+
 local function destroy(house: House)
 	houses[house.gang] = nil
 	cells[house.cell] = nil
@@ -129,23 +161,24 @@ local function ensure(doc: any): House?
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	model:SetAttribute("GangId", doc.id)
 	model:PivotTo(cellCFrame(cell))
-	local house: House = { model = model, gang = doc.id, cell = cell, emptySince = os.clock() }
+	local house: House =
+		{ model = model, features = {}, gang = doc.id, cell = cell, emptySince = os.clock() }
 	for _, d in ipairs(model:GetDescendants()) do
 		d:SetAttribute("HouseOf", doc.id)
 		if d:IsA("BasePart") and d.Name == "HouseBounds" then
 			house.bounds = d
 		end
+		local upgrade = FEATURES[d.Name]
+		if upgrade and d.Parent then
+			table.insert(house.features, { root = d, parent = d.Parent, upgrade = upgrade })
+		end
 	end
 	paint(house, doc)
+	fit(house, doc) -- what is not bought yet leaves before the copy enters the workspace
 	model.Parent = workspace
 	-- the tags only now: the prompt services bind this copy
+	tagAll(model)
 	for _, d in ipairs(model:GetDescendants()) do
-		local list = d:GetAttribute("HouseTags")
-		if typeof(list) == "string" then
-			for tag in string.gmatch(list, "[^,%s]+") do
-				CollectionService:AddTag(d, tag)
-			end
-		end
 		if
 			d:IsA("BasePart")
 			and d:GetAttribute("HouseSpawn")
@@ -326,6 +359,15 @@ local function tick()
 	end
 end
 
+-- a new copy of a gang on this server (a purchase here or on another server, a rename): the house follows at once
+local function changed(id: string, doc: any)
+	local house = houses[id]
+	if house and doc and not doc.disbanded then
+		paint(house, doc)
+		fit(house, doc)
+	end
+end
+
 -- QA: which gangs have a house here ({gangId = cell})
 function GangHouseService.houses(): { [string]: number }
 	local out = {}
@@ -340,6 +382,7 @@ function GangHouseService.Start()
 		return
 	end
 	started = true
+	GangService.OnChanged(changed)
 	Remotes.event("GangHome").OnServerEvent:Connect(function(player)
 		if os.clock() - (lastUse[player] or -math.huge) < 1 then
 			return
