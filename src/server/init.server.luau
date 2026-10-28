@@ -60,6 +60,7 @@ for _, name in ipairs({
 	"BoosterToItem",
 	"BookUse",
 	"BookResult",
+	"AncientRoll",
 }) do
 	Remotes.event(name)
 end

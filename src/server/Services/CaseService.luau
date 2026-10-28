@@ -438,6 +438,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 	local money = 0
 	local failure: string? = nil
 	local artifactNotices: { ArtifactService.Notice } = {}
+	local rolledBook: Types.ItemStack? = nil
 	local ok, err = pcall(ProfileService.Mutate, player, function(p)
 		local key: string? = nil
 		for _, candidate in ipairs(accepted) do
@@ -459,6 +460,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		staged.inventory = {}
 		if session.id == "ancientCase" then
 			staged.inventory[1] = ancientBook(key == "improved_ancient_key")
+			rolledBook = staged.inventory[1]
 		end
 		local rolls = if session.id == "ancientCase"
 			then 0
@@ -587,6 +589,13 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		)
 	end
 	ArtifactService.Notify(player, artifactNotices)
+	-- the Ancient case roulette [владелец 28.10: «вокруг кейса крутятся книги с названием, как рулетка, и
+	-- останавливается сверху та книга, которая выпала»]: the client spins books round the case, then shows the window
+	local book = rolledBook and rolledBook.books and rolledBook.books[1]
+	if not failure and book then
+		Remotes.event("AncientRoll")
+			:FireClient(player, session.part, book.id, book.level, rolledBook and rolledBook.rarity)
+	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
 

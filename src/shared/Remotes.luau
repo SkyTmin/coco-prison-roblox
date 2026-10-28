@@ -23,6 +23,7 @@
 -- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)
+-- Server → client:        AncientRoll(casePart, bookId, level, rarity) — the Ancient case roulette (AncientRoulette)
 -- Server → client:        BookResult(stringsKey) — the outcome of a BookUse (the book window closes on success)
 -- Client → server:        EatStart(slot), EatCancel() — hold to eat (FoodService); server → client Ate(itemId)
 -- Client → server:        DonateBuy(itemId, count), DonateTopUp(packId), DonateBuyRobux(itemId), StashClaim(index) — the donate shop (DonateService); server →

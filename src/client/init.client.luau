@@ -1956,6 +1956,23 @@ require(script.CasePreviewWindow).listen(function()
 	end
 	open("casePreview")
 end)
+-- the Ancient case roulette [владелец 28.10]: books spin over the case, the window waits hidden (never closed: that
+-- empties the case)
+Remotes.event("AncientRoll").OnClientEvent
+	:Connect(function(part: any, bookId: any, level: any, rarity: any)
+		require(script.AncientRoulette).play(
+			part,
+			bookId,
+			level,
+			rarity,
+			locale,
+			function(visible: boolean)
+				if openWindow and currentWindowKind == "case" then
+					openWindow.Visible = visible
+				end
+			end
+		)
+	end)
 local function refreshWindow(force: boolean?)
 	if not force and refreshMenu then
 		refreshMenu(profile)
