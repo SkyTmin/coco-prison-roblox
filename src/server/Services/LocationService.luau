@@ -108,6 +108,9 @@ local function gangRefusal(location: Config.Location, profile: any): string?
 	return nil
 end
 
+-- locations whose arrival depends on the player (База банды: the copy of his own gang, GangHouseService)
+local arrivals: { [string]: (Player) -> BasePart? } = {}
+
 local function teleport(player: Player, locationId: any, spot: any, arrival: BasePart?)
 	if
 		typeof(locationId) ~= "string"
@@ -171,8 +174,12 @@ local function teleport(player: Player, locationId: any, spot: any, arrival: Bas
 		toast(player, gangRefused)
 		return
 	end
-	-- the server may name the arrival (База банды: the gang's house, GangHouseService); spawns with a HouseSpawn
-	-- attribute belong to a house and are only used that way
+	-- the server may name the arrival (База банды: the gang's own copy, GangHouseService); spawns with a HouseSpawn
+	-- attribute belong to such a copy and are only used that way
+	local resolve = arrivals[locationId]
+	if not arrival and spot == nil and resolve then
+		arrival = resolve(player)
+	end
 	local spawn: BasePart? = if arrival
 			and spot == nil
 			and arrival:GetAttribute("LocationId") == locationId
@@ -385,6 +392,11 @@ end
 
 -- a trip started by the server for the player (the Шнырь → Гетто; «Домой» → the gang's house = arrival): the same
 -- checks and channel as the locations menu
+-- a location whose arrival is chosen per player (GangHouseService: the gang's own base)
+function LocationService.SetArrival(locationId: string, resolve: (Player) -> BasePart?)
+	arrivals[locationId] = resolve
+end
+
 function LocationService.Request(player: Player, locationId: string, arrival: BasePart?)
 	teleport(player, locationId, nil, arrival)
 end

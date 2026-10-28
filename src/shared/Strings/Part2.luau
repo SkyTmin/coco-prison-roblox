@@ -2128,10 +2128,10 @@ return {
 		fr = "Échec : un livre a brûlé dans la forge",
 	},
 	gang_plot_foreign = {
-		ru = "Это дом чужой банды",
-		en = "This is another gang's house",
-		es = "Esta es la casa de otra banda",
-		fr = "C'est la maison d'un autre gang",
+		ru = "Это база чужой банды",
+		en = "This is another gang's base",
+		es = "Esta es la base de otra banda",
+		fr = "C'est la base d'un autre gang",
 	},
 	gang_house_enter = {
 		ru = "Домой",
@@ -2140,10 +2140,10 @@ return {
 		fr = "Maison",
 	},
 	gang_house_exit = {
-		ru = "Выйти во двор",
-		en = "Go out to the yard",
-		es = "Salir al patio",
-		fr = "Sortir dans la cour",
+		ru = "Выйти в тюрьму",
+		en = "Go out to the prison",
+		es = "Salir a la prisión",
+		fr = "Sortir vers la prison",
 	},
 	gang_home = {
 		ru = "На базу банды",

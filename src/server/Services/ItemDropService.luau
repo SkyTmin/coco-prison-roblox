@@ -8,7 +8,7 @@
 -- to them (ItemPickupFx). Tools and armor cannot be thrown [владелец 21.10]. Every rules.drops.clearEverySeconds the
 -- server removes all of them with a warning first (ClearLag on Minecraft servers), and never keeps more than
 -- rules.drops.maxOnServer at once — with many players the ground must not fill with parts.
--- On the База банды (gang_base: the courtyard and the house copies) an item dropped by / from a gang member is seen and
+-- On the База банды (gang_base: each gang its own copy) an item dropped by / from a gang member is seen and
 -- picked up only by his gang [сеть TG/15 13.12.2025: «Предметы на Базе банды теперь отображаются и поднимаются только
 -- членами банды»]: the drop carries the attribute GangId, pickUp skips non-members, GroundItems hides it from them.
 -- Client → server: DropItem(slot, count?) — count nil = the whole stack.
