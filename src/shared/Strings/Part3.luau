@@ -254,7 +254,7 @@ return {
 		fr = "%d rubis",
 	},
 	donate_desc_pris = {
-		ru = "Игровая подписка на %d дней: автокопание, префикс [Авторитет] в чате, на Аукционе 10 слотов и без комиссии, меню /pp (ночь, AppleSkin, респавн шахт и боссов с телепортом), чужая /stats, эффекты чар. Повторная покупка продлевает срок.",
+		ru = "Статус «Авторитет» на %d дней: автокопание, префикс [Авторитет] в чате, на Аукционе 10 слотов и без комиссии, меню /pp (ночь, AppleSkin, респавн шахт и боссов с телепортом), чужая /stats, эффекты чар. Повторная покупка продлевает срок.",
 		en = "A %d-day game subscription: auto-dig, the [Kingpin] chat prefix, 10 Auction slots with no fee, the /pp menu (night, AppleSkin, mine and boss respawns with teleports), other players' /stats, enchant effects. Buying again extends it.",
 		es = "Suscripción de juego por %d días: excavación automática, prefijo [Capo] en el chat, 10 espacios en la Subasta sin comisión, menú /pp (noche, AppleSkin, reaparición de minas y jefes con teletransporte), /stats de otros, efectos de encantamientos. Comprar otra vez la alarga.",
 		fr = "Abonnement de jeu de %d jours : minage automatique, préfixe [Caïd] dans le chat, 10 emplacements aux Enchères sans commission, menu /pp (nuit, AppleSkin, réapparition des mines et des boss avec téléportation), /stats des autres, effets d'enchantement. Racheter prolonge la durée.",
@@ -416,10 +416,10 @@ return {
 		fr = "Active",
 	},
 	pris_need = {
-		ru = "Для начала приобретите подписку в /donate",
-		en = "Get the subscription in /donate first",
-		es = "Primero consigue la suscripción en /donate",
-		fr = "Procure-toi d'abord l'abonnement dans /donate",
+		ru = "Стать Авторитетом — в /donate",
+		en = "Become a Kingpin in /donate",
+		es = "Hazte Capo en /donate",
+		fr = "Deviens Caïd dans /donate",
 	},
 	pris_extend = {
 		ru = "Продлить",
@@ -724,4 +724,48 @@ return {
 		es = "Enviado — la respuesta está en el chat",
 		fr = "Envoyé — la réponse est dans le chat",
 	},
+	-- названия значков, которые ItemInfo проверяет как предметы (28.10)
+	item_auction_no_fee = {
+		ru = "Удаление комиссии",
+		en = "Fee removal",
+		es = "Sin comisión",
+		fr = "Sans commission",
+	},
+	item_gang_members = {
+		ru = "Участники банды",
+		en = "Gang members",
+		es = "Miembros de la banda",
+		fr = "Membres du gang",
+	},
+	item_gang_points = {
+		ru = "Очки банды",
+		en = "Gang points",
+		es = "Puntos de banda",
+		fr = "Points de gang",
+	},
+	item_gang_quests = {
+		ru = "Поручения банды",
+		en = "Gang quests",
+		es = "Encargos de banda",
+		fr = "Missions de gang",
+	},
+	item_gang_treasury = {
+		ru = "Казна банды",
+		en = "Gang treasury",
+		es = "Tesoro de la banda",
+		fr = "Trésor du gang",
+	},
+	item_gang_upgrades = {
+		ru = "Улучшения банды",
+		en = "Gang upgrades",
+		es = "Mejoras de banda",
+		fr = "Améliorations de gang",
+	},
+	item_ghetto_treasure = {
+		ru = "Сундук с сокровищами",
+		en = "Treasure chest",
+		es = "Cofre del tesoro",
+		fr = "Coffre au trésor",
+	},
+	item_ruby = { ru = "Рубин", en = "Ruby", es = "Rubí", fr = "Rubis" },
 }
