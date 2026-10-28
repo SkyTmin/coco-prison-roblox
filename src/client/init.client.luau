@@ -2680,7 +2680,14 @@ local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 	if state == Enum.UserInputState.Begin then
 		if
 			currentWindowKind
-			or (input and isMobile() and input.UserInputType == Enum.UserInputType.MouseButton1)
+			-- a phone turns taps into MouseButton1 too: those are handled by the touch code. Without a touch screen the
+			-- mouse is real and digs, also under Studio's ForceMobile [владелец 28.10: «не могу копать в Studio»]
+			or (
+				input
+				and isMobile()
+				and UserInputService.TouchEnabled
+				and input.UserInputType == Enum.UserInputType.MouseButton1
+			)
 		then
 			return Enum.ContextActionResult.Pass
 		end
