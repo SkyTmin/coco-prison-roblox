@@ -14,7 +14,7 @@
 --                       to take, lift the finger — that part is now selected
 --   double tap          quick move to the other container
 -- Item info (Minecraft tooltip, ItemTooltip): mouse — while hovering a slot with nothing on the cursor;
--- touch — for the selected stack and while a slot is long-pressed (also during the split bar).
+-- touch — only while a slot is long-pressed (also during the split bar), gone when the finger lifts.
 -- Both: drag a stack out of the window and let go → it is thrown on the ground (throw, when given).
 -- A move is sent as move(from, to, count?) — count nil means "the whole stack".
 local Players = game:GetService("Players")
@@ -435,7 +435,9 @@ function DragDrop.new(
 			local tipAddress: Address? = nil
 			local tipAnchor: (Vector2 | GuiObject)? = nil
 			if lastTouch then
-				tipAddress = touchFocus or (if held then held.from else nil)
+				-- only while the finger stays on a slot [владелец 28.10: «сведения должны открываться, когда держишь
+				-- палец на предмете, а то текст мешает»]: a tap that selects a stack shows nothing
+				tipAddress = touchFocus
 				tipAnchor = if tipAddress then frameOf(tipAddress) else nil
 			elseif hoverAddress and not held and not active then
 				tipAddress, tipAnchor = hoverAddress, UserInputService:GetMouseLocation()

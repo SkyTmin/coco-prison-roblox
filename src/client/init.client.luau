@@ -3137,6 +3137,24 @@ do
 		localizedLabels[caption] = "touch_layout"
 	end
 end
+-- [владелец 28.10: «добавить кнопку вид или убрать её»] the first / third person button: off at the start (the view
+-- lives in the settings, V / F5 on a computer); «Добавить» in the layout editor puts it on the screen, where it is
+-- moved and resized like the others, on a phone and on a computer
+do
+	local button =
+		touchIconButton(gui, Config.icons.icons["menu_camera"], "", 56, T("touch_camera"))
+	button.Name = "HudView"
+	button.AnchorPoint = Vector2.new(1, 1)
+	button.Position = UDim2.new(1, -16, 1, -210)
+	button.Visible = false
+	button.Activated:Connect(toggleFirstPerson)
+	HudLayout.register("view", button, true, true)
+	HudLayout.setOptional("view", false)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "touch_camera"
+	end
+end
 local touchActions = Instance.new("Frame")
 touchActions.Name = "TouchActions"
 touchActions.Size = UDim2.fromScale(1, 1)
