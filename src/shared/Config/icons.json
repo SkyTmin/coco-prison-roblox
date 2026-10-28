@@ -156,7 +156,27 @@
     "skill_armorer": "rbxassetid://137084596029374",
     "skill_brewer": "rbxassetid://129660149988782",
     "menu_skills": "rbxassetid://106647411420989",
-    "ui_lock": "rbxassetid://99037711880296"
+    "ui_lock": "rbxassetid://99037711880296",
+    "menu_daily": "rbxassetid://96684562699176",
+    "menu_names": "rbxassetid://75499413406549",
+    "gang_upgrades": "rbxassetid://103382786284289",
+    "menu_invite": "rbxassetid://127869704998044",
+    "gang_quests": "rbxassetid://96340079622481",
+    "gang_treasury": "rbxassetid://106707102200847",
+    "ghetto_treasure": "rbxassetid://100585632607085",
+    "menu_pris": "rbxassetid://129803042076193",
+    "menu_favorite": "rbxassetid://72908653138771",
+    "gang_points": "rbxassetid://107923476644565",
+    "menu_black_market": "rbxassetid://112166808424672",
+    "ruby": "rbxassetid://107668490118722",
+    "auction_no_fee": "rbxassetid://94002091476324",
+    "menu_librarian": "rbxassetid://104339056452091",
+    "menu_players": "rbxassetid://78599876686207",
+    "menu_ghetto": "rbxassetid://120570615664682",
+    "menu_gangs": "rbxassetid://76401634926325",
+    "menu_forge": "rbxassetid://115081539242254",
+    "menu_gang_home": "rbxassetid://124354725642685",
+    "gang_members": "rbxassetid://83529133629268"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }
