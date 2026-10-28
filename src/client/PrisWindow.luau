@@ -86,7 +86,7 @@ function PrisWindow.build(
 	Kit.bob(crown, 3, 2.4)
 	Kit.text(
 		header,
-		"PRIS+",
+		T("pris_title"),
 		UDim2.fromOffset(200, 24),
 		UDim2.fromOffset(66, 8),
 		22,

@@ -331,7 +331,7 @@ function ChatWindow.start(api: Api)
 			)
 		end
 		if info.pris then
-			table.insert(parts, colored("<b>[PRIS+]</b>", PRIS))
+			table.insert(parts, colored("<b>" .. T("pris_tag") .. "</b>", PRIS))
 		end
 		if info.tag and info.tag ~= "" then
 			table.insert(

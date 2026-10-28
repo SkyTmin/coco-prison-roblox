@@ -264,7 +264,7 @@ function PlayerListWindow.build(
 		end)
 		local name = Kit.text(
 			cardBack,
-			(if PrisPlus.of(target) then Kit.colored("[PRIS+] ", PRIS) else "")
+			(if PrisPlus.of(target) then Kit.colored(T("pris_tag") .. " ", PRIS) else "")
 				.. Chat.escape(target.DisplayName),
 			UDim2.new(1, -92, 0, 22),
 			UDim2.fromOffset(82, 12),
@@ -533,7 +533,7 @@ function PlayerListWindow.build(
 			),
 		}
 		if PrisPlus.of(player) then
-			table.insert(parts, Kit.colored("[PRIS+]", PRIS))
+			table.insert(parts, Kit.colored(T("pris_tag"), PRIS))
 		end
 		table.insert(parts, "<b>" .. Chat.escape(player.DisplayName) .. "</b>")
 		local nick = attr(player, "Nick", "string")

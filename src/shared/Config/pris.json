@@ -2,7 +2,7 @@
   "source": "[клиент, вики, сеть] PRIS+ и рубины; числа — [решение] (docs/research/remaining-features-design.md, этап 8)",
   "_source": "docs/research/remaining-features-design.md, этап 8; факты remaining-features-facts.md §8 [клиент donate.list.subscribe.description, prison_plus.*; вики DONATE-SHOP-BOOSTERS, MENUS-SOCIAL; сеть S6, S7, TG/10, TG/40]",
   "days": 30,
-  "_days": "[решение] PRIS+ — товар донат-магазина pris_plus за 299 кр. (цены в фактах нет): +30 дней к сроку p.prisPlusUntil, повторная покупка продлевает; не подписка Roblox (её нельзя оплатить кристаллами и рубинами, а рубины тратятся первыми [вики])",
+  "_days": "[решение] [владелец 28.10: переименовать, цена 999] «Авторитет» (в коде pris_plus) — товар донат-магазина за 999 кр. (цены в фактах нет): +30 дней к сроку p.prisPlusUntil, повторная покупка продлевает; не подписка Roblox (её нельзя оплатить кристаллами и рубинами, а рубины тратятся первыми [вики])",
   "auctionSlots": 10,
   "_auctionSlots": "[вики] слоты Аукциона 5 → 10 с PRIS+ (докупленные слоты прибавляются)",
   "nightClock": 0,

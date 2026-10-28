@@ -238,7 +238,7 @@
 
 - **Приглашение**: `SocialService:CanSendGameInviteAsync` → `PromptGameInvite` (системное окно Roblox); если Roblox не даёт приглашать — тост «Приглашения сейчас недоступны».
 - **Новичок**: вошедший по приглашению несёт `GetJoinData().ReferredByPlayerId`; только для нового профиля (`ProfileService.IsNew`: в DataStore ничего не было) и не сам себя — `p.referral.by` и сразу подарок: **обычный ключ + 500 $** **[решение]** (что не влезло — в хранилище [B]).
-- **Пригласившему**, когда друг дошёл до **5 ур.** **[решение — защита от фейковых аккаунтов]**: **улучшенный древний ключ + 2 500 $**, счётчик «Приглашено друзей» (`p.stats.referrals`), наград не больше **20** **[решение]** (дальше друзья только считаются; запись хранит до 100 друзей).
+- **Пригласившему**, когда друг дошёл до **5 ур.** **[решение — защита от фейковых аккаунтов]**: **древний ключ + 2 500 $** **[владелец 28.10]**, счётчик «Приглашено друзей» (`p.stats.referrals`), наград не больше **20** **[решение]** (дальше друзья только считаются; запись хранит до 100 друзей).
 - **Без двойной выдачи** (по правилу CLAUDE.md «Auction … outbox»): сервер друга добавляет его userId в DataStore `Referrals_v1/Inviter_<id>` (UpdateAsync, id в списке один раз) и только потом ставит `p.referral.credited`; «уровень ≥ 5 и не засчитан» — заметка-исход, повтор раз в минуту и при входе безопасен. Пригласивший сверяет запись при каждом входе и по сигналу MessagingService `Referrals_v1`; каждый друг платит один раз (`p.invites.seen`, профиль под сессионной блокировкой), запись он не меняет.
 - **Время в игре**: `p.stats.playSeconds`, прибавляется раз в минуту.
 - **«Избранное»**: после **30 мин** игры и с **5 ур.** — раз за сессию тёмная карточка сверху «Нравится игра? Поставь лайк и добавь игру в Избранное» с кнопками «В Избранное» (`AvatarEditorService:PromptSetFavorite(game.PlaceId, Enum.AvatarItemType.Asset, true)`, ответ `PromptSetFavoriteCompleted`) и «Позже». Добавил — больше не показываем (`p.favorite.done`); «Позже» или отмена окна Roblox — снова через **3 дня** (реальных, `p.favorite.laterUntil`) **[решение]**; без ответа карточка уходит через 40 с и вернётся в следующую сессию. **Никакой награды** за лайк / Избранное — запрещено правилами Roblox. Эмодзи 👍 в тексте нет **[решение: шрифты UI могут его не нарисовать]**.
@@ -299,7 +299,9 @@
 - Иконка плитки `menu_daily` (Codex → Blender, `assets/icons/items3d/menu_daily.png`) ждёт загрузки; до неё — древняя звезда.
 - QA (Studio): `ServerStorage.DailyDebug:Invoke("state", userId)` → JSON; `("shift", userId, часы)` — сдвинуть прошлую награду назад; `("claim", userId)`; `("portion", userId)`; `("reset", userId)`; `("canteen", "open" | "closed" | nil)`.
 
-## 11.10 PRIS+, рубины, «Удаление комиссии»
+## 11.10 PRIS+ → «Авторитет», рубины, «Удаление комиссии»
+
+**[владелец 28.10]** подписка в игре называется **«Авторитет»** (en Kingpin, es Capo, fr Caïd; префикс в чате [Авторитет]), цена **999 кристаллов / 999 Robux за 30 дней**. В коде и конфигах id остаётся `pris_plus` / `PrisPlus`.
 
 Дизайн: `docs/research/remaining-features-design.md` «Этап 8»; факты — `remaining-features-facts.md` §8, §10. Числа — `scripts/design-decisions.json` → `prisPlus` (→ `src/shared/Config/pris.json`, `Config.pris`), товары — `donate.items` (`pris_plus`, `auction_no_fee`, `rubies_100`, вкладка `pris`), аукцион — `auction.maxRubies`. Код: `src/shared/PrisPlus.luau` (правила), `PrisService` (атрибут `PrisPlus`, таймеры шахт `PrisQuery`, QA `PrisDebug`), `DonateService` / `Shared/Donate` (покупка, рубины первыми), `AuctionService` / `Shared/Auction` (слоты, комиссия, лоты за рубины), `ChatService` (префикс), `ChatCommandService` (`/rubb`, `/stats ник`), `BookService` (`EnchantFx`); клиент — `PrisWindow` (`/pp`, `/mining`, плитка меню X, кнопка «PRIS+» в сетке телефона, без клавиши), `PrisPerks` (автокопание, ночь, AppleSkin), `EnchantFx`, `IndoorLighting.SetNight`.
 

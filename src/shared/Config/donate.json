@@ -408,13 +408,13 @@
       "productName": "Перезарядка стойки"
     },
     "pris_plus": {
-      "price": 299,
+      "price": 999,
       "prisDays": 30,
       "max": 3,
       "icon": "menu_pris",
-      "robux": 299,
+      "robux": 999,
       "productId": 0,
-      "productName": "PRIS+ на 30 дней"
+      "productName": "Авторитет на 30 дней"
     },
     "auction_no_fee": {
       "price": 199,
