@@ -48,6 +48,11 @@ local function rewardEntries(rewards: { any }): { Entry }
 		elseif id == "wooden_sword_or_bow" then
 			add({ id = "sword", count = 1, level = 1 })
 			add({ id = "bow", count = 1, level = 1 })
+		elseif id == "booster" then
+			-- the artifact case's box: a local booster of each kind (CaseService picks one)
+			for _, kind in ipairs(Config.boosters.kinds) do
+				add({ id = "booster_" .. kind .. "_local", count = 1 })
+			end
 		elseif id == "rare_wooden_pickaxe_silk_touch" then
 			add({
 				id = "pickaxe",

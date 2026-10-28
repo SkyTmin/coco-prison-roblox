@@ -1569,11 +1569,26 @@ local function buildLocations(): Frame
 				local chip = Ui.panel(chips, UDim2.new(), UDim2.new())
 				chip.LayoutOrder = i
 				chip.BackgroundColor3 = Ui.colors.slot
+				-- the block's picture before its name, as in the inventory [владелец 28.10: «добавь значки этих
+				-- блоков»]: the uploaded icon, else the block-colour tile
+				local picture = Instance.new("ImageLabel")
+				picture.Size = UDim2.fromOffset(24, 24)
+				picture.Position = UDim2.new(0, 5, 0.5, -12)
+				picture.BorderSizePixel = 0
+				picture.ScaleType = Enum.ScaleType.Fit
+				picture.ResampleMode = Enum.ResamplerMode.Pixelated
+				local icon, tint = BlockColors.icon(id)
+				local tile = if icon then nil else BlockColors.of(id)
+				picture.Image = icon or ""
+				picture.ImageColor3 = tint
+				picture.BackgroundColor3 = tile or Color3.new()
+				picture.BackgroundTransparency = if tile then 0 else 1
+				picture.Parent = chip
 				local blockName = Ui.label(
 					chip,
 					Strings.itemName(id, nil, locale),
-					UDim2.new(1, -12, 1, 0),
-					UDim2.fromOffset(6, 0),
+					UDim2.new(1, -40, 1, 0),
+					UDim2.fromOffset(34, 0),
 					12
 				)
 				blockName.TextWrapped = true

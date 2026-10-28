@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
@@ -480,6 +481,9 @@ openCase = function(player: Player, id: any, requestedKey: any)
 				else
 					money += amount
 				end
+			elseif item == "ancient_book" then
+				-- the artifact case's book: an ordinary-key roll of the Ancient case [меню: «порошок/книга»]
+				staged.inventory[1] = ancientBook(false)
 			else
 				if reward.count then
 					count = random:NextInteger(reward.count[1], reward.count[2])
@@ -495,6 +499,12 @@ openCase = function(player: Player, id: any, requestedKey: any)
 					item, level = if random:NextInteger(1, 2) == 1 then "sword" else "bow", 1
 				elseif item == "rare_wooden_pickaxe_silk_touch" then
 					item, level = "pickaxe", 1
+				elseif item == "booster" then
+					-- «ящик (набор)» of the artifact case: a local ×2 booster of a random kind, the storage's item
+					item = Boosters.itemId(
+						Boosters.kinds[random:NextInteger(1, #Boosters.kinds)],
+						"local"
+					)
 				end
 				if reward.id == "rare_wooden_pickaxe_silk_touch" then
 					local free: number? = nil
