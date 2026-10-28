@@ -13,6 +13,7 @@ local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfessionService = require(script.Parent.ProfessionService)
@@ -260,6 +261,9 @@ local function levelUp(player: Player)
 	end
 	toast(player, "level_reached", rule.level)
 	Sfx.toPlayer(player, "level_up", 0.7)
+	if rule.level >= Config.chat.levelAnnounceFrom then -- «новый уровень игрока» in the server chat [вики MENUS-SOCIAL]
+		ChatService.announce("chat_level_up", player.DisplayName, rule.level)
+	end
 	-- an invited friend reaching the friend level pays the inviter (ReferralService); lazy: it is started later
 	task.spawn(require(script.Parent.ReferralService).check, player)
 end

@@ -2028,6 +2028,27 @@ local function open(kind: string)
 	-- Roblox hides its touch controls and stops touch camera panning while a menu is open
 	UserInputService.ModalEnabled = true
 end
+-- «Урна» (/rubbish, этап 3): what lies in the bin is destroyed when the window goes (RubbishWindow)
+windowBuilders.rubbish = function()
+	local win, refresh =
+		require(script.RubbishWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
+	return win
+end
+-- the chat (этап 3): our own window over TextChatService, the commands, «[Совет]», /hide (ChatWindow)
+require(script.ChatWindow).start({
+	open = function(kind: string)
+		closeWindow()
+		open(kind)
+	end,
+	profile = function()
+		return profile
+	end,
+	locale = function()
+		return locale
+	end,
+	toast = showToast,
+})
 require(script.CasePreviewWindow).listen(function()
 	if currentWindowKind == "casePreview" then
 		closeWindow()
@@ -3029,6 +3050,7 @@ local menuKeys = {
 	"factions",
 	"gangs",
 	"donate",
+	"rubbish", -- «Урна» (/rubbish, этап 3)
 }
 local function touchIconButton(
 	parent: Instance,
@@ -3128,12 +3150,14 @@ end)
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
 		or (if kind == "gangs" then Config.icons.icons.top_crown else nil) -- until menu_gangs is uploaded
+		or (if kind == "rubbish" then Config.iconFor("fire_shard") else nil) -- until menu_rubbish is uploaded
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
 		elseif kind == "upgrade" then "touch_menu_upgrade"
 		elseif kind == "factions" then "factions_title"
 		elseif kind == "donate" then "touch_menu_donate"
+		elseif kind == "rubbish" then "rubbish_title"
 		else kind
 	local button = touchIconButton(touchMenuGrid, icon, "", 56, T(captionKey))
 	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)

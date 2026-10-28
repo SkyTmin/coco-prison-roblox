@@ -170,6 +170,12 @@ local function migrate(data: any): Profile
 	if typeof(profile.favorite) ~= "table" then
 		profile.favorite = nil
 	end
+	if typeof(profile.thanked) ~= "table" then -- /thx (ChatCommandService)
+		profile.thanked = nil
+	end
+	if typeof(profile.settings) ~= "table" then
+		profile.settings = nil
+	end
 	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
 	local rawArtifacts = profile.artifacts
 	profile.artifacts = {}
@@ -745,6 +751,19 @@ function ProfileService.Start()
 			return typeof(v) == "boolean"
 		end,
 		autosellTextOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		-- the chat (этап 3): tips, transfers to me, gifts to me, the other players hidden
+		tipsOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		payOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		giftOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		hidePlayers = function(v)
 			return typeof(v) == "boolean"
 		end,
 	}

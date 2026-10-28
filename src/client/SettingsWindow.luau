@@ -34,6 +34,10 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		hideBoosters = s.hideBoosters == true,
 		autosellOff = s.autosellOff == true,
 		autosellTextOff = s.autosellTextOff == true,
+		tipsOff = s.tipsOff == true,
+		payOff = s.payOff == true,
+		giftOff = s.giftOff == true,
+		hidePlayers = s.hidePlayers == true,
 	}
 end
 
@@ -54,7 +58,7 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 9
+	local rows = 13
 	local win, content =
 		createWindow(parent, T("settings_title"), UDim2.fromOffset(W, rows * ROW + 56), onClose)
 	win.Name = "Window_Settings"
@@ -235,12 +239,64 @@ function SettingsWindow.build(
 		"autosellTextOff",
 		settings.autosellTextOff == true
 	)
-	-- 9. move and resize the buttons, the notifications, the booster bar
+	-- 9–12. the chat (этап 3): «[Совет]» lines [клиент settings.elements.advice_toggle], money transfers and gifts
+	-- to this player [клиент pay.*, gift.*], the other players hidden (/hide; H stays the layout editor)
+	local function flag(
+		i: number,
+		caption: string,
+		name: string,
+		key: string,
+		on: boolean,
+		onText: string,
+		offText: string
+	)
+		toggle(row(i, caption), name, on, onText, offText, function()
+			set(key, on)
+		end)
+	end
+	flag(
+		9,
+		T("settings_tips"),
+		"Tips",
+		"tipsOff",
+		not settings.tipsOff,
+		T("settings_shown"),
+		T("settings_hidden")
+	)
+	flag(
+		10,
+		T("settings_pay"),
+		"Pay",
+		"payOff",
+		not settings.payOff,
+		T("settings_accept"),
+		T("settings_refuse")
+	)
+	flag(
+		11,
+		T("settings_gift"),
+		"Gift",
+		"giftOff",
+		not settings.giftOff,
+		T("settings_accept"),
+		T("settings_refuse")
+	)
+	toggle(
+		row(12, T("settings_players")),
+		"Players",
+		not settings.hidePlayers,
+		T("settings_shown"),
+		T("settings_hidden"),
+		function()
+			set("hidePlayers", not settings.hidePlayers)
+		end
+	)
+	-- 13. move and resize the buttons, the notifications, the booster bar
 	local layout = Ui.button(
 		content,
 		T("settings_layout"),
 		UDim2.new(1, 0, 0, ROW - 6),
-		UDim2.fromOffset(0, 8 * ROW),
+		UDim2.fromOffset(0, 12 * ROW),
 		Ui.colors.buttonBlue
 	)
 	layout.Name = "Layout"

@@ -27,6 +27,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Warzone = require(Shared.Warzone)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local FactionService = require(script.Parent.FactionService)
 local NeedsService = require(script.Parent.NeedsService)
 local AchievementService = require(script.Parent.AchievementService)
@@ -70,6 +71,7 @@ local function announce(build: (string) -> string)
 	for _, player in ipairs(Players:GetPlayers()) do
 		toast:FireClient(player, build(Strings.localeOf(player)))
 	end
+	ChatService.announceWith(build) -- and in the chat [вики LOCATIONS-MENU: видел в чате]
 end
 
 local function mirror(point: PointState)

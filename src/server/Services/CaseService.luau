@@ -14,6 +14,7 @@ local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
 local ArtifactService = require(script.Parent.ArtifactService)
 local FactionStorage = require(script.Parent.FactionStorageService)
@@ -493,6 +494,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		elseif granted then
 			toast(player, "nickname_received", granted)
 			applyNickname(player)
+			ChatService.announce("chat_nickname", player.DisplayName, granted) -- «выбитая кличка» [вики MENUS-SOCIAL]
 		end
 		Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 		return

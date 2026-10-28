@@ -34,6 +34,7 @@ local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
@@ -1025,6 +1026,15 @@ local function reward(boss: Boss, lastHit: number?)
 			)
 		)
 	end
+	-- the whole server reads it in the chat [вики MENUS-SOCIAL: гибель босса, топ урона] (the spawn stays silent
+	-- [владелец 27.10: «выключи уведомление о появлении боссов»])
+	local podium = table.concat(top, "  ")
+	ChatService.announceWith(function(locale)
+		local name = if locale == "ru" or not boss.card.nameEn
+			then boss.card.name
+			else boss.card.nameEn
+		return Strings.t("chat_boss_killed", locale, name, podium)
+	end)
 	for _, player in ipairs(present) do
 		local dealt = boss.damageBy[player.UserId] or 0
 		local share = if total > 0 then dealt / total else 0

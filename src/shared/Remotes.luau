@@ -46,6 +46,11 @@
 -- Client → server:        GangHome() — «Домой» in the «Банда» window: to the gang's own house (GangHouseService)
 -- Server → client:        TreasureReset() — damage broke the treasure chest capture: the client lets the prompt go
 -- Client → server:        Favorite("done" | "later") — the «Избранное» card's outcome (ReferralService; no reward ever)
+-- Client → server:        ChatGlobal(text) — a «!» line for every server (ChatService filters it; the local, faction and
+--                         gang lines go through TextChatService TextChannels, not a remote); ChatCommand(name, {args})
+--                         — /pay, /gift, /thx (ChatCommandService); Rubbish({ {slot, id, count} }) — the «Урна» closed
+-- Server → client:        ChatGlobal({u, n, l, f, g, c, k, t}) — a filtered global line (user id, display name, level,
+--                         faction, gang tag, gang colour, nickname, text); ChatSystem(text, "announce" | "reply" | "error")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

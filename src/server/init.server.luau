@@ -70,6 +70,10 @@ for _, name in ipairs({
 	"GhettoBuy",
 	"TreasureReset",
 	"Favorite",
+	"ChatGlobal",
+	"ChatSystem",
+	"ChatCommand",
+	"Rubbish",
 }) do
 	Remotes.event(name)
 end
@@ -158,6 +162,8 @@ MobService.Start()
 NameplateService.Start()
 LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
 require(script.Services.ReferralService).Start() -- inviting friends (Referrals_v1), play time, the «Избранное» card
+require(script.Services.ChatService).Start() -- the chat: faction / gang TextChannels, the global chat, announcements
+require(script.Services.ChatCommandService).Start() -- /pay, /gift, /thx and the bin (Rubbish)
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character

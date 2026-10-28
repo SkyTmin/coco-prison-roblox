@@ -9,6 +9,12 @@ export type Settings = {
 	hideBoosters: boolean?,
 	autosellOff: boolean?, -- the bought auto-sell switched off [владелец 28.10]
 	autosellTextOff: boolean?, -- no «+0,057 $» at the crosshair
+	-- the chat (этап 3): «[Совет]» lines off [клиент settings.elements.advice_toggle], /pay and /gift refused to
+	-- this player [клиент pay.*, gift.*], the other players hidden (/hide, local only)
+	tipsOff: boolean?,
+	payOff: boolean?,
+	giftOff: boolean?,
+	hidePlayers: boolean?,
 }
 
 export type ItemStack = {
@@ -102,6 +108,8 @@ export type Profile = {
 	invites: { seen: { [string]: boolean }, rewarded: number }?,
 	-- the «Избранное» card (FavoriteCard): done = added, never shown again; laterUntil = os.time() of the next showing
 	favorite: { done: boolean?, laterUntil: number? }?,
+	-- /thx (ChatCommandService): the shared boosters already thanked for, booster key → its endsAt (pruned later)
+	thanked: { [string]: number }?,
 	location: string,
 	operationIds: { [string]: boolean },
 }

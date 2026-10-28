@@ -28,6 +28,7 @@ local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
 local ItemDropService = require(script.Parent.ItemDropService)
 
@@ -59,6 +60,7 @@ local function announce(key: string, ...: any)
 	for _, player in ipairs(Players:GetPlayers()) do
 		toast(player, key, ...)
 	end
+	ChatService.announce(key, ...) -- and in the chat (этап 3)
 end
 
 local function units(dollars: number): number

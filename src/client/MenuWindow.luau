@@ -37,6 +37,12 @@ MenuWindow.ENTRIES = {
 		icon = if Config.icons.icons.menu_gangs then nil else "top_crown",
 	},
 	{ kind = "donate", caption = "donate_title", key = "N" },
+	-- «Урна» (/rubbish, этап 3); the fire shard until our Blender icon menu_rubbish is uploaded
+	{
+		kind = "rubbish",
+		caption = "rubbish_title",
+		icon = if Config.icons.icons.menu_rubbish then nil else "fire_shard",
+	},
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },

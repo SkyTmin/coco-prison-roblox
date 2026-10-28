@@ -16,6 +16,7 @@ local Boosters = require(Shared.Boosters)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 
 local MAP_NAME = "SharedBoosters_v1"
 local KEY = "shared"
@@ -151,17 +152,16 @@ local function announce(a: Boosters.Active)
 			)
 		then
 			local locale = Strings.localeOf(player)
-			Remotes.event("Toast"):FireClient(
-				player,
-				Strings.t(
-					"booster_started_by",
-					locale,
-					a.by or "?",
-					Strings.boosterName(a.kind, scope, locale),
-					tostring(a.mult),
-					minutes
-				)
+			local text = Strings.t(
+				"booster_started_by",
+				locale,
+				a.by or "?",
+				Strings.boosterName(a.kind, scope, locale),
+				tostring(a.mult),
+				minutes
 			)
+			Remotes.event("Toast"):FireClient(player, text)
+			ChatService.system(player, text, "announce") -- and in the chat: /thx thanks for it (этап 3)
 		end
 	end
 end

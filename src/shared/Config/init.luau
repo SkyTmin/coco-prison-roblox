@@ -39,6 +39,7 @@ Config.gangs = load("gangs") -- gangs (Shared/Gangs, GangService)
 Config.ghetto = load("ghetto") -- the Ghetto: trader, black market, treasure chest (GhettoService)
 Config.warzone = load("warzone") -- the Дворы: four faction capture points (Shared/Warzone, WarzoneService)
 Config.referrals = load("referrals") -- inviting friends, the «Избранное» card (ReferralService, FavoriteCard)
+Config.chat = load("chat") -- the chat and its commands (ChatService, ChatCommandService, ChatWindow)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number
