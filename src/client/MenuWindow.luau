@@ -43,6 +43,12 @@ MenuWindow.ENTRIES = {
 		caption = "rubbish_title",
 		icon = if Config.icons.icons.menu_rubbish then nil else "fire_shard",
 	},
+	-- «Ежедневные награды» (/daily, этап 7); the ancient star until our Blender icon menu_daily is uploaded
+	{
+		kind = "daily",
+		caption = "daily_title",
+		icon = if Config.icons.icons.menu_daily then nil else "ancient_star",
+	},
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },

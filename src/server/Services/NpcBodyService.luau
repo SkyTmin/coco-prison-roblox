@@ -35,6 +35,8 @@ local COSTUMES: { [string]: string } = {
 	Trainer = "trainer",
 	QuestGiver = "clerk",
 	Guard = "guard",
+	CanteenCook = "cook", -- the Столовая (DailyService)
+	DailyRewards = "clerk", -- «Ежедневные награды» on the spawn (DailyService)
 	Gatekeeper = "gatekeeper",
 	Cultist = "cultist",
 	-- the people of the locations (scripts/locations/market/30-bazaar.luau)

@@ -269,6 +269,30 @@ npc({
 	pants = Color3.fromRGB(30, 35, 55),
 	hat = "cap",
 })
+-- [этап 7] the cook behind the serving counter of the Столовая (build-buildings: counter at z 34) gives the portion
+-- (DailyService, tag CanteenCook) [клиент canteen.*]
+npc({
+	name = "CanteenCook",
+	tag = "CanteenCook",
+	cf = facing(140, 37.5, 140, 0),
+	label = "Повар",
+	skin = SKIN[1],
+	shirt = Color3.fromRGB(240, 240, 240),
+	pants = Color3.fromRGB(40, 40, 45),
+	hat = "chef",
+	apron = Color3.fromRGB(250, 250, 250),
+})
+-- [этап 7] «Ежедневные награды» on the spawn plaza, across from the teleporter (x −17, z 40) [клиент npc.spawn.daily]
+npc({
+	name = "DailyRewards",
+	tag = "DailyNpc",
+	cf = facing(17, 37, 17, 0),
+	label = "Ежедневные награды",
+	skin = SKIN[4],
+	shirt = Color3.fromRGB(70, 80, 120),
+	pants = Color3.fromRGB(45, 40, 40),
+	hat = "cap",
+})
 
 -- Chests built in a local frame: -Z (the lock side) faces the target (the fountain).
 -- style: wood = Color3 for the body, band = Color3 for the bands, glow = Color3 for the slit light.

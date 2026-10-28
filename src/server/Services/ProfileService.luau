@@ -173,6 +173,19 @@ local function migrate(data: any): Profile
 	if typeof(profile.thanked) ~= "table" then -- /thx (ChatCommandService)
 		profile.thanked = nil
 	end
+	-- «Ежедневные награды» / Столовая (DailyService)
+	local daily = profile.daily :: any
+	if
+		typeof(daily) ~= "table"
+		or typeof(daily.streak) ~= "number"
+		or typeof(daily.lastDay) ~= "number"
+		or typeof(daily.lastAt) ~= "number"
+	then
+		profile.daily = nil
+	end
+	if typeof(profile.canteen) ~= "number" then
+		profile.canteen = nil
+	end
 	if typeof(profile.settings) ~= "table" then
 		profile.settings = nil
 	end

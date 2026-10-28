@@ -11,6 +11,8 @@
 -- Rewards: inventory (dropsAs + dropCount), blocksTotal (× block upgrade), upgrade counters,
 -- profession xp, ordinary key roll, artifact fragments, combo (resets after idle, see rules.combo), capture points
 -- on the pads of the Дворы (WarzoneService).
+-- Шот-шахты (location.shot, Config.shotTime): every block breaks in one tick with the mine's tool (or any), the
+-- pause after it keeps them at rules.digging.shotHitsPerSecond; rewards, books and counters as usual [решение].
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -61,6 +63,7 @@ local combos: { [Player]: Combo } = {}
 local lastBreakAt: { [Player]: number } = {} -- Minecraft's pause after a break [ваниль]
 local lastPause: { [Player]: number } = {} -- that pause: 0 after an instantly broken block
 local insomniaToastAt: { [Player]: number } = {} -- holding dig must not spam the toast
+local shotToastAt: { [Player]: number } = {} -- the same for the shot mine's «only this tool» toast
 local random = Random.new()
 local nextToken = 0
 
@@ -152,8 +155,25 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 	-- creative test mode: every block breaks at once with any tool (CreativeService)
 	local character = player.Character
 	local haste = if character then tonumber(character:GetAttribute("Haste")) or 0 else 0
+	-- a shot mine breaks every block in one hit, only its own tool where it names one (Config.shotTime)
+	local shot = Config.shotTime(mine.location, toolId, toolLevel)
+	if shot == false and not player:GetAttribute("Creative") then
+		-- the client keeps sending DigStart while the button is held: one toast in 3 s
+		if os.clock() - (shotToastAt[player] or -math.huge) <= 3 then
+			return nil, nil, nil
+		end
+		shotToastAt[player] = os.clock()
+		local tool = (mine.location.shot :: { tool: string? }).tool :: string
+		local locale = Strings.localeOf(player)
+		Remotes.event("Toast"):FireClient(
+			player,
+			Strings.t("shot_wrong_tool", locale, Strings.t("item_" .. tool, locale))
+		)
+		return nil, nil, nil
+	end
 	local needed = if player:GetAttribute("Creative")
 		then Config.rules.creative.breakSeconds
+		elseif shot then shot
 		else Config.breakTime(block, toolId, toolLevel, haste)
 	if not needed then
 		if block.tool ~= "any" and toolId ~= block.tool then
@@ -272,7 +292,7 @@ local function complete(player: Player, token: number)
 	local brokenCFrame, brokenSize, brokenColor = part.CFrame, part.Size, part.Color
 	local blockId = MineService.breakBlock(mine, i)
 	lastBreakAt[player] = os.clock()
-	lastPause[player] = Config.hitDelayAfter(dig.needed)
+	lastPause[player] = Config.pauseAfter(mine.location, dig.needed) -- shot mines: 8 blocks a second at most
 	if not blockId then
 		Remotes.event("DigRejected"):FireClient(player, part)
 		return
@@ -484,6 +504,7 @@ function DigService.Start()
 		digTokens[player] = nil
 		fxQueue[player] = nil
 		insomniaToastAt[player] = nil
+		shotToastAt[player] = nil
 	end)
 	-- combo idle timer (wall clock, independent of frame rate): reset and tell the client
 	local elapsed = 0

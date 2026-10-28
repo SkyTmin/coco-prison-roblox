@@ -13,6 +13,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -58,6 +59,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           40,
@@ -96,6 +98,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -130,6 +133,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -166,6 +170,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -198,6 +203,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -230,6 +238,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -263,6 +272,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -295,6 +305,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -327,6 +338,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -359,6 +371,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -391,6 +406,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": "shovel"
+      },
       "mine": {
         "size": [
           32,
@@ -425,6 +443,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -456,6 +477,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": "shears"
+      },
       "mine": {
         "size": [
           32,
@@ -486,6 +510,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -518,6 +545,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -552,6 +580,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -582,6 +613,9 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": {
+        "tool": null
+      },
       "mine": {
         "size": [
           32,
@@ -614,6 +648,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -644,6 +679,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -674,6 +710,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -704,6 +741,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -734,6 +772,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -764,6 +803,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -794,6 +834,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -824,6 +865,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
+      "shot": null,
       "mine": {
         "size": [
           16,
@@ -880,6 +922,7 @@
         ],
         "resetSeconds": 120
       },
+      "shot": null,
       "mine": {
         "size": [
           40,

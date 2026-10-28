@@ -93,6 +93,8 @@ for (const loc of pricesWiki.locations) {
 		requiresGangUpgrade: dec.requiresGangUpgrade ?? null,
 		friendlyFire: dec.friendlyFire ?? false,
 		miniMine: dec.miniMine ?? null,
+		// Шот-шахта [вики HANDBOOK-WIKI]: one hit breaks any block; tool null = any (DigService, Config.shotTime)
+		shot: dec.shot ? { tool: dec.shotTool ?? null } : null,
 		mine: {
 			size: dec.size ?? def.size,
 			resetSeconds: dec.resetSeconds ?? def.resetSeconds,
@@ -296,6 +298,7 @@ write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.mark
 write("ghetto.json", { source: "[вики, клиент] Гетто; числа — [решение] (docs/research/remaining-features-design.md, этап 1в)", ...decisions.ghetto });
 write("warzone.json", { source: "[клиент, вики] Дворы и фракционные точки; числа — [решение] (docs/research/remaining-features-design.md, этап 2)", ...decisions.warzone });
 write("referrals.json", { source: "[решение] приглашение друзей и карточка «Избранное» (docs/research/remaining-features-design.md, этап 10)", ...decisions.referrals });
+write("daily.json", { source: "[решение] Столовая и ежедневные награды (docs/research/remaining-features-design.md, этап 7)", canteen: decisions.canteen, daily: decisions.daily });
 write("chat.json", { source: "[решение] чат и команды (docs/research/remaining-features-design.md, этап 3)", ...decisions.chat });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
 const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;

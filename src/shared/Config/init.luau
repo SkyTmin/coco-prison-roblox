@@ -40,6 +40,7 @@ Config.ghetto = load("ghetto") -- the Ghetto: trader, black market, treasure che
 Config.warzone = load("warzone") -- the Дворы: four faction capture points (Shared/Warzone, WarzoneService)
 Config.referrals = load("referrals") -- inviting friends, the «Избранное» card (ReferralService, FavoriteCard)
 Config.chat = load("chat") -- the chat and its commands (ChatService, ChatCommandService, ChatWindow)
+Config.daily = load("daily") -- the canteen portion and the daily rewards (Shared/Daily, DailyService)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number
@@ -92,6 +93,7 @@ export type Location = {
 	requiresGangUpgrade: string?, -- Гетто: the gang upgrade that opens it [клиент location.list.non_access.ghetto]
 	friendlyFire: boolean?, -- Гетто: players of one faction may hit each other [сеть TG/10]
 	miniMine: { size: { number }, resetSeconds: number }?, -- the faction base's small mines
+	shot: { tool: string? }?, -- Шот-шахта [вики HANDBOOK-WIKI]: one hit breaks any block (tool nil = any)
 	mine: {
 		size: { number },
 		resetSeconds: number,
@@ -381,6 +383,32 @@ end
 -- minecraft.wiki/w/Breaking]
 function Config.hitDelayAfter(needed: number): number
 	return if needed <= TICK + 1e-6 then 0 else Config.hitDelay()
+end
+
+-- Шот-шахта [вики HANDBOOK-WIKI: «любой блок ломается с одного удара»]: nil = not a shot mine, false = the
+-- mine wants another tool (Лепреконова долина — лопата, Изнанка — ножницы [вики]), else the break time (one
+-- tick). Any held item — even the hand — is fine where the tool is «любой» [решение].
+function Config.shotTime(location: Location?, toolId: string?, toolLevel: number): (number | false)?
+	local shot = if location then location.shot else nil
+	if not shot then
+		return nil
+	end
+	if shot.tool and (toolId ~= shot.tool or toolLevel < 1) then
+		return false
+	end
+	return TICK
+end
+
+-- the pause after a broken block: a shot mine tops its one tick up to 1 / shotHitsPerSecond [решение: 8 в с]
+function Config.pauseAfter(location: Location?, needed: number): number
+	if location and location.shot then
+		local digging = Config.rules.digging
+		local rate = if digging and typeof(digging.shotHitsPerSecond) == "number"
+			then digging.shotHitsPerSecond
+			else 8
+		return math.max(0, 1 / rate - TICK)
+	end
+	return Config.hitDelayAfter(needed)
 end
 
 function Config.hitDelay(): number

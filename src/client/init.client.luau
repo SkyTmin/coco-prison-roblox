@@ -1264,6 +1264,25 @@ end
 
 -- [владелец 22.10] a red «PVP» plate in the corner of the preview of every PvP location
 local function pvpBadge(preview: GuiObject, location: Config.Location)
+	if location.shot then
+		-- a yellow «ШОТ» plate bottom-left: every block breaks in one hit [вики HANDBOOK-WIKI]
+		local shot = Instance.new("TextLabel")
+		shot.Name = "ShotBadge"
+		shot.AnchorPoint = Vector2.new(0, 1)
+		shot.Position = UDim2.new(0, 6, 1, -6)
+		shot.Size = UDim2.fromOffset(52, 22)
+		shot.BackgroundColor3 = Color3.fromRGB(230, 180, 30)
+		shot.BorderSizePixel = 0
+		shot.Font = Enum.Font.GothamBold
+		shot.Text = T("shot_badge")
+		shot.TextColor3 = Color3.fromRGB(30, 24, 8)
+		shot.TextSize = 13
+		shot.ZIndex = preview.ZIndex + 2
+		shot.Parent = preview
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(0, 4)
+		round.Parent = shot
+	end
 	if not location.pvp then
 		return
 	end
@@ -2035,6 +2054,13 @@ windowBuilders.rubbish = function()
 	refreshMenu = refresh
 	return win
 end
+-- «Ежедневные награды» (/daily, the NPC on the spawn, the menu tile; этап 7): DailyWindow, DailyService decides
+windowBuilders.daily = function()
+	local win, refresh =
+		require(script.DailyWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
+	return win
+end
 -- the chat (этап 3): our own window over TextChatService, the commands, «[Совет]», /hide (ChatWindow)
 require(script.ChatWindow).start({
 	open = function(kind: string)
@@ -2542,6 +2568,16 @@ local function expectedTime(part: BasePart): number?
 	if profile.needs.sleep <= 0 then
 		return nil
 	end
+	-- шот-шахта: one hit (the server refuses with a toast when the mine wants another tool)
+	local mineId = part:GetAttribute("MineId")
+	local shot = Config.shotTime(
+		if typeof(mineId) == "string" then Config.location(mineId) else nil,
+		toolId,
+		level
+	)
+	if shot ~= nil then
+		return shot or nil
+	end
 	local character = player.Character
 	local haste = if character then tonumber(character:GetAttribute("Haste")) or 0 else 0
 	return Config.breakTime(block, toolId, level, haste)
@@ -2691,7 +2727,12 @@ RunService.RenderStepped:Connect(function()
 				BlockBreak.Break(digTarget)
 				hideLocally(digTarget)
 				digPredicted = true
-				nextDigAt = now + Config.hitDelayAfter(digNeeded)
+				local mineId = digTarget:GetAttribute("MineId")
+				nextDigAt = now
+					+ Config.pauseAfter(
+						if typeof(mineId) == "string" then Config.location(mineId) else nil,
+						digNeeded
+					)
 			end
 		end
 	elseif holding and aim and not pending[aim.part] and now >= nextDigAt then
@@ -3051,6 +3092,7 @@ local menuKeys = {
 	"gangs",
 	"donate",
 	"rubbish", -- «Урна» (/rubbish, этап 3)
+	"daily", -- «Ежедневные награды» (этап 7)
 }
 local function touchIconButton(
 	parent: Instance,
@@ -3151,6 +3193,7 @@ for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
 		or (if kind == "gangs" then Config.icons.icons.top_crown else nil) -- until menu_gangs is uploaded
 		or (if kind == "rubbish" then Config.iconFor("fire_shard") else nil) -- until menu_rubbish is uploaded
+		or (if kind == "daily" then Config.iconFor("ancient_star") else nil) -- until menu_daily is uploaded
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
@@ -3158,6 +3201,7 @@ for i, kind in ipairs(menuKeys) do
 		elseif kind == "factions" then "factions_title"
 		elseif kind == "donate" then "touch_menu_donate"
 		elseif kind == "rubbish" then "rubbish_title"
+		elseif kind == "daily" then "daily_short"
 		else kind
 	local button = touchIconButton(touchMenuGrid, icon, "", 56, T(captionKey))
 	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)

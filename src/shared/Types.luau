@@ -113,6 +113,10 @@ export type Profile = {
 	favorite: { done: boolean?, laterUntil: number? }?,
 	-- /thx (ChatCommandService): the shared boosters already thanked for, booster key → its endsAt (pruned later)
 	thanked: { [string]: number }?,
+	-- «Ежедневные награды» (DailyService, Shared/Daily): streak = rewards in a row, lastDay = Moscow day number of the
+	-- last one, lastAt = its server time
+	daily: { streak: number, lastDay: number, lastAt: number }?,
+	canteen: number?, -- Столовая: the opening (Daily.canteenPeriod) whose portion was taken
 	location: string,
 	operationIds: { [string]: boolean },
 }

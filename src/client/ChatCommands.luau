@@ -45,6 +45,7 @@ local WINDOWS: { [string]: string } = {
 	achievements = "achievements",
 	artifacts = "artifacts",
 	rubbish = "rubbish",
+	daily = "daily", -- «Ежедневные награды» (DailyWindow, этап 7)
 }
 local SERVER = { pay = true, gift = true, thx = true }
 -- PRIS+ (этап 8), рубины, клички (этап 9), автопродажа из меню, вики, гайд: not built yet
@@ -107,8 +108,6 @@ function ChatCommands.run(text: string, ctx: Context)
 		Remotes.event("Teleport"):FireServer(Warzone.LOCATION)
 	elseif name == "hide" then
 		ctx.say(T(if ctx.toggleHide() then "chat_hide_on" else "chat_hide_off"), "reply")
-	elseif name == "daily" then
-		ctx.say(T("chat_daily_soon"), "reply")
 	elseif name == "gang" then
 		gang(args, ctx, T)
 	elseif

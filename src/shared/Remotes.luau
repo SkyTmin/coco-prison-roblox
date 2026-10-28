@@ -53,6 +53,8 @@
 --                         — /pay, /gift, /thx (ChatCommandService); Rubbish({ {slot, id, count} }) — the «Урна» closed
 -- Server → client:        ChatGlobal({u, n, l, f, g, c, k, t}) — a filtered global line (user id, display name, level,
 --                         faction, gang tag, gang colour, nickname, text); ChatSystem(text, "announce" | "reply" | "error")
+-- Client → server:        DailyClaim() — take today's card of «Ежедневные награды» (DailyService; the window opens by
+--                         /daily, the menu tile or the NPC's prompt → OpenMenu("daily"))
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
