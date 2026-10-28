@@ -1,5 +1,7 @@
 --!strict
 -- LocationSpawn + LocationId mark arrivals; Teleporter parts open the locations menu.
+-- База банды / Гетто (requiresGang, requiresGangUpgrade) [вики «Нужна банда», «Нужно гетто»]: refused without a gang
+-- (or the upgrade); a player there who loses the gang (left, kicked, disbanded) is sent back to the prison spawn.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -13,6 +15,7 @@ local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local CombatService = require(script.Parent.CombatService)
 local InventoryService = require(script.Parent.InventoryService)
+local GangService = require(script.Parent.GangService)
 
 local LocationService = {}
 local started = false
@@ -89,7 +92,23 @@ local function factionMissing(location: Config.Location, profile: any): boolean
 	return location.requiresFaction == true and not Config.faction(profile.faction)
 end
 
-local function teleport(player: Player, locationId: any, spot: any)
+-- [вики «Нужна банда»; клиент location.list.non_access.ghetto «Необходимо находиться в банде и открыть локацию
+-- Гетто»] the refusal key, nil = allowed
+local function gangRefusal(location: Config.Location, profile: any): string?
+	if location.requiresGang ~= true then
+		return nil
+	end
+	if not GangService.gangOf(profile) then
+		return "gang_location_need_gang"
+	end
+	local upgrade = location.requiresGangUpgrade
+	if typeof(upgrade) == "string" and GangService.level(profile, upgrade) < 1 then
+		return "gang_location_need_" .. upgrade
+	end
+	return nil
+end
+
+local function teleport(player: Player, locationId: any, spot: any, arrival: BasePart?)
 	if
 		typeof(locationId) ~= "string"
 		or (spot ~= nil and (typeof(spot) ~= "string" or not SPOTS[spot]))
@@ -147,17 +166,31 @@ local function teleport(player: Player, locationId: any, spot: any)
 		toast(player, "faction_required")
 		return
 	end
-	local spawn: BasePart? = nil
+	local gangRefused = gangRefusal(location, profile)
+	if gangRefused then
+		toast(player, gangRefused)
+		return
+	end
+	-- the server may name the arrival (База банды: the gang's house, GangHouseService); spawns with a HouseSpawn
+	-- attribute belong to a house and are only used that way
+	local spawn: BasePart? = if arrival
+			and spot == nil
+			and arrival:GetAttribute("LocationId") == locationId
+		then arrival
+		else nil
 	for _, part in ipairs(CollectionService:GetTagged("LocationSpawn")) do
+		if spawn then
+			break
+		end
 		if
 			part:IsA("BasePart")
 			and part:IsDescendantOf(workspace)
 			and part:GetAttribute("LocationId") == locationId
+			and part:GetAttribute("HouseSpawn") == nil
 			and matchesSpot(part, spot)
 			and matchesFaction(part, profile.faction)
 		then
 			spawn = part
-			break
 		end
 	end
 	if not spawn then
@@ -235,6 +268,7 @@ local function updateChannels()
 				or (not withinCurrent and profile.level < location.unlockLevel)
 				or (not withinCurrent and location.requiresPass and not profile.passes[channel.locationId])
 				or factionMissing(location, profile)
+				or gangRefusal(location, profile) ~= nil
 				or not matchesFaction(channel.spawn, profile.faction)
 				or not channel.spawn:IsDescendantOf(workspace)
 				or not CollectionService:HasTag(channel.spawn, "LocationSpawn")
@@ -253,6 +287,71 @@ local function updateChannels()
 			end)
 			Remotes.event("TeleportChannel"):FireClient(player, nil)
 		end
+	end
+end
+
+-- a player standing on a gang location without the right to be there any more goes back to the prison spawn
+local function evictStrangers()
+	for _, player in ipairs(Players:GetPlayers()) do
+		local profile = ProfileService.Get(player)
+		local location = profile and Config.location(profile.location)
+		if not profile or not location or not gangRefusal(location, profile) then
+			continue
+		end
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local home: BasePart? = nil
+		for _, part in ipairs(CollectionService:GetTagged("LocationSpawn")) do
+			if
+				part:IsA("BasePart")
+				and part:IsDescendantOf(workspace)
+				and part:GetAttribute("LocationId") == "prison"
+				and matchesSpot(part, nil)
+			then
+				home = part
+				break
+			end
+		end
+		if
+			not character
+			or not humanoid
+			or humanoid.Health <= 0
+			or not root
+			or not root:IsA("BasePart")
+			or not home
+		then
+			continue
+		end
+		-- not actually there (a rejoin keeps p.location but spawns at the prison): only the record is fixed
+		local there = false
+		for _, part in ipairs(CollectionService:GetTagged("LocationSpawn")) do
+			if
+				part:IsA("BasePart")
+				and part:GetAttribute("LocationId") == location.id
+				and (part.Position - root.Position).Magnitude < 900
+			then
+				there = true
+				break
+			end
+		end
+		if not there then
+			ProfileService.Mutate(player, function(p)
+				p.location = "prison"
+			end)
+			continue
+		end
+		clearChannel(player)
+		streamAround(player, home.Position)
+		if player.Character ~= character then
+			continue
+		end
+		character:PivotTo(home.CFrame + Vector3.new(0, 4, 0))
+		root.AssemblyLinearVelocity = Vector3.zero
+		ProfileService.Mutate(player, function(p)
+			p.location = "prison"
+		end)
+		toast(player, "gang_location_evicted")
 	end
 end
 
@@ -284,6 +383,12 @@ local function bindPrompt(part: Instance)
 	prompts[part] = { prompt = prompt, connection = connection }
 end
 
+-- a trip started by the server for the player (the Шнырь → Гетто; «Домой» → the gang's house = arrival): the same
+-- checks and channel as the locations menu
+function LocationService.Request(player: Player, locationId: string, arrival: BasePart?)
+	teleport(player, locationId, nil, arrival)
+end
+
 function LocationService.Start()
 	if started then
 		return
@@ -301,8 +406,20 @@ function LocationService.Start()
 	for _, part in ipairs(CollectionService:GetTagged("Teleporter")) do
 		bindPrompt(part)
 	end
-	Remotes.event("Teleport").OnServerEvent:Connect(teleport)
+	Remotes.event("Teleport").OnServerEvent
+		:Connect(function(player: Player, locationId: any, spot: any)
+			teleport(player, locationId, spot) -- a client never names the arrival part
+		end)
 	RunService.Heartbeat:Connect(updateChannels)
+	task.spawn(function()
+		while true do
+			task.wait(3) -- [решение] a lost gang is noticed within a few seconds
+			local ok, err = pcall(evictStrangers)
+			if not ok then
+				warn("[LocationService] evict: " .. tostring(err))
+			end
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(player)
 		lastTeleport[player] = nil
 		clearChannel(player)

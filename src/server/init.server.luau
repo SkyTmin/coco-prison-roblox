@@ -64,6 +64,11 @@ for _, name in ipairs({
 	"GangAction",
 	"GangState",
 	"GangInvites",
+	"GangChestPage",
+	"GangHome",
+	"GangNpc",
+	"GhettoBuy",
+	"TreasureReset",
 }) do
 	Remotes.event(name)
 end
@@ -122,6 +127,7 @@ require(script.Services.DonateService).Start() -- the donate shop: crystals for 
 AchievementService.Start()
 GlobalBoosterService.Start()
 require(script.Services.GangService).Start() -- gangs: shared documents, invites, quests, treasury, upgrades
+require(script.Services.GangChestService).Start() -- the gang storage on the База банды (one server at a time)
 AuctionService.Start()
 BoosterService.Start()
 CaseService.Start()
@@ -131,6 +137,9 @@ CombatService.Start()
 require(script.Services.BookService).Start() -- ancient books: applying from the hand, the 32 effects
 BowService.Start()
 LocationService.Start()
+require(script.Services.GangHouseService).Start() -- База банды: a house of its own for every gang (copies of a template)
+require(script.Services.GangBaseService).Start() -- База банды: Библиотекарь, Кузнец, Шнырь
+require(script.Services.GhettoService).Start() -- Гетто: Торговец, Чёрный рынок, Сундук с сокровищами
 TrainerService.Start()
 require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
 require(script.Services.PotionService).Start() -- the potion stand: brewing, drinking, splash potions

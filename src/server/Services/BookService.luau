@@ -206,8 +206,12 @@ local function mayHurt(attacker: Player, model: Model): boolean
 		return false
 	end
 	local a, b = Config.location(mine.location), Config.location(theirs.location)
-	local sameFaction = mine.faction ~= nil and theirs.faction == mine.faction
+	local sameFaction = mine.faction ~= nil
+			and theirs.faction == mine.faction
+			and not (a ~= nil and a.friendlyFire and b ~= nil and b.friendlyFire) -- the Гетто [сеть TG/10]
 		or GangService.allies(attacker, victim) -- one gang with its PvP off
+		or model:GetAttribute("NoPvp") == true -- inside a gang house (GangHouseService)
+		or (attacker.Character ~= nil and attacker.Character:GetAttribute("NoPvp") == true)
 	return a ~= nil and a.pvp == true and b ~= nil and b.pvp == true and not sameFaction
 end
 

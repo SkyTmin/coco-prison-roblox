@@ -291,6 +291,8 @@ end
 
 -- ── the local copy and what members see ────────────────────────────────────────────────────────────────────────
 
+local MIRRORED_UPGRADES = { "ghetto", "library", "forge", "chests" }
+
 local function viewOf(doc: Gang, player: Player): any
 	local view: any = deepCopy(doc)
 	view.ops = nil
@@ -303,6 +305,13 @@ local function mirror(player: Player, doc: Gang?)
 	player:SetAttribute("GangId", if doc then doc.id else nil)
 	player:SetAttribute("GangTag", if doc then doc.tag else nil)
 	player:SetAttribute("GangColor", if doc then doc.color else nil)
+	-- the upgrades the base / ghetto stages show on the client (location cards, NPC windows): GangUp_<id> = level
+	for _, upgradeId in ipairs(MIRRORED_UPGRADES) do
+		player:SetAttribute(
+			"GangUp_" .. upgradeId,
+			if doc then Gangs.level(doc, upgradeId) else nil
+		)
+	end
 end
 
 local function sendState(player: Player)
@@ -480,6 +489,23 @@ function GangService.allies(a: Player, b: Player): boolean
 	end
 	local doc = GangService.gangOf(pa)
 	return doc ~= nil and doc.pvp ~= true
+end
+
+-- gang points from outside the quests (the Библиотекарь on the base, §1.5): one UpdateAsync; the caller has already
+-- taken what was paid (the book), so a failed write loses the points, never doubles anything. Returns success.
+function GangService.addPoints(player: Player, amount: number): boolean
+	local id = gangIdOf(ProfileService.Get(player))
+	if not id or amount <= 0 or amount ~= amount or amount >= math.huge then
+		return false
+	end
+	local err = edit(id, function(gang)
+		if not gang.members[tostring(player.UserId)] then
+			return "gang_err_no_gang"
+		end
+		gang.points += math.floor(amount)
+		return nil
+	end)
+	return err == nil
 end
 
 -- quest progress of a member: dig (blocks), mobs (kills), boss (damage), sell ($), pvp (kills) — written by the flush

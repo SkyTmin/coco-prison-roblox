@@ -314,6 +314,18 @@ function GangWindow.build(
 				end
 			end)
 		end
+		-- «Домой» = /gang home [дизайн §1.5]: the trip to the gang's own house on the База банды (GangHouseService)
+		local home = Ui.button(
+			page,
+			T("gang_home"),
+			UDim2.fromOffset(190, 34),
+			UDim2.new(1, -194, 0, pageH - 80),
+			Ui.colors.buttonBlue
+		)
+		home.TextSize = 15
+		home.Activated:Connect(function()
+			Remotes.event("GangHome"):FireServer()
+		end)
 		if myRole() ~= "leader" then
 			confirmButton(
 				page,

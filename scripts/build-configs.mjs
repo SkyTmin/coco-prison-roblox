@@ -89,6 +89,9 @@ for (const loc of pricesWiki.locations) {
 		requiresPass: loc.requiresPass ?? false,
 		pvp: dec.pvp ?? (loc.level >= decisions.pvpFromLevel && loc.id !== "fraction_base"),
 		requiresFaction: dec.requiresFaction ?? false,
+		requiresGang: dec.requiresGang ?? false,
+		requiresGangUpgrade: dec.requiresGangUpgrade ?? null,
+		friendlyFire: dec.friendlyFire ?? false,
 		miniMine: dec.miniMine ?? null,
 		mine: {
 			size: dec.size ?? def.size,
@@ -99,6 +102,29 @@ for (const loc of pricesWiki.locations) {
 		mines: Object.fromEntries(Object.entries(decisions.mines).filter(([k, v]) => k.startsWith(loc.id + "_") && v.shares).map(([k, v]) => [k, { shares: v.shares, ...(v.resetSeconds ? { resetSeconds: v.resetSeconds } : {}), source: v._source || "[решение]" }])), // per-mine overrides (e.g. prison_small)
 		sellList: loc.blocks.map((b) => b.id),
 		sharesSource: wikiShares ? "[меню]" : "[решение]",
+	});
+}
+// Social locations with no price list (База банды, Гетто [вики LOCATIONS-MENU]): declared only in
+// design-decisions.mines.<id> with kind + name + level, no mine of their own.
+for (const [id, dec] of Object.entries(decisions.mines)) {
+	if (id.startsWith("_") || !dec.kind || typeof dec.level !== "number" || !dec.name || locations.some((l) => l.id === id)) continue;
+	const def = decisions.mines._default;
+	locations.push({
+		id,
+		kind: dec.kind,
+		name: dec.name,
+		unlockLevel: dec.level,
+		requiresPass: false,
+		pvp: dec.pvp ?? false,
+		requiresFaction: dec.requiresFaction ?? false,
+		requiresGang: dec.requiresGang ?? false,
+		requiresGangUpgrade: dec.requiresGangUpgrade ?? null,
+		friendlyFire: dec.friendlyFire ?? false,
+		miniMine: null,
+		mine: { size: def.size, resetSeconds: def.resetSeconds, warnSeconds: def.warnSeconds, shares: {} },
+		mines: {},
+		sellList: [],
+		sharesSource: "[решение]",
 	});
 }
 // Item-only entries (drops that are not blocks, e.g. melon slices): name/price from design decisions.
@@ -267,6 +293,7 @@ const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tier
 }));
 write("artifacts.json", { source: "[меню, клиент]; шанс за блок [владелец], из кейса [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
+write("ghetto.json", { source: "[вики, клиент] Гетто; числа — [решение] (docs/research/remaining-features-design.md, этап 1в)", ...decisions.ghetto });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
 const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;
 const blockArmor = blockArmorIds?.faces;

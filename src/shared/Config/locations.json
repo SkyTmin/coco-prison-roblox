@@ -9,6 +9,9 @@
       "requiresPass": false,
       "pvp": false,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -51,6 +54,9 @@
       "requiresPass": false,
       "pvp": false,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -86,6 +92,9 @@
       "requiresPass": false,
       "pvp": false,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -117,6 +126,9 @@
       "requiresPass": false,
       "pvp": false,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -150,6 +162,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -179,6 +194,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -208,6 +226,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -238,6 +259,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -267,6 +291,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -296,6 +323,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -325,6 +355,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -354,6 +387,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -385,6 +421,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -413,6 +452,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -440,6 +482,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -469,6 +514,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -500,6 +548,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -527,6 +578,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -556,6 +610,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -583,6 +640,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -610,6 +670,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -637,6 +700,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -664,6 +730,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -691,6 +760,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -718,6 +790,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -745,6 +820,9 @@
       "requiresPass": true,
       "pvp": true,
       "requiresFaction": false,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": null,
       "mine": {
         "size": [
@@ -791,6 +869,9 @@
       "requiresPass": false,
       "pvp": true,
       "requiresFaction": true,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
       "miniMine": {
         "size": [
           12,
@@ -822,6 +903,58 @@
         "iron_ore"
       ],
       "sharesSource": "[меню]"
+    },
+    {
+      "id": "gang_base",
+      "kind": "social",
+      "name": "База банды",
+      "unlockLevel": 5,
+      "requiresPass": false,
+      "pvp": true,
+      "requiresFaction": false,
+      "requiresGang": true,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
+      "miniMine": null,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {}
+      },
+      "mines": {},
+      "sellList": [],
+      "sharesSource": "[решение]"
+    },
+    {
+      "id": "ghetto",
+      "kind": "social",
+      "name": "Гетто",
+      "unlockLevel": 5,
+      "requiresPass": false,
+      "pvp": true,
+      "requiresFaction": false,
+      "requiresGang": true,
+      "requiresGangUpgrade": "ghetto",
+      "friendlyFire": true,
+      "miniMine": null,
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 15,
+        "shares": {}
+      },
+      "mines": {},
+      "sellList": [],
+      "sharesSource": "[решение]"
     }
   ]
 }

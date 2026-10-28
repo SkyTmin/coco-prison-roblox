@@ -157,7 +157,10 @@ local function step()
 			drop(part)
 			continue
 		end
+		-- an item of another gang on the База банды is not shown (ItemDropService: attribute GangId)
+		local gang = part:GetAttribute("GangId")
 		local far = (part.Position - eye).Magnitude > SHOW_DISTANCE
+			or (gang ~= nil and gang ~= Players.LocalPlayer:GetAttribute("GangId"))
 		for _, copy in ipairs(entry.copies) do
 			if far then
 				if copy.container.Parent then

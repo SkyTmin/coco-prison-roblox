@@ -262,10 +262,15 @@ function CombatService.HitModel(
 		local other = theirs and Config.location(theirs.location)
 		-- players of one faction do not fight [сеть, патч 2022; клиент: удар без урона]
 		-- and members of one gang with its PvP setting off [клиент gang.settings.pvp]
+		-- (the Гетто allows hits inside a faction: friendlyFire [сеть TG/10])
 		local sameFaction = theirs ~= nil
 				and profile.faction ~= nil
 				and theirs.faction == profile.faction
+				and not (mine and mine.friendlyFire and other and other.friendlyFire)
 			or GangService.allies(player, victim)
+			-- inside a gang house nobody fights (GangHouseService sets NoPvp on the characters there)
+			or model:GetAttribute("NoPvp") == true
+			or (player.Character ~= nil and player.Character:GetAttribute("NoPvp") == true)
 		if mine and mine.pvp and other and other.pvp and not sameFaction then
 			local before = target.Health
 			CombatService.ApplyDamage(target, damage, "player", player)

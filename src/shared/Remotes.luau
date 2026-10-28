@@ -38,6 +38,13 @@
 --                         "transfer" userId | "disband" | "deposit" / "withdraw" dollars | "upgrade" upgradeId |
 --                         "settings" {pvp?, color?, icon?, desc?}; server → client GangState(view | false) — the gang
 --                         document without op ids + `you` (role) + `now`; GangInvites({ {gang, name, tag, from, expires} })
+-- Client → server:        GangChestPage(page) — turn the page of the open gang storage (CaseService; caseId "gangChest",
+--                         player attributes GangChestPage / GangChestPages); GangNpc(op, a, b) — База банды NPCs
+--                         (GangBaseService): "library" slot (hand a book in) | "forge" slotA slotB (merge two books)
+-- Client → server:        GhettoBuy(kind, id, count?) — "trader" (keys / stars for $, 1..64) | "black" (one piece of the
+--                         black market; stock in ReplicatedStorage.BlackMarket attributes) (GhettoService)
+-- Client → server:        GangHome() — «Домой» in the «Банда» window: to the gang's own house (GangHouseService)
+-- Server → client:        TreasureReset() — damage broke the treasure chest capture: the client lets the prompt go
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

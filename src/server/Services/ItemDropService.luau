@@ -8,6 +8,9 @@
 -- to them (ItemPickupFx). Tools and armor cannot be thrown [владелец 21.10]. Every rules.drops.clearEverySeconds the
 -- server removes all of them with a warning first (ClearLag on Minecraft servers), and never keeps more than
 -- rules.drops.maxOnServer at once — with many players the ground must not fill with parts.
+-- On the База банды (gang_base: the courtyard and the house copies) an item dropped by / from a gang member is seen and
+-- picked up only by his gang [сеть TG/15 13.12.2025: «Предметы на Базе банды теперь отображаются и поднимаются только
+-- членами банды»]: the drop carries the attribute GangId, pickUp skips non-members, GroundItems hides it from them.
 -- Client → server: DropItem(slot, count?) — count nil = the whole stack.
 
 local CollectionService = game:GetService("CollectionService")
@@ -33,7 +36,7 @@ local REACH_UP = rules.pickupReachBlocks.vertical * BLOCK
 local MERGE = rules.mergeBlocks * BLOCK
 local STACK = 64
 local FX_RANGE = 64
-type Drop = { part: BasePart, stack: Types.ItemStack, pickupAt: number }
+type Drop = { part: BasePart, stack: Types.ItemStack, pickupAt: number, gang: string? }
 local random = Random.new()
 local order: { BasePart } = {} -- oldest first, for the server-wide cap
 local drops: { [BasePart]: Drop } = {}
@@ -71,12 +74,25 @@ local function remove(drop: BasePart)
 	drop:Destroy()
 end
 
+-- the gang an item from `from` belongs to: only on the База банды and only when he is in a gang
+local function gangOf(from: Player?): string?
+	local profile = from and ProfileService.Get(from)
+	local gang = from and from:GetAttribute("GangId")
+	return if profile
+			and profile.location == "gang_base"
+			and typeof(gang) == "string"
+		then gang
+		else nil
+end
+
 function ItemDropService.Spawn(
 	stack: Types.ItemStack,
 	position: Vector3,
 	velocity: Vector3,
-	pickupDelay: number
+	pickupDelay: number,
+	from: Player?
 )
+	local gang = gangOf(from)
 	local drop = Instance.new("Part")
 	drop.Name = "ItemDrop"
 	drop.Size = Vector3.one * ITEM
@@ -92,6 +108,7 @@ function ItemDropService.Spawn(
 	drop:SetAttribute("ItemId", stack.id)
 	drop:SetAttribute("Level", stack.level or 0)
 	drop:SetAttribute("Count", stack.count)
+	drop:SetAttribute("GangId", gang)
 	CollectionService:AddTag(drop, "ItemDrop")
 	-- [ваниль] an item falls at 0.04 block/tick² = 16 blocks/s², a third of Roblox's gravity: a force lifts the rest
 	-- off, so a throw flies as far as in Minecraft
@@ -107,7 +124,12 @@ function ItemDropService.Spawn(
 	-- server ownership: a nearby client cannot move a drop to claim it remotely
 	drop:SetNetworkOwner(nil)
 	drop.AssemblyLinearVelocity = velocity
-	drops[drop] = { part = drop, stack = table.clone(stack), pickupAt = os.clock() + pickupDelay }
+	drops[drop] = {
+		part = drop,
+		stack = table.clone(stack),
+		pickupAt = os.clock() + pickupDelay,
+		gang = gang,
+	}
 	table.insert(order, drop)
 	while #order > rules.maxOnServer do
 		remove(order[1])
@@ -115,12 +137,18 @@ function ItemDropService.Spawn(
 end
 
 -- loot scatters around the body; a player's loot waits 40 ticks, a mob's 10 [ваниль]
-function ItemDropService.SpawnLoot(stack: Types.ItemStack, position: Vector3, fromMob: boolean?)
+function ItemDropService.SpawnLoot(
+	stack: Types.ItemStack,
+	position: Vector3,
+	fromMob: boolean?,
+	from: Player?
+)
 	ItemDropService.Spawn(
 		stack,
 		position + Vector3.new(random:NextNumber(-1, 1), 1.5, random:NextNumber(-1, 1)),
 		Vector3.new(random:NextNumber(-3, 3), 8, random:NextNumber(-3, 3)),
-		if fromMob then rules.lootPickupDelaySeconds.mob else rules.lootPickupDelaySeconds.death
+		if fromMob then rules.lootPickupDelaySeconds.mob else rules.lootPickupDelaySeconds.death,
+		from
 	)
 end
 
@@ -168,6 +196,7 @@ local function pickUp()
 			local at = part.Position
 			if
 				now < drop.pickupAt
+				or (drop.gang ~= nil and player:GetAttribute("GangId") ~= drop.gang)
 				or math.abs(at.X - root.Position.X) > REACH_SIDE
 				or math.abs(at.Z - root.Position.Z) > REACH_SIDE
 				or at.Y + ITEM / 2 < feet - REACH_UP
@@ -227,6 +256,7 @@ local function merge()
 							other ~= drop
 							and drops[other.part]
 							and other.stack.id == drop.stack.id
+							and other.gang == drop.gang
 							and (other.stack.level or 0) == (drop.stack.level or 0)
 							and drop.stack.count + other.stack.count <= STACK
 							and (other.part.Position - part.Position).Magnitude <= MERGE
@@ -305,7 +335,8 @@ local function onDropItem(player: Player, slot: any, count: any)
 			thrown,
 			head.Position - Vector3.new(0, 0.3 * BLOCK, 0),
 			look * (0.3 * 20 * BLOCK) + Vector3.new(0, 0.1 * 20 * BLOCK, 0),
-			rules.pickupDelaySeconds
+			rules.pickupDelaySeconds,
+			player
 		)
 	end
 end

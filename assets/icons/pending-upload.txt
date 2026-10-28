@@ -5,3 +5,9 @@ gang_treasury
 gang_upgrades
 gang_quests
 gang_members
+menu_black_market
+ghetto_treasure
+menu_librarian
+menu_forge
+menu_gang_home
+menu_ghetto

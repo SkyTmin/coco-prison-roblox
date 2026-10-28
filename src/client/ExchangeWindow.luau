@@ -2,9 +2,13 @@
 -- Star / shard exchanger windows of the original (NPC-MENU-RECOVERY npc-03 / npc-09): a dark card per
 -- offer with blue "−" / "+" quantity buttons around the item icon, "Стоимость » <icon>10" and a blue
 -- "Обменять" button; under the cards an "Инвентарь" panel with the 9×4 inventory grid.
+-- The same window sells for $ in the Гетто (GhettoService, Shared/Ghetto): "trader" — the Торговец (keys, stars;
+-- −/+ 1..64), "black" — the Чёрный рынок (one piece, «В наличии: N шт.» from ReplicatedStorage.BlackMarket, the
+-- price of the buyer's level, «Обновление через …»).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Ghetto = require(Shared.Ghetto)
 local Strings = require(Shared.Strings)
 local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
@@ -37,13 +41,33 @@ function ExchangeWindow.build(
 	onClose: () -> (),
 	createWindow: CreateWindow
 ): (Frame, (Types.Profile?) -> ())
-	local offers = if kind == "stars"
+	local forMoney = kind == "trader" or kind == "black"
+	local isBlack = kind == "black"
+	local offers: { [string]: any } = if kind == "stars"
 		then Config.market.starExchange
-		else Config.market.shardExchange
+		elseif kind == "shards" then Config.market.shardExchange
+		else {}
+	if kind == "trader" then
+		for _, offer in ipairs(Ghetto.traderOffers()) do
+			offers[offer.id] = offer.price
+		end
+	elseif isBlack then
+		for _, item in ipairs(Ghetto.blackItems()) do
+			offers[item.id] = item
+		end
+	end
 	-- card order of the original screens [меню]: ancient key, improved key, dispeller / blade, stone
 	local ORDER = {
 		stars = { "ancient_key", "improved_ancient_key", "dispeller" },
 		shards = { "moon_blade", "volcanic_stone" },
+		trader = Ghetto.TRADER_ORDER,
+		black = (function()
+			local order = {}
+			for _, item in ipairs(Ghetto.blackItems()) do
+				table.insert(order, item.id)
+			end
+			return order
+		end)(),
 	}
 	local ids: { string } = {}
 	for _, id in ipairs(ORDER[kind] or {}) do
@@ -52,18 +76,21 @@ function ExchangeWindow.build(
 		end
 	end
 	for id in pairs(offers) do
-		if not table.find(ids, id) then
+		if not table.find(ids, id) and string.sub(id, 1, 1) ~= "_" then
 			table.insert(ids, id)
 		end
 	end
 	-- the cards and the inventory share one width [владелец 28.10: «инвентарь меньше, чем сверху»]: the inventory
 	-- slots grow to fill it, a short row of cards stretches to the inventory
-	local rowWidth = math.max(#ids * (CARD_W + GAP) - GAP, 9 * (SLOT + 4) + 12)
-	local cardW = math.floor((rowWidth - (#ids - 1) * GAP) / math.max(#ids, 1))
+	-- more than 3 offers (the black market's 6) wrap into rows of 3
+	local perRow = math.max(1, math.min(#ids, 3))
+	local rows = math.max(1, math.ceil(#ids / perRow))
+	local rowWidth = math.max(perRow * (CARD_W + GAP) - GAP, 9 * (SLOT + 4) + 12)
+	local cardW = math.floor((rowWidth - (perRow - 1) * GAP) / perRow)
 	local slot = math.clamp(math.floor((rowWidth - 16 - 8 * 4) / 9), SLOT, 60)
 	local gridLeft = math.floor((rowWidth - (9 * slot + 8 * 4)) / 2)
 	local width = rowWidth + 20
-	local invY = CARD_H + 14
+	local invY = rows * (CARD_H + GAP) + 4
 	local invHeight = 4 * (slot + 4) + 46
 	local win, content = createWindow(
 		parent,
@@ -75,13 +102,22 @@ function ExchangeWindow.build(
 	local updates: { (Types.Profile?) -> () } = {}
 	for index, id in ipairs(ids) do
 		local offer = offers[id]
-		local input = if kind == "stars" then "ancient_star" else offer.input
-		local cost: number = if kind == "stars" then offer else offer.count
+		local input = if kind == "stars"
+			then "ancient_star"
+			elseif forMoney then "money_bag"
+			else offer.input
+		local cost: number = if kind == "stars" or kind == "trader"
+			then offer
+			elseif isBlack then offer.price
+			else offer.count
 		local quantity = 1
 		local card = Ui.panel(
 			content,
 			UDim2.fromOffset(cardW, CARD_H),
-			UDim2.fromOffset((index - 1) * (cardW + GAP) + 4, 4)
+			UDim2.fromOffset(
+				((index - 1) % perRow) * (cardW + GAP) + 4,
+				((index - 1) // perRow) * (CARD_H + GAP) + 4
+			)
 		)
 		local minus = Ui.button(card, "−", UDim2.fromOffset(36, 36), UDim2.fromOffset(14, 14))
 		local plus = Ui.button(card, "+", UDim2.fromOffset(36, 36), UDim2.new(1, -50, 0, 14))
@@ -120,24 +156,33 @@ function ExchangeWindow.build(
 		costIcon.Parent = card
 		local costValue =
 			Ui.label(card, "", UDim2.fromOffset(40, 24), UDim2.new(1, -32, 0, 108), 14)
+		minus.Visible = not isBlack -- the black market sells one piece at a time
+		plus.Visible = not isBlack
 		local button = Ui.button(
 			card,
-			Strings.t("exchange", locale),
+			Strings.t(if forMoney then "buy" else "exchange", locale),
 			UDim2.new(1, -24, 0, 38),
 			UDim2.new(0, 12, 1, -50)
 		)
 		local function update(p: Types.Profile?)
-			local have = itemCount(p, input)
-			local need = cost * quantity
-			qty.Text = string.format("×%d", quantity)
+			local have = if forMoney
+				then (if p then p.coins / Config.moneyScale else 0)
+				else itemCount(p, input)
+			local price = if isBlack and p then Ghetto.blackPrice(offer, p.level) else cost
+			local need = price * quantity
+			qty.Text = if isBlack
+				then Strings.t("black_market_stock", locale, Ghetto.stock(id))
+				else string.format("×%d", quantity)
 			costLabel.Text = string.format(
 				'%s <font color="%s">»</font>',
 				Strings.t("cost", locale),
 				Ui.hex(Ui.colors.muted)
 			)
-			costValue.Text = tostring(need)
+			costValue.Text = if forMoney
+				then Strings.money(math.floor(need * Config.moneyScale + 0.5))
+				else tostring(need)
 			costValue.TextColor3 = if have >= need then Ui.colors.text else Ui.colors.red
-			local ok = p ~= nil and have >= need
+			local ok = p ~= nil and have >= need and (not isBlack or Ghetto.stock(id) > 0)
 			button.BackgroundColor3 = if ok then Ui.colors.buttonBlue else Ui.colors.buttonGrey
 			button.Interactable = ok
 		end
@@ -150,7 +195,12 @@ function ExchangeWindow.build(
 			update(profile)
 		end)
 		button.Activated:Connect(function()
-			Remotes.event("Exchange"):FireServer(kind, id, quantity)
+			if forMoney then
+				Remotes.event("GhettoBuy")
+					:FireServer(if isBlack then "black" else "trader", id, quantity)
+			else
+				Remotes.event("Exchange"):FireServer(kind, id, quantity)
+			end
 		end)
 		table.insert(updates, update)
 	end
@@ -197,6 +247,38 @@ function ExchangeWindow.build(
 		end
 	end
 	refresh(profile)
+	if isBlack then
+		-- the stock changes as anyone on the server buys; the restock time ticks in the caption
+		local restockLabel = Ui.label(
+			content,
+			"",
+			UDim2.fromOffset(rowWidth, 18),
+			UDim2.fromOffset(6, invY + invHeight + 6),
+			13,
+			Ui.colors.muted
+		)
+		local folder = ReplicatedStorage:FindFirstChild(Ghetto.STOCK_FOLDER)
+		if folder then
+			local connection = folder.AttributeChanged:Connect(function()
+				refresh(profile)
+			end)
+			win.Destroying:Connect(function()
+				connection:Disconnect()
+			end)
+		end
+		task.spawn(function()
+			while win.Parent do
+				local left =
+					math.max(0, math.floor(Ghetto.restockAt() - workspace:GetServerTimeNow()))
+				restockLabel.Text = Strings.t(
+					"black_market_restock",
+					locale,
+					string.format("%d:%02d", left // 60, left % 60)
+				)
+				task.wait(1)
+			end
+		end)
+	end
 	return win, refresh
 end
 

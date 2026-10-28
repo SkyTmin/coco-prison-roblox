@@ -111,7 +111,7 @@ local function died(player: Player, character: Model)
 		end
 	end)
 	for _, stack in ipairs(drops) do
-		ItemDropService.SpawnLoot(stack, position)
+		ItemDropService.SpawnLoot(stack, position, false, player) -- on the База банды: his gang's only
 	end
 end
 

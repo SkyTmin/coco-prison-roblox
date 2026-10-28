@@ -1237,6 +1237,8 @@ local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	underworld = true,
 	pyramid = true,
 	basement = true,
+	gang_base = true,
+	ghetto = true,
 }
 
 local function locationCategory(location: Config.Location): string
@@ -1256,6 +1258,7 @@ local function locationAvailable(location: Config.Location): boolean
 		and p.level >= location.unlockLevel
 		and (not location.requiresPass or p.passes[location.id] == true)
 		and (not location.requiresFaction or Config.faction(p.faction) ~= nil)
+		and require(script.GangNpcWindow).locationRefusal(location) == nil -- База банды / Гетто
 end
 
 -- [владелец 22.10] a red «PVP» plate in the corner of the preview of every PvP location
@@ -1479,6 +1482,9 @@ local function buildLocations(): Frame
 				refusal.Text = T("level_too_low", selected.unlockLevel)
 			elseif selected.requiresFaction and not Config.faction(profile.faction) then
 				refusal.Text = T("faction_required") -- [клиент] «Необходимо находиться во фракции»
+			elseif require(script.GangNpcWindow).locationRefusal(selected) then
+				-- [клиент location.list.non_access.ghetto]
+				refusal.Text = T(require(script.GangNpcWindow).locationRefusal(selected) :: string)
 			elseif not available then
 				refusal.Text = T("location_pass_required")
 			end
@@ -1965,7 +1971,46 @@ local windowBuilders: { [string]: () -> Frame } = {
 		refreshMenu = refresh
 		return win
 	end,
+	-- База банды: Библиотекарь / Кузнец (GangNpcWindow, GangBaseService)
+	gangLibrary = function()
+		local win, refresh = require(script.GangNpcWindow).build(
+			gui,
+			"library",
+			profile,
+			locale,
+			closeWindow,
+			createWindow
+		)
+		refreshMenu = refresh
+		return win
+	end,
+	gangForge = function()
+		local win, refresh = require(script.GangNpcWindow).build(
+			gui,
+			"forge",
+			profile,
+			locale,
+			closeWindow,
+			createWindow
+		)
+		refreshMenu = refresh
+		return win
+	end,
+	-- Гетто: Торговец and Чёрный рынок in the exchanger window (GhettoService)
+	ghettoTrader = function()
+		local win, refresh =
+			ExchangeWindow.build(gui, "trader", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
+	blackMarket = function()
+		local win, refresh =
+			ExchangeWindow.build(gui, "black", profile, locale, closeWindow, createWindow)
+		refreshMenu = refresh
+		return win
+	end,
 }
+require(script.GangNpcWindow).listen() -- the treasure chest capture broken by damage lets the prompt go
 local function open(kind: string)
 	local builder = windowBuilders[kind]
 	if not builder then

@@ -36,6 +36,7 @@ Config.auction = load("auction")
 Config.artifacts = load("artifacts")
 Config.market = load("market")
 Config.gangs = load("gangs") -- gangs (Shared/Gangs, GangService)
+Config.ghetto = load("ghetto") -- the Ghetto: trader, black market, treasure chest (GhettoService)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number
@@ -84,6 +85,9 @@ export type Location = {
 	requiresPass: boolean,
 	pvp: boolean,
 	requiresFaction: boolean?, -- База фракций: only for faction members [клиент]
+	requiresGang: boolean?, -- База банды / Гетто: only for gang members [вики «Нужна банда»]
+	requiresGangUpgrade: string?, -- Гетто: the gang upgrade that opens it [клиент location.list.non_access.ghetto]
+	friendlyFire: boolean?, -- Гетто: players of one faction may hit each other [сеть TG/10]
 	miniMine: { size: { number }, resetSeconds: number }?, -- the faction base's small mines
 	mine: {
 		size: { number },

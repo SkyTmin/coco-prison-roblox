@@ -3,6 +3,9 @@
 -- сделать как наш инвентарь», the grey vanilla panel's button texts ran out of the buttons]: the case's 9×3 grid,
 -- the backpack 9×3 and the hotbar in Ui.invSlot cells with captions, then the buttons: open with a key, take all,
 -- key choice. Drag/drop and shift/double-tap quick moves come from DragDrop; the server validates every move.
+-- The gang storage (gangChest) has pages of 27: «◀ Стр. x / N ▶» instead of the key buttons (player attributes
+-- GangChestPage / GangChestPages from CaseService, GangChestPage(page) asks for another page).
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -26,6 +29,7 @@ local TITLES = {
 	nicknameCase = "nickname_case",
 	enderChest = "ender_chest",
 	factionChest = "faction_chest", -- the faction storage on the faction base (contents mirrored by the server)
+	gangChest = "gang_chest", -- the gang storage on the База банды (GangChestService)
 }
 
 function ChestWindow.build(
@@ -40,7 +44,8 @@ function ChestWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local isEnder = id == "enderChest"
-	local isStorage = isEnder or id == "factionChest" -- keeps items, no key, no Open button
+	local isGang = id == "gangChest"
+	local isStorage = isEnder or id == "factionChest" or isGang -- keeps items, no key, no Open button
 	local gridWidth = 9 * SLOT + 8 * GAP
 	local caseY = 4
 	local bagY = caseY + 18 + 3 * (SLOT + GAP) + 10
@@ -147,6 +152,43 @@ function ChestWindow.build(
 		Ui.label(content, "", UDim2.fromOffset(gridWidth, 18), UDim2.fromOffset(PAD, rowY + 40), 13)
 	hint.TextColor3 = Ui.colors.muted
 	hint.TextTruncate = Enum.TextTruncate.AtEnd
+	-- the gang storage pages
+	local pageLabel: TextLabel? = nil
+	local prevPage: TextButton?, nextPage: TextButton? = nil, nil
+	local localPlayer = Players.LocalPlayer
+	local function pageInfo(): (number, number)
+		local page = localPlayer:GetAttribute("GangChestPage")
+		local pages = localPlayer:GetAttribute("GangChestPages")
+		return if typeof(page) == "number" then page else 1,
+			if typeof(pages) == "number" then pages else 1
+	end
+	if isGang then
+		local x = PAD + third + 8
+		prevPage = button("◀", x, 44, Ui.colors.buttonGrey)
+		pageLabel = Ui.label(
+			content,
+			"",
+			UDim2.fromOffset(third - 96, 34),
+			UDim2.fromOffset(x + 48, rowY),
+			15
+		)
+		local labelRef = pageLabel :: TextLabel
+		labelRef.TextXAlignment = Enum.TextXAlignment.Center
+		nextPage = button("▶", x + third - 44, 44, Ui.colors.buttonGrey)
+		local function turn(delta: number)
+			local page, pages = pageInfo()
+			local target = math.clamp(page + delta, 1, pages)
+			if target ~= page then
+				Remotes.event("GangChestPage"):FireServer(target)
+			end
+		end
+		(prevPage :: TextButton).Activated:Connect(function()
+			turn(-1)
+		end);
+		(nextPage :: TextButton).Activated:Connect(function()
+			turn(1)
+		end)
+	end
 
 	local function keyCount(key: string?): number
 		local profile = getProfile()
@@ -215,6 +257,18 @@ function ChestWindow.build(
 						else tostring(math.floor(stack.coins / Config.moneyScale))
 				) .. "$"
 			end
+		end
+		if isGang and pageLabel then
+			local page, pages = pageInfo()
+			pageLabel.Text = t("gang_chest_page", page, pages)
+			-- two pages of 27 per level of «Сундуки» (a double chest) [сеть S7]
+			local maxPages = 0
+			for _, u in ipairs(Config.gangs.upgrades) do
+				if u.id == "chests" then
+					maxPages = u.max * math.floor(Config.gangs.base.chest.slotsPerLevel / 27)
+				end
+			end
+			hint.Text = if pages < maxPages then t("gang_chest_more") else ""
 		end
 		if isStorage then
 			return

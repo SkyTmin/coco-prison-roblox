@@ -1,5 +1,8 @@
 --!strict
 -- Personal persistent chests. Opening the UI never spends a key or grants rewards.
+-- Shared storages: the faction chests (FactionStorageService) and the gang storage on the База банды (tag GangChest,
+-- GangChestService: pages of 27 slots, one server at a time; GangChestPage(page) turns the page, the player attributes
+-- GangChestPage / GangChestPages tell the window where it is).
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,6 +17,9 @@ local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local ArtifactService = require(script.Parent.ArtifactService)
 local FactionStorage = require(script.Parent.FactionStorageService)
+local GangChest = require(script.Parent.GangChestService)
+local GangService = require(script.Parent.GangService)
+local GangHouse = require(script.Parent.GangHouseService)
 local Types = require(Shared.Types)
 
 type Reward = {
@@ -37,7 +43,8 @@ type Session = {
 	tokens: number,
 	tokenAt: number,
 	faction: string?, -- factionChest: whose storage and which of the 8 chests
-	index: number?,
+	index: number?, -- factionChest: the chest; gangChest: the page
+	gang: string?, -- gangChest: whose storage
 }
 type Address = { container: "case" | "inv", index: number }
 local CASES: { [string]: { tag: string, text: string } } = {
@@ -46,8 +53,15 @@ local CASES: { [string]: { tag: string, text: string } } = {
 	artifactCase = { tag = "ArtifactCase", text = "artifact_case" },
 	nicknameCase = { tag = "NicknameCase", text = "nickname_case" },
 }
-local TAGS =
-	{ "OrdinaryCase", "AncientCase", "ArtifactCase", "NicknameCase", "EnderChest", "FactionChest" }
+local TAGS = {
+	"OrdinaryCase",
+	"AncientCase",
+	"ArtifactCase",
+	"NicknameCase",
+	"EnderChest",
+	"FactionChest",
+	"GangChest",
+}
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
@@ -60,13 +74,29 @@ local function containerTitle(id: string): string
 	return if id == "enderChest"
 		then "ender_chest"
 		elseif id == "factionChest" then "faction_chest"
+		elseif id == "gangChest" then "gang_chest"
 		else CASES[id].text
 end
 
 -- storage chests keep what is put in and need no key: the personal ender chest and the faction chests
 -- of the faction base (FactionStorageService; the profile only mirrors the open chest for the window)
 local function isStorage(id: string): boolean
-	return id == "enderChest" or id == "factionChest"
+	return id == "enderChest" or id == "factionChest" or id == "gangChest"
+end
+
+local function gangIdOf(profile: Types.Profile?): string?
+	local doc = profile and GangService.gangOf(profile)
+	return if doc then doc.id else nil
+end
+
+-- the live slots behind a shared storage session (nil = none / not open on this server)
+local function sharedSlots(session: Session): { [number]: Types.ItemStack }?
+	if session.id == "factionChest" then
+		return FactionStorage.Chest(session.faction, session.index)
+	elseif session.id == "gangChest" then
+		return GangChest.Page(session.gang, session.index)
+	end
+	return nil
 end
 
 local function deepCopy(slots: { [number]: Types.ItemStack }): { [number]: Types.ItemStack }
@@ -87,6 +117,9 @@ local function caseId(part: Instance): string?
 	end
 	if CollectionService:HasTag(part, "FactionChest") then
 		return "factionChest"
+	end
+	if CollectionService:HasTag(part, "GangChest") then
+		return "gangChest"
 	end
 	local attribute = part:GetAttribute("CaseId")
 	if attribute ~= nil then
@@ -156,6 +189,10 @@ local function validate(player: Player, id: any): Session?
 		or not near(player, session.part)
 		or not profile
 		or (id == "factionChest" and profile.faction ~= session.faction) -- left the faction meanwhile
+		or (
+			id == "gangChest"
+			and (gangIdOf(profile) ~= session.gang or not GangChest.Valid(session.gang))
+		)
 	then
 		close(player)
 		return nil
@@ -246,6 +283,7 @@ local function openChest(player: Player, part: BasePart)
 	end
 	local heldKey: string? = nil
 	local shared: { [number]: Types.ItemStack }? = nil
+	local gang: string? = nil
 	if id == "factionChest" then
 		-- [клиент] «Вы не можете открывать сундуки на чужой базе фракции!»
 		if profile.faction == nil or part:GetAttribute("Faction") ~= profile.faction then
@@ -253,6 +291,29 @@ local function openChest(player: Player, part: BasePart)
 			return
 		end
 		shared = FactionStorage.Chest(profile.faction, part:GetAttribute("ChestIndex"))
+		if not shared then
+			return
+		end
+	elseif id == "gangChest" then
+		-- the gang storage [вики HANDBOOK-WIKI «склад»]: one server at a time (GangChestService)
+		gang = gangIdOf(profile)
+		if not gang then
+			toast(player, "gang_location_need_gang")
+			return
+		end
+		if not GangHouse.allowed(part, player) then
+			toast(player, "gang_plot_foreign") -- the chest in another gang's house
+			return
+		end
+		local ok, refusal = GangChest.Open(gang)
+		if not ok then
+			toast(player, refusal or "gang_chest_unavailable")
+			return
+		end
+		if not near(player, part) or gangIdOf(ProfileService.Get(player)) ~= gang then
+			return -- walked away or left the gang while the storage was loading
+		end
+		shared = GangChest.Page(gang, 1)
 		if not shared then
 			return
 		end
@@ -279,9 +340,14 @@ local function openChest(player: Player, part: BasePart)
 		rolledAt = -math.huge,
 		tokens = 80,
 		tokenAt = os.clock(),
-		faction = if shared then profile.faction else nil,
-		index = if shared then part:GetAttribute("ChestIndex") :: number else nil,
+		faction = if shared and not gang then profile.faction else nil,
+		index = if gang then 1 elseif shared then part:GetAttribute("ChestIndex") :: number else nil,
+		gang = gang,
 	}
+	if gang then
+		player:SetAttribute("GangChestPage", 1)
+		player:SetAttribute("GangChestPages", GangChest.PageCount(GangService.gangOf(profile)))
+	end
 	ProfileService.Mutate(player, function(p)
 		if shared then
 			p.caseContents[id] = deepCopy(shared)
@@ -629,10 +695,8 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 	end
 	session.tokens -= 1
 	local claimedMoney = 0
-	local shared = if session.id == "factionChest"
-		then FactionStorage.Chest(session.faction, session.index)
-		else nil
-	if session.id == "factionChest" and not shared then
+	local shared = sharedSlots(session)
+	if (session.id == "factionChest" or session.id == "gangChest") and not shared then
 		return
 	end
 	ProfileService.Mutate(player, function(p)
@@ -672,24 +736,52 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 	if claimedMoney > 0 then
 		toast(player, "case_money", Strings.money(claimedMoney))
 	end
-	if shared and session.faction then
-		-- the faction chest is shared: every member who has this chest open sees the change
-		FactionStorage.MarkDirty(session.faction)
+	if shared then
+		-- a shared storage: every member who has this chest / page open sees the change
+		if session.id == "gangChest" and session.gang then
+			GangChest.MarkDirty(session.gang)
+		elseif session.faction then
+			FactionStorage.MarkDirty(session.faction)
+		end
 		for viewer, other in pairs(sessions) do
 			if
-				other.id == "factionChest"
+				other.id == session.id
 				and other.faction == session.faction
+				and other.gang == session.gang
 				and other.index == session.index
 			then
 				ProfileService.Mutate(viewer, function(p)
-					p.caseContents.factionChest = deepCopy(shared)
+					p.caseContents[session.id] = deepCopy(shared)
 				end)
-				Remotes.event("CaseUpdated"):FireClient(viewer, "factionChest", true)
+				Remotes.event("CaseUpdated"):FireClient(viewer, session.id, true)
 			end
 		end
 		return
 	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
+end
+
+-- «◀ / ▶» in the gang storage window: show another page of 27 slots
+local function turnPage(player: Player, rawPage: any)
+	local session = validate(player, "gangChest")
+	if not session or typeof(rawPage) ~= "number" or rawPage ~= math.floor(rawPage) then
+		return
+	end
+	local pages = GangChest.PageCount(GangService.gangOf(ProfileService.Get(player)))
+	if rawPage < 1 or rawPage > pages or rawPage == session.index then
+		return
+	end
+	local slots = GangChest.Page(session.gang, rawPage)
+	if not slots then
+		return
+	end
+	session.index = rawPage
+	ProfileService.Mutate(player, function(p)
+		p.caseContents.gangChest = deepCopy(slots)
+	end)
+	player:SetAttribute("GangChestPage", rawPage)
+	player:SetAttribute("GangChestPages", pages)
+	Remotes.event("CaseUpdated"):FireClient(player, "gangChest", true)
 end
 
 local function unbind(part: Instance)
@@ -771,6 +863,16 @@ function CaseService.Start()
 	Remotes.event("CaseUpdated")
 	Remotes.event("CaseOpen").OnServerEvent:Connect(openCase)
 	Remotes.event("CaseMove").OnServerEvent:Connect(move)
+	Remotes.event("GangChestPage").OnServerEvent:Connect(turnPage)
+	GangChest.SetViewerCounter(function(gangId: string): number
+		local n = 0
+		for _, session in pairs(sessions) do
+			if session.id == "gangChest" and session.gang == gangId then
+				n += 1
+			end
+		end
+		return n
+	end)
 	Remotes.event("CaseClose").OnServerEvent:Connect(function(player: Player, id: any)
 		if validate(player, id) then
 			close(player)
@@ -814,7 +916,9 @@ function CaseService.Start()
 		end)
 		CollectionService:GetInstanceRemovedSignal(tag):Connect(function(part)
 			unbind(part)
-			bind(part)
+			if part:IsDescendantOf(game) then -- a destroyed gang house copy is not bound again
+				bind(part)
+			end
 		end)
 		for _, part in ipairs(CollectionService:GetTagged(tag)) do
 			bind(part)
