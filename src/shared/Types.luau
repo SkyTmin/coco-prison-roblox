@@ -76,7 +76,9 @@ export type Profile = {
 		pendingBuys: { [string]: { price: number, op: string, at: number, seller: number? } },
 		returns: { ItemStack }, -- items that did not fit («Забрать»)
 	}?, -- the auction; schema stays v3
-	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths, warzonePoints (points taken on the Дворы)
+	-- rats, zombies, bats, kills, deaths, warzonePoints (points taken on the Дворы), playSeconds (time in the game),
+	-- referrals («Приглашено друзей»: invited friends who reached the friend level)
+	stats: { [string]: number },
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
 	lastSeen: number?, -- os.time() of that spot; older than rules.teleport.rejoinReturnSeconds = back to the spawn
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
@@ -93,6 +95,13 @@ export type Profile = {
 	gangOps: { [string]: { kind: string, gang: string, amount: number?, tag: string?, at: number } }?,
 	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y, shown, size} (HudLayout); schema stays v3
 	settings: Settings?, -- the settings window (SettingsWindow); nil = the defaults; schema stays v3
+	-- «Пригласить друга» (ReferralService): by = the inviter's userId, set once on a brand-new profile that joined
+	-- through an invite; credited = this friend reached Config.referrals.friendLevel and is in the inviter's record
+	referral: { by: number, credited: boolean? }?,
+	-- the inviter's side: seen = friend userIds already counted (each pays once), rewarded = rewards paid (≤ maxRewards)
+	invites: { seen: { [string]: boolean }, rewarded: number }?,
+	-- the «Избранное» card (FavoriteCard): done = added, never shown again; laterUntil = os.time() of the next showing
+	favorite: { done: boolean?, laterUntil: number? }?,
 	location: string,
 	operationIds: { [string]: boolean },
 }

@@ -22,7 +22,14 @@ local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 
 type Profile = Types.Profile
-type Session = { profile: Profile, loadFailed: boolean, dirty: boolean, saving: boolean }
+-- fresh: nothing was stored for this player before this load (a brand-new profile — ReferralService)
+type Session = {
+	profile: Profile,
+	loadFailed: boolean,
+	dirty: boolean,
+	saving: boolean,
+	fresh: boolean?,
+}
 
 local STORE_NAME = "PlayerProfiles_v3"
 local SCHEMA_VERSION = 3
@@ -148,6 +155,20 @@ local function migrate(data: any): Profile
 	end
 	if typeof(profile.gangOps) ~= "table" then
 		profile.gangOps = nil
+	end
+	-- «Пригласить друга» / «Избранное» (ReferralService)
+	if typeof(profile.referral) ~= "table" or typeof((profile.referral :: any).by) ~= "number" then
+		profile.referral = nil
+	end
+	if typeof(profile.invites) ~= "table" then
+		profile.invites = nil
+	else
+		local invites = profile.invites :: any
+		invites.seen = if typeof(invites.seen) == "table" then invites.seen else {}
+		invites.rewarded = if typeof(invites.rewarded) == "number" then invites.rewarded else 0
+	end
+	if typeof(profile.favorite) ~= "table" then
+		profile.favorite = nil
 	end
 	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
 	local rawArtifacts = profile.artifacts
@@ -322,6 +343,8 @@ local function load(player: Player)
 		loadFailed = not ok,
 		dirty = false,
 		saving = false,
+		-- nil, or only the lock acquire wrote (the first session died before its first save): a brand-new player
+		fresh = ok and (typeof(result) ~= "table" or result.schemaVersion == nil),
 	}
 	if not ok then
 		warn(
@@ -455,6 +478,12 @@ end
 function ProfileService.IsReal(player: Player): boolean
 	local session = sessions[player]
 	return session ~= nil and not session.loadFailed
+end
+
+-- true when this session started a brand-new profile (no record existed): the invite reward is for new players only
+function ProfileService.IsNew(player: Player): boolean
+	local session = sessions[player]
+	return session ~= nil and not session.loadFailed and session.fresh == true
 end
 
 function ProfileService.Mutate(player: Player, mutator: (Profile) -> ())

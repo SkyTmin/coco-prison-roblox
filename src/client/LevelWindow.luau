@@ -21,6 +21,7 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
 local Kit = require(script.Parent.WindowKit)
+local Invite = require(script.Parent.Invite)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 type Rank = Ranks.Rank
@@ -360,8 +361,9 @@ function LevelWindow.build(
 
 	-- ---------------------------------------------------------------- the button
 	local button, buttonLabel, buttonBack =
-		Kit.actionButton(content, UDim2.new(1, -8, 0, 48), UDim2.new(0, 4, 1, -52), 20)
+		Kit.actionButton(content, UDim2.new(1, -192, 0, 48), UDim2.new(0, 4, 1, -52), 20)
 	button.Name = "LevelUp"
+	Kit.fit(buttonLabel) -- narrower since the invite button sits next to it
 	local buttonGradient = gradient(buttonBack, Color3.new(), Color3.new(), 90)
 	local glow = stroke(button, Color3.new(1, 1, 1), 0)
 	local pressScale = Instance.new("UIScale")
@@ -577,11 +579,40 @@ function LevelWindow.build(
 		buttonGradient.Color = ColorSequence.new(rank.color, rank.dark)
 	end
 
+	-- «Пригласить друга» next to it (этап 10): Roblox's invite window; below, the friends who reached the friend
+	-- level (ReferralService) out of the rewarded ones
+	local invite, inviteLabel, inviteBack =
+		Kit.actionButton(content, UDim2.fromOffset(180, 48), UDim2.new(1, -184, 1, -52), 15)
+	invite.Name = "Invite"
+	gradient(inviteBack, Color3.fromRGB(70, 170, 255), Color3.fromRGB(30, 90, 190), 90)
+	Kit.pressable(invite)
+	local inviteNote: string? = nil
+	local function inviteText(profile: Types.Profile?)
+		inviteLabel.Text = inviteNote
+			or (
+				T("invite_friend")
+				.. '\n<font size="12">'
+				.. T("invite_count", Invite.count(profile), Config.referrals.maxRewards)
+				.. "</font>"
+			)
+	end
+	invite.Activated:Connect(function()
+		Invite.prompt(function()
+			inviteNote = T("invite_unavailable")
+			inviteText(getProfile())
+			task.delay(3, function()
+				inviteNote = nil
+				inviteText(getProfile())
+			end)
+		end)
+	end)
+
 	local function refresh()
 		local profile = getProfile()
 		if not profile then
 			return
 		end
+		inviteText(profile)
 		local rank = Ranks.of(profile.level)
 		local rule = Config.levelRule(profile.level + 1)
 		if profile.level ~= shownLevel then

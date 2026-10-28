@@ -2148,6 +2148,10 @@ windowBuilders.menu = function()
 			closeWindow()
 			currentWindowKind = nil
 			openHudEditor()
+		elseif kind == "invite" then -- Roblox's invite window, not one of ours (Invite.luau)
+			require(script.Invite).prompt(function()
+				showToast(T("invite_unavailable"))
+			end)
 		else
 			open(kind)
 		end
@@ -3198,6 +3202,35 @@ do
 	if caption and caption:IsA("TextLabel") then
 		localizedLabels[caption] = "settings_title"
 	end
+end
+-- the grid cell after the settings: «Пригласить друга» (этап 10; Roblox's invite window, Invite.luau) and the
+-- «Избранное» card that slides in after 30 minutes of play (FavoriteCard)
+do
+	local button = touchIconButton(
+		touchMenuGrid,
+		Config.icons.icons.menu_invite or Config.iconFor("ordinary_key"),
+		"",
+		56,
+		T("touch_menu_invite")
+	)
+	button.Position =
+		UDim2.fromOffset(((#menuKeys + 3) % 6) * 60, math.floor((#menuKeys + 3) / 6) * 60)
+	button.Name = "Touch_invite"
+	button.Activated:Connect(function()
+		setTouchMenuOpen(false)
+		require(script.Invite).prompt(function()
+			showToast(T("invite_unavailable"))
+		end)
+	end)
+	local caption = button:FindFirstChild("Caption")
+	if caption and caption:IsA("TextLabel") then
+		localizedLabels[caption] = "touch_menu_invite"
+	end
+	require(script.FavoriteCard).start(gui, function()
+		return profile
+	end, function()
+		return locale
+	end)
 end
 -- the 11th grid cell: move the HUD buttons [владелец 22.10] (HudLayout; key H on a computer)
 do

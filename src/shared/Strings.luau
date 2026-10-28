@@ -5171,6 +5171,63 @@ local STRINGS: { [string]: Entry } = {
 		es = "CAPTURA PUNTOS: %s",
 		fr = "CAPTUREZ DES POINTS : %s",
 	},
+	-- «Пригласить друга» and the «Избранное» card (этап 10: ReferralService, Invite, FavoriteCard)
+	invite_friend = {
+		ru = "Пригласить друга",
+		en = "Invite a friend",
+		es = "Invitar a un amigo",
+		fr = "Inviter un ami",
+	},
+	touch_menu_invite = { ru = "Друзья", en = "Invite", es = "Invitar", fr = "Inviter" },
+	invite_unavailable = {
+		ru = "Приглашения сейчас недоступны",
+		en = "Invites are not available right now",
+		es = "Las invitaciones no están disponibles ahora",
+		fr = "Les invitations ne sont pas disponibles pour le moment",
+	},
+	invite_count = {
+		ru = "Приглашено друзей: %d / %d",
+		en = "Friends invited: %d / %d",
+		es = "Amigos invitados: %d / %d",
+		fr = "Amis invités : %d / %d",
+	},
+	referral_welcome = {
+		ru = "Вас пригласил друг! Подарок: %s и %s $",
+		en = "A friend invited you! Gift: %s and %s $",
+		es = "¡Te invitó un amigo! Regalo: %s y %s $",
+		fr = "Un ami vous a invité ! Cadeau : %s et %s $",
+	},
+	referral_reward = {
+		ru = "Приглашённый друг дошёл до %d ур.! Награда: %s и %s $",
+		en = "A friend you invited reached level %d! Reward: %s and %s $",
+		es = "¡Un amigo que invitaste llegó al nivel %d! Recompensa: %s y %s $",
+		fr = "Un ami invité a atteint le niveau %d ! Récompense : %s et %s $",
+	},
+	referral_counted = {
+		ru = "Приглашённый друг дошёл до %d ур. Награды уже получены за %d друзей",
+		en = "A friend you invited reached level %d. Rewards were already given for %d friends",
+		es = "Un amigo que invitaste llegó al nivel %d. Ya recibiste recompensas por %d amigos",
+		fr = "Un ami invité a atteint le niveau %d. Récompenses déjà reçues pour %d amis",
+	},
+	favorite_title = {
+		ru = "Нравится игра?",
+		en = "Enjoying the game?",
+		es = "¿Te gusta el juego?",
+		fr = "Le jeu vous plaît ?",
+	},
+	favorite_text = {
+		ru = "Поставь лайк и добавь игру в Избранное, чтобы не потерять её.",
+		en = "Give it a like and add it to your Favorites so you never lose it.",
+		es = "Dale me gusta y añádelo a Favoritos para no perderlo.",
+		fr = "Mets un j'aime et ajoute le jeu aux Favoris pour ne pas le perdre.",
+	},
+	favorite_add = {
+		ru = "В Избранное",
+		en = "Add to Favorites",
+		es = "A Favoritos",
+		fr = "Aux Favoris",
+	},
+	favorite_later = { ru = "Позже", en = "Later", es = "Más tarde", fr = "Plus tard" },
 	keys_hint = {
 		ru = "Локации [M]  Работа [O]  Улучшить [J]  Уровень [U]  Инвентарь [E]  Использовать [F]  Достижения [L]  Бустеры [B]  Аукцион [Y]  Умения [T]  Зельеварка [Z]  Меню [X]  Фракции [G]  Банда [R]  Вид [V]  Кнопки [H]",
 		en = "Locations [M]  Jobs [O]  Upgrade [J]  Level [U]  Inventory [E]  Use [F]  Achievements [L]  Boosters [B]  Auction [Y]  Skills [T]  Potions [Z]  Menu [X]  Factions [G]  Gang [R]  View [V]  Buttons [H]",

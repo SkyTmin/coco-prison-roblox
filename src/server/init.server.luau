@@ -69,6 +69,7 @@ for _, name in ipairs({
 	"GangNpc",
 	"GhettoBuy",
 	"TreasureReset",
+	"Favorite",
 }) do
 	Remotes.event(name)
 end
@@ -156,6 +157,7 @@ CollisionGroups.Start() -- players and mobs pass through each other
 MobService.Start()
 NameplateService.Start()
 LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
+require(script.Services.ReferralService).Start() -- inviting friends (Referrals_v1), play time, the «Избранное» card
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character

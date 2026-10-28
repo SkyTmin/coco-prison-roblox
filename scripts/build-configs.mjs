@@ -295,6 +295,7 @@ write("artifacts.json", { source: "[меню, клиент]; шанс за бл�
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("ghetto.json", { source: "[вики, клиент] Гетто; числа — [решение] (docs/research/remaining-features-design.md, этап 1в)", ...decisions.ghetto });
 write("warzone.json", { source: "[клиент, вики] Дворы и фракционные точки; числа — [решение] (docs/research/remaining-features-design.md, этап 2)", ...decisions.warzone });
+write("referrals.json", { source: "[решение] приглашение друзей и карточка «Избранное» (docs/research/remaining-features-design.md, этап 10)", ...decisions.referrals });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
 const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;
 const blockArmor = blockArmorIds?.faces;

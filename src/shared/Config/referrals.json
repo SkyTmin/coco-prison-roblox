@@ -1,0 +1,23 @@
+{
+  "source": "[решение] приглашение друзей и карточка «Избранное» (docs/research/remaining-features-design.md, этап 10)",
+  "_source": "docs/research/remaining-features-design.md, этап 10 [владелец 28.10: «Да нужно»]; все числа — [решение]. Награда за лайк / Избранное запрещена правилами Roblox — её нет.",
+  "newcomer": {
+    "item": "ordinary_key",
+    "count": 1,
+    "money": 500
+  },
+  "inviter": {
+    "item": "improved_ancient_key",
+    "count": 1,
+    "money": 2500
+  },
+  "friendLevel": 5,
+  "maxRewards": 20,
+  "recordCap": 100,
+  "_recordCap": "сколько друзей хранит запись Referrals_v1/<пригласивший> (больше — счётчик стоит, наград всё равно не больше maxRewards)",
+  "favorite": {
+    "playMinutes": 30,
+    "level": 5,
+    "laterDays": 3
+  }
+}

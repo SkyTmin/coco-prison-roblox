@@ -260,6 +260,8 @@ local function levelUp(player: Player)
 	end
 	toast(player, "level_reached", rule.level)
 	Sfx.toPlayer(player, "level_up", 0.7)
+	-- an invited friend reaching the friend level pays the inviter (ReferralService); lazy: it is started later
+	task.spawn(require(script.Parent.ReferralService).check, player)
 end
 
 local function bindPrompt(part: Instance, kind: string, tag: string)

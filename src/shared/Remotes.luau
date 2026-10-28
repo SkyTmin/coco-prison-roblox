@@ -45,6 +45,7 @@
 --                         black market; stock in ReplicatedStorage.BlackMarket attributes) (GhettoService)
 -- Client → server:        GangHome() — «Домой» in the «Банда» window: to the gang's own house (GangHouseService)
 -- Server → client:        TreasureReset() — damage broke the treasure chest capture: the client lets the prompt go
+-- Client → server:        Favorite("done" | "later") — the «Избранное» card's outcome (ReferralService; no reward ever)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

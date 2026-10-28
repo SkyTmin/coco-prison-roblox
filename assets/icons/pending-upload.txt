@@ -11,3 +11,6 @@ menu_librarian
 menu_forge
 menu_gang_home
 menu_ghetto
+# Приглашения и «Избранное» (28.10, Claude, этап 10): assets/icons/items3d/<id>.png → upload_image → assets/icons/ids.json → node scripts/build-configs.mjs
+menu_invite
+menu_favorite

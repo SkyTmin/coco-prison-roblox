@@ -9,7 +9,8 @@ local Strings = require(Shared.Strings)
 local Ui = require(script.Parent.Ui)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
-export type Entry = { kind: string, caption: string, key: string, icon: string? }
+-- key = nil: no hotkey (the tile shows none)
+export type Entry = { kind: string, caption: string, key: string?, icon: string? }
 
 local MenuWindow = {}
 
@@ -39,6 +40,13 @@ MenuWindow.ENTRIES = {
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },
+	-- «Пригласить друга» (этап 10): Roblox's invite window (Invite.luau), no window of ours and no hotkey; the ordinary
+	-- key (the newcomer's gift) until our Blender icon menu_invite is uploaded
+	{
+		kind = "invite",
+		caption = "invite_friend",
+		icon = if Config.icons.icons.menu_invite then nil else "ordinary_key",
+	},
 } :: { Entry }
 
 function MenuWindow.build(
@@ -96,7 +104,7 @@ function MenuWindow.build(
 		caption.TextTruncate = Enum.TextTruncate.AtEnd
 		local key = Ui.label(
 			tile,
-			"[" .. entry.key .. "]",
+			if entry.key then "[" .. entry.key .. "]" else "",
 			UDim2.new(1, -8, 0, 16),
 			UDim2.fromOffset(4, 74),
 			12,
