@@ -1,25 +1,24 @@
 --!strict
--- Case / chest window in the look of the original: the vanilla Minecraft 3-row chest GUI
--- (reference: owner's screenshots of the "Кейс с предметами" chest — light grey bevelled panel,
--- dark-grey titles "Кейс с предметами" / "Инвентарь", 9×3 chest grid, 9×3 inventory, hotbar row).
--- Below the vanilla area a row of Minecraft-style buttons: open with a key, take all, key choice.
--- Drag/drop and shift/double-tap quick moves come from DragDrop; the server validates every move.
+-- Case / chest window in our own dark inventory style [владелец 28.10: «окно где забираешь предметы с кейсов …
+-- сделать как наш инвентарь», the grey vanilla panel's button texts ran out of the buttons]: the case's 9×3 grid,
+-- the backpack 9×3 and the hotbar in Ui.invSlot cells with captions, then the buttons: open with a key, take all,
+-- key choice. Drag/drop and shift/double-tap quick moves come from DragDrop; the server validates every move.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
-local BlockColors = require(Shared.BlockColors)
 local CreativeWindow = require(script.Parent.CreativeWindow)
 local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
+local SlotView = require(script.Parent.SlotView)
 
 type Address = DragDrop.Address
 type SlotView = { address: Address, name: TextLabel, count: TextLabel, icon: ImageLabel }
 local ChestWindow = {}
 
-local MC = Ui.MC
+local SLOT, GAP, PAD = 44, 4, 16 -- the inventory window's sizes
 local TITLES = {
 	ordinaryCase = "case_contents_title", -- [меню] "Кейс с предметами"
 	ancientCase = "ancient_case",
@@ -42,27 +41,26 @@ function ChestWindow.build(
 	end
 	local isEnder = id == "enderChest"
 	local isStorage = isEnder or id == "factionChest" -- keeps items, no key, no Open button
-	-- vanilla chest GUI is 176×168 GUI px; our button row adds 30
-	local width, height = 176 * MC, (168 + 36) * MC
-	local win, raw = createWindow(
+	local gridWidth = 9 * SLOT + 8 * GAP
+	local caseY = 4
+	local bagY = caseY + 18 + 3 * (SLOT + GAP) + 10
+	local barY = bagY + 18 + 3 * (SLOT + GAP) + 10
+	local rowY = barY + 18 + SLOT + 14
+	local win, content = createWindow(
 		parent,
 		t(TITLES[id] or "ordinary_case"),
-		UDim2.fromOffset(width, height),
+		UDim2.fromOffset(gridWidth + 2 * PAD + 12, rowY + 34 + 26 + 44),
 		onClose
 	)
-	local content = Ui.toMc(win, raw)
-	Ui.mcText(
-		content,
-		t(TITLES[id] or "ordinary_case"),
-		UDim2.fromOffset(150 * MC, 10 * MC),
-		UDim2.fromOffset(8 * MC, 5 * MC)
-	)
-	Ui.mcText(
-		content,
-		t("inventory"),
-		UDim2.fromOffset(150 * MC, 10 * MC),
-		UDim2.fromOffset(8 * MC, 72 * MC)
-	)
+	win.BackgroundTransparency = 0 -- the HUD under it never shows through the slots
+	local function caption(text: string, y: number)
+		local l =
+			Ui.label(content, text, UDim2.fromOffset(gridWidth, 16), UDim2.fromOffset(PAD, y), 12)
+		l.TextColor3 = Ui.colors.muted
+	end
+	caption(t(TITLES[id] or "ordinary_case"), caseY)
+	caption(t("inv_backpack"), bagY)
+	caption(t("inv_hotbar"), barY)
 
 	local views: { SlotView } = {}
 	local configuredKeys = Config.keys.caseKeys[id]
@@ -100,49 +98,55 @@ function ChestWindow.build(
 	local function grid(container: "case" | "inv", first: number, rows: number, y: number)
 		for row = 0, rows - 1 do
 			for column = 0, 8 do
-				local frame, name, count, icon = Ui.mcSlot(content)
-				frame.Position = UDim2.fromOffset((8 + column * 18) * MC, (y + row * 18) * MC)
+				local frame, name, count, icon = Ui.invSlot(content, SLOT)
+				frame.Position =
+					UDim2.fromOffset(PAD + column * (SLOT + GAP), y + row * (SLOT + GAP))
 				local address: Address = { container = container, index = first + row * 9 + column }
 				table.insert(views, { address = address, name = name, count = count, icon = icon })
 				drag.Bind(frame, address)
+				if container == "inv" and first == 1 then -- hotbar keys, as in the inventory
+					local key = Ui.label(
+						frame,
+						tostring(column + 1),
+						UDim2.fromOffset(12, 12),
+						UDim2.fromOffset(4, 2),
+						10
+					)
+					key.TextColor3 = Ui.colors.muted
+					key.ZIndex = 5
+				end
 			end
 		end
 	end
-	grid("case", 1, 3, 17) -- [ваниль] chest rows at y = 17
-	grid("inv", 10, 3, 84) -- [ваниль] inventory at y = 84
-	grid("inv", 1, 1, 142) -- [ваниль] hotbar at y = 142
+	grid("case", 1, 3, caseY + 18)
+	grid("inv", 10, 3, bagY + 18)
+	grid("inv", 1, 1, barY + 18)
 
-	local rowY = 168 * MC
-	local open = Ui.mcButton(
-		content,
-		t("case_open"),
-		UDim2.fromOffset(54 * MC, 20 * MC),
-		UDim2.fromOffset(8 * MC, rowY)
-	)
+	-- plain buttons whose text fits (the old Minecraft buttons cut «Забрать всё»)
+	local function button(text: string, x: number, width: number, color: Color3): TextButton
+		local b =
+			Ui.button(content, text, UDim2.fromOffset(width, 34), UDim2.fromOffset(x, rowY), color)
+		b.TextSize = 15
+		b.TextWrapped = true
+		return b
+	end
+	local third = math.floor((gridWidth - 2 * 8) / 3)
+	local open = button(t("case_open"), PAD, third, Ui.colors.buttonGreen)
 	open.Visible = not isStorage
-	local take = Ui.mcButton(
-		content,
+	local take = button(
 		t("case_take_all"),
-		UDim2.fromOffset(54 * MC, 20 * MC),
-		UDim2.fromOffset(if isStorage then 8 * MC else 64 * MC, rowY)
+		if isStorage then PAD else PAD + third + 8,
+		third,
+		Ui.colors.buttonBlue
 	)
 	local keyButton: TextButton? = nil
 	if #accepted > 1 then
-		keyButton = Ui.mcButton(
-			content,
-			"",
-			UDim2.fromOffset(48 * MC, 20 * MC),
-			UDim2.fromOffset(120 * MC, rowY)
-		)
+		keyButton = button("", PAD + 2 * (third + 8), third, Ui.colors.buttonGrey)
 	end
-	local hint = Ui.mcText(
-		content,
-		"",
-		UDim2.fromOffset(160 * MC, 10 * MC),
-		UDim2.fromOffset(8 * MC, 189 * MC),
-		7 * MC
-	)
-	hint.TextXAlignment = Enum.TextXAlignment.Left
+	local hint =
+		Ui.label(content, "", UDim2.fromOffset(gridWidth, 18), UDim2.fromOffset(PAD, rowY + 40), 13)
+	hint.TextColor3 = Ui.colors.muted
+	hint.TextTruncate = Enum.TextTruncate.AtEnd
 
 	local function keyCount(key: string?): number
 		local profile = getProfile()
@@ -193,34 +197,23 @@ function ChestWindow.build(
 			end
 		end
 	end)
+	local function setActive(b: TextButton, active: boolean)
+		b.Active = active
+		b.AutoButtonColor = active
+		b.BackgroundTransparency = if active then 0 else 0.5
+		b.TextTransparency = if active then 0 else 0.4
+	end
 	local function refresh()
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
-			local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
-			local tint = Color3.new(1, 1, 1)
-			if stack and not icon then
-				icon, tint = BlockColors.icon(stack.id)
-			end
-			local tile = if stack and not icon then BlockColors.of(stack.id) else nil
-			view.icon.Image, view.icon.Visible = icon or "", icon ~= nil or tile ~= nil
-			view.icon.ImageColor3 = tint
-			view.icon.BackgroundColor3 = tile or Color3.new()
-			view.icon.BackgroundTransparency = if tile then 0 else 1
-			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
-			view.name.Visible = false -- no text on items (the tile or picture identifies them)
+			SlotView.render(view.name, view.count, view.icon, stack)
 			-- a money bag shows whole dollars ("74$"): "74.156$" ran into the next slots; the tooltip has the exact sum
-			view.count.Text = if stack and stack.coins
-				then (if stack.coins >= 100 * Config.moneyScale
-					then Strings.money(stack.coins)
-					else tostring(math.floor(stack.coins / Config.moneyScale))) .. "$"
-				elseif stack and stack.count > 1 then tostring(stack.count)
-				else ""
-			local glint = view.icon:FindFirstChild("Glint")
-			if glint and glint:IsA("ImageLabel") then
-				local enchanted = stack ~= nil
-					and icon ~= nil
-					and Config.isEnchanted(stack.id, stack.level)
-				glint.Image, glint.Visible = icon or "", enchanted
+			if stack and stack.coins then
+				view.count.Text = (
+					if stack.coins >= 100 * Config.moneyScale
+						then Strings.money(stack.coins)
+						else tostring(math.floor(stack.coins / Config.moneyScale))
+				) .. "$"
 			end
 		end
 		if isStorage then
@@ -243,7 +236,7 @@ function ChestWindow.build(
 		if keyButton then
 			keyButton.Text = Strings.itemName(selectedKey, nil, locale)
 		end
-		Ui.setMcButtonActive(open, available and have > 0)
+		setActive(open, available and have > 0)
 		hint.Text = if not available
 			then t("case_locked")
 			elseif have == 0 then t(

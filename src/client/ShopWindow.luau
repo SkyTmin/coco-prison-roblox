@@ -62,7 +62,7 @@ function ShopWindow.build(
 	Ui.titleColor(win, Ui.colors.header)
 	local buttons: { { button: TextButton, price: number } } = {}
 	for index, offer in ipairs(offers) do
-		local card = Ui.panel(
+		local card = Ui.card(
 			content,
 			UDim2.fromOffset(CARD_W, CARD_H),
 			UDim2.fromOffset((index - 1) * (CARD_W + GAP) + 4, 4)
@@ -70,12 +70,23 @@ function ShopWindow.build(
 		local icon = Instance.new("ImageLabel")
 		icon.AnchorPoint = Vector2.new(0.5, 0)
 		icon.Size = UDim2.fromOffset(112, 112)
-		icon.Position = UDim2.new(0.5, 0, 0, 36)
+		icon.Position = UDim2.new(0.5, 0, 0, 44)
 		icon.BackgroundTransparency = 1
 		icon.ScaleType = Enum.ScaleType.Fit
 		icon.ResampleMode = Enum.ResamplerMode.Pixelated
 		icon.Image = Config.iconFor(offer.id, if Config.tools[offer.id] then 1 else nil) or ""
 		icon.Parent = card
+		-- the item's name over the picture (the cards had only a picture)
+		local name = Ui.label(
+			card,
+			Strings.itemName(offer.id, if Config.tools[offer.id] then 1 else nil, locale),
+			UDim2.new(1, -16, 0, 22),
+			UDim2.fromOffset(8, 12),
+			16,
+			Ui.colors.header
+		)
+		name.TextXAlignment = Enum.TextXAlignment.Center
+		name.TextTruncate = Enum.TextTruncate.AtEnd
 		local priceBox = Ui.inset(card, UDim2.new(1, -24, 0, 34), UDim2.new(0, 12, 1, -92))
 		local price = Ui.rich(
 			priceBox,

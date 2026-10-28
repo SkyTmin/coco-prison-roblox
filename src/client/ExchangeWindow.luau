@@ -8,6 +8,7 @@ local Config = require(Shared.Config)
 local Strings = require(Shared.Strings)
 local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
+local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
@@ -55,13 +56,19 @@ function ExchangeWindow.build(
 			table.insert(ids, id)
 		end
 	end
-	local invWidth = 9 * (SLOT + 4) + 16
-	local width = math.max(#ids * (CARD_W + GAP) + 10, invWidth + 8)
+	-- the cards and the inventory share one width [владелец 28.10: «инвентарь меньше, чем сверху»]: the inventory
+	-- slots grow to fill it, a short row of cards stretches to the inventory
+	local rowWidth = math.max(#ids * (CARD_W + GAP) - GAP, 9 * (SLOT + 4) + 12)
+	local cardW = math.floor((rowWidth - (#ids - 1) * GAP) / math.max(#ids, 1))
+	local slot = math.clamp(math.floor((rowWidth - 16 - 8 * 4) / 9), SLOT, 60)
+	local gridLeft = math.floor((rowWidth - (9 * slot + 8 * 4)) / 2)
+	local width = rowWidth + 20
 	local invY = CARD_H + 14
+	local invHeight = 4 * (slot + 4) + 46
 	local win, content = createWindow(
 		parent,
 		Strings.t("exchange_" .. kind, locale),
-		UDim2.fromOffset(width, invY + 4 * (SLOT + 4) + 44 + 46),
+		UDim2.fromOffset(width, invY + invHeight + 54),
 		onClose
 	)
 	Ui.titleColor(win, Ui.colors.header)
@@ -73,8 +80,8 @@ function ExchangeWindow.build(
 		local quantity = 1
 		local card = Ui.panel(
 			content,
-			UDim2.fromOffset(CARD_W, CARD_H),
-			UDim2.fromOffset((index - 1) * (CARD_W + GAP) + 4, 4)
+			UDim2.fromOffset(cardW, CARD_H),
+			UDim2.fromOffset((index - 1) * (cardW + GAP) + 4, 4)
 		)
 		local minus = Ui.button(card, "−", UDim2.fromOffset(36, 36), UDim2.fromOffset(14, 14))
 		local plus = Ui.button(card, "+", UDim2.fromOffset(36, 36), UDim2.new(1, -50, 0, 14))
@@ -148,11 +155,7 @@ function ExchangeWindow.build(
 		table.insert(updates, update)
 	end
 	-- inventory panel (read-only, like the original's exchanger screens)
-	local inv = Ui.panel(
-		content,
-		UDim2.fromOffset(invWidth, 4 * (SLOT + 4) + 40),
-		UDim2.fromOffset(4, invY)
-	)
+	local inv = Ui.card(content, UDim2.fromOffset(rowWidth, invHeight), UDim2.fromOffset(4, invY))
 	Ui.label(
 		inv,
 		Strings.t("inventory", locale),
@@ -163,8 +166,12 @@ function ExchangeWindow.build(
 	)
 	local views: { { index: number, name: TextLabel, count: TextLabel, icon: ImageLabel } } = {}
 	local function slotAt(index: number, column: number, row: number)
-		local frame, name, count, icon = Ui.slot(inv, SLOT)
-		frame.Position = UDim2.fromOffset(8 + column * (SLOT + 4), 30 + row * (SLOT + 4))
+		local frame, name, count, icon = Ui.invSlot(inv, slot)
+		-- the hotbar row sits a little apart, as in the inventory
+		frame.Position = UDim2.fromOffset(
+			gridLeft + column * (slot + 4),
+			30 + row * (slot + 4) + (if row == 3 then 6 else 0)
+		)
 		table.insert(views, { index = index, name = name, count = count, icon = icon })
 	end
 	for row = 0, 2 do
@@ -181,13 +188,12 @@ function ExchangeWindow.build(
 			update(p)
 		end
 		for _, view in ipairs(views) do
-			local stack = if p then p.inventory[view.index] else nil
-			local image = if stack then Config.iconFor(stack.id, stack.level) else nil
-			view.icon.Image, view.icon.Visible = image or "", image ~= nil
-			view.name.Text = if stack and not image
-				then Strings.itemName(stack.id, stack.level, locale)
-				else ""
-			view.count.Text = if stack and stack.count > 1 then tostring(stack.count) else ""
+			SlotView.render(
+				view.name,
+				view.count,
+				view.icon,
+				if p then p.inventory[view.index] else nil
+			)
 		end
 	end
 	refresh(profile)

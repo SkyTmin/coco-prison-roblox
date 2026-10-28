@@ -71,7 +71,7 @@ function DragDrop.new(
 	layer.ResetOnSpawn = false
 	layer.DisplayOrder = 100
 	layer.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-	local ghost, ghostName, ghostCount, ghostIcon = Ui.slot(layer, 44)
+	local ghost, ghostName, ghostCount, ghostIcon = Ui.invSlot(layer, 44)
 	ghost.AnchorPoint = Vector2.new(0.5, 0.5)
 	ghost.BackgroundTransparency = 0.3
 	ghost.Visible = false

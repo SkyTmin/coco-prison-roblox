@@ -240,7 +240,7 @@ function UpgradeWindow.build(
 			alive[entry.key] = true
 			local view = itemButtons[entry.key]
 			if not view then
-				local frame, _, _, icon = Ui.slot(itemsRow, 48)
+				local frame, _, _, icon = Ui.invSlot(itemsRow, 48)
 				local hit = Instance.new("TextButton")
 				hit.Size, hit.BackgroundTransparency, hit.Text = UDim2.fromScale(1, 1), 1, ""
 				hit.Parent = frame

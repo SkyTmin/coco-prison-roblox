@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local ItemInfo = require(Shared.ItemInfo)
 local Remotes = require(Shared.Remotes)
@@ -66,23 +67,24 @@ local function refill(player: Player)
 	end
 end
 
-local function give(player: Player, id: any, level: any)
+local function give(player: Player, id: any, level: any, bookLevel: any)
 	if typeof(id) ~= "string" then
 		return
 	end
 	if id == "ancient_book" then
-		-- one max-level book per enchant, always applies (effect id in `level`)
+		-- a book of the chosen level (default the top one), always applies (effect id in `level`)
 		local effect = Config.books.effects[level]
 		local entry = Config.books.catalog[level]
 		if typeof(level) ~= "string" or not effect or not entry then
 			return
 		end
+		local wanted = math.clamp(math.floor(tonumber(bookLevel) or #effect), 1, #effect)
 		ProfileService.Mutate(player, function(profile)
 			local stack: any = {
 				id = "ancient_book",
 				count = 1,
-				level = #effect,
-				books = { { id = level, level = #effect } },
+				level = wanted,
+				books = { { id = level, level = wanted } },
 				rarity = entry.rarity,
 				applyChance = 100,
 			}
@@ -106,7 +108,7 @@ local function give(player: Player, id: any, level: any)
 	end)
 end
 
-local function onRequest(player: Player, op: any, a: any, b: any)
+local function onRequest(player: Player, op: any, a: any, b: any, c: any)
 	if not allowed(player) or not ProfileService.Get(player) then
 		return
 	end
@@ -117,7 +119,7 @@ local function onRequest(player: Player, op: any, a: any, b: any)
 			refill(player)
 		end
 	elseif op == "give" then
-		give(player, a, b)
+		give(player, a, b, c)
 	elseif op == "coins" then
 		ProfileService.Mutate(player, function(profile)
 			profile.coins += 1000 * Config.moneyScale
@@ -153,7 +155,14 @@ function CreativeService.Start()
 	for id in pairs(Config.blocks) do
 		catalog[id] = true
 	end
-	catalog.ancient_book = nil -- books come with their effect (give "ancient_book", effectId)
+	catalog.ancient_book = nil -- books come with their effect (give "ancient_book", effectId, level)
+	catalog.money_bag = nil -- a bag without coins; money comes from the +1000 $ button
+	for _, kind in ipairs(Boosters.kinds) do
+		catalog["booster_" .. kind] = nil -- the plain pictures; the items are per scope
+		for _, scope in ipairs(Boosters.scopes) do
+			catalog[Boosters.itemId(kind, scope)] = true
+		end
+	end
 	Remotes.event("Creative").OnServerEvent:Connect(onRequest)
 	-- the server's warnings and errors go to the creative window of allowed players: the owner reads
 	-- them on a phone where the chat (and /console) is not available [владелец 21.10]

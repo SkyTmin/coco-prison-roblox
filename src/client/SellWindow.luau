@@ -142,7 +142,7 @@ function SellWindow.build(
 			end
 			shown[blockId] = true
 			local row = Ui.inset(list, UDim2.new(1, -24, 0, ROW - 4), UDim2.fromOffset(12, y))
-			local slot, _, _, icon = Ui.slot(row, 36)
+			local slot, _, _, icon = Ui.invSlot(row, 36)
 			slot.Position = UDim2.fromOffset(6, 5)
 			local image, tint = BlockColors.icon(blockId)
 			icon.Image, icon.Visible = image or "", image ~= nil

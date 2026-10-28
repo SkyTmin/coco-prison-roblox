@@ -59,6 +59,9 @@ local function corner(parent: Instance, radius: number)
 	c.Parent = parent
 end
 
+local CARD = Color3.fromRGB(26, 28, 36) -- Ui.card and the panels inside windows
+local CARD_STROKE = Color3.fromRGB(52, 54, 66)
+
 local function stroke(parent: Instance, color: Color3, thickness: number): UIStroke
 	local s = Instance.new("UIStroke")
 	s.Color = color
@@ -74,6 +77,7 @@ function Ui.panel(parent: Instance, size: UDim2, position: UDim2): Frame
 	f.BackgroundColor3 = Ui.colors.panel
 	f.BackgroundTransparency = Ui.colors.panelTransparency
 	f.BorderSizePixel = 0
+	f:SetAttribute("PlainPanel", true) -- inside a window it turns into a card (Ui.window)
 	corner(f, 4)
 	stroke(f, Ui.colors.border, 1)
 	f.Parent = parent
@@ -145,6 +149,20 @@ function Ui.button(
 	b.TextColor3 = Color3.new(1, 1, 1)
 	b.Text = text
 	b.AutoButtonColor = true
+	-- a long text shrinks and wraps inside the button instead of running out of it [владелец 28.10: «кнопки буквы
+	-- выходят»]; TextSize stays the largest size, callers keep setting it
+	b.TextScaled = true
+	b.TextWrapped = true
+	local fit = Instance.new("UITextSizeConstraint")
+	fit.MaxTextSize = b.TextSize
+	fit.MinTextSize = 8
+	fit.Parent = b
+	b:GetPropertyChangedSignal("TextSize"):Connect(function()
+		fit.MaxTextSize = b.TextSize
+	end)
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 4), UDim.new(0, 4)
+	pad.Parent = b
 	corner(b, 3)
 	-- the original's buttons have a lighter 1px edge
 	local s = stroke(b, Color3.new(1, 1, 1), 1)
@@ -157,6 +175,19 @@ end
 function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> ()): (Frame, Frame)
 	local win = Ui.panel(parent, size, UDim2.new(0.5, -size.X.Offset / 2, 0.5, -size.Y.Offset / 2))
 	win.Name = "Window_" .. title
+	-- every window looks like the inventory [владелец 28.10]: opaque, the world never shows through, and the plain
+	-- panels inside it become cards (Ui.panel parents itself last, so its colours are final here)
+	win.BackgroundTransparency = 0
+	win.DescendantAdded:Connect(function(d)
+		if d:IsA("Frame") and d:GetAttribute("PlainPanel") then
+			d.BackgroundColor3 = CARD
+			d.BackgroundTransparency = 0
+			local s = d:FindFirstChildOfClass("UIStroke")
+			if s then
+				s.Color = CARD_STROKE
+			end
+		end
+	end)
 	win.Active = true -- touches on the window never reach the camera / thumbstick
 	local titleBar = Ui.panel(win, UDim2.new(1, -44, 0, 28), UDim2.fromOffset(6, 6))
 	titleBar.Name = "TitleBar"
@@ -293,7 +324,7 @@ end
 -- A card inside a window: a slightly lighter rounded block that groups related things.
 function Ui.card(parent: Instance, size: UDim2, position: UDim2): Frame
 	local f = Ui.panel(parent, size, position)
-	f.BackgroundColor3 = Color3.fromRGB(26, 28, 36)
+	f.BackgroundColor3 = CARD
 	f.BackgroundTransparency = 0
 	local c = f:FindFirstChildOfClass("UICorner")
 	if c then
@@ -301,7 +332,7 @@ function Ui.card(parent: Instance, size: UDim2, position: UDim2): Frame
 	end
 	local s = f:FindFirstChildOfClass("UIStroke")
 	if s then
-		s.Color = Color3.fromRGB(52, 54, 66)
+		s.Color = CARD_STROKE
 	end
 	return f
 end
