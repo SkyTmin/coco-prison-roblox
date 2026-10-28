@@ -643,6 +643,10 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 		toast(player, "auction_not_tradable")
 		return
 	end
+	if Config.blockLocked(stack.id, profile.level) then -- [сеть TG/25] selling covers the Аукцион too
+		toast(player, "block_locked_sell", stack.count)
+		return
+	end
 	if amount > stack.count then
 		return
 	end

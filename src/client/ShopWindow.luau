@@ -3,6 +3,7 @@
 -- orange title in the strip, red ✕, one dark card per offer with a big pixel icon, an inset
 -- "Цена » 0.03$" line (white / grey » / green value with $) and a green "Приобрести" button.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
@@ -87,6 +88,17 @@ function ShopWindow.build(
 		)
 		name.TextXAlignment = Enum.TextXAlignment.Center
 		name.TextTruncate = Enum.TextTruncate.AtEnd
+		if kind == "food" and UserInputService.KeyboardEnabled then
+			local hint = Ui.label(
+				card,
+				t("shop_bulk_hint"),
+				UDim2.new(1, -16, 0, 18),
+				UDim2.fromOffset(8, 157),
+				13,
+				Ui.colors.muted
+			)
+			hint.TextXAlignment = Enum.TextXAlignment.Center
+		end
 		local priceBox = Ui.inset(card, UDim2.new(1, -24, 0, 34), UDim2.new(0, 12, 1, -92))
 		local price = Ui.rich(
 			priceBox,
@@ -111,7 +123,10 @@ function ShopWindow.build(
 		)
 		buy.TextSize = 17
 		buy.Activated:Connect(function()
-			Remotes.event("BuyItem"):FireServer(offer.id)
+			-- [сеть TG/25] Shift + «Купить» = 64 штуки еды
+			local bulk = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
+				or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+			Remotes.event("BuyItem"):FireServer(offer.id, bulk)
 		end)
 		table.insert(buttons, { button = buy, price = offer.price })
 	end

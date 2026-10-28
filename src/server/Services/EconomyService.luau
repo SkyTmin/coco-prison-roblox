@@ -125,11 +125,14 @@ local function sell(player: Player)
 		toast(player, "too_far")
 		return
 	end
-	local total = 0
+	local total, locked = 0, 0
 	ProfileService.Mutate(player, function(p)
-		total = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
+		total, locked = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
 		p.coins += total
 	end)
+	if locked > 0 then
+		toast(player, "block_locked_sell", locked)
+	end
 	GangService.progress(player, "sell", total / Config.moneyScale) -- gang quests: selling
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
@@ -139,10 +142,13 @@ local function sell(player: Player)
 	end
 end
 
-local function buy(player: Player, id: any)
+-- [сеть TG/25] with Shift the food stall sells 64 at once; tools stay one by one
+local BULK = 64
+local function buy(player: Player, id: any, bulk: any)
 	if typeof(id) ~= "string" then
 		return
 	end
+	local count = if bulk == true and FOOD_PRICES[id] then BULK else 1
 	local price = SHOP_PRICES[id] or FOOD_PRICES[id]
 	if not price then
 		return
@@ -155,20 +161,23 @@ local function buy(player: Player, id: any)
 		toast(player, "too_far")
 		return
 	end
-	if profile.coins < units(price) then
+	if profile.coins < units(price) * count then
 		toast(player, "not_enough_money")
 		return
 	end
 	local overflow = 0
 	ProfileService.Mutate(player, function(p)
-		p.coins -= units(price)
-		overflow = InventoryService.add(p, id, 1, if Config.tools[id] then 1 else nil)
+		p.coins -= units(price) * count
+		overflow = InventoryService.add(p, id, count, if Config.tools[id] then 1 else nil)
 		if overflow > 0 then
-			p.coins += units(price) -- refund when it does not fit
+			p.coins += units(price) * overflow -- refund what does not fit
 		end
 	end)
-	if overflow > 0 then
+	local got = count - overflow
+	if got <= 0 then
 		toast(player, "bag_full")
+	elseif count > 1 then
+		toast(player, "donate_bought", Strings.itemName(id, 1, Strings.localeOf(player)), got)
 	else
 		toast(player, "bought", Strings.itemName(id, 1, Strings.localeOf(player)))
 	end

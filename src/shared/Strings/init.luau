@@ -6,7 +6,7 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {}
-for _, part in ipairs({ script.Part1, script.Part2, script.Part3 }) do
+for _, part in ipairs({ script.Part1, script.Part2, script.Part3, script.Part4 }) do
 	for key, entry in pairs(require(part) :: any) do
 		STRINGS[key] = entry
 	end

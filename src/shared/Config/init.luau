@@ -117,6 +117,37 @@ function Config.location(id: string): Location?
 	return locationsById[id]
 end
 
+-- [сеть TG/25] the lowest location level at which a block can be dug (nil = no mine has it)
+local blockMinLevel: { [string]: number } = {}
+for _, loc in ipairs(Config.locationsFile.locations) do
+	local any_ = loc :: any
+	local function note(shares: any)
+		if typeof(shares) ~= "table" then
+			return
+		end
+		for blockId in pairs(shares) do
+			local have = blockMinLevel[blockId]
+			if not have or loc.unlockLevel < have then
+				blockMinLevel[blockId] = loc.unlockLevel
+			end
+		end
+	end
+	note(any_.mine and any_.mine.shares)
+	note(any_.miniMine and any_.miniMine.shares)
+	if typeof(any_.mines) == "table" then
+		for _, mine in pairs(any_.mines) do
+			note(mine.shares)
+		end
+	end
+end
+
+-- a block from mines far above the player (rules.digging.blockLevelGap): no picking up, dropping or selling it
+function Config.blockLocked(id: string, level: number): boolean
+	local need = blockMinLevel[id]
+	local gap = Config.rules.digging and Config.rules.digging.blockLevelGap
+	return need ~= nil and typeof(gap) == "number" and need > level + gap
+end
+
 -- Factions [клиент]: four of them, joined from level 5, leaving costs money; names and taglines live in
 -- Strings (faction_<id>, faction_<id>_desc), colours here
 export type Faction = { id: string, color: { number } }

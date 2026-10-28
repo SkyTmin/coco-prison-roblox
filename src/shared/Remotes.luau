@@ -1,7 +1,7 @@
 --!strict
 -- RemoteEvents / RemoteFunctions under ReplicatedStorage.Remotes, created lazily on the server.
 --
--- Client → server events:  DigStart(part, hitPoint), DigCancel(), DigFinish(part) [legacy, ignored], Sell(), BuyItem(id), UpgradeItem(id),
+-- Client → server events:  DigStart(part, hitPoint), DigCancel(), DigFinish(part) [legacy, ignored], Sell(), BuyItem(id, bulk? — Shift: 64 food), UpgradeItem(id),
 --                           LevelUp(), InventoryMove(from, to, count?), SelectSlot(n), SpendPoint(kind),
 --                           ClaimProfessionPoints(job), UseConsumable(slot), BoosterToItem(storageIndex),
 --                           BookUse(sourceSlot, "inv" | "armor", slot | piece) — a book / powder / dispeller on an item,

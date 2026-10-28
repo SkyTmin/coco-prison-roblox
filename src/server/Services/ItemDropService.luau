@@ -190,6 +190,7 @@ local function pickUp()
 		then
 			continue
 		end
+		local level = (ProfileService.Get(player) :: Types.Profile).level
 		local feet = root.Position.Y - root.Size.Y / 2 - humanoid.HipHeight
 		local top = feet + heightOf(character)
 		for part, drop in pairs(drops) do
@@ -197,6 +198,7 @@ local function pickUp()
 			if
 				now < drop.pickupAt
 				or (drop.gang ~= nil and player:GetAttribute("GangId") ~= drop.gang)
+				or Config.blockLocked(drop.stack.id, level) -- [сеть TG/25] blocks of mines far above the player
 				or math.abs(at.X - root.Position.X) > REACH_SIDE
 				or math.abs(at.Z - root.Position.Z) > REACH_SIDE
 				or at.Y + ITEM / 2 < feet - REACH_UP
@@ -307,6 +309,11 @@ local function onDropItem(player: Player, slot: any, count: any)
 	if Config.tools[stack.id] then
 		Remotes.event("Toast")
 			:FireClient(player, Strings.t("drop_not_tools", Strings.localeOf(player)))
+		return
+	end
+	if Config.blockLocked(stack.id, profile.level) then
+		Remotes.event("Toast")
+			:FireClient(player, Strings.t("block_locked_drop", Strings.localeOf(player)))
 		return
 	end
 	local amount = if count == nil

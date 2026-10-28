@@ -194,7 +194,8 @@ function SellWindow.build(
 		if p then
 			for _, stack in pairs(p.inventory) do
 				local b = Config.block(stack.id)
-				if b and b.sellable ~= false then
+				-- blocks of mines far above the player are not sold [сеть TG/25]
+				if b and b.sellable ~= false and not Config.blockLocked(stack.id, p.level) then
 					totals[stack.id] = (totals[stack.id] or 0) + stack.count
 				end
 			end
