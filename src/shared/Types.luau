@@ -76,7 +76,7 @@ export type Profile = {
 		pendingBuys: { [string]: { price: number, op: string, at: number, seller: number? } },
 		returns: { ItemStack }, -- items that did not fit («Забрать»)
 	}?, -- the auction; schema stays v3
-	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths
+	stats: { [string]: number }, -- rats, zombies, bats, kills, deaths, warzonePoints (points taken on the Дворы)
 	lastPosition: { number }?, -- {x, y, z} where the player left; restored on the next join [владелец]
 	lastSeen: number?, -- os.time() of that spot; older than rules.teleport.rejoinReturnSeconds = back to the spawn
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3

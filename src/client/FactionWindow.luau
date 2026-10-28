@@ -3,6 +3,8 @@
 -- tagline («Описание фракции»), how many of its players are on the server, and «Выбрать» (or «Ваша
 -- фракция» on your own card). Below: your faction, «Смен фракций» and «Покинуть фракцию» for leaveCost $
 -- [меню], pressed twice to confirm. The server decides everything (FactionService).
+-- Under it the Дворы [клиент fraction.gui.*]: «Захваченные точки N/4», «Взято точек», a card per point (owner, the
+-- hold left in minutes «13 мин.» [вики], or the capture race) and the button to the Дворы (/warzone).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -10,12 +12,14 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local Warzone = require(Shared.Warzone)
 local Ui = require(script.Parent.Ui)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local FactionWindow = {}
 
 local CARD_W, CARD_H, GAP = 220, 330, 10
+local POINTS_H = 110 -- the Дворы block under the footer
 
 local function members(id: string): number
 	local n = 0
@@ -41,7 +45,7 @@ function FactionWindow.build(
 	local win, content = createWindow(
 		parent,
 		t("factions_title"),
-		UDim2.fromOffset(#list * (CARD_W + GAP) + 10, CARD_H + 110),
+		UDim2.fromOffset(#list * (CARD_W + GAP) + 10, CARD_H + 110 + POINTS_H),
 		onClose
 	)
 	Ui.titleColor(win, Ui.colors.header)
@@ -179,7 +183,109 @@ function FactionWindow.build(
 			leave.Text = t("faction_leave_confirm", leaveCost)
 		end
 	end)
+	-- the Дворы: points held, points taken, a card per point, the way there
+	local pointsY = footerY + 56
+	local width = #list * (CARD_W + GAP) - 2
+	local heldLabel =
+		Ui.rich(content, "", UDim2.fromOffset(width - 190, 22), UDim2.fromOffset(8, pointsY), 15)
+	local go = Ui.button(
+		content,
+		t("warzone_go"),
+		UDim2.fromOffset(170, 26),
+		UDim2.new(1, -178, 0, pointsY - 2),
+		Ui.colors.buttonBlue
+	)
+	go.Activated:Connect(function()
+		Remotes.event("Teleport"):FireServer(Warzone.LOCATION)
+	end)
+	local chipW = math.floor((width - 4 - (#Warzone.points - 1) * 8) / #Warzone.points)
+	local chips: { { title: TextLabel, status: TextLabel, card: Frame } } = {}
+	for i, point in ipairs(Warzone.points) do
+		local chip = Ui.card(
+			content,
+			UDim2.fromOffset(chipW, 70),
+			UDim2.fromOffset(4 + (i - 1) * (chipW + 8), pointsY + 28)
+		)
+		local title = Ui.label(
+			chip,
+			t("warzone_point_" .. point.id),
+			UDim2.new(1, -12, 0, 20),
+			UDim2.fromOffset(6, 4),
+			14,
+			Ui.colors.header
+		)
+		Ui.label(
+			chip,
+			t("warzone_bonus_" .. point.id, tostring(Warzone.cfg.bonus)),
+			UDim2.new(1, -12, 0, 16),
+			UDim2.fromOffset(6, 24),
+			12,
+			Ui.colors.money
+		).TextTruncate =
+			Enum.TextTruncate.AtEnd
+		local status = Ui.rich(chip, "", UDim2.new(1, -12, 0, 22), UDim2.fromOffset(6, 42), 12)
+		status.TextTruncate = Enum.TextTruncate.AtEnd
+		chips[i] = { title = title, status = status, card = chip }
+	end
+	local shownProfile: Types.Profile? = profile
+	local function refreshPoints()
+		local p = shownProfile
+		local now = workspace:GetServerTimeNow()
+		local mine = if p then p.faction else nil
+		heldLabel.Text = string.format(
+			'%s: <font color="%s">%d/%d</font>   %s: <font color="%s">%d</font>',
+			t("warzone_held"),
+			Ui.hex(Ui.colors.header),
+			Warzone.heldBy(mine, now),
+			#Warzone.points,
+			t("warzone_taken"),
+			Ui.hex(Ui.colors.header),
+			if p then p.stats.warzonePoints or 0 else 0
+		)
+		for i, point in ipairs(Warzone.points) do
+			local chip = chips[i]
+			local state = Warzone.state(point.id, now)
+			local owner = state.owner
+			if owner then
+				-- [вики] the hold left «13 мин.» (fraction.gui.point_time)
+				local minutes = math.max(1, math.ceil((state.untilAt - now) / 60))
+				chip.status.Text = string.format(
+					'<font color="%s">%s</font> · %s',
+					Ui.hex(Config.factionColor(owner)),
+					t("faction_" .. owner),
+					t("warzone_minutes", minutes)
+				)
+			elseif state.leader then
+				chip.status.Text = string.format(
+					'<font color="%s">%s</font> %d/%d',
+					Ui.hex(Config.factionColor(state.leader)),
+					t("faction_" .. state.leader),
+					state.lead,
+					state.need
+				)
+			else
+				chip.status.Text = string.format(
+					'<font color="%s">%s</font>',
+					Ui.hex(Ui.colors.money),
+					t("warzone_free")
+				)
+			end
+			chip.card.BackgroundColor3 = if owner and owner == mine
+				then Ui.colors.panel:Lerp(Config.factionColor(owner), 0.15)
+				else Ui.colors.panel
+		end
+	end
+	-- the timers run on their own (the window is refreshed only when the profile changes)
+	task.spawn(function()
+		while win.Parent do
+			refreshPoints()
+			task.wait(1)
+		end
+	end)
+
 	local function refresh(p: Types.Profile?)
+		shownProfile = p
+		refreshPoints()
 		for _, update in ipairs(updates) do
 			update(p)
 		end

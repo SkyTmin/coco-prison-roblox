@@ -8,10 +8,12 @@
 -- reach the clients through ReplicatedStorage.SharedBoosters. A booster of a kind and scope that already runs waits
 -- in the queue and starts when the one before it ends. Times are workspace:GetServerTimeNow() seconds (the client
 -- counts down the same clock) and run on while the player is offline [решение]. Kinds: blocks (dug blocks), money
--- (selling), mobs (kills). Several boosters of one kind add up: 1 + Σ(mult − 1) [решение].
+-- (selling), mobs (kills). Several boosters of one kind add up: 1 + Σ(mult − 1) [решение]; a point of the Дворы held by
+-- the player's faction adds its +0.2 the same way (Shared/Warzone).
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(script.Parent.Config)
+local Warzone = require(script.Parent.Warzone)
 
 export type Stored = { kind: string, mult: number, minutes: number, count: number, scope: string? }
 export type Active = {
@@ -24,6 +26,7 @@ export type Active = {
 	gang: string?, -- gang scope: the gang id whose members it boosts (quest rewards, GangService)
 	by: string?, -- shared boosters: who started it (shown in the HUD)
 	id: string?, -- shared boosters: the activation id
+	point: string?, -- a held point of the Дворы (Shared/Warzone): not a booster, never stored or queued
 }
 
 local Boosters = {}
@@ -112,6 +115,18 @@ function Boosters.runningAll(p: any, now: number?): { Active }
 		if a.startsAt <= t and t < a.endsAt and applies(p, a) then
 			table.insert(out, a)
 		end
+	end
+	-- the points of the Дворы the player's faction holds: «(+0.2x)» to that kind [вики], shown with the faction ones
+	for _, bonus in ipairs(Warzone.bonuses(p, t)) do
+		table.insert(out, {
+			kind = bonus.kind,
+			mult = 1 + Warzone.cfg.bonus,
+			startsAt = bonus.since,
+			endsAt = bonus.untilAt,
+			scope = "faction",
+			faction = bonus.faction,
+			point = bonus.point,
+		})
 	end
 	return out
 end

@@ -140,6 +140,7 @@ LocationService.Start()
 require(script.Services.GangHouseService).Start() -- База банды: a house of its own for every gang (copies of a template)
 require(script.Services.GangBaseService).Start() -- База банды: Библиотекарь, Кузнец, Шнырь
 require(script.Services.GhettoService).Start() -- Гетто: Торговец, Чёрный рынок, Сундук с сокровищами
+require(script.Services.WarzoneService).Start() -- Дворы: four faction points captured by digging at the beacons
 TrainerService.Start()
 require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
 require(script.Services.PotionService).Start() -- the potion stand: brewing, drinking, splash potions

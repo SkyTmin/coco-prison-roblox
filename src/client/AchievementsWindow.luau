@@ -239,6 +239,132 @@ function AchievementsWindow.build(
 		end)
 	end
 
+	-- counter achievements (Achievements.statCards, e.g. the Дворы points): one star per named step, the title is the
+	-- step being worked on, always visible, after the digger cards
+	for index, card in ipairs(Achievements.statCards) do
+		local steps = #card.steps
+		local frame = Ui.card(list, UDim2.fromOffset(CARD_W, CARD_H), UDim2.new())
+		frame.Name = "Card_" .. card.id
+		frame.LayoutOrder = #Achievements.cards + index
+		image(frame, 40, UDim2.fromOffset(8, 8), Config.icons.icons[card.icon])
+		local name = Ui.label(
+			frame,
+			"",
+			UDim2.new(1, -96, 0, 18),
+			UDim2.fromOffset(56, 6),
+			13,
+			Ui.colors.green
+		)
+		local stepLabel = Ui.label(
+			frame,
+			"",
+			UDim2.fromOffset(32, 18),
+			UDim2.new(1, -40, 0, 6),
+			13,
+			Ui.colors.gray
+		)
+		stepLabel.TextXAlignment = Enum.TextXAlignment.Right
+		local stars: { TextLabel } = {}
+		for i = 1, steps do
+			local star = Ui.label(
+				frame,
+				"★",
+				UDim2.fromOffset(17, 16),
+				UDim2.fromOffset(54 + (i - 1) * 18, 28),
+				15,
+				STAR_GREY
+			)
+			star.TextXAlignment = Enum.TextXAlignment.Center
+			stars[i] = star
+		end
+		local goal = Ui.label(
+			frame,
+			"",
+			UDim2.new(1, -16, 0, 16),
+			UDim2.fromOffset(8, 52),
+			12,
+			Ui.colors.text
+		)
+		local bar = Instance.new("Frame")
+		bar.Size = UDim2.new(1, -16, 0, 16)
+		bar.Position = UDim2.fromOffset(8, 70)
+		bar.BackgroundColor3 = Ui.colors.inset
+		bar.BorderSizePixel = 0
+		bar.Parent = frame
+		local fill = Instance.new("Frame")
+		fill.BackgroundColor3 = BAR_BLUE
+		fill.BorderSizePixel = 0
+		fill.Parent = bar
+		local barText = Ui.label(bar, "", UDim2.fromScale(1, 1), UDim2.new(), 11, Ui.colors.white)
+		barText.TextXAlignment = Enum.TextXAlignment.Center
+		barText.ZIndex = 2
+		local rewardTitle = Ui.label(
+			frame,
+			T("achievement_reward_label"),
+			UDim2.fromOffset(90, 22),
+			UDim2.fromOffset(8, 92),
+			12,
+			Ui.colors.muted
+		)
+		rewardTitle.AutomaticSize = Enum.AutomaticSize.X
+		local rewardIcon = image(frame, 18, UDim2.fromOffset(100, 94), nil)
+		local rewardText = Ui.label(
+			frame,
+			"",
+			UDim2.new(1, -130, 0, 22),
+			UDim2.fromOffset(122, 92),
+			12,
+			Ui.colors.money
+		)
+		rewardText.TextTruncate = Enum.TextTruncate.AtEnd
+
+		table.insert(updates, function(p: Types.Profile): (boolean, boolean)
+			local claimed = Achievements.statClaimed(p, card)
+			local have = Achievements.statProgress(p, card)
+			local complete = claimed >= steps
+			local step = math.min(claimed + 1, steps)
+			local target = card.steps[step].count
+			name.Text = T("achievement_" .. card.id .. "_" .. step)
+			stepLabel.Text = tostring(step)
+			for i, star in ipairs(stars) do
+				star.TextColor3 = if i <= claimed then STAR_YELLOW else STAR_GREY
+			end
+			if complete then
+				goal.Text = T("achievement_done_short")
+				goal.TextColor3 = Ui.colors.money
+				fill.Size = UDim2.fromScale(1, 1)
+				fill.BackgroundColor3 = Ui.colors.buttonGreen
+				barText.Text = Strings.big(have)
+				rewardTitle.Visible, rewardIcon.Visible, rewardText.Visible = false, false, false
+				return true, true
+			end
+			goal.Text = T("achievement_" .. card.id .. "_goal", Strings.big(target))
+			goal.TextColor3 = Ui.colors.text
+			fill.Size = UDim2.fromScale(math.clamp(have / target, 0, 1), 1)
+			fill.BackgroundColor3 = BAR_BLUE
+			barText.Text = string.format("%s / %s", Strings.big(have), Strings.big(target))
+			local reward = Achievements.statReward(card.steps[step])
+			rewardTitle.Visible, rewardText.Visible = true, true
+			if reward.booster then
+				local scope = reward.scope or "local"
+				rewardIcon.Image = Boosters.icon(reward.booster, scope)
+				rewardText.Text = string.format(
+					"%s x%s",
+					Strings.t("booster_" .. reward.booster, locale),
+					tostring(Config.boosters.localMultiplier)
+				)
+				rewardText.TextColor3 = Boosters.SCOPE_COLORS[scope]
+			else
+				rewardIcon.Image = Config.icons.icons.money or ""
+				rewardText.Text = Strings.grouped((reward.money or 0) / Config.moneyScale, 0)
+					.. " $"
+				rewardText.TextColor3 = Ui.colors.money
+			end
+			rewardIcon.Visible = rewardIcon.Image ~= ""
+			return true, false
+		end)
+	end
+
 	local function refresh(p: Types.Profile?)
 		if not p then
 			return

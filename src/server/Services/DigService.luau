@@ -9,7 +9,8 @@
 -- to the block centre, so a block seen from above at the pit edge is diggable even when its centre is
 -- farther away or hidden behind a neighbour. Line of sight is checked to that same hit point.
 -- Rewards: inventory (dropsAs + dropCount), blocksTotal (× block upgrade), upgrade counters,
--- profession xp, ordinary key roll, artifact fragments, combo (resets after idle, see rules.combo).
+-- profession xp, ordinary key roll, artifact fragments, combo (resets after idle, see rules.combo), capture points
+-- on the pads of the Дворы (WarzoneService).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -31,6 +32,7 @@ local HungerService = require(script.Parent.HungerService)
 local AchievementService = require(script.Parent.AchievementService)
 local ArtifactService = require(script.Parent.ArtifactService)
 local GangService = require(script.Parent.GangService)
+local WarzoneService = require(script.Parent.WarzoneService)
 
 local REACH = (Config.rules.digging and Config.rules.digging.reachStuds or 18) :: number -- [ваниль] 4.5 blocks
 -- The client digs at 4.5 blocks; the server accepts up to 6 like the vanilla server [ваниль]: it sees the
@@ -361,6 +363,7 @@ local function complete(player: Player, token: number)
 	GangService.progress(player, "dig", 1) -- gang quests: blocks
 	GangService.progress(player, "sell", sold / Config.moneyScale) -- gang quests: the auto-sell is selling too
 	AchievementService.OnDug(player, blockId)
+	WarzoneService.OnDug(player, mine.id) -- the Дворы: a block of a point's pad is a capture point
 	ArtifactService.Notify(player, artifactNotices)
 	if overflow > 0 or keyFull then
 		toast(player, "bag_full")

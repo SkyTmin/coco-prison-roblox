@@ -120,9 +120,9 @@ for (const [id, dec] of Object.entries(decisions.mines)) {
 		requiresGang: dec.requiresGang ?? false,
 		requiresGangUpgrade: dec.requiresGangUpgrade ?? null,
 		friendlyFire: dec.friendlyFire ?? false,
-		miniMine: null,
-		mine: { size: def.size, resetSeconds: def.resetSeconds, warnSeconds: def.warnSeconds, shares: {} },
-		mines: {},
+		miniMine: dec.miniMine ?? null, // Дворы: the 5×5 pads at the beacons (mines.warzone_<point>)
+		mine: { size: def.size, resetSeconds: def.resetSeconds, warnSeconds: dec.warnSeconds ?? def.warnSeconds, shares: {} },
+		mines: Object.fromEntries(Object.entries(decisions.mines).filter(([k, v]) => k.startsWith(id + "_") && v.shares).map(([k, v]) => [k, { shares: v.shares, ...(v.resetSeconds ? { resetSeconds: v.resetSeconds } : {}), source: v._source || "[решение]" }])),
 		sellList: [],
 		sharesSource: "[решение]",
 	});
@@ -294,6 +294,7 @@ const artifactTiers = Object.fromEntries(Object.entries(decisions.artifacts.tier
 write("artifacts.json", { source: "[меню, клиент]; шанс за блок [владелец], из кейса [решение]; картинки — assets/artifacts/ids.json", ...decisions.artifacts, tiers: artifactTiers });
 write("market.json", { source: "[меню] NPC-MENU-RECOVERY", ...decisions.market });
 write("ghetto.json", { source: "[вики, клиент] Гетто; числа — [решение] (docs/research/remaining-features-design.md, этап 1в)", ...decisions.ghetto });
+write("warzone.json", { source: "[клиент, вики] Дворы и фракционные точки; числа — [решение] (docs/research/remaining-features-design.md, этап 2)", ...decisions.warzone });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
 const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;
 const blockArmor = blockArmorIds?.faces;

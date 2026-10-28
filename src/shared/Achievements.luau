@@ -16,12 +16,18 @@ export type Card = {
 	price: number, -- $ per block, for the money check
 }
 export type Reward = { money: number?, booster: string?, scope: string? }
+-- a counter achievement with named steps (design-decisions achievements.statCards): progress = p.stats[stat], step n is
+-- called Strings achievement_<id>_<n>, the goal achievement_<id>_goal; p.achievements[id] = claimed steps
+export type StatStep = { count: number, money: number?, booster: string?, scope: string? }
+export type StatCard = { id: string, stat: string, icon: string, steps: { StatStep } }
 
 local Achievements = {}
 local cfg = Config.achievementsCfg
 
 Achievements.cards = cfg.cards :: { Card }
 Achievements.tiers = cfg.tiers :: number
+-- Дворы: Захватчик 1 / Штурмовик 25 / Полководец 100 points [клиент prison.warzone.points*]
+Achievements.statCards = (cfg.statCards or {}) :: { StatCard }
 
 local byBlock: { [string]: Card } = {}
 for _, card in ipairs(Achievements.cards) do
@@ -73,6 +79,22 @@ function Achievements.satisfied(count: number): number
 		tier += 1
 	end
 	return tier
+end
+
+-- counter achievements: progress, claimed steps, the reward of a step (money in 1/moneyScale units)
+function Achievements.statProgress(p: any, card: StatCard): number
+	return if p.stats then p.stats[card.stat] or 0 else 0
+end
+
+function Achievements.statClaimed(p: any, card: StatCard): number
+	return math.clamp(p.achievements[card.id] or 0, 0, #card.steps)
+end
+
+function Achievements.statReward(step: StatStep): Reward
+	if step.booster then
+		return { booster = step.booster, scope = step.scope }
+	end
+	return { money = (step.money or 0) * Config.moneyScale }
 end
 
 return Achievements

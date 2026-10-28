@@ -37,6 +37,7 @@ Config.artifacts = load("artifacts")
 Config.market = load("market")
 Config.gangs = load("gangs") -- gangs (Shared/Gangs, GangService)
 Config.ghetto = load("ghetto") -- the Ghetto: trader, black market, treasure chest (GhettoService)
+Config.warzone = load("warzone") -- the Дворы: four faction capture points (Shared/Warzone, WarzoneService)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

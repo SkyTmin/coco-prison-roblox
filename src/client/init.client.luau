@@ -1239,6 +1239,7 @@ local DESCRIBED_LOCATIONS: { [string]: boolean } = {
 	basement = true,
 	gang_base = true,
 	ghetto = true,
+	warzone = true,
 }
 
 local function locationCategory(location: Config.Location): string
@@ -3146,6 +3147,7 @@ end
 do
 	CreativeWindow.Listen()
 	require(script.BossHud).Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
+	require(script.WarzoneHud).Start(gui) -- the Дворы: boards over the beacons, the capture hint at a free point
 	require(script.BossAnimator).Start() -- smooth boss joints from its Action attributes
 	require(script.MobAnimator).Start() -- Blender clips on the rats (idle, walk, bite, hurt, death)
 	TopBoards.Start(function() -- the spawn top boards

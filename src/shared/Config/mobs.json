@@ -13,7 +13,8 @@
       "locations": [
         "basement",
         "fraction_base",
-        "ghetto"
+        "ghetto",
+        "warzone"
       ],
       "_source": "[владелец] 20 HP",
       "respawnSeconds": 120,

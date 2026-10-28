@@ -113,11 +113,21 @@ function BoosterHud.start(
 				local scope = Boosters.scopeOf(a)
 				local color = Boosters.SCOPE_COLORS[scope]
 				local left = math.max(0, math.floor(a.endsAt - now))
-				local waiting = Boosters.queueAfter(p, a)
+				-- a held point of the Дворы is not in any queue
+				local waiting = if a.point then 0 else Boosters.queueAfter(p, a)
 				row.icon.Image = Boosters.icon(a.kind, scope)
 				-- after the scope: who started a faction / global one, then the queue
 				local parts = {}
-				if a.by and scope ~= "local" then
+				if a.point then
+					table.insert(
+						parts,
+						string.format(
+							'<font color="%s">%s</font>',
+							Ui.hex(Ui.colors.white),
+							t("warzone_point_" .. a.point)
+						)
+					)
+				elseif a.by and scope ~= "local" then
 					table.insert(
 						parts,
 						string.format('<font color="%s">%s</font>', Ui.hex(Ui.colors.white), a.by)

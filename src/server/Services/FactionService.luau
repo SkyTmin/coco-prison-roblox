@@ -5,7 +5,7 @@
 --     фракции может находиться лишь одинаковое количество игроков»] — here: members online on this server,
 --     a faction may be at most balanceSlack ahead of the smallest one [решение];
 --   * leaving costs leaveCost $ [меню: «покинуть фракцию за 2500 $»] and counts «Смен фракций»;
---     whoever leaves while on the faction base goes back to the prison spawn;
+--     whoever leaves while on the faction base or the Дворы goes back to the prison spawn;
 --   * the faction is mirrored to the player attribute Faction (nameplates, PvP, chests read it).
 
 local CollectionService = game:GetService("CollectionService")
@@ -140,7 +140,9 @@ local function leave(player: Player)
 		toast(player, "not_enough_money")
 		return
 	end
-	local wasOnBase = profile.location == "fraction_base"
+	-- the faction base and the Дворы are for faction members only [клиент]
+	local here = Config.location(profile.location)
+	local wasOnBase = here ~= nil and here.requiresFaction == true
 	ProfileService.Mutate(player, function(p)
 		p.coins -= cost
 		p.faction = nil

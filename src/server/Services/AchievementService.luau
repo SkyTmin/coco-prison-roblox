@@ -83,6 +83,47 @@ function AchievementService.OnDug(player: Player, blockId: string)
 	end
 end
 
+-- After p.stats[stat] grew (WarzoneService: warzonePoints): pays every step of the counter achievements now reached.
+function AchievementService.OnStat(player: Player, stat: string)
+	for _, card in ipairs(Achievements.statCards) do
+		if card.stat ~= stat then
+			continue
+		end
+		local done: { { step: number, reward: Achievements.Reward } } = {}
+		ProfileService.Mutate(player, function(p)
+			local have = Achievements.statProgress(p, card)
+			for step = Achievements.statClaimed(p, card) + 1, #card.steps do
+				if have < card.steps[step].count then
+					break
+				end
+				local reward = Achievements.statReward(card.steps[step])
+				if reward.booster then
+					Boosters.store(p, reward.booster, reward.scope)
+				else
+					p.coins += reward.money or 0
+				end
+				p.achievements[card.id] = step
+				table.insert(done, { step = step, reward = reward })
+			end
+		end)
+		local locale = Strings.localeOf(player)
+		local toast = Remotes.event("Toast")
+		for _, entry in ipairs(done) do
+			local name = Strings.t("achievement_" .. card.id .. "_" .. entry.step, locale)
+			toast:FireClient(player, Strings.t("achievement_done", locale, name))
+			toast:FireClient(
+				player,
+				Strings.t(
+					"achievement_reward",
+					locale,
+					AchievementService.rewardText(entry.reward, locale),
+					name
+				)
+			)
+		end
+	end
+end
+
 function AchievementService.Start() end
 
 return AchievementService

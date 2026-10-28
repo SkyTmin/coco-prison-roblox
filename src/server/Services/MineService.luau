@@ -48,6 +48,7 @@ export type Mine = {
 	rebuilding: boolean,
 	dug: number, -- blocks broken since the last reset: an untouched mine is not rebuilt
 	resetSeconds: number, -- the location's timer, or the faction base mini-mine's
+	noLadders: boolean, -- anchor attribute NoLadders: no free ladder shafts (the small pads of the Дворы)
 }
 
 local MineService = {}
@@ -244,7 +245,9 @@ local function rebuild(mine: Mine)
 	end
 	for i = 1, total do
 		local x, _, z = coords(mine, i)
-		local id = if ladderShaft(mine.size, x, z) then nil else pickBlock(mine.shares, rng)
+		local id = if not mine.noLadders and ladderShaft(mine.size, x, z)
+			then nil
+			else pickBlock(mine.shares, rng)
 		if id then
 			layout[i] = id
 		end
@@ -462,6 +465,7 @@ local function register(anchor: Instance)
 			then location.miniMine.resetSeconds
 			elseif override and override.resetSeconds then override.resetSeconds
 			else location.mine.resetSeconds,
+		noLadders = anchor:GetAttribute("NoLadders") == true,
 	}
 	mines[mineId] = mine
 	anchor.Transparency = 1
@@ -567,7 +571,9 @@ function MineService.Start()
 					end
 					continue
 				end
-				if left <= mine.location.mine.warnSeconds and not warned[id] then
+				-- warnSeconds 0: no warning (the Дворы pads reset every minute, a toast each time would be noise)
+				local warnSeconds = mine.location.mine.warnSeconds
+				if warnSeconds > 0 and left <= warnSeconds and not warned[id] then
 					warned[id] = true
 					for _, player in ipairs(playersNear(mine)) do
 						Remotes.event("Toast"):FireClient(

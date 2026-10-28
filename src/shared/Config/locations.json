@@ -955,6 +955,68 @@
       "mines": {},
       "sellList": [],
       "sharesSource": "[решение]"
+    },
+    {
+      "id": "warzone",
+      "kind": "social",
+      "name": "Дворы",
+      "unlockLevel": 7,
+      "requiresPass": false,
+      "pvp": true,
+      "requiresFaction": true,
+      "requiresGang": false,
+      "requiresGangUpgrade": null,
+      "friendlyFire": false,
+      "miniMine": {
+        "size": [
+          5,
+          3,
+          5
+        ],
+        "resetSeconds": 60
+      },
+      "mine": {
+        "size": [
+          40,
+          16,
+          40
+        ],
+        "resetSeconds": 480,
+        "warnSeconds": 0,
+        "shares": {}
+      },
+      "mines": {
+        "warzone_money": {
+          "shares": {
+            "iron_ore": 0.6,
+            "stone": 0.4
+          },
+          "source": "[решение] площадка точки «Деньги»: железная руда и камень (всё копается каменной киркой — 7 ур.)"
+        },
+        "warzone_blocks": {
+          "shares": {
+            "coal_ore": 0.6,
+            "stone": 0.4
+          },
+          "source": "[решение] площадка точки «Блоки»: угольная руда и камень"
+        },
+        "warzone_mobs": {
+          "shares": {
+            "quartz_ore": 0.6,
+            "stone": 0.4
+          },
+          "source": "[решение] площадка точки «Мобы»: кварцевая руда и камень"
+        },
+        "warzone_haste": {
+          "shares": {
+            "lapis_block": 0.5,
+            "stone": 0.5
+          },
+          "source": "[решение] площадка точки «Спешка»: лазурит и камень"
+        }
+      },
+      "sellList": [],
+      "sharesSource": "[решение]"
     }
   ]
 }
