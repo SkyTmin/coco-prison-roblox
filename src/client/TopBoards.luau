@@ -1,6 +1,6 @@
 --!strict
 -- The spawn top boards [владелец 22.10, скриншоты Prison Classic]: on every part tagged "TopBoard" (attribute
--- Board = rats / money / level / blocks; scripts/build-tops.luau) a SurfaceGui in PlayerGui draws the table
+-- Board = rats / money / level / blocks / deaths; scripts/build-tops.luau) a SurfaceGui in PlayerGui draws the table
 -- from ReplicatedStorage.Tops.<board> (LeaderboardService): a title bar, the header «# · Игрок · <value>»,
 -- then the rows — places 1–3 with a gold / light-blue / orange crown, the name in its faction's colour with
 -- the nickname after it in white, the value in green with its icon; 10 rows show, the rest scroll.
@@ -22,6 +22,7 @@ local ROW, GAP = 44, 5
 local CELL = Color3.fromRGB(34, 34, 36)
 local BACK = Color3.fromRGB(56, 40, 32)
 local GREEN = Color3.fromRGB(110, 230, 80)
+local RED = Color3.fromRGB(255, 85, 85) -- the deaths board: red numbers [вики MENUS-SOCIAL]
 local GOLD = Color3.fromRGB(255, 170, 0) -- with boosts, like the sidebar (Ui.colors.orange, Minecraft gold)
 local GRAY = Color3.fromRGB(170, 170, 170) -- clean
 local CROWNS =
@@ -33,6 +34,7 @@ local BOARDS = {
 	money = { title = "top_money", value = "top_value_money", icon = "hud_money" },
 	level = { title = "top_level", value = "top_value_level", dot = true },
 	blocks = { title = "top_blocks", value = "top_value_blocks", icon = "hud_blocks", total = true },
+	deaths = { title = "top_deaths", value = "top_value_deaths", dot = true, color = RED },
 }
 
 local localeOf: () -> string = function()
@@ -116,7 +118,7 @@ local function valueContent(parent: Frame, board: string, s: string, size: numbe
 	limit.MaxTextSize = size
 	limit.Parent = l
 	if def.dot then
-		local d = text(parent, "●", size, GREEN)
+		local d = text(parent, "●", size, def.color or GREEN)
 		d.Size = UDim2.new(0, 28, 1, 0)
 		d.Position = UDim2.new(1, -34, 0, 0)
 	elseif def.icon then
@@ -231,7 +233,7 @@ local function render(part: BasePart, gui: SurfaceGui)
 				)
 				else formatValue(board :: string, tonumber(row.v) or 0),
 			28,
-			GREEN
+			def.color or GREEN
 		)
 	end
 end

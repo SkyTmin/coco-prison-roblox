@@ -1,7 +1,8 @@
 --!nocheck
 -- Spawn top boards [владелец 22.10, скриншоты Prison Classic: «на спавне топы игроков»]: four stone-brick
 -- portals on the lawns either side of the spawn plaza, facing the fountain — Топ по крысам, по деньгам,
--- по уровню, по блокам. Each board is a part tagged "TopBoard" (attribute Board); the client draws the table
+-- по уровню, по блокам — and the fifth, Топ по смертям [вики MENUS-SOCIAL], on the south lawn east of the spoke to
+-- the Малая шахта (between the plaza hedge z = 45 and the ring road z = 56) [решение]. Each board is a part tagged "TopBoard" (attribute Board); the client draws the table
 -- on it (src/client/TopBoards.luau) from ReplicatedStorage.Tops (LeaderboardService).
 -- Run in Studio (Edit) after build-prison / decorate-prison. Idempotent: replaces Workspace.Prison.Tops and
 -- removes the decoration props standing where the portals go (decorate-prison keeps out of Tops next time).
@@ -82,22 +83,25 @@ local function portal(id, frame)
 	return model
 end
 
--- lawns west and east of the plaza (plaza edge x = ±45, ring road beyond), two boards each, facing x = 0
+-- lawns west and east of the plaza (plaza edge x = ±45, ring road beyond), two boards each, facing x = 0;
+-- the deaths board south of the plaza facing north. The third value: the direction to the fountain
 local spots = {
-	{ "rats", Vector3.new(-56, 0, -23), 1 },
-	{ "money", Vector3.new(-56, 0, 23), 1 },
-	{ "level", Vector3.new(56, 0, -23), -1 },
-	{ "blocks", Vector3.new(56, 0, 23), -1 },
+	{ "rats", Vector3.new(-56, 0, -23), Vector3.xAxis },
+	{ "money", Vector3.new(-56, 0, 23), Vector3.xAxis },
+	{ "level", Vector3.new(56, 0, -23), -Vector3.xAxis },
+	{ "blocks", Vector3.new(56, 0, 23), -Vector3.xAxis },
+	{ "deaths", Vector3.new(24, 0, 51), -Vector3.zAxis },
 }
 local removed = 0
 local decor = root:FindFirstChild("Decor")
 for _, s in ipairs(spots) do
 	local pos, dir = s[2], s[3]
-	local frame = CFrame.lookAt(pos, pos + Vector3.new(dir, 0, 0)) * CFrame.Angles(0, math.pi, 0)
+	local facing = CFrame.lookAt(pos, pos + dir)
+	local frame = facing * CFrame.Angles(0, math.pi, 0)
 	-- clear the props in the footprint (plus a little room in front)
 	if decor then
-		local box = CFrame.new(pos + Vector3.new(dir * 2, 8, 0))
-		for _, p in ipairs(workspace:GetPartBoundsInBox(box, Vector3.new(9, 16, W + 8))) do
+		local box = facing * CFrame.new(0, 8, -2)
+		for _, p in ipairs(workspace:GetPartBoundsInBox(box, Vector3.new(W + 8, 16, 9))) do
 			if p:IsDescendantOf(decor) then
 				local top = p
 				while top.Parent ~= decor do
@@ -121,4 +125,4 @@ for _, s in ipairs(spots) do
 	end
 	portal(s[1], frame)
 end
-return ("[build-tops] 4 boards, %d props cleared"):format(removed)
+return ("[build-tops] %d boards, %d props cleared"):format(#spots, removed)

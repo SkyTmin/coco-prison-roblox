@@ -3,10 +3,16 @@
 -- Shared storages: the faction chests (FactionStorageService) and the gang storage on the База банды (tag GangChest,
 -- GangChestService: pages of 27 slots, one server at a time; GangChestPage(page) turns the page, the player attributes
 -- GangChestPage / GangChestPages tell the window where it is).
+-- The Хранилище [вики DONATE-SHOP-BOOSTERS; сеть S6]: every EnderChest (Спавн, the vault building of
+-- scripts/build-vault.luau with attribute Vault, the faction base) opens the same p.enderChest of up to 3 sections of
+-- 27 (Shared/Vault). The window sends the section it shows with each CaseMove (only an open one is accepted) and buys
+-- the next section with VaultUnlock(section, "dollars" | "crystals"). Everything stays in the profile: no dupe path.
 local CollectionService = game:GetService("CollectionService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
@@ -22,6 +28,7 @@ local GangChest = require(script.Parent.GangChestService)
 local GangService = require(script.Parent.GangService)
 local GangHouse = require(script.Parent.GangHouseService)
 local Types = require(Shared.Types)
+local Vault = require(Shared.Vault)
 
 type Reward = {
 	id: string,
@@ -677,7 +684,32 @@ openCase = function(player: Player, id: any, requestedKey: any)
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
 
-local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount: any)
+-- the Хранилище section a move of the ender chest addresses: only an open one (Shared/Vault); every other storage 1
+local function moveSection(player: Player, id: string, rawSection: any): number?
+	if id ~= "enderChest" then
+		return 1
+	end
+	local profile = ProfileService.Get(player)
+	if
+		typeof(rawSection) ~= "number"
+		or rawSection ~= math.floor(rawSection)
+		or rawSection < 1
+		or rawSection > Vault.unlocked(profile)
+	then
+		return nil
+	end
+	return rawSection
+end
+
+-- rawSection: the Хранилище section the window shows (enderChest only); the case slot index is within that section
+local function move(
+	player: Player,
+	id: any,
+	rawFrom: any,
+	rawTo: any,
+	rawCount: any,
+	rawSection: any
+)
 	local count = if typeof(rawCount) == "number" then rawCount else nil
 	local session = validate(player, id)
 	local from, to = address(rawFrom), address(rawTo)
@@ -689,6 +721,15 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 	then
 		return
 	end
+	local section = moveSection(player, session.id, rawSection)
+	if not section then
+		return
+	end
+	-- the slots of p.enderChest behind the window's case slots (other containers: the slot itself)
+	local fromIndex = if from.container == "case"
+		then Vault.slot(section, from.index)
+		else from.index
+	local toIndex = if to.container == "case" then Vault.slot(section, to.index) else to.index
 	local now = os.clock()
 	session.tokens = math.min(80, session.tokens + (now - session.tokenAt) * 40)
 	session.tokenAt = now
@@ -705,10 +746,10 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 		local contents = shared or contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
-		if not source[from.index] then
+		if not source[fromIndex] then
 			return
 		end
-		local stack = source[from.index]
+		local stack = source[fromIndex]
 		if
 			from.container == "case"
 			and to.container == "inv"
@@ -723,7 +764,7 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 				and amount == math.floor(amount)
 			then
 				-- Remove the claim before crediting; replaying this move sees an empty slot.
-				source[from.index] = nil
+				source[fromIndex] = nil
 				p.coins += amount
 				claimedMoney = amount
 			end
@@ -731,9 +772,9 @@ local function move(player: Player, id: any, rawFrom: any, rawTo: any, rawCount:
 		end
 		-- Reuse inventory merge/swap and stack limits for both containers.
 		local staged = table.clone(p)
-		staged.inventory = { [1] = source[from.index], [2] = target[to.index] }
+		staged.inventory = { [1] = source[fromIndex], [2] = target[toIndex] }
 		InventoryService.move(staged, 1, 2, count)
-		source[from.index], target[to.index] = staged.inventory[1], staged.inventory[2]
+		source[fromIndex], target[toIndex] = staged.inventory[1], staged.inventory[2]
 	end)
 	if claimedMoney > 0 then
 		toast(player, "case_money", Strings.money(claimedMoney))
@@ -786,6 +827,92 @@ local function turnPage(player: Player, rawPage: any)
 	Remotes.event("CaseUpdated"):FireClient(player, "gangChest", true)
 end
 
+-- «Открыть за 10 000 $» / «за 199 кр.» in the Хранилище window [вики DONATE-SHOP-BOOSTERS]: the next section only
+-- (strictly in order: «Не торопитесь!»), with the ender chest open. `section` is the one the button showed, so a
+-- double click or a stale window never pays twice; the price is checked and taken in the same mutation.
+local unlockAt: { [Player]: number } = {}
+local function unlockSection(player: Player, rawSection: any, currency: any)
+	if
+		not validate(player, "enderChest")
+		or typeof(rawSection) ~= "number"
+		or (currency ~= "dollars" and currency ~= "crystals")
+		or os.clock() - (unlockAt[player] or -math.huge) < 0.5
+	then
+		return
+	end
+	unlockAt[player] = os.clock()
+	local price = Vault.price(rawSection)
+	local result: string? = nil
+	ProfileService.Mutate(player, function(p)
+		local open = Vault.unlocked(p)
+		if open >= Vault.MAX then
+			result = "vault_max"
+			return
+		elseif not price or rawSection ~= open + 1 then
+			result = if rawSection > open + 1 then "vault_in_order" else nil
+			return
+		end
+		if currency == "dollars" then
+			local cost = math.floor(price.dollars * Config.moneyScale + 0.5)
+			if p.coins < cost then
+				result = "vault_no_money"
+				return
+			end
+			p.coins -= cost
+		else
+			local have = p.crystals or 0
+			if have < price.crystals then
+				result = "vault_no_crystals"
+				return
+			end
+			p.crystals = have - price.crystals
+		end
+		p.vaultSections = open + 1
+		result = "vault_unlocked"
+	end)
+	if result then
+		toast(player, result)
+	end
+	Remotes.event("CaseUpdated"):FireClient(player, "enderChest", true)
+	if result == "vault_unlocked" then
+		task.spawn(ProfileService.SaveNow, player) -- paid with crystals / dollars: keep it through a crash
+	end
+end
+
+-- QA (Studio only): ServerStorage.VaultDebug — ("state", userId) → JSON {sections, used = {per section}};
+-- ("sections", userId, n) sets the open sections (1 … MAX; items in a closed section stay, unseen)
+local function debugHook()
+	if not RunService:IsStudio() then
+		return
+	end
+	local hook = Instance.new("BindableFunction")
+	hook.Name = "VaultDebug"
+	hook.OnInvoke = function(op: string, userId: number, n: any): any
+		local player = Players:GetPlayerByUserId(userId)
+		local profile = player and ProfileService.Get(player)
+		if not player or not profile then
+			return nil
+		end
+		if op == "sections" and typeof(n) == "number" then
+			ProfileService.Mutate(player, function(p)
+				p.vaultSections = math.clamp(math.floor(n), 1, Vault.MAX)
+			end)
+			Remotes.event("CaseUpdated"):FireClient(player, "enderChest", true)
+		end
+		local used = {}
+		for section = 1, Vault.MAX do
+			used[section] = 0
+			for index = 1, Vault.SLOTS do
+				if profile.enderChest[Vault.slot(section, index)] then
+					used[section] += 1
+				end
+			end
+		end
+		return HttpService:JSONEncode({ sections = Vault.unlocked(profile), used = used })
+	end
+	hook.Parent = ServerStorage
+end
+
 local function unbind(part: Instance)
 	local binding = bindings[part]
 	if binding then
@@ -806,7 +933,9 @@ local function bind(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "CasePrompt"
-	prompt.ActionText = Strings.t(containerTitle(id))
+	-- the chest in the Хранилище building (scripts/build-vault.luau, attribute Vault) is the same ender chest
+	prompt.ActionText =
+		Strings.t(if part:GetAttribute("Vault") then "vault_title" else containerTitle(id))
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = RANGE
 	prompt.RequiresLineOfSight = false -- usable from any side of the chest model
@@ -840,7 +969,9 @@ local function bind(part: Instance)
 			local current = caseId(part)
 			prompt.Enabled = current ~= nil
 			if current then
-				prompt.ActionText = Strings.t(containerTitle(current))
+				prompt.ActionText = Strings.t(
+					if part:GetAttribute("Vault") then "vault_title" else containerTitle(current)
+				)
 			end
 			if info then
 				info.Enabled = current ~= nil and CASES[current] ~= nil
@@ -866,6 +997,8 @@ function CaseService.Start()
 	Remotes.event("CaseOpen").OnServerEvent:Connect(openCase)
 	Remotes.event("CaseMove").OnServerEvent:Connect(move)
 	Remotes.event("GangChestPage").OnServerEvent:Connect(turnPage)
+	Remotes.event("VaultUnlock").OnServerEvent:Connect(unlockSection)
+	debugHook()
 	GangChest.SetViewerCounter(function(gangId: string): number
 		local n = 0
 		for _, session in pairs(sessions) do
@@ -882,6 +1015,7 @@ function CaseService.Start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		sessions[player] = nil
+		unlockAt[player] = nil
 	end)
 	local function watchNickname(player: Player)
 		player.CharacterAdded:Connect(function()

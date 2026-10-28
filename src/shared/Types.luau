@@ -53,7 +53,10 @@ export type Profile = {
 	counters: { [string]: number }, -- upgrade counters by display name ("Земля", "Крысы", …)
 	inventory: { [number]: ItemStack }, -- slots 1..36 (1..9 = hotbar)
 	caseContents: { [string]: { [number]: ItemStack } }, -- per case kind, sparse slots 1..27; schema stays v3
-	enderChest: { [number]: ItemStack }, -- personal sparse slots 1..27; schema stays v3
+	-- personal sparse slots: the Хранилище (ender chest) has up to 3 sections of 27 [сеть S6], section s = slots
+	-- (s − 1)·27 + 1 … s·27; schema stays v3
+	enderChest: { [number]: ItemStack },
+	vaultSections: number?, -- unlocked Хранилище sections 1..3 (CaseService VaultUnlock); nil = 1
 	artifacts: { [string]: ArtifactTier }, -- common / rare / epic; schema stays v3
 	armor: { [string]: ItemStack }, -- helmet / chestplate / leggings / boots
 	selectedSlot: number,

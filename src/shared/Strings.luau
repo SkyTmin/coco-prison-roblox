@@ -780,6 +780,14 @@ local STRINGS: { [string]: Entry } = {
 		es = "Top de bloques",
 		fr = "Top des blocs",
 	},
+	-- [клиент board.top.deaths.*; вики MENUS-SOCIAL] the fifth board
+	top_deaths = {
+		ru = "Топ по смертям",
+		en = "Top deaths",
+		es = "Top de muertes",
+		fr = "Top des morts",
+	},
+	top_value_deaths = { ru = "Смертей", en = "Deaths", es = "Muertes", fr = "Morts" },
 	top_player = { ru = "Игрок", en = "Player", es = "Jugador", fr = "Joueur" },
 	top_value_rats = { ru = "Крысы", en = "Rats", es = "Ratas", fr = "Rats" },
 	top_value_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
@@ -880,6 +888,80 @@ local STRINGS: { [string]: Entry } = {
 		en = "Ender chest",
 		es = "Cofre de Ender",
 		fr = "Coffre de l’Ender",
+	},
+	-- the Хранилище = the ender chest in up to 3 sections [вики DONATE-SHOP-BOOSTERS; клиент storage.*]
+	vault_title = { ru = "Хранилище", en = "Vault", es = "Almacén", fr = "Coffre-fort" },
+	vault_section = {
+		ru = "Отсек %d",
+		en = "Section %d",
+		es = "Sección %d",
+		fr = "Section %d",
+	},
+	vault_section_locked = {
+		ru = "Отсек %d · закрыт",
+		en = "Section %d · locked",
+		es = "Sección %d · cerrada",
+		fr = "Section %d · fermée",
+	},
+	vault_opened = {
+		ru = "Хранилище · открыто %d из %d",
+		en = "Vault · %d of %d open",
+		es = "Almacén · %d de %d abiertas",
+		fr = "Coffre-fort · %d sur %d ouvertes",
+	},
+	vault_price_dollars = {
+		ru = "Открыть · %s $",
+		en = "Open · %s $",
+		es = "Abrir · %s $",
+		fr = "Ouvrir · %s $",
+	},
+	vault_price_crystals = {
+		ru = "Открыть · %d кр.",
+		en = "Open · %d cr.",
+		es = "Abrir · %d cr.",
+		fr = "Ouvrir · %d cr.",
+	},
+	vault_confirm = {
+		ru = "Точно? %s",
+		en = "Sure? %s",
+		es = "¿Seguro? %s",
+		fr = "Sûr ? %s",
+	},
+	vault_buy_hint = {
+		ru = "Отсек %d: 27 слотов — за доллары или за кристаллы",
+		en = "Section %d: 27 slots — for dollars or crystals",
+		es = "Sección %d: 27 espacios — por dólares o cristales",
+		fr = "Section %d : 27 emplacements — en dollars ou en cristaux",
+	},
+	vault_in_order = {
+		ru = "Не торопитесь! Сначала откройте предыдущий отсек",
+		en = "Not so fast! Open the previous section first",
+		es = "¡Sin prisa! Primero abre la sección anterior",
+		fr = "Pas si vite ! Ouvrez d’abord la section précédente",
+	},
+	vault_unlocked = {
+		ru = "Вы успешно расширили Хранилище!",
+		en = "You have expanded your Vault!",
+		es = "¡Has ampliado tu Almacén!",
+		fr = "Vous avez agrandi votre Coffre-fort !",
+	},
+	vault_max = {
+		ru = "Хранилище уже расширено до максимума",
+		en = "Your Vault is already at its maximum",
+		es = "Tu Almacén ya está al máximo",
+		fr = "Votre Coffre-fort est déjà au maximum",
+	},
+	vault_no_money = {
+		ru = "Не хватает денег на отсек",
+		en = "Not enough money for the section",
+		es = "No tienes dinero suficiente para la sección",
+		fr = "Pas assez d’argent pour la section",
+	},
+	vault_no_crystals = {
+		ru = "Не хватает кристаллов на отсек",
+		en = "Not enough crystals for the section",
+		es = "No tienes cristales suficientes para la sección",
+		fr = "Pas assez de cristaux pour la section",
 	},
 	eat_full = {
 		ru = "Вы не голодны",
@@ -5851,6 +5933,14 @@ local WORLD: { [string]: { [string]: string } } = {
 		en = "Ender chest",
 		es = "Cofre de Ender",
 		fr = "Coffre de l'Ender",
+	},
+	-- the Хранилище building (scripts/build-vault.luau): the hologram and the chest sign
+	["ХРАНИЛИЩЕ"] = { en = "VAULT", es = "ALMACÉN", fr = "COFFRE-FORT" },
+	["Хранилище"] = { en = "Vault", es = "Almacén", fr = "Coffre-fort" },
+	["3 отсека по 27 слотов"] = {
+		en = "3 sections of 27 slots",
+		es = "3 secciones de 27 espacios",
+		fr = "3 sections de 27 emplacements",
 	},
 	["Проводник: продать"] = {
 		en = "Buyer: sell",

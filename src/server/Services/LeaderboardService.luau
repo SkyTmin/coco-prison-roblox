@@ -1,6 +1,6 @@
 --!strict
 -- Spawn top boards [владелец 22.10, скриншоты; клиент prison.classic.board.top.*]: Топ по крысам (чистые),
--- по деньгам, по уровню, по блокам (чистые). One OrderedDataStore per board for the whole game: each player's
+-- по деньгам, по уровню, по блокам (чистые), по смертям. One OrderedDataStore per board for the whole game: each player's
 -- values are written every WRITE_EVERY seconds when they changed, when they leave and on shutdown; the top TOP_N of each
 -- board is read every READ_EVERY seconds. Names (display name, nickname, faction) live in TopNames_v1, written
 -- when they change. Every PUBLISH_EVERY seconds the stored top, overlaid with the live values of the players
@@ -11,6 +11,8 @@ local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 
 local ProfileService = require(script.Parent.ProfileService)
 local Types = require(ReplicatedStorage:WaitForChild("Shared").Types)
@@ -56,6 +58,15 @@ local BOARDS: { Board } = {
 			return p.stats.blocksClean or 0
 		end,
 		total = "b",
+	},
+	{
+		-- the fifth board «Топ по смертям» [клиент board.top.deaths.*; вики MENUS-SOCIAL]: deaths from players, mobs
+		-- and bosses (DeathService; falls and lava do not count). No prize ❓ [вики: вероятно, нет]
+		id = "deaths",
+		store = "Top_deaths_v1",
+		value = function(p)
+			return p.stats.deaths or 0
+		end,
 	},
 }
 
@@ -227,6 +238,19 @@ function LeaderboardService.Start()
 		end
 	end
 	folder.Parent = ReplicatedStorage
+	if RunService:IsStudio() then
+		-- QA: ServerStorage.TopsDebug — ("publish", board?) redraws the boards now and returns that board's JSON
+		local hook = Instance.new("BindableFunction")
+		hook.Name = "TopsDebug"
+		hook.OnInvoke = function(op: string, board: string?): string?
+			if op == "publish" then
+				publish()
+			end
+			local value = folder:FindFirstChild(board or "deaths")
+			return if value and value:IsA("StringValue") then value.Value else nil
+		end
+		hook.Parent = ServerStorage
+	end
 	local ok, store = pcall(function()
 		return DataStoreService:GetDataStore("TopNames_v1")
 	end)

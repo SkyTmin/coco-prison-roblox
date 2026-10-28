@@ -65,6 +65,7 @@ for _, name in ipairs({
 	"GangState",
 	"GangInvites",
 	"GangChestPage",
+	"VaultUnlock",
 	"GangHome",
 	"GangNpc",
 	"GhettoBuy",

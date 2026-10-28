@@ -20,6 +20,7 @@ local Wire = require(Shared.Wire)
 local Achievements = require(Shared.Achievements)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local Vault = require(Shared.Vault)
 
 type Profile = Types.Profile
 -- fresh: nothing was stored for this player before this load (a brand-new profile — ReferralService)
@@ -119,12 +120,11 @@ local function migrate(data: any): Profile
 		end
 		profile.inventory = decodeInventory(data.inventory)
 		profile.enderChest = decodeInventory(data.enderChest)
+		-- the Хранилище sections (Shared/Vault): a broken count is put back in 1 … MAX; slots of every possible
+		-- section stay (a locked section can hold nothing, but nothing is ever dropped because of the count)
+		profile.vaultSections = if Vault.unlocked(profile) > 1 then Vault.unlocked(profile) else nil
 		for slot in pairs(profile.enderChest) do
-			if
-				slot < 1
-				or slot > Config.rules.survival.enderChest.slots
-				or slot ~= math.floor(slot)
-			then
+			if slot < 1 or slot > Vault.SLOTS * Vault.MAX or slot ~= math.floor(slot) then
 				profile.enderChest[slot] = nil
 			end
 		end
@@ -203,7 +203,7 @@ local function migrate(data: any): Profile
 	end
 	-- Tools never stack; old profiles may hold "bow ×N" from before the bow was a tool [владелец 26.10]:
 	-- split such stacks into free slots of the same container (the ender chest holds what does not fit).
-	local chestSlots = Config.rules.survival.enderChest.slots :: number
+	local chestSlots = Vault.SLOTS * Vault.unlocked(profile) -- only into the open sections
 	local function split(
 		container: { [number]: Types.ItemStack },
 		size: number,

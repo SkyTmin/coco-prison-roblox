@@ -5,6 +5,9 @@
 -- key choice. Drag/drop and shift/double-tap quick moves come from DragDrop; the server validates every move.
 -- The gang storage (gangChest) has pages of 27: «◀ Стр. x / N ▶» instead of the key buttons (player attributes
 -- GangChestPage / GangChestPages from CaseService, GangChestPage(page) asks for another page).
+-- The ender chest is the Хранилище (Shared/Vault): tabs «Отсек 1/2/3» over the grid, the tab is local and goes with
+-- every CaseMove; a closed tab shows «Открыть за 10 000 $» / «за 199 кр.» (the next one only, a second tap
+-- confirms) or «Не торопитесь!» when an earlier section is still closed.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -12,6 +15,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local Vault = require(Shared.Vault)
 local CreativeWindow = require(script.Parent.CreativeWindow)
 local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
@@ -47,23 +51,25 @@ function ChestWindow.build(
 	local isGang = id == "gangChest"
 	local isStorage = isEnder or id == "factionChest" or isGang -- keeps items, no key, no Open button
 	local gridWidth = 9 * SLOT + 8 * GAP
-	local caseY = 4
+	local caseY = if isEnder then 38 else 4 -- the ender chest: the section tabs above
+	local section = 1 -- the Хранилище section on screen
 	local bagY = caseY + 18 + 3 * (SLOT + GAP) + 10
 	local barY = bagY + 18 + 3 * (SLOT + GAP) + 10
 	local rowY = barY + 18 + SLOT + 14
 	local win, content = createWindow(
 		parent,
-		t(TITLES[id] or "ordinary_case"),
+		t(if isEnder then "vault_title" else TITLES[id] or "ordinary_case"),
 		UDim2.fromOffset(gridWidth + 2 * PAD + 12, rowY + 34 + 26 + 44),
 		onClose
 	)
 	win.BackgroundTransparency = 0 -- the HUD under it never shows through the slots
-	local function caption(text: string, y: number)
+	local function caption(text: string, y: number): TextLabel
 		local l =
 			Ui.label(content, text, UDim2.fromOffset(gridWidth, 16), UDim2.fromOffset(PAD, y), 12)
 		l.TextColor3 = Ui.colors.muted
+		return l
 	end
-	caption(t(TITLES[id] or "ordinary_case"), caseY)
+	local caseCaption = caption(t(TITLES[id] or "ordinary_case"), caseY)
 	caption(t("inv_backpack"), bagY)
 	caption(t("inv_hotbar"), barY)
 
@@ -78,14 +84,23 @@ function ChestWindow.build(
 		if not profile then
 			return nil
 		end
-		local container = if address.container == "inv"
-			then profile.inventory
-			elseif isEnder then profile.enderChest
-			else profile.caseContents[id]
+		if address.container == "inv" then
+			return profile.inventory[address.index]
+		elseif isEnder then
+			return profile.enderChest[Vault.slot(section, address.index)]
+		end
+		local container = profile.caseContents[id]
 		return if container then container[address.index] else nil
 	end
+	-- a closed Хранилище section takes nothing (the server refuses it too)
+	local function sectionOpen(): boolean
+		return not isEnder or section <= Vault.unlocked(getProfile())
+	end
 	local function move(from: Address, to: Address, count: number?)
-		Remotes.event("CaseMove"):FireServer(id, from, to, count)
+		if (from.container == "case" or to.container == "case") and not sectionOpen() then
+			return
+		end
+		Remotes.event("CaseMove"):FireServer(id, from, to, count, if isEnder then section else nil)
 	end
 	local function quick(from: Address)
 		local container: "case" | "inv" = if from.container == "case" then "inv" else "case"
@@ -126,6 +141,31 @@ function ChestWindow.build(
 	grid("case", 1, 3, caseY + 18)
 	grid("inv", 10, 3, bagY + 18)
 	grid("inv", 1, 1, barY + 18)
+	local refresh: () -> ()
+
+	-- the Хранилище section tabs
+	local tabs: { TextButton } = {}
+	if isEnder then
+		local tabWidth = math.floor((gridWidth - (Vault.MAX - 1) * 8) / Vault.MAX)
+		for n = 1, Vault.MAX do
+			local tab = Ui.button(
+				content,
+				t("vault_section", n),
+				UDim2.fromOffset(tabWidth, 28),
+				UDim2.fromOffset(PAD + (n - 1) * (tabWidth + 8), 4),
+				Ui.colors.buttonGrey
+			)
+			tab.TextSize = 14
+			tab.Activated:Connect(function()
+				if section ~= n then
+					section = n
+					drag.Clear() -- a stack picked up in another section must not land here
+					refresh()
+				end
+			end)
+			tabs[n] = tab
+		end
+	end
 
 	-- plain buttons whose text fits (the old Minecraft buttons cut «Забрать всё»)
 	local function button(text: string, x: number, width: number, color: Color3): TextButton
@@ -189,6 +229,37 @@ function ChestWindow.build(
 			turn(1)
 		end)
 	end
+	-- the Хранилище: the two prices of the next section; the first tap arms a button, a second tap within 4 s buys
+	local buyDollars: TextButton?, buyCrystals: TextButton? = nil, nil
+	local armed: string?, armedAt = nil, 0
+	if isEnder then
+		buyDollars = button("", PAD, third, Ui.colors.buttonGreen)
+		buyCrystals = button("", PAD + third + 8, third, Ui.colors.buttonBlue)
+		local function buy(currency: string, b: TextButton)
+			if not b.Active then
+				-- not enough money / crystals: the server says so
+				Remotes.event("VaultUnlock"):FireServer(section, currency)
+			elseif armed == currency and os.clock() - armedAt < 4 then
+				armed = nil
+				Remotes.event("VaultUnlock"):FireServer(section, currency)
+			else
+				armed, armedAt = currency, os.clock()
+				task.delay(4.1, function()
+					if armed == currency and os.clock() - armedAt >= 4 then
+						armed = nil
+						refresh()
+					end
+				end)
+			end
+			refresh()
+		end
+		(buyDollars :: TextButton).Activated:Connect(function()
+			buy("dollars", buyDollars :: TextButton)
+		end);
+		(buyCrystals :: TextButton).Activated:Connect(function()
+			buy("crystals", buyCrystals :: TextButton)
+		end)
+	end
 
 	local function keyCount(key: string?): number
 		local profile = getProfile()
@@ -245,7 +316,42 @@ function ChestWindow.build(
 		b.BackgroundTransparency = if active then 0 else 0.5
 		b.TextTransparency = if active then 0 else 0.4
 	end
-	local function refresh()
+	-- the tabs, the caption «Хранилище · открыто N из 3» and the buttons of the section on screen
+	local function refreshVault()
+		local profile = getProfile()
+		local unlocked = Vault.unlocked(profile)
+		for n, tab in ipairs(tabs) do
+			tab.BackgroundColor3 = if n == section
+				then Ui.colors.buttonBlue
+				elseif n <= unlocked then Ui.colors.buttonGrey
+				else Ui.colors.slot
+			tab.Text = t(if n <= unlocked then "vault_section" else "vault_section_locked", n)
+		end
+		caseCaption.Text = t("vault_opened", unlocked, Vault.MAX)
+		local isOpen = section <= unlocked
+		local price = if isOpen then nil else Vault.price(section)
+		local isNext = section == unlocked + 1
+		take.Visible = isOpen
+		local dollars, crystals = buyDollars :: TextButton, buyCrystals :: TextButton
+		dollars.Visible = not isOpen and isNext and price ~= nil
+		crystals.Visible = dollars.Visible
+		if price then
+			local cost = t("vault_price_dollars", Strings.grouped(price.dollars, 0))
+			local gems = t("vault_price_crystals", price.crystals)
+			dollars.Text = if armed == "dollars" then t("vault_confirm", cost) else cost
+			crystals.Text = if armed == "crystals" then t("vault_confirm", gems) else gems
+			setActive(
+				dollars,
+				profile ~= nil and profile.coins >= price.dollars * Config.moneyScale
+			)
+			setActive(crystals, profile ~= nil and (profile.crystals or 0) >= price.crystals)
+		end
+		hint.Text = if isOpen
+			then ""
+			elseif not isNext then t("vault_in_order")
+			else t("vault_buy_hint", section)
+	end
+	refresh = function()
 		for _, view in ipairs(views) do
 			local stack = stackAt(view.address)
 			SlotView.render(view.name, view.count, view.icon, stack)
@@ -269,6 +375,9 @@ function ChestWindow.build(
 				end
 			end
 			hint.Text = if pages < maxPages then t("gang_chest_more") else ""
+		end
+		if isEnder then
+			refreshVault()
 		end
 		if isStorage then
 			return

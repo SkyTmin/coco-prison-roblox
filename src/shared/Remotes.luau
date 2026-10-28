@@ -7,8 +7,10 @@
 --                           BookUse(sourceSlot, "inv" | "armor", slot | piece) — a book / powder / dispeller on an item,
 --                           CaseOpen(caseId, keyId?), CaseClose(caseId),
 --                           ArtifactAssemble(tier: "common"|"rare"|"epic"),
---                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?)
---                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it.
+--                           CaseMove(caseId, {container = "case"|"inv", index}, destination, count?, section?)
+--                           caseId also accepts "enderChest" for personal storage; CaseOpen rejects it. For the
+--                           ender chest (the Хранилище) `section` = the open section the window shows (Shared/Vault);
+--                           VaultUnlock(section, "dollars" | "crystals") buys the next section (CaseService).
 -- Server → client events:  ProfileUpdated(profile) once, then ProfilePatch(ops) with the changes only, Toast(text), MineReset(mineId, state), Combo(mult, n),
 --                          AutoSold(units) — a dug block sold by the auto-sell (the «+0,057 $» at the crosshair)
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
