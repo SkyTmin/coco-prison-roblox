@@ -11,6 +11,10 @@
 -- computer), moved here from the menu grid together with the language.
 -- Этап 8 [сеть TG/40: «эффекты чар можно выключить в /settings» — for subscribers]: the «Эффекты чар PRIS+» row (the
 -- particles of Вихрь / Ярость / Бульдозер, EnchantFx), locked without PRIS+; the same switch is in the /pp window.
+-- The «Чат» section (docs/research/chat-ux-spec.md) [владелец 28.10: «МАКСИМУМ УСИЛИЙ К ЧАТУ»]: the chat on / off, its
+-- size, the feed backing, how the feed hides, bubbles over heads, global lines in the feed, tips, the chat button on a
+-- computer — the same profile settings as the gear in the open chat (ChatWindow). The rows scroll (the window stays
+-- the size of 12 rows); the scroll position survives the rebuild after every change.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -45,12 +49,22 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		night = s.night == true,
 		appleSkinOff = s.appleSkinOff == true,
 		enchantFxOff = s.enchantFxOff == true,
+		chatSize = if s.chatSize == 1 or s.chatSize == 3 then s.chatSize else 2,
+		chatBack = if s.chatBack == 1 or s.chatBack == 3 then s.chatBack else 2,
+		chatFade = if s.chatFade == 2 or s.chatFade == 3 then s.chatFade else 1,
+		bubblesOff = s.bubblesOff == true,
+		chatGlobalOff = s.chatGlobalOff == true,
+		chatOff = s.chatOff == true,
+		chatButton = s.chatButton == true,
 	}
 end
 
 local function set(key: string, value: any)
 	Remotes.event("SetSetting"):FireServer(key, value)
 end
+
+local scrollY = 0 -- where the rows were scrolled to (the window is rebuilt on every profile change)
+local VISIBLE_ROWS = 12
 
 function SettingsWindow.build(
 	parent: Instance,
@@ -65,17 +79,51 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 14
-	local win, content =
-		createWindow(parent, T("settings_title"), UDim2.fromOffset(W, rows * ROW + 56), onClose)
+	local rows = 23 -- 2 section titles, 12 general rows + the layout button, 8 chat rows
+	local win, content = createWindow(
+		parent,
+		T("settings_title"),
+		UDim2.fromOffset(W, VISIBLE_ROWS * ROW + 56),
+		onClose
+	)
 	win.Name = "Window_Settings"
+	local scroll = Instance.new("ScrollingFrame")
+	scroll.Name = "Rows"
+	scroll.BackgroundTransparency = 1
+	scroll.BorderSizePixel = 0
+	scroll.Size = UDim2.fromScale(1, 1)
+	scroll.CanvasSize = UDim2.fromOffset(0, rows * ROW)
+	scroll.ScrollBarThickness = 5
+	scroll.ScrollBarImageColor3 = Ui.colors.border
+	scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+	scroll.Parent = content
+	task.defer(function()
+		scroll.CanvasPosition = Vector2.new(0, scrollY)
+	end)
+	scroll:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+		scrollY = scroll.CanvasPosition.Y
+	end)
+	local W_ROW = W - 12 - 8 -- the rows leave room for the scroll bar
+	-- a section title over its rows («Общие», «Чат»)
+	local function section(slot: number, caption: string)
+		local title = Ui.label(
+			scroll,
+			caption,
+			UDim2.new(1, -8, 0, ROW - 10),
+			UDim2.fromOffset(4, slot * ROW + 6),
+			15,
+			Ui.colors.header
+		)
+		title.Name = "Section" .. slot
+	end
+	-- general rows sit at slot i (the «Общие» title takes slot 0)
 	local function row(i: number, caption: string): Frame
 		local line = Instance.new("Frame")
 		line.Name = "Row" .. i
 		line.BackgroundTransparency = 1
-		line.Size = UDim2.new(1, 0, 0, ROW - 6)
-		line.Position = UDim2.fromOffset(0, (i - 1) * ROW)
-		line.Parent = content
+		line.Size = UDim2.fromOffset(W_ROW, ROW - 6)
+		line.Position = UDim2.fromOffset(0, i * ROW)
+		line.Parent = scroll
 		local label = Ui.label(
 			line,
 			caption,
@@ -107,10 +155,11 @@ function SettingsWindow.build(
 		return b
 	end
 
+	section(0, T("settings_general_section"))
 	-- 1. language: a button per locale, the current one green
 	local languages = row(1, T("settings_language"))
 	local count = #Config.locales
-	local width = (W - 12 - LABEL_W - 8 - (count - 1) * 4) / count
+	local width = (W_ROW - LABEL_W - 8 - (count - 1) * 4) / count
 	for i, code in ipairs(Config.locales) do
 		local b = Ui.button(
 			languages,
@@ -246,8 +295,8 @@ function SettingsWindow.build(
 		"autosellTextOff",
 		settings.autosellTextOff == true
 	)
-	-- 9–12. the chat (этап 3): «[Совет]» lines [клиент settings.elements.advice_toggle], money transfers and gifts
-	-- to this player [клиент pay.*, gift.*], the other players hidden (/hide; H stays the layout editor)
+	-- 9–11. the chat (этап 3): money transfers and gifts to this player [клиент pay.*, gift.*], the other players
+	-- hidden (/hide; H stays the layout editor); the «[Совет]» lines [клиент settings.elements.advice_toggle] are in «Чат»
 	local function flag(
 		i: number,
 		caption: string,
@@ -263,15 +312,6 @@ function SettingsWindow.build(
 	end
 	flag(
 		9,
-		T("settings_tips"),
-		"Tips",
-		"tipsOff",
-		not settings.tipsOff,
-		T("settings_shown"),
-		T("settings_hidden")
-	)
-	flag(
-		10,
 		T("settings_pay"),
 		"Pay",
 		"payOff",
@@ -280,7 +320,7 @@ function SettingsWindow.build(
 		T("settings_refuse")
 	)
 	flag(
-		11,
+		10,
 		T("settings_gift"),
 		"Gift",
 		"giftOff",
@@ -289,7 +329,7 @@ function SettingsWindow.build(
 		T("settings_refuse")
 	)
 	toggle(
-		row(12, T("settings_players")),
+		row(11, T("settings_players")),
 		"Players",
 		not settings.hidePlayers,
 		T("settings_shown"),
@@ -298,9 +338,9 @@ function SettingsWindow.build(
 			set("hidePlayers", not settings.hidePlayers)
 		end
 	)
-	-- 13. the PRIS+ enchant particles (этап 8), only for subscribers
+	-- 12. the PRIS+ enchant particles (этап 8), only for subscribers
 	do
-		local line = row(13, T("settings_enchant_fx"))
+		local line = row(12, T("settings_enchant_fx"))
 		if PrisPlus.active(profile, workspace:GetServerTimeNow()) then
 			toggle(
 				line,
@@ -324,16 +364,98 @@ function SettingsWindow.build(
 			b.TextSize = 13
 		end
 	end
-	-- 14. move and resize the buttons, the notifications, the booster bar
+	-- 13. move and resize the buttons, the notifications, the booster bar, the chat
 	local layout = Ui.button(
-		content,
+		scroll,
 		T("settings_layout"),
-		UDim2.new(1, 0, 0, ROW - 6),
+		UDim2.fromOffset(W_ROW, ROW - 6),
 		UDim2.fromOffset(0, 13 * ROW),
 		Ui.colors.buttonBlue
 	)
 	layout.Name = "Layout"
 	layout.Activated:Connect(openLayout)
+
+	-- «Чат» (slots 14…): the same values as the gear in the open chat
+	section(14, T("settings_chat_section"))
+	local function choice(
+		i: number,
+		caption: string,
+		name: string,
+		key: string,
+		value: number,
+		prefix: string
+	)
+		local line = row(i, caption)
+		local w = (W_ROW - LABEL_W - 8 - 2 * 4) / 3
+		for n = 1, 3 do
+			local b = Ui.button(
+				line,
+				T(prefix .. n),
+				UDim2.new(0, w, 1, 0),
+				UDim2.fromOffset(LABEL_W + 4 + (n - 1) * (w + 4), 0),
+				if value == n then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+			)
+			b.Name = name .. n
+			b.TextSize = 13
+			b.Activated:Connect(function()
+				if value ~= n then
+					set(key, n)
+				end
+			end)
+		end
+	end
+	toggle(
+		row(15, T("chat_enabled")),
+		"Chat",
+		not settings.chatOff,
+		T("settings_on"),
+		T("settings_off"),
+		function()
+			set("chatOff", not settings.chatOff)
+		end
+	)
+	choice(16, T("chat_size"), "ChatSize", "chatSize", settings.chatSize :: number, "chat_size_")
+	choice(17, T("chat_back"), "ChatBack", "chatBack", settings.chatBack :: number, "chat_back_")
+	choice(18, T("chat_fade"), "ChatFade", "chatFade", settings.chatFade :: number, "chat_fade_")
+	flag(
+		19,
+		T("chat_bubbles"),
+		"Bubbles",
+		"bubblesOff",
+		not settings.bubblesOff,
+		T("settings_on"),
+		T("settings_off")
+	)
+	flag(
+		20,
+		T("chat_global_feed"),
+		"GlobalFeed",
+		"chatGlobalOff",
+		not settings.chatGlobalOff,
+		T("settings_shown"),
+		T("settings_hidden")
+	)
+	flag(
+		21,
+		T("settings_tips"),
+		"Tips",
+		"tipsOff",
+		not settings.tipsOff,
+		T("settings_shown"),
+		T("settings_hidden")
+	)
+	-- the chat button on a computer (a phone always has it)
+	toggle(
+		row(22, T("chat_button_option")),
+		"ChatButton",
+		settings.chatButton == true,
+		T("settings_on"),
+		T("settings_off"),
+		function()
+			set("chatButton", not settings.chatButton)
+		end
+	)
+	scroll.CanvasSize = UDim2.fromOffset(0, 23 * ROW)
 	return win
 end
 

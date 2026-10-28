@@ -80,3 +80,16 @@ workspace attribute `ForceMobile` in Studio)
   of the closed feed and the open panel for a fake viewport, plus the rects of the HUD elements it checked, and
   `overlaps = {...}`; test 1920×1080, 1366×768, 1280×720, 2560×1440, phone 844×390, 667×375, tablet 1024×768.
 - `chatSpam(n)` pushes n test lines (feed fade, scrolling, ×N collapse).
+
+## Owner additions [владелец 28.10, evening]
+1. **Gear (⚙) in the corner of the open panel** → a compact quick-settings popover right there: chat size
+   (smaller / bigger), background transparency, «Кнопка чата» (computer) and «Выключить чат». The same values as the
+   Settings «Чат» section (one source of truth: the profile settings).
+2. **«Выключить чат»**: the chat (feed, panel, phone button) disappears completely; one toast «Чат выключен. Включить
+   снова: Меню → Настройки → Чат». Enter / «/» do nothing while it is off (commands too: off = off). Re-enabled in
+   Settings «Чат».
+3. **Closed state exactly like Minecraft**: player messages appear bottom-left and fade; when nobody writes, nothing
+   of the chat is visible at all.
+4. **«Кнопка чата» as an option**: on a computer an optional small chat button (off by default; a switch in Settings
+   «Чат» and in the gear popover) that opens the chat by click; on a phone the button always stays (it is the only
+   way to open the chat), small and unobtrusive.

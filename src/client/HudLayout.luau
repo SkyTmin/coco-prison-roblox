@@ -33,6 +33,8 @@ local MIN_SCALE, MAX_SCALE, SCALE_STEP = 0.5, 2, 0.1
 local entries: { Entry } = {}
 local editing = false
 local moved: { [string]: boolean } = {} -- elements the applied layout puts at the player's own place
+local appliedSize: { [string]: number } = {} -- the player's size of each element under the applied layout
+local listeners: { () -> () } = {} -- told after every apply (the chat lays itself out over the result)
 
 -- grip: the part the player grabs (the menu button of the whole touch menu); the object moves
 function HudLayout.register(
@@ -131,6 +133,7 @@ function HudLayout.apply(mode: string, layout: Layout?)
 			e.object.Position = e.default
 		end
 		local size = if inMode(e, mode) then sizeIn(pos) else 1
+		appliedSize[e.id] = size
 		if size ~= 1 or e.base ~= 1 or e.object:FindFirstChildOfClass("UIScale") then
 			uiScale(e.object).Scale = e.base * size
 		end
@@ -138,6 +141,19 @@ function HudLayout.apply(mode: string, layout: Layout?)
 			e.object.Visible = shownIn(e, if inMode(e, mode) then layout else nil)
 		end
 	end
+	for _, listener in ipairs(listeners) do
+		task.spawn(listener)
+	end
+end
+
+-- the player's size of an element under the layout applied last (1 when unchanged)
+function HudLayout.sizeNow(id: string): number
+	return appliedSize[id] or 1
+end
+
+-- called after every apply (an element that computes its own default place re-lays itself out over the result)
+function HudLayout.onApplied(listener: () -> ())
+	table.insert(listeners, listener)
 end
 
 function HudLayout.moved(id: string): boolean

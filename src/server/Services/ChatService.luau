@@ -409,12 +409,18 @@ function ChatService.Start()
 		return
 	end
 	started = true
-	if TextChatService.ChatVersion ~= Enum.ChatVersion.TextChatService then
-		warn(
-			"[ChatService] TextChatService.ChatVersion is not TextChatService: the chat needs it "
-				.. "(docs/research/floors-evening-checklist.md, этап 3)"
-		)
-	end
+	-- the ChatVersion property can read LegacyChatService in a place where TextChatService runs anyway (legacy chat is
+	-- retired), so the check is whether Roblox created its default channels
+	task.delay(10, function()
+		local channels = TextChatService:FindFirstChild("TextChannels")
+		if not (channels and channels:FindFirstChild(Chat.GENERAL)) then
+			warn(
+				"[ChatService] TextChatService.TextChannels."
+					.. Chat.GENERAL
+					.. " has not appeared 10 s after the start: the chat cannot send"
+			)
+		end
+	end)
 	local existing = TextChatService:FindFirstChild(Chat.FOLDER)
 	if existing and existing:IsA("Folder") then
 		folder = existing

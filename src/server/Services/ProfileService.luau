@@ -810,6 +810,28 @@ function ProfileService.Start()
 		enchantFxOff = function(v)
 			return typeof(v) == "boolean"
 		end,
+		-- the chat's look (ChatWindow, docs/research/chat-ux-spec.md): three-step choices and switches
+		chatSize = function(v)
+			return v == 1 or v == 2 or v == 3
+		end,
+		chatBack = function(v)
+			return v == 1 or v == 2 or v == 3
+		end,
+		chatFade = function(v)
+			return v == 1 or v == 2 or v == 3
+		end,
+		bubblesOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		chatGlobalOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		chatOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		chatButton = function(v)
+			return typeof(v) == "boolean"
+		end,
 	}
 	Remotes.event("SetSetting").OnServerEvent:Connect(function(player: Player, key: any, value: any)
 		local check = typeof(key) == "string" and SETTINGS[key]

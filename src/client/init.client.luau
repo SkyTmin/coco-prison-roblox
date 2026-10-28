@@ -2088,7 +2088,8 @@ windowBuilders.players = function()
 	refreshMenu = refresh
 	return win
 end
--- the chat (этап 3): our own window over TextChatService, the commands, «[Совет]», /hide (ChatWindow)
+-- the chat (этап 3, docs/research/chat-ux-spec.md): our own feed and panel over TextChatService, the commands,
+-- «[Совет]», /hide (ChatWindow); the HUD it keeps clear of is handed over below the touch controls
 require(script.ChatWindow).start({
 	open = function(kind: string)
 		closeWindow()
@@ -2101,6 +2102,9 @@ require(script.ChatWindow).start({
 		return locale
 	end,
 	toast = showToast,
+	windowOpen = function()
+		return currentWindowKind ~= nil
+	end,
 })
 require(script.CasePreviewWindow).profile = function() -- the nickname case shows the chances without owned names
 	return profile
@@ -3583,6 +3587,26 @@ HudLayout.register("boosters", boosterHud, true, true)
 -- [владелец 28.10] the status effect icons move too; the phone's «Бег» button (Sprint)
 HudLayout.register("effects", effectsHud, true, true)
 HudLayout.register("sprint", require(script.Sprint).start(touchActions), true, false)
+-- the chat keeps clear of these (real rects; ChatLayout); the hotbar counts with the meters drawn over it
+require(script.ChatWindow).hud({
+	hotbar = hotbar,
+	hints = hints,
+	artifacts = artifactButton,
+	menu = menuButton,
+	boosters = boosterHud,
+	stats = stats,
+	effects = effectsHud,
+	toast = toast,
+	language = languageButton,
+	teleport = teleportCountdown,
+	touchMenu = menuToggle,
+	inventory = inventoryButton,
+	eat = eatButton,
+	sprint = touchActions:FindFirstChild("Touch_sprint") :: GuiObject,
+	attack = touchActions:FindFirstChild("Touch_attack") :: GuiObject,
+	jump = touchActions:FindFirstChild("Touch_jump") :: GuiObject,
+	view = gui:FindFirstChild("HudView") :: GuiObject,
+})
 
 Instance.new("UIScale").Parent = stats -- HudLayout sets it: the mode's base × the player's size
 local hotbarScale = Instance.new("UIScale")
@@ -3860,6 +3884,8 @@ if RunService:IsStudio() then
 		elseif action == "close" then
 			closeWindow()
 			return true
+		elseif action:sub(1, 4) == "chat" then -- chatLayout / chatLive / chatSpam / chatOpen / chatState
+			return require(script.ChatWindow).debug(action, arg)
 		elseif action == "hudEdit" then
 			openHudEditor()
 			return HudLayout.isEditing()

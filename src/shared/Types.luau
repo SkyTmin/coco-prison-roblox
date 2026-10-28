@@ -21,6 +21,16 @@ export type Settings = {
 	night: boolean?,
 	appleSkinOff: boolean?,
 	enchantFxOff: boolean?,
+	-- the chat's look (docs/research/chat-ux-spec.md): size 1–3 (Маленький / Средний / Большой, default 2), the feed
+	-- backing 1–3 (Тёмный / Обычный / Без фона, default 2), the feed hides 1 after 10 s (default) / 2 never / 3 always,
+	-- no bubbles over heads, no global lines in the feed, the whole chat off, the optional chat button on a computer
+	chatSize: number?,
+	chatBack: number?,
+	chatFade: number?,
+	bubblesOff: boolean?,
+	chatGlobalOff: boolean?,
+	chatOff: boolean?,
+	chatButton: boolean?,
 }
 
 export type ItemStack = {
