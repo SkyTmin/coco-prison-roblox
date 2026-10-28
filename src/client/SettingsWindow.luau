@@ -7,6 +7,8 @@
 -- (profile.settings, SetSetting; the language: SetLocale); the window is rebuilt on every profile change.
 -- [владелец 28.10, вики MENUS-SOCIAL: «Авто-продажа блоков», «Частицы у прицела при автопродаже»] two more rows: auto-sell
 -- on / off and the income at the crosshair shown / hidden (both on by default; locked until the auto-sell is bought).
+-- [владелец 28.10: «в меню кнопки язык и вид убери в настройки»] the «Вид» row: first / third person (V / F5 on a
+-- computer), moved here from the menu grid together with the language.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -45,13 +47,14 @@ function SettingsWindow.build(
 	profile: Types.Profile?,
 	onClose: () -> (),
 	createWindow: CreateWindow,
-	openLayout: () -> ()
+	openLayout: () -> (),
+	view: { firstPerson: () -> boolean, toggle: () -> () }
 ): Frame
 	local function T(key: string, ...: any): string
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 8
+	local rows = 9
 	local win, content =
 		createWindow(parent, T("settings_title"), UDim2.fromOffset(W, rows * ROW + 56), onClose)
 	win.Name = "Window_Settings"
@@ -114,8 +117,25 @@ function SettingsWindow.build(
 		end)
 	end
 
-	-- 2. volume: − 70 % +
-	local volumeRow = row(2, T("settings_volume"))
+	-- 2. the view: first / third person (changes at once, no profile round trip)
+	local viewButton = toggle(
+		row(2, T("touch_camera")),
+		"View",
+		view.firstPerson(),
+		T("settings_view_first"),
+		T("settings_view_third"),
+		function() end
+	)
+	viewButton.BackgroundColor3 = Ui.colors.buttonGrey
+	viewButton.Activated:Connect(function()
+		view.toggle()
+		viewButton.Text = if view.firstPerson()
+			then T("settings_view_first")
+			else T("settings_view_third")
+	end)
+
+	-- 3. volume: − 70 % +
+	local volumeRow = row(3, T("settings_volume"))
 	local volume = settings.volume :: number
 	local minus = Ui.button(
 		volumeRow,
@@ -150,9 +170,9 @@ function SettingsWindow.build(
 		set("volume", math.min(1, math.floor(volume * 10 + 0.5) / 10 + 0.1))
 	end)
 
-	-- 3. sound on / off
+	-- 4. sound on / off
 	toggle(
-		row(3, T("settings_sound")),
+		row(4, T("settings_sound")),
 		"Sound",
 		not settings.muted,
 		T("settings_on"),
@@ -161,9 +181,9 @@ function SettingsWindow.build(
 			set("muted", not settings.muted)
 		end
 	)
-	-- 4–5. notifications and the booster bar
+	-- 5–6. notifications and the booster bar
 	toggle(
-		row(4, T("settings_toasts")),
+		row(5, T("settings_toasts")),
 		"Toasts",
 		not settings.hideToasts,
 		T("settings_shown"),
@@ -173,7 +193,7 @@ function SettingsWindow.build(
 		end
 	)
 	toggle(
-		row(5, T("settings_boosters")),
+		row(6, T("settings_boosters")),
 		"Boosters",
 		not settings.hideBoosters,
 		T("settings_shown"),
@@ -182,7 +202,7 @@ function SettingsWindow.build(
 			set("hideBoosters", not settings.hideBoosters)
 		end
 	)
-	-- 6–7. the auto-sell (a donate purchase) and its income at the crosshair
+	-- 7–8. the auto-sell (a donate purchase) and its income at the crosshair
 	local owned = profile ~= nil and profile.autosell == true
 	local function autosellToggle(
 		i: number,
@@ -202,25 +222,25 @@ function SettingsWindow.build(
 		end)
 	end
 	autosellToggle(
-		6,
+		7,
 		T("settings_autosell"),
 		"Autosell",
 		"autosellOff",
 		settings.autosellOff == true
 	)
 	autosellToggle(
-		7,
+		8,
 		T("settings_autosell_text"),
 		"AutosellText",
 		"autosellTextOff",
 		settings.autosellTextOff == true
 	)
-	-- 8. move and resize the buttons, the notifications, the booster bar
+	-- 9. move and resize the buttons, the notifications, the booster bar
 	local layout = Ui.button(
 		content,
 		T("settings_layout"),
 		UDim2.new(1, 0, 0, ROW - 6),
-		UDim2.fromOffset(0, 7 * ROW),
+		UDim2.fromOffset(0, 8 * ROW),
 		Ui.colors.buttonBlue
 	)
 	layout.Name = "Layout"

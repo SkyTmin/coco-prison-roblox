@@ -664,6 +664,18 @@ local STRINGS: { [string]: Entry } = {
 	settings_language = { ru = "Язык", en = "Language", es = "Idioma", fr = "Langue" },
 	settings_volume = { ru = "Громкость", en = "Volume", es = "Volumen", fr = "Volume" },
 	settings_sound = { ru = "Звук", en = "Sound", es = "Sonido", fr = "Son" },
+	settings_view_first = {
+		ru = "От первого лица",
+		en = "First person",
+		es = "Primera persona",
+		fr = "Première personne",
+	},
+	settings_view_third = {
+		ru = "От третьего лица",
+		en = "Third person",
+		es = "Tercera persona",
+		fr = "Troisième personne",
+	},
 	settings_on = { ru = "Включён", en = "On", es = "Activado", fr = "Activé" },
 	settings_off = { ru = "Выключен", en = "Off", es = "Desactivado", fr = "Désactivé" },
 	settings_toasts = {

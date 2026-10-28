@@ -2095,7 +2095,12 @@ windowBuilders.settings = function()
 		closeWindow()
 		currentWindowKind = nil
 		openHudEditor()
-	end)
+	end, {
+		firstPerson = function()
+			return firstPerson
+		end,
+		toggle = toggleFirstPerson,
+	})
 end
 local shownHudLayout = ""
 local function render(p: Types.Profile)
@@ -2944,7 +2949,6 @@ local menuKeys = {
 	"artifacts",
 	"factions",
 	"donate",
-	"language_code",
 }
 local function touchIconButton(
 	parent: Instance,
@@ -3050,47 +3054,19 @@ for i, kind in ipairs(menuKeys) do
 		elseif kind == "factions" then "factions_title"
 		elseif kind == "donate" then "touch_menu_donate"
 		else kind
-	local button = touchIconButton(
-		touchMenuGrid,
-		icon,
-		if kind == "language_code" then T(kind) else "",
-		56,
-		if kind == "language_code" then nil else T(captionKey)
-	)
+	local button = touchIconButton(touchMenuGrid, icon, "", 56, T(captionKey))
 	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)
 	button.Name = "Touch_" .. kind
 	button.Activated:Connect(function()
-		if kind == "language_code" then
-			cycleLocale() -- the menu stays open to see the new language
-		else
-			setTouchMenuOpen(false)
-			open(kind)
-		end
+		setTouchMenuOpen(false)
+		open(kind)
 	end)
-	if kind == "language_code" then
-		localizedButtons[button] = kind
-	end
 	local caption = button:FindFirstChild("Caption")
 	if caption and caption:IsA("TextLabel") then
 		localizedLabels[caption] = captionKey
 	end
 end
--- the 8th grid cell: first / third person view (was a separate HUD button)
-do
-	local button =
-		touchIconButton(touchMenuGrid, Config.icons.icons["menu_camera"], "", 56, T("touch_camera"))
-	button.Position = UDim2.fromOffset((#menuKeys % 6) * 60, math.floor(#menuKeys / 6) * 60)
-	button.Name = "Touch_camera"
-	button.Activated:Connect(function()
-		setTouchMenuOpen(false)
-		toggleFirstPerson()
-	end)
-	local caption = button:FindFirstChild("Caption")
-	if caption and caption:IsA("TextLabel") then
-		localizedLabels[caption] = "touch_camera"
-	end
-end
--- the 9th grid cell: creative test mode, only for players CreativeService allows
+-- [владелец 28.10] «Язык» and «Вид» left the grid for the settings. The cell after the windows: creative test mode, only for players CreativeService allows
 do
 	CreativeWindow.Listen()
 	require(script.BossHud).Start(gui) -- boss name + health bar at the top, respawn boards over the arenas
@@ -3108,8 +3084,7 @@ do
 	require(script.IndoorLighting).Start() -- brighter ambient light under the quarry cave roof
 	local button =
 		touchIconButton(touchMenuGrid, Config.iconFor("golden_apple"), "", 56, T("creative"))
-	button.Position =
-		UDim2.fromOffset(((#menuKeys + 1) % 6) * 60, math.floor((#menuKeys + 1) / 6) * 60)
+	button.Position = UDim2.fromOffset((#menuKeys % 6) * 60, math.floor(#menuKeys / 6) * 60)
 	button.Name = "Touch_creative"
 	local function show()
 		button.Visible = player:GetAttribute("CreativeAllowed") == true
@@ -3135,7 +3110,7 @@ do
 		T("settings_title")
 	)
 	button.Position =
-		UDim2.fromOffset(((#menuKeys + 3) % 6) * 60, math.floor((#menuKeys + 3) / 6) * 60)
+		UDim2.fromOffset(((#menuKeys + 2) % 6) * 60, math.floor((#menuKeys + 2) / 6) * 60)
 	button.Name = "Touch_settings"
 	button.Activated:Connect(function()
 		setTouchMenuOpen(false)
@@ -3151,7 +3126,7 @@ do
 	local button =
 		touchIconButton(touchMenuGrid, Config.icons.icons["menu_layout"], "", 56, T("touch_layout"))
 	button.Position =
-		UDim2.fromOffset(((#menuKeys + 2) % 6) * 60, math.floor((#menuKeys + 2) / 6) * 60)
+		UDim2.fromOffset(((#menuKeys + 1) % 6) * 60, math.floor((#menuKeys + 1) / 6) * 60)
 	button.Name = "Touch_layout"
 	button.Activated:Connect(function()
 		setTouchMenuOpen(false)
