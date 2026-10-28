@@ -22,15 +22,17 @@ local ROW, GAP = 44, 5
 local CELL = Color3.fromRGB(34, 34, 36)
 local BACK = Color3.fromRGB(56, 40, 32)
 local GREEN = Color3.fromRGB(110, 230, 80)
+local GOLD = Color3.fromRGB(255, 170, 0) -- with boosts, like the sidebar (Ui.colors.orange, Minecraft gold)
+local GRAY = Color3.fromRGB(170, 170, 170) -- clean
 local CROWNS =
 	{ Color3.fromRGB(255, 196, 40), Color3.fromRGB(150, 210, 255), Color3.fromRGB(255, 150, 50) }
 local FONT = Enum.Font.Code
 
 local BOARDS = {
-	rats = { title = "top_rats", value = "top_value_rats", icon = "hud_rat" },
+	rats = { title = "top_rats", value = "top_value_rats", icon = "hud_rat", total = true },
 	money = { title = "top_money", value = "top_value_money", icon = "hud_money" },
 	level = { title = "top_level", value = "top_value_level", dot = true },
-	blocks = { title = "top_blocks", value = "top_value_blocks", icon = "hud_blocks" },
+	blocks = { title = "top_blocks", value = "top_value_blocks", icon = "hud_blocks", total = true },
 }
 
 local localeOf: () -> string = function()
@@ -100,14 +102,19 @@ local function formatValue(board: string, v: number): string
 	return Strings.grouped(v, 0)
 end
 
-local COLS = { rank = { 0, 96 }, player = { 104, 520 }, value = { 632, 236 } }
+local COLS = { rank = { 0, 96 }, player = { 104, 440 }, value = { 552, 316 } }
 
 -- the value header / cell: text and, after it, the board's icon (or a green dot)
 local function valueContent(parent: Frame, board: string, s: string, size: number, color: Color3)
 	local def = BOARDS[board]
-	local l = text(parent, s, size, color)
-	l.Size = UDim2.new(1, -40, 1, 0)
+	local l = text(parent, s, size, color, true)
+	l.Size = UDim2.new(1, -46, 1, 0)
 	l.TextXAlignment = Enum.TextXAlignment.Right
+	-- long "gold (gray)" values shrink instead of running under the icon
+	l.TextScaled = true
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = size
+	limit.Parent = l
 	if def.dot then
 		local d = text(parent, "●", size, GREEN)
 		d.Size = UDim2.new(0, 28, 1, 0)
@@ -208,7 +215,21 @@ local function render(part: BasePart, gui: SurfaceGui)
 		valueContent(
 			cell(r, COLS.value[1], COLS.value[2], ROW),
 			board :: string,
-			formatValue(board :: string, tonumber(row.v) or 0),
+			-- blocks / rats: the boosted count gold, the clean one (the place) gray in brackets, like the sidebar; an
+			-- old record without the boosted count (the player has not played since) shows only the gray one
+			if def.total
+				then (if tonumber(row.t)
+					then string.format(
+						'<font color="%s">%s</font> ',
+						hex(GOLD),
+						Strings.big(tonumber(row.t) or 0)
+					)
+					else "") .. string.format(
+					'<font color="%s">(%s)</font>',
+					hex(GRAY),
+					Strings.big(tonumber(row.v) or 0)
+				)
+				else formatValue(board :: string, tonumber(row.v) or 0),
 			28,
 			GREEN
 		)

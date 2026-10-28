@@ -23,7 +23,9 @@ local WRITE_EVERY = 120
 local READ_EVERY = 90
 local PUBLISH_EVERY = 10
 
-type Board = { id: string, store: string, value: (Types.Profile) -> number }
+-- total: the Meta field with the boosted count shown before the clean one, gold, like the sidebar [владелец 28.10:
+-- «золотым — блоки и мобы, добытые с бустом; топ по блокам тоже так»]; the board is still sorted by the clean value
+type Board = { id: string, store: string, value: (Types.Profile) -> number, total: string? }
 local BOARDS: { Board } = {
 	{
 		id = "rats",
@@ -31,6 +33,7 @@ local BOARDS: { Board } = {
 		value = function(p)
 			return p.stats.rats or 0
 		end,
+		total = "r",
 	},
 	{
 		id = "money",
@@ -52,10 +55,12 @@ local BOARDS: { Board } = {
 		value = function(p)
 			return p.stats.blocksClean or 0
 		end,
+		total = "b",
 	},
 }
 
-type Meta = { n: string, k: string?, f: string? }
+-- b / r: blocks and rats with boosts (written with the name, so the top shows them for offline players too)
+type Meta = { n: string, k: string?, f: string?, b: number?, r: number? }
 type Row = { id: number, v: number }
 
 local stores: { [string]: OrderedDataStore } = {}
@@ -72,6 +77,8 @@ local function metaOf(player: Player, p: Types.Profile): Meta
 		n = player.DisplayName,
 		k = if typeof(p.nickname) == "string" and p.nickname ~= "" then p.nickname else nil,
 		f = p.faction,
+		b = math.floor(p.blocksTotal),
+		r = math.floor(p.stats.ratsTotal or p.stats.rats or 0),
 	}
 end
 
@@ -189,7 +196,8 @@ local function publish()
 		local out = {}
 		for i = 1, math.min(TOP_N, #rows) do
 			local meta = names[rows[i].id] or { n = "#" .. rows[i].id }
-			table.insert(out, { v = rows[i].v, n = meta.n, k = meta.k, f = meta.f })
+			local total = if board.total then (meta :: any)[board.total] else nil
+			table.insert(out, { v = rows[i].v, t = total, n = meta.n, k = meta.k, f = meta.f })
 		end
 		local value = folder:FindFirstChild(board.id) :: StringValue
 		local json = HttpService:JSONEncode(out)
