@@ -55,6 +55,12 @@
 --                         faction, gang tag, gang colour, nickname, text); ChatSystem(text, "announce" | "reply" | "error")
 -- Client → server:        DailyClaim() — take today's card of «Ежедневные награды» (DailyService; the window opens by
 --                         /daily, the menu tile or the NPC's prompt → OpenMenu("daily"))
+-- Этап 8 (PRIS+, рубины):  RemoteFunction PrisQuery("mines") → { now, mines = { {id, location, left, cycle} } } or nil
+--                         (PrisService: PRIS+ players only, once a second); server → client EnchantFx(kind, position,
+--                         power) — unreliable, a PRIS+ player's Вихрь / Ярость / Бульдозер worked nearby (BookService);
+--                         AuctionSell(slot, amount, price, currency?) — currency "rubies" = whole rubies, else dollars;
+--                         ChatGlobal carries p = 1 for the [PRIS+] prefix; ChatCommand also takes "rubb" (/rubb ник N)
+--                         and "stats" (/stats ник, PRIS+ only)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

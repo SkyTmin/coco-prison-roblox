@@ -41,6 +41,7 @@ Config.warzone = load("warzone") -- the Дворы: four faction capture points 
 Config.referrals = load("referrals") -- inviting friends, the «Избранное» card (ReferralService, FavoriteCard)
 Config.chat = load("chat") -- the chat and its commands (ChatService, ChatCommandService, ChatWindow)
 Config.daily = load("daily") -- the canteen portion and the daily rewards (Shared/Daily, DailyService)
+Config.pris = load("pris") -- PRIS+ and the rubies (Shared/PrisPlus, PrisService, PrisWindow)
 
 Config.money = Config.rules.money
 Config.moneyScale = Config.rules.money.scale :: number

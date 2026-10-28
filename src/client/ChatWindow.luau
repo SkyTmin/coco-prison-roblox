@@ -26,6 +26,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Chat = require(Shared.Chat)
 local Config = require(Shared.Config)
 local Gangs = require(Shared.Gangs)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -52,6 +53,7 @@ local TAB_H, INPUT_H, PAD = 26, 30, 6
 local GLOBAL = Color3.fromRGB(85, 220, 255)
 local NICK = Color3.fromRGB(255, 200, 80)
 local MUTED = Color3.fromRGB(150, 150, 165)
+local PRIS = Color3.fromRGB(255, 190, 40) -- the [PRIS+] prefix (этап 8) [вики MENUS-SOCIAL]
 local REPLY = Color3.fromRGB(205, 205, 215)
 local TIP = Color3.fromRGB(110, 225, 130)
 local SYSTEM_COLORS: { [string]: Color3 } = {
@@ -288,7 +290,7 @@ function ChatWindow.start(api: Api)
 		add(nil, colored(Chat.escape(text), color))
 	end
 
-	-- «[G] [TAG] Ник [48 ур.] Кличка » текст»
+	-- «[G] [PRIS+] [TAG] Ник [48 ур.] Кличка » текст» [вики MENUS-SOCIAL: «[G] [PRIS+] <донат> | <ник> …»]
 	local function playerLine(
 		kind: Kind,
 		info: {
@@ -298,6 +300,7 @@ function ChatWindow.start(api: Api)
 			tag: string?,
 			color: number?,
 			nick: string?,
+			pris: boolean?,
 		},
 		text: string
 	): string
@@ -309,6 +312,9 @@ function ChatWindow.start(api: Api)
 				parts,
 				colored("[" .. T("chat_tag_faction") .. "]", Config.factionColor(info.faction))
 			)
+		end
+		if info.pris then
+			table.insert(parts, colored("<b>[PRIS+]</b>", PRIS))
 		end
 		if info.tag and info.tag ~= "" then
 			table.insert(
@@ -345,6 +351,7 @@ function ChatWindow.start(api: Api)
 			tag = if typeof(tag) == "string" then tag else nil,
 			color = if typeof(color) == "number" then color else nil,
 			nick = if typeof(nick) == "string" then nick else nil,
+			pris = PrisPlus.of(who),
 		}
 	end
 
@@ -573,6 +580,7 @@ function ChatWindow.start(api: Api)
 				tag = if typeof(data.g) == "string" then data.g else nil,
 				color = if typeof(data.c) == "number" then data.c else nil,
 				nick = if typeof(data.k) == "string" then data.k else nil,
+				pris = data.p == 1,
 			}, data.t),
 			data.u == player.UserId
 		)

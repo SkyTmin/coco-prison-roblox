@@ -592,6 +592,24 @@ function MineService.Start()
 	end)
 end
 
+-- the mine timers of this server for the PRIS+ «Респавн шахт» board (PrisService): mine id, its location, seconds to
+-- the next reset (an untouched mine runs its cycle too) and the cycle length
+function MineService.timers(): { { id: string, location: string, left: number, cycle: number } }
+	local now = os.clock()
+	local out = {}
+	for id, mine in pairs(mines) do
+		table.insert(out, {
+			id = id,
+			location = mine.location.id,
+			left = if mine.rebuilding or mine.resetAt == 0
+				then 0
+				else math.max(0, mine.resetAt - now),
+			cycle = mine.resetSeconds,
+		})
+	end
+	return out
+end
+
 MineService.BLOCK = BLOCK
 MineService.BLOCK_TAG = BLOCK_TAG
 return MineService

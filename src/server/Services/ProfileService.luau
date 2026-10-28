@@ -189,6 +189,23 @@ local function migrate(data: any): Profile
 	if typeof(profile.settings) ~= "table" then
 		profile.settings = nil
 	end
+	-- PRIS+ and the rubies (этап 8, Shared/PrisPlus)
+	if
+		typeof(profile.prisPlusUntil) ~= "number"
+		or profile.prisPlusUntil ~= profile.prisPlusUntil
+	then
+		profile.prisPlusUntil = nil
+	end
+	if profile.noAuctionFee ~= true then
+		profile.noAuctionFee = nil
+	end
+	local rubies = profile.rubies
+	profile.rubies = if typeof(rubies) == "number"
+			and rubies == rubies
+			and rubies > 0
+			and rubies < math.huge
+		then math.floor(rubies)
+		else nil
 	-- Numeric fragment keys can return as strings from DataStore, just like inventory slots.
 	local rawArtifacts = profile.artifacts
 	profile.artifacts = {}
@@ -777,6 +794,20 @@ function ProfileService.Start()
 			return typeof(v) == "boolean"
 		end,
 		hidePlayers = function(v)
+			return typeof(v) == "boolean"
+		end,
+		-- PRIS+ (этап 8): auto-dig, night, AppleSkin, the enchant particles (the client acts on them; harmless
+		-- without PRIS+ — the /pp window only offers them to subscribers)
+		autoDig = function(v)
+			return typeof(v) == "boolean"
+		end,
+		night = function(v)
+			return typeof(v) == "boolean"
+		end,
+		appleSkinOff = function(v)
+			return typeof(v) == "boolean"
+		end,
+		enchantFxOff = function(v)
 			return typeof(v) == "boolean"
 		end,
 	}

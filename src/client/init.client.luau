@@ -632,6 +632,7 @@ local function renderSurvival()
 	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
 	fillMeter(drumsticks, hunger / Config.rules.survival.hunger.max * 20)
 	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
+	require(script.PrisPerks).appleSkin(drumsticks.group, profile, health, maxHealth) -- PRIS+ AppleSkin (этап 8)
 	local points = Combat.armorPoints(if profile then profile.armor else nil)
 	armorMeter.group.Visible = points > 0
 	fillMeter(armorMeter, points)
@@ -2061,6 +2062,16 @@ windowBuilders.daily = function()
 	refreshMenu = refresh
 	return win
 end
+-- «PRIS+» (/pp, /mining, the menu tile; этап 8): PrisWindow; the switches go through SetSetting, PrisService decides
+windowBuilders.pris = function()
+	local win, refresh =
+		require(script.PrisWindow).build(gui, profile, locale, closeWindow, createWindow, open)
+	refreshMenu = refresh
+	return win
+end
+require(script.EnchantFx).start(function()
+	return profile
+end) -- PRIS+ particles of Вихрь / Ярость / Бульдозер (этап 8)
 -- the chat (этап 3): our own window over TextChatService, the commands, «[Совет]», /hide (ChatWindow)
 require(script.ChatWindow).start({
 	open = function(kind: string)
@@ -2233,6 +2244,7 @@ local function render(p: Types.Profile)
 	end
 	languageButton.Text = T("language_code")
 	renderCameraButton()
+	require(script.PrisPerks).sync(p) -- PRIS+ night (этап 8)
 	do -- the settings window's values [владелец 27.10]
 		local settings = SettingsWindow.of(p)
 		require(script.Audio).set(settings.volume :: number, settings.muted == true)
@@ -2705,6 +2717,8 @@ RunService.RenderStepped:Connect(function()
 	end
 	highlight.Adornee = if aim then aim.part else nil
 	highlight.Visible = aim ~= nil and not pending[aim.part]
+	-- PRIS+ auto-dig (этап 8, PrisPerks): a mine block under the crosshair is dug as if the button were held
+	local want = holding or (aim ~= nil and require(script.PrisPerks).autoDig(aim.part))
 	if digging and digTarget then
 		if digPredicted then
 			-- [владелец 21.10, lag] do not wait for the server to remove the block: it gets our DigStarts
@@ -2712,12 +2726,12 @@ RunService.RenderStepped:Connect(function()
 			-- hidden block is not queryable, the crosshair finds the one behind it). Waiting cost a full
 			-- round trip per block and looked like digging stopped.
 			stopDig(false)
-			if holding and aim and not pending[aim.part] and now >= nextDigAt then
+			if want and aim and not pending[aim.part] and now >= nextDigAt then
 				startDig(aim)
 			end
 		elseif not aim or aim.part ~= digTarget then
 			stopDig(true)
-			if holding and aim and not pending[aim.part] and now >= nextDigAt then
+			if want and aim and not pending[aim.part] and now >= nextDigAt then
 				startDig(aim)
 			end
 		else
@@ -2735,11 +2749,11 @@ RunService.RenderStepped:Connect(function()
 					)
 			end
 		end
-	elseif holding and aim and not pending[aim.part] and now >= nextDigAt then
+	elseif want and aim and not pending[aim.part] and now >= nextDigAt then
 		startDig(aim)
 	end
 	-- keep swinging while the dig input is held on blocks (instant mining flips digging every few frames)
-	HeldItem.SetDigging(digging or (holding and digPredicted) or (holding and aim ~= nil))
+	HeldItem.SetDigging(digging or (want and digPredicted) or (want and aim ~= nil))
 end)
 
 -- Melee attack along the look direction (click / tap with nothing to dig), Better Combat-style
@@ -3093,6 +3107,7 @@ local menuKeys = {
 	"donate",
 	"rubbish", -- «Урна» (/rubbish, этап 3)
 	"daily", -- «Ежедневные награды» (этап 7)
+	"pris", -- «PRIS+» (этап 8)
 }
 local function touchIconButton(
 	parent: Instance,
@@ -3194,6 +3209,7 @@ for i, kind in ipairs(menuKeys) do
 		or (if kind == "gangs" then Config.icons.icons.top_crown else nil) -- until menu_gangs is uploaded
 		or (if kind == "rubbish" then Config.iconFor("fire_shard") else nil) -- until menu_rubbish is uploaded
 		or (if kind == "daily" then Config.iconFor("ancient_star") else nil) -- until menu_daily is uploaded
+		or (if kind == "pris" then Config.icons.icons.top_crown else nil) -- until menu_pris is uploaded
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
@@ -3202,6 +3218,7 @@ for i, kind in ipairs(menuKeys) do
 		elseif kind == "donate" then "touch_menu_donate"
 		elseif kind == "rubbish" then "rubbish_title"
 		elseif kind == "daily" then "daily_short"
+		elseif kind == "pris" then "pris_title"
 		else kind
 	local button = touchIconButton(touchMenuGrid, icon, "", 56, T(captionKey))
 	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)

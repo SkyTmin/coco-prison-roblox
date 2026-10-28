@@ -15,6 +15,12 @@ export type Settings = {
 	payOff: boolean?,
 	giftOff: boolean?,
 	hidePlayers: boolean?,
+	-- PRIS+ (этап 8, the /pp menu) [клиент prison_plus.*]: the auto-dig, the night on this screen, the AppleSkin line
+	-- (on by default); the enchant particles of PRIS+ players hidden on this screen [сеть TG/40]
+	autoDig: boolean?,
+	night: boolean?,
+	appleSkinOff: boolean?,
+	enchantFxOff: boolean?,
 }
 
 export type ItemStack = {
@@ -71,6 +77,11 @@ export type Profile = {
 	crystals: number?, -- donate currency (DonateService, bought for Robux); nil = 0; schema stays v3
 	receipts: { string }?, -- the last Robux purchase ids already granted (ProcessReceipt is retried)
 	auctionSlots: number?, -- extra auction slots bought in the donate shop
+	-- PRIS+ (Shared/PrisPlus, этап 8): os.time() it ends; the «Удаление комиссии на Аукционе» purchase (for good);
+	-- rubies [вики DONATE-SHOP-BOOSTERS] — whole, never negative
+	prisPlusUntil: number?,
+	noAuctionFee: boolean?,
+	rubies: number?,
 	stash: { { id: string, count: number } }?, -- bought items that did not fit the inventory, claimed from storage [B]
 	achievements: { [string]: number }, -- «Копатель» card id (counter name or block id) = claimed tier
 	dug: { [string]: number }?, -- blocks without an upgrade counter, per block id (achievements); schema stays v3

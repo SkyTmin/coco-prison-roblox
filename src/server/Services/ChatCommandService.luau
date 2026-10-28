@@ -12,6 +12,10 @@
 --   * /thx [клиент booster.thx*]: for every running faction / global / gang booster of someone else that applies to
 --     you and you have not thanked yet (p.thanked), you and its owner (when he is on this server) get
 --     100 $ × your level / 10 [решение: Config.chat.thxPerLevel]; once per booster.
+--   * /rubb ник N [вики; клиент pay.rubies.*] (этап 8): whole rubies from Config.pris.rubbMin, the same rules and saves
+--     as /pay (the receiver's «Переводы» switch refuses rubies too).
+--   * /stats ник [сеть S6] (этап 8): another player's stats (on this server) only for a PRIS+ player; /stats alone is
+--     answered on the client from the own profile.
 -- Rubbish(list) — «Урна» [клиент garbage.*] closed: list = { {slot, id, count} }; the stacks that still match go away.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -19,6 +23,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -139,6 +144,83 @@ local function pay(player: Player, args: { string })
 		)
 	)
 	saveBoth(player, target)
+end
+
+-- ── /rubb, /stats ник (этап 8) ──────────────────────────────────────────────────────────────────────────────────
+
+local function rubb(player: Player, args: { string })
+	local profile = ProfileService.Get(player)
+	if not args[1] or not args[2] then
+		ChatService.fail(player, "chat_rubb_usage")
+		return
+	end
+	local amount = tonumber(args[2])
+	local min = PrisPlus.cfg.rubbMin
+	if
+		not amount
+		or amount ~= amount
+		or amount < min
+		or amount > 1e9
+		or amount ~= math.floor(amount)
+	then
+		ChatService.fail(player, "chat_rubb_min", min)
+		return
+	end
+	local target, targetProfile = receiver(player, args[1], "chat_rubb_self")
+	if not target or not targetProfile or not profile or not ProfileService.IsReal(player) then
+		return
+	end
+	if targetProfile.settings and targetProfile.settings.payOff then
+		ChatService.fail(player, "chat_pay_off", target.DisplayName)
+		return
+	end
+	if PrisPlus.rubies(profile) < amount then
+		ChatService.fail(player, "chat_rubb_no_rubies", PrisPlus.rubies(profile))
+		return
+	end
+	-- no yield from the check to here: the rubies leave one profile and enter the other at once
+	ProfileService.Mutate(player, function(p)
+		local left = PrisPlus.rubies(p) - amount
+		p.rubies = if left > 0 then left else nil
+	end)
+	ProfileService.Mutate(target, function(p)
+		p.rubies = PrisPlus.rubies(p) + amount
+	end)
+	ChatService.reply(player, "chat_rubb_sent", amount, target.DisplayName)
+	ChatService.reply(target, "chat_rubb_received", player.DisplayName, amount)
+	Remotes.event("Toast"):FireClient(
+		target,
+		Strings.t("chat_rubb_received", Strings.localeOf(target), player.DisplayName, amount)
+	)
+	saveBoth(player, target)
+end
+
+local function stats(player: Player, args: { string })
+	local profile = ProfileService.Get(player)
+	if not args[1] or not profile then
+		return
+	end
+	if not PrisPlus.active(profile) then
+		ChatService.fail(player, "chat_stats_other")
+		return
+	end
+	local target, err = findPlayer(args[1])
+	local other = target and ProfileService.Get(target)
+	if not target or not other then
+		ChatService.fail(player, err or "chat_player_not_found", args[1])
+		return
+	end
+	local s = other.stats
+	ChatService.reply(
+		player,
+		"chat_stats_of",
+		target.DisplayName,
+		other.level,
+		Strings.big(other.blocksTotal),
+		s.rats or 0,
+		s.kills or 0,
+		s.deaths or 0
+	)
 end
 
 -- ── /gift ───────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -380,7 +462,8 @@ end
 
 -- ── start ───────────────────────────────────────────────────────────────────────────────────────────────────────
 
-local COMMANDS: { [string]: (Player, { string }) -> () } = { pay = pay, gift = gift, thx = thx }
+local COMMANDS: { [string]: (Player, { string }) -> () } =
+	{ pay = pay, gift = gift, thx = thx, rubb = rubb, stats = stats }
 
 local function run(player: Player, name: string, args: { string }): boolean
 	local command = COMMANDS[name]

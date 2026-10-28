@@ -49,6 +49,12 @@ MenuWindow.ENTRIES = {
 		caption = "daily_title",
 		icon = if Config.icons.icons.menu_daily then nil else "ancient_star",
 	},
+	-- «PRIS+» (/pp, этап 8); the crown until our Blender icon menu_pris is uploaded
+	{
+		kind = "pris",
+		caption = "pris_title",
+		icon = if Config.icons.icons.menu_pris then nil else "top_crown",
+	},
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },

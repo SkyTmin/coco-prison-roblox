@@ -3,12 +3,14 @@
 -- Windows open here (the same windows as the keys and the menu), teleports go through the usual Teleport remote,
 -- the gang ones through GangAction / GangHome (GangService checks everything); /pay, /gift and /thx are the server's
 -- (ChatCommand → ChatCommandService). /hide is a command and a settings switch, not the original's H — H is the HUD
--- editor here. The commands of systems that are not built yet answer «скоро».
+-- editor here. The commands of systems that are not built yet answer «скоро». Этап 8: /pp and /mining open the PRIS+
+-- window, /rubb goes to the server, /stats Ник asks the server (PRIS+ only).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Chat = require(Shared.Chat)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -46,13 +48,12 @@ local WINDOWS: { [string]: string } = {
 	artifacts = "artifacts",
 	rubbish = "rubbish",
 	daily = "daily", -- «Ежедневные награды» (DailyWindow, этап 7)
+	pp = "pris", -- PRIS+ (PrisWindow, этап 8)
+	mining = "pris", -- the auto-dig switch lives in the PRIS+ window
 }
-local SERVER = { pay = true, gift = true, thx = true }
--- PRIS+ (этап 8), рубины, клички (этап 9), автопродажа из меню, вики, гайд: not built yet
+local SERVER = { pay = true, gift = true, thx = true, rubb = true }
+-- клички (этап 9), автопродажа из меню, вики, гайд: not built yet
 local SOON = {
-	pp = true,
-	mining = true,
-	rubb = true,
 	titles = true,
 	names = true,
 	nickname = true,
@@ -115,13 +116,26 @@ function ChatCommands.run(text: string, ctx: Context)
 	then
 		ctx.say(T("chat_not_ready"), "error")
 	elseif profile and (name == "balance" or name == "bal" or name == "money") then
-		ctx.say(T("chat_balance", Strings.money(profile.coins), profile.crystals or 0), "reply")
+		ctx.say(
+			T(
+				"chat_balance",
+				Strings.money(profile.coins),
+				profile.crystals or 0,
+				PrisPlus.rubies(profile)
+			),
+			"reply"
+		)
 	elseif profile and name == "blocks" then
 		ctx.say(T("chat_blocks", Strings.big(profile.blocksTotal)), "reply")
 	elseif profile and name == "stats" then
 		local who = args[1] and Strings.lower(args[1])
 		if who and who ~= Strings.lower(me.Name) and who ~= Strings.lower(me.DisplayName) then
-			ctx.say(T("chat_stats_other"), "reply") -- [клиент] another player's stats need PRIS+ (этап 8)
+			-- [сеть S6] another player's stats need PRIS+: the server checks and answers (ChatCommandService)
+			if PrisPlus.active(profile, workspace:GetServerTimeNow()) then
+				Remotes.event("ChatCommand"):FireServer("stats", args)
+			else
+				ctx.say(T("chat_stats_other"), "error")
+			end
 			return
 		end
 		local stats = profile.stats

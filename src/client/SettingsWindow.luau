@@ -9,9 +9,12 @@
 -- on / off and the income at the crosshair shown / hidden (both on by default; locked until the auto-sell is bought).
 -- [владелец 28.10: «в меню кнопки язык и вид убери в настройки»] the «Вид» row: first / third person (V / F5 on a
 -- computer), moved here from the menu grid together with the language.
+-- Этап 8 [сеть TG/40: «эффекты чар можно выключить в /settings» — for subscribers]: the «Эффекты чар PRIS+» row (the
+-- particles of Вихрь / Ярость / Бульдозер, EnchantFx), locked without PRIS+; the same switch is in the /pp window.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -38,6 +41,10 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		payOff = s.payOff == true,
 		giftOff = s.giftOff == true,
 		hidePlayers = s.hidePlayers == true,
+		autoDig = s.autoDig == true,
+		night = s.night == true,
+		appleSkinOff = s.appleSkinOff == true,
+		enchantFxOff = s.enchantFxOff == true,
 	}
 end
 
@@ -58,7 +65,7 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local settings = SettingsWindow.of(profile)
-	local rows = 13
+	local rows = 14
 	local win, content =
 		createWindow(parent, T("settings_title"), UDim2.fromOffset(W, rows * ROW + 56), onClose)
 	win.Name = "Window_Settings"
@@ -291,12 +298,38 @@ function SettingsWindow.build(
 			set("hidePlayers", not settings.hidePlayers)
 		end
 	)
-	-- 13. move and resize the buttons, the notifications, the booster bar
+	-- 13. the PRIS+ enchant particles (этап 8), only for subscribers
+	do
+		local line = row(13, T("settings_enchant_fx"))
+		if PrisPlus.active(profile, workspace:GetServerTimeNow()) then
+			toggle(
+				line,
+				"EnchantFx",
+				not settings.enchantFxOff,
+				T("settings_shown"),
+				T("settings_hidden"),
+				function()
+					set("enchantFxOff", not settings.enchantFxOff)
+				end
+			)
+		else
+			local b = toggle(
+				line,
+				"EnchantFx",
+				false,
+				"",
+				T("settings_pris_locked"),
+				function() end
+			)
+			b.TextSize = 13
+		end
+	end
+	-- 14. move and resize the buttons, the notifications, the booster bar
 	local layout = Ui.button(
 		content,
 		T("settings_layout"),
 		UDim2.new(1, 0, 0, ROW - 6),
-		UDim2.fromOffset(0, 12 * ROW),
+		UDim2.fromOffset(0, 13 * ROW),
 		Ui.colors.buttonBlue
 	)
 	layout.Name = "Layout"

@@ -18,6 +18,11 @@
 -- writes nothing: never a cached GetAsync): the item or the money moves exactly once, because the note and the
 -- move are one profile change. Settling runs on load, after each step, when another server reports a sale of the
 -- player's lot (MessagingService AuctionSold), on opening «Личные товары» and every settleSeconds.
+--
+-- Этап 8 (Shared/PrisPlus): 10 slots with PRIS+; a lot may cost rubies (cur = "rubies", whole rubies; the buyer's
+-- p.rubies pay, the pending purchase remembers the currency, the seller is paid in it); the commission rate the seller
+-- had at listing is stored on the lot (fee) and the lower of it and his rate at the sale is charged (PRIS+ or the
+-- «Удаление комиссии» bought later still helps; PRIS+ that ran out before the sale does not cost him the 0 %).
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
 local MemoryStoreService = game:GetService("MemoryStoreService")
@@ -31,6 +36,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Auction = require(Shared.Auction)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local InventoryService = require(script.Parent.InventoryService)
@@ -42,6 +48,8 @@ type Lot = {
 	id: string,
 	item: ItemStack,
 	price: number,
+	cur: string?, -- "rubies"; nil = money
+	fee: number?, -- the seller's commission rate at listing
 	seller: number,
 	sellerName: string,
 	createdAt: number,
@@ -52,7 +60,7 @@ type Lot = {
 	buyOp: string?, -- the purchase id that won it (a retried purchase recognises itself)
 	soldAt: number?,
 }
-type PendingBuy = { price: number, op: string, at: number, seller: number? }
+type PendingBuy = { price: number, op: string, at: number, seller: number?, cur: string? }
 type Data = {
 	lots: { [string]: Summary },
 	pendingSells: { [string]: Summary },
@@ -119,6 +127,24 @@ end
 local function itemText(player: Player, item: ItemStack): string
 	local name = Strings.itemName(item.id, item.level, Strings.localeOf(player))
 	return if item.count > 1 then name .. " ×" .. item.count else name
+end
+
+-- the wallet of a lot's currency (read / change inside a mutation)
+local function wallet(p: Types.Profile, cur: string?): number
+	return if cur == Auction.RUBIES then PrisPlus.rubies(p) else p.coins
+end
+
+local function credit(p: Types.Profile, cur: string?, amount: number)
+	if cur == Auction.RUBIES then
+		local rubies = PrisPlus.rubies(p) + amount
+		p.rubies = if rubies > 0 then rubies else nil
+	else
+		p.coins += amount
+	end
+end
+
+local function priceText(player: Player, cur: string?, amount: number): string
+	return Auction.priceText({ cur = cur }, amount, Strings.localeOf(player))
 end
 
 local function data(p: Types.Profile): Data
@@ -230,6 +256,8 @@ local function summaryOf(lot: Lot | Summary): Summary
 		id = lot.id,
 		item = deepCopy(lot.item),
 		price = lot.price,
+		cur = if lot.cur == Auction.RUBIES then Auction.RUBIES else nil,
+		fee = if typeof(lot.fee) == "number" then lot.fee else nil,
 		seller = lot.seller,
 		sellerName = lot.sellerName,
 		createdAt = lot.createdAt,
@@ -382,6 +410,9 @@ local function settleLot(player: Player, id: string, reindex: boolean?)
 	local sold = state == "sold"
 	local item: ItemStack = if record and record.item then record.item else summary.item
 	local price = if record then record.price else summary.price
+	local cur = if record then record.cur else summary.cur
+	local listedFee = if record and typeof(record.fee) == "number" then record.fee else summary.fee
+	local net = 0
 	local toInbox = false
 	local done = false
 	ProfileService.Mutate(player, function(p)
@@ -392,7 +423,8 @@ local function settleLot(player: Player, id: string, reindex: boolean?)
 		a.lots[id] = nil
 		done = true
 		if sold then
-			p.coins += Auction.net(price)
+			net = Auction.net(price, math.min(listedFee or cfg.commission, PrisPlus.commission(p)))
+			credit(p, cur, net)
 		else
 			toInbox = give(p, item)
 		end
@@ -407,7 +439,7 @@ local function settleLot(player: Player, id: string, reindex: boolean?)
 			"auction_sold",
 			itemText(player, item),
 			record and record.buyerName or "?",
-			Strings.money(Auction.net(price))
+			priceText(player, cur, net)
 		)
 	else
 		toast(
@@ -506,6 +538,7 @@ local function finishBuy(player: Player, id: string, op: string, state: string?,
 	local item = record and record.item
 	local delivered = false
 	local refunded = 0
+	local refundCur: string? = nil
 	local toInbox = false
 	ProfileService.Mutate(player, function(p)
 		local a = data(p)
@@ -518,8 +551,9 @@ local function finishBuy(player: Player, id: string, op: string, state: string?,
 			toInbox = give(p, item)
 			delivered = true
 		else
-			p.coins += pending.price
+			credit(p, pending.cur, pending.price)
 			refunded = pending.price
+			refundCur = pending.cur
 		end
 	end)
 	if delivered and item then
@@ -539,7 +573,7 @@ local function finishBuy(player: Player, id: string, op: string, state: string?,
 		toast(
 			player,
 			if stillOn then "auction_refund_retry" else "auction_gone",
-			Strings.money(refunded)
+			priceText(player, refundCur, refunded)
 		)
 	end
 	changed(player)
@@ -599,7 +633,7 @@ local function canAct(player: Player): boolean
 	return true
 end
 
-local function sell(player: Player, slot: number, amount: number, dollars: number)
+local function sell(player: Player, slot: number, amount: number, value: number, currency: any)
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return
@@ -613,7 +647,10 @@ local function sell(player: Player, slot: number, amount: number, dollars: numbe
 		return
 	end
 	local a = data(profile)
-	local slots = cfg.slots + (profile.auctionSlots or 0) -- donate: «Дополнительный слот на Аукционе»
+	-- 5, 10 with PRIS+, plus the donate «Дополнительный слот на Аукционе»
+	local slots = PrisPlus.auctionSlots(profile)
+	local cur = if currency == Auction.RUBIES then Auction.RUBIES else nil
+	local fee = PrisPlus.commission(profile)
 	if count(a.lots) + count(a.pendingSells) >= slots then
 		toast(player, "auction_slots_full", slots)
 		return
@@ -634,7 +671,9 @@ local function sell(player: Player, slot: number, amount: number, dollars: numbe
 		local new: Summary = {
 			id = HttpService:GenerateGUID(false),
 			item = item,
-			price = dollars * Config.moneyScale,
+			price = if cur then value else value * Config.moneyScale,
+			cur = cur,
+			fee = fee,
 			seller = player.UserId,
 			sellerName = player.Name,
 			createdAt = now,
@@ -679,12 +718,17 @@ local function sell(player: Player, slot: number, amount: number, dollars: numbe
 			end
 		end)
 		indexSet(s)
-		toast(player, "auction_listed", itemText(player, s.item), Strings.money(s.price))
+		toast(player, "auction_listed", itemText(player, s.item), priceText(player, s.cur, s.price))
 	else
 		-- not confirmed: read the key again at once (tombstone if missing → the item comes back)
 		local state = settleSell(player, s.id)
 		if state == "created" then
-			toast(player, "auction_listed", itemText(player, s.item), Strings.money(s.price))
+			toast(
+				player,
+				"auction_listed",
+				itemText(player, s.item),
+				priceText(player, s.cur, s.price)
+			)
 		elseif state == "void" then
 			toast(player, "auction_try_later")
 		else
@@ -712,17 +756,23 @@ local function buy(player: Player, id: string, price: number)
 	if data(profile).pendingBuys[id] then
 		return
 	end
-	if profile.coins < price then
-		toast(player, "auction_no_money", Strings.money(price))
+	local cur = s.cur
+	if wallet(profile, cur) < price then
+		toast(
+			player,
+			if cur then "auction_no_rubies" else "auction_no_money",
+			priceText(player, cur, price)
+		)
 		return
 	end
 	local op = HttpService:GenerateGUID(false)
 	local paid = false
 	ProfileService.Mutate(player, function(p)
 		local a = data(p)
-		if p.coins >= price and not a.pendingBuys[id] then
-			p.coins -= price
-			a.pendingBuys[id] = { price = price, op = op, at = os.time(), seller = s.seller }
+		if wallet(p, cur) >= price and not a.pendingBuys[id] then
+			credit(p, cur, -price)
+			a.pendingBuys[id] =
+				{ price = price, op = op, at = os.time(), seller = s.seller, cur = cur }
 			paid = true
 		end
 	end)
@@ -736,7 +786,7 @@ local function buy(player: Player, id: string, price: number)
 			local pending = a.pendingBuys[id]
 			if pending and pending.op == op then
 				a.pendingBuys[id] = nil
-				p.coins += pending.price
+				credit(p, pending.cur, pending.price)
 			end
 		end)
 		toast(player, "auction_try_later")
@@ -759,6 +809,7 @@ local function buy(player: Player, id: string, price: number)
 			old.status ~= "active"
 			or old.expiresAt <= os.time()
 			or old.price ~= price
+			or old.cur ~= cur
 			or old.seller == buyer
 		then
 			state = "gone"
@@ -886,8 +937,9 @@ local function query(player: Player, raw: any): any
 			and table.find(Auction.CATEGORIES, q.category)
 		then q.category
 		else "all"
-	local minPrice = (num(q.minPrice) or 0) * Config.moneyScale
-	local maxPrice = (num(q.maxPrice) or math.huge) * Config.moneyScale
+	-- the price bounds are in the lot's own currency: dollars for money lots, rubies for ruby lots
+	local minPrice = num(q.minPrice) or 0
+	local maxPrice = num(q.maxPrice) or math.huge
 	local minLevel = num(q.minLevel) or -math.huge
 	local maxLevel = num(q.maxLevel) or math.huge
 	local search = if typeof(q.search) == "string" and #q.search > 0
@@ -902,8 +954,8 @@ local function query(player: Player, raw: any): any
 		if
 			s.expiresAt > now
 			and (category == "all" or Auction.category(item.id) == category)
-			and s.price >= minPrice
-			and s.price <= maxPrice
+			and s.price >= minPrice * (if Auction.isRubies(s) then 1 else Config.moneyScale)
+			and s.price <= maxPrice * (if Auction.isRubies(s) then 1 else Config.moneyScale)
 			and level >= minLevel
 			and level <= maxLevel
 		then
@@ -924,7 +976,9 @@ local function query(player: Player, raw: any): any
 	local desc = q.desc ~= false
 	table.sort(list, function(a, b)
 		local x, y
-		if sort == "price" then
+		if sort == "price" and Auction.isRubies(a) ~= Auction.isRubies(b) then
+			return not Auction.isRubies(a) -- money lots first, then the ruby ones, each by its price
+		elseif sort == "price" then
 			x, y = a.price, b.price
 		elseif sort == "level" then
 			x, y = a.item.level or 0, b.item.level or 0
@@ -1067,13 +1121,20 @@ end
 function AuctionService.Start()
 	Remotes.event("AuctionUpdated")
 	Remotes.event("AuctionSell").OnServerEvent
-		:Connect(action(sell, function(slot: any, amount: any, dollars: any)
+		:Connect(action(sell, function(slot: any, amount: any, value: any, currency: any)
+			local rubies = currency == Auction.RUBIES
 			return InventoryService.isSlot(slot)
 				and isInt(amount, 1, 64)
-				and isInt(dollars, cfg.minPrice, cfg.maxPrice)
+				and (currency == nil or currency == "money" or rubies)
+				and (
+					if rubies
+						then isInt(value, 1, cfg.maxRubies)
+						else isInt(value, cfg.minPrice, cfg.maxPrice)
+				)
 		end))
 	Remotes.event("AuctionBuy").OnServerEvent:Connect(action(buy, function(id: any, price: any)
-		return isId(id) and isInt(price, 1, cfg.maxPrice * Config.moneyScale)
+		return isId(id)
+			and isInt(price, 1, math.max(cfg.maxPrice * Config.moneyScale, cfg.maxRubies))
 	end))
 	Remotes.event("AuctionCancel").OnServerEvent:Connect(action(cancel, function(id: any)
 		return isId(id)

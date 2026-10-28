@@ -16,6 +16,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -860,12 +861,12 @@ local function unlockSection(player: Player, rawSection: any, currency: any)
 			end
 			p.coins -= cost
 		else
-			local have = p.crystals or 0
-			if have < price.crystals then
+			-- a donate purchase: the rubies go first (Shared/Donate, этап 8)
+			if Donate.wallet(p, nil) < price.crystals then
 				result = "vault_no_crystals"
 				return
 			end
-			p.crystals = have - price.crystals
+			Donate.pay(p, nil, price.crystals)
 		end
 		p.vaultSections = open + 1
 		result = "vault_unlocked"

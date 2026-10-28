@@ -300,6 +300,7 @@ write("warzone.json", { source: "[клиент, вики] Дворы и фрак
 write("referrals.json", { source: "[решение] приглашение друзей и карточка «Избранное» (docs/research/remaining-features-design.md, этап 10)", ...decisions.referrals });
 write("daily.json", { source: "[решение] Столовая и ежедневные награды (docs/research/remaining-features-design.md, этап 7)", canteen: decisions.canteen, daily: decisions.daily });
 write("chat.json", { source: "[решение] чат и команды (docs/research/remaining-features-design.md, этап 3)", ...decisions.chat });
+write("pris.json", { source: "[клиент, вики, сеть] PRIS+ и рубины; числа — [решение] (docs/research/remaining-features-design.md, этап 8)", ...decisions.prisPlus });
 // our own armor faces for the block body (assets/models/armor/armor.py → assets/armor/block/*.png, uploaded → ids.json)
 const blockArmorIds = existsSync(join(root, "assets/armor/block/ids.json")) ? read("assets/armor/block/ids.json") : undefined;
 const blockArmor = blockArmorIds?.faces;

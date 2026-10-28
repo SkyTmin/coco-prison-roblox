@@ -17,6 +17,7 @@ local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
 local Potions = require(Shared.Potions)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -357,6 +358,29 @@ function BookService.Splash(
 	end
 end
 
+-- PRIS+ particles of Вихрь / Ярость / Бульдозер [сеть S7, TG/27] (этап 8): when the book of a PRIS+ player works,
+-- everyone within ENCHANT_FX_RANGE gets EnchantFx(kind, position, power) (unreliable, cosmetic; the client draws it
+-- unless its settings.enchantFxOff [сеть TG/40], src/client/EnchantFx.luau)
+local ENCHANT_FX_RANGE = 160
+local function enchantFx(owner: Player, kind: string, model: Model, power: number?)
+	if not PrisPlus.of(owner) or not table.find(PrisPlus.cfg.enchantFx, kind) then
+		return
+	end
+	local pivot = model:GetPivot().Position
+	local remote = Remotes.unreliable("EnchantFx")
+	for _, viewer in ipairs(Players:GetPlayers()) do
+		local character = viewer.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if
+			root
+			and root:IsA("BasePart")
+			and (root.Position - pivot).Magnitude <= ENCHANT_FX_RANGE
+		then
+			remote:FireClient(viewer, kind, pivot, power or 1)
+		end
+	end
+end
+
 -- ---------------------------------------------------------------- combat: blows given
 export type Hit = { boxer: boolean }
 
@@ -391,6 +415,7 @@ function BookService.outgoing(
 			damage *= 1 + step * streak.stacks
 			streak.stacks = math.min(RAGE_MAX, streak.stacks + 1)
 			streak.at = t
+			enchantFx(attacker, "rage", model, streak.stacks)
 		else
 			rage[attacker] = { target = model, stacks = 1, at = t }
 		end
@@ -454,6 +479,7 @@ function BookService.afterHit(
 	if roll(Books.value(weapon, "vortex")) then
 		HurtService.Knockback(model, look, 1.9, 1.2)
 		playerEffect(model, "nausea", 1, 2)
+		enchantFx(attacker, "vortex", model)
 	elseif hit and hit.boxer then
 		HurtService.Knockback(model, look, 1, 2.4)
 	end
@@ -541,6 +567,7 @@ function BookService.afterHurt(
 	end
 	if roll(Books.worn(profile, "bulldozer")) then
 		playerEffect(attackerModel, "slowness", 1, SLOW_SECONDS)
+		enchantFx(victim, "bulldozer", attackerModel)
 	end
 	local snitch = Books.worn(profile, "snitch")
 	if snitch > 0 then

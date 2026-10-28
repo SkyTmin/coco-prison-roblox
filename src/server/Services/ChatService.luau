@@ -30,6 +30,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Chat = require(Shared.Chat)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
+local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 
@@ -310,6 +311,7 @@ local function sendGlobal(player: Player, raw: any, skipCooldown: boolean?): (bo
 		g = player:GetAttribute("GangTag") or "",
 		c = player:GetAttribute("GangColor") or 0,
 		k = if typeof(profile.nickname) == "string" then profile.nickname else "",
+		p = if PrisPlus.active(profile) then 1 else nil, -- the [PRIS+] prefix (этап 8)
 		t = result,
 	}
 	deliverGlobal(data)

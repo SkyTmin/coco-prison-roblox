@@ -10,11 +10,15 @@
 -- Tint (Color3) colours the whole picture through a ColorCorrectionEffect: the atmosphere's haze does not show at
 -- low render quality (Studio 26.10, Изнанка: the red dusk read as a plain blue sky).
 -- Local only: other players keep their own lighting.
+-- PRIS+ «Включение ночи» [клиент prison_plus] (этап 8): IndoorLighting.SetNight(on) turns the outdoor clock to
+-- Config.pris.nightClock / nightBrightness on this screen; a volume with its own clock still wins inside it.
 
 local CollectionService = game:GetService("CollectionService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 
 local IndoorLighting = {}
 
@@ -23,6 +27,12 @@ local EASE = TweenInfo.new(0.8, Enum.EasingStyle.Sine)
 local INDOOR_HAZE = 0.05 -- Atmosphere.Density inside: the outdoor haze turned the cave grey
 
 local started = false
+local wantNight = false
+
+-- replaced in Start; before it only remembers the wish
+function IndoorLighting.SetNight(on: boolean)
+	wantNight = on
+end
 
 local function inside(volume: BasePart, position: Vector3): boolean
 	local p = volume.CFrame:PointToObjectSpace(position)
@@ -83,6 +93,30 @@ function IndoorLighting.Start()
 			end
 		end
 	end
+	-- the night: the day values it replaced (outdoors, or in the remembered outdoor values while inside a volume)
+	local nightSaved: { ClockTime: number, Brightness: number }? = nil
+	IndoorLighting.SetNight = function(on: boolean)
+		wantNight = on
+		if on == (nightSaved ~= nil) then
+			return
+		end
+		local target: any = if current and outdoor then outdoor else Lighting
+		if on then
+			nightSaved = { ClockTime = target.ClockTime, Brightness = target.Brightness }
+			target.ClockTime = Config.pris.nightClock
+			target.Brightness = Config.pris.nightBrightness
+			if not current then
+				setGrading(false)
+			end
+		elseif nightSaved then
+			target.ClockTime = nightSaved.ClockTime
+			target.Brightness = nightSaved.Brightness
+			nightSaved = nil
+			if not current then
+				setGrading(true)
+			end
+		end
+	end
 	local function apply(volume: BasePart?)
 		if volume == current then
 			return
@@ -121,7 +155,7 @@ function IndoorLighting.Start()
 					then brightness
 					else outdoor.Brightness
 			end
-			setGrading(typeof(clock) ~= "number")
+			setGrading(typeof(clock) ~= "number" and not nightSaved)
 			if air and outdoor then
 				local haze = volume:GetAttribute("Haze")
 				local color = volume:GetAttribute("AtmosphereColor")
@@ -148,7 +182,7 @@ function IndoorLighting.Start()
 			}):Play()
 			Lighting.ClockTime = outdoor.ClockTime
 			Lighting.Brightness = outdoor.Brightness
-			setGrading(true)
+			setGrading(not nightSaved)
 			if air and outdoor.Density then
 				TweenService:Create(air, EASE, {
 					Density = outdoor.Density,
@@ -160,6 +194,9 @@ function IndoorLighting.Start()
 			outdoor = nil
 		end
 		current = volume
+	end
+	if wantNight then
+		IndoorLighting.SetNight(true)
 	end
 	task.spawn(function()
 		while true do

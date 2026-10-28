@@ -167,6 +167,7 @@ require(script.Services.ReferralService).Start() -- inviting friends (Referrals_
 require(script.Services.ChatService).Start() -- the chat: faction / gang TextChannels, the global chat, announcements
 require(script.Services.ChatCommandService).Start() -- /pay, /gift, /thx and the bin (Rubbish)
 require(script.Services.DailyService).Start() -- the canteen portion and the daily rewards (/daily)
+require(script.Services.PrisService).Start() -- PRIS+: the PrisPlus attribute, the mine respawn board (PrisQuery)
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character

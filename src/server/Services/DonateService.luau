@@ -17,6 +17,9 @@
 --     in the storage window [B]; StashClaim(index) moves as much as fits back into the inventory. Bought boosters go to
 --     the same storage and the toast says so. Only a full booster storage or the auction-slot limit can still refuse
 --     a receipt that already came — then the item's price comes back in crystals, never nothing.
+--   * Этап 8 (the «PRIS+» tab): pris_plus adds days to p.prisPlusUntil (PrisService publishes the attribute),
+--     auction_no_fee sets p.noAuctionFee, rubies_100 adds p.rubies. Every purchase for crystals takes the rubies first
+--     (Donate.pay), except rubies themselves; a crystal purchase is saved at once (SaveNow) like a receipt.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,6 +29,7 @@ local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
+local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
@@ -94,6 +98,15 @@ local function give(p: any, item: Donate.Item, count: number): string
 				Boosters.store(p, kind, item.booster.scope, Donate.MULT, Donate.MINUTES)
 			end
 		end
+	elseif item.prisDays then
+		PrisPlus.extend(p, item.prisDays * count)
+		return "pris"
+	elseif item.noFee then
+		p.noAuctionFee = true
+		return "nofee"
+	elseif item.rubies then
+		p.rubies = Donate.rubies(p) + item.rubies * count
+		return "rubies"
 	elseif item.auctionSlot then
 		-- an item until used, so it can be sold at the Auction [владелец 28.10]
 		local left = InventoryService.add(p, Donate.AUCTION_SLOT, count)
@@ -133,21 +146,22 @@ local function onBuy(player: Player, id: any, rawCount: any)
 		return
 	end
 	local price = item.price * count
-	if Donate.crystals(profile) < price then
-		toast(player, "donate_not_enough", tostring(price - Donate.crystals(profile)))
+	if Donate.wallet(profile, id) < price then
+		toast(player, "donate_not_enough", tostring(price - Donate.wallet(profile, id)))
 		return
 	end
 	local place: string? = nil
 	ProfileService.Mutate(player, function(p)
 		-- checked again on the profile itself: nothing may change between the checks and the sale
-		if Donate.crystals(p) < price or blocked(p, id, item, count) then
+		if Donate.wallet(p, id) < price or blocked(p, id, item, count) then
 			return
 		end
-		p.crystals = Donate.crystals(p) - price
+		Donate.pay(p, id, price) -- the rubies first
 		place = give(p, item, count)
 	end)
 	if place then
 		bought(player, id, count, place)
+		task.spawn(ProfileService.SaveNow, player) -- the donate currency moved: keep it through a crash
 	end
 end
 

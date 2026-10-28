@@ -16,3 +16,7 @@ menu_invite
 menu_favorite
 # Столовая и ежедневные награды (28.10, Claude, этап 7): assets/icons/items3d/<id>.png → upload_image → assets/icons/ids.json → node scripts/build-configs.mjs
 menu_daily
+# PRIS+, рубины, «Удаление комиссии» (28.10, Claude, этап 8): assets/icons/items3d/<id>.png → upload_image → assets/icons/ids.json → node scripts/build-configs.mjs
+menu_pris
+ruby
+auction_no_fee

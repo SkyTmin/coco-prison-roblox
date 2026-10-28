@@ -12,6 +12,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -344,7 +345,7 @@ function ChestWindow.build(
 				dollars,
 				profile ~= nil and profile.coins >= price.dollars * Config.moneyScale
 			)
-			setActive(crystals, profile ~= nil and (profile.crystals or 0) >= price.crystals)
+			setActive(crystals, profile ~= nil and Donate.wallet(profile, nil) >= price.crystals) -- rubies count (этап 8)
 		end
 		hint.Text = if isOpen
 			then ""

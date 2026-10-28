@@ -7,6 +7,10 @@
 -- our crystal prices our crystal picture). Shared/Donate holds the rules, DonateService decides; built once and
 -- updated in place, a purchase flashes the panel and «+N» floats up. Every item can also be bought straight for Robux,
 -- one piece per purchase (the green button; its own Developer Product, DonateBuyRobux).
+-- Этап 8: the «PRIS+» tab (PRIS+ 30 дней, «Удаление комиссии», 100 рубинов); the rubies balance under the crystals —
+-- rubies pay first, so a price is affordable with crystals + rubies (Donate.wallet); a good without its Developer
+-- Product yet (productId 0) shows «Скоро» on the green button outside Studio, a good with robux 0 has no green button.
+-- DonateWindow.startTab opens a given tab once (the PRIS+ window's «Купить»).
 -- [владелец 28.10: «просто в заблуждение вводит … одна цена, в итоге другую сумму вводить надо»] Robux prices are the
 -- ones Roblox really charges this player (MarketplaceService:GetProductInfo on the client — regional pricing may lower
 -- them; the config's number shows until the answer comes), and under the green button a line says what the Roblox
@@ -14,9 +18,11 @@
 -- price (80, 400, 800 …) — the game can neither change that package nor read the balance; the rest stays on the account.
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -25,6 +31,7 @@ local Kit = require(script.Parent.WindowKit)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local DonateWindow = {}
+DonateWindow.startTab = nil :: string?
 
 local W, H = 790, 600
 local CARD_W, CARD_H, GAP, COLS = 112, 132, 8, 4
@@ -37,7 +44,13 @@ local TABS: { [string]: { color: Color3, icon: string } } = {
 	keys = { color = Color3.fromRGB(255, 190, 70), icon = "ancient_key" },
 	needs = { color = Color3.fromRGB(120, 220, 140), icon = "soap" },
 	auction = { color = Color3.fromRGB(255, 140, 90), icon = "auction_slot" },
+	-- the crown until our Blender icon menu_pris is uploaded
+	pris = {
+		color = Color3.fromRGB(255, 190, 40),
+		icon = if Config.icons.icons.menu_pris then "menu_pris" else "top_crown",
+	},
 }
+local RUBY = Color3.fromRGB(255, 80, 95)
 
 -- productId → the price Roblox charges this player; asked once a session
 local livePrices: { [number]: number } = {}
@@ -172,6 +185,17 @@ function DonateWindow.build(
 		CRYSTAL,
 		Kit.BOLD
 	)
+	-- the rubies [вики DONATE-SHOP-BOOSTERS]: spent first
+	local rubiesLabel = Kit.text(
+		header,
+		"",
+		UDim2.fromOffset(220, 18),
+		UDim2.new(1, -420, 0, 22),
+		15,
+		RUBY,
+		Kit.BOLD
+	)
+	rubiesLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local balanceEdge = Instance.new("UIStroke")
 	balanceEdge.Thickness = 1.5
 	balanceEdge.Transparency = 0.5
@@ -203,7 +227,7 @@ function DonateWindow.build(
 		local button = Instance.new("TextButton")
 		button.AutoButtonColor = false
 		button.Text = ""
-		button.Size = UDim2.new(0.2, -5, 1, 0)
+		button.Size = UDim2.new(1 / #Donate.tabs, -5, 1, 0)
 		button.BackgroundColor3 = Kit.CARD
 		button.LayoutOrder = i
 		button.Parent = tabBar
@@ -562,6 +586,8 @@ function DonateWindow.build(
 		local p = current
 		local crystals = Donate.crystals(p)
 		balance.Text = grouped(crystals)
+		local rubies = Donate.rubies(p)
+		rubiesLabel.Text = if rubies > 0 then t("donate_rubies_balance", grouped(rubies)) else ""
 		local look = TABS[tab] or TABS.keys
 		for id, entry in pairs(tabButtons) do
 			local on = id == tab
@@ -577,7 +603,9 @@ function DonateWindow.build(
 			card.edge.Thickness = if on then 2.5 else 1.5
 			local item = Donate.item(id)
 			if item and card.price then
-				card.price.TextColor3 = if crystals >= item.price then Ui.colors.text else Kit.BAD
+				card.price.TextColor3 = if Donate.wallet(p, id) >= item.price
+					then Ui.colors.text
+					else Kit.BAD
 			end
 		end
 
@@ -599,6 +627,8 @@ function DonateWindow.build(
 			note.TextColor3 = Kit.GOOD
 			buy.button.Visible = false
 			orRobux.Visible = false
+			robux.button.Visible = true
+			packageHint.Visible = true
 			robux.label.Text = ROBUX .. " " .. grouped(packPrice)
 			robux.paint(Kit.GOOD, true)
 			robux.run = function()
@@ -616,12 +646,25 @@ function DonateWindow.build(
 			amount.Text = tostring(count)
 			totalIcon.Visible = true
 			total.Text = grouped(price)
-			total.TextColor3 = if crystals >= price then Ui.colors.text else Kit.BAD
+			local wallet = Donate.wallet(p, id)
+			total.TextColor3 = if wallet >= price then Ui.colors.text else Kit.BAD
+			local term = PrisPlus.left(p, workspace:GetServerTimeNow())
 			if item.auctionSlot then
 				note.Text = t("donate_bought_count", p and p.auctionSlots or 0, item.max)
+			elseif item.prisDays and term > 0 then
+				local d, h = PrisPlus.split(term)
+				note.Text = t("donate_pris_left", d, h)
+			elseif not item.rubies and Donate.rubies(p) > 0 then
+				note.Text = t("donate_rubies_first", grouped(math.min(Donate.rubies(p), price)))
 			else
 				note.Text = ""
 			end
+			-- no Developer Product yet (the owner creates it): «Скоро» outside Studio; none at all: no green button
+			local noRobux = item.robux <= 0
+			local soon = item.productId <= 0 and not RunService:IsStudio()
+			robux.button.Visible = not noRobux
+			orRobux.Visible = not noRobux
+			packageHint.Visible = not noRobux and not soon
 			note.TextColor3 = Ui.colors.muted
 			robux.label.Text = t(
 				"donate_robux_buy",
@@ -634,11 +677,17 @@ function DonateWindow.build(
 				robux.paint(nil, false)
 				robux.run = function() end
 			else
-				robux.paint(Kit.GOOD, false)
-				robux.run = function()
-					Remotes.event("DonateBuyRobux"):FireServer(id)
+				if soon then
+					robux.label.Text = t("donate_robux_soon")
+					robux.paint(nil, false)
+					robux.run = function() end
+				else
+					robux.paint(Kit.GOOD, false)
+					robux.run = function()
+						Remotes.event("DonateBuyRobux"):FireServer(id)
+					end
 				end
-				if crystals < price then
+				if wallet < price then
 					buy.label.Text = t("donate_top_up")
 					buy.paint(CRYSTAL:Lerp(Kit.GREY, 0.5), false)
 					buy.run = function()
@@ -700,8 +749,10 @@ function DonateWindow.build(
 		current = p
 		refreshAll()
 	end
-	-- no crystals yet: open on the packs
-	selectTab(if Donate.crystals(profile) > 0 then "keys" else "crystals")
+	-- no crystals yet: open on the packs; the PRIS+ window asks for its tab
+	local wanted = DonateWindow.startTab
+	DonateWindow.startTab = nil
+	selectTab(wanted or (if Donate.wallet(profile, nil) > 0 then "keys" else "crystals"))
 	-- the real prices: redraw once they arrive (the pack cards carry them)
 	loadPrices(function()
 		if win.Parent then

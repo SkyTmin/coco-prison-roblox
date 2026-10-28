@@ -8,6 +8,8 @@
 --     still being confirmed, and the items that came back but did not fit — «Забрать».
 --   Продать — «Выберите предмет из инвентаря» → «Продажа предмета»: count, price, what the seller gets after the
 --     commission → «Выставить на продажу».
+-- Этап 8: a lot may cost rubies (the price in red «руб.», the seller picks «$ / Рубины» in the form); the slots and the
+-- commission follow PRIS+ / «Удаление комиссии» (Shared/PrisPlus); the rubies balance next to the money.
 -- Every outcome is the server's (AuctionService); the window only sends intents and redraws.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -16,6 +18,7 @@ local Auction = require(Shared.Auction)
 local BlockColors = require(Shared.BlockColors)
 local Config = require(Shared.Config)
 local ItemInfo = require(Shared.ItemInfo)
+local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
@@ -36,6 +39,7 @@ local WIN_W = GRID_X + COLS * (SLOT + GAP) + 16
 local WIN_H = 500
 local POLL_SECONDS = 10
 local cfg = Auction.cfg
+local RUBY = Color3.fromRGB(255, 80, 95)
 
 local function paint(view: SlotView, stack: ItemStack?)
 	local icon = if stack then Config.iconFor(stack.id, stack.level) else nil
@@ -131,7 +135,10 @@ function AuctionWindow.build(
 	local function lotLines(lot: Summary, mine: boolean): { ItemInfo.Line }
 		return {
 			{ text = T("auction_seller", lot.sellerName), color = Ui.colors.gray },
-			{ text = T("auction_cost", Strings.money(lot.price)), color = Ui.colors.money },
+			{
+				text = T("auction_cost", Auction.priceText(lot, nil, locale)),
+				color = if Auction.isRubies(lot) then RUBY else Ui.colors.money,
+			},
 			{
 				text = T("auction_expires", timeText(lot.expiresAt - serverNow())),
 				color = Ui.colors.gray,
@@ -175,12 +182,29 @@ function AuctionWindow.build(
 	sellButton.TextSize = 15
 	local money = Ui.rich(content, "", UDim2.fromOffset(180, 28), UDim2.new(1, -310, 0, 0), 15)
 	money.TextXAlignment = Enum.TextXAlignment.Right
+	money.Size = UDim2.fromOffset(280, 28) -- wider for the rubies; the right edge stays
+	money.Position = UDim2.new(1, -410, 0, 0)
+	local commissionNote: TextLabel? = nil
 	local function drawMoney()
+		local rubies = PrisPlus.rubies(current)
 		money.Text = string.format(
 			'<font color="%s">%s$</font>',
 			Ui.hex(Ui.colors.money),
 			Strings.money(if current then current.coins else 0)
-		)
+		) .. if rubies > 0
+			then string.format(
+				'  <font color="%s">%s</font>',
+				Ui.hex(RUBY),
+				Auction.priceText({ cur = Auction.RUBIES }, rubies, locale)
+			)
+			else ""
+		if commissionNote then
+			commissionNote.Text = T(
+				"auction_commission_note",
+				math.floor(PrisPlus.commission(current, serverNow()) * 100 + 0.5),
+				cfg.lotDays
+			)
+		end
 	end
 	for _, kind in ipairs({ "auction", "mine", "sell" }) do
 		local page = Instance.new("Frame")
@@ -419,7 +443,7 @@ function AuctionWindow.build(
 	refreshButton.Activated:Connect(function()
 		query()
 	end)
-	local commissionNote = Ui.label(
+	local note = Ui.label(
 		auctionPage,
 		T("auction_commission_note", math.floor(cfg.commission * 100 + 0.5), cfg.lotDays),
 		UDim2.new(1, -GRID_X, 0, 18),
@@ -427,7 +451,8 @@ function AuctionWindow.build(
 		12,
 		Ui.colors.muted
 	)
-	commissionNote.TextWrapped = true
+	note.TextWrapped = true
+	commissionNote = note
 
 	-- the purchase question over the grid
 	local ask = Ui.panel(auctionPage, UDim2.fromOffset(340, 120), UDim2.new())
@@ -473,9 +498,9 @@ function AuctionWindow.build(
 				"auction_confirm_buy",
 				nameOf(lot.item),
 				string.format(
-					'<font color="%s">%s$</font>',
-					Ui.hex(Ui.colors.money),
-					Strings.money(lot.price)
+					'<font color="%s">%s</font>',
+					Ui.hex(if Auction.isRubies(lot) then RUBY else Ui.colors.money),
+					Auction.priceText(lot, nil, locale)
 				)
 			)
 		buyButton.Visible = not mine
@@ -696,10 +721,10 @@ function AuctionWindow.build(
 				n,
 				s.item,
 				string.format(
-					'<b>%s</b>\n<font color="%s">%s$</font>  <font color="%s">%s</font>',
+					'<b>%s</b>\n<font color="%s">%s</font>  <font color="%s">%s</font>',
 					nameOf(s.item),
-					Ui.hex(Ui.colors.money),
-					Strings.money(s.price),
+					Ui.hex(if Auction.isRubies(s) then RUBY else Ui.colors.money),
+					Auction.priceText(s, nil, locale),
 					Ui.hex(Ui.colors.muted),
 					status
 				),
@@ -715,7 +740,7 @@ function AuctionWindow.build(
 			card.LayoutOrder = n
 			Ui.label(
 				card,
-				T("auction_buying", Strings.money(b.price)),
+				T("auction_buying", Auction.priceText(b, nil, locale)),
 				UDim2.new(1, -16, 1, 0),
 				UDim2.fromOffset(8, 0),
 				14,
@@ -733,8 +758,7 @@ function AuctionWindow.build(
 			)
 			hint.TextXAlignment = Enum.TextXAlignment.Center
 		end
-		slotsLabel.Text =
-			T("auction_slots", used, cfg.slots + (if current then current.auctionSlots or 0 else 0))
+		slotsLabel.Text = T("auction_slots", used, PrisPlus.auctionSlots(current, serverNow()))
 		local returns = if a then a.returns else {}
 		returnsLabel.Text = T("auction_returns", #returns)
 		for i, view in ipairs(returnViews) do
@@ -837,6 +861,17 @@ function AuctionWindow.build(
 	local priceBox =
 		textBox(form, tostring(cfg.minPrice), UDim2.fromOffset(156, 26), UDim2.fromOffset(10, 168))
 	priceBox.Name = "Price"
+	-- the currency of the lot [клиент advice.3: «за деньги или рубины»]
+	local currency = "money"
+	local currencyButton = Ui.button(
+		form,
+		"",
+		UDim2.fromOffset(110, 26),
+		UDim2.fromOffset(172, 168),
+		Ui.colors.buttonGrey
+	)
+	currencyButton.Name = "Currency"
+	currencyButton.TextSize = 13
 	local net = Ui.rich(form, "", UDim2.new(1, -20, 0, 36), UDim2.fromOffset(10, 198), 13)
 	net.TextWrapped = true
 	local listButton = Ui.button(
@@ -866,9 +901,13 @@ function AuctionWindow.build(
 		local amount = math.floor(number(countBox) or 1)
 		amount = math.clamp(amount, 1, stack.count)
 		local dollars = number(priceBox)
+		local lo, hi = cfg.minPrice, cfg.maxPrice
+		if currency == Auction.RUBIES then
+			lo, hi = 1, cfg.maxRubies
+		end
 		if dollars then
 			dollars = math.floor(dollars)
-			if dollars < cfg.minPrice or dollars > cfg.maxPrice then
+			if dollars < lo or dollars > hi then
 				dollars = nil
 			end
 		end
@@ -902,15 +941,23 @@ function AuctionWindow.build(
 		if stack and amount and tostring(amount) ~= countBox.Text and countBox.Text ~= "" then
 			countBox.Text = tostring(amount)
 		end
+		local rubies = currency == Auction.RUBIES
+		currencyButton.Text =
+			T(if rubies then "auction_currency_rubies" else "auction_currency_money")
+		currencyButton.BackgroundColor3 = if rubies
+			then RUBY:Lerp(Color3.new(), 0.35)
+			else Ui.colors.buttonGrey
 		if dollars then
-			local units = dollars * Config.moneyScale
+			local rate = PrisPlus.commission(current, serverNow())
+			local lot = { cur = if rubies then Auction.RUBIES else nil }
+			local units = if rubies then dollars else dollars * Config.moneyScale
 			net.Text = T(
 				"auction_you_get",
-				math.floor(cfg.commission * 100 + 0.5),
+				math.floor(rate * 100 + 0.5),
 				string.format(
-					'<font color="%s">%s$</font>',
-					Ui.hex(Ui.colors.money),
-					Strings.money(Auction.net(units))
+					'<font color="%s">%s</font>',
+					Ui.hex(if rubies then RUBY else Ui.colors.money),
+					Auction.priceText(lot, Auction.net(units, rate), locale)
 				)
 			)
 		else
@@ -919,8 +966,8 @@ function AuctionWindow.build(
 				Ui.hex(Ui.colors.muted),
 				T(
 					"auction_price_range",
-					Strings.grouped(cfg.minPrice, 0),
-					Strings.grouped(cfg.maxPrice, 0)
+					Strings.grouped(if rubies then 1 else cfg.minPrice, 0),
+					Strings.grouped(if rubies then cfg.maxRubies else cfg.maxPrice, 0)
 				)
 			)
 		end
@@ -944,7 +991,7 @@ function AuctionWindow.build(
 	listButton.Activated:Connect(function()
 		local stack, amount, dollars = readSell()
 		if stack and amount and dollars and chosen then
-			Remotes.event("AuctionSell"):FireServer(chosen, amount, dollars)
+			Remotes.event("AuctionSell"):FireServer(chosen, amount, dollars, currency)
 			chosen = nil
 			priceBox.Text = ""
 			countBox.Text = ""
@@ -953,6 +1000,10 @@ function AuctionWindow.build(
 	end)
 	backButton.Activated:Connect(function()
 		show("auction")
+	end)
+	currencyButton.Activated:Connect(function()
+		currency = if currency == Auction.RUBIES then "money" else Auction.RUBIES
+		drawSell()
 	end)
 	sellButton.Activated:Connect(function()
 		show(if tab == "sell" then "auction" else "sell")

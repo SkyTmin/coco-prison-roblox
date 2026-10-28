@@ -60,13 +60,16 @@ const goods = [
 		description: `Донат-магазин: ${pack.crystals} кристаллов — валюта магазина.`,
 		icon: pack.icon,
 	})),
-	...Object.entries(donate.items).map(([id, item]) => ({
-		entry: item,
-		name: item.productName,
-		price: item.robux,
-		description: `Донат-магазин: ${item.productName}, 1 шт.`,
-		icon: item.icon ?? item.give ?? id,
-	})),
+	// robux 0 = sold for crystals only (rubies_100): no Developer Product
+	...Object.entries(donate.items)
+		.filter(([, item]) => item.robux > 0)
+		.map(([id, item]) => ({
+			entry: item,
+			name: item.productName,
+			price: item.robux,
+			description: `Донат-магазин: ${item.productName}, 1 шт.`,
+			icon: item.icon ?? item.give ?? id,
+		})),
 ];
 
 async function api(url, init = {}) {
