@@ -208,8 +208,11 @@ function ChestWindow.build(
 			view.icon.BackgroundTransparency = if tile then 0 else 1
 			view.name.Text = if stack then Strings.itemName(stack.id, stack.level, locale) else ""
 			view.name.Visible = false -- no text on items (the tile or picture identifies them)
+			-- a money bag shows whole dollars ("74$"): "74.156$" ran into the next slots; the tooltip has the exact sum
 			view.count.Text = if stack and stack.coins
-				then Strings.money(stack.coins) .. "$"
+				then (if stack.coins >= 100 * Config.moneyScale
+					then Strings.money(stack.coins)
+					else tostring(math.floor(stack.coins / Config.moneyScale))) .. "$"
 				elseif stack and stack.count > 1 then tostring(stack.count)
 				else ""
 			local glint = view.icon:FindFirstChild("Glint")
