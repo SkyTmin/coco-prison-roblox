@@ -5,6 +5,7 @@
 -- редкостью и подсказкой)]. Built from the same configs CaseService rolls from, with the same item shapes (the wooden
 -- pickaxe with Silk Touch, level-1 armor and weapons, a book at its top level), so the tooltips say exactly what drops.
 local Config = require(script.Parent.Config)
+local Nicknames = require(script.Parent.Nicknames)
 local Types = require(script.Parent.Types)
 
 export type Entry = {
@@ -106,8 +107,7 @@ function CasePreview.of(caseId: string): ({ Entry }, { string }?)
 	if caseId == "ancientCase" then
 		return bookEntries(), nil
 	elseif caseId == "nicknameCase" then
-		local names = Config.keys.nicknameCase and Config.keys.nicknameCase.nicknames
-		return {}, if typeof(names) == "table" then names else {}
+		return {}, Nicknames.list -- клички (этап 9): 46, four rarity tiers
 	end
 	local config = Config.keys[caseId]
 	local rewards = if typeof(config) == "table" then config.rewards or config else nil

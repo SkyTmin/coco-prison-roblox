@@ -4,7 +4,7 @@
 --   * a faction with too many members refuses and names another [клиент: error.overloaded; сеть: «в каждой
 --     фракции может находиться лишь одинаковое количество игроков»] — here: members online on this server,
 --     a faction may be at most balanceSlack ahead of the smallest one [решение];
---   * leaving costs leaveCost $ [меню: «покинуть фракцию за 2500 $»] and counts «Смен фракций»;
+--   * leaving costs leaveCost $ (5 000 $ [вики 26.10]; the menu shot of 20.10 said 2500 $) and counts «Смен фракций»;
 --     whoever leaves while on the faction base or the Дворы goes back to the prison spawn;
 --   * the faction is mirrored to the player attribute Faction (nameplates, PvP, chests read it).
 

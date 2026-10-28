@@ -168,6 +168,8 @@ require(script.Services.ChatService).Start() -- the chat: faction / gang TextCha
 require(script.Services.ChatCommandService).Start() -- /pay, /gift, /thx and the bin (Rubbish)
 require(script.Services.DailyService).Start() -- the canteen portion and the daily rewards (/daily)
 require(script.Services.PrisService).Start() -- PRIS+: the PrisPlus attribute, the mine respawn board (PrisQuery)
+require(script.Services.NicknameService).Start() -- клички: «Ваши клички» (NicknameSet), the shown name (этап 9)
+require(script.Services.PlayerCardService).Start() -- the TAB list / chat player card numbers (PlayerCard, этап 9)
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character

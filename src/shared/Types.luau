@@ -104,7 +104,7 @@ export type Profile = {
 	nicknames: { string }?, -- owned nicknames from the nickname case; schema stays v3
 	skills: { [string]: number }?, -- the skill tree: branch id → bought levels (Shared/Skills); schema stays v3
 	potionBrewedAt: number?, -- server time of the last brew: the potion stand charges from it (Shared/Potions)
-	nickname: string?, -- shown as a prefix of the display name
+	nickname: string?, -- the active nickname (Shared/Nicknames, «Ваши клички»), nil = none; schema stays v3
 	trainer: { [string]: number }?, -- strength / agility / needs levels (Config.trainer); schema stays v3
 	faction: string?, -- white / black / yellow / latino (Config.factions); nil = none; schema stays v3
 	factionChanges: number?, -- «Смен фракций» [клиент]; schema stays v3

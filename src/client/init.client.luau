@@ -708,6 +708,8 @@ RunService.Heartbeat:Connect(function()
 	end
 end)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+-- our TAB list (PlayerListWindow, этап 9) replaces Roblox's; block / report / friends stay in Roblox's Esc menu
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 renderSurvival()
 
 -- All menu builders use this viewport clamp, including menus rebuilt after profile updates.
@@ -2072,6 +2074,20 @@ end
 require(script.EnchantFx).start(function()
 	return profile
 end) -- PRIS+ particles of Вихрь / Ярость / Бульдозер (этап 8)
+-- «Ваши клички» (/names, /titles, /nickname, the menu tile; этап 9): NicknameWindow, NicknameService decides
+windowBuilders.names = function()
+	local win, refresh =
+		require(script.NicknameWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
+	return win
+end
+-- the TAB list with the player card (Tab, the menu tile, the phone grid, a click on a chat line; этап 9)
+windowBuilders.players = function()
+	local win, refresh =
+		require(script.PlayerListWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
+	return win
+end
 -- the chat (этап 3): our own window over TextChatService, the commands, «[Совет]», /hide (ChatWindow)
 require(script.ChatWindow).start({
 	open = function(kind: string)
@@ -2086,6 +2102,9 @@ require(script.ChatWindow).start({
 	end,
 	toast = showToast,
 })
+require(script.CasePreviewWindow).profile = function() -- the nickname case shows the chances without owned names
+	return profile
+end
 require(script.CasePreviewWindow).listen(function()
 	if currentWindowKind == "casePreview" then
 		closeWindow()
@@ -3087,7 +3106,7 @@ touchMenus.Parent = gui
 local touchMenuGrid = Instance.new("Frame")
 touchMenuGrid.Name = "Grid"
 touchMenuGrid.Position = UDim2.fromOffset(60, 0)
-touchMenuGrid.Size = UDim2.fromOffset(6 * 60, 3 * 60)
+touchMenuGrid.Size = UDim2.fromOffset(6 * 60, 4 * 60)
 touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
@@ -3108,6 +3127,8 @@ local menuKeys = {
 	"rubbish", -- «Урна» (/rubbish, этап 3)
 	"daily", -- «Ежедневные награды» (этап 7)
 	"pris", -- «PRIS+» (этап 8)
+	"names", -- «Ваши клички» (этап 9)
+	"players", -- the TAB list (этап 9): the phone's way to it
 }
 local function touchIconButton(
 	parent: Instance,
@@ -3210,6 +3231,8 @@ for i, kind in ipairs(menuKeys) do
 		or (if kind == "rubbish" then Config.iconFor("fire_shard") else nil) -- until menu_rubbish is uploaded
 		or (if kind == "daily" then Config.iconFor("ancient_star") else nil) -- until menu_daily is uploaded
 		or (if kind == "pris" then Config.icons.icons.top_crown else nil) -- until menu_pris is uploaded
+		or (if kind == "names" then Config.iconFor("nickname_key") else nil) -- until menu_names is uploaded
+		or (if kind == "players" then Config.icons.icons.rank_1 else nil) -- until menu_players is uploaded
 	-- short captions: the full "Улучшить предмет" / "Повысить уровень" shrink to ~5 px in a 56 px button
 	local captionKey = if kind == "level"
 		then "touch_menu_level"
@@ -3749,6 +3772,8 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		open("artifacts")
 	elseif k == Enum.KeyCode.M then
 		open("locations")
+	elseif k == Enum.KeyCode.Tab then
+		open("players") -- the TAB list (этап 9); Roblox's own list is off
 	elseif k == Enum.KeyCode.H then
 		openHudEditor() -- move the HUD [владелец 22.10]
 	elseif k == Enum.KeyCode.K and player:GetAttribute("CreativeAllowed") then

@@ -14,6 +14,8 @@
 --   * An account Roblox does not let chat (attribute ChatAllowed = false) still sees the announcements and may type
 --     commands; the input says so.
 --   * «[Совет]» every Config.chat.tipsMinutes (chat_tip_1…N in Strings), off in the settings (settings.tipsOff).
+-- Этап 9: a click / tap on another player's line opens his card in the TAB list (PlayerListWindow.focusUser) [дизайн
+-- этап 3: «наведение/тап по нику — карточка игрока»] — the whole line, a RichText name has no hit box of its own.
 -- Keys: Enter or «/» focus the input (H stays the HUD editor; /hide hides the players instead of the original's H).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -43,7 +45,7 @@ export type Api = {
 }
 
 type Kind = Chat.Kind
-type Line = { kind: Kind?, text: string, own: boolean } -- kind nil = a system line, shown in every tab
+type Line = { kind: Kind?, text: string, own: boolean, user: number? } -- kind nil = a system line, shown in every tab
 
 local ChatWindow = {}
 
@@ -221,6 +223,21 @@ function ChatWindow.start(api: Api)
 		label.Text = line.text
 		label.LayoutOrder = order
 		label.Parent = log
+		local user = line.user
+		if user and not line.own then
+			-- the sender's card (этап 9): only while he is on this server
+			local hit = Instance.new("TextButton")
+			hit.BackgroundTransparency = 1
+			hit.Text = ""
+			hit.Size = UDim2.fromScale(1, 1)
+			hit.Parent = label
+			hit.Activated:Connect(function()
+				if Players:GetPlayerByUserId(user) then
+					require(script.Parent.PlayerListWindow).focusUser = user
+					api.open("players")
+				end
+			end)
+		end
 		local shown = 0
 		for _, child in ipairs(log:GetChildren()) do
 			if child:IsA("TextLabel") then
@@ -265,8 +282,8 @@ function ChatWindow.start(api: Api)
 		scrollDown()
 	end
 
-	local function add(kind: Kind?, text: string, own: boolean?)
-		local line = { kind = kind, text = text, own = own == true }
+	local function add(kind: Kind?, text: string, own: boolean?, user: number?)
+		local line = { kind = kind, text = text, own = own == true, user = user }
 		table.insert(lines, line)
 		if #lines > cfg.history * 4 then
 			table.remove(lines, 1)
@@ -558,7 +575,8 @@ function ChatWindow.start(api: Api)
 		add(
 			kind,
 			playerLine(kind, infoOf(source.UserId, source.Name), message.Text),
-			source.UserId == player.UserId
+			source.UserId == player.UserId,
+			source.UserId
 		)
 	end)
 	Remotes.event("ChatGlobal").OnClientEvent:Connect(function(data: any)
@@ -582,7 +600,8 @@ function ChatWindow.start(api: Api)
 				nick = if typeof(data.k) == "string" then data.k else nil,
 				pris = data.p == 1,
 			}, data.t),
-			data.u == player.UserId
+			data.u == player.UserId,
+			data.u
 		)
 	end)
 	Remotes.event("ChatSystem").OnClientEvent:Connect(function(text: any, kind: any)

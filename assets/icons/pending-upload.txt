@@ -20,3 +20,6 @@ menu_daily
 menu_pris
 ruby
 auction_no_fee
+# Клички и TAB (28.10, Claude, этап 9): assets/icons/items3d/<id>.png → upload_image → assets/icons/ids.json → node scripts/build-configs.mjs
+menu_names
+menu_players

@@ -17,6 +17,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
+local Nicknames = require(Shared.Nicknames)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -28,6 +29,7 @@ local FactionStorage = require(script.Parent.FactionStorageService)
 local GangChest = require(script.Parent.GangChestService)
 local GangService = require(script.Parent.GangService)
 local GangHouse = require(script.Parent.GangHouseService)
+local NicknameService = require(script.Parent.NicknameService) -- клички (этап 9): the shown name, the «Ваши клички» window
 local Types = require(Shared.Types)
 local Vault = require(Shared.Vault)
 
@@ -270,15 +272,6 @@ local function hasAnyKey(profile: Types.Profile, keys: { string }): boolean
 	return false
 end
 
-local function applyNickname(player: Player)
-	local profile = ProfileService.Get(player)
-	local character = player.Character
-	local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
-	if humanoid and profile and typeof(profile.nickname) == "string" and profile.nickname ~= "" then
-		humanoid.DisplayName = "[" .. profile.nickname .. "] " .. player.DisplayName
-	end
-end
-
 local openCase: (player: Player, id: any, requestedKey: any) -> ()
 
 -- [владелец 22.10] a case opens with its key IN HAND: the key is spent at once and the window shows
@@ -460,8 +453,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 	end
 	if session.id == "nicknameCase" then
 		-- [вики] the nickname case grants a unique nickname; "all nicknames already owned" is a separate error.
-		-- The nickname list itself is ours (scripts/design-decisions.json → keys.nicknameCase) [решение].
-		local names = Config.keys.nicknameCase and Config.keys.nicknameCase.nicknames
+		-- The list (46 like the original [клиент], names ours) and the tier weights: Shared/Nicknames [решение].
 		local granted: string? = nil
 		local failure: string? = nil
 		ProfileService.Mutate(player, function(p)
@@ -480,17 +472,11 @@ openCase = function(player: Player, id: any, requestedKey: any)
 				return
 			end
 			local owned = p.nicknames or {}
-			local pool: { string } = {}
-			for _, name in ipairs(if typeof(names) == "table" then names else {}) do
-				if not table.find(owned, name) then
-					table.insert(pool, name)
-				end
-			end
-			if #pool == 0 then
+			local pick = Nicknames.pick(owned, random)
+			if not pick then
 				failure = "nickname_all_owned" -- the key is not spent
 				return
 			end
-			local pick = pool[random:NextInteger(1, #pool)]
 			table.insert(owned, pick)
 			p.nicknames = owned
 			p.nickname = pick
@@ -501,7 +487,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 			toast(player, failure)
 		elseif granted then
 			toast(player, "nickname_received", granted)
-			applyNickname(player)
+			NicknameService.apply(player)
 			ChatService.announce("chat_nickname", player.DisplayName, granted) -- «выбитая кличка» [вики MENUS-SOCIAL]
 		end
 		Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
@@ -1018,23 +1004,6 @@ function CaseService.Start()
 		sessions[player] = nil
 		unlockAt[player] = nil
 	end)
-	local function watchNickname(player: Player)
-		player.CharacterAdded:Connect(function()
-			task.spawn(function()
-				for _ = 1, 30 do
-					if ProfileService.Get(player) then
-						applyNickname(player)
-						return
-					end
-					task.wait(1)
-				end
-			end)
-		end)
-	end
-	Players.PlayerAdded:Connect(watchNickname)
-	for _, player in ipairs(Players:GetPlayers()) do
-		watchNickname(player)
-	end
 	local elapsed = 0
 	RunService.Heartbeat:Connect(function(dt)
 		elapsed += dt

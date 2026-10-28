@@ -4,6 +4,8 @@
 -- Re-applied twice a second while on (new characters, a picked-up item, a fresh armour model). Turning it off puts
 -- back exactly what this module changed. The original binds H; H is the HUD editor here, so it is /hide and the
 -- settings switch (settings.hidePlayers) instead.
+-- Этап 9: the player card of the TAB list hides one player the same way («Скрыть игрока»; this session only
+-- [решение]) — setPlayer(userId, on); the loop runs while anyone is hidden.
 local Players = game:GetService("Players")
 
 local HidePlayers = {}
@@ -12,6 +14,7 @@ local hidden = false
 local parts: { [Instance]: number } = {} -- part / decal → its modifier before
 local guis: { [Instance]: boolean } = {} -- billboards this module switched off
 local running = false
+local only: { [number]: boolean } = {} -- userId → hidden one by one (the player card)
 
 local function hideCharacter(character: Model)
 	for _, d in ipairs(character:GetDescendants()) do
@@ -30,7 +33,7 @@ end
 local function apply()
 	local me = Players.LocalPlayer
 	for _, other in ipairs(Players:GetPlayers()) do
-		if other ~= me and other.Character then
+		if other ~= me and other.Character and (hidden or only[other.UserId]) then
 			hideCharacter(other.Character)
 		end
 	end
@@ -55,24 +58,20 @@ function HidePlayers.isHidden(): boolean
 	return hidden
 end
 
-function HidePlayers.set(on: boolean)
-	if on == hidden then
-		return
-	end
-	hidden = on
-	if not on then
-		restore()
-		return
-	end
+local function anyone(): boolean
+	return hidden or next(only) ~= nil
+end
+
+local function run()
 	apply()
 	if running then
 		return
 	end
 	running = true
 	task.spawn(function()
-		while hidden do
+		while anyone() do
 			task.wait(0.5)
-			if hidden then
+			if anyone() then
 				apply()
 				for d in pairs(parts) do -- forget what was destroyed
 					if not d.Parent then
@@ -83,6 +82,37 @@ function HidePlayers.set(on: boolean)
 		end
 		running = false
 	end)
+end
+
+function HidePlayers.set(on: boolean)
+	if on == hidden then
+		return
+	end
+	hidden = on
+	if not on then
+		restore() -- everything back, then the ones hidden one by one again
+		if next(only) ~= nil then
+			run()
+		end
+		return
+	end
+	run()
+end
+
+function HidePlayers.isPlayerHidden(userId: number): boolean
+	return only[userId] == true
+end
+
+function HidePlayers.setPlayer(userId: number, on: boolean)
+	only[userId] = if on then true else nil
+	if on then
+		run()
+	else
+		restore()
+		if anyone() then
+			run()
+		end
+	end
 end
 
 return HidePlayers

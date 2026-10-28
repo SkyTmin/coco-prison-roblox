@@ -4,7 +4,8 @@
 -- the gang ones through GangAction / GangHome (GangService checks everything); /pay, /gift and /thx are the server's
 -- (ChatCommand → ChatCommandService). /hide is a command and a settings switch, not the original's H — H is the HUD
 -- editor here. The commands of systems that are not built yet answer «скоро». Этап 8: /pp and /mining open the PRIS+
--- window, /rubb goes to the server, /stats Ник asks the server (PRIS+ only).
+-- window, /rubb goes to the server, /stats Ник asks the server (PRIS+ only). Этап 9: /names, /titles, /nickname open
+-- «Ваши клички», /players and /list the TAB list.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -50,13 +51,15 @@ local WINDOWS: { [string]: string } = {
 	daily = "daily", -- «Ежедневные награды» (DailyWindow, этап 7)
 	pp = "pris", -- PRIS+ (PrisWindow, этап 8)
 	mining = "pris", -- the auto-dig switch lives in the PRIS+ window
+	titles = "names", -- «Ваши клички» (NicknameWindow, этап 9)
+	names = "names",
+	nickname = "names",
+	players = "players", -- the TAB list (этап 9)
+	list = "players",
 }
 local SERVER = { pay = true, gift = true, thx = true, rubb = true }
--- клички (этап 9), автопродажа из меню, вики, гайд: not built yet
+-- автопродажа из меню, вики, гайд: not built yet
 local SOON = {
-	titles = true,
-	names = true,
-	nickname = true,
 	autosell = true,
 	wiki = true,
 	quests = true,

@@ -61,6 +61,9 @@
 --                         AuctionSell(slot, amount, price, currency?) — currency "rubies" = whole rubies, else dollars;
 --                         ChatGlobal carries p = 1 for the [PRIS+] prefix; ChatCommand also takes "rubb" (/rubb ник N)
 --                         and "stats" (/stats ник, PRIS+ only)
+-- Этап 9 (клички, TAB):    NicknameSet(name | "") — make an owned nickname active / take it off (NicknameService);
+--                         RemoteFunction PlayerCard(userId) → { u, level, faction, gang, tag, color, nick, pris, blocks,
+--                         rats, kills, deaths, canInvite } or nil — the TAB list / chat player card (PlayerCardService)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")

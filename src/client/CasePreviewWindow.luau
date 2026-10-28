@@ -3,7 +3,8 @@
 -- предметами, которые могут выпасть с данного сундука … оттуда нельзя забирать предметы, только читать»; «сделай
 -- красивыми, ты уже инвентарь наш делал чёткий»]: every possible drop (Shared/CasePreview) in the dark inventory
 -- style — read-only slots with a rarity strip, a legend of the rarities, hover (or tap) for the item tooltip with
--- its rarity, a money bag adds its range. The nickname case lists its nicknames on cards instead. The server puts a
+-- its rarity, a money bag adds its range. The nickname case lists its 46 nicknames on cards in their tier colour
+-- (этап 9, Shared/Nicknames) and a legend with each tier's chance for this player instead. The server puts a
 -- second prompt «Подробнее» (CaseInfo, key R) under «Открыть кейс»; the client opens this window itself.
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -13,6 +14,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CasePreview = require(Shared.CasePreview)
 local Config = require(Shared.Config)
 local ItemInfo = require(Shared.ItemInfo)
+local Nicknames = require(Shared.Nicknames)
 local Strings = require(Shared.Strings)
 local ItemTooltip = require(script.Parent.ItemTooltip)
 local SlotView = require(script.Parent.SlotView)
@@ -35,6 +37,8 @@ local RARITIES = { "common", "rare", "legendary" }
 
 -- the case whose window opens next (set by the prompt)
 CasePreviewWindow.caseId = "ordinaryCase"
+-- the own profile (init.client sets it): the nickname case shows the chances without the owned names
+CasePreviewWindow.profile = nil :: (() -> any)?
 
 -- the «Подробнее» prompts: open the window for that case
 function CasePreviewWindow.listen(open: () -> ())
@@ -58,16 +62,16 @@ function CasePreviewWindow.build(
 	end
 	local id = CasePreviewWindow.caseId
 	local entries, nicknames = CasePreview.of(id)
-	local nickCols = 3
-	local nickW, nickH = (GRID_W - (nickCols - 1) * GAP) / nickCols, 30
+	local nickCols = 4
+	local nickW, nickH = (GRID_W - (nickCols - 1) * GAP) / nickCols, 26
 	local rows = if nicknames
-		then math.clamp(math.ceil(#nicknames / nickCols), 1, 8)
+		then math.clamp(math.ceil(#nicknames / nickCols), 1, 12)
 		else math.clamp(math.ceil(#entries / COLS), 1, MAX_ROWS)
 	local gridH = if nicknames
 		then rows * nickH + (rows - 1) * GAP
 		else rows * SLOT + (rows - 1) * GAP
 	local gridTop = 30
-	local height = gridTop + gridH + (if nicknames then 14 else 44)
+	local height = gridTop + gridH + 44
 	local title = t(TITLES[id] or "ordinary_case")
 	local win, content =
 		createWindow(parent, title, UDim2.fromOffset(INNER_W + 12, height + 46), onClose)
@@ -103,6 +107,31 @@ function CasePreviewWindow.build(
 			label.Font = Enum.Font.SourceSansBold
 			label.TextXAlignment = Enum.TextXAlignment.Center
 			label.TextTruncate = Enum.TextTruncate.AtEnd
+			label.TextColor3 = Nicknames.color(name)
+			SlotView.rarityBar(plate, Nicknames.color(name))
+		end
+		-- the tiers and their chance on the next key for this player (the owned names are out of the pool)
+		local legend = Ui.card(
+			content,
+			UDim2.fromOffset(GRID_W, 30),
+			UDim2.fromOffset(PAD, gridTop + gridH + 10)
+		)
+		local profile = CasePreviewWindow.profile and CasePreviewWindow.profile()
+		local chances = Nicknames.chances(
+			if profile and typeof(profile.nicknames) == "table" then profile.nicknames else {}
+		)
+		local x = 10
+		for _, tier in ipairs(Nicknames.TIERS) do
+			local label = Ui.label(
+				legend,
+				t("nick_tier_" .. tier) .. " " .. string.format("%.1f%%", chances[tier] * 100),
+				UDim2.fromOffset(104, 30),
+				UDim2.fromOffset(x, 0),
+				13,
+				Nicknames.COLORS[tier]
+			)
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			x += 104
 		end
 		return win
 	end

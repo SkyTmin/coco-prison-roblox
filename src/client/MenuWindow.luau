@@ -55,6 +55,19 @@ MenuWindow.ENTRIES = {
 		caption = "pris_title",
 		icon = if Config.icons.icons.menu_pris then nil else "top_crown",
 	},
+	-- «Ваши клички» (/names, этап 9); the nickname key until our Blender icon menu_names is uploaded
+	{
+		kind = "names",
+		caption = "names_title",
+		icon = if Config.icons.icons.menu_names then nil else "nickname_key",
+	},
+	-- the TAB list (этап 9); the first rank emblem until our Blender icon menu_players is uploaded
+	{
+		kind = "players",
+		caption = "players_title",
+		key = "Tab",
+		icon = if Config.icons.icons.menu_players then nil else "rank_1",
+	},
 	{ kind = "inventory", caption = "inventory", key = "E" },
 	{ kind = "layout", caption = "touch_layout", key = "H" },
 	{ kind = "settings", caption = "settings_title", key = "P" },
