@@ -276,6 +276,7 @@ local hotbar = Ui.panel(
 	UDim2.fromOffset(9 * (SLOT + 4) + 8, SLOT + 12),
 	UDim2.new(0.5, -(9 * (SLOT + 4) + 8) / 2, 1, -SLOT - 20)
 )
+hotbar.Name = "Hotbar"
 local hotbarSlots: { Frame } = {}
 local hotbarNames: { TextLabel } = {}
 local hotbarCounts: { TextLabel } = {}
@@ -3723,6 +3724,10 @@ UserInputService:GetPropertyChangedSignal("KeyboardEnabled"):Connect(updateLayou
 workspace:GetAttributeChangedSignal("ForceMobile"):Connect(updateLayout)
 watchViewport()
 RunService.RenderStepped:Connect(function()
+	local hasInventoryRow = openWindow ~= nil
+		and openWindow.Visible
+		and (currentWindowKind == "inventory" or currentWindowKind == "case")
+	hotbar.Visible = not hasInventoryRow
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
 	local food, needItem = isFood(), isNeedConsumable()
