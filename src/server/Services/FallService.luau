@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Sfx = require(Shared.Sfx)
 local Cobweb = require(Shared.Cobweb)
+local Ladders = require(Shared.Ladders)
 local HurtService = require(script.Parent.HurtService)
 
 local BLOCK = 4
@@ -42,8 +43,10 @@ local function step()
 			or state == Enum.HumanoidStateType.Swimming
 			or humanoid.FloorMaterial == Enum.Material.Water
 			or Cobweb.holds(character) -- a web stops the fall [ваниль]
+			or (humanoid.FloorMaterial == Enum.Material.Air and Ladders.near(character) ~= nil)
 		if safe then
 			track.apex = nil -- ladders and water cancel the fall
+			table.clear(track.history) -- a ladder catch must also discard the pre-catch falling history
 		elseif humanoid.FloorMaterial == Enum.Material.Air then
 			-- FloorMaterial can lag behind the replicated position: the apex also looks at recent frames
 			local apex = track.apex or y
