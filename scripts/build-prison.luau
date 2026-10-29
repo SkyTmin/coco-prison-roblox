@@ -510,7 +510,8 @@ local function spot(id: string, x: number, z: number)
 	p:SetAttribute("Spot", id)
 	CollectionService:AddTag(p, "LocationSpawn")
 end
-spot("spawn", 0, 24)
+-- [владелец 29.10] the first teleport spot arrives by the big mine, just like the initial spawn.
+spot("spawn", spawn.Position.X, spawn.Position.Z)
 spot("mine", 0, -40)
 spot("small_mine", 0, 70)
 spot("market", 120, -80)
