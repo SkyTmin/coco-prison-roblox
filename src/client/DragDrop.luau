@@ -18,6 +18,7 @@
 -- Both: drag a stack out of the window and let go → it is thrown on the ground (throw, when given).
 -- A move is sent as move(from, to, count?) — count nil means "the whole stack".
 local Players = game:GetService("Players")
+local GuiService = game:GetService("GuiService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -37,6 +38,12 @@ local DragDrop = {}
 local HOLD_SPLIT = 0.35 -- s of touch hold before the split bar appears
 local DRAG_SLOP = 7 -- px before a press becomes a drag
 local DOUBLE_TAP = 0.32 -- s
+
+-- GetMouseLocation is screen-relative; GUI hit tests / AbsolutePosition and touch input exclude the top inset.
+local function mousePosition(): Vector2
+	local inset = GuiService:GetGuiInset()
+	return UserInputService:GetMouseLocation() - inset
+end
 
 local function same(a: Address?, b: Address?): boolean
 	return a ~= nil and b ~= nil and a.container == b.container and a.index == b.index
@@ -138,7 +145,8 @@ function DragDrop.new(
 		ghostName.Visible = false
 		local count = if held and held.count then held.count else stack.count
 		ghostCount.Text = if count > 1 then tostring(count) else ""
-		ghost.Position = UDim2.fromOffset(point.X, point.Y)
+		local localPoint = point - layer.AbsolutePosition
+		ghost.Position = UDim2.fromOffset(localPoint.X, localPoint.Y)
 		ghost.Visible = true
 	end
 	local function setHeld(value: Held?)
@@ -151,7 +159,7 @@ function DragDrop.new(
 	local function position(input: InputObject): Vector2
 		return if input.UserInputType == Enum.UserInputType.Touch
 			then Vector2.new(input.Position.X, input.Position.Y)
-			else UserInputService:GetMouseLocation()
+			else mousePosition()
 	end
 	local function slotUnder(point: Vector2): Address?
 		-- GUI hit testing respects UIScale, insets, and overlapping windows.
@@ -423,13 +431,8 @@ function DragDrop.new(
 	table.insert(
 		connections,
 		RunService.RenderStepped:Connect(function()
-			if
-				held
-				and not active
-				and UserInputService.MouseEnabled
-				and not UserInputService.TouchEnabled
-			then
-				showGhost(UserInputService:GetMouseLocation())
+			if held and not active and UserInputService.MouseEnabled and not lastTouch then
+				showGhost(mousePosition())
 			end
 			-- item info
 			local tipAddress: Address? = nil
@@ -452,8 +455,8 @@ function DragDrop.new(
 				local f = if pressAddress then frameOf(pressAddress) else nil
 				if f then
 					splitBar.Position = UDim2.fromOffset(
-						f.AbsolutePosition.X + f.AbsoluteSize.X / 2,
-						f.AbsolutePosition.Y - 8
+						f.AbsolutePosition.X + f.AbsoluteSize.X / 2 - layer.AbsolutePosition.X,
+						f.AbsolutePosition.Y - 8 - layer.AbsolutePosition.Y
 					)
 					splitBar.Visible = true
 				end
