@@ -296,7 +296,7 @@ class Mob:
                 act = bpy.data.actions.get("%s|%s" % (clip, name))
                 if act:
                     loop = bool(act.get("loop", False))
-                    frames.update(int(f) for f in act["frames"])  # Blender 5 actions are layered: no act.fcurves
+                    frames.update(float(f) for f in act["frames"])  # keep half-frame endings (1.55 / 2.25 s)
             frames = sorted(frames)
             tracks = {}
             for name in order:
@@ -307,7 +307,7 @@ class Mob:
                 use(e, act)
                 keys = []
                 for f in frames:
-                    scene.frame_set(f)
+                    scene.frame_set(int(f), subframe=f - int(f))
                     rest = Vector(e["pivot"]) - (Vector(e.parent["pivot"]) if e.parent else Vector((0, 0, 0)))
                     offset = e.location - rest
                     keys.append({"t": round(f / FPS, 4), "q": to_roblox_quat(e.rotation_euler),
@@ -399,7 +399,7 @@ class Mob:
                 joints[name].rotation_euler = Euler((0, 0, 0), "XYZ")
                 parent = joints[name].parent
                 joints[name].location = Vector(joints[name]["pivot"]) - (Vector(parent["pivot"]) if parent else Vector())
-        bpy.context.scene.frame_set(frame)
+        bpy.context.scene.frame_set(int(frame), subframe=frame - int(frame))
 
     def perspective(self, cam, spec):
         loc, target, lens = spec

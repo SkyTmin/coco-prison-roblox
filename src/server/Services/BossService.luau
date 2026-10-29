@@ -38,6 +38,7 @@ local ChatService = require(script.Parent.ChatService) -- announcements in the c
 local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
+local SplinterAbilities = require(script.Parent.SplinterAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -48,6 +49,7 @@ local LAVA = Color3.fromRGB(255, 110, 30)
 local TELEGRAPH = Color3.fromRGB(255, 40, 30)
 
 type Fight = {
+	splinter: any?,
 	meleeDamage: number,
 	meleeRange: number,
 	meleeCooldown: number,
@@ -402,11 +404,13 @@ local function buildBlock(boss: Boss, def: any): Model
 			boss.motors[d.Name] = d -- the crumble on death takes them apart
 		end
 	end
-	local glow = Instance.new("PointLight") -- lava glow from the chest
-	glow.Range = 16
-	glow.Brightness = 1.4
-	glow.Color = paletteColor(boss, "glow", LAVA)
-	glow.Parent = model:FindFirstChild("J_body") or root
+	if fight.glowBrightness ~= 0 then
+		local glow = Instance.new("PointLight") -- lava bosses only; Splinter uses matte fur
+		glow.Range = 16
+		glow.Brightness = fight.glowBrightness or 1.4
+		glow.Color = paletteColor(boss, "glow", LAVA)
+		glow.Parent = model:FindFirstChild("J_body") or root
+	end
 	local humanoid = Instance.new("Humanoid")
 	humanoid.RigType = Enum.HumanoidRigType.R6
 	humanoid.HipHeight = BLOCK_ROOT_HEIGHT - root.Size.Y / 2
@@ -934,11 +938,17 @@ end
 
 local function melee(boss: Boss, f: { player: Player, root: BasePart, humanoid: Humanoid })
 	local root = boss.root :: BasePart
-	boss.busyUntil = math.max(boss.busyUntil, os.clock() + 0.8) -- busy, but hittable: only abilities shield it
-	act(boss, "melee", 0.9)
-	task.wait(0.4)
+	local cfg = boss.fight.splinter
+	local duration = if cfg then cfg.melee.duration else 0.9
+	boss.busyUntil = math.max(boss.busyUntil, os.clock() + duration)
+	act(boss, "melee", duration)
+	task.wait(if cfg then cfg.melee.hitAt else 0.4)
 	if
-		f.humanoid.Health > 0
+		boss.root == root
+		and boss.humanoid
+		and boss.humanoid.Health > 0
+		and f.root.Parent
+		and f.humanoid.Health > 0
 		and (f.root.Position - root.Position).Magnitude <= boss.fight.meleeRange + 2
 	then
 		hurt(boss, f, boss.fight.meleeDamage, root.Position)
@@ -1119,11 +1129,26 @@ local function died(boss: Boss)
 		table.insert(hitters, userId)
 	end
 	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
+	SplinterAbilities.Clear(boss)
+	-- Set the action before clearing boss.model; clients keep the final pose until removal.
+	if boss.fight.splinter then
+		act(boss, "death", boss.fight.splinter.deathDuration)
+	end
 	boss.model, boss.humanoid, boss.root = nil, nil, nil
 	table.clear(boss.damageBy)
 	boss.state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + boss.card.respawnSeconds)
 	publish(boss)
 	local root = model.PrimaryPart
+	if boss.fight.splinter and root then
+		root.Anchored = true
+		root.CanCollide = false
+		model:SetAttribute("Shielded", false)
+		Debris:AddItem(model, boss.fight.splinter.deathDuration)
+		task.delay(boss.card.respawnSeconds, function()
+			spawnBoss(boss)
+		end)
+		return
+	end
 	if model:GetAttribute("BlockModel") and root then
 		-- a Blender block model (thousands of voxel boxes) never changes its parts: breaking the joints, physics
 		-- or a fade on every box rebuilt its render on every client (~0.6 s frozen frames [владелец 22.10:
@@ -1285,9 +1310,16 @@ local function think(boss: Boss)
 		boss.nextAbilityAt = now
 			+ boss.fight.abilityCooldown
 				* (if phase2 then boss.fight.phase2CooldownScale else 1)
-		boss.nextAbility = boss.nextAbility % 3 + 1
+		boss.nextAbility = boss.nextAbility % (if boss.fight.splinter then 4 else 3) + 1
 		humanoid:MoveTo(root.Position)
-		if boss.nextAbility == 1 then
+		if boss.fight.splinter then
+			SplinterAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.nextAbility == 1 then
 			task.spawn(lavaBlade, boss, target.root.Position)
 		elseif boss.nextAbility == 2 then
 			task.spawn(earthSpikes, boss, phase2)

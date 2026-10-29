@@ -214,7 +214,16 @@ local function blockClip(
 	length: number,
 	clips: any
 ): (string?, number)
-	if action == "melee" or action == "roar" or action == "jump" then
+	if
+		action == "melee"
+		or action == "roar"
+		or action == "jump"
+		or action == "swoop"
+		or action == "potion"
+		or action == "shoot"
+		or action == "summon"
+		or action == "death"
+	then
 		local c = clips[action]
 		return action, if c then seconds / length * c.length else 0
 	elseif action == "blade" then
@@ -254,12 +263,18 @@ local function animateBlock(rig: Rig, dt: number, root: BasePart, now: number)
 	local length = math.max(0.05, tonumber(model:GetAttribute("ActionLen")) or 0)
 	local seconds = workspace:GetServerTimeNow() - at
 	local clipName, t = nil, 0
-	if typeof(action) == "string" and seconds >= 0 and seconds <= length then
-		clipName, t = blockClip(action, seconds, length, clips)
+	if typeof(action) == "string" and seconds >= 0 and (seconds <= length or action == "death") then
+		clipName, t = blockClip(action, math.min(seconds, length), length, clips)
 	end
 	local clip = clipName and clips[clipName]
 	-- fade the action in and out so a blow never snaps
-	local actionW = if clip then math.clamp(math.min(seconds, length - seconds) / FADE, 0, 1) else 0
+	local actionW = if clip
+		then math.clamp(
+			(if action == "death" then seconds else math.min(seconds, length - seconds)) / FADE,
+			0,
+			1
+		)
+		else 0
 	for _, joint in ipairs(prepared.joints) do
 		local motor = rig.blockMotors[joint]
 		if motor then
