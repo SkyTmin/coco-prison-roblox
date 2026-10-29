@@ -28,6 +28,7 @@ local MineService = require(script.Parent.MineService)
 local NeedsService = require(script.Parent.NeedsService)
 local ProfileService = require(script.Parent.ProfileService)
 local GangService = require(script.Parent.GangService)
+local ProfessionService = require(script.Parent.ProfessionService)
 
 local BookService = {}
 
@@ -643,6 +644,7 @@ function BookService.onDug(
 	end
 	local toolId, toolLevel = tool.id, tool.level or 1
 	local extra: { string } = {}
+	local layer: { string } = {}
 	local layerStats = 0
 	if roll(Books.value(tool, "plastolom")) then
 		-- the whole layer the block was in (the player stands on it while digging down)
@@ -653,8 +655,8 @@ function BookService.onDug(
 				table.insert(cells, MineService.index(mine, x, y, z))
 			end
 		end
-		local broken = breakCells(mine, cells, toolId, toolLevel)
-		layerStats = math.min(LAYER_STATS_CAP, math.floor(#broken / 2))
+		layer = breakCells(mine, cells, toolId, toolLevel)
+		layerStats = math.min(LAYER_STATS_CAP, math.floor(#layer / 2))
 	elseif roll(Books.value(tool, "hammer")) then
 		-- 3×3 across the dug face
 		local x, y, z = MineService.coords(mine, index)
@@ -689,21 +691,49 @@ function BookService.onDug(
 		extra = breakCells(mine, cells, toolId, toolLevel)
 	end
 	local copy = roll(Books.value(tool, "trader"))
-	if copy or #extra > 0 or layerStats > 0 then
+	local sold, soldItems = 0, 0
+	if copy or #extra > 0 or #layer > 0 then
 		ProfileService.Mutate(player, function(p)
 			local mult = blockMultiplier(p)
+			local moneyMult = ProfessionService.moneyMultiplier(p)
+			local function give(id: string, count: number, sellOnly: boolean?)
+				local amount, items = InventoryService.autoSell(p, id, count, moneyMult)
+				sold += amount
+				soldItems += items
+				if items == 0 and not sellOnly then
+					InventoryService.add(p, id, count)
+				end
+			end
+			local function giveBlock(id: string, sellOnly: boolean?)
+				local block = Config.block(id)
+				local drop = if BookService.silkTouch(p)
+					then id
+					else if block then block.dropsAs or id else id
+				local range = if block then (block :: any).dropCount else nil
+				local count = if typeof(range) == "table" and #range == 2
+					then random:NextInteger(range[1], range[2])
+					else 1
+				give(drop, count, sellOnly)
+			end
 			if copy then
-				InventoryService.add(p, dropId, dropCount)
+				give(dropId, dropCount)
 			end
 			for _, id in ipairs(extra) do
-				local block = Config.block(id)
-				InventoryService.add(p, if block and block.dropsAs then block.dropsAs else id, 1)
+				giveBlock(id)
+			end
+			-- Пластолом keeps its half-layer stats cap; active auto-sell pays for every actual block removed.
+			for _, id in ipairs(layer) do
+				giveBlock(id, true)
 			end
 			local counted = #extra + layerStats
 			p.blocksTotal += mult * counted
 			p.stats.blocksClean = (p.stats.blocksClean or 0) + counted
 		end)
 	end
+	if sold > 0 then
+		Remotes.event("AutoSold"):FireClient(player, sold)
+	end
+	GangService.progress(player, "sellItems", soldItems)
 	if roll(Books.value(tool, "archaeologist")) then
 		NeedsService.GiveEffect(player, "haste", HASTE_LEVEL, HASTE_SECONDS)
 	end
@@ -879,9 +909,9 @@ local function springs(player: Player, profile: Types.Profile)
 	if not humanoid then
 		return
 	end
-	-- the ordinary jump is one block [владелец 28.10]; Пружины add theirs
-	local height = (Config.rules.combat.jumpBlocks or 1.05) * BLOCK
-		+ Books.worn(profile, "springs") * BLOCK
+	-- [владелец 29.10] full jump height I 1.25 / II 1.5 / III 2 blocks; keep the base step clearance.
+	local base = Config.rules.combat.jumpBlocks or 1.05
+	local height = (math.max(1, Books.worn(profile, "springs")) + base - 1) * BLOCK
 	if humanoid.UseJumpPower then
 		local power = math.sqrt(2 * workspace.Gravity * height)
 		if math.abs(humanoid.JumpPower - power) > 0.01 then

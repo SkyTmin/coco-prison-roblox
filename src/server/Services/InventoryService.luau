@@ -227,6 +227,33 @@ function InventoryService.unequipArmor(profile: Profile, part: string, slot: num
 	return true
 end
 
+-- Mining drops, including ancient-book effects, use the same auto-sell eligibility and rounding.
+function InventoryService.canAutoSell(profile: Profile, id: string): boolean
+	local block = Config.block(id)
+	return profile.autosell == true
+		and not (profile.settings and profile.settings.autosellOff)
+		and block ~= nil
+		and block.sellable ~= false
+		and block.basePrice > 0
+		and not Config.blockLocked(id, profile.level)
+end
+
+-- Returns (money credited, items sold); (0, 0) leaves the drop for the caller to put in the bag.
+function InventoryService.autoSell(
+	profile: Profile,
+	id: string,
+	count: number,
+	multiplier: number
+): (number, number)
+	if count <= 0 or not InventoryService.canAutoSell(profile, id) then
+		return 0, 0
+	end
+	local block = Config.block(id) :: Config.Block
+	local amount = math.floor(block.basePrice * Config.moneyScale * multiplier * count + 0.5)
+	profile.coins += amount
+	return amount, count
+end
+
 -- Sells every block stack; returns money units earned.
 -- blocks from mines far above the player stay in the bag [сеть TG/25]; the second result counts them
 -- sells every sellable block: (money, items kept because their block is locked, items sold)

@@ -192,7 +192,11 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 		end
 		return nil, nil, nil
 	end
-	if not InventoryService.canAdd(profile, block.dropsAs or block.id, 1) then
+	local dropId = if BookService.silkTouch(profile) then block.id else block.dropsAs or block.id
+	if
+		not InventoryService.canAutoSell(profile, dropId)
+		and not InventoryService.canAdd(profile, dropId, 1)
+	then
 		toast(player, "bag_full")
 		return nil, nil, nil
 	end
@@ -329,24 +333,9 @@ local function complete(player: Player, token: number)
 		-- the auto-sell [владелец 28.10: «когда игрок копает, предмет сразу продаётся … по центру экрана сумма»;
 		-- вики: «+0,057 $» = цена скупщика с множителями]: the drop goes straight to the buyer's price, the same
 		-- rounding as InventoryService.sellAll; anything the buyer does not take still goes to the bag
-		local sale = Config.block(dropId)
-		if
-			p.autosell
-			and not (p.settings and p.settings.autosellOff)
-			and sale
-			and sale.sellable ~= false
-			and sale.basePrice > 0
-		then
-			sold = math.floor(
-				sale.basePrice
-						* Config.moneyScale
-						* ProfessionService.moneyMultiplier(p)
-						* dropCount
-					+ 0.5
-			)
-			p.coins += sold
-			soldItems = dropCount
-		else
+		sold, soldItems =
+			InventoryService.autoSell(p, dropId, dropCount, ProfessionService.moneyMultiplier(p))
+		if soldItems == 0 then
 			overflow = InventoryService.add(p, dropId, dropCount)
 		end
 		local blockMult = (1 + p.professions.upgrades.blocks * Config.professions.upgrades.blocks)

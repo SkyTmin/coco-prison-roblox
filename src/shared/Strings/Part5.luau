@@ -659,4 +659,10 @@ return {
 		es = "Elige dos libros del mismo tipo",
 		fr = "Choisis deux livres du même type",
 	},
+	chat_boss_payout = {
+		ru = "%d. %s — урон %s (%d%%), награда %s $",
+		en = "%d. %s — damage %s (%d%%), reward %s $",
+		es = "%d. %s — daño %s (%d%%), recompensa %s $",
+		fr = "%d. %s — dégâts %s (%d%%), récompense %s $",
+	},
 }

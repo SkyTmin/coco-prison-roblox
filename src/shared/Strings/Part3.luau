@@ -39,10 +39,10 @@ return {
 		fr = "%s a atteint le niveau %d !",
 	},
 	chat_boss_killed = {
-		ru = "%s побеждён! Больше всех урона: %s",
-		en = "%s is defeated! Most damage: %s",
-		es = "¡%s ha sido derrotado! Más daño: %s",
-		fr = "%s est vaincu ! Plus de dégâts : %s",
+		ru = "%s побеждён! Урон и награды:",
+		en = "%s is defeated! Damage and rewards:",
+		es = "¡%s ha sido derrotado! Daño y recompensas:",
+		fr = "%s est vaincu ! Dégâts et récompenses :",
 	},
 	chat_nickname = {
 		ru = "%s выбил кличку «%s»!",

@@ -1006,12 +1006,13 @@ local function reward(boss: Boss, lastHit: number?)
 	local bank = (boss.card.money and boss.card.money[2] or 0) * Config.moneyScale
 	local rules = Config.bosses.rewards
 	local present = playersInLocation(boss)
+	local payouts: { [number]: number } = {}
 	local ranking = {}
 	for userId, dealt in pairs(boss.damageBy) do
 		table.insert(ranking, { userId = userId, dealt = dealt })
 	end
 	table.sort(ranking, function(a, b)
-		return a.dealt > b.dealt
+		return if a.dealt == b.dealt then a.userId < b.userId else a.dealt > b.dealt
 	end)
 	local top = {}
 	for i = 1, math.min(3, #ranking) do
@@ -1026,15 +1027,6 @@ local function reward(boss: Boss, lastHit: number?)
 			)
 		)
 	end
-	-- the whole server reads it in the chat [вики MENUS-SOCIAL: гибель босса, топ урона] (the spawn stays silent
-	-- [владелец 27.10: «выключи уведомление о появлении боссов»])
-	local podium = table.concat(top, "  ")
-	ChatService.announceWith(function(locale)
-		local name = if locale == "ru" or not boss.card.nameEn
-			then boss.card.name
-			else boss.card.nameEn
-		return Strings.t("chat_boss_killed", locale, name, podium)
-	end)
 	for _, player in ipairs(present) do
 		local dealt = boss.damageBy[player.UserId] or 0
 		local share = if total > 0 then dealt / total else 0
@@ -1065,6 +1057,7 @@ local function reward(boss: Boss, lastHit: number?)
 			end
 			ProfileService.Mutate(player, function(p)
 				p.coins += amount
+				payouts[player.UserId] = amount -- report the actual credit, including book / last-hit bonuses
 				p.stats.bosses = (p.stats.bosses or 0) + 1
 				for id, count in pairs(items) do
 					grant(p, id, count)
@@ -1079,6 +1072,37 @@ local function reward(boss: Boss, lastHit: number?)
 			toast(player, "boss_no_reward", math.floor(rules.minDamageShare * 100))
 		end
 	end
+	-- [владелец 29.10] every contributor, not only the podium: damage, share and actual money received.
+	-- Resolve departed players' names outside the death handler; absent / ineligible players received zero.
+	task.spawn(function()
+		ChatService.announceWith(function(locale)
+			local name = if locale == "ru" or not boss.card.nameEn
+				then boss.card.name
+				else boss.card.nameEn
+			return Strings.t("chat_boss_killed", locale, name)
+		end)
+		for i, entry in ipairs(ranking) do
+			local player = Players:GetPlayerByUserId(entry.userId)
+			local name = if player then player.Name else tostring(entry.userId)
+			if not player then
+				local ok, found = pcall(Players.GetNameFromUserIdAsync, Players, entry.userId)
+				if ok then
+					name = found
+				end
+			end
+			ChatService.announce(
+				"chat_boss_payout",
+				i,
+				name,
+				Strings.grouped(entry.dealt, 1),
+				math.floor(entry.dealt / math.max(total, 1) * 100 + 0.5),
+				Strings.grouped(
+					(payouts[entry.userId] or 0) / Config.moneyScale,
+					Config.money.displayDecimals
+				)
+			)
+		end
+	end)
 end
 
 local function died(boss: Boss)

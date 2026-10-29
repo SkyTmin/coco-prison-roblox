@@ -669,10 +669,10 @@ return {
 		fr = "Sous 10 cœurs, %s de chances d'infliger des dégâts doublés",
 	},
 	book_desc_springs = {
-		ru = "Прыжок выше на %s бл.",
-		en = "Jump %s block(s) higher",
-		es = "Salto %s bloque(s) más alto",
-		fr = "Saut plus haut de %s bloc(s)",
+		ru = "Высота прыжка: %s бл.",
+		en = "Jump height: %s block(s)",
+		es = "Altura de salto: %s bloque(s)",
+		fr = "Hauteur du saut : %s bloc(s)",
 	},
 	book_desc_tank = {
 		ru = "+%s ❤ к здоровью",
