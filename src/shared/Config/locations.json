@@ -203,9 +203,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -371,9 +369,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -406,9 +402,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": "shovel"
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -443,9 +437,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -477,9 +469,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": "shears"
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -510,9 +500,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -580,9 +568,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -613,9 +599,7 @@
       "requiresGangUpgrade": null,
       "friendlyFire": false,
       "miniMine": null,
-      "shot": {
-        "tool": null
-      },
+      "shot": null,
       "mine": {
         "size": [
           32,
@@ -984,7 +968,9 @@
       "requiresGang": true,
       "requiresGangUpgrade": "ghetto",
       "friendlyFire": true,
-      "miniMine": null,
+      "miniMine": {
+        "resetSeconds": 600
+      },
       "mine": {
         "size": [
           40,
@@ -995,7 +981,36 @@
         "warnSeconds": 15,
         "shares": {}
       },
-      "mines": {},
+      "mines": {
+        "ghetto_private_1": {
+          "shares": {
+            "stone": 70,
+            "iron_ore": 30
+          },
+          "source": "[решение 29.10] временная шахта банды Гетто"
+        },
+        "ghetto_private_2": {
+          "shares": {
+            "stone": 70,
+            "iron_ore": 30
+          },
+          "source": "[решение 29.10] временная шахта банды Гетто"
+        },
+        "ghetto_private_3": {
+          "shares": {
+            "stone": 70,
+            "iron_ore": 30
+          },
+          "source": "[решение 29.10] временная шахта банды Гетто"
+        },
+        "ghetto_private_4": {
+          "shares": {
+            "stone": 70,
+            "iron_ore": 30
+          },
+          "source": "[решение 29.10] временная шахта банды Гетто"
+        }
+      },
       "sellList": [],
       "sharesSource": "[решение]"
     },

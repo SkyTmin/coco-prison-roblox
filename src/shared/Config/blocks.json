@@ -790,6 +790,19 @@
       "sellable": false,
       "itemOnly": true,
       "upgradeCounter": null
+    },
+    "gang_mine_pass": {
+      "id": "gang_mine_pass",
+      "name": "Пропуск в шахту банды",
+      "basePrice": 0,
+      "hardness": 0,
+      "tool": "any",
+      "minTier": 0,
+      "dropsAs": null,
+      "dropCount": null,
+      "sellable": false,
+      "itemOnly": true,
+      "upgradeCounter": null
     }
   }
 }

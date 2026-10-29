@@ -63,7 +63,8 @@ end
 
 local function decode(saved: any): { [number]: Slots }
 	local pages: { [number]: Slots } = {}
-	for i = 1, GangChestService.MAX_PAGES do
+	-- Keep old pages intact when reducing the purchase cap (withdraw-only below).
+	for i = 1, math.max(64, GangChestService.MAX_PAGES) do
 		pages[i] = {}
 	end
 	if typeof(saved) ~= "table" or typeof(saved.pages) ~= "table" then
@@ -229,11 +230,20 @@ function GangChestService.PageCount(gang: any): number
 	if not gang then
 		return 0
 	end
-	return math.clamp(
+	local count = math.clamp(
 		Gangs.level(gang, "chests") * GangChestService.PAGES_PER_LEVEL,
 		0,
 		GangChestService.MAX_PAGES
 	)
+	local chest = chests[gang.id]
+	if chest then
+		for page, slots in pairs(chest.pages) do
+			if next(slots) ~= nil then
+				count = math.max(count, page)
+			end
+		end
+	end
+	return count
 end
 
 function GangChestService.MarkDirty(id: string)

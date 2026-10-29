@@ -66,14 +66,15 @@ end
 
 -- One plain swing (no weapon combo), e.g. a tap that hit nothing to dig
 function HeldItem.Swing()
-	if swingPhase < 0 then
+	if swingPhase < 0 or swingPhase >= 0.5 then
+		heldUntil = 0
 		startCycle()
 	end
 end
 
--- Hitstop when a blow lands: the first-person swing and the body animation stand still for a moment
+-- Body hitstop only: first-person strikes keep their short, continuous cycle.
 function HeldItem.Hitstop(seconds: number)
-	heldUntil = os.clock() + seconds
+	-- First-person motion stays responsive; hitstop belongs to the body animation.
 	CharacterAnimator.HoldLocal(seconds)
 end
 
@@ -84,7 +85,8 @@ end
 
 -- A melee attack of the combo (Combat): its animation over the weapon's attack length
 function HeldItem.Attack(kind: string, duration: number)
-	swingPhase, swingKind, swingLength = 0, kind, duration
+	heldUntil = 0
+	swingPhase, swingKind, swingLength = 0, kind, math.min(duration, SWING_SECONDS)
 	CharacterAnimator.PlayLocal(kind, duration)
 end
 

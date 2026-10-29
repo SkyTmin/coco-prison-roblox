@@ -53,6 +53,11 @@ local function part(name, size, cf, color, material, parent)
 	p.Anchored = true
 	p.Color = color or STONE
 	p.Material = material or Enum.Material.SmoothPlastic
+	-- [владелец 29.10] Window panes must not bloom like large light sources.
+	if string.find(string.lower(name), "window") or name == "KioskGlass" then
+		p.Material = Enum.Material.SmoothPlastic
+		p.Color = p.Color:Lerp(Color3.fromRGB(70, 65, 55), 0.45)
+	end
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Parent = parent
@@ -114,7 +119,7 @@ end
 local function light(p, range, brightness, color)
 	local l = Instance.new("PointLight")
 	l.Range = range
-	l.Brightness = brightness
+	l.Brightness = brightness * 0.45
 	l.Color = color or WARM
 	l.Shadows = false
 	l.Parent = p
@@ -494,8 +499,10 @@ do
 	)
 end
 -- the gang storage: four double chests along the north wall
-for _, x in ipairs({ -15, -5, 5, 15 }) do
-	chest(at(x, 0, -ID + 2.5), house, "GangChest")
+for index = 1, 8 do
+	local x = -15 + ((index - 1) % 4) * 10
+	local body = chest(at(x, math.floor((index - 1) / 4) * 3.6, -ID + 2.5), house, "GangChest")
+	body.Parent:SetAttribute("UpgradeLevel", index)
 end
 -- the Библиотекарь's corner (west): bookshelves, a lectern, the librarian
 do

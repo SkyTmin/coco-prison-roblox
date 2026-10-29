@@ -114,7 +114,8 @@ end
 -- shows the chests / Библиотекарь / Кузнец the gang has bought and takes away the rest (parented to nil, kept)
 local function fit(house: House, doc: any)
 	for _, f in ipairs(house.features) do
-		local has = Gangs.level(doc, f.upgrade) >= 1
+		local has = Gangs.level(doc, f.upgrade)
+			>= (tonumber(f.root:GetAttribute("UpgradeLevel")) or 1)
 		if has and f.root.Parent == nil then
 			f.root.Parent = f.parent
 			tagAll(f.root)

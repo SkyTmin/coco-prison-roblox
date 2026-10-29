@@ -189,7 +189,8 @@
     "menu_gangs": "rbxassetid://76401634926325",
     "menu_forge": "rbxassetid://115081539242254",
     "menu_gang_home": "rbxassetid://124354725642685",
-    "gang_members": "rbxassetid://83529133629268"
+    "gang_members": "rbxassetid://83529133629268",
+    "gang_mine_pass": "rbxassetid://70371341641640"
   },
   "_note": "shovel_wood: first upload 82350366712316 never loads (moderation?) — re-encoded copy uploaded as 124201732381557 Tool icons (27.10): first uploads of axe wood/stone/diamond, all pickaxes, shears, shovel iron/diamond, sword diamond never loaded — re-uploaded with one invisible corner pixel changed."
 }

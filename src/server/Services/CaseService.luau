@@ -745,6 +745,12 @@ local function move(
 		if not source[fromIndex] then
 			return
 		end
+		-- Legacy overflow above eight chests is withdrawal-only, never a ninth chest.
+		if session.id == "gangChest" and session.index > GangChest.MAX_PAGES then
+			if from.container ~= "case" or to.container ~= "inv" or target[toIndex] ~= nil then
+				return
+			end
+		end
 		local stack = source[fromIndex]
 		if
 			from.container == "case"

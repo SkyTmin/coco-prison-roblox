@@ -1,8 +1,8 @@
 --!nocheck
 -- Builds the Гетто (ghetto: «Нужна банда и улучшение Гетто», PvP, own gang members may hit each other
 -- [вики LOCATIONS-MENU]; docs/research/remaining-features-design.md «Этап 1в. Гетто») — Workspace.Ghetto at X 11400,
--- height Y 15000. A walled city block at dusk: a main street (north–south) crossed by a second one, sixteen lots
--- between them with 8-stud back alleys. Most lots hold brick blocks of 3–5 storeys (lit / dark / boarded windows,
+-- height Y 15000. A walled city block at dusk: a main street (north–south) crossed by a second one, thirty-six lots
+-- between them with 8-stud back alleys. Most lots hold brick blocks of 2–4 storeys (lit / dark / boarded windows,
 -- fire escapes, shop shutters with signs, roof parapets, water towers, chimneys); two lots are wastelands (zombies,
 -- wrecked cars, fences), one is a fenced basketball court, one the walled yard of the Чёрный рынок (tag BlackMarket).
 -- The Торговец stands at a kiosk by the arrival (tag GhettoTrader). Rats in the alleys and zombies on the
@@ -24,7 +24,7 @@ root.Parent = workspace
 
 local OX, OZ = 11400, 0
 local BY = 15000 -- the location's own height [CLAUDE.md: new locations float at their own height]
-local HALF = 120 -- the inner half size of the walled block
+local HALF = 220 -- the inner half size of the walled block
 local FLOOR = 9 -- one storey
 local rng = Random.new(20261029)
 
@@ -66,6 +66,11 @@ local function part(name, size, cf, color, material, parent)
 	p.Anchored = true
 	p.Color = color or DARK
 	p.Material = material or Enum.Material.SmoothPlastic
+	-- [владелец 29.10] Window panes must not bloom like large light sources.
+	if string.find(string.lower(name), "window") or name == "KioskGlass" then
+		p.Material = Enum.Material.SmoothPlastic
+		p.Color = p.Color:Lerp(Color3.fromRGB(70, 65, 55), 0.45)
+	end
 	p.TopSurface = Enum.SurfaceType.Smooth
 	p.BottomSurface = Enum.SurfaceType.Smooth
 	p.Parent = parent or root
@@ -113,7 +118,7 @@ end
 local function light(p, range, brightness, color)
 	local l = Instance.new("PointLight")
 	l.Range = range
-	l.Brightness = brightness
+	l.Brightness = brightness * 0.45
 	l.Color = color or WARM
 	l.Shadows = false
 	l.Parent = p
@@ -531,7 +536,7 @@ local BRICKS = {
 }
 local function building(x0, z0, x1, z1, streetFaces, parent)
 	local f = folder("Block", parent)
-	local floors = rng:NextInteger(3, 5)
+	local floors = rng:NextInteger(2, 4)
 	local h = floors * FLOOR + 1
 	local look = BRICKS[rng:NextInteger(1, #BRICKS)]
 	tbox("Walls", x0, 0, z0, x1, h, z1, look[1], look[2], f)
@@ -992,8 +997,30 @@ for _, s in ipairs({ -1, 1 }) do
 	end
 end
 
+-- Outer ring streets connect the additional blocks; dimensions of props stay human-sized.
+for _, v in ipairs({ -142, -72, 72, 142 }) do
+	part(
+		"RingRoad",
+		Vector3.new(12, 0.2, HALF * 2),
+		at(v, 0.05, 0),
+		ASPHALT,
+		Enum.Material.Asphalt,
+		ground
+	)
+	part(
+		"RingRoad",
+		Vector3.new(HALF * 2, 0.2, 12),
+		at(0, 0.05, v),
+		ASPHALT,
+		Enum.Material.Asphalt,
+		ground
+	)
+	for _, t in ipairs({ -190, -105, 105, 190 }) do
+		lamp(v, t, false, ground)
+	end
+end
 -- ================================================================ the lots
-local LOTS = { { 18, 62 }, { 70, HALF } } -- inner / outer, mirrored to both signs
+local LOTS = { { 18, 62 }, { 82, 130 }, { 154, 208 } } -- inner / outer, mirrored to both signs
 local lots = folder("Lots")
 local special = {
 	["1,-1,2,2"] = "wasteland", -- north-east corner
@@ -1231,7 +1258,7 @@ do
 	boardText(
 		board,
 		"ЧЁРНЫЙ РЫНОК",
-		Color3.fromRGB(190, 120, 255),
+		Color3.fromRGB(255, 170, 40),
 		{ Enum.NormalId.Back, Enum.NormalId.Front }
 	)
 	post.Name = "GatePost"
@@ -1550,6 +1577,76 @@ do
 	})
 end
 
+-- Ghetto trades and gang mine entrance [owner/wiki 29.10]. All prompts are server-owned.
+for _, spec in ipairs({
+	{ name = "GhettoMason", label = "Каменщик", costume = "miner", x = -10, z = 142 },
+	{ name = "GhettoPassDealer", label = "Барыга", costume = "buyer", x = 10, z = 142 },
+	{
+		name = "GhettoMineGate",
+		label = "Шахта банды",
+		costume = "miner",
+		x = 0,
+		z = -142,
+	},
+}) do
+	npc({
+		name = spec.name,
+		label = spec.label,
+		costume = spec.costume,
+		parent = arrival,
+		cf = at(spec.x, 3.2, spec.z),
+		tags = { spec.name },
+	})
+end
+-- Four isolated rooms under the district; the server leases each to one gang.
+local mineRooms = folder("GangMineRooms")
+for index = 1, 4 do
+	local room = Instance.new("Model")
+	room.Name = "GangMineRoom_" .. index
+	room.Parent = mineRooms
+	local x, y, z = (index - 2.5) * 120, -300, 0
+	box("Floor", x - 34, y - 34, z - 34, x + 34, y - 32, z + 34, DARK, nil, room)
+	box("Rim", x - 34, y - 32, z - 34, x - 24, y, z + 34, IRON, nil, room)
+	box("Rim", x + 24, y - 32, z - 34, x + 34, y, z + 34, IRON, nil, room)
+	box("Rim", x - 24, y - 32, z - 34, x + 24, y, z - 24, IRON, nil, room)
+	box("Rim", x - 24, y - 32, z + 24, x + 24, y, z + 34, IRON, nil, room)
+	for _, wall in ipairs({
+		{ -35, 0, 2, 70 },
+		{ 35, 0, 2, 70 },
+		{ 0, -35, 70, 2 },
+		{ 0, 35, 70, 2 },
+	}) do
+		part(
+			"Wall",
+			Vector3.new(wall[3], 60, wall[4]),
+			at(x + wall[1], y - 5, z + wall[2]),
+			DARK,
+			nil,
+			room
+		)
+	end
+	part("Roof", Vector3.new(72, 2, 72), at(x, y + 24, z), DARK, nil, room)
+	local lampPart = part("Lamp", Vector3.new(2, 1, 2), at(x, y + 16, z), WARM, nil, room)
+	light(lampPart, 60, 2)
+	local anchor = part("Anchor", Vector3.new(1, 0.2, 1), at(x, y - 0.1, z), nil, nil, room)
+	anchor:SetAttribute("LocationId", "ghetto")
+	anchor:SetAttribute("MineId", "ghetto_private_" .. index)
+	anchor:SetAttribute("MiniMine", true)
+	anchor:SetAttribute("Size", Vector3.new(12, 8, 12))
+	anchor:SetAttribute("GangMine", true)
+	CollectionService:AddTag(anchor, "MineAnchor")
+	local spawn = part("Arrival", Vector3.new(4, 0.2, 4), at(x, y + 0.1, z + 29), IRON, nil, room)
+	spawn:SetAttribute("LocationId", "ghetto")
+	CollectionService:AddTag(spawn, "GhettoMineExit")
+	local bounds = decor(part("Bounds", Vector3.new(72, 64, 72), at(x, y - 6, z), nil, nil, room))
+	bounds.Transparency = 1
+	local ladder = Instance.new("TrussPart")
+	ladder.Name = "Ladder"
+	ladder.Size = Vector3.new(2, 32, 2)
+	ladder.CFrame = at(x, y - 16, z + 23)
+	ladder.Anchored = true
+	ladder.Parent = room
+end
 -- ================================================================ mobs, the treasure points
 local mobs = folder("MobSpawns")
 local function mobSpawn(id, x, z, radius)
@@ -1603,11 +1700,11 @@ local volume = decor(
 	part("DuskAir", Vector3.new(2 * HALF + 40, 300, 2 * HALF + 40), at(0, 100, 0), nil, nil, air)
 )
 volume.Transparency = 1
-volume:SetAttribute("Ambient", Color3.fromRGB(125, 105, 115))
+volume:SetAttribute("Ambient", Color3.fromRGB(110, 110, 120))
 volume:SetAttribute("Exposure", -0.15)
 volume:SetAttribute("Haze", 0.22)
-volume:SetAttribute("ClockTime", 18.4) -- dusk: the sun low, long shadows, the lamps already on
-volume:SetAttribute("Brightness", 1.4)
+volume:SetAttribute("ClockTime", 16) -- dusk: the sun low, long shadows, the lamps already on
+volume:SetAttribute("Brightness", 1)
 volume:SetAttribute("AtmosphereColor", Color3.fromRGB(160, 100, 85))
 volume:SetAttribute("AtmosphereDecay", Color3.fromRGB(90, 55, 65))
 CollectionService:AddTag(volume, "IndoorLighting")

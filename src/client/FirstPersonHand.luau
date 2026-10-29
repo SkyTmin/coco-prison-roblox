@@ -237,9 +237,7 @@ function FirstPersonHand.Start()
 			local kind, progress = HeldItem.SwingState()
 			-- the sword strikes in view like the pickaxe [владелец 27.10: «удар от первого лица у меча сделай как у
 			-- кирки»]: its combo's cuts and stab stay in third person (CharacterAnimator) and in the hitboxes
-			if itemId == "sword" then
-				kind = "slam"
-			end
+			kind = "slam" -- [владелец 29.10] the same quick Minecraft swing for every held item
 			local swingOffset = CFrame.identity
 			local swingShift = CFrame.identity -- moves the whole hand in camera space
 			if progress then

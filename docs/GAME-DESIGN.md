@@ -286,7 +286,9 @@
 
 **[клиент board.top.deaths.*; вики MENUS-SOCIAL]** Пятое табло на Спавне «Топ по смертям»: «# | Игрок | Смертей», красные числа, короны у 1–3, 10 строк видно (20 хранится). Значение — `p.stats.deaths` (`DeathService`: смерти от игроков, мобов и боссов; падение и лава не считаются). `LeaderboardService` (OrderedDataStore `Top_deaths_v1`, те же частоты записи и чтения, что у остальных табло) → `ReplicatedStorage.Tops.deaths` → `src/client/TopBoards.luau`. Портал — `scripts/build-tops.luau`, на южном газоне между площадью и кольцевой дорогой (24, 51), лицом к фонтану **[решение]**. Приза нет **[вики: ❓, вероятно нет]**. QA: `ServerStorage.TopsDebug:Invoke("publish", "deaths")` → JSON табло.
 
-## 11.8 Шот-шахты
+## 11.8 Шот-шахты — отключены 29.10
+
+**[владелец 29.10: «Убери ШОТы»]** У всех восьми локаций отключён shot-режим и плашка «ШОТ». Сами локации сохранены; копание использует обычную твёрдость, инструмент и чары. Описание ниже — прежняя механика, больше не действует.
 
 Дизайн: `docs/research/remaining-features-design.md` «Этап 6» (только шот-шахты; Нефтезавод на паузе вместе с бандами **[владелец 28.10]**); факты — `remaining-features-facts.md` §6. Числа — `scripts/design-decisions.json` → `mines.<id>.shot` / `shotTool` (→ `locations.json` → `location.shot = { tool }`) и `digging.shotHitsPerSecond` (→ `Config.rules.digging`). Код: `Config.shotTime` / `Config.pauseAfter` (общие для сервера и клиента), `DigService.check` / `complete`, прогноз клиента `expectedTime` в `init.client.luau`.
 

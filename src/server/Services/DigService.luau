@@ -138,6 +138,16 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 	if not profile then
 		return nil, nil, nil
 	end
+	if mine.anchor:GetAttribute("GangMine") then
+		local gang = GangService.gangOf(profile)
+		if
+			not gang
+			or gang.id ~= mine.anchor:GetAttribute("GangMineOwner")
+			or (tonumber(mine.anchor:GetAttribute("GangMineUntil")) or 0) <= os.time()
+		then
+			return nil, nil, nil
+		end
+	end
 	if profile.level < mine.location.unlockLevel then
 		toast(player, "level_too_low", mine.location.unlockLevel)
 		return nil, nil, nil
