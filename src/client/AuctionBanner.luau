@@ -4,11 +4,11 @@
 --   * AuctionListed(lotId) — our lot is on sale: the offer card «Объявить на всех серверах?» with the queue wait
 --     (AuctionAnnounceInfo) and the ways to pay: a stored announcement, Robux, crystals → AuctionAnnounce(lotId, pay).
 --   * AuctionAnnounced(m) — someone's announcement (AuctionService filtered out players who hid auction ads): a banner
---     at the top for BANNER_SECONDS with the item's icon, name, enchantments, count, price, seller and «Открыть»
---     (the auction window with the item's name in the search). One banner at a time, the rest wait.
-local GuiService = game:GetService("GuiService")
+--     at the first safe top edge for BANNER_SECONDS: a compact, tappable card and a separate close target.
+--     It opens the auction with the item's name in the search. One banner at a time, the rest wait.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Auction = require(Shared.Auction)
@@ -21,7 +21,8 @@ local Ui = require(script.Parent.Ui)
 local AuctionBanner = {}
 
 local BANNER_SECONDS = 8
-local BANNER_W, BANNER_H = 460, 92
+local BANNER_W, BANNER_H = 400, 52 -- [владелец 29.10] keep the play area clear on small phones
+local TOP_GAP, EDGE_GAP, CLOSE_SIZE = 4, 8, 44
 local OFFER_W, OFFER_H = 420, 210
 
 type Announce = {
@@ -50,6 +51,7 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 	gui.Name = "AuctionBanner"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 60
+	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -64,36 +66,46 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 	local showing = false
 
 	local function show(m: Announce)
-		local w = width(BANNER_W)
-		local top = GuiService:GetGuiInset().Y + 8
-		local card =
-			Ui.card(gui, UDim2.fromOffset(w, BANNER_H), UDim2.new(0.5, -w / 2, 0, -BANNER_H - 8))
+		-- ScreenGui already excludes the Roblox bar and device cutouts. Do not add GetGuiInset again.
+		-- Relative width follows the *safe* area immediately, including rotation while the banner is visible.
+		local hidden = UDim2.new(0.5, 0, 0, -BANNER_H - EDGE_GAP)
+		local card = Ui.card(gui, UDim2.new(1, -EDGE_GAP * 2, 0, BANNER_H), hidden)
 		card.Name = "Announce"
+		card.AnchorPoint = Vector2.new(0.5, 0)
+		local limit = Instance.new("UISizeConstraint")
+		limit.MaxSize = Vector2.new(BANNER_W, BANNER_H)
+		limit.Parent = card
 		local icon = Instance.new("ImageLabel")
-		icon.Size = UDim2.fromOffset(64, 64)
-		icon.Position = UDim2.fromOffset(12, (BANNER_H - 64) / 2)
+		icon.Size = UDim2.fromOffset(32, 32)
+		icon.Position = UDim2.fromOffset(EDGE_GAP, 10)
 		icon.BackgroundTransparency = 1
 		icon.ScaleType = Enum.ScaleType.Fit
 		icon.ResampleMode = Enum.ResamplerMode.Pixelated
 		icon.Image = Config.iconFor(m.item.id, m.item.level) or ""
 		icon.Parent = card
-		local textW = w - 88 - 104
-		local title = Ui.label(
+		if m.item.count > 1 then
+			local count =
+				Ui.label(icon, tostring(m.item.count), UDim2.fromScale(1, 1), UDim2.new(), 13)
+			count.TextXAlignment = Enum.TextXAlignment.Right
+			count.TextYAlignment = Enum.TextYAlignment.Bottom
+			count.TextStrokeTransparency = 0
+		end
+		local seller = Ui.label(
 			card,
 			T("auction_announce_banner", m.seller),
-			UDim2.fromOffset(textW, 20),
-			UDim2.fromOffset(88, 8),
-			15,
+			UDim2.new(),
+			UDim2.fromOffset(48, 3),
+			12,
 			Ui.colors.header
 		)
-		title.TextTruncate = Enum.TextTruncate.AtEnd
+		seller.TextTruncate = Enum.TextTruncate.AtEnd
 		local name = Strings.itemName(m.item.id, m.item.level, locale())
 		local line = Ui.label(
 			card,
-			if m.item.count > 1 then name .. " ×" .. m.item.count else name,
-			UDim2.fromOffset(textW, 20),
-			UDim2.fromOffset(88, 28),
-			16,
+			name,
+			UDim2.new(1, -96, 0, 18),
+			UDim2.fromOffset(48, 17),
+			14,
 			Ui.colors.white
 		)
 		line.TextTruncate = Enum.TextTruncate.AtEnd
@@ -104,40 +116,102 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 		local enchants = Ui.label(
 			card,
 			table.concat(books, ", "),
-			UDim2.fromOffset(textW, 18),
-			UDim2.fromOffset(88, 48),
-			13,
+			UDim2.new(),
+			UDim2.fromOffset(48, 34),
+			12,
 			Ui.colors.purple
 		)
 		enchants.TextTruncate = Enum.TextTruncate.AtEnd
-		Ui.label(
+		local price = Ui.label(
 			card,
 			Auction.priceText({ cur = m.cur }, m.price, locale()),
-			UDim2.fromOffset(textW, 18),
-			UDim2.fromOffset(88, if #books > 0 then 66 else 50),
-			15,
+			UDim2.new(),
+			UDim2.new(),
+			14,
 			Ui.colors.money
 		)
-		local open = Ui.button(
+		price.TextXAlignment = Enum.TextXAlignment.Right
+		price.TextTruncate = Enum.TextTruncate.AtEnd
+		local hint = Ui.label(
 			card,
 			T("auction_announce_open"),
-			UDim2.fromOffset(92, 34),
-			UDim2.new(1, -104, 0.5, -17),
-			Ui.colors.buttonBlue
+			UDim2.new(),
+			UDim2.new(),
+			12,
+			Ui.colors.level
 		)
+		hint.TextXAlignment = Enum.TextXAlignment.Right
+		hint.TextTruncate = Enum.TextTruncate.AtEnd
+		local priceWidth = TextService:GetTextSize(
+			price.Text,
+			price.TextSize,
+			price.Font,
+			Vector2.new(1000, 100)
+		).X
+		local function layout()
+			local contentWidth = math.max(0, card.AbsoluteSize.X - 96)
+			local pw = math.min(contentWidth, priceWidth + 4)
+			local hw = math.min(contentWidth, 64)
+			seller.Size = UDim2.fromOffset(math.max(0, contentWidth - pw - 6), 16)
+			price.Size = UDim2.fromOffset(pw, 16)
+			price.Position = UDim2.new(1, -48 - pw, 0, 3)
+			enchants.Size = UDim2.fromOffset(math.max(0, contentWidth - hw - 6), 15)
+			hint.Size = UDim2.fromOffset(hw, 15)
+			hint.Position = UDim2.new(1, -48 - hw, 0, 34)
+		end
+		card:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+		layout()
+
+		-- The whole card opens the auction; the close target remains 44 px even on narrow phones.
+		-- No full-screen input layer: only these two targets consume touches.
+		local open = Instance.new("TextButton")
+		open.Name = "Open"
+		open.Text = ""
+		open.BackgroundTransparency = 1
+		open.Size = UDim2.new(1, -CLOSE_SIZE, 1, 0)
+		open.ZIndex = 2
+		open.Parent = card
+		local close = Instance.new("ImageButton")
+		close.Name = "Close"
+		close.BackgroundTransparency = 1
+		close.Size = UDim2.fromOffset(CLOSE_SIZE, CLOSE_SIZE)
+		close.Position = UDim2.new(1, -CLOSE_SIZE, 0.5, -CLOSE_SIZE / 2)
+		close.ZIndex = 2
+		close.Parent = card
+		local cross = Instance.new("ImageLabel")
+		cross.Size = UDim2.fromOffset(18, 18)
+		cross.Position = UDim2.fromScale(0.5, 0.5)
+		cross.AnchorPoint = Vector2.new(0.5, 0.5)
+		cross.BackgroundTransparency = 1
+		cross.Image = Config.icons.icons.ui_close or ""
+		cross.ScaleType = Enum.ScaleType.Fit
+		cross.ResampleMode = Enum.ResamplerMode.Pixelated
+		cross.Parent = close
+		local dismissed = Instance.new("BindableEvent")
+		local closed = false
+		local function dismiss()
+			if not closed then
+				closed = true
+				dismissed:Fire()
+			end
+		end
+		close.Activated:Connect(dismiss)
 		open.Activated:Connect(function()
+			if closed then
+				return
+			end
+			dismiss()
 			openAuction(name)
 		end)
-		TweenService:Create(card, TweenInfo.new(0.3), { Position = UDim2.new(0.5, -w / 2, 0, top) })
+		TweenService:Create(card, TweenInfo.new(0.2), { Position = UDim2.new(0.5, 0, 0, TOP_GAP) })
 			:Play()
-		task.wait(BANNER_SECONDS)
-		local out = TweenService:Create(
-			card,
-			TweenInfo.new(0.3),
-			{ Position = UDim2.new(0.5, -w / 2, 0, -BANNER_H - 8) }
-		)
+		task.delay(BANNER_SECONDS, dismiss)
+		dismissed.Event:Wait()
+		open.Active, close.Active = false, false
+		local out = TweenService:Create(card, TweenInfo.new(0.2), { Position = hidden })
 		out:Play()
 		out.Completed:Wait()
+		dismissed:Destroy()
 		card:Destroy()
 	end
 
