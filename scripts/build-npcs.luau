@@ -250,16 +250,6 @@ npc({
 	hat = "band",
 })
 npc({
-	name = "QuestGiver",
-	tag = "QuestNpc",
-	cf = facing(-52, -58, 0, 0),
-	label = "Задания",
-	skin = SKIN[1],
-	shirt = Color3.fromRGB(70, 80, 120),
-	pants = Color3.fromRGB(45, 40, 40),
-	hat = "cap",
-})
-npc({
 	name = "Guard",
 	tag = "GuardNpc",
 	cf = facing(-6, -186, 0, 0),

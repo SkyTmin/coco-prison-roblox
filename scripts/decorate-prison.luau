@@ -635,33 +635,7 @@ for _, x in ipairs({ -22, 22 }) do
 	lampPost(x, 42)
 	lampPost(x, -42)
 end
-do -- notice board at the NW plaza corner and a well by the bedroom road
-	part("NoticeBoard", Vector3.new(8, 4.5, 0.4), CFrame.new(-52, 4.5, -52), DARK_WOOD, "px_planks")
-	part(
-		"NoticePost",
-		Vector3.new(0.6, 7, 0.6),
-		CFrame.new(-55.5, 3.5, -52),
-		DARK_WOOD,
-		Enum.Material.Wood
-	)
-	part(
-		"NoticePost",
-		Vector3.new(0.6, 7, 0.6),
-		CFrame.new(-48.5, 3.5, -52),
-		DARK_WOOD,
-		Enum.Material.Wood
-	)
-	part("NoticeRoof", Vector3.new(9, 0.4, 2), CFrame.new(-52, 7, -52), DARK_WOOD, "px_planks")
-	for i = 1, 5 do
-		part(
-			"Notice",
-			Vector3.new(1.6, 2, 0.1),
-			CFrame.new(-55 + i * 1.3 + (i % 2) * 0.2, 4.6 + (i % 2) * 0.6, -51.7)
-				* CFrame.Angles(0, 0, rng:NextNumber(-0.15, 0.15)),
-			({ Color3.fromRGB(240, 240, 240), Color3.fromRGB(250, 240, 180) })[rng:NextInteger(1, 2)],
-			Enum.Material.SmoothPlastic
-		)
-	end
+do -- well by the bedroom road; the spawn quest board was removed [владелец 29.10]
 	local wx, wz = -60, 104
 	local ring = part(
 		"WellRing",
