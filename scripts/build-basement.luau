@@ -90,8 +90,8 @@ local function box(name, x0, y0, z0, x1, y1, z1, variant, tint, parent)
 end
 local function light(parentPart, range, brightness, color)
 	local l = Instance.new("PointLight")
-	l.Range = range
-	l.Brightness = brightness
+	l.Range = math.min(range, 24)
+	l.Brightness = math.min(brightness, 0.65) -- [владелец 01.11] preserve stone/skin detail beside torches
 	l.Color = color
 	l.Shadows = false
 	l.Parent = parentPart

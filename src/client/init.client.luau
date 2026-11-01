@@ -444,38 +444,12 @@ local function buildMeter(
 	end
 	return { group = group, fills = fills, tooltip = tooltip }
 end
--- every heart of the level (10 + 0.5 a level, 34.5 at 50): rows of 10 stacked upwards like Minecraft's extra hearts
-local hearts = buildMeter(false, "♥", Color3.fromRGB(235, 55, 55), 40)
-local drumsticks = buildMeter(true, "🍗", Color3.fromRGB(225, 150, 65))
--- Minecraft's armor row over the hearts [владелец 27.10: «иконки брони как в майне»], hidden without armor
+-- [владелец 01.11] one compact numeric bar each; armor remains an icon row.
+local survivalBars = require(script.SurvivalBars).new(survivalHud)
+local drumsticks = survivalBars.hunger
 local armorMeter = buildMeter(false, "armor", Color3.new())
+armorMeter.group.Name = "ArmorMeter"
 armorMeter.group.Position = UDim2.fromOffset(0, -22)
--- Absorption's golden hearts (the golden apple) [ваниль]: a row of their own over the red ones, only the hearts there
--- are; the armor row moves up over it
--- [ваниль Gui.renderHearts, minecraft.wiki/w/Damage; владелец 27.10: «эффект получения урона как в майне»] after a
--- loss the heart row blinks for 1 s (white outlines every 3 ticks) and shows the health just lost as pale hearts; at
--- 2 hearts or less the hearts jitter every tick; with Regeneration a lifted heart runs along the row
-local HEART_WHITE = Color3.fromRGB(255, 255, 255)
-local heartsBlinkUntil, heartsLost = 0, 0
-local lastHealthShown: number? = nil
-local paleHearts: { Frame } = {}
-for i, fill in ipairs(hearts.fills) do
-	local pale = fill:Clone()
-	pale.Name = "Lost"
-	for _, d in ipairs(pale:GetDescendants()) do
-		if d:IsA("TextLabel") then
-			d.TextColor3 = Color3.fromRGB(255, 225, 225)
-		end
-	end
-	pale.ZIndex = 2
-	fill.ZIndex = 3
-	pale.Visible = false
-	pale.Parent = fill.Parent
-	paleHearts[i] = pale
-end
-local goldenHearts = buildMeter(false, "♥", Color3.fromRGB(255, 205, 40))
-goldenHearts.group.Position = UDim2.fromOffset(0, -22)
-goldenHearts.group.Visible = false
 
 -- Minecraft's experience bar between the meters and the hotbar [владелец 27.10]: the number is the player's level, the
 -- green fill how close the next level is (the blocks since the last level and the money it costs, the lower of the two)
@@ -589,49 +563,13 @@ local function renderSurvival()
 	local humanoid = trackedHumanoid
 	local health = if humanoid then humanoid.Health else 0
 	local maxHealth = if humanoid then humanoid.MaxHealth else 20
-	-- [ваниль Gui.renderHearts] one heart per 2 HP of the max, rows of 10 going up; with many rows they close in
-	-- (row step max(10 − (rows − 2), 3) of the heart's 10 px)
-	local shownHearts = math.clamp(math.ceil(maxHealth / 2), 1, #hearts.fills)
-	local heartRows = math.ceil(shownHearts / 10)
-	local rowStep = 24 * math.max(10 - (heartRows - 2), 3) / 10
-	if heartRows <= 1 then
-		rowStep = 24
-	end
-	for i, fill in ipairs(hearts.fills) do
-		local cell = fill.Parent
-		if cell and cell:IsA("Frame") then
-			cell.Visible = i <= shownHearts
-			cell:SetAttribute("BaseY", -math.floor((i - 1) / 10) * rowStep)
-		end
-	end
-	local heartsTop = (heartRows - 1) * rowStep
-	fillMeter(hearts, health)
-	hearts.tooltip.Text = T("health_tooltip", health, maxHealth)
-	if humanoid and lastHealthShown and health < lastHealthShown - 0.01 then
-		local now = os.clock()
-		heartsLost = math.max(lastHealthShown, if now < heartsBlinkUntil then heartsLost else 0)
-		heartsBlinkUntil = now + 1
-		local halves = math.ceil(math.clamp(heartsLost, 0, #paleHearts * 2))
-		for i, pale in ipairs(paleHearts) do
-			pale.Size = UDim2.fromScale(math.clamp(halves - (i - 1) * 2, 0, 2) / 2, 1)
-		end
-	end
-	lastHealthShown = if humanoid then health else nil
 	local character = humanoid and humanoid.Parent
 	local golden = character and character:GetAttribute("AbsorptionHealth")
-	local absorbed = if typeof(golden) == "number" then math.clamp(golden, 0, 20) else 0
-	goldenHearts.group.Visible = absorbed > 0
-	fillMeter(goldenHearts, absorbed)
-	for i, fill in ipairs(goldenHearts.fills) do
-		local cell = fill.Parent
-		if cell and cell:IsA("Frame") then
-			cell.Visible = i <= math.ceil(absorbed / 2)
-		end
-	end
-	goldenHearts.group.Position = UDim2.fromOffset(0, -heartsTop - 22)
-	armorMeter.group.Position = UDim2.fromOffset(0, -heartsTop - (if absorbed > 0 then 44 else 22))
+	local absorbed = if typeof(golden) == "number" then math.max(0, golden) else 0
+	survivalBars.health.update(health, maxHealth, absorbed)
+	survivalBars.health.tooltip.Text = T("health_tooltip", health, maxHealth)
 	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
-	fillMeter(drumsticks, hunger / Config.rules.survival.hunger.max * 20)
+	drumsticks.update(hunger, Config.rules.survival.hunger.max)
 	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
 	require(script.PrisPerks).appleSkin(drumsticks.group, profile, health, maxHealth) -- PRIS+ AppleSkin (этап 8)
 	local points = Combat.armorPoints(if profile then profile.armor else nil)
@@ -668,46 +606,6 @@ player.CharacterAdded:Connect(watchHealth)
 if player.Character then
 	task.spawn(watchHealth, player.Character)
 end
-local heartsTick = -1
-RunService.Heartbeat:Connect(function()
-	local now = os.clock()
-	local tick = math.floor(now / 0.05)
-	if tick == heartsTick then
-		return
-	end
-	heartsTick = tick
-	local humanoid = trackedHumanoid
-	local health = if humanoid then humanoid.Health else 0
-	local character = humanoid and humanoid.Parent
-	local regen = character ~= nil and typeof(character:GetAttribute("Regeneration")) == "number"
-	local blinking = now < heartsBlinkUntil and math.floor((heartsBlinkUntil - now) / 0.15) % 2 == 1
-	for i, fill in ipairs(hearts.fills) do
-		local cell = fill.Parent
-		if not cell or not cell:IsA("Frame") then
-			continue
-		end
-		local outline = cell:FindFirstChildOfClass("TextLabel")
-		if outline then
-			outline.TextColor3 = if blinking then HEART_WHITE else Ui.colors.border
-		end
-		paleHearts[i].Visible = blinking
-		if not cell.Visible then
-			continue
-		end
-		local base = cell:GetAttribute("BaseY")
-		local y = if typeof(base) == "number" then base else 0
-		if health > 0 and health <= 4 then
-			y += math.random(0, 1) * 2
-		end
-		if
-			regen
-			and i - 1 == tick % math.ceil((if humanoid then humanoid.MaxHealth else 20) + 5)
-		then
-			y -= 2
-		end
-		cell.Position = UDim2.fromOffset(cell.Position.X.Offset, y)
-	end
-end)
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
 -- our TAB list (PlayerListWindow, этап 9) replaces Roblox's; block / report / friends stay in Roblox's Esc menu
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
@@ -1053,10 +951,16 @@ local function buildInventory(): Frame
 		if not character or not root or not root:IsA("BasePart") then
 			return
 		end
+		local wasArchivable = character.Archivable
 		character.Archivable = true
 		local copy = character:Clone()
-		character.Archivable = false
+		character.Archivable = wasArchivable
 		for _, d in ipairs(copy:GetDescendants()) do
+			if d:IsA("BasePart") or d:IsA("Decal") then
+				d.LocalTransparencyModifier = 0 -- the live first-person body is hidden, its preview is not
+			elseif d:IsA("Humanoid") then
+				d.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+			end
 			if
 				d:IsA("Script")
 				or d:IsA("LocalScript")
@@ -2587,6 +2491,7 @@ local function stopDig(tellServer: boolean)
 end
 
 local function startDig(aim: Aim)
+	HeldItem.Swing(true) -- respond immediately when idle; automatic next blocks must finish the current cycle
 	local needed = expectedTime(aim.part)
 	if not needed then
 		Remotes.event("DigStart"):FireServer(aim.part, aim.hit) -- the server replies with the reason
@@ -2707,11 +2612,11 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- Melee attack along the look direction (click / tap with nothing to dig), Better Combat-style
--- [владелец 22.10]: attacks come at the weapon's pace (vanilla attack speed), each plays the next animation
--- of the weapon's combo (sword: cut right, cut left, stab); the server hits along the arc (Combat).
+-- Damage comes at the weapon's pace; every press has a short visual swing [владелец 01.11].
+-- Accepted attacks advance the combo; the server hits along the arc (Combat).
 -- [владелец 22.10: «бой неудобный»; docs/research/combat-feel.md] the soft lock of CombatFeel picks the
 -- target, the character turns to it and the blow is aimed at it (the server re-aims at where it is when the
--- blow lands); a press a little early is buffered instead of lost; the impact is predicted on the client.
+-- blow lands); a press a little early is buffered instead of lost; hit feedback follows server confirmation.
 local attackState: Combat.ComboState = { lastAt = -math.huge, index = 0 }
 local attackQueued = false
 local BUFFER = 0.2 -- s before the weapon is ready in which a press is kept for later
@@ -2721,7 +2626,7 @@ local function heldKind(): (string, number)
 	local kind = Combat.kind(toolId)
 	return kind, Combat.duration(kind, stack and stack.level)
 end
-local function attack()
+local function attack(repeating: boolean?)
 	local currentCamera = workspace.CurrentCamera
 	if not currentCamera or currentWindowKind then
 		return
@@ -2730,19 +2635,25 @@ local function attack()
 	local now = os.clock()
 	local readyAt = attackState.lastAt + duration * 0.85
 	if now < readyAt then
+		-- Weapon recovery limits damage, never the hand. Held input finishes each short cycle;
+		-- a fresh tap can restart its return half without pinning the arm at the first frame.
+		if HeldItem.Swing(repeating) then
+			CombatFeel.OnSwing()
+		end
 		if readyAt - now <= BUFFER and not attackQueued then
 			attackQueued = true
 			task.delay(readyAt - now + 0.01, function()
 				attackQueued = false
-				attack()
+				attack(true)
 			end)
 		end
-		return -- still in the previous attack
+		return -- the next server attack must still respect the weapon's recovery
 	end
 	local _, blow = Combat.next(attackState, kind, duration, now)
 	local target = CombatFeel.Target()
 	local aimed = if target then CombatFeel.FaceTarget(target) else nil
 	HeldItem.Attack(blow.animation, duration)
+	CombatFeel.OnSwing()
 	-- falling after a jump = a critical hit (×1.5) on the server, like Minecraft
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -2752,7 +2663,6 @@ local function attack()
 		and root:IsA("BasePart")
 		and humanoid.FloorMaterial == Enum.Material.Air
 		and root.AssemblyLinearVelocity.Y < -1
-	CombatFeel.OnAttack(target, duration * blow.upswing, falling)
 	-- the server time the other players are drawn at here: the server tests the blow there (lag compensation)
 	Remotes.event("Attack"):FireServer(
 		aimed or currentCamera.CFrame.LookVector,
@@ -2761,11 +2671,11 @@ local function attack()
 		require(script.Motion).viewTime()
 	)
 end
--- holding the attack (mouse with nothing to dig, the touch attack button) keeps swinging at the weapon's pace
+-- Held input keeps the short hand cycles going; damage stays at the weapon's pace.
 local attackHeld = false
 RunService.Heartbeat:Connect(function()
 	if attackHeld and not currentWindowKind and not holding then
-		attack()
+		attack(true)
 	end
 end)
 
@@ -3196,7 +3106,7 @@ do
 	TopBoards.Start(function() -- the spawn top boards
 		return locale
 	end)
-	CombatFeel.Start(gui, function() -- soft lock, predicted hits, damage numbers, mob health bars
+	CombatFeel.Start(gui, function() -- soft lock, confirmed hit feedback, mob health bars
 		local kind = heldKind()
 		return kind
 	end, function()
@@ -3790,9 +3700,20 @@ if RunService:IsStudio() then
 	local hook = Instance.new("BindableFunction")
 	hook.Name = "ClientDebug"
 	hook.OnInvoke = function(action: string, arg: any): any
-		if action == "attack" then
+		if action == "swing" then
+			HeldItem.Swing()
+			return true
+		elseif action == "swingState" then
+			local kind, phase = HeldItem.SwingState()
+			return { kind = kind, phase = phase }
+		elseif action == "attack" then
 			attack()
 			return CombatFeel.Target()
+		elseif action == "attackHeld" then
+			attackHeld = arg == true
+			return attackHeld
+		elseif action == "attackState" then
+			return { lastAt = attackState.lastAt, index = attackState.index }
 		elseif action == "swingAt" then
 			HeldItem.DebugHold(tonumber(arg) or 0.2, 30)
 			return true

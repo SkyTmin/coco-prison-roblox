@@ -4,7 +4,7 @@
 -- only when the hand is empty, as in Java. The right arm (a block in the character's skin colour)
 -- holding the item sits in the lower right of the view; it bobs while walking and swings down-forward
 -- while digging or hitting (HeldItem.SwingAmount). Local only: the model lives under the camera, the
--- character itself stays hidden by Roblox in first person.
+-- FirstPersonVisibility also hides the body while menu cameras are Scriptable.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -147,6 +147,7 @@ function FirstPersonHand.Start()
 		return
 	end
 	started = true
+	require(script.Parent.FirstPersonVisibility).Start()
 	local player = Players.LocalPlayer
 	local model = Instance.new("Model")
 	model.Name = "FirstPersonHand"
@@ -273,7 +274,7 @@ function FirstPersonHand.Start()
 				else
 					-- pickaxe, shovel, axe, blocks, the bare hand [владелец 22.10: «анимации кирки от 1 лица
 					-- такое себе»]: Minecraft Java's first-person swing curve (the math of its item-in-hand
-					-- renderer, progress linear over the 0.3 s swing). The hand darts in towards the centre
+					-- renderer, progress linear over the short HeldItem swing). The hand darts in towards the centre
 					-- and up on a fast-in √p curve, the item chops forward 80° and tilts, then settles back
 					-- slower; the old sine went out and back evenly and looked floaty.
 					local p = progress

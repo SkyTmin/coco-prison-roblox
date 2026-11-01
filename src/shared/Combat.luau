@@ -17,6 +17,7 @@ export type Weapon = { rangeBonus: number, attacks: { Attack } }
 export type ComboState = { lastAt: number, index: number }
 
 local Combat = {}
+Combat.SWING_SECONDS = 0.22 -- [владелец 01.11; длительность — решение] visual strike, independent of damage recovery
 local rules = Config.rules.combat
 
 -- the weapon kind of a held item id ("sword", "axe", "pickaxe", "shovel" or "hand")

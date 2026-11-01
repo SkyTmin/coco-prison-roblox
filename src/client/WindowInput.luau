@@ -37,6 +37,11 @@ function WindowInput.Start(isOpen: () -> boolean)
 					end
 					if savedCamera and savedCamera.Parent then
 						savedCamera.CameraType = savedType
+						local character = player.Character
+						local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+						if savedType == Enum.CameraType.Custom and humanoid then
+							savedCamera.CameraSubject = humanoid
+						end
 					end
 					savedCamera = nil
 					UserInputService.MouseIconEnabled = savedMouseIcon

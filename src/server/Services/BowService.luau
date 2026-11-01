@@ -382,7 +382,6 @@ local function step(arrow: Flying): boolean
 		local damage = math.ceil(speed * base)
 		if arrow.crit then
 			damage += random:NextInteger(0, math.floor(damage / 2) + 1)
-			CombatService.critBurst(from + delta * bestT)
 		end
 		local result = CombatService.HitModel(
 			shooter,

@@ -86,7 +86,7 @@ for (const e of selected) {
 		lua.push(`at(${path}, "${e.className}")`);
 	} else {
 		const src = e.source.replace(/\]==\]/g, "]==]..']==]'..[==[");
-		lua.push(`do local s = at(${path}, "${e.className}"); s.Source = [==[${src}]==]; n += 1 end`);
+		lua.push(`do local s = at(${path}, "${e.className}"); s.Source = [==[${src}]==]; n += 1; if n % 20 == 0 then task.wait() end end`);
 	}
 }
 lua.push(`return "synced " .. n .. " scripts"`);

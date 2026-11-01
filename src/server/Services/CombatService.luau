@@ -206,29 +206,20 @@ local function insideArc(
 	return lateral <= 2.5
 end
 
--- Minecraft crit particles: a burst of little stars at the target
-function CombatService.critBurst(at: Vector3)
-	local p = Instance.new("Part")
-	p.Name = "CritBurst"
-	p.Anchored = true
-	p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
-	p.Transparency = 1
-	p.Size = Vector3.one
-	p.Position = at + Vector3.new(0, 1, 0)
-	local stars = Instance.new("ParticleEmitter")
-	stars.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	stars.Color = ColorSequence.new(Color3.fromRGB(255, 245, 210), Color3.fromRGB(190, 170, 120))
-	stars.Size = NumberSequence.new(0.6, 0.1)
-	stars.Lifetime = NumberRange.new(0.35, 0.6)
-	stars.Speed = NumberRange.new(10, 18)
-	stars.SpreadAngle = Vector2.new(180, 180)
-	stars.Drag = 6
-	stars.LightEmission = 0.8
-	stars.Enabled = false
-	stars.Parent = p
-	p.Parent = workspace
-	stars:Emit(18)
-	game:GetService("Debris"):AddItem(p, 1)
+-- Observers see a confirmed critical hit too. The attacker already receives HitConfirm.
+local function critBurst(model: Model, attacker: Player)
+	local cf = model:GetBoundingBox()
+	for _, other in ipairs(Players:GetPlayers()) do
+		local root = other.Character and other.Character:FindFirstChild("HumanoidRootPart")
+		if
+			other ~= attacker
+			and root
+			and root:IsA("BasePart")
+			and (root.Position - cf.Position).Magnitude <= 80
+		then
+			Remotes.unreliable("CombatCritFx"):FireClient(other, model)
+		end
+	end
 end
 
 -- One validated blow (a melee arc or an arrow) from `player` to `model`: PvP only where both players' locations
@@ -281,6 +272,9 @@ function CombatService.HitModel(
 				elseif dealt > 0 then "hit"
 				else "blocked"
 			confirm:FireClient(player, model, dealt, crit, result)
+			if crit and dealt > 0 then
+				critBurst(model, player)
+			end
 			BookService.afterHit(
 				player,
 				profile,
@@ -309,6 +303,9 @@ function CombatService.HitModel(
 	local dealt = before - target.Health
 	local result = if target.Health <= 0 then "killed" else "hit"
 	confirm:FireClient(player, model, dealt, crit, result)
+	if crit and dealt > 0 then
+		critBurst(model, player)
+	end
 	BookService.afterHit(player, profile, weapon, model, dealt, look, ranged == true, bookHit)
 	return result
 end
@@ -350,10 +347,12 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 		baseDamage *= Config.rules.combat.crit.multiplier
 	end
 	local look = direction.Unit
+	-- Hit on the short visible swing; weapon recovery still controls how often damage can land.
+	local upswing = math.min(duration, Combat.SWING_SECONDS) * attack.upswing
 	-- lag compensation: the blow lands upswing seconds after the moment the attacker was looking at
 	local seen = MotionService.viewTime(viewTime)
-	local at = if seen then seen + duration * attack.upswing else nil
-	task.delay(duration * attack.upswing, function()
+	local at = if seen then seen + upswing else nil
+	task.delay(upswing, function()
 		local head = character:FindFirstChild("Head")
 		if not character.Parent or humanoid.Health <= 0 or not head or not head:IsA("BasePart") then
 			return
@@ -393,9 +392,6 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 			if target and target.Health > 0 then
 				local cf, size = CombatService.targetBox(model, at)
 				if insideArc(attack, eye, look, cf, size, range) then
-					if crit then
-						CombatService.critBurst(cf.Position)
-					end
 					CombatService.HitModel(
 						player,
 						profile,
@@ -415,6 +411,7 @@ function CombatService.Start()
 		return
 	end
 	started = true
+	Remotes.unreliable("CombatCritFx")
 	Remotes.event("Attack").OnServerEvent:Connect(onAttack)
 	-- swing animations: a player's client says it swings (chop / slash), the others nearby play it on that
 	-- character (CharacterAnimator); unreliable — a lost swing only skips an animation

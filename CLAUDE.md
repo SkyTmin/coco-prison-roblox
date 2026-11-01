@@ -41,6 +41,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 ## Studio loop without the Rojo plugin (agent sessions)
 
+**Owner-confirmed active QA place (01.11): «Каторга», PlaceId `92594200898716`, universe `10772144679`.** Studio still displays the old internal title `Место игрока coco_shamill: 10202026_1`; the owner explicitly confirmed it. Reuse this open cloud place for current QA and sync only repository scripts. A Rojo source-only build is a validation artifact, not a replacement for its map. Do not switch to a local build merely because the cloud title differs from «Каторга».
+
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
 2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync-part.luau`
    (the comma list limits it to changed files). Keep `node scripts/serve-repo.mjs` running (serves the

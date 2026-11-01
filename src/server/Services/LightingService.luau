@@ -61,6 +61,24 @@ end
 
 function LightingService.Start()
 	LightingService.Apply()
+	-- Existing cloud maps also receive the softer basement lights without rebuilding the location.
+	local function soften(object: Instance)
+		if object:IsA("PointLight") or object:IsA("SpotLight") or object:IsA("SurfaceLight") then
+			object.Brightness = math.min(object.Brightness, 0.65)
+			object.Range = math.min(object.Range, 24)
+			object.Shadows = false
+		end
+	end
+	local basement = workspace:FindFirstChild("Basement")
+	if basement then
+		for index, object in basement:GetDescendants() do
+			soften(object)
+			if index % 1000 == 0 then
+				task.wait()
+			end
+		end
+		basement.DescendantAdded:Connect(soften)
+	end
 end
 
 return LightingService

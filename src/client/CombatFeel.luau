@@ -1,18 +1,7 @@
 --!strict
--- How combat feels on the client [владелец 22.10: «бой с мобами и боссами неудобный — сделай удобнее и
--- приятнее»; research: docs/research/combat-feel.md]:
---   * soft lock: the best enemy (a mob, a boss, a player of another faction) within reach in a ±60° cone of
---     the camera gets a thin white outline; an attack turns the character to it and aims the blow at it
---     (the server then aims at where that target is when the blow lands); the lock sticks while it lasts;
---   * predicted hit: the moment the blow lands the client already plays the impact — a hit (crit) sound, a
---     red flash, a burst of particles, a 50 ms hitstop — or a clank
---     and «Блок» when the boss is shielded; a miss is just the swing whoosh; the damage numbers come from
---     the server (HitConfirm);
---   * health bars over mobs (shown when hurt, gone 4 s after the last hit); a rat about to bite flashes a
---     red outline (its wind-up); a shielded boss glows with a pale blue outline;
---   * no red flash at the screen edges when we get hurt: Minecraft has none [владелец 27.10: «эффект получения урона
---     как в майне»] — the tilt (EffectsHud), the red model (HurtService) and the blinking hearts do it.
--- No vibration and no camera punch [владелец 22.10: «выключи вибрацию в игре»].
+-- Combat feedback [владелец 01.11]: immediate short swings, server-confirmed damage/block text
+-- near the crosshair, red hurt models (HurtService), matte critical pixels and a brief lateral hurt roll
+-- (EffectsHud). No hitstop, camera punch or predicted hit flashes. Mob bars / soft lock remain in-world.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -25,19 +14,23 @@ local Combat = require(Shared.Combat)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
-local HeldItem = require(script.Parent.HeldItem)
 
 local CombatFeel = {}
 
 local CONE = 60 -- degrees each side of the camera's look
 local REACH_SLACK = 2 -- studs beyond the weapon's reach that still lock
-local HITSTOP = 0.05
 local BAR_HIDE = 4
 
 local player = Players.LocalPlayer
 local started = false
 local current: Model? = nil
 local outline: Highlight? = nil
+local feedbackLayer: Frame? = nil
+local feedbackLabels: { TextLabel } = {}
+local particleCount = 0
+local lastHitSound = -math.huge
+local feedbackRight = true
+local random = Random.new()
 local getKind: () -> string = function()
 	return "hand"
 end
@@ -173,139 +166,125 @@ function CombatFeel.FaceTarget(target: Model): Vector3?
 	return if dir.Magnitude > 0.1 then dir.Unit else nil
 end
 
-local function flash(model: Model, color: Color3, seconds: number, name: string)
-	local old = model:FindFirstChild(name)
-	if old then
-		old:Destroy()
-	end
-	local h = Instance.new("Highlight")
-	h.Name = name
-	h.FillColor = color
-	h.FillTransparency = 0.45
-	h.OutlineTransparency = 1
-	h.DepthMode = Enum.HighlightDepthMode.Occluded
-	h.Adornee = model
-	h.Parent = model
-	TweenService:Create(h, TweenInfo.new(seconds), { FillTransparency = 1 }):Play()
-	task.delay(seconds, function()
-		h:Destroy()
-	end)
-end
-
+-- Small matte pixel fragments for critical hits / death, no glowing particle clouds.
 local function burst(at: Vector3, color: Color3, count: number)
-	local p = Instance.new("Part")
-	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
-	p.Transparency = 1
-	p.Size = Vector3.one * 0.2
-	p.CFrame = CFrame.new(at)
-	p.Parent = workspace
-	local e = Instance.new("ParticleEmitter")
-	e.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	e.Shape = Enum.ParticleEmitterShape.Sphere
-	e.Speed = NumberRange.new(6, 12)
-	e.Lifetime = NumberRange.new(0.25, 0.45)
-	e.Acceleration = Vector3.new(0, -30, 0)
-	e.Size = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.45),
-		NumberSequenceKeypoint.new(1, 0),
-	})
-	e.Color = ColorSequence.new(color)
-	e.LightEmission = 0.3
-	e.Rate = 0
-	e.Parent = p
-	e:Emit(count)
-	task.delay(0.8, function()
-		p:Destroy()
-	end)
+	for _ = 1, math.min(count, 24 - particleCount) do
+		particleCount += 1
+		local p = Instance.new("Part")
+		p.Name = "CombatPixel"
+		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
+		p.CastShadow = false
+		p.Material, p.Color = Enum.Material.SmoothPlastic, color
+		p.Size = Vector3.one * (math.random(12, 22) / 100)
+		local spread = Vector3.new(math.random() - 0.5, math.random() - 0.5, math.random() - 0.5)
+		p.Position = at + spread * 1.8
+		p.Parent = workspace
+		TweenService:Create(p, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+			Position = p.Position + spread * 2 + Vector3.new(0, -0.5, 0),
+			Size = Vector3.one * 0.03,
+			Transparency = 1,
+		}):Play()
+		task.delay(0.4, function()
+			p:Destroy()
+			particleCount -= 1
+		end)
+	end
 end
 
--- a floating number / word over a model
-local function popText(model: Model, text: string, color: Color3, big: boolean)
-	local anchor = model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart
-	if not anchor or not anchor:IsA("BasePart") then
+-- Combat verdicts pop at varied positions beside the crosshair [владелец 01.11], never over a tall boss.
+-- Alternate sides and bound the active labels so a sweeping attack does not fill a phone screen.
+local function popText(text: string, color: Color3, big: boolean)
+	local layer = feedbackLayer
+	if not layer then
 		return
 	end
-	local _, size = model:GetBoundingBox()
-	local gui = Instance.new("BillboardGui")
-	gui.Name = "DamagePop"
-	gui.Size = UDim2.fromOffset(if big then 120 else 90, if big then 40 else 30)
-	gui.StudsOffsetWorldSpace = Vector3.new(math.random(-10, 10) / 10, size.Y / 2 + 0.8, 0)
-	gui.AlwaysOnTop = true
-	gui.MaxDistance = 80
-	gui.Adornee = anchor
+	for i = #feedbackLabels, 1, -1 do
+		if not feedbackLabels[i].Parent then
+			table.remove(feedbackLabels, i)
+		end
+	end
+	if #feedbackLabels >= 3 then
+		local oldest = table.remove(feedbackLabels)
+		if oldest then
+			oldest:Destroy()
+		end
+	end
 	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
+	label.Name = "DamagePop"
+	local right = feedbackRight
+	feedbackRight = not right
+	local x, y = random:NextInteger(24, 38), random:NextInteger(-30, 32)
+	for _, entry in ipairs(feedbackLabels) do
+		if
+			entry:GetAttribute("RightSide") == right
+			and math.abs(y - entry.Position.Y.Offset) < 25
+		then
+			y = math.clamp(
+				entry.Position.Y.Offset + (if y < entry.Position.Y.Offset then -26 else 26),
+				-48,
+				48
+			)
+		end
+	end
+	label.AnchorPoint = Vector2.new(if right then 0 else 1, 0.5)
+	label.Position = UDim2.new(0.5, if right then x else -x, 0.5, y)
+	label.Size = UDim2.fromOffset(math.min(240, math.max(80, layer.AbsoluteSize.X / 2 - 42)), 26)
+	label.TextXAlignment = if right then Enum.TextXAlignment.Left else Enum.TextXAlignment.Right
+	label:SetAttribute("RightSide", right)
 	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBlack
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = if big then 23 else 20
 	label.TextScaled = true
+	local textLimit = Instance.new("UITextSizeConstraint")
+	textLimit.MinTextSize, textLimit.MaxTextSize = 12, label.TextSize
+	textLimit.Parent = label
+	label.TextTruncate = Enum.TextTruncate.AtEnd
 	label.Text = text
 	label.TextColor3 = color
-	label.TextStrokeTransparency = 0.2
-	label.Parent = gui
-	gui.Parent = player:WaitForChild("PlayerGui")
-	local rise = gui.StudsOffsetWorldSpace + Vector3.new(0, 2.2, 0)
-	TweenService
-		:Create(gui, TweenInfo.new(0.75, Enum.EasingStyle.Quad), { StudsOffsetWorldSpace = rise })
-		:Play()
-	TweenService
-		:Create(label, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+	label.TextStrokeColor3, label.TextStrokeTransparency = Color3.new(), 0
+	label.ZIndex = 7
+	label.Parent = layer
+	table.insert(feedbackLabels, 1, label)
+	TweenService:Create(label, TweenInfo.new(0.75, Enum.EasingStyle.Quad), {
+		Position = label.Position - UDim2.fromOffset(0, 14),
+	}):Play()
+	TweenService:Create(
+		label,
+		TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0.5),
+		{
 			TextTransparency = 1,
 			TextStrokeTransparency = 1,
-		})
-		:Play()
+		}
+	):Play()
 	task.delay(0.8, function()
-		gui:Destroy()
+		label:Destroy()
 	end)
 end
 
-local function shielded(model: Model): boolean
-	return model:GetAttribute("Shielded") == true
-		or model:FindFirstChildOfClass("ForceField") ~= nil
-end
-
--- Called by the attack: the swing whoosh now, the predicted impact when the blow lands.
-function CombatFeel.OnAttack(target: Model?, delay: number, crit: boolean)
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
+-- A visual swing is independent of damage recovery; hit/block effects wait for the server verdict.
+function CombatFeel.OnSwing()
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if root and root:IsA("BasePart") then
 		Sfx.play("swing", root, 0.35, 0.95 + math.random() * 0.15)
 	end
-	if not target then
-		return
+end
+
+-- Near the visible side of a tall target, instead of its possibly off-screen bounding-box centre.
+local function impactAt(model: Model): Vector3
+	local camera = workspace.CurrentCamera
+	if not camera then
+		return centreOf(model)
 	end
-	task.delay(delay, function()
-		local r = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-		if not alive(target) or not r or not r:IsA("BasePart") then
-			return
-		end
-		local model = target :: Model
-		local reach = Combat.range(getKind()) + REACH_SLACK + 2
-		local _, size = model:GetBoundingBox()
-		local dist = (centreOf(model) - r.Position).Magnitude - math.max(size.X, size.Z) / 2
-		if dist > reach then
-			return -- it got away: the whoosh was the miss
-		end
-		local at = centreOf(model)
-		if shielded(model) then
-			Sfx.play("block", nil, 0.5, 1.1)
-			popText(
-				model,
-				Strings.t("combat_blocked", localeOf()),
-				Color3.fromRGB(180, 200, 230),
-				false
-			)
-			burst(at, Color3.fromRGB(190, 225, 255), 6)
-			return
-		end
-		Sfx.play(if crit then "crit" else "hit", nil, 0.55, 0.92 + math.random() * 0.16)
-		flash(model, Color3.fromRGB(255, 40, 40), 0.22, "PredictFlash")
-		burst(
-			at,
-			if crit then Color3.fromRGB(255, 230, 120) else Color3.fromRGB(255, 90, 80),
-			if crit then 14 else 8
+	local cf, size = model:GetBoundingBox()
+	local localEye = cf:PointToObjectSpace(camera.CFrame.Position)
+	local half = size / 2
+	return cf:PointToWorldSpace(
+		Vector3.new(
+			math.clamp(localEye.X, -half.X, half.X),
+			math.clamp(localEye.Y, -half.Y, half.Y),
+			math.clamp(localEye.Z, -half.Z, half.Z)
 		)
-		HeldItem.Hitstop(if crit then HITSTOP * 1.8 else HITSTOP)
-	end)
+	)
 end
 
 local function formatDamage(n: number): string
@@ -394,7 +373,21 @@ local function watchMob(model: Instance)
 	end)
 	-- the bite wind-up: a red outline for the moment the rat rears up
 	model:GetAttributeChangedSignal("MobWindup"):Connect(function()
+		local root = Players.LocalPlayer.Character
+			and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		local at = model:GetAttribute("MobWindup")
+		if
+			not root
+			or not root:IsA("BasePart")
+			or humanoid.Health <= 0
+			or typeof(at) ~= "number"
+			or workspace:GetServerTimeNow() - at > 0.5
+			or (root.Position - centreOf(model)).Magnitude > 24
+		then
+			return
+		end
 		local h = Instance.new("Highlight")
+		h.Name = "MobWindup"
 		h.FillTransparency = 1
 		h.OutlineColor = Color3.fromRGB(255, 60, 40)
 		h.OutlineTransparency = 0.1
@@ -440,6 +433,22 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 	end
 	started = true
 	getKind, localeOf = kindProvider, locale
+	local layer = Instance.new("Frame")
+	layer.Name = "CombatFeedback"
+	layer.BackgroundTransparency = 1
+	layer.Size = UDim2.fromScale(1, 1)
+	layer.ZIndex = 7
+	layer.Parent = gui
+	feedbackLayer = layer
+	Remotes.unreliable("CombatCritFx").OnClientEvent:Connect(function(model: any)
+		if
+			typeof(model) == "Instance"
+			and model:IsA("Model")
+			and model:IsDescendantOf(workspace)
+		then
+			burst(impactAt(model), Color3.fromRGB(185, 151, 103), 6)
+		end
+	end)
 	local h = Instance.new("Highlight")
 	h.Name = "SoftLock"
 	h.FillTransparency = 1
@@ -467,41 +476,49 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 			end
 		end
 	end)
-	-- the server's verdict on each blow: numbers, «Блок», «Своя фракция»
+	-- The server's verdict is also the only source of hit sounds and critical particles.
 	Remotes.event("HitConfirm").OnClientEvent
 		:Connect(function(model: any, dealt: any, crit: any, status: any)
-			if typeof(model) ~= "Instance" or not model:IsA("Model") then
-				return
-			end
+			local target = if typeof(model) == "Instance"
+					and model:IsA("Model")
+					and model.Parent
+				then model
+				else nil
 			local loc = localeOf()
 			if status == "hit" or status == "killed" then
 				if typeof(dealt) == "number" and dealt > 0 then
 					popText(
-						model,
 						formatDamage(dealt) .. (if crit then "!" else ""),
-						if crit then Color3.fromRGB(255, 220, 70) else Color3.fromRGB(255, 255, 255),
+						if crit then Color3.fromRGB(255, 220, 70) else Color3.new(1, 1, 1),
 						crit == true
 					)
+					-- A sweeping hit may confirm several targets in one frame: one sound is enough.
+					if os.clock() - lastHitSound > 0.06 then
+						lastHitSound = os.clock()
+						Sfx.play(
+							if crit then "crit" else "hit",
+							nil,
+							0.55,
+							0.92 + math.random() * 0.16
+						)
+					end
+					if target and crit then
+						burst(impactAt(target), Color3.fromRGB(185, 151, 103), 6)
+					end
 				end
-				if status == "killed" then
-					burst(centreOf(model), Color3.fromRGB(235, 235, 235), 16)
+				if target and status == "killed" then
+					burst(impactAt(target), Color3.fromRGB(220, 220, 220), 8)
 				end
 			elseif status == "blocked" then
-				popText(
-					model,
-					Strings.t("combat_blocked", loc),
-					Color3.fromRGB(180, 200, 230),
-					false
-				)
+				popText(Strings.t("combat_blocked", loc), Color3.fromRGB(180, 200, 230), false)
+				if os.clock() - lastHitSound > 0.06 then
+					lastHitSound = os.clock()
+					Sfx.play("block", nil, 0.5, 1.1)
+				end
 			elseif status == "ally" then
-				popText(model, Strings.t("faction_same", loc), Color3.fromRGB(170, 170, 170), false)
+				popText(Strings.t("faction_same", loc), Color3.fromRGB(170, 170, 170), false)
 			elseif status == "nopvp" then
-				popText(
-					model,
-					Strings.t("combat_no_pvp", loc),
-					Color3.fromRGB(170, 170, 170),
-					false
-				)
+				popText(Strings.t("combat_no_pvp", loc), Color3.fromRGB(170, 170, 170), false)
 			end
 		end)
 	for _, m in ipairs(CollectionService:GetTagged("Mob")) do

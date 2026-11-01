@@ -180,14 +180,13 @@ function EffectsHud.start(
 	-- screen effects, run right after Roblox's camera update; the previous frame's roll is removed first
 	-- so a stationary camera never accumulates it
 	local nausea = 0 -- 0..1, ramps in and out
-	-- hurt camera like Minecraft Java [ваниль GameRenderer.bobHurt, владелец 27.10: «эффект получения урона должен
-	-- быть как в майне»]: hurtTime 10 ticks (0.5 s), tilt = sin(f⁴·π) · 14° with f = time left / 0.5 s (a quick kick, a
-	-- slow return), about an axis turned by hurtDir: towards the one who hit us; with no attacker the last direction
-	-- again, our left at first (minecraft.wiki/w/Damage). Knockback tells us where the blow came from.
+	-- Minecraft-shaped hurt envelope, 0.5 s. [владелец 01.11] keep aim steady:
+	-- a brief 8-degree lateral roll [решение], never a pitch/yaw deflection. Knockback chooses its side.
 	local HURT_SECONDS = 0.5
 	local hurtAt = -math.huge
 	local hurtDir = 0 -- degrees, Minecraft's: 0 = from the left, 90 = from the front, 180 = from the right
 	local function watchHealth(character: Model)
+		hurtAt, hurtDir = -math.huge, 0
 		local humanoid = character:WaitForChild("Humanoid", 10)
 		if not humanoid or not humanoid:IsA("Humanoid") then
 			return
@@ -198,6 +197,12 @@ function EffectsHud.start(
 				hurtAt = os.clock()
 			end
 			last = health
+		end)
+		-- A hit absorbed entirely by golden health still has the normal hurt feedback.
+		character.ChildAdded:Connect(function(child)
+			if child.Name == "HurtFlash" and child:IsA("Highlight") and humanoid.Health > 0 then
+				hurtAt = os.clock()
+			end
 		end)
 	end
 	player.CharacterAdded:Connect(watchHealth)
@@ -240,14 +245,22 @@ function EffectsHud.start(
 	darkness.ZIndex = -10
 	darkness.Visible = false
 	darkness.Parent = gui
+	-- Undo last frame's cosmetic roll BEFORE the camera controller reads its previous orientation.
+	-- Undoing it after the controller ran allowed boss hits to accumulate into downward aim drift.
 	RunService:BindToRenderStep(
-		"PrisonEffects",
-		Enum.RenderPriority.Camera.Value + 1,
-		function(dt: number)
+		"PrisonEffectsUnroll",
+		Enum.RenderPriority.Camera.Value - 1,
+		function()
 			if rolledCamera and baseCFrame and rolledCamera.CFrame == appliedCFrame then
 				rolledCamera.CFrame = baseCFrame
 			end
 			rolledCamera, baseCFrame, appliedCFrame = nil, nil, nil
+		end
+	)
+	RunService:BindToRenderStep(
+		"PrisonEffects",
+		Enum.RenderPriority.Camera.Value + 1,
+		function(dt: number)
 			local camera = workspace.CurrentCamera
 			if not camera then
 				return
@@ -294,9 +307,11 @@ function EffectsHud.start(
 						math.rad(6) * nausea * math.sin(now * 1.6)
 							+ math.rad(2) * nausea * math.sin(now * 3.7)
 					)
-					* CFrame.Angles(0, -dir, 0)
-					* CFrame.Angles(0, 0, math.rad(14) * hurt)
-					* CFrame.Angles(0, dir, 0)
+					* CFrame.Angles(
+						0,
+						0,
+						math.rad(8) * hurt * (if math.cos(dir) < 0 then -1 else 1)
+					)
 				rolledCamera, baseCFrame, appliedCFrame = camera, base, rolled
 				camera.CFrame = rolled
 			end

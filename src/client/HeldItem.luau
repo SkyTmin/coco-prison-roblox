@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
+local Combat = require(ReplicatedStorage:WaitForChild("Shared").Combat)
 local ItemModels = require(script.Parent:WaitForChild("ItemModels"))
 local CharacterAnimator = require(script.Parent:WaitForChild("CharacterAnimator"))
 local BowState = require(script.Parent:WaitForChild("BowState"))
@@ -34,7 +35,7 @@ local GLINT_TINT, GLINT_BAND, GLINT_WIDTH, GLINT_SPEED = 0.12, 0.6, 0.16, 0.45
 -- keyframed animation on the character (CharacterAnimator), which the server relays so every player sees
 -- it. Digging repeats the overhead blow; a melee attack (Attack) plays the combo animation of the weapon
 -- over its attack length. The hold pose (arm relaxed, item in front) is CharacterAnimator's too.
-local SWING_SECONDS = 0.3
+local SWING_SECONDS = Combat.SWING_SECONDS
 local swingActive = false -- digging: keep swinging
 local swingPhase = -1 -- 0..1 inside a cycle, -1 = resting
 local swingKind = "slam" -- the animation of the current cycle
@@ -65,11 +66,13 @@ function HeldItem.SwingState(): (string, number?)
 end
 
 -- One plain swing (no weapon combo), e.g. a tap that hit nothing to dig
-function HeldItem.Swing()
-	if swingPhase < 0 or swingPhase >= 0.5 then
+function HeldItem.Swing(repeating: boolean?): boolean
+	if swingPhase < 0 or (not repeating and swingPhase >= 0.5) then
 		heldUntil = 0
 		startCycle()
+		return true
 	end
+	return false
 end
 
 -- Body hitstop only: first-person strikes keep their short, continuous cycle.
@@ -83,11 +86,11 @@ function HeldItem.DebugHold(phase: number, seconds: number)
 	swingPhase, heldUntil = phase, os.clock() + seconds
 end
 
--- A melee attack of the combo (Combat): its animation over the weapon's attack length
+-- Accepted melee combo: body and hand share the short strike; weapon recovery is separate.
 function HeldItem.Attack(kind: string, duration: number)
 	heldUntil = 0
 	swingPhase, swingKind, swingLength = 0, kind, math.min(duration, SWING_SECONDS)
-	CharacterAnimator.PlayLocal(kind, duration)
+	CharacterAnimator.PlayLocal(kind, swingLength)
 end
 
 -- The bow's grip in its model (assets/models/bow/bow.py: the middle of the limb arc, upper left of the 16×16 item):

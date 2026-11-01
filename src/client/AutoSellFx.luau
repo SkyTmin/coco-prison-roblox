@@ -18,6 +18,8 @@ local LIFE = 1.1 -- s on screen
 local RISE = 34 -- px it floats up
 local MAX = 4
 local SPREAD = 22 -- px up / down at random
+local TEXT_SIZE, TEXT_HEIGHT = 17, 20
+local AREA_SCALE = 1.15 -- [владелец 01.11] larger, outlined, always above ordinary sale numbers
 
 function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, locale: () -> string)
 	local layer = Instance.new("Frame")
@@ -38,6 +40,8 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 		local now = os.clock()
 		local isArea = area == true
 		local life = LIFE + (if isArea then 0.5 else 0)
+		-- Same area by the crosshair; red labels draw over green labels through ZIndex.
+		local y = -10 + random:NextInteger(-SPREAD, SPREAD)
 		for i = #live, 1, -1 do
 			if now > live[i].untilAt or not live[i].label.Parent then
 				table.remove(live, i)
@@ -66,20 +70,27 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 		local label = Ui.label(
 			layer,
 			text,
-			UDim2.fromOffset(120, 20),
+			UDim2.fromOffset(120, TEXT_HEIGHT),
 			UDim2.new(
 				0.5,
-				if right then 14 else -134,
+				if right then 14 else -(if isArea then 120 * AREA_SCALE else 120) - 14,
 				0.5,
-				-10 + random:NextInteger(-SPREAD, SPREAD)
+				y
 			),
-			17,
+			TEXT_SIZE,
 			if isArea then Color3.fromRGB(255, 75, 75) else Ui.colors.green
 		)
+		if isArea then
+			-- TextSize is integer-valued; UIScale preserves the requested exact 15% increase.
+			local scale = Instance.new("UIScale")
+			scale.Scale = AREA_SCALE
+			scale.Parent = label
+		end
 		label.TextXAlignment = if right then Enum.TextXAlignment.Left else Enum.TextXAlignment.Right
 		right = not right
-		label.TextStrokeTransparency = 0.35
-		label.ZIndex = 5
+		label.TextStrokeColor3 = Color3.new(0, 0, 0)
+		label.TextStrokeTransparency = if isArea then 0 else 0.35
+		label.ZIndex = if isArea then 6 else 5
 		label:SetAttribute("AreaSale", isArea)
 		table.insert(live, { label = label, untilAt = now + life, area = isArea })
 		local info = TweenInfo.new(life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)

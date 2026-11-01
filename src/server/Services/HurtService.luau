@@ -1,6 +1,6 @@
 --!strict
 -- Getting hurt like Minecraft [владелец 21.10, ваниль]: whenever a player, mob or boss loses health
--- (hits, falls, needs…) its model flashes red for 0.3 s and a hurt sound plays at it (everyone sees and
+-- (hits, falls, needs…) its model flashes red for 0.5 s and a hurt sound plays at it (everyone sees and
 -- hears it); melee hits also knock the target back (vanilla ≈ 0.4 block/tick horizontally plus a small
 -- lift). The camera tilt of the hurt player is client side (EffectsHud).
 

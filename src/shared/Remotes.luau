@@ -22,6 +22,7 @@
 -- Client → server:        Creative(op, a?, b?) — test mode (CreativeService): toggle / give id level|bookId /
 --                          coins / level / refill / clear; only for players with the CreativeAllowed attribute
 -- Client → server:        Swing(kind) → others get SwingFx(userId, kind) (unreliable) — swing animations
+-- Server → nearby others: CombatCritFx(model) (unreliable), only after a confirmed damaging critical hit
 -- Server → client:        ServerLog(message, isError) — server warnings for CreativeAllowed players
 -- Client → server:        DropItem(slot, count?) — throw a stack on the ground (ItemDropService)
 -- Server → client:        Knockback(velocity) — melee knockback the victim's client applies (HurtService)

@@ -159,6 +159,7 @@ local function setStatus(model: Model, status: string, level: number, seconds: n
 		glow.FillTransparency = 1
 		glow.OutlineColor = Color3.fromRGB(255, 255, 255)
 		glow.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		glow.Adornee = model
 		glow.Parent = model
 	elseif status == "Cursed" then
 		local humanoid = humanoidOf(model)
@@ -649,7 +650,7 @@ function BookService.onDug(
 	local layerStats = 0
 	local layerChance =
 		BookTuning.proc("plastolom", Books.level(tool, "plastolom"), Books.value(tool, "plastolom"))
-	if roll(layerChance) then
+	if BookTuning.layerReady(player, now()) and roll(layerChance) then
 		-- the whole layer the block was in (the player stands on it while digging down)
 		local _, y = MineService.coords(mine, index)
 		local cells: { number } = {}
@@ -659,6 +660,9 @@ function BookService.onDug(
 			end
 		end
 		layer = breakCells(mine, cells, toolId, toolLevel)
+		if #layer > 0 then
+			BookTuning.layerStarted(player, now())
+		end
 		layerStats = math.min(LAYER_STATS_CAP, math.floor(#layer / 2))
 	elseif roll(Books.value(tool, "hammer")) then
 		-- 3×3 across the dug face
@@ -915,12 +919,10 @@ local function springs(player: Player, profile: Types.Profile)
 	-- [владелец 29.10] full jump height I 1.25 / II 1.5 / III 2 blocks; keep the base step clearance.
 	local base = Config.rules.combat.jumpBlocks or 1.05
 	local height = (math.max(1, Books.worn(profile, "springs")) + base - 1) * BLOCK
-	if humanoid.UseJumpPower then
-		local power = math.sqrt(2 * workspace.Gravity * height)
-		if math.abs(humanoid.JumpPower - power) > 0.01 then
-			humanoid.JumpPower = power
-		end
-	elseif math.abs(humanoid.JumpHeight - height) > 0.01 then
+	-- Humanoid's impulse is not a ballistic sqrt(2gh): that overshot the target in Studio.
+	-- Let Roblox use its native height mode so the book controls height directly.
+	humanoid.UseJumpPower = false
+	if math.abs(humanoid.JumpHeight - height) > 0.01 then
 		humanoid.JumpHeight = height
 	end
 end
@@ -929,6 +931,7 @@ function BookService.Start()
 	Remotes.event("BookUse").OnServerEvent:Connect(onUse)
 	Players.PlayerRemoving:Connect(function(player)
 		lastUse[player], rage[player] = nil, nil
+		BookTuning.clear(player)
 	end)
 	task.spawn(function()
 		local hulkWorn: { [Player]: boolean } = {}
