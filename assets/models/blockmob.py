@@ -20,7 +20,7 @@ import math
 import os
 import random
 import sys
-from mathutils import Euler, Matrix, Vector
+from mathutils import Euler, Matrix, Vector, Quaternion
 
 FPS = 30
 NOISE_TEXELS = 16
@@ -90,6 +90,29 @@ def default_noise(seed=7, depth=0.12, jitter=(-0.09, 0.06), floor=0.7):
 
 def tile_mean(tile):
     return sum(sum(r) for r in tile) / (len(tile) * len(tile[0]))
+
+
+def simplify_keys(keys, position_error, angle_error):
+    """Keep Blender's baked easing within a bounded error under Roblox's linear/slerp playback."""
+    if len(keys) <= 2:
+        return keys
+    a, b = keys[0], keys[-1]
+    qa = Quaternion((a['q'][3], *a['q'][:3])).normalized()
+    qb = Quaternion((b['q'][3], *b['q'][:3])).normalized()
+    worst, split = 0, 0
+    for i, key in enumerate(keys[1:-1], 1):
+        t = (key['t'] - a['t']) / (b['t'] - a['t'])
+        pos = Vector(a['p']).lerp(Vector(b['p']), t)
+        q = Quaternion((key['q'][3], *key['q'][:3])).normalized()
+        dot = min(1, abs(qa.slerp(qb, t).dot(q)))
+        error = max((pos-Vector(key['p'])).length / position_error,
+                    2*math.acos(dot) / math.radians(angle_error))
+        if error > worst:
+            worst, split = error, i
+    if worst <= 1:
+        return [a, b]
+    return (simplify_keys(keys[:split+1], position_error, angle_error)[:-1]
+            + simplify_keys(keys[split:], position_error, angle_error))
 
 
 # ------------------------------------------------------------------ the pipeline
@@ -231,10 +254,37 @@ class Mob:
                     e.location = base + Vector(off or (0, 0, 0))
                     e.keyframe_insert("rotation_euler", frame=frame)
                     e.keyframe_insert("location", frame=frame)
+                if self.g.get("BAKE_CURVES"):
+                    # Blender 5 layered actions; clamped tangents avoid ground penetration from overshoot.
+                    for layer in act.layers:
+                        for strip in layer.strips:
+                            for bag in strip.channelbags:
+                                for curve in bag.fcurves:
+                                    for key in curve.keyframe_points:
+                                        key.handle_left_type = key.handle_right_type = 'AUTO_CLAMPED'
                 e.location = base
                 e.rotation_euler = Euler((0, 0, 0), "XYZ")
                 e.animation_data.action = None
-        scene.frame_end = 60
+        # Optional floor contact bake for authored collapses. Compute first, then write, so prior
+        # correction keys never feed back into the next measurement. Geometry stays rigidly jointed.
+        for clip in self.g.get('GROUND_CLIPS', []):
+            order = list(joints)
+            act = bpy.data.actions[clip + '|root']
+            end = max(act['frames'])
+            offsets = []
+            meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')]
+            for frame in range(math.floor(end)+1):
+                self.pose(joints, order, clip, frame)
+                low = min((o.matrix_world @ Vector(v)).z for o in meshes for v in o.bound_box)
+                offsets.append((frame, -low))
+            root = joints['root']
+            use(root, act)
+            for frame, z in offsets:
+                root.location.z = z
+                root.keyframe_insert('location', index=2, frame=frame)
+            act['frames'] = [f for f, _ in offsets]
+        self.pose(joints, list(joints), None, 0)
+        scene.frame_end = 96
         bpy.ops.wm.save_as_mainfile(filepath=self.blend)
         self.log("built", self.blend, len(self.parts_def), "parts")
 
@@ -298,6 +348,9 @@ class Mob:
                     loop = bool(act.get("loop", False))
                     frames.update(float(f) for f in act["frames"])  # keep half-frame endings (1.55 / 2.25 s)
             frames = sorted(frames)
+            if self.g.get("BAKE_CURVES"):
+                # Subframes preserve fast contacts too; simplification removes redundant samples afterwards.
+                frames = sorted(set(frames) | {f/4 for f in range(math.ceil(frames[0]*4), math.floor(frames[-1]*4)+1)})
             tracks = {}
             for name in order:
                 e = joints[name]
@@ -315,10 +368,18 @@ class Mob:
                 # drop tracks that never move
                 if any(abs(k["q"][0]) + abs(k["q"][1]) + abs(k["q"][2]) > 1e-4 or any(abs(v) > 1e-4 for v in k["p"])
                        for k in keys):
-                    tracks[name] = keys
+                    tracks[name] = (simplify_keys(keys, .008, .35) if self.g.get("BAKE_CURVES") else keys)
             out["clips"][clip] = {"length": round(frames[-1] / FPS, 4), "loop": loop, "tracks": tracks}
+            if clip in self.g.get('CLIP_IMPACTS', {}):
+                out['clips'][clip]['impact'] = self.g['CLIP_IMPACTS'][clip]
+        if self.g.get('BAKE_CURVES'):
+            out['packedKeys'] = True
+            for clip in out['clips'].values():
+                for name, keys in clip['tracks'].items():
+                    clip['tracks'][name] = [[int(v) if v == int(v) else v
+                                            for v in [k['t'], *k['p'], *k['q']]] for k in keys]
         os.makedirs(os.path.dirname(self.json_out), exist_ok=True)
-        if len(out["parts"]) > 300:
+        if len(out["parts"]) > 300 or self.g.get("BAKE_CURVES"):
             # Roblox caps a ModuleScript at 200 000 characters: big models store each part as one array
             # [joint, centre, size, colour, top | null, glow 0/1, rot | null] (BlockRig reads both forms)
             # format 2: [joint index, cx, cy, cz, sx, sy, sz, colour index, glow, top colour index | -1] with
@@ -417,7 +478,7 @@ class Mob:
             clip, frame = spec[0], spec[1]
             self.perspective(cam, spec[2] if len(spec) > 2 else self.g["PREVIEW_CAMERA"])
             self.pose(joints, order, clip, frame)
-            scene.render.filepath = os.path.join(self.here, "preview-%s.png" % clip)
+            scene.render.filepath = os.path.join(self.here, self.g.get('PREVIEW_PREFIX', 'preview-') + clip + '.png')
             bpy.ops.render.render(write_still=True)
         self.log("previews rendered")
 
@@ -432,7 +493,7 @@ class Mob:
                 self.perspective(cam, spec)
             else:
                 ortho(cam, *spec)
-            scene.render.filepath = os.path.join(self.here, "compare-%s.png" % name)
+            scene.render.filepath = os.path.join(self.here, self.g.get('COMPARE_PREFIX', 'compare-') + name + '.png')
             bpy.ops.render.render(write_still=True)
         self.log("compare views rendered")
 

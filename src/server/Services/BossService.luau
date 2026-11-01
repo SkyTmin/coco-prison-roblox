@@ -50,6 +50,9 @@ local TELEGRAPH = Color3.fromRGB(255, 40, 30)
 
 type Fight = {
 	splinter: any?,
+	meleeDuration: number?,
+	meleeHitAt: number?,
+	deathDuration: number?,
 	meleeDamage: number,
 	meleeRange: number,
 	meleeCooldown: number,
@@ -635,6 +638,13 @@ local function act(boss: Boss, action: string, seconds: number)
 		model:SetAttribute("Action", action)
 		model:SetAttribute("ActionAt", workspace:GetServerTimeNow())
 		model:SetAttribute("ActionLen", seconds)
+		model:SetAttribute(
+			"ActionRelease",
+			if action == "blade"
+				then boss.fight.lavaBlade.telegraph
+				elseif action == "spikes" then boss.fight.earthSpikes.telegraph
+				else nil
+		)
 	end
 end
 
@@ -939,10 +949,10 @@ end
 local function melee(boss: Boss, f: { player: Player, root: BasePart, humanoid: Humanoid })
 	local root = boss.root :: BasePart
 	local cfg = boss.fight.splinter
-	local duration = if cfg then cfg.melee.duration else 0.9
+	local duration = if cfg then cfg.melee.duration else boss.fight.meleeDuration or 0.9
 	boss.busyUntil = math.max(boss.busyUntil, os.clock() + duration)
 	act(boss, "melee", duration)
-	task.wait(if cfg then cfg.melee.hitAt else 0.4)
+	task.wait(if cfg then cfg.melee.hitAt else boss.fight.meleeHitAt or 0.4)
 	if
 		boss.root == root
 		and boss.humanoid
@@ -1131,19 +1141,22 @@ local function died(boss: Boss)
 	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
 	SplinterAbilities.Clear(boss)
 	-- Set the action before clearing boss.model; clients keep the final pose until removal.
-	if boss.fight.splinter then
-		act(boss, "death", boss.fight.splinter.deathDuration)
+	local deathDuration = if boss.fight.splinter
+		then boss.fight.splinter.deathDuration
+		else boss.fight.deathDuration
+	if deathDuration then
+		act(boss, "death", deathDuration)
 	end
 	boss.model, boss.humanoid, boss.root = nil, nil, nil
 	table.clear(boss.damageBy)
 	boss.state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + boss.card.respawnSeconds)
 	publish(boss)
 	local root = model.PrimaryPart
-	if boss.fight.splinter and root then
+	if deathDuration and root then
 		root.Anchored = true
 		root.CanCollide = false
 		model:SetAttribute("Shielded", false)
-		Debris:AddItem(model, boss.fight.splinter.deathDuration)
+		Debris:AddItem(model, deathDuration)
 		task.delay(boss.card.respawnSeconds, function()
 			spawnBoss(boss)
 		end)

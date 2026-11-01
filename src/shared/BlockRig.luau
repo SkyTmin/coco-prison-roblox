@@ -10,8 +10,8 @@
 local BlockRig = {}
 
 export type Key = { t: number, cf: CFrame }
-export type Clip = { length: number, loop: boolean, tracks: { [string]: { Key } } }
-export type Prepared = { clips: { [string]: Clip }, joints: { string } }
+export type Clip = { length: number, loop: boolean, tracks: { [string]: { Key } }, impact: number? }
+export type Prepared = { clips: { [string]: Clip }, joints: { string }, walkSpeed: number? }
 
 local MIN_FACE = 0.25 -- faces smaller than this get no texture (eyes, teeth, plate edges)
 local FACES = {
@@ -163,21 +163,28 @@ function BlockRig.prepare(def: any): Prepared
 		for joint, keys in pairs(c.tracks) do
 			local list: { Key } = {}
 			for _, k in ipairs(keys) do
-				local q, p = k.q, k.p
-				table.insert(
-					list,
-					{ t = k.t, cf = CFrame.new(p[1], p[2], p[3], q[1], q[2], q[3], q[4]) }
-				)
+				if def.packedKeys then -- dense Blender curve bake: [t, px, py, pz, qx, qy, qz, qw]
+					table.insert(
+						list,
+						{ t = k[1], cf = CFrame.new(k[2], k[3], k[4], k[5], k[6], k[7], k[8]) }
+					)
+				else
+					local q, p = k.q, k.p
+					table.insert(
+						list,
+						{ t = k.t, cf = CFrame.new(p[1], p[2], p[3], q[1], q[2], q[3], q[4]) }
+					)
+				end
 			end
 			tracks[joint] = list
 		end
-		clips[name] = { length = c.length, loop = c.loop, tracks = tracks }
+		clips[name] = { length = c.length, loop = c.loop, tracks = tracks, impact = c.impact }
 	end
 	local joints = {}
 	for _, j in ipairs(def.joints) do
 		table.insert(joints, j.name)
 	end
-	local out = { clips = clips, joints = joints }
+	local out = { clips = clips, joints = joints, walkSpeed = def.walkSpeed }
 	cache[def] = out
 	return out
 end

@@ -159,6 +159,8 @@ type Rig = {
 	locoFrom: { [string]: CFrame },
 	locoFadeAt: number,
 	last: { [string]: CFrame },
+	actionKey: string,
+	actionFrom: Pose,
 }
 local rigs: { [Model]: Rig } = {}
 
@@ -179,6 +181,8 @@ local function track(model: Instance)
 		locoFrom = {},
 		locoFadeAt = -1,
 		last = {},
+		actionKey = "",
+		actionFrom = {},
 	}
 	local blockId = model:GetAttribute("BlockModel")
 	local def = typeof(blockId) == "string"
@@ -212,7 +216,8 @@ local function blockClip(
 	action: string,
 	seconds: number,
 	length: number,
-	clips: any
+	clips: any,
+	release: number?
 ): (string?, number)
 	if
 		action == "melee"
@@ -227,17 +232,29 @@ local function blockClip(
 		local c = clips[action]
 		return action, if c then seconds / length * c.length else 0
 	elseif action == "blade" then
-		local sweepAt = math.max(0.5, length - 0.9)
+		local sweepAt = if release
+				and clips.blade_sweep
+				and clips.blade_sweep.impact
+			then release - clips.blade_sweep.impact
+			else math.max(0.5, length - 0.9)
 		if seconds < sweepAt then
 			return "blade_raise", seconds
 		end
 		return "blade_sweep", seconds - sweepAt
 	elseif action == "spikes" then
-		local slamAt = math.max(0.3, length - 0.6)
+		local slamAt = if release
+				and clips.spikes_slam
+				and clips.spikes_slam.impact
+			then release - clips.spikes_slam.impact
+			else math.max(0.3, length - 0.6)
 		if seconds < slamAt then
 			return "spikes_raise", seconds
 		end
 		return "spikes_slam", seconds - slamAt
+	elseif action == "charge" and clips.charge_raise and clips.charge_run then
+		local windup = clips.charge_raise.length
+		return if seconds < windup then "charge_raise" else "charge_run",
+			if seconds < windup then seconds else seconds - windup
 	elseif action == "charge" or action == "stunned" then
 		return action, seconds
 	end
@@ -255,7 +272,9 @@ local function animateBlock(rig: Rig, dt: number, root: BasePart, now: number)
 		rig.locoFadeAt = now
 		rig.loco = loco
 	end
-	rig.locoT += dt * (if loco == "walk" then math.clamp(speed / 8, 0.6, 2) else 1)
+	rig.locoT += dt * (if loco == "walk"
+		then math.clamp(speed / (prepared.walkSpeed or 8), 0.6, if prepared.walkSpeed then 4 else 2)
+		else 1)
 	local locoClip = clips[loco]
 	local locoW = if rig.locoFadeAt >= 0 then math.clamp((now - rig.locoFadeAt) / FADE, 0, 1) else 1
 	local action = model:GetAttribute("Action")
@@ -264,9 +283,20 @@ local function animateBlock(rig: Rig, dt: number, root: BasePart, now: number)
 	local seconds = workspace:GetServerTimeNow() - at
 	local clipName, t = nil, 0
 	if typeof(action) == "string" and seconds >= 0 and (seconds <= length or action == "death") then
-		clipName, t = blockClip(action, math.min(seconds, length), length, clips)
+		clipName, t = blockClip(
+			action,
+			math.min(seconds, length),
+			length,
+			clips,
+			tonumber(model:GetAttribute("ActionRelease"))
+		)
 	end
 	local clip = clipName and clips[clipName]
+	local actionKey = if clip then tostring(action) .. ":" .. tostring(at) else ""
+	if actionKey ~= rig.actionKey then
+		rig.actionKey = actionKey
+		rig.actionFrom = table.clone(rig.last)
+	end
 	-- fade the action in and out so a blow never snaps
 	local actionW = if clip
 		then math.clamp(
@@ -284,10 +314,25 @@ local function animateBlock(rig: Rig, dt: number, root: BasePart, now: number)
 			if locoW < 1 then
 				cf = (rig.locoFrom[joint] or CFrame.identity):Lerp(cf, locoW)
 			end
-			if clip and clip.tracks[joint] then
-				cf = cf:Lerp(BlockRig.sample(clip, joint, t), actionW)
+			if clip and (clip.tracks[joint] or action == "death") then
+				-- An interrupted attack blends from its visible pose, including when death begins.
+				if seconds < FADE then
+					cf = rig.actionFrom[joint] or cf
+				end
+				local target = BlockRig.sample(clip, joint, t)
+				if clipName == "charge_run" and t < FADE then
+					local windup = clips.charge_raise
+					target = BlockRig.sample(windup, joint, windup.length)
+						:Lerp(target, ease(t / FADE))
+				end
+				cf = cf:Lerp(target, actionW)
 			end
-			if clipName == "blade_raise" and joint == "armL" and seconds > 0.4 then
+			if
+				clipName == "blade_raise"
+				and joint == "armL"
+				and seconds > 0.4
+				and model:GetAttribute("BlockModel") ~= "giant_zombie"
+			then
 				cf *= CFrame.Angles(0, 0, rad(3 * math.sin(seconds * 30))) -- the raised blade trembles
 			end
 			motor.Transform = cf

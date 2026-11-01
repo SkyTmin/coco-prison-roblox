@@ -1506,7 +1506,11 @@
         },
         "model": "giant_zombie",
         "texture": "rbxassetid://125898523534644",
-        "_blender": "[владелец 22.10] модель из Blender по референсу Codex (assets/models/giant_zombie: по частям — каждая часть по своим видам, скруглённые сечения), анимации — клипы Blender (BossAnimator); template — запасной шаблон",
+        "_blender": "[владелец 01.11] новая модель Зомбаря из Blender: сочленённые конечности, грудь, челюсть и кисти; запечённые плавные кривые, отдельное падение. assets/models/giant_zombie/giant_zombie.py; template — запасной шаблон",
+        "meleeDuration": 1.32,
+        "meleeHitAt": 0.56,
+        "deathDuration": 3.2,
+        "_animation": "[клиент RESOURCEPACK-BOSSES] ближний удар 1,32 с; [решение 01.11] контакт 0,56 с и подробная смерть 3,2 с вместо оригинальных 2 с. Наши прежние дополнительные приёмы сохранены; HP, урон и награды без изменений",
         "template": "giant_zombie",
         "scale": 1,
         "palette": {

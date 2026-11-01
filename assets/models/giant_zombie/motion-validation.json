@@ -1,0 +1,19 @@
+{
+  "parts": 416,
+  "joints": 23,
+  "clips": 14,
+  "maxLocalPositionErrorStuds": 0.007713228493086817,
+  "maxLocalRotationErrorDegrees": 0.3669079222182352,
+  "deathFloorMin": -0.014986969530582428,
+  "deathFloorMax": 0.025979826226830482,
+  "worstPositionAt": [
+    "death",
+    "root",
+    0.9333333333333333
+  ],
+  "worstRotationAt": [
+    "charge_run",
+    "shinR",
+    0.3333333333333333
+  ]
+}
