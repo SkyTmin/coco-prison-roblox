@@ -58,7 +58,7 @@ local function fixture(index)
 	local hits = {}
 	local hooks = {
 		act = function() end,
-		shield = function() end,
+		hold = function() end,
 		fighters = function()
 			return { f }
 		end,

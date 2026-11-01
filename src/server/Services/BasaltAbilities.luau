@@ -254,7 +254,7 @@ function BasaltAbilities.Cast(
 	end
 	boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate = 0, false
 	boss.busyUntil = math.max(boss.busyUntil, os.clock() + cfg.duration)
-	hooks.shield(boss, cfg.duration)
+	hooks.hold(boss, cfg.duration)
 	hooks.act(boss, name, cfg.duration)
 	boss.state:SetAttribute("Telegraph", cfg.release)
 	task.delay(cfg.duration, function()

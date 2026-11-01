@@ -96,10 +96,17 @@ end
 
 -- Every damage goes through here [ваниль]: Absorption's golden health (character attribute AbsorptionHealth, the
 -- golden apple — NeedsService.GiveEffect) takes it before the health does; a blow it soaks up whole still flashes
--- and sounds. A ForceField (creative mode, a casting boss) still blocks everything, as TakeDamage does.
+-- and sounds. Player ForceFields retain their protection; bosses never block [владелец 02.11].
 function HurtService.Damage(humanoid: Humanoid, amount: number)
 	local model = humanoid.Parent
-	if amount <= 0 or not model or model:FindFirstChildOfClass("ForceField") then
+	if amount <= 0 or not model then
+		return
+	end
+	if CollectionService:HasTag(model, "Boss") then
+		humanoid.Health = math.max(0, humanoid.Health - amount)
+		return
+	end
+	if model:FindFirstChildOfClass("ForceField") then
 		return
 	end
 	local golden = model:GetAttribute("AbsorptionHealth")

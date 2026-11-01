@@ -131,9 +131,9 @@ local function watchCurse(humanoid: Humanoid)
 	end)
 end
 
--- a status on whoever was hit; a boss casting a skill takes none
+-- Boss skills never block book effects [владелец 02.11].
 local function setStatus(model: Model, status: string, level: number, seconds: number, by: Player?)
-	if model:GetAttribute("Shielded") == true then
+	if model:GetAttribute("Shielded") == true and not CollectionService:HasTag(model, "Boss") then
 		return
 	end
 	-- Frost is given its new stack count; the others keep the stronger level

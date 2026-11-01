@@ -222,7 +222,7 @@ function MinotaurAbilities.Wake(boss: any, hooks: any)
 	boss.model:SetAttribute("Sleeping", false)
 	boss.busyUntil = os.clock() + duration
 	boss.nextAbilityAt = boss.busyUntil + boss.fight.abilityCooldown
-	hooks.shield(boss, duration)
+	hooks.hold(boss, duration)
 	hooks.act(boss, "awakening", duration)
 	task.delay(142 / 30, function()
 		if alive(boss, s) then
@@ -493,7 +493,7 @@ function MinotaurAbilities.Cast(
 	face(s.root, target)
 	boss.busyUntil = os.clock() + cfg.duration
 	boss.state:SetAttribute("Telegraph", cfg.release or cfg.hits[1])
-	hooks.shield(boss, cfg.duration)
+	hooks.hold(boss, cfg.duration)
 	hooks.act(boss, name, cfg.duration)
 	if name ~= "minotaur_rush" then
 		finishAfter(boss, s, cfg.duration)

@@ -58,9 +58,10 @@ function CombatService.ApplyDamage(
 	local character = humanoid.Parent
 	if
 		character
+		and not CollectionService:HasTag(character, "Boss")
 		and (
 			character:FindFirstChildOfClass("ForceField")
-			or character:GetAttribute("Shielded") == true -- a boss casting a skill
+			or character:GetAttribute("Shielded") == true
 		)
 	then
 		return false
@@ -236,9 +237,9 @@ local function critBurst(model: Model, attacker: Player)
 end
 
 -- One validated blow (a melee arc or an arrow) from `player` to `model`: PvP only where both players' locations
--- allow it and never between players of one faction; a casting boss is invulnerable; mobs and bosses remember the
+-- allow it and never between players of one faction; bosses remain vulnerable while casting; mobs and bosses remember the
 -- attacker (LastHitBy → MobService / BossService rewards). Knockback along `look`; the attacker gets HitConfirm.
--- Returns the outcome: "killed" | "hit" | "blocked" | "ally" | "nopvp".
+-- Returns the outcome: "killed" | "hit" | "cooldown" | "blocked" | "ally" | "nopvp".
 function CombatService.HitModel(
 	player: Player,
 	profile: Types.Profile,
@@ -316,8 +317,10 @@ function CombatService.HitModel(
 		local result = if sameFaction then "ally" else "nopvp"
 		confirm:FireClient(player, model, 0, false, result)
 		return result
-	elseif model:GetAttribute("Shielded") == true or model:FindFirstChildOfClass("ForceField") then
-		-- a boss casting is invulnerable: no damage, no shove, and the attacker is told so
+	elseif
+		not CollectionService:HasTag(model, "Boss")
+		and (model:GetAttribute("Shielded") == true or model:FindFirstChildOfClass("ForceField"))
+	then
 		confirm:FireClient(player, model, 0, false, "blocked")
 		return "blocked"
 	end
@@ -327,8 +330,10 @@ function CombatService.HitModel(
 		if CollectionService:HasTag(model, "Boss") then player.UserId else nil
 	)
 	if damage <= 0 then
-		confirm:FireClient(player, model, 0, false, "blocked")
-		return "blocked"
+		-- Java's short hurt window is not a defensive block. Don't label it as one on bosses.
+		local result = if CollectionService:HasTag(model, "Boss") then "cooldown" else "blocked"
+		confirm:FireClient(player, model, 0, false, result)
+		return result
 	end
 	target:SetAttribute("LastHitBy", player.UserId)
 	target:SetAttribute("LastHitAt", os.clock())

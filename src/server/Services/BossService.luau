@@ -103,7 +103,7 @@ type Boss = {
 	root: BasePart?,
 	motors: { [string]: Motor6D },
 	damageBy: { [number]: number },
-	busyUntil: number, -- casting: no other action, and invulnerable
+	busyUntil: number, -- casting: no other action; the boss still takes damage
 	nextMeleeAt: number,
 	nextAbilityAt: number,
 	lastTargetAt: number,
@@ -560,12 +560,7 @@ local function publish(boss: Boss)
 	boss.state:SetAttribute("Alive", alive)
 	boss.state:SetAttribute("Health", if humanoid then math.max(0, humanoid.Health) else 0)
 	boss.state:SetAttribute("MaxHealth", boss.card.hp)
-	boss.state:SetAttribute(
-		"Invulnerable",
-		boss.model ~= nil
-			and boss.model:GetAttribute("Shielded") == true
-			and os.clock() >= boss.stunnedUntil
-	)
+	boss.state:SetAttribute("Invulnerable", false) -- [владелец 02.11] no boss blocks
 	boss.state:SetAttribute("Stunned", os.clock() < boss.stunnedUntil)
 	boss.dirty = true
 end
@@ -620,25 +615,14 @@ local function load(id: string): Saved?
 end
 
 -- ---------------------------------------------------------------- casting helpers
-local function setInvulnerable(boss: Boss, seconds: number)
+local function holdCast(boss: Boss, seconds: number)
 	boss.busyUntil = math.max(boss.busyUntil, os.clock() + seconds)
 	local model = boss.model
 	if not model then
 		return
 	end
-	-- only the attribute (CombatService refuses damage while it is set): a ForceField in a ~3000-part block
-	-- model froze the server for ~600 ms each time a skill started [владелец 22.10: «очень сильно логает»].
-	-- No Highlight: it also outlined the invisible root box; BossAnimator pulses the lava instead.
-	model:SetAttribute("Shielded", true)
-	task.delay(seconds, function()
-		if
-			(os.clock() >= boss.busyUntil - 0.01 or os.clock() < boss.stunnedUntil)
-			and boss.model == model
-		then
-			model:SetAttribute("Shielded", false)
-			publish(boss)
-		end
-	end)
+	-- Casting only reserves the action. Damage, books and feedback continue normally.
+	model:SetAttribute("Shielded", false)
 	publish(boss)
 end
 
@@ -718,7 +702,7 @@ local function lavaBlade(boss: Boss, target: Vector3)
 	local flat = (target - from) * Vector3.new(1, 0, 1)
 	local dir = if flat.Magnitude > 0.1 then flat.Unit else root.CFrame.LookVector
 	root.CFrame = CFrame.lookAt(root.Position, root.Position + dir)
-	setInvulnerable(boss, cfg.telegraph + cfg.length / cfg.speed + 0.3)
+	holdCast(boss, cfg.telegraph + cfg.length / cfg.speed + 0.3)
 	act(boss, "blade", cfg.telegraph + cfg.length / cfg.speed + 0.3)
 	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	local strip = telegraphPart(
@@ -791,7 +775,7 @@ local function earthSpikes(boss: Boss, phase2: boolean)
 	if #spots == 0 then
 		return
 	end
-	setInvulnerable(boss, cfg.telegraph + 0.6)
+	holdCast(boss, cfg.telegraph + 0.6)
 	act(boss, "spikes", cfg.telegraph + 0.6)
 	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	-- both fists slam the ground
@@ -899,7 +883,7 @@ local function charge(boss: Boss, target: Vector3)
 		obstacle = obstacle or "wall"
 	end
 	root.CFrame = CFrame.lookAt(root.Position, root.Position + dir)
-	setInvulnerable(boss, cfg.telegraph + distance / cfg.speed)
+	holdCast(boss, cfg.telegraph + distance / cfg.speed)
 	act(boss, "charge", cfg.telegraph + distance / cfg.speed)
 	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	local strip = telegraphPart(
@@ -955,7 +939,7 @@ local function charge(boss: Boss, target: Vector3)
 				sparks:Destroy()
 			end)
 		end
-		-- the shield of the charge is gone at once: the stun is the window to hit it
+		-- the collision ends the charge; stun still grants its existing damage bonus
 		if model then
 			model:SetAttribute("Shielded", false)
 		end
@@ -1291,7 +1275,7 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		if boss.fight.minotaur then
 			MinotaurAbilities.Bindings(boss, false)
 		end
-		setInvulnerable(boss, 1.8)
+		holdCast(boss, 1.8)
 		act(boss, "roar", 1.8)
 	end
 	publish(boss)
@@ -1340,7 +1324,7 @@ local function think(boss: Boss, dt: number)
 	end)
 	local target = list[1]
 	if boss.fight.minotaur and boss.model and boss.model:GetAttribute("Sleeping") then
-		MinotaurAbilities.Wake(boss, { act = act, shield = setInvulnerable })
+		MinotaurAbilities.Wake(boss, { act = act, hold = holdCast })
 		return
 	end
 	local now = os.clock()
@@ -1383,7 +1367,7 @@ local function think(boss: Boss, dt: number)
 				hurt = hurt,
 				fighters = fighters,
 				telegraph = telegraphPart,
-				shield = setInvulnerable,
+				hold = holdCast,
 			})
 		elseif boss.fight.basalt then
 			BasaltAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
@@ -1391,7 +1375,7 @@ local function think(boss: Boss, dt: number)
 				hurt = hurt,
 				fighters = fighters,
 				telegraph = telegraphPart,
-				shield = setInvulnerable,
+				hold = holdCast,
 			})
 		elseif boss.nextAbility == 1 then
 			task.spawn(lavaBlade, boss, target.root.Position)

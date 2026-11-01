@@ -400,33 +400,6 @@ local function watchMob(model: Instance)
 	end)
 end
 
-local function watchBoss(model: Instance)
-	if not model:IsA("Model") then
-		return
-	end
-	local glow: Highlight? = nil
-	local function update()
-		local on = model:GetAttribute("Shielded") == true
-		if on and not glow then
-			local h = Instance.new("Highlight")
-			h.Name = "ShieldGlow"
-			h.FillColor = Color3.fromRGB(150, 200, 255)
-			h.FillTransparency = 0.82
-			h.OutlineColor = Color3.fromRGB(190, 225, 255)
-			h.OutlineTransparency = 0.2
-			h.DepthMode = Enum.HighlightDepthMode.Occluded
-			h.Adornee = model
-			h.Parent = model
-			glow = h
-		elseif not on and glow then
-			glow:Destroy()
-			glow = nil
-		end
-	end
-	model:GetAttributeChangedSignal("Shielded"):Connect(update)
-	update()
-end
-
 function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: () -> string)
 	if started then
 		return
@@ -509,7 +482,9 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 				if target and status == "killed" then
 					burst(impactAt(target), Color3.fromRGB(220, 220, 220), 8)
 				end
-			elseif status == "blocked" then
+			elseif
+				status == "blocked" and not (target and CollectionService:HasTag(target, "Boss"))
+			then
 				popText(Strings.t("combat_blocked", loc), Color3.fromRGB(180, 200, 230), false)
 				if os.clock() - lastHitSound > 0.06 then
 					lastHitSound = os.clock()
@@ -527,10 +502,6 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 	CollectionService:GetInstanceAddedSignal("Mob"):Connect(function(m)
 		task.spawn(watchMob, m)
 	end)
-	for _, m in ipairs(CollectionService:GetTagged("Boss")) do
-		watchBoss(m)
-	end
-	CollectionService:GetInstanceAddedSignal("Boss"):Connect(watchBoss)
 end
 
 return CombatFeel
