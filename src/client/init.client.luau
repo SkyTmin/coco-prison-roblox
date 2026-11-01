@@ -101,25 +101,23 @@ local function renderCameraButton()
 	crosshair.Visible = firstPerson or isMobile() or BowController.Drawing()
 end
 local THIRD_PERSON_ZOOM = 12
+-- [owner 02.11] The wheel selects hotbar slots; distance changes only with V / F5.
+player.CameraMinZoomDistance = THIRD_PERSON_ZOOM
+player.CameraMaxZoomDistance = THIRD_PERSON_ZOOM
 local function toggleFirstPerson()
 	firstPerson = not firstPerson
 	local currentCamera = workspace.CurrentCamera
 	if currentCamera then
 		currentCamera.CameraType = Enum.CameraType.Custom
 	end
-	if firstPerson then
-		player.CameraMode = Enum.CameraMode.LockFirstPerson
-	else
-		-- Classic mode alone keeps the camera glued to the head (zoom 0.5); push it back out by
-		-- clamping the zoom range for one frame, then restore the normal range.
-		player.CameraMode = Enum.CameraMode.Classic
-		player.CameraMinZoomDistance = THIRD_PERSON_ZOOM
-		player.CameraMaxZoomDistance = THIRD_PERSON_ZOOM
-		task.delay(0.1, function()
-			player.CameraMinZoomDistance = 0.5
-			player.CameraMaxZoomDistance = 128
-		end)
-	end
+	player.CameraMode = if firstPerson
+		then Enum.CameraMode.LockFirstPerson
+		else Enum.CameraMode.Classic
+	local distance = if firstPerson then 0.5 else THIRD_PERSON_ZOOM
+	-- Roblox clamps the new minimum against the current maximum: widen first.
+	player.CameraMinZoomDistance = 0.5
+	player.CameraMaxZoomDistance = distance
+	player.CameraMinZoomDistance = distance
 	renderCameraButton()
 end
 
@@ -2749,6 +2747,20 @@ ContextActionService:BindAction(
 	Enum.KeyCode.ButtonR2
 )
 
+local function useConsumable()
+	if profile and not currentWindowKind and not HudLayout.isEditing() then
+		local stack = profile.inventory[profile.selectedSlot]
+		if stack and require(Shared.Books).isUsable(stack.id) then
+			require(script.BookWindow).sourceSlot = profile.selectedSlot
+			open("book")
+			return
+		end
+		-- a splash potion flies where the camera looks (PotionService)
+		Remotes.event("UseConsumable")
+			:FireServer(profile.selectedSlot, workspace.CurrentCamera.CFrame.LookVector)
+	end
+end
+
 -- The bow [владелец 26.10]: hold the right mouse button (gamepad L2) to draw, let go to shoot (BowController); the
 -- left button still digs and hits (with a bow in hand a blow is a bare-hand punch, as in Minecraft)
 BowController.Start(function()
@@ -2765,6 +2777,9 @@ end)
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	if
 		not processed
+		and not currentWindowKind
+		and not HudLayout.isEditing()
+		and not UserInputService:GetFocusedTextBox()
 		and (
 			input.UserInputType == Enum.UserInputType.MouseButton2
 			or input.KeyCode == Enum.KeyCode.ButtonL2
@@ -2774,6 +2789,11 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 			BowController.Begin()
 		elseif Eating.InHand() then
 			Eating.Hold("mouse", true)
+		elseif profile then
+			local stack = profile.inventory[profile.selectedSlot]
+			if stack and require(Shared.Books).isUsable(stack.id) then
+				useConsumable()
+			end
 		end
 	end
 end)
@@ -3380,19 +3400,6 @@ do
 		jumpProxy.Position = UDim2.fromOffset(at.X, at.Y)
 	end)
 end
-local function useConsumable()
-	if profile then
-		local stack = profile.inventory[profile.selectedSlot]
-		if stack and require(Shared.Books).isUsable(stack.id) then
-			require(script.BookWindow).sourceSlot = profile.selectedSlot
-			open("book")
-			return
-		end
-		-- a splash potion flies where the camera looks (PotionService)
-		Remotes.event("UseConsumable")
-			:FireServer(profile.selectedSlot, workspace.CurrentCamera.CFrame.LookVector)
-	end
-end
 -- Throw the held item like Minecraft: Q one item, Ctrl+Q the whole stack; on a phone hold a hotbar
 -- slot. Tools and armor stay (the server refuses them with a toast) [владелец 21.10]
 local function throwSelected(wholeStack: boolean)
@@ -3679,7 +3686,14 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 UserInputService.InputChanged:Connect(function(input, processed)
-	if processed or not profile or input.UserInputType ~= Enum.UserInputType.MouseWheel then
+	if
+		processed
+		or not profile
+		or currentWindowKind
+		or HudLayout.isEditing()
+		or UserInputService:GetFocusedTextBox()
+		or input.UserInputType ~= Enum.UserInputType.MouseWheel
+	then
 		return
 	end
 	local n = profile.selectedSlot - math.sign(input.Position.Z)

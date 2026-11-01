@@ -92,6 +92,19 @@ end
 
 local looks: { [Player]: Look } = {}
 
+-- [owner 02.11] Hide Roblox's animated respawn aura, retaining its spawn protection.
+local function quietSpawn(character: Model)
+	local function hide(instance: Instance)
+		if instance:IsA("ForceField") then
+			instance.Visible = false
+		end
+	end
+	character.DescendantAdded:Connect(hide) -- Roblox can add the field after CharacterAdded.
+	for _, instance in ipairs(character:GetDescendants()) do
+		hide(instance)
+	end
+end
+
 local function dress(player: Player, character: Model)
 	if character:GetAttribute("BlockBody") ~= true then
 		return
@@ -135,6 +148,7 @@ function AvatarService.Start()
 	BlockBody.build("StarterCharacter").Parent = StarterPlayer
 	local function added(player: Player)
 		player.CharacterAdded:Connect(function(character)
+			quietSpawn(character)
 			dress(player, character)
 		end)
 		player:GetAttributeChangedSignal("Faction"):Connect(function()
@@ -149,6 +163,7 @@ function AvatarService.Start()
 				end
 			end)
 		elseif character then
+			quietSpawn(character)
 			dress(player, character)
 		end
 	end

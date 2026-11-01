@@ -1,7 +1,7 @@
 --!strict
 -- The book window [владелец 28.10: «Если взять книгу в руку, можно будет нажать использовать. Выйдет меню, и можно
 -- выбрать предмет, куда наложится»; «сделай красивыми, ты уже инвентарь наш делал чёткий»]: an ancient book, powder
--- or a dispeller in the hand → «Использовать» (F / the touch button) → this window, in the dark inventory style: a
+-- or a dispeller in the hand → «Использовать» (RMB / L2 / F / the touch button) → this window, in the dark inventory style: a
 -- card with the held item (name in its rarity colour, what it does, the apply chance), the items it can go on (the bag
 -- and the worn armor; powder: the books) — the ones that do not fit dimmed with the reason in the tooltip — and a
 -- card with the outcome line and the button. The server (BookService) checks everything again and rolls the chance.
