@@ -2,6 +2,7 @@
 -- Original gameplay for the five Splinter clips listed in RESOURCEPACK-BOSSES.md.
 -- The audit gives names/durations, not damage or mechanics: those are decisions in Config.bosses.
 -- Every cast owns a boss-generation token; death cancels delayed hits, projectiles and temporary adds.
+local BossPhysics = require(script.Parent.BossPhysics)
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -177,8 +178,7 @@ local function swoop(boss: any, session: any, target: Vector3, hooks: any)
 		RunService.Heartbeat:Wait()
 	end
 	if alive(boss, session) then
-		root.Anchored = anchored
-		root.AssemblyLinearVelocity = Vector3.zero
+		BossPhysics.restore(root, anchored)
 	end
 end
 

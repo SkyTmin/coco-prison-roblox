@@ -17,6 +17,7 @@
 --     respawn timer that is already running. One record per boss for the whole game: with several
 --     servers the last writer wins (fine while the game runs one server).
 
+local BossPhysics = require(script.Parent.BossPhysics)
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
 local MemoryStoreService = game:GetService("MemoryStoreService")
@@ -45,6 +46,7 @@ local MinotaurAbilities = require(script.Parent.MinotaurAbilities)
 local PiglinAbilities = require(script.Parent.PiglinAbilities)
 local SkeletonAbilities = require(script.Parent.SkeletonAbilities)
 local KnightAbilities = require(script.Parent.KnightAbilities)
+local PoseidonAbilities = require(script.Parent.PoseidonAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -61,6 +63,7 @@ type Fight = {
 	piglin: any?,
 	skeleton: any?,
 	knight: any?,
+	poseidon: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
 	meleeHitAt: number?,
@@ -890,7 +893,7 @@ local function charge(boss: Boss, target: Vector3)
 	boss.state:SetAttribute("Telegraph", cfg.telegraph)
 	local strip = telegraphPart(
 		Vector3.new(cfg.width, 0.2, math.max(distance, 1)),
-		CFrame.lookAt(from + dir * (distance / 2), from + dir * distance),
+		CFrame.lookAt(from + dir * (distance / 2), from + dir * (distance / 2 + 1)),
 		false,
 		paletteColor(boss, "telegraph", TELEGRAPH)
 	)
@@ -916,7 +919,10 @@ local function charge(boss: Boss, target: Vector3)
 		end
 		RunService.Heartbeat:Wait()
 	end
-	root.Anchored = false
+	if boss.root ~= root or not root.Parent then
+		return
+	end
+	BossPhysics.restore(root, false)
 	if obstacle and boss.root == root then
 		local seconds = if obstacle == "pillar" then cfg.stunPillar else cfg.stunWall
 		boss.stunnedUntil = os.clock() + seconds
@@ -1122,6 +1128,7 @@ local function died(boss: Boss)
 	PiglinAbilities.Clear(boss)
 	SkeletonAbilities.Clear(boss)
 	KnightAbilities.Clear(boss)
+	PoseidonAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
 	end
@@ -1249,6 +1256,9 @@ function spawnBoss(boss: Boss, saved: Saved?)
 	local last = humanoid.Health
 	local bonusing = false
 	humanoid.HealthChanged:Connect(function(health)
+		if boss.humanoid ~= humanoid then
+			return
+		end
 		local delta = last - health
 		last = health
 		local by = humanoid:GetAttribute("LastHitBy")
@@ -1267,7 +1277,9 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		publish(boss)
 	end)
 	humanoid.Died:Once(function()
-		died(boss)
+		if boss.humanoid == humanoid then
+			died(boss)
+		end
 	end)
 	boss.state:SetAttribute("RespawnAt", 0)
 	if boss.fight.minotaur and humanoid.Health == humanoid.MaxHealth then
@@ -1276,6 +1288,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		PiglinAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.knight then
 		KnightAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.poseidon then
+		PoseidonAbilities.Spawn(boss, { act = act })
 	else
 		if boss.fight.minotaur then
 			MinotaurAbilities.Bindings(boss, false)
@@ -1291,6 +1305,28 @@ end
 local function think(boss: Boss, dt: number)
 	local root, humanoid = boss.root, boss.humanoid
 	if not root or not humanoid or humanoid.Health <= 0 then
+		return
+	end
+	-- A void-deleted assembly can leave a living Humanoid and a dangling root reference.
+	-- Rebuild that encounter with its HP/contributions; this is not a kill or a fresh reward.
+	if not root:IsDescendantOf(workspace) or not humanoid:IsDescendantOf(workspace) then
+		local saved, old = snapshot(boss), boss.model
+		local lastHit = humanoid:GetAttribute("LastHitBy")
+		SplinterAbilities.Clear(boss)
+		BasaltAbilities.Clear(boss)
+		MinotaurAbilities.Clear(boss)
+		PiglinAbilities.Clear(boss)
+		SkeletonAbilities.Clear(boss)
+		KnightAbilities.Clear(boss)
+		PoseidonAbilities.Clear(boss)
+		boss.model, boss.root, boss.humanoid = nil, nil, nil
+		if old then
+			old:Destroy()
+		end
+		spawnBoss(boss, saved)
+		if boss.humanoid then
+			boss.humanoid:SetAttribute("LastHitBy", lastHit)
+		end
 		return
 	end
 	local list = fighters(boss)
@@ -1341,12 +1377,24 @@ local function think(boss: Boss, dt: number)
 		boss.nextAbility = boss.nextAbility
 				% (if boss.fight.piglin or boss.fight.knight
 					then 7
-					elseif boss.fight.splinter or boss.fight.minotaur or boss.fight.skeleton then 4
+					elseif
+						boss.fight.splinter
+						or boss.fight.minotaur
+						or boss.fight.skeleton
+						or boss.fight.poseidon
+					then 4
 					else 3)
 			+ 1
 		humanoid:MoveTo(root.Position)
 		if boss.fight.splinter then
 			SplinterAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.poseidon then
+			PoseidonAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1401,13 +1449,17 @@ local function think(boss: Boss, dt: number)
 	local distance = ((target.root.Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude
 	if distance <= boss.fight.meleeRange then
 		humanoid:MoveTo(root.Position)
-		root.CFrame = CFrame.lookAt(
-			root.Position,
-			Vector3.new(target.root.Position.X, root.Position.Y, target.root.Position.Z)
-		)
+		BossPhysics.face(root, target.root.Position)
 		if now >= boss.nextMeleeAt then
 			boss.nextMeleeAt = now + boss.fight.meleeCooldown
-			if boss.fight.knight then
+			if boss.fight.poseidon then
+				PoseidonAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.knight then
 				KnightAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,

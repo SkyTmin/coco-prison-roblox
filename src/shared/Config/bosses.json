@@ -1294,7 +1294,66 @@
             255
           ]
         },
-        "_abilities": "[решение] волна прилива (полоса), удары трезубцем — молнии из-под пола (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+        "_abilities": "[клиент] mso_poseidon names/durations: swing, swing_2, stab, wave_clash, epicenter, swim/torpedo. [вики] lightning and waves. [владелец] no immunity. [решение] original model, motion, geometry, contact times and death; assets/models/poseidon/README.md",
+        "model": "poseidon",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 4.8,
+        "poseidon": {
+          "recovery": 1.5,
+          "spawnDuration": 3.2,
+          "melee": [
+            {
+              "name": "swing",
+              "duration": 1,
+              "release": 0.48,
+              "damage": 12,
+              "radius": 9,
+              "halfAngle": 65
+            },
+            {
+              "name": "swing_2",
+              "duration": 1,
+              "release": 0.51,
+              "damage": 12,
+              "radius": 9,
+              "halfAngle": 65
+            }
+          ],
+          "wave_clash": {
+            "duration": 1.3,
+            "release": 0.66,
+            "range": 26,
+            "speed": 24,
+            "width": 8,
+            "damage": 19
+          },
+          "epicenter": {
+            "duration": 1.7,
+            "release": 1.02,
+            "range": 18,
+            "radius": 3.5,
+            "damage": 19,
+            "phase2Count": 2
+          },
+          "torpedo": {
+            "duration": 2.65,
+            "release": 0.65,
+            "travelDuration": 1,
+            "attackDuration": 1,
+            "attackAt": 0.55,
+            "range": 18,
+            "radius": 3.5,
+            "damage": 24
+          },
+          "stab": {
+            "duration": 1.3,
+            "release": 0.68,
+            "radius": 11,
+            "halfAngle": 25,
+            "damage": 19
+          }
+        }
       },
       "money": [
         0,

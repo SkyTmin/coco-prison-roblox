@@ -1,5 +1,6 @@
 --!strict
 -- Original Skeletron encounter: audited swipe/stomp/breath/roar names, authored geometry and timing.
+local BossPhysics = require(script.Parent.BossPhysics)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
@@ -34,8 +35,8 @@ local function finish(boss: any, s: any)
 	casts[boss] = nil
 	s.folder:Destroy()
 	if living(boss, s.encounter) then
-		boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate, s.root.Anchored =
-			s.speed, s.rotate, s.anchored
+		boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate = s.speed, s.rotate
+		BossPhysics.restore(s.root, s.anchored)
 	end
 end
 function SkeletonAbilities.Clear(boss: any)

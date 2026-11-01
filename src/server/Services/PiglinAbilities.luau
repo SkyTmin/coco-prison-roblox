@@ -1,6 +1,7 @@
 --!strict
 -- Original combat for the audited Piglin Glutton action names. All ranges/damage are our config.
 -- Cast tokens cancel delayed work; the encounter owns surviving guards independently of each cast.
+local BossPhysics = require(script.Parent.BossPhysics)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -36,7 +37,7 @@ local function finish(boss: any, s: any)
 	s.folder:Destroy()
 	if living(boss, s.encounter) then
 		boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate = s.speed, s.rotate
-		s.root.Anchored = s.anchored
+		BossPhysics.restore(s.root, s.anchored)
 	end
 end
 function PiglinAbilities.Clear(boss: any)

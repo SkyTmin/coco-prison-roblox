@@ -1,6 +1,7 @@
 --!strict
 -- Original gameplay for the audited Minotaur clips; numeric hit geometry lives in design-decisions.
 -- Each cast owns a token and effect folder. Death/replacement cancels every delayed hit and movement.
+local BossPhysics = require(script.Parent.BossPhysics)
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -65,7 +66,7 @@ function MinotaurAbilities.Clear(boss: any)
 		s.folder:Destroy()
 		if boss.root == s.root and s.root.Parent and boss.humanoid and boss.humanoid.Health > 0 then
 			boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate = s.speed, s.rotate
-			s.root.Anchored = s.anchored
+			BossPhysics.restore(s.root, s.anchored)
 		end
 	end
 end

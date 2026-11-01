@@ -1,5 +1,6 @@
 --!strict
 -- Audited knight action names; original motion, geometry and damage. No defensive immunity [owner 02.11].
+local BossPhysics = require(script.Parent.BossPhysics)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -30,8 +31,8 @@ local function finish(boss: any, s: any)
 	casts[boss] = nil
 	s.folder:Destroy()
 	if boss.root == s.root and s.root.Parent and boss.humanoid.Health > 0 then
-		boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate, s.root.Anchored =
-			s.speed, s.rotate, s.anchored
+		boss.humanoid.WalkSpeed, boss.humanoid.AutoRotate = s.speed, s.rotate
+		BossPhysics.restore(s.root, s.anchored)
 	end
 end
 function KnightAbilities.Clear(boss: any)

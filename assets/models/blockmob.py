@@ -491,7 +491,9 @@ class Mob:
                 json.dump(out, f, ensure_ascii=False, indent=1)
         self.save_noise()
         self.log("exported", self.json_out, len(out["parts"]), "parts", clips)
-        self.render_previews(joints, order)
+        # Low-memory machines can export first and render the actual exported tracks separately.
+        if '--data-only' not in sys.argv:
+            self.render_previews(joints, order)
 
     # ---------------------------------------------------------------- renders
     def setup_render(self, w, h):

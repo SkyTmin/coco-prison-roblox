@@ -51,6 +51,16 @@
 
 ## Журнал
 
+### 02.11 — Poseidon finished; common boss physics corrected; next Illusionist
+
+Original 521-cuboid/35-joint/18-clip sea king integrated in Katorga: two trident swings, thrust, moving wave, telegraphed lightning, water rush and finishing attack, seated/awakening motion, independent hair/beard/cloth/fingers and a 4.8-second articulated collapse with released trident. HP1120, damage12/19/24 and wiki loot retained; no blocks, chat damage+$ only. Videos, blend, sources and validation in assets/models/poseidon. Final export-track renders and floor/support checks passed; background Blender only.
+
+Installed mechanics: 35 cases/68 assertions; real client animator15 checks. Live90 seconds:424 samples,129 unanchored, four specials, one complete model, server ownership, Y7503.4985 throughout. Exact player/boss overlap50 frames passed. A deleted-root fixture recreated one boss with800 HP preserved, no false death/reward, then HP1120 restored. Knight156/Skeleton61/no-block43 regression checks pass. Character returned, Creative ON. Selene/StyLua/Rojo/diff pass; only pre-existing asset203785492 warning. Real4–6-player/mobile combat and old Skeleton cold-start timing discrepancy remain open.
+
+The disappearing assembly was investigated rather than ignored: CFrame.lookAt(position, samePosition) reproducibly yields NaN rotation; the old common melee facing reached it at a rush endpoint. Guarded BossPhysics.face now keeps the prior facing. Anchoring also reset explicit network ownership; all authored anchored casts now reclaim server ownership and clear velocity on release. Lost living assemblies rebuild with HP/damage shares, guarded against old death callbacks; cast destination remains range-bounded after arena clamping. Pre-fix live15-stud bound failure was retained in the audit; final run uses the same bound and validates all transform entries.
+
+Completed8/19 models. Next Illusionist: wiki/audit checked (dagger/cards/box/rabbits/regeneration, eight-second death); original built-in image_gen turnaround and exact prompt saved in assets/models/illusionist. Model and gameplay not yet implemented. Studio-side loader works in Edit; Play disallows loadstring, so QA sources were sent directly via execute_luau instead.
+
 ### 02.11 — Settings, equipment glow, Studio scene duplicates [owner]
 
 Settings now group Controls/Display/Sound/Gameplay/Social/Language with six original voxel pictograms rendered headlessly in Blender and uploaded. Mouse/touch camera sensitivity 20–300%, brightness 50–150%, neutral 100% [decision]; server validates finite ranges and saves through ProfileService. Mouse uses MouseDeltaSensitivity; touch wraps the installed CameraInput pointer rotation without replacing PlayerModule. Local brightness has a separate correction. Layout reflows without shrinking all text, +/- and reset retain the open category. All four locales supported. Removed equipment glint decals/Highlights/per-frame tint from armor, held/first-person items and inventory/upgrade icons; enchantment stats unchanged. Retro grading disabled permanently; entering/leaving a lighting volume cannot re-enable it.
