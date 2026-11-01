@@ -51,6 +51,14 @@
 
 ## Журнал
 
+### 02.11 — Illusionist finished; glow/duplicates rechecked in Katorga
+
+Original built-in image_gen reference and exact prompt, headless Blender model359 parts/34 joints/16 clips, separate rabbit72 parts/12 joints/5 clips. Six source-named skills replace the generic fallback: dagger, card fan, marked box, exploding rabbits, lateral card phase, interruptible regeneration. HP1340 and wiki rewards unchanged; no block/immunity, chat damage+$ only. Projectiles cancel on encounter death, use hand sockets/swept walls and a per-fan hit budget; max4 living rabbits, killable fuse; ground skills and card step reject unsupported endpoints. Death8s articulates knees/spine/head/hands and separately drops dagger/cards/hat. Videos/exported-curve review and all sources in assets/models/illusionist/README.md.
+
+Final installed QA:44 scenarios/92 server assertions,14 actual client animation checks,43 no-block checks PASS. Final90-second live fight424 samples/102 unanchored, all six specials, exact server ownership, Y9004.4971 unchanged; earlier independent90-second run also passed425/100. Export error max.00798 studs/.365 degrees, stance.01803, floor.021. Full comparison and final videos reviewed; Selene/StyLua/Rojo/diff/Python/module-size checks pass. No publish and no Blender GUI. Transient cold-start Sfx WaitForChild warning resolved into client/server ready; known asset203785492 warning remains. Real group/mobile/load and previous Skeleton cold-start timing audit remain open.
+
+Final live inventory:19 bosses, one model each; client one own character, equipment glow0, Bloom/ColorGrading disabled. Owner returned to spawn, Creative ON, saved mouse.5 retained. Settings/icons/glow fixes remain committed in de0fd3d; Studio Ctrl+A/Ctrl+D duplicate diagnosis and Shift sprint mitigation documented below (editor shortcuts themselves are not disabled). Completed9/19 bosses; next Spider Queen, see docs/research/boss-production-queue.md.
+
 ### 02.11 — Poseidon finished; common boss physics corrected; next Illusionist
 
 Original 521-cuboid/35-joint/18-clip sea king integrated in Katorga: two trident swings, thrust, moving wave, telegraphed lightning, water rush and finishing attack, seated/awakening motion, independent hair/beard/cloth/fingers and a 4.8-second articulated collapse with released trident. HP1120, damage12/19/24 and wiki loot retained; no blocks, chat damage+$ only. Videos, blend, sources and validation in assets/models/poseidon. Final export-track renders and floor/support checks passed; background Blender only.

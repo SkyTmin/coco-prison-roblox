@@ -2171,7 +2171,89 @@
             255
           ]
         },
-        "_abilities": "[решение] волна иллюзий (полоса), клинки из пола (круги), рывок-телепорт — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Кролик» [клиент] позже"
+        "_abilities": "[клиент] illusionist: dagger, cards, box, rabbits, phasecards, regeneration and death8. [владелец] no blocks/immunity. [решение] original mechanics, movement, ranges and timings; assets/models/illusionist/README.md",
+        "model": "illusionist",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 8,
+        "illusionist": {
+          "recovery": 1.5,
+          "spawnDuration": 1.8,
+          "melee": [
+            {
+              "name": "attack",
+              "duration": 1,
+              "release": 0.46,
+              "damage": 14,
+              "radius": 8,
+              "halfAngle": 60
+            },
+            {
+              "name": "attack2",
+              "duration": 1,
+              "release": 0.5,
+              "damage": 14,
+              "radius": 8,
+              "halfAngle": 60
+            }
+          ],
+          "attackdagger": {
+            "duration": 1.34,
+            "release": 0.71,
+            "damage": 22,
+            "range": 34,
+            "speed": 24,
+            "radius": 1.1
+          },
+          "attackcards": {
+            "duration": 2.006,
+            "release": 1.02,
+            "damage": 22,
+            "range": 30,
+            "speed": 20,
+            "radius": 1.2,
+            "count": 3,
+            "phase2Count": 5,
+            "spreadDegrees": 12
+          },
+          "attackbox": {
+            "duration": 2.2,
+            "release": 1.21,
+            "damage": 28,
+            "range": 22,
+            "radius": 4.2
+          },
+          "summonrabbits": {
+            "duration": 3.35,
+            "release": 2.15,
+            "range": 7,
+            "count": 3,
+            "phase2Count": 4,
+            "maxAlive": 4,
+            "hp": 10,
+            "speed": 10,
+            "lifetime": 14,
+            "triggerRadius": 4,
+            "radius": 4.5,
+            "damage": 14,
+            "fuse": 2.5,
+            "explosionDuration": 3.5
+          },
+          "phasecards": {
+            "duration": 1,
+            "release": 0.45,
+            "moveEnd": 0.8,
+            "range": 6
+          },
+          "regeneration": {
+            "duration": 5.9,
+            "release": 1.3,
+            "ticks": 4,
+            "interval": 0.8,
+            "healFraction": 0.02,
+            "interruptDamage": 40
+          }
+        }
       },
       "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
       "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."

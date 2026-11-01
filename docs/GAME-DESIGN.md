@@ -148,6 +148,8 @@
 
 ### Боссы
 
+**02.11 — Illusionist [owner]:** original Blender magician with 359 parts, 34 joints and 16 clips, plus a 72-part articulated rabbit [implementation]. Two melee swings; swept dagger/card projectiles, marked box, capped exploding rabbits, vulnerable lateral card phase and interruptible regeneration [client action names/durations; exact mechanics are decisions]. Eight-second stagger/kneel/collapse with independently released dagger/cards/hat. HP1340, damage14/22/28 and wiki rewards retained [decision/wiki/menu]; no blocks, chat damage+$ only. Studio: 92 server and 14 client animation checks, 43 no-block checks, two 90-second live fights passed. [Sources, decisions, videos and limitations](../assets/models/illusionist/README.md).
+
 **02.11 — Royal Garden Knight [owner]:** original Blender model with 415 parts, 30 joints and 25 clips [implementation]. Five sword attacks, leap, two fury cuts, spinning/thrusting sequence, visual guard/bash, four dashes with collision flinch, charged ground impact [client names/durations; mechanics are decisions]. No damage blocks. Death drops both props, buckles knees, settles torso and hands onto the ground. HP 920/rewards/respawn preserved [decision/menu/wiki]. Studio: 156 server assertions and 22 client animation checks pass. [Sources and review videos](../assets/models/royal_knight/README.md).
 
 
