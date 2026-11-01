@@ -273,7 +273,9 @@ class Mob:
             end = max(act['frames'])
             offsets = []
             meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')]
-            for frame in range(math.floor(end)+1):
+            steps = max(1, int(self.g.get('GROUND_SUBSTEPS', 1)))
+            for sample in range(math.floor(end*steps)+1):
+                frame = sample / steps
                 self.pose(joints, order, clip, frame)
                 low = min((o.matrix_world @ Vector(v)).z for o in meshes for v in o.bound_box)
                 offsets.append((frame, -low))
@@ -282,6 +284,16 @@ class Mob:
             for frame, z in offsets:
                 root.location.z = z
                 root.keyframe_insert('location', index=2, frame=frame)
+            if steps > 1:
+                # Contact switches between toes, blade and torso can form sharp corners. Dense,
+                # linear correction keys avoid Bezier overshoot between those support changes.
+                for layer in act.layers:
+                    for strip in layer.strips:
+                        for bag in strip.channelbags:
+                            for curve in bag.fcurves:
+                                if curve.data_path == 'location' and curve.array_index == 2:
+                                    for key in curve.keyframe_points:
+                                        key.interpolation = 'LINEAR'
             act['frames'] = [f for f, _ in offsets]
         self.pose(joints, list(joints), None, 0)
         scene.frame_end = 96

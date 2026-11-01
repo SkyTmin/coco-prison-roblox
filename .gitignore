@@ -25,3 +25,4 @@ sync*.luau
 tools/sdk-agent/node_modules/
 *.blend1
 assets/models/giant_zombie/render-frames*/
+assets/models/basalt_guardian/render-frames*/

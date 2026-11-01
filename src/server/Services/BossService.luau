@@ -39,6 +39,7 @@ local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 local SplinterAbilities = require(script.Parent.SplinterAbilities)
+local BasaltAbilities = require(script.Parent.BasaltAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -50,6 +51,7 @@ local TELEGRAPH = Color3.fromRGB(255, 40, 30)
 
 type Fight = {
 	splinter: any?,
+	basalt: any?,
 	meleeDuration: number?,
 	meleeHitAt: number?,
 	deathDuration: number?,
@@ -1140,6 +1142,7 @@ local function died(boss: Boss)
 	end
 	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
 	SplinterAbilities.Clear(boss)
+	BasaltAbilities.Clear(boss)
 	-- Set the action before clearing boss.model; clients keep the final pose until removal.
 	local deathDuration = if boss.fight.splinter
 		then boss.fight.splinter.deathDuration
@@ -1331,6 +1334,14 @@ local function think(boss: Boss)
 				hurt = hurt,
 				fighters = fighters,
 				telegraph = telegraphPart,
+			})
+		elseif boss.fight.basalt then
+			BasaltAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+				shield = setInvulnerable,
 			})
 		elseif boss.nextAbility == 1 then
 			task.spawn(lavaBlade, boss, target.root.Position)

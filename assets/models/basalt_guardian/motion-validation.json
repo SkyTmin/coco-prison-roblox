@@ -1,0 +1,22 @@
+{
+  "parts": 422,
+  "joints": 24,
+  "clips": 10,
+  "maxLocalPositionErrorStuds": 0.007933616580864545,
+  "maxLocalRotationErrorDegrees": 0.3538774132280195,
+  "deathFloorMin": -0.029141560196876526,
+  "deathFloorMax": 0.028188174590468407,
+  "worstPositionAt": [
+    "roar",
+    "body",
+    0.5
+  ],
+  "worstRotationAt": [
+    "sword_smash",
+    "chest",
+    2.316666666666667
+  ],
+  "maxGripSpacingErrorStuds": 0.014610670184206143,
+  "deathStartFeetHeight": -1.3083062185614835e-05,
+  "deathFinalTorsoFloor": 0.3199923038482666
+}

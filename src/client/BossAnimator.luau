@@ -228,6 +228,9 @@ local function blockClip(
 		or action == "shoot"
 		or action == "summon"
 		or action == "death"
+		or action == "sword_slash"
+		or action == "sword_smash"
+		or action == "sword_spike"
 	then
 		local c = clips[action]
 		return action, if c then seconds / length * c.length else 0

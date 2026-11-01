@@ -403,7 +403,38 @@
         },
         "model": "basalt_guardian",
         "texture": "rbxassetid://90771552374484",
-        "_blender": "[владелец 22.10] модель из Blender по референсу Codex (assets/models/basalt_guardian: вид спереди по пикселям, меч и горб — по виду сбоку), анимации — клипы Blender (BossAnimator); template — запасной шаблон из места",
+        "_blender": "[владелец 01.11] новый сочленённый Страж из Blender, отдельные меч/кисти/колени/плечевые плиты; плавный экспорт и поэтапная смерть. assets/models/basalt_guardian/basalt_guardian.py",
+        "meleeDuration": 1.5,
+        "meleeHitAt": 0.62,
+        "deathDuration": 4,
+        "glowBrightness": 0,
+        "basalt": {
+          "_source": "[клиент RESOURCEPACK-BOSSES] attack_1 1,5 с; sword_slash 1,8; sword_smash 3,5; sword_spike 4; death 4. [вики BOSS-CARDS] клинок из застывшей лавы и базальтовые шипы. Точные контакты/геометрия/ограничение эффектов — [решение 01.11], прежний слабый урон сохранён; заменяет общий таран",
+          "sword_slash": {
+            "duration": 1.8,
+            "release": 0.7,
+            "length": 34,
+            "width": 6,
+            "speed": 55,
+            "damage": 0.5
+          },
+          "sword_smash": {
+            "duration": 3.5,
+            "release": 1.9,
+            "forward": 1.2,
+            "radius": 8,
+            "damage": 0.5
+          },
+          "sword_spike": {
+            "duration": 4,
+            "release": 2.15,
+            "radius": 4.5,
+            "damage": 0.5,
+            "perTarget": 1,
+            "perTargetPhase2": 3,
+            "maxSpots": 18
+          }
+        },
         "template": "basalt_guardian",
         "scale": 0.55
       },
