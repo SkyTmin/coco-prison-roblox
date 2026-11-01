@@ -51,6 +51,11 @@
 
 ## Журнал
 
+### 02.11 — Royal Garden Knight finished; next Poseidon
+
+Original concept/Blender model: 415 parts, 30 joints, 25 authored clips, split exported modules below 200k chars. Five sword contacts, leap, two fury cuts, spin/thrust, visual guard/bash, four wall-aware dashes/flinch, slow ground impact. Death releases sword/shield, folds the knees and settles prone with hand IK. HP 920, existing rewards and respawn unchanged; no blocks. Sources, numbers and videos in `assets/models/royal_knight/README.md`. Correct Katorga synced 252 scripts; 52 runtime scenarios/156 assertions and 22 actual client animation checks PASS, no-block 43 checks rerun PASS. Curve sampler and support checks pass; Selene/StyLua/Rojo/diff and balance simulation pass. A preview export exhausted system memory; final exported-track renders completed successfully with Play stopped, then Play restored. No new console errors (old asset 203785492 type warning persists). Camera restored, fixtures removed, no publication. Completed 7 of 19 models; remaining 12 in `docs/research/boss-production-queue.md`. Next Poseidon, level 13 Sunken Lighthouse. Skeleton cold-start timed-suite discrepancy and actual group/mobile tests remain open.
+
+
 ### 02.11 — No boss blocks [owner]
 
 Removed casting immunity from all bosses; casting still reserves the action, and retained Minecraft hurt timing reports `cooldown` rather than a defensive block. Boss damage and book effects ignore stale Shielded/ForceField protection; player protection is preserved. Removed boss shield glow and blocked feedback. Correct Katorga Studio synced: 43 isolated no-block checks (all 19 definitions) and 24 Java-combat checks PASS; currently spawned bosses all report no shield. Selene, StyLua, Rojo, diff check and economy simulation pass. Knight concept/model source in progress, remaining bosses tracked in `docs/research/boss-production-queue.md`; not yet integrated or claimed complete.

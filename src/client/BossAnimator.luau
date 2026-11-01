@@ -150,7 +150,6 @@ type Rig = {
 	motors: { [string]: Motor6D },
 	walkPhase: number,
 	walkBlend: number,
-	lava: { [BasePart]: Color3 }, -- glowing parts → their colour, pulsed while the boss is shielded
 	-- Blender bosses (model attribute BlockModel → Shared.Models.<id>): the clips instead of the poses above
 	block: BlockRig.Prepared?,
 	blockMotors: { [string]: Motor6D },
@@ -173,7 +172,6 @@ local function track(model: Instance)
 		motors = {},
 		walkPhase = 0,
 		walkBlend = 0,
-		lava = {},
 		block = nil,
 		blockMotors = {},
 		loco = "idle",
@@ -193,11 +191,6 @@ local function track(model: Instance)
 			if d:IsA("Motor6D") then
 				rig.blockMotors[d.Name] = d
 			end
-		end
-	end
-	for _, d in ipairs(model:GetDescendants()) do
-		if d:IsA("BasePart") and d.Material == Enum.Material.Neon then
-			rig.lava[d] = d.Color
 		end
 	end
 	rigs[model] = rig
@@ -283,6 +276,11 @@ local function blockClip(
 			if seconds < windup then seconds else seconds - windup
 	elseif action == "charge" or action == "stunned" then
 		return action, seconds
+	end
+	-- Dedicated encounters publish their authored clip names. Looping stances/spins use real time.
+	local authored = clips[action]
+	if authored then
+		return action, if authored.loop then seconds else seconds / length * authored.length
 	end
 	return nil, 0
 end
@@ -379,9 +377,7 @@ local function animate(rig: Rig, dt: number)
 		return
 	end
 	if rig.block then
-		-- no lava flare here: recolouring one Neon part of a ~3000-part block model rebuilds the whole model's
-		-- render (~650 ms frozen frame each skill [владелец 22.10: «очень сильно логает»]); CombatFeel's
-		-- ShieldGlow highlight shows the shield instead
+		-- Only joint transforms: per-part colour changes rebuild the full model render.
 		animateBlock(rig, dt, root, os.clock())
 		return
 	end
@@ -439,12 +435,6 @@ local function animate(rig: Rig, dt: number)
 	end
 	for name, m in pairs(rig.motors) do
 		m.Transform = pose[name] or CFrame.identity
-	end
-	-- shielded (an attack animation, no damage gets through): the lava flares white-yellow and pulses
-	local shielded = model:GetAttribute("Shielded") == true
-	local flare = if shielded then 0.5 + 0.5 * math.sin(now * 12) else 0
-	for part, base in pairs(rig.lava) do
-		part.Color = base:Lerp(Color3.fromRGB(255, 240, 160), flare)
 	end
 end
 

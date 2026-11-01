@@ -44,6 +44,7 @@ local BasaltAbilities = require(script.Parent.BasaltAbilities)
 local MinotaurAbilities = require(script.Parent.MinotaurAbilities)
 local PiglinAbilities = require(script.Parent.PiglinAbilities)
 local SkeletonAbilities = require(script.Parent.SkeletonAbilities)
+local KnightAbilities = require(script.Parent.KnightAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -59,6 +60,7 @@ type Fight = {
 	minotaur: any?,
 	piglin: any?,
 	skeleton: any?,
+	knight: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
 	meleeHitAt: number?,
@@ -1119,6 +1121,7 @@ local function died(boss: Boss)
 	MinotaurAbilities.Clear(boss)
 	PiglinAbilities.Clear(boss)
 	SkeletonAbilities.Clear(boss)
+	KnightAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
 	end
@@ -1271,6 +1274,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		MinotaurAbilities.Sleep(boss)
 	elseif boss.fight.piglin then
 		PiglinAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.knight then
+		KnightAbilities.Spawn(boss, { act = act })
 	else
 		if boss.fight.minotaur then
 			MinotaurAbilities.Bindings(boss, false)
@@ -1334,7 +1339,7 @@ local function think(boss: Boss, dt: number)
 			+ boss.fight.abilityCooldown
 				* (if phase2 then boss.fight.phase2CooldownScale else 1)
 		boss.nextAbility = boss.nextAbility
-				% (if boss.fight.piglin
+				% (if boss.fight.piglin or boss.fight.knight
 					then 7
 					elseif boss.fight.splinter or boss.fight.minotaur or boss.fight.skeleton then 4
 					else 3)
@@ -1342,6 +1347,13 @@ local function think(boss: Boss, dt: number)
 		humanoid:MoveTo(root.Position)
 		if boss.fight.splinter then
 			SplinterAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.knight then
+			KnightAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1395,7 +1407,14 @@ local function think(boss: Boss, dt: number)
 		)
 		if now >= boss.nextMeleeAt then
 			boss.nextMeleeAt = now + boss.fight.meleeCooldown
-			if boss.fight.skeleton then
+			if boss.fight.knight then
+				KnightAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.skeleton then
 				SkeletonAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,

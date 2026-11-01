@@ -364,7 +364,126 @@
             120
           ]
         },
-        "_abilities": "[решение] рубящая волна (полоса), удар мечом в землю (круги), рыцарский таран — о колонну ристалища оглушение 3 с; набор как у Минотавра, своя модель позже"
+        "_abilities": "[клиент] knight: audited names/durations in RESOURCEPACK-BOSSES. [владелец 02.11] no blocks or immunity. [решение] original model, motion, contact times, geometry, numbers: assets/models/royal_knight/README.md",
+        "model": "royal_knight",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 3.85,
+        "knight": {
+          "recovery": 1.4,
+          "spawnDuration": 1.5,
+          "melee": [
+            {
+              "name": "c1",
+              "duration": 0.65,
+              "release": 0.3,
+              "damage": 10,
+              "radius": 8,
+              "halfAngle": 65
+            },
+            {
+              "name": "c2",
+              "duration": 0.65,
+              "release": 0.31,
+              "damage": 10,
+              "radius": 8,
+              "halfAngle": 65
+            },
+            {
+              "name": "c3",
+              "duration": 0.65,
+              "release": 0.33,
+              "damage": 10,
+              "radius": 8,
+              "halfAngle": 28
+            },
+            {
+              "name": "c4",
+              "duration": 0.95,
+              "release": 0.5,
+              "damage": 10,
+              "radius": 8,
+              "halfAngle": 45
+            },
+            {
+              "name": "c5",
+              "duration": 1,
+              "release": 0.56,
+              "damage": 10,
+              "radius": 8,
+              "halfAngle": 60
+            }
+          ],
+          "berserkerleap": {
+            "duration": 2,
+            "release": 1.35,
+            "moveAt": 0.57,
+            "range": 14,
+            "radius": 4.5,
+            "damage": 20
+          },
+          "strikeoffury1": {
+            "duration": 2.9,
+            "release": 1.1,
+            "contacts": [
+              1.1,
+              2
+            ],
+            "damage": 16,
+            "radius": 9,
+            "halfAngle": 65
+          },
+          "strikeoffury2": {
+            "duration": 2.75,
+            "release": 1.3,
+            "contacts": [
+              1.3,
+              2
+            ],
+            "damage": 16,
+            "radius": 9,
+            "halfAngle": 60
+          },
+          "relentlesswhirlwindspin": {
+            "duration": 2.5,
+            "release": 0.8,
+            "contacts": [
+              0.8,
+              1.4,
+              2
+            ],
+            "damage": 12,
+            "radius": 8.5,
+            "halfAngle": 180,
+            "pierceDuration": 0.6977,
+            "pierceAt": 0.32,
+            "pierceDamage": 8
+          },
+          "bloodboundbarrier": {
+            "duration": 2.3,
+            "release": 1.33,
+            "guardDuration": 0.8,
+            "bashDuration": 1.5,
+            "damage": 10,
+            "radius": 7,
+            "halfAngle": 55
+          },
+          "dash": {
+            "duration": 0.65,
+            "backDuration": 0.8,
+            "moveAt": 0.18,
+            "moveEnd": 0.46,
+            "range": 7,
+            "flinchDuration": 2.5
+          },
+          "viciousstrike": {
+            "duration": 4.75,
+            "release": 2.85,
+            "range": 15,
+            "radius": 5,
+            "damage": 20
+          }
+        }
       },
       "money": [
         0,
