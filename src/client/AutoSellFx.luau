@@ -1,7 +1,7 @@
 --!strict
 -- The auto-sell's income at the crosshair [владелец 28.10: «по центру экрана сумма, как на скриншоте»; вики
 -- MENUS-SOCIAL: green «+0,057 $» next to the crosshair for each sold block, «Частицы у прицела при автопродаже»]:
--- every AutoSold from the server floats a green «+0,057 $» up from just right of the screen centre and fades it out;
+-- AutoSold floats income near the crosshair; area-book sales are red and stay 0.5 s longer.
 -- [владелец 28.10: «пусть появляется в разных местах, то справа, то слева»] each one on the other side of the
 -- crosshair from the last, a little higher or lower at random. Hidden by settings.autosellTextOff.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -26,24 +26,38 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 	layer.Size = UDim2.fromScale(1, 1)
 	layer.ZIndex = 5
 	layer.Parent = gui
-	local live: { { label: TextLabel, at: number } } = {}
+	local live: { { label: TextLabel, untilAt: number, area: boolean } } = {}
 	local right = true
 	local random = Random.new()
 
-	Remotes.event("AutoSold").OnClientEvent:Connect(function(units: number)
+	Remotes.event("AutoSold").OnClientEvent:Connect(function(units: number, area: boolean?)
 		local p = getProfile()
 		if typeof(units) ~= "number" or (p and p.settings and p.settings.autosellTextOff) then
 			return
 		end
 		local now = os.clock()
+		local isArea = area == true
+		local life = LIFE + (if isArea then 0.5 else 0)
 		for i = #live, 1, -1 do
-			if now - live[i].at > LIFE or not live[i].label.Parent then
+			if now > live[i].untilAt or not live[i].label.Parent then
 				table.remove(live, i)
 			end
 		end
 		if #live >= MAX then
-			live[1].label:Destroy()
-			table.remove(live, 1)
+			local oldest = nil
+			for i, entry in ipairs(live) do
+				if not entry.area then
+					oldest = i
+					break
+				end
+			end
+			-- Ordinary sales cannot cut short the longer area-sale notification.
+			if not oldest and not isArea then
+				return
+			end
+			local removeAt = oldest or 1
+			live[removeAt].label:Destroy()
+			table.remove(live, removeAt)
 		end
 		local text = "+" .. Strings.money(units) .. " $"
 		if locale() == "ru" or locale() == "es" or locale() == "fr" then
@@ -60,14 +74,15 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 				-10 + random:NextInteger(-SPREAD, SPREAD)
 			),
 			17,
-			Ui.colors.green
+			if isArea then Color3.fromRGB(255, 75, 75) else Ui.colors.green
 		)
 		label.TextXAlignment = if right then Enum.TextXAlignment.Left else Enum.TextXAlignment.Right
 		right = not right
 		label.TextStrokeTransparency = 0.35
 		label.ZIndex = 5
-		table.insert(live, { label = label, at = now })
-		local info = TweenInfo.new(LIFE, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		label:SetAttribute("AreaSale", isArea)
+		table.insert(live, { label = label, untilAt = now + life, area = isArea })
+		local info = TweenInfo.new(life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 		TweenService:Create(label, info, {
 			Position = label.Position - UDim2.fromOffset(0, RISE),
 		}):Play()
@@ -79,11 +94,11 @@ function AutoSellFx.start(gui: Instance, getProfile: () -> Types.Profile?, local
 				Enum.EasingDirection.In,
 				0,
 				false,
-				LIFE * 0.5
+				life - LIFE * 0.5
 			),
 			{ TextTransparency = 1, TextStrokeTransparency = 1 }
 		):Play()
-		task.delay(LIFE, function()
+		task.delay(life, function()
 			label:Destroy()
 		end)
 	end)

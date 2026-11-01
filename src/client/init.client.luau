@@ -3648,6 +3648,9 @@ UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
 UserInputService:GetPropertyChangedSignal("KeyboardEnabled"):Connect(updateLayout)
 workspace:GetAttributeChangedSignal("ForceMobile"):Connect(updateLayout)
 watchViewport()
+require(script.WindowInput).Start(function()
+	return currentWindowKind ~= nil or HudLayout.isEditing()
+end)
 RunService.RenderStepped:Connect(function()
 	local hasInventoryRow = openWindow ~= nil
 		and openWindow.Visible

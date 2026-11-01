@@ -29,6 +29,8 @@ local HIT_VOLUME, HIT_PITCH = 0.25, 0.5 -- [ваниль] (volume + 1) / 8, pitc
 local BREAK_VOLUME, BREAK_PITCH = 1, 0.8 -- [ваниль] (volume + 1) / 2, pitch × 0.8
 local POOL = 2 -- sounds per (material, kind): at most two overlapping copies
 local OTHERS_RANGE = 48 -- hear other players' breaks within this many studs
+local particleBudget = 48
+local particleAt = os.clock()
 
 type Segment = { number }
 type Voice = { sound: Sound, anchor: BasePart, token: number }
@@ -166,7 +168,7 @@ local function textureOf(blockId: string?): string?
 	return if blockId and textures then textures[blockId] else nil
 end
 
--- Block-textured particles at a block position. amount ≈ 5 for a hit, 32 for a break.
+-- Block-textured particles: 2 per hit / 8 per break, bounded across nearby digs.
 local function emit(
 	cframe: CFrame,
 	size: Vector3,
@@ -175,6 +177,14 @@ local function emit(
 	amount: number,
 	strong: boolean
 )
+	local now = os.clock()
+	particleBudget = math.min(48, particleBudget + (now - particleAt) * 48)
+	particleAt = now
+	amount = math.min(amount, math.floor(particleBudget))
+	if amount <= 0 then
+		return
+	end
+	particleBudget -= amount
 	local holder = Instance.new("Part")
 	holder.Name = "BlockParticles"
 	holder.Size = size * 0.9
@@ -188,7 +198,7 @@ local function emit(
 	e.Texture = texture or "rbxasset://textures/particles/sparkles_main.dds"
 	e.Color = if texture then ColorSequence.new(Color3.new(1, 1, 1)) else ColorSequence.new(color)
 	e.Size = NumberSequence.new(if strong then 0.45 else 0.3)
-	e.Lifetime = NumberRange.new(0.5, 1.1)
+	e.Lifetime = NumberRange.new(0.25, 0.55)
 	e.Speed = NumberRange.new(if strong then 5 else 2, if strong then 11 else 4)
 	e.SpreadAngle = Vector2.new(180, 180)
 	e.Acceleration = Vector3.new(0, -45, 0)
@@ -201,7 +211,7 @@ local function emit(
 	e.LightInfluence = 1
 	e.Parent = holder
 	e:Emit(amount)
-	Debris:AddItem(holder, 2)
+	Debris:AddItem(holder, 0.65)
 end
 
 local function clearDecals()
@@ -254,7 +264,7 @@ function BlockBreak.Update(part: BasePart, k: number)
 		lastHit = now
 		local blockId = blockIdOf(part)
 		play(materialOf(blockId), "hit", part.Position, HIT_VOLUME, HIT_PITCH)
-		emit(part.CFrame, part.Size, part.Color, blockId, 5, false)
+		emit(part.CFrame, part.Size, part.Color, blockId, 2, false)
 	end
 end
 
@@ -267,7 +277,7 @@ end
 
 local function breakEffects(cframe: CFrame, size: Vector3, color: Color3, blockId: string?)
 	play(materialOf(blockId), "break", cframe.Position, BREAK_VOLUME, BREAK_PITCH)
-	emit(cframe, size, color, blockId, 32, true)
+	emit(cframe, size, color, blockId, 8, true)
 end
 
 -- The block is about to disappear (local dig finished): burst of particles + break sound.
@@ -324,7 +334,7 @@ local function stepOthers()
 				dig.lastHit = now
 				local blockId = blockIdOf(dig.part)
 				play(materialOf(blockId), "hit", dig.part.Position, HIT_VOLUME, HIT_PITCH)
-				emit(dig.part.CFrame, dig.part.Size, dig.part.Color, blockId, 5, false)
+				emit(dig.part.CFrame, dig.part.Size, dig.part.Color, blockId, 2, false)
 			end
 		end
 	end

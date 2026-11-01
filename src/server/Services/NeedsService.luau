@@ -499,9 +499,9 @@ local function refreshEffects()
 	end
 end
 
-local function startEvent()
+local function startEvent(name: string?)
 	local event: Event = {
-		name = EVENTS[math.random(1, #EVENTS)],
+		name = name or EVENTS[math.random(1, #EVENTS)],
 		endsAt = os.clock() + Config.needs.randomEvent.durationSeconds,
 		endsAtServer = workspace:GetServerTimeNow() + Config.needs.randomEvent.durationSeconds,
 	}
@@ -511,23 +511,6 @@ local function startEvent()
 		toast(player, "event_started", name)
 	end
 	refreshEffects()
-	if event.name == "regeneration" then
-		task.spawn(function()
-			while activeEvent == event do
-				task.wait(2)
-				if activeEvent ~= event or os.clock() >= event.endsAt then
-					break
-				end
-				for _, player in ipairs(Players:GetPlayers()) do
-					local character = player.Character
-					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-					if humanoid and humanoid.Health > 0 then
-						humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 1)
-					end
-				end
-			end
-		end)
-	end
 	task.delay(Config.needs.randomEvent.durationSeconds, function()
 		if activeEvent == event then
 			activeEvent = nil
@@ -582,24 +565,32 @@ end
 
 -- [ваниль] Regeneration heals 1 HP every 50 >> (level − 1) ticks: level I 2,5 s, II 1,25 s
 local function regenerate()
-	local clocks: { [Player]: number } = {}
+	local clocks: { [Player]: { humanoid: Humanoid, at: number } } = {}
 	while true do
 		task.wait(0.25)
 		local now = os.clock()
-		for player, own in pairs(timed) do
-			local entry = own.Regeneration
+		for _, player in ipairs(Players:GetPlayers()) do
 			local character = player.Character
 			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-			if not entry or now >= entry.endsAt or not humanoid or humanoid.Health <= 0 then
+			local level = Effects.level(character, "Regeneration")
+			if level <= 0 or not humanoid or humanoid.Health <= 0 then
 				clocks[player] = nil
 				continue
 			end
-			local every = 2.5 / 2 ^ (entry.level - 1)
-			local last = clocks[player] or now
-			clocks[player] = last
-			if now - last >= every then
-				clocks[player] = now
+			local every = 2.5 / 2 ^ (level - 1)
+			local clock = clocks[player]
+			if not clock or clock.humanoid ~= humanoid then
+				clock = { humanoid = humanoid, at = now }
+				clocks[player] = clock
+			end
+			if now - clock.at >= every then
+				clock.at = now
 				humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + 1)
+			end
+		end
+		for player in pairs(clocks) do
+			if player.Parent ~= Players then
+				clocks[player] = nil
 			end
 		end
 	end
@@ -610,6 +601,17 @@ function NeedsService.Start()
 		return
 	end
 	started = true
+	if game:GetService("RunService"):IsStudio() then
+		local hook = Instance.new("BindableFunction")
+		hook.Name = "NeedsDebug"
+		hook.OnInvoke = function(name: string)
+			if table.find(EVENTS, name) then
+				startEvent(name)
+			end
+			return if activeEvent then activeEvent.name else nil
+		end
+		hook.Parent = game:GetService("ServerStorage")
+	end
 	for tag, need in pairs(RESTORE_TAGS) do
 		for _, instance in ipairs(CollectionService:GetTagged(tag)) do
 			bindPrompt(instance, tag, need)

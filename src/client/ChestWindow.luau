@@ -104,14 +104,11 @@ function ChestWindow.build(
 		Remotes.event("CaseMove"):FireServer(id, from, to, count, if isEnder then section else nil)
 	end
 	local function quick(from: Address)
-		local container: "case" | "inv" = if from.container == "case" then "inv" else "case"
-		for index = 1, if container == "case" then 27 else 36 do
-			local destination: Address = { container = container, index = index }
-			if not stackAt(destination) then
-				move(from, destination)
-				return
-			end
+		if not sectionOpen() then
+			return
 		end
+		Remotes.event("CaseMove")
+			:FireServer(id, from, "quick", nil, if isEnder then section else nil)
 	end
 	local drag = DragDrop.new(win, stackAt, move, quick, function(from: Address, count: number?)
 		Remotes.event("DropItem"):FireServer(from.index, count) -- only bag slots are thrown
@@ -289,25 +286,10 @@ function ChestWindow.build(
 		end
 	end)
 	take.Activated:Connect(function()
-		-- Reserve destinations locally, but send a separate validated intent for every stack.
-		local free: { number } = {}
-		for index = 1, 36 do
-			if not stackAt({ container = "inv", index = index }) then
-				table.insert(free, index)
-			end
-		end
-		local nextFree = 1
+		-- The server processes each intent against the updated inventory, including partial stacks.
 		for index = 1, 27 do
 			if stackAt({ container = "case", index = index }) then
-				local destination = free[nextFree]
-				if not destination then
-					break
-				end
-				move(
-					{ container = "case", index = index },
-					{ container = "inv", index = destination }
-				)
-				nextFree += 1
+				quick({ container = "case", index = index })
 			end
 		end
 	end)

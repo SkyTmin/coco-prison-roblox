@@ -24,6 +24,7 @@ local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
+local BookTuning = require(script.Parent.BookTuning)
 local ArtifactService = require(script.Parent.ArtifactService)
 local FactionStorage = require(script.Parent.FactionStorageService)
 local GangChest = require(script.Parent.GangChestService)
@@ -404,11 +405,15 @@ local function ancientBook(improved: boolean): Types.ItemStack
 	end
 	table.sort(effects)
 	local effect = effects[random:NextInteger(1, #effects)]
-	local catalogEntry = Config.books.catalog[effect]
 	local maxLevel = #Config.books.effects[effect]
 	local level = if improved
 		then maxLevel
 		else math.min(maxLevel, tonumber(weightedKey(rules.level)) :: number)
+	effect = BookTuning.roll(effect, level, effects, random)
+	level = if improved
+		then #Config.books.effects[effect]
+		else math.min(level, #Config.books.effects[effect])
+	local catalogEntry = Config.books.catalog[effect]
 	local chance = if improved then rules.improvedApplyChance else rules.applyChance
 	return {
 		id = "ancient_book",
@@ -709,6 +714,10 @@ local function move(
 	local count = if typeof(rawCount) == "number" then rawCount else nil
 	local session = validate(player, id)
 	local from, to = address(rawFrom), address(rawTo)
+	local quick = rawTo == "quick" and rawCount == nil
+	if quick and from then
+		to = { container = if from.container == "case" then "inv" else "case", index = 1 }
+	end
 	if
 		not session
 		or not from
@@ -747,7 +756,11 @@ local function move(
 		end
 		-- Legacy overflow above eight chests is withdrawal-only, never a ninth chest.
 		if session.id == "gangChest" and session.index > GangChest.MAX_PAGES then
-			if from.container ~= "case" or to.container ~= "inv" or target[toIndex] ~= nil then
+			if
+				from.container ~= "case"
+				or to.container ~= "inv"
+				or (not quick and target[toIndex] ~= nil)
+			then
 				return
 			end
 		end
@@ -773,6 +786,14 @@ local function move(
 			return
 		end
 		-- Reuse inventory merge/swap and stack limits for both containers.
+		if quick then
+			local first = if to.container == "case" then Vault.slot(section, 1) else 1
+			local last = if to.container == "case"
+				then Vault.slot(section, 27)
+				else InventoryService.SLOTS
+			InventoryService.transfer(source, fromIndex, target, first, last)
+			return
+		end
 		local staged = table.clone(p)
 		staged.inventory = { [1] = source[fromIndex], [2] = target[toIndex] }
 		InventoryService.move(staged, 1, 2, count)

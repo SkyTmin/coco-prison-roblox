@@ -196,6 +196,7 @@ function Ui.window(parent: Instance, title: string, size: UDim2, onClose: () -> 
 	-- the font; our pixel cross (Codex → Blender, icon ui_close) grows a little under the mouse
 	local close = Instance.new("ImageButton")
 	close.Name = "Close"
+	close.Modal = true
 	close.Size = UDim2.fromOffset(28, 28)
 	close.Position = UDim2.new(1, -34, 0, 6)
 	close.BackgroundTransparency = 1

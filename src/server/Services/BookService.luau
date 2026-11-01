@@ -30,6 +30,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local GangService = require(script.Parent.GangService)
 local ProfessionService = require(script.Parent.ProfessionService)
 
+local BookTuning = require(script.Parent.BookTuning)
 local BookService = {}
 
 local BLOCK = 4 -- studs per block
@@ -646,7 +647,9 @@ function BookService.onDug(
 	local extra: { string } = {}
 	local layer: { string } = {}
 	local layerStats = 0
-	if roll(Books.value(tool, "plastolom")) then
+	local layerChance =
+		BookTuning.proc("plastolom", Books.level(tool, "plastolom"), Books.value(tool, "plastolom"))
+	if roll(layerChance) then
 		-- the whole layer the block was in (the player stands on it while digging down)
 		local _, y = MineService.coords(mine, index)
 		local cells: { number } = {}
@@ -731,7 +734,7 @@ function BookService.onDug(
 		end)
 	end
 	if sold > 0 then
-		Remotes.event("AutoSold"):FireClient(player, sold)
+		Remotes.event("AutoSold"):FireClient(player, sold, #extra > 0 or #layer > 0)
 	end
 	GangService.progress(player, "sellItems", soldItems)
 	if roll(Books.value(tool, "archaeologist")) then

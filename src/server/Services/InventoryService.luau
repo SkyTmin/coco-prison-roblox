@@ -116,6 +116,54 @@ function InventoryService.isSlot(n: any): boolean
 	return typeof(n) == "number" and n == n and n == math.floor(n) and n >= 1 and n <= SLOTS
 end
 
+-- Quick container transfer: fill compatible stacks before allocating slots; leave any overflow in source.
+function InventoryService.transfer(
+	source: { [number]: ItemStack },
+	from: number,
+	target: { [number]: ItemStack },
+	first: number,
+	last: number
+): number
+	local stack = source[from]
+	if not stack or source == target then
+		return 0
+	end
+	local remaining = stack.count
+	local stackable = InventoryService.isStackable(stack.id)
+	if stackable then
+		for slot = first, last do
+			local other = target[slot]
+			if other and other.id == stack.id and other.level == stack.level then
+				local count = math.min(math.max(0, STACK - other.count), remaining)
+				other.count += count
+				remaining -= count
+			end
+			if remaining == 0 then
+				break
+			end
+		end
+	end
+	for slot = first, last do
+		if remaining == 0 then
+			break
+		end
+		if not target[slot] then
+			local count = if stackable then math.min(STACK, remaining) else 1
+			local piece = table.clone(stack)
+			piece.count = count
+			target[slot] = piece
+			remaining -= count
+		end
+	end
+	local moved = stack.count - remaining
+	if remaining == 0 then
+		source[from] = nil
+	else
+		stack.count = remaining
+	end
+	return moved
+end
+
 function InventoryService.move(profile: Profile, from: number, to: number, count: number?): boolean
 	if from == to or not InventoryService.isSlot(from) or not InventoryService.isSlot(to) then
 		return false
