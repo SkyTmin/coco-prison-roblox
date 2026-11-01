@@ -247,6 +247,12 @@ local function blockClip(
 		or action == "healing"
 		or action == "spawn"
 		or action == "hurt"
+		or action == "atkrswipe"
+		or action == "atklswipe"
+		or action == "sklrstomp"
+		or action == "skllstomp"
+		or action == "sklpoisonbreath"
+		or action == "sklroar"
 		or (action == "charge" and not clips.charge_raise)
 	then
 		local c = clips[action]

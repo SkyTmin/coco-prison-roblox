@@ -77,6 +77,11 @@ local function choose(e: Entry, now: number, serverNow: number): (string, number
 		e.diedAt = e.diedAt or now
 		return "death", now - (e.diedAt :: number)
 	end
+	local spawnAt = e.model:GetAttribute("MobSpawnAt")
+	local spawn = e.rig.clips.spawn
+	if typeof(spawnAt) == "number" and spawn and serverNow - spawnAt < spawn.length then
+		return "spawn", math.max(0, serverNow - spawnAt)
+	end
 	local windup = e.model:GetAttribute("MobWindup")
 	local bite = e.rig.clips.bite
 	if typeof(windup) == "number" and bite and serverNow - windup < bite.length then

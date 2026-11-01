@@ -276,8 +276,10 @@ class Mob:
             meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')
                       and o.parent.name.removeprefix('Joint_') not in detached]
             steps = max(1, int(self.g.get('GROUND_SUBSTEPS', 1)))
-            for sample in range(math.floor(end*steps)+1):
-                frame = sample / steps
+            sample_frames = [sample / steps for sample in range(math.floor(end*steps)+1)]
+            if end > sample_frames[-1] + 1e-6:
+                sample_frames.append(end)  # non-integral audited endpoints also need floor correction
+            for frame in sample_frames:
                 self.pose(joints, order, clip, frame)
                 low = min((o.matrix_world @ Vector(v)).z for o in meshes for v in o.bound_box)
                 offsets.append((frame, -low))
