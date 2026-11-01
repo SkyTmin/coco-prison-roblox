@@ -8,7 +8,6 @@
 -- per item (two shovels are two entries, each with its own level), the held tool first; the
 -- requirement counters are the player's.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
@@ -72,29 +71,6 @@ function UpgradeWindow.build(
 	bigIcon.ScaleType = Enum.ScaleType.Fit
 	bigIcon.ResampleMode = Enum.ResamplerMode.Pixelated
 	bigIcon.Parent = left
-	-- the enchantment glint: the same picture exactly on top, a purple band sweeping across it
-	-- [владелец 27.10: the old copy was shifted by its anchor and looked like «две кирки рядом»]
-	local glint = bigIcon:Clone()
-	glint.AnchorPoint = Vector2.zero
-	glint.Position, glint.Size = UDim2.new(), UDim2.fromScale(1, 1)
-	glint.ImageColor3 = Color3.fromRGB(200, 120, 255)
-	glint.Parent = bigIcon
-	local sweep = Instance.new("UIGradient")
-	sweep.Rotation = 30
-	sweep.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.4, 1),
-		NumberSequenceKeypoint.new(0.5, 0.45),
-		NumberSequenceKeypoint.new(0.6, 1),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	sweep.Offset = Vector2.new(-1, 0)
-	sweep.Parent = glint
-	TweenService:Create(
-		sweep,
-		TweenInfo.new(2.2, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1),
-		{ Offset = Vector2.new(1, 0) }
-	):Play()
 	local itemName =
 		Ui.label(left, "", UDim2.new(1, -16, 0, 22), UDim2.fromOffset(8, 158), 15, Ui.colors.header)
 	itemName.TextXAlignment = Enum.TextXAlignment.Center
@@ -291,8 +267,7 @@ function UpgradeWindow.build(
 		local up = Config.upgrade(id, viewLevel)
 		local shownLevel = viewLevel
 		local icon = Config.iconFor(id, shownLevel) or ""
-		bigIcon.Image, glint.Image = icon, icon
-		glint.Visible = Config.isEnchanted(id, shownLevel)
+		bigIcon.Image = icon
 		itemName.Text = Strings.itemFullName(id, shownLevel, locale)
 		itemLevel.Text = string.format("%s %d", t("level"), shownLevel)
 		upsHeader.Text =

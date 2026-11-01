@@ -21,14 +21,6 @@ local HeldItem = {}
 local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local started = false
--- The enchant glint of a held model, Minecraft's [ваниль]: the item keeps its colours under a light purple tint, and
--- bands of purple light slide along it (from the handle to the head). Each pixel part keeps its base colour and its
--- place along the item's diagonal, 0 at the handle end … 1 at the head.
-type Glinting = { base: Color3, t: number }
-local enchantedParts: { [BasePart]: Glinting } = {}
-local GLINT = Color3.fromRGB(170, 90, 255)
-local GLINT_TINT, GLINT_BAND, GLINT_WIDTH, GLINT_SPEED = 0.12, 0.6, 0.16, 0.45
-
 -- The swing [владелец 22.10: «замах от первого и третьего лица, видно другим»]. It runs in whole cycles of
 -- SWING_SECONDS: a cycle that has started always finishes (instant mining used to restart it every few
 -- frames, so the arm never moved). Each cycle drives the first-person hand (SwingAmount) and plays our
@@ -161,26 +153,6 @@ function HeldItem.MakeVisual(
 		else
 			model.Name = "HeldItemVisual"
 			visual, container = model.PrimaryPart :: BasePart, model
-			if Config.isEnchanted(id, if level > 0 then level else nil) then
-				local glow = Instance.new("Highlight")
-				glow.Name = "EnchantGlow"
-				glow.FillColor = Color3.fromRGB(190, 110, 255)
-				glow.FillTransparency = 0.88
-				glow.OutlineColor = Color3.fromRGB(230, 180, 255)
-				glow.OutlineTransparency = 0.5
-				glow.DepthMode = Enum.HighlightDepthMode.Occluded
-				glow.Adornee = model
-				glow.Parent = model
-				local root = model.PrimaryPart :: BasePart
-				local span = root.Size.Y + root.Size.Z
-				for _, px in ipairs(model:GetChildren()) do
-					local weld = px:FindFirstChildOfClass("Weld")
-					if px:IsA("BasePart") and px.Name == "Px" and weld then
-						local at = weld.C0.Position
-						enchantedParts[px] = { base = px.Color, t = 0.5 + (at.Y + at.Z) / span }
-					end
-				end
-			end
 		end
 	end
 	visual.CanCollide, visual.CanTouch, visual.CanQuery = false, false, false
@@ -367,36 +339,10 @@ function HeldItem.Start()
 	CollectionService:GetInstanceAddedSignal("HeldMannequin"):Connect(mannequin)
 	CollectionService:GetInstanceRemovedSignal("HeldMannequin"):Connect(clear)
 	RunService.Heartbeat:Connect(function()
-		local now = os.clock()
-		local fill = 0.86 + 0.06 * math.sin(now * 3)
-		for _, rig in pairs(rigs) do
-			local visual = rig.visual
-			local glow = visual and visual:FindFirstChild("EnchantGlow")
-			if glow and glow:IsA("Highlight") then
-				glow.FillTransparency = fill
-				glow.OutlineTransparency = 0.45 + 0.35 * (0.5 + 0.5 * math.sin(now * 5))
-			end
-		end
 		-- the bow's pull stages: a new model when the stage changes
 		for _, rig in pairs(rigs) do
 			if rig.variant and BowState.ModelId(rig.character) ~= rig.variant then
 				render(rig)
-			end
-		end
-		-- two bands 0.8 apart run over −0.3 … 1.3, so one is always somewhere on the item
-		local phase = (now * GLINT_SPEED) % 1.6 - 0.3
-		for px, glinting in pairs(enchantedParts) do
-			if px.Parent then
-				local band = 0
-				for _, centre in ipairs({
-					phase,
-					if phase + 0.8 > 1.3 then phase - 0.8 else phase + 0.8,
-				}) do
-					band = math.max(band, 1 - math.abs(glinting.t - centre) / GLINT_WIDTH)
-				end
-				px.Color = glinting.base:Lerp(GLINT, GLINT_TINT + GLINT_BAND * band)
-			else
-				enchantedParts[px] = nil
 			end
 		end
 	end)

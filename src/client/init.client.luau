@@ -621,6 +621,13 @@ local function fitWindow(win: Frame, layout: WindowLayout)
 	-- the HUD ignores the GUI inset, so keep windows below Roblox's top bar (58 px on phones),
 	-- otherwise its menu/chat buttons cover the window's tabs and title
 	local inset = GuiService:GetGuiInset().Y
+	if win.Name == "Window_Settings" then
+		layout.size = UDim2.fromOffset(
+			math.clamp(viewport.X - 24, 300, 540),
+			math.clamp(viewport.Y - inset - 24, 260, 580)
+		)
+		win.Size = layout.size
+	end
 	local width = layout.size.X.Offset + layout.size.X.Scale * viewport.X
 	local height = layout.size.Y.Offset + layout.size.Y.Scale * viewport.Y
 	layout.scale.Scale =
@@ -669,18 +676,6 @@ local function stackLabel(stack: Types.ItemStack?): (string, string)
 	return name, if stack.count > 1 then tostring(stack.count) else ""
 end
 
-local glintLabels: { [ImageLabel]: boolean } = {}
-RunService.Heartbeat:Connect(function()
-	local pulse = 0.4 + 0.3 * math.sin(os.clock() * 4)
-	for label in pairs(glintLabels) do
-		if label.Parent then
-			label.ImageTransparency = pulse
-		else
-			glintLabels[label] = nil
-		end
-	end
-end)
-
 local function renderSlot(
 	name: TextLabel,
 	count: TextLabel,
@@ -701,14 +696,6 @@ local function renderSlot(
 	image.Visible = icon ~= nil or tile ~= nil
 	image.BackgroundColor3 = tile or Color3.new()
 	image.BackgroundTransparency = if tile then 0 else 1
-	-- Minecraft-style enchant glint: purple copy of the icon pulsing over it
-	local glint = image:FindFirstChild("Glint")
-	if glint and glint:IsA("ImageLabel") then
-		local enchanted = stack ~= nil and icon ~= nil and Config.isEnchanted(stack.id, stack.level)
-		glint.Image = icon or ""
-		glint.Visible = enchanted
-		glintLabels[glint] = if enchanted then true else nil
-	end
 	name.Visible = false
 end
 
@@ -2136,16 +2123,26 @@ windowBuilders.menu = function()
 end
 -- «Настройки» [P]: language, volume, notifications, booster bar, the layout editor [владелец 27.10]
 windowBuilders.settings = function()
-	return SettingsWindow.build(gui, locale, profile, closeWindow, createWindow, function()
-		closeWindow()
-		currentWindowKind = nil
-		openHudEditor()
-	end, {
-		firstPerson = function()
-			return firstPerson
+	local win, refresh = SettingsWindow.build(
+		gui,
+		locale,
+		profile,
+		closeWindow,
+		createWindow,
+		function()
+			closeWindow()
+			currentWindowKind = nil
+			openHudEditor()
 		end,
-		toggle = toggleFirstPerson,
-	})
+		{
+			firstPerson = function()
+				return firstPerson
+			end,
+			toggle = toggleFirstPerson,
+		}
+	)
+	refreshMenu = refresh
+	return win
 end
 local shownHudLayout = ""
 local function render(p: Types.Profile)
@@ -2166,6 +2163,7 @@ local function render(p: Types.Profile)
 	require(script.PrisPerks).sync(p) -- PRIS+ night (этап 8)
 	do -- the settings window's values [владелец 27.10]
 		local settings = SettingsWindow.of(p)
+		require(script.PlayerPreferences).Apply(settings)
 		require(script.Audio).set(settings.volume :: number, settings.muted == true)
 		if settings.hideToasts then
 			toast.Visible = false

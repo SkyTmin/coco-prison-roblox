@@ -199,10 +199,6 @@ function CreativeWindow.build(
 			image.BackgroundColor3 = BlockColors.of(stack.id)
 			image.BackgroundTransparency = 0
 		end
-		local glint = image:FindFirstChild("Glint")
-		if glint and glint:IsA("ImageLabel") and icon then
-			glint.Image, glint.Visible = icon, Config.isEnchanted(stack.id, stack.level)
-		end
 		local button = Instance.new("TextButton")
 		button.Size = UDim2.fromScale(1, 1)
 		button.BackgroundTransparency = 1

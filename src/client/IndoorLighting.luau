@@ -75,24 +75,6 @@ function IndoorLighting.Start()
 	local function atmosphere(): Atmosphere?
 		return Lighting:FindFirstChildOfClass("Atmosphere")
 	end
-	-- the place's ColorGradingEffect (Retro tonemapper) washes a night scene out to plain white:
-	-- off while a volume sets the clock, back on outside
-	local graded: { ColorGradingEffect } = {}
-	local function setGrading(on: boolean)
-		if on then
-			for _, effect in ipairs(graded) do
-				effect.Enabled = true
-			end
-			table.clear(graded)
-		else
-			for _, effect in ipairs(Lighting:GetChildren()) do
-				if effect:IsA("ColorGradingEffect") and effect.Enabled then
-					effect.Enabled = false
-					table.insert(graded, effect)
-				end
-			end
-		end
-	end
 	-- the night: the day values it replaced (outdoors, or in the remembered outdoor values while inside a volume)
 	local nightSaved: { ClockTime: number, Brightness: number }? = nil
 	IndoorLighting.SetNight = function(on: boolean)
@@ -105,16 +87,10 @@ function IndoorLighting.Start()
 			nightSaved = { ClockTime = target.ClockTime, Brightness = target.Brightness }
 			target.ClockTime = Config.pris.nightClock
 			target.Brightness = Config.pris.nightBrightness
-			if not current then
-				setGrading(false)
-			end
 		elseif nightSaved then
 			target.ClockTime = nightSaved.ClockTime
 			target.Brightness = nightSaved.Brightness
 			nightSaved = nil
-			if not current then
-				setGrading(true)
-			end
 		end
 	end
 	local function apply(volume: BasePart?)
@@ -155,7 +131,6 @@ function IndoorLighting.Start()
 					then brightness
 					else outdoor.Brightness
 			end
-			setGrading(typeof(clock) ~= "number" and not nightSaved)
 			if air and outdoor then
 				local haze = volume:GetAttribute("Haze")
 				local color = volume:GetAttribute("AtmosphereColor")
@@ -182,7 +157,6 @@ function IndoorLighting.Start()
 			}):Play()
 			Lighting.ClockTime = outdoor.ClockTime
 			Lighting.Brightness = outdoor.Brightness
-			setGrading(not nightSaved)
 			if air and outdoor.Density then
 				TweenService:Create(air, EASE, {
 					Density = outdoor.Density,

@@ -1,6 +1,6 @@
 --!strict
 -- Sprinting like Minecraft [ваниль; владелец 28.10: «как в майнкрафте быстрее бежать. Чекни как на телефоне можно
--- сделать удобнее»]. Computer: W twice quickly or Ctrl while walking; it stops when the player stops. Phone: the
+-- сделать удобнее»]. Computer: W twice quickly or Shift (also Ctrl outside Studio) while walking; it stops when the player stops. Phone: the
 -- joystick pushed to its edge for a moment sprints by itself [решение: как в популярных Roblox-играх; владелец 28.10:
 -- «если джостик потянут сильно, бег будет быстрым»], and the optional «Бег» button (off at the start, «Добавить» in the
 -- layout editor) keeps sprinting on (a toggle). The client only sends the intent (Sprint); the
@@ -20,7 +20,7 @@ local EDGE, EDGE_HOLD, EDGE_LEAVE = 0.95, 0.25, 0.6
 
 local player = Players.LocalPlayer
 local wanted = false -- what was sent
-local keyboard = false -- W twice / Ctrl
+local keyboard = false -- W twice / sprint key
 local locked = false -- the phone button
 local lastW = 0
 local edgeSince: number? = nil
@@ -74,7 +74,11 @@ function Sprint.start(touchParent: Instance): ImageButton
 				keyboard = true
 			end
 			lastW = now
-		elseif input.KeyCode == Enum.KeyCode.LeftControl then
+		elseif
+			input.KeyCode == Enum.KeyCode.LeftShift
+			or input.KeyCode == Enum.KeyCode.RightShift
+			or (not RunService:IsStudio() and input.KeyCode == Enum.KeyCode.LeftControl)
+		then
 			keyboard = true
 		end
 	end)

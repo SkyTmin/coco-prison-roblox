@@ -846,6 +846,12 @@ function ProfileService.Start()
 			return typeof(v) == "boolean"
 		end,
 	}
+	local Preferences = require(ReplicatedStorage.Shared.Preferences)
+	for key in pairs(Preferences.numbers) do
+		SETTINGS[key] = function(value)
+			return Preferences.valid(key, value)
+		end
+	end
 	Remotes.event("SetSetting").OnServerEvent:Connect(function(player: Player, key: any, value: any)
 		local check = typeof(key) == "string" and SETTINGS[key]
 		if not check or not check(value) then

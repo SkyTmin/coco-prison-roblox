@@ -795,10 +795,10 @@ return {
 	},
 	chat_enabled = { ru = "Чат", en = "Chat", es = "Chat", fr = "Chat" },
 	chat_off_toast = {
-		ru = "Чат выключен. Включить снова: Меню → Настройки → Чат",
-		en = "The chat is off. To turn it back on: Menu → Settings → Chat",
-		es = "El chat está apagado. Para volver a encenderlo: Menú → Ajustes → Chat",
-		fr = "Le chat est coupé. Pour le rallumer : Menu → Réglages → Chat",
+		ru = "Чат выключен. Включить снова: Меню → Настройки → Общение",
+		en = "The chat is off. To turn it back on: Menu → Settings → Social",
+		es = "El chat está apagado. Para volver a encenderlo: Menú → Ajustes → Social",
+		fr = "Le chat est coupé. Pour le rallumer : Menu → Réglages → Social",
 	},
 	settings_chat_section = { ru = "Чат", en = "Chat", es = "Chat", fr = "Chat" },
 	settings_general_section = {

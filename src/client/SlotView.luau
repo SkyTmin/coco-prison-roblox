@@ -1,6 +1,6 @@
 --!strict
 -- Draws a stack into a slot from Ui.invSlot / Ui.slot the way the inventory does (init.client renderSlot): the icon,
--- a block-colour tile when there is no picture, the count, the enchant glint (static here). For the windows that live
+-- a block-colour tile when there is no picture, the count. For the windows that live
 -- in their own modules (BookWindow, CasePreviewWindow).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -28,16 +28,6 @@ function SlotView.render(
 	image.Visible = icon ~= nil or tile ~= nil
 	image.BackgroundColor3 = tile or Color3.new()
 	image.BackgroundTransparency = if tile then 0 else 1
-	local glint = image:FindFirstChild("Glint")
-	if glint and glint:IsA("ImageLabel") then
-		glint.Image = icon or ""
-		glint.Visible = stack ~= nil
-			and icon ~= nil
-			and (
-				Config.isEnchanted(stack.id, stack.level)
-				or (stack.books ~= nil and #stack.books > 0)
-			)
-	end
 	name.Visible = false
 end
 

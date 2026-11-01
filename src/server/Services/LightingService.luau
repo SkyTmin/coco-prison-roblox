@@ -26,9 +26,13 @@ function LightingService.Apply()
 	for property, value in pairs(SETTINGS) do
 		(Lighting :: any)[property] = value
 	end
-	-- glare off: bloom and sun rays wash out light blocks (sand, quartz)
+	-- Glare off: the cloud map also carries a Retro tonemapper that clips bright textures.
 	for _, effect in ipairs(Lighting:GetChildren()) do
-		if effect:IsA("BloomEffect") or effect:IsA("SunRaysEffect") then
+		if
+			effect:IsA("BloomEffect")
+			or effect:IsA("SunRaysEffect")
+			or effect:IsA("ColorGradingEffect")
+		then
 			effect.Enabled = false
 		end
 	end

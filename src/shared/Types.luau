@@ -3,6 +3,9 @@
 
 -- [владелец 27.10: «в меню настройки общие … скрыть уведомления … бар бустеров … языки … уменьшить звук, выключить»]
 export type Settings = {
+	mouseSensitivity: number?, -- 0.2..3, default 1
+	touchSensitivity: number?, -- separate touch camera multiplier
+	brightness: number?, -- 0.5..1.5, default 1
 	volume: number?, -- 0..1, default 1
 	muted: boolean?,
 	hideToasts: boolean?,

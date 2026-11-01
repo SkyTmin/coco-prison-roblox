@@ -2,7 +2,7 @@
 -- Armor rendered the Minecraft way: a textured box slightly larger than each limb, welded to it, with
 -- the faces of the Minecraft armor layer (Pixel Perfection via VoxeLibre, CC BY-SA 4.0 — see
 -- assets/thirdparty/voxelibre/ATTRIBUTION.md) as Decals. Faces come from Config.armor (generated from
--- assets/armor/ids.json). Enchanted pieces (level with an enchant > 0) get a purple glint overlay.
+-- assets/armor/ids.json). Equipment keeps its base textures without glow [owner 02.11].
 -- The server owns the `Armor` attribute ("helmet:<level>,chestplate:<level>,...").
 -- Our block body (character attribute BlockBody, AvatarService) wears our own armor [владелец 26.10: «броню сделаем по
 -- телу»; «броню делаем новую в блендер: кожаная, кольчужная, железная и алмазная»; «бери пример с майна»]
@@ -16,7 +16,6 @@
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Body = require(Shared.Models.player) :: any
@@ -27,7 +26,6 @@ local ArmorVisual = {}
 local rigs: { [Instance]: Rig } = {}
 local playerConnections: { [Player]: { RBXScriptConnection } } = {}
 local started = false
-local glintDecals: { [Decal]: number } = {} -- glint overlay → its phase (the box's height: the shimmer runs down)
 
 -- Minecraft armor model is 1/16 block larger than the skin box on each side; R15 limbs are ~1 stud
 -- wide, so +0.3 studs total keeps the same proportion and hides the body underneath.
@@ -150,10 +148,8 @@ local function faceTexture(piece: string, material: string, key: string, face: s
 	return faces[piece .. "_" .. material .. "_" .. key .. "_" .. face]
 end
 
--- the face images of one box: { [Roblox face]: { texture, glint } } — our own on the block body once uploaded (each
--- face with its own glint mask: the enchant shimmer lies only on the armor's pixels [владелец 26.10: «не забывай за
--- зачарования эффект»]), else VoxeLibre's with the shared glint over the whole face
-type FaceImages = { texture: string, glint: string }
+-- Base texture for each armor face; enchantment stats do not change its appearance.
+type FaceImages = { texture: string }
 local function boxTextures(
 	piece: string,
 	material: string,
@@ -162,32 +158,25 @@ local function boxTextures(
 ): { [Enum.NormalId]: FaceImages }
 	local out: { [Enum.NormalId]: FaceImages } = {}
 	local armor = Config.armor :: any
-	local fallbackGlint: string = armor and armor.glint or ""
 	local block = own and armor and armor.block
 	if block then
-		local glints = armor.blockGlint or {}
 		for face, normal in pairs(OWN_FACES) do
 			local name = piece .. "_" .. material .. "_" .. key .. "_" .. face
 			if block[name] then
-				out[normal] = { texture = block[name], glint = glints[name] or fallbackGlint }
+				out[normal] = { texture = block[name] }
 			end
 		end
 		-- our set has no face here (only chainmail has lower sleeves): no box, never VoxeLibre's with the
-		-- shared glint over the bare skin
+		-- texture over the bare skin
 		return out
 	end
 	for face, normal in pairs(FACES) do
 		local texture = faceTexture(piece, material, key, face)
 		if texture then
-			out[normal] = { texture = texture, glint = fallbackGlint }
+			out[normal] = { texture = texture }
 		end
 	end
 	return out
-end
-
-local function enchanted(id: string, level: number): boolean
-	local ok, value = pcall(Config.enchantForLevel, id, level)
-	return ok and type(value) == "number" and value > 0
 end
 
 -- one textured box welded to the limb: `size` in studs, its centre `centreY` studs above the limb's centre
@@ -199,7 +188,6 @@ local function makeBox(
 	key: string,
 	size: Vector3,
 	centreY: number,
-	glint: boolean,
 	own: boolean
 )
 	local part = Instance.new("Part")
@@ -220,17 +208,6 @@ local function makeBox(
 		decal.Texture = images.texture
 		decal.Parent = part
 		any = true
-		if glint then
-			local g = Instance.new("Decal")
-			g.Name = "Glint"
-			g.Face = normal
-			g.Texture = images.glint
-			g.Transparency = 0.55
-			g.Color3 = Color3.fromRGB(200, 120, 255)
-			g.ZIndex = 2
-			g.Parent = part
-			glintDecals[g] = part.Position.Y
-		end
 	end
 	if not any then
 		part:Destroy()
@@ -245,20 +222,13 @@ local function makeBox(
 end
 
 -- an R15 avatar's box: the part grown by `pad`, the slice y0..y1 of its height
-local function buildBox(
-	parent: Model,
-	limb: BasePart,
-	piece: string,
-	material: string,
-	box: Box,
-	glint: boolean
-)
+local function buildBox(parent: Model, limb: BasePart, piece: string, material: string, box: Box)
 	local pad = box.pad or PAD
 	local fullY = limb.Size.Y + pad
 	local height = fullY * (box.y1 - box.y0)
 	local centreY = fullY / 2 - fullY * (box.y0 + box.y1) / 2 -- limb-space Y of the slice centre
 	local size = Vector3.new(limb.Size.X + pad, height, limb.Size.Z + pad)
-	makeBox(parent, limb, piece, material, box.key, size, centreY, glint, false)
+	makeBox(parent, limb, piece, material, box.key, size, centreY, false)
 end
 
 -- a block body's box: the limb grown by `grow` px a side, rows r0..r1 of it; the part holds rows a0..a1
@@ -267,8 +237,7 @@ local function buildBlockBox(
 	limb: BasePart,
 	piece: string,
 	material: string,
-	box: BlockBox,
-	glint: boolean
+	box: BlockBox
 )
 	local px: number = Body.px
 	local grown = box.length + 2 * box.grow
@@ -276,7 +245,7 @@ local function buildBlockBox(
 	local y0 = top - grown * box.r0 / box.length
 	local y1 = top - grown * box.r1 / box.length
 	local size = Vector3.new(box.width + 2 * box.grow, y0 - y1, box.depth + 2 * box.grow) * px
-	makeBox(parent, limb, piece, material, box.key, size, (y0 + y1) / 2 * px, glint, true)
+	makeBox(parent, limb, piece, material, box.key, size, (y0 + y1) / 2 * px, true)
 end
 
 -- Minecraft draws armor over the skin and hides nothing else, but Roblox avatars wear bulky layered
@@ -305,17 +274,8 @@ local function setAccessoriesHidden(character: Model, rendered: { [string]: bool
 	end
 end
 
-local function forgetGlints(model: Model)
-	for _, d in ipairs(model:GetDescendants()) do
-		if d:IsA("Decal") then
-			glintDecals[d] = nil
-		end
-	end
-end
-
 local function render(rig: Rig)
 	if rig.visual then
-		forgetGlints(rig.visual)
 		rig.visual:Destroy()
 		rig.visual = nil
 	end
@@ -327,7 +287,6 @@ local function render(rig: Rig)
 	local visual = Instance.new("Model")
 	visual.Name = "ArmorVisual"
 	local rendered: { [string]: boolean } = {}
-	local anyGlint = false
 	local block = rig.character:GetAttribute("BlockBody") == true
 	for entry in string.gmatch(attribute, "[^,]+") do
 		local id, rawLevel = string.match(entry, "^([^:]+):(%d+)$")
@@ -338,34 +297,21 @@ local function render(rig: Rig)
 		end
 		rendered[id] = true
 		local material = Config.materialForLevel(level)
-		local glint = enchanted(id, level)
-		anyGlint = anyGlint or glint
 		if block then
 			for _, box in ipairs(BLOCK_BOXES[id] or {}) do
 				local limb = rig.character:FindFirstChild(box.part)
 				if limb and limb:IsA("BasePart") then
-					buildBlockBox(visual, limb, id, material, box, glint)
+					buildBlockBox(visual, limb, id, material, box)
 				end
 			end
 		else
 			for _, box in ipairs(boxes) do
 				local limb = rig.character:FindFirstChild(box.limb)
 				if limb and limb:IsA("BasePart") then
-					buildBox(visual, limb, id, material, box, glint)
+					buildBox(visual, limb, id, material, box)
 				end
 			end
 		end
-	end
-	if anyGlint and not block then
-		local glow = Instance.new("Highlight")
-		glow.Name = "EnchantGlow"
-		glow.FillColor = Color3.fromRGB(190, 110, 255)
-		glow.FillTransparency = 0.75
-		glow.OutlineColor = Color3.fromRGB(230, 180, 255)
-		glow.OutlineTransparency = 0.6
-		glow.DepthMode = Enum.HighlightDepthMode.Occluded
-		glow.Adornee = visual
-		glow.Parent = visual
 	end
 	visual.Parent = rig.character
 	rig.visual = visual
@@ -381,7 +327,6 @@ local function clear(player: Instance)
 		connection:Disconnect()
 	end
 	if rig.visual then
-		forgetGlints(rig.visual)
 		rig.visual:Destroy()
 	end
 	rigs[player] = nil
@@ -452,25 +397,6 @@ function ArmorVisual.Start()
 	end
 	CollectionService:GetInstanceAddedSignal("ArmorMannequin"):Connect(mannequin)
 	CollectionService:GetInstanceRemovedSignal("ArmorMannequin"):Connect(clear)
-	-- enchant glint shimmer: Decals have no UV offset, so the purple overlay's transparency pulses in a wave that runs
-	-- down the body (the phase is each box's height), like Minecraft's sweeping glint
-	RunService.Heartbeat:Connect(function()
-		local now = os.clock()
-		for _, rig in pairs(rigs) do
-			local visual = rig.visual
-			local glow = visual and visual:FindFirstChild("EnchantGlow")
-			if glow and glow:IsA("Highlight") then
-				glow.FillTransparency = 0.65 + 0.2 * math.sin(os.clock() * 3)
-			end
-		end
-		for decal, phase in pairs(glintDecals) do
-			if decal.Parent then
-				decal.Transparency = 0.2 + 0.55 * (0.5 + 0.5 * math.sin(now * 3.5 + phase * 1.6))
-			else
-				glintDecals[decal] = nil
-			end
-		end
-	end)
 end
 
 return ArmorVisual

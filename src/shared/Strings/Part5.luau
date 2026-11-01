@@ -755,4 +755,60 @@ return {
 		es = "Pase de mina recibido.",
 		fr = "Pass de mine reçu.",
 	},
+
+	-- Personal input/display settings [owner 02.11].
+	settings_tab_controls = {
+		ru = "Управление",
+		en = "Controls",
+		es = "Controles",
+		fr = "Commandes",
+	},
+	settings_tab_display = { ru = "Экран", en = "Display", es = "Pantalla", fr = "Affichage" },
+	settings_tab_sound = { ru = "Звук", en = "Sound", es = "Sonido", fr = "Son" },
+	settings_tab_game = { ru = "Игра", en = "Gameplay", es = "Juego", fr = "Jeu" },
+	settings_tab_social = { ru = "Общение", en = "Social", es = "Social", fr = "Social" },
+	settings_tab_language = { ru = "Язык", en = "Language", es = "Idioma", fr = "Langue" },
+	settings_mouse_sensitivity = {
+		ru = "Чувствительность мыши",
+		en = "Mouse sensitivity",
+		es = "Sensibilidad del ratón",
+		fr = "Sensibilité de la souris",
+	},
+	settings_touch_sensitivity = {
+		ru = "Чувствительность на телефоне",
+		en = "Touch sensitivity",
+		es = "Sensibilidad táctil",
+		fr = "Sensibilité tactile",
+	},
+	settings_mouse_hint = {
+		ru = "Скорость поворота камеры мышью. 100% — обычная.",
+		en = "Camera turning speed with a mouse. 100% is normal.",
+		es = "Velocidad de giro con ratón. 100% es normal.",
+		fr = "Vitesse de rotation avec la souris. 100% est normal.",
+	},
+	settings_touch_hint = {
+		ru = "Скорость поворота камеры пальцем. 100% — обычная.",
+		en = "Camera turning speed with a finger. 100% is normal.",
+		es = "Velocidad de giro con el dedo. 100% es normal.",
+		fr = "Vitesse de rotation avec le doigt. 100% est normal.",
+	},
+	settings_brightness = {
+		ru = "Яркость",
+		en = "Brightness",
+		es = "Brillo",
+		fr = "Luminosité",
+	},
+	settings_brightness_hint = {
+		ru = "Только на вашем экране. 100% — обычная яркость.",
+		en = "Only on your screen. 100% is normal brightness.",
+		es = "Solo en tu pantalla. 100% es el brillo normal.",
+		fr = "Uniquement sur votre écran. 100% est la luminosité normale.",
+	},
+	settings_auto_save = {
+		ru = "Изменения сохраняются автоматически",
+		en = "Changes are saved automatically",
+		es = "Los cambios se guardan automáticamente",
+		fr = "Les changements sont enregistrés automatiquement",
+	},
+	settings_reset_value = { ru = "Сброс", en = "Reset", es = "Restabl.", fr = "Rétablir" },
 }

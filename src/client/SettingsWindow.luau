@@ -1,41 +1,31 @@
 --!strict
--- «Настройки» [P] [владелец 27.10: «в меню настройки общие и туда добавить кнопки можно. Где можно скрыть
--- уведомления, уменьшить там уведомления, переместить их … тоже самое с баром бустеров. Туда же языки добавить и
--- уменьшить звук, выключить, в общем базовые настройки»]: language, volume (−/+ by 10 %), sound on/off,
--- notifications and the booster bar shown / hidden, and «Кнопки и интерфейс» — the layout editor, where every
--- element (the notifications and the booster bar too) is moved and resized. Values live in the profile
--- (profile.settings, SetSetting; the language: SetLocale); the window is rebuilt on every profile change.
--- [владелец 28.10, вики MENUS-SOCIAL: «Авто-продажа блоков», «Частицы у прицела при автопродаже»] two more rows: auto-sell
--- on / off and the income at the crosshair shown / hidden (both on by default; locked until the auto-sell is bought).
--- [владелец 28.10: «в меню кнопки язык и вид убери в настройки»] the «Вид» row: first / third person (V / F5 on a
--- computer), moved here from the menu grid together with the language.
--- Этап 8 [сеть TG/40: «эффекты чар можно выключить в /settings» — for subscribers]: the «Эффекты чар PRIS+» row (the
--- particles of Вихрь / Ярость / Бульдозер, EnchantFx), locked without PRIS+; the same switch is in the /pp window.
--- The «Чат» section [владелец 28.10: «МАКСИМУМ УСИЛИЙ К ЧАТУ»; вечер: чат Roblox]: the chat on / off, the size of Roblox's
--- chat window (not the text — Roblox takes that from the player's own settings), its background, bubbles over heads,
--- tips (ChatWindow applies them). The rows scroll (the window stays the size of 12 rows); the scroll position
--- survives the rebuild after every change.
+-- Personal settings grouped by purpose; responsive cards retain their size on small screens.
+-- Values persist through SetSetting; profile updates refresh only the changed settings page.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GuiService = game:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Preferences = require(Shared.Preferences)
 local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
-
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
-
 local SettingsWindow = {}
-
-local W, ROW, LABEL_W = 420, 44, 150
 local LANGUAGES = { ru = "Русский", en = "English", es = "Español", fr = "Français" }
+local TABS = { "controls", "display", "sound", "game", "social", "language" }
+local selectedTab = "controls"
 
 -- the settings with their defaults filled in
 function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 	local s = profile and profile.settings or {}
 	return {
-		volume = if typeof(s.volume) == "number" then s.volume else 1,
+		mouseSensitivity = Preferences.number("mouseSensitivity", s.mouseSensitivity),
+		touchSensitivity = Preferences.number("touchSensitivity", s.touchSensitivity),
+		brightness = Preferences.number("brightness", s.brightness),
+		volume = Preferences.number("volume", s.volume),
 		muted = s.muted == true,
 		hideToasts = s.hideToasts == true,
 		hideBoosters = s.hideBoosters == true,
@@ -57,13 +47,6 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 	}
 end
 
-local function set(key: string, value: any)
-	Remotes.event("SetSetting"):FireServer(key, value)
-end
-
-local scrollY = 0 -- where the rows were scrolled to (the window is rebuilt on every profile change)
-local VISIBLE_ROWS = 12
-
 function SettingsWindow.build(
 	parent: Instance,
 	locale: string,
@@ -72,378 +55,362 @@ function SettingsWindow.build(
 	createWindow: CreateWindow,
 	openLayout: () -> (),
 	view: { firstPerson: () -> boolean, toggle: () -> () }
-): Frame
+): (Frame, (Types.Profile?) -> ())
 	local function T(key: string, ...: any): string
 		return Strings.t(key, locale, ...)
 	end
-	local settings = SettingsWindow.of(profile)
-	local rows = 21 -- 2 section titles, 12 general rows + the layout button, 6 chat rows
-	local win, content = createWindow(
-		parent,
-		T("settings_title"),
-		UDim2.fromOffset(W, VISIBLE_ROWS * ROW + 56),
-		onClose
-	)
+	local current = profile
+	local settings: any = SettingsWindow.of(profile)
+	local viewport = workspace.CurrentCamera.ViewportSize
+	local inset = GuiService:GetGuiInset().Y
+	local width = math.clamp(viewport.X - 24, 300, 540)
+	local height = math.clamp(viewport.Y - inset - 24, 260, 580)
+	local win, content =
+		createWindow(parent, T("settings_title"), UDim2.fromOffset(width, height), onClose)
 	win.Name = "Window_Settings"
+	local tabs = Instance.new("Frame")
+	tabs.Name, tabs.BackgroundTransparency = "Categories", 1
+	tabs.Size, tabs.Parent = UDim2.new(1, -4, 0, 84), content
 	local scroll = Instance.new("ScrollingFrame")
-	scroll.Name = "Rows"
-	scroll.BackgroundTransparency = 1
-	scroll.BorderSizePixel = 0
-	scroll.Size = UDim2.fromScale(1, 1)
-	scroll.CanvasSize = UDim2.fromOffset(0, rows * ROW)
-	scroll.ScrollBarThickness = 5
-	scroll.ScrollBarImageColor3 = Ui.colors.border
-	scroll.ScrollingDirection = Enum.ScrollingDirection.Y
-	scroll.Parent = content
-	task.defer(function()
-		scroll.CanvasPosition = Vector2.new(0, scrollY)
-	end)
-	scroll:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-		scrollY = scroll.CanvasPosition.Y
-	end)
-	local W_ROW = W - 12 - 8 -- the rows leave room for the scroll bar
-	-- a section title over its rows («Общие», «Чат»)
-	local function section(slot: number, caption: string)
-		local title = Ui.label(
-			scroll,
-			caption,
-			UDim2.new(1, -8, 0, ROW - 10),
-			UDim2.fromOffset(4, slot * ROW + 6),
-			15,
-			Ui.colors.header
-		)
-		title.Name = "Section" .. slot
+	scroll.Name, scroll.BackgroundTransparency, scroll.BorderSizePixel = "Rows", 1, 0
+	scroll.Position, scroll.Size = UDim2.fromOffset(0, 88), UDim2.new(1, 0, 1, -114)
+	scroll.ScrollBarThickness, scroll.ScrollBarImageColor3 = 5, Ui.colors.border
+	scroll.ScrollingDirection, scroll.Parent = Enum.ScrollingDirection.Y, content
+	local note = Ui.label(
+		content,
+		T("settings_auto_save"),
+		UDim2.new(1, -8, 0, 22),
+		UDim2.new(0, 4, 1, -22),
+		12,
+		Ui.colors.muted
+	)
+	note.TextXAlignment = Enum.TextXAlignment.Center
+	local buttons: { [string]: TextButton } = {}
+	local renderPage: (boolean?) -> ()
+	local function send(key: string, value: any)
+		settings[key] = value
+		Remotes.event("SetSetting"):FireServer(key, value)
+		renderPage(true)
 	end
-	-- general rows sit at slot i (the «Общие» title takes slot 0)
-	local function row(i: number, caption: string): Frame
-		local line = Instance.new("Frame")
-		line.Name = "Row" .. i
-		line.BackgroundTransparency = 1
-		line.Size = UDim2.fromOffset(W_ROW, ROW - 6)
-		line.Position = UDim2.fromOffset(0, i * ROW)
-		line.Parent = scroll
+	local y = 0
+	local function row(name: string, caption: string, hint: string?): Frame
+		local h = if hint then 116 else 84
+		local card = Ui.card(scroll, UDim2.new(1, -9, 0, h), UDim2.fromOffset(0, y))
+		card.Name = "Row_" .. name
+		y += h + 8
 		local label = Ui.label(
-			line,
+			card,
 			caption,
-			UDim2.new(0, LABEL_W, 1, 0),
-			UDim2.fromOffset(4, 0),
-			15,
+			UDim2.new(1, -20, 0, 32),
+			UDim2.fromOffset(10, 2),
+			16,
 			Ui.colors.text
 		)
-		label.TextXAlignment = Enum.TextXAlignment.Left
-		return line
+		label.TextWrapped = true
+		if hint then
+			local detail = Ui.label(
+				card,
+				hint,
+				UDim2.new(1, -20, 0, 30),
+				UDim2.fromOffset(10, 34),
+				12,
+				Ui.colors.muted
+			)
+			detail.TextWrapped = true
+		end
+		local control = Instance.new("Frame")
+		control.Name, control.BackgroundTransparency = "Control", 1
+		control.Position, control.Size = UDim2.new(0, 10, 1, -46), UDim2.new(1, -20, 0, 38)
+		control.Parent = card
+		return control
 	end
 	local function toggle(
-		line: Frame,
-		name: string,
-		on: boolean,
-		onText: string,
-		offText: string,
-		flip: () -> ()
-	)
-		local b = Ui.button(
-			line,
-			if on then onText else offText,
-			UDim2.new(1, -LABEL_W - 8, 1, 0),
-			UDim2.fromOffset(LABEL_W + 4, 0),
-			if on then Ui.colors.buttonGreen else Ui.colors.buttonGrey
-		)
-		b.Name = name
-		b.Activated:Connect(flip)
-		return b
-	end
-
-	section(0, T("settings_general_section"))
-	-- 1. language: a button per locale, the current one green
-	local languages = row(1, T("settings_language"))
-	local count = #Config.locales
-	local width = (W_ROW - LABEL_W - 8 - (count - 1) * 4) / count
-	for i, code in ipairs(Config.locales) do
-		local b = Ui.button(
-			languages,
-			LANGUAGES[code] or code,
-			UDim2.new(0, width, 1, 0),
-			UDim2.fromOffset(LABEL_W + 4 + (i - 1) * (width + 4), 0),
-			if code == locale then Ui.colors.buttonGreen else Ui.colors.buttonGrey
-		)
-		b.Name = "Lang_" .. code
-		b.TextSize = 13
-		b.Activated:Connect(function()
-			if code ~= locale then
-				Remotes.event("SetLocale"):FireServer(code)
-			end
-		end)
-	end
-
-	-- 2. the view: first / third person (changes at once, no profile round trip)
-	local viewButton = toggle(
-		row(2, T("touch_camera")),
-		"View",
-		view.firstPerson(),
-		T("settings_view_first"),
-		T("settings_view_third"),
-		function() end
-	)
-	viewButton.BackgroundColor3 = Ui.colors.buttonGrey
-	viewButton.Activated:Connect(function()
-		view.toggle()
-		viewButton.Text = if view.firstPerson()
-			then T("settings_view_first")
-			else T("settings_view_third")
-	end)
-
-	-- 3. volume: − 70 % +
-	local volumeRow = row(3, T("settings_volume"))
-	local volume = settings.volume :: number
-	local minus = Ui.button(
-		volumeRow,
-		"−",
-		UDim2.new(0, 44, 1, 0),
-		UDim2.fromOffset(LABEL_W + 4, 0),
-		Ui.colors.buttonGrey
-	)
-	minus.Name = "VolumeDown"
-	local plus = Ui.button(
-		volumeRow,
-		"+",
-		UDim2.new(0, 44, 1, 0),
-		UDim2.new(1, -44, 0, 0),
-		Ui.colors.buttonGrey
-	)
-	plus.Name = "VolumeUp"
-	local shown = Ui.label(
-		volumeRow,
-		string.format("%d%%", math.floor(volume * 100 + 0.5)),
-		UDim2.new(1, -LABEL_W - 4 - 96, 1, 0),
-		UDim2.fromOffset(LABEL_W + 4 + 48, 0),
-		16,
-		if settings.muted then Ui.colors.muted else Ui.colors.text
-	)
-	shown.Name = "VolumeValue"
-	shown.TextXAlignment = Enum.TextXAlignment.Center
-	minus.Activated:Connect(function()
-		set("volume", math.max(0, math.floor(volume * 10 + 0.5) / 10 - 0.1))
-	end)
-	plus.Activated:Connect(function()
-		set("volume", math.min(1, math.floor(volume * 10 + 0.5) / 10 + 0.1))
-	end)
-
-	-- 4. sound on / off
-	toggle(
-		row(4, T("settings_sound")),
-		"Sound",
-		not settings.muted,
-		T("settings_on"),
-		T("settings_off"),
-		function()
-			set("muted", not settings.muted)
-		end
-	)
-	-- 5–6. notifications and the booster bar
-	toggle(
-		row(5, T("settings_toasts")),
-		"Toasts",
-		not settings.hideToasts,
-		T("settings_shown"),
-		T("settings_hidden"),
-		function()
-			set("hideToasts", not settings.hideToasts)
-		end
-	)
-	toggle(
-		row(6, T("settings_boosters")),
-		"Boosters",
-		not settings.hideBoosters,
-		T("settings_shown"),
-		T("settings_hidden"),
-		function()
-			set("hideBoosters", not settings.hideBoosters)
-		end
-	)
-	-- 7–8. the auto-sell (a donate purchase) and its income at the crosshair
-	local owned = profile ~= nil and profile.autosell == true
-	local function autosellToggle(
-		i: number,
 		caption: string,
-		name: string,
-		key: string,
-		off: boolean
-	)
-		local line = row(i, caption)
-		if not owned then
-			local b = toggle(line, name, false, "", T("settings_autosell_locked"), function() end)
-			b.TextSize = 13
-			return
-		end
-		toggle(line, name, not off, T("settings_on"), T("settings_off"), function()
-			set(key, not off)
-		end)
-	end
-	autosellToggle(
-		7,
-		T("settings_autosell"),
-		"Autosell",
-		"autosellOff",
-		settings.autosellOff == true
-	)
-	autosellToggle(
-		8,
-		T("settings_autosell_text"),
-		"AutosellText",
-		"autosellTextOff",
-		settings.autosellTextOff == true
-	)
-	-- 9–11. the chat (этап 3): money transfers and gifts to this player [клиент pay.*, gift.*], the other players
-	-- hidden (/hide; H stays the layout editor); the «[Совет]» lines [клиент settings.elements.advice_toggle] are in «Чат»
-	local function flag(
-		i: number,
-		caption: string,
-		name: string,
 		key: string,
 		on: boolean,
-		onText: string,
-		offText: string
+		onText: string?,
+		offText: string?,
+		locked: string?
 	)
-		toggle(row(i, caption), name, on, onText, offText, function()
-			set(key, on)
-		end)
-	end
-	flag(
-		9,
-		T("settings_pay"),
-		"Pay",
-		"payOff",
-		not settings.payOff,
-		T("settings_accept"),
-		T("settings_refuse")
-	)
-	flag(
-		10,
-		T("settings_gift"),
-		"Gift",
-		"giftOff",
-		not settings.giftOff,
-		T("settings_accept"),
-		T("settings_refuse")
-	)
-	toggle(
-		row(11, T("settings_players")),
-		"Players",
-		not settings.hidePlayers,
-		T("settings_shown"),
-		T("settings_hidden"),
-		function()
-			set("hidePlayers", not settings.hidePlayers)
-		end
-	)
-	-- 12. the PRIS+ enchant particles (этап 8), only for subscribers
-	do
-		local line = row(12, T("settings_enchant_fx"))
-		if PrisPlus.active(profile, workspace:GetServerTimeNow()) then
-			toggle(
-				line,
-				"EnchantFx",
-				not settings.enchantFxOff,
-				T("settings_shown"),
-				T("settings_hidden"),
-				function()
-					set("enchantFxOff", not settings.enchantFxOff)
-				end
-			)
-		else
-			local b = toggle(
-				line,
-				"EnchantFx",
-				false,
-				"",
-				T("settings_pris_locked"),
-				function() end
-			)
-			b.TextSize = 13
-		end
-	end
-	-- 13. move and resize the buttons, the notifications, the booster bar
-	local layout = Ui.button(
-		scroll,
-		T("settings_layout"),
-		UDim2.fromOffset(W_ROW, ROW - 6),
-		UDim2.fromOffset(0, 13 * ROW),
-		Ui.colors.buttonBlue
-	)
-	layout.Name = "Layout"
-	layout.Activated:Connect(openLayout)
-
-	-- «Чат» (slots 14…)
-	section(14, T("settings_chat_section"))
-	local function choice(
-		i: number,
-		caption: string,
-		name: string,
-		key: string,
-		value: number,
-		prefix: string
-	)
-		local line = row(i, caption)
-		local w = (W_ROW - LABEL_W - 8 - 2 * 4) / 3
-		for n = 1, 3 do
-			local b = Ui.button(
-				line,
-				T(prefix .. n),
-				UDim2.new(0, w, 1, 0),
-				UDim2.fromOffset(LABEL_W + 4 + (n - 1) * (w + 4), 0),
-				if value == n then Ui.colors.buttonGreen else Ui.colors.buttonGrey
-			)
-			b.Name = name .. n
-			b.TextSize = 13
+		local control = row(key, T(caption))
+		local b = Ui.button(
+			control,
+			locked or T(if on then onText or "settings_on" else offText or "settings_off"),
+			UDim2.fromScale(1, 1),
+			UDim2.new(),
+			if on and not locked then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+		)
+		b.Name, b.TextSize = key, 15
+		b.Active, b.AutoButtonColor = locked == nil, locked == nil
+		if not locked then
 			b.Activated:Connect(function()
-				if value ~= n then
-					set(key, n)
-				end
+				send(key, not settings[key])
 			end)
 		end
 	end
-	toggle(
-		row(15, T("chat_enabled")),
-		"Chat",
-		not settings.chatOff,
-		T("settings_on"),
-		T("settings_off"),
-		function()
-			set("chatOff", not settings.chatOff)
+	local function number(key: string, caption: string, hint: string?)
+		local control = row(key, T(caption), if hint then T(hint) else nil)
+		local range = Preferences.numbers[key]
+		local value = settings[key]
+		local minus =
+			Ui.button(control, "−", UDim2.fromOffset(42, 38), UDim2.new(), Ui.colors.buttonGrey)
+		minus.Name = key .. "Down"
+		local plus = Ui.button(
+			control,
+			"+",
+			UDim2.fromOffset(42, 38),
+			UDim2.new(1, -120, 0, 0),
+			Ui.colors.buttonGrey
+		)
+		plus.Name = key .. "Up"
+		local shown = Ui.label(
+			control,
+			string.format("%d%%", math.floor(value * 100 + 0.5)),
+			UDim2.new(1, -174, 1, 0),
+			UDim2.fromOffset(46, 0),
+			18
+		)
+		shown.Name, shown.TextXAlignment = key .. "Value", Enum.TextXAlignment.Center
+		local reset = Ui.button(
+			control,
+			T("settings_reset_value"),
+			UDim2.fromOffset(72, 38),
+			UDim2.new(1, -72, 0, 0),
+			Ui.colors.buttonGrey
+		)
+		reset.Name, reset.TextSize = key .. "Reset", 13
+		minus.Active, minus.AutoButtonColor = value > range.min, value > range.min
+		plus.Active, plus.AutoButtonColor = value < range.max, value < range.max
+		minus.Activated:Connect(function()
+			send(key, math.max(range.min, math.round(value * 10 - 1) / 10))
+		end)
+		plus.Activated:Connect(function()
+			send(key, math.min(range.max, math.round(value * 10 + 1) / 10))
+		end)
+		reset.Activated:Connect(function()
+			send(key, range.default)
+		end)
+	end
+	local function choice(key: string, caption: string, prefix: string)
+		local control = row(key, T(caption))
+		for i = 1, 3 do
+			local b = Ui.button(
+				control,
+				T(prefix .. i),
+				UDim2.new(1 / 3, -4, 1, 0),
+				UDim2.fromScale((i - 1) / 3, 0),
+				if settings[key] == i then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+			)
+			b.Name, b.TextSize = key .. i, 13
+			b.Activated:Connect(function()
+				send(key, i)
+			end)
 		end
-	)
-	choice(16, T("chat_size"), "ChatSize", "chatSize", settings.chatSize :: number, "chat_size_")
-	choice(17, T("chat_back"), "ChatBack", "chatBack", settings.chatBack :: number, "chat_back_")
-	flag(
-		18,
-		T("chat_bubbles"),
-		"Bubbles",
-		"bubblesOff",
-		not settings.bubblesOff,
-		T("settings_on"),
-		T("settings_off")
-	)
-	flag(
-		19,
-		T("settings_tips"),
-		"Tips",
-		"tipsOff",
-		not settings.tipsOff,
-		T("settings_shown"),
-		T("settings_hidden")
-	)
-	-- the paid auction announcements of other players (AuctionBanner + their chat line)
-	flag(
-		20,
-		T("settings_auction_ads"),
-		"AuctionAds",
-		"auctionAdsOff",
-		not settings.auctionAdsOff,
-		T("settings_shown"),
-		T("settings_hidden")
-	)
-	scroll.CanvasSize = UDim2.fromOffset(0, rows * ROW)
-	return win
+	end
+	renderPage = function(keepScroll: boolean?)
+		local previous = if keepScroll then scroll.CanvasPosition.Y else 0
+		for _, child in scroll:GetChildren() do
+			child:Destroy()
+		end
+		y = 0
+		for id, button in buttons do
+			button.BackgroundColor3 = if id == selectedTab
+				then Ui.colors.buttonBlue
+				else Ui.colors.buttonGrey
+		end
+		if selectedTab == "controls" then
+			number("mouseSensitivity", "settings_mouse_sensitivity", "settings_mouse_hint")
+			number("touchSensitivity", "settings_touch_sensitivity", "settings_touch_hint")
+			local control = row("view", T("touch_camera"))
+			local b = Ui.button(
+				control,
+				T(if view.firstPerson() then "settings_view_first" else "settings_view_third"),
+				UDim2.fromScale(1, 1),
+				UDim2.new(),
+				Ui.colors.buttonGrey
+			)
+			b.Name = "View"
+			b.Activated:Connect(function()
+				view.toggle()
+				renderPage(true)
+			end)
+			local layout = Ui.button(
+				scroll,
+				T("settings_layout"),
+				UDim2.new(1, -9, 0, 44),
+				UDim2.fromOffset(0, y),
+				Ui.colors.buttonBlue
+			)
+			layout.Name = "Layout"
+			layout.Activated:Connect(openLayout)
+			y += 52
+		elseif selectedTab == "display" then
+			number("brightness", "settings_brightness", "settings_brightness_hint")
+			toggle(
+				"settings_toasts",
+				"hideToasts",
+				not settings.hideToasts,
+				"settings_shown",
+				"settings_hidden"
+			)
+			toggle(
+				"settings_boosters",
+				"hideBoosters",
+				not settings.hideBoosters,
+				"settings_shown",
+				"settings_hidden"
+			)
+			toggle(
+				"settings_players",
+				"hidePlayers",
+				not settings.hidePlayers,
+				"settings_shown",
+				"settings_hidden"
+			)
+			toggle(
+				"settings_enchant_fx",
+				"enchantFxOff",
+				not settings.enchantFxOff,
+				"settings_shown",
+				"settings_hidden",
+				if PrisPlus.active(current, workspace:GetServerTimeNow())
+					then nil
+					else T("settings_pris_locked")
+			)
+		elseif selectedTab == "sound" then
+			number("volume", "settings_volume")
+			toggle("settings_sound", "muted", not settings.muted)
+		elseif selectedTab == "game" then
+			local locked = if current and current.autosell
+				then nil
+				else T("settings_autosell_locked")
+			toggle("settings_autosell", "autosellOff", not settings.autosellOff, nil, nil, locked)
+			toggle(
+				"settings_autosell_text",
+				"autosellTextOff",
+				not settings.autosellTextOff,
+				"settings_shown",
+				"settings_hidden",
+				locked
+			)
+			toggle(
+				"settings_pay",
+				"payOff",
+				not settings.payOff,
+				"settings_accept",
+				"settings_refuse"
+			)
+			toggle(
+				"settings_gift",
+				"giftOff",
+				not settings.giftOff,
+				"settings_accept",
+				"settings_refuse"
+			)
+		elseif selectedTab == "social" then
+			toggle("chat_enabled", "chatOff", not settings.chatOff)
+			choice("chatSize", "chat_size", "chat_size_")
+			choice("chatBack", "chat_back", "chat_back_")
+			toggle("chat_bubbles", "bubblesOff", not settings.bubblesOff)
+			toggle(
+				"settings_tips",
+				"tipsOff",
+				not settings.tipsOff,
+				"settings_shown",
+				"settings_hidden"
+			)
+			toggle(
+				"settings_auction_ads",
+				"auctionAdsOff",
+				not settings.auctionAdsOff,
+				"settings_shown",
+				"settings_hidden"
+			)
+		else
+			for _, code in Config.locales do
+				local b = Ui.button(
+					scroll,
+					LANGUAGES[code] or code,
+					UDim2.new(1, -9, 0, 48),
+					UDim2.fromOffset(0, y),
+					if code == locale then Ui.colors.buttonGreen else Ui.colors.buttonGrey
+				)
+				b.Name = "Lang_" .. code
+				y += 56
+				b.Activated:Connect(function()
+					if code ~= locale then
+						Remotes.event("SetLocale"):FireServer(code)
+					end
+				end)
+			end
+		end
+		scroll.CanvasSize = UDim2.fromOffset(0, y)
+		scroll.CanvasPosition =
+			Vector2.new(0, math.min(previous, math.max(0, y - scroll.AbsoluteWindowSize.Y)))
+	end
+	for i, id in TABS do
+		local b = Ui.button(
+			tabs,
+			"",
+			UDim2.new(1 / 3, -4, 0, 56),
+			UDim2.new((i - 1) % 3 / 3, 0, 0, math.floor((i - 1) / 3) * 62),
+			Ui.colors.buttonGrey
+		)
+		b.Name, b.TextSize = "Tab_" .. id, 14
+		local icon = Instance.new("ImageLabel")
+		icon.Name, icon.BackgroundTransparency = "Icon", 1
+		icon.Image = Config.icons.icons["menu_settings_" .. id] or ""
+		icon.Size, icon.Position = UDim2.fromOffset(28, 28), UDim2.new(0.5, -14, 0, 4)
+		icon.ScaleType, icon.ResampleMode = Enum.ScaleType.Fit, Enum.ResamplerMode.Pixelated
+		icon.Parent = b
+		local caption = Ui.label(
+			b,
+			T("settings_tab_" .. id),
+			UDim2.new(1, -4, 0, 20),
+			UDim2.fromOffset(2, 33),
+			12
+		)
+		caption.Name, caption.TextXAlignment = "Caption", Enum.TextXAlignment.Center
+		buttons[id] = b
+		b.Activated:Connect(function()
+			selectedTab = id
+			renderPage(false)
+		end)
+	end
+	local function arrangeTabs()
+		local columns = if win.AbsoluteSize.X >= 480 then 6 else 3
+		local tabHeight = math.ceil(#TABS / columns) * 62
+		tabs.Size = UDim2.new(1, -4, 0, tabHeight)
+		scroll.Position = UDim2.fromOffset(0, tabHeight)
+		scroll.Size = UDim2.new(1, 0, 1, -tabHeight - 26)
+		for i, id in TABS do
+			local button = buttons[id]
+			button.Size = UDim2.new(1 / columns, -4, 0, 56)
+			button.Position =
+				UDim2.new((i - 1) % columns / columns, 0, 0, math.floor((i - 1) / columns) * 62)
+			button.TextSize = if columns == 6 then 13 else 14
+		end
+	end
+	win:GetPropertyChangedSignal("AbsoluteSize"):Connect(arrangeTabs)
+	arrangeTabs()
+	local function stamp(p: Types.Profile?): string
+		return HttpService:JSONEncode({
+			settings = p and p.settings or {},
+			autosell = p and p.autosell,
+			pris = PrisPlus.active(p, workspace:GetServerTimeNow()),
+		})
+	end
+	local previous = stamp(profile)
+	local function refresh(p: Types.Profile?)
+		current = p
+		local nextStamp = stamp(p)
+		if nextStamp ~= previous then
+			previous = nextStamp
+			settings = SettingsWindow.of(p)
+			renderPage(true)
+		end
+	end
+	renderPage(false)
+	return win, refresh
 end
-
 return SettingsWindow
