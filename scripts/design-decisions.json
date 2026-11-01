@@ -1188,7 +1188,53 @@
             60
           ]
         },
-        "_abilities": "[решение] рёв-волна (полоса), удар копытом (обвал камня из земли), бычий таран — в колонну оглушение 3 с [coco-instruments: Минотавр, docs/research/boss-from-instruments.md]"
+        "_abilities": "[клиент RESOURCEPACK-BOSSES] сон, пробуждение, рога, impact, double_attack, throws_the_ground, minotaur_rush, stun, death; [решение] impact = удар копытом, два удара ладонями, ком земли по дуге с предупреждением, таран с оглушением о преграду. Прежние HP, награды и урон 2/4/5 сохранены; длительности взяты из аудита.",
+        "model": "minotaur",
+        "texture": "rbxassetid://93131048217957",
+        "scale": 1,
+        "glowBrightness": 0,
+        "meleeDuration": 1.125,
+        "meleeHitAt": 0.55,
+        "deathDuration": 12.958333333333334,
+        "minotaur": {
+          "_source": "[клиент] имена и длительности клипов; [решение 01.11] свои позы, попадания, дальности и поведение. Серверные навыки оригинала не извлечены.",
+          "awakening": 9.833333333333334,
+          "stunDuration": 3.7916666666666665,
+          "impact": {
+            "duration": 1.1666666666666667,
+            "release": 0.6,
+            "forward": 2,
+            "radius": 4.5,
+            "damage": 4
+          },
+          "double_attack": {
+            "duration": 1.6666666666666667,
+            "hits": [
+              0.55,
+              1.05
+            ],
+            "range": 8,
+            "halfAngle": 65,
+            "damage": 2
+          },
+          "throws_the_ground": {
+            "duration": 3.5833333333333335,
+            "pickup": 0.8,
+            "release": 2.25,
+            "range": 30,
+            "flight": 0.85,
+            "radius": 4.5,
+            "damage": 4
+          },
+          "minotaur_rush": {
+            "duration": 4.125,
+            "release": 1.35,
+            "speed": 48,
+            "maxDistance": 44,
+            "radius": 3.5,
+            "damage": 5
+          }
+        }
       },
       "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
     },

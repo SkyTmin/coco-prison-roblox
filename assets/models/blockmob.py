@@ -364,14 +364,33 @@ class Mob:
                 # Subframes preserve fast contacts too; simplification removes redundant samples afterwards.
                 frames = sorted(set(frames) | {f/4 for f in range(math.ceil(frames[0]*4), math.floor(frames[-1]*4)+1)})
             tracks = {}
+            sampled = None
+            if self.g.get('BATCH_SAMPLE'):
+                # Evaluate the scene once per time sample instead of once per joint. Local
+                # transforms are identical; this keeps long articulated clips practical headlessly.
+                sampled = {}
+                rests = {}
+                for name in order:
+                    e = joints[name]
+                    act = bpy.data.actions.get('%s|%s' % (clip, name))
+                    use(e, act)
+                    if act:
+                        sampled[name] = []
+                        rests[name] = Vector(e['pivot']) - (Vector(e.parent['pivot']) if e.parent else Vector())
+                for f in frames:
+                    scene.frame_set(int(f), subframe=f-int(f))
+                    for name, keys in sampled.items():
+                        e = joints[name]
+                        keys.append({'t':round(f/FPS,4),'q':to_roblox_quat(e.rotation_euler),
+                                     'p':to_roblox_vec(e.location-rests[name])})
             for name in order:
                 e = joints[name]
                 act = bpy.data.actions.get("%s|%s" % (clip, name))
                 if not act:
                     continue
                 use(e, act)
-                keys = []
-                for f in frames:
+                keys = sampled[name] if sampled is not None else []
+                for f in ([] if sampled is not None else frames):
                     scene.frame_set(int(f), subframe=f - int(f))
                     rest = Vector(e["pivot"]) - (Vector(e.parent["pivot"]) if e.parent else Vector((0, 0, 0)))
                     offset = e.location - rest

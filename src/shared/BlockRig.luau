@@ -11,7 +11,12 @@ local BlockRig = {}
 
 export type Key = { t: number, cf: CFrame }
 export type Clip = { length: number, loop: boolean, tracks: { [string]: { Key } }, impact: number? }
-export type Prepared = { clips: { [string]: Clip }, joints: { string }, walkSpeed: number? }
+export type Prepared = {
+	clips: { [string]: Clip },
+	joints: { string },
+	walkSpeed: number?,
+	runSpeed: number?,
+}
 
 local MIN_FACE = 0.25 -- faces smaller than this get no texture (eyes, teeth, plate edges)
 local FACES = {
@@ -193,7 +198,8 @@ function BlockRig.prepare(def: any): Prepared
 	for _, j in ipairs(def.joints) do
 		table.insert(joints, j.name)
 	end
-	local out = { clips = clips, joints = joints, walkSpeed = def.walkSpeed }
+	local out =
+		{ clips = clips, joints = joints, walkSpeed = def.walkSpeed, runSpeed = def.runSpeed }
 	cache[def] = out
 	return out
 end

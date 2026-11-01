@@ -40,6 +40,7 @@ local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 local SplinterAbilities = require(script.Parent.SplinterAbilities)
 local BasaltAbilities = require(script.Parent.BasaltAbilities)
+local MinotaurAbilities = require(script.Parent.MinotaurAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -52,6 +53,7 @@ local TELEGRAPH = Color3.fromRGB(255, 40, 30)
 type Fight = {
 	splinter: any?,
 	basalt: any?,
+	minotaur: any?,
 	meleeDuration: number?,
 	meleeHitAt: number?,
 	deathDuration: number?,
@@ -1143,6 +1145,10 @@ local function died(boss: Boss)
 	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
 	SplinterAbilities.Clear(boss)
 	BasaltAbilities.Clear(boss)
+	MinotaurAbilities.Clear(boss)
+	if boss.fight.minotaur then
+		MinotaurAbilities.Bindings(boss, false)
+	end
 	-- Set the action before clearing boss.model; clients keep the final pose until removal.
 	local deathDuration = if boss.fight.splinter
 		then boss.fight.splinter.deathDuration
@@ -1288,8 +1294,15 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		died(boss)
 	end)
 	boss.state:SetAttribute("RespawnAt", 0)
-	setInvulnerable(boss, 1.8)
-	act(boss, "roar", 1.8)
+	if boss.fight.minotaur and humanoid.Health == humanoid.MaxHealth then
+		MinotaurAbilities.Sleep(boss)
+	else
+		if boss.fight.minotaur then
+			MinotaurAbilities.Bindings(boss, false)
+		end
+		setInvulnerable(boss, 1.8)
+		act(boss, "roar", 1.8)
+	end
 	publish(boss)
 	-- no spawn announcement to everyone [владелец 27.10: «выключи уведомление о появлении боссов. Их не должно быть»]:
 	-- the arena's countdown board (BossHud) shows when a boss is up
@@ -1302,6 +1315,9 @@ local function think(boss: Boss)
 	end
 	local list = fighters(boss)
 	if #list == 0 then
+		if boss.model and boss.model:GetAttribute("Sleeping") then
+			return
+		end
 		-- nobody to fight: walk home; after leashSeconds heal fully and forget the damage
 		humanoid:MoveTo(boss.spawn.Position)
 		if
@@ -1320,13 +1336,19 @@ local function think(boss: Boss)
 			< (b.root.Position - root.Position).Magnitude
 	end)
 	local target = list[1]
+	if boss.fight.minotaur and boss.model and boss.model:GetAttribute("Sleeping") then
+		MinotaurAbilities.Wake(boss, { act = act, shield = setInvulnerable })
+		return
+	end
 	local now = os.clock()
 	local phase2 = humanoid.Health <= humanoid.MaxHealth * boss.fight.phase2At
 	if now >= boss.nextAbilityAt then
 		boss.nextAbilityAt = now
 			+ boss.fight.abilityCooldown
 				* (if phase2 then boss.fight.phase2CooldownScale else 1)
-		boss.nextAbility = boss.nextAbility % (if boss.fight.splinter then 4 else 3) + 1
+		boss.nextAbility = boss.nextAbility
+				% (if boss.fight.splinter or boss.fight.minotaur then 4 else 3)
+			+ 1
 		humanoid:MoveTo(root.Position)
 		if boss.fight.splinter then
 			SplinterAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
@@ -1334,6 +1356,14 @@ local function think(boss: Boss)
 				hurt = hurt,
 				fighters = fighters,
 				telegraph = telegraphPart,
+			})
+		elseif boss.fight.minotaur then
+			MinotaurAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+				shield = setInvulnerable,
 			})
 		elseif boss.fight.basalt then
 			BasaltAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
@@ -1361,7 +1391,15 @@ local function think(boss: Boss)
 		)
 		if now >= boss.nextMeleeAt then
 			boss.nextMeleeAt = now + boss.fight.meleeCooldown
-			task.spawn(melee, boss, target)
+			if boss.fight.minotaur then
+				MinotaurAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+				})
+			else
+				task.spawn(melee, boss, target)
+			end
 		end
 	else
 		-- chase, but never leave the arena

@@ -1,0 +1,43 @@
+{
+  "parts": 456,
+  "joints": 34,
+  "clips": 16,
+  "maxLocalPositionErrorStuds": 0.007954597415976667,
+  "maxLocalRotationErrorDegrees": 0.3711497769093058,
+  "deathFloorMin": -0.014789409935474396,
+  "deathFloorMax": 0.009455524384975433,
+  "worstPositionAt": [
+    "run",
+    "body",
+    0.2
+  ],
+  "worstRotationAt": [
+    "throws_the_ground",
+    "handL",
+    2.283333333333333
+  ],
+  "maxReleaseOriginErrorStuds": 0.0023829072385086396,
+  "deathStartFeetHeight": -7.282942533493042e-07,
+  "deathFinalTorsoFloor": 1.2037235498428345,
+  "deathFinalShoulderHipSupportHeight": -1.043081283569336e-07,
+  "maxWalkStanceErrorStuds": 0.04585758839447128,
+  "maxTwoHandGripSpacingErrorStuds": 0.0168860778455433,
+  "floorByClip": {
+    "death": {
+      "min": -0.014789409935474396,
+      "max": 0.009455524384975433
+    },
+    "sleep": {
+      "min": 1.4356803148984909e-05,
+      "max": 0.00014802534133195877
+    },
+    "awakening": {
+      "min": -0.007890940643846989,
+      "max": 0.005885671824216843
+    },
+    "stun": {
+      "min": -0.015745028853416443,
+      "max": 0.007841714657843113
+    }
+  }
+}

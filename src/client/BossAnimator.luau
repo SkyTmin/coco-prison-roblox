@@ -231,6 +231,12 @@ local function blockClip(
 		or action == "sword_slash"
 		or action == "sword_smash"
 		or action == "sword_spike"
+		or action == "impact"
+		or action == "double_attack"
+		or action == "throws_the_ground"
+		or action == "minotaur_rush"
+		or action == "awakening"
+		or action == "stun"
 	then
 		local c = clips[action]
 		return action, if c then seconds / length * c.length else 0
@@ -269,14 +275,19 @@ local function animateBlock(rig: Rig, dt: number, root: BasePart, now: number)
 	local clips = prepared.clips
 	local model = rig.model
 	local speed = (root.AssemblyLinearVelocity * Vector3.new(1, 0, 1)).Magnitude
-	local loco = if speed > 1 then "walk" else "idle"
+	local loco = if model:GetAttribute("Sleeping") and clips.sleep
+		then "sleep"
+		elseif clips.run and prepared.runSpeed and speed > prepared.runSpeed * 0.75 then "run"
+		elseif speed > 1 then "walk"
+		else "idle"
 	if loco ~= rig.loco then
 		rig.locoFrom = table.clone(rig.last)
 		rig.locoFadeAt = now
 		rig.loco = loco
 	end
-	rig.locoT += dt * (if loco == "walk"
-		then math.clamp(speed / (prepared.walkSpeed or 8), 0.6, if prepared.walkSpeed then 4 else 2)
+	local strideSpeed = if loco == "run" then prepared.runSpeed else prepared.walkSpeed
+	rig.locoT += dt * (if loco == "walk" or loco == "run"
+		then math.clamp(speed / (strideSpeed or 8), 0.6, if strideSpeed then 4 else 2)
 		else 1)
 	local locoClip = clips[loco]
 	local locoW = if rig.locoFadeAt >= 0 then math.clamp((now - rig.locoFadeAt) / FADE, 0, 1) else 1
