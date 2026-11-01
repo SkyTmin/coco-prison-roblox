@@ -272,7 +272,9 @@ class Mob:
             act = bpy.data.actions[clip + '|root']
             end = max(act['frames'])
             offsets = []
-            meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')]
+            detached = self.g.get('GROUND_DETACHED', {}).get(clip, {})
+            meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')
+                      and o.parent.name.removeprefix('Joint_') not in detached]
             steps = max(1, int(self.g.get('GROUND_SUBSTEPS', 1)))
             for sample in range(math.floor(end*steps)+1):
                 frame = sample / steps
@@ -295,6 +297,30 @@ class Mob:
                                     for key in curve.keyframe_points:
                                         key.interpolation = 'LINEAR'
             act['frames'] = [f for f, _ in offsets]
+            # Optional dropped props: keep the torso grounded independently of the weapon, then
+            # bake the prop's world-floor contact into its local joint (no runtime detached physics).
+            for name, (release, landed) in detached.items():
+                obj = joints[name]; prop_act = bpy.data.actions[clip + '|' + name]
+                prop_meshes = [o for o in bpy.data.objects if o.name.startswith('Part_') and o.parent == obj]
+                values = []
+                for frame, _ in offsets:
+                    self.pose(joints, order, clip, frame)
+                    low = min((o.matrix_world @ Vector(v)).z for o in prop_meshes for v in o.bound_box)
+                    u = max(0, min(1, (frame-release)/(landed-release)))
+                    correction = max(0, -low) if low < 0 else -low*u*u*(3-2*u)
+                    local = obj.parent.matrix_world.to_3x3().inverted() @ Vector((0,0,correction))
+                    values.append((frame, obj.location.copy()+local))
+                use(obj, prop_act)
+                for frame, location in values:
+                    obj.location = location
+                    obj.keyframe_insert('location', frame=frame)
+                for layer in prop_act.layers:
+                    for strip in layer.strips:
+                        for bag in strip.channelbags:
+                            for curve in bag.fcurves:
+                                if curve.data_path == 'location':
+                                    for key in curve.keyframe_points: key.interpolation='LINEAR'
+                prop_act['frames'] = [f for f, _ in values]
         self.pose(joints, list(joints), None, 0)
         scene.frame_end = 96
         bpy.ops.wm.save_as_mainfile(filepath=self.blend)

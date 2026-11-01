@@ -237,6 +237,17 @@ local function blockClip(
 		or action == "minotaur_rush"
 		or action == "awakening"
 		or action == "stun"
+		or action == "verticalatk"
+		or action == "horizontalatk"
+		or action == "footstomp"
+		or action == "spinslam"
+		or action == "bodyslam"
+		or action == "upchuck"
+		or action == "summoningchant"
+		or action == "healing"
+		or action == "spawn"
+		or action == "hurt"
+		or (action == "charge" and not clips.charge_raise)
 	then
 		local c = clips[action]
 		return action, if c then seconds / length * c.length else 0

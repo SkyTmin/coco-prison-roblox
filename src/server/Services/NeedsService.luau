@@ -192,6 +192,10 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	local frost = tonumber(character:GetAttribute("Frost")) or 0
 	local hulk = profile ~= nil and Books.worn(profile, "hulk") > 0
 	-- sprinting [ваниль; владелец 28.10: «как в майнкрафте быстрее бежать»]: ×1.3, not at 6 hunger or less
+	if character:GetAttribute("StopSprint") then
+		state.sprinting = false
+		character:SetAttribute("StopSprint", nil)
+	end
 	local sprint = state.sprinting
 		and profile ~= nil
 		and (profile.hunger > Effects.SPRINT_MIN_HUNGER or player:GetAttribute("Creative") == true)

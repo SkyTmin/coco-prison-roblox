@@ -39,10 +39,10 @@ for(const [name,c] of Object.entries(base.clips)){
 }
 const card=read('scripts/design-decisions.json').bosses.minotaur, f=card.fight;
 const generated=read('src/shared/Config/bosses.json').bosses.find(b=>b.id==='minotaur');
-assert.deepEqual(generated.fight,f);assert.equal(card.hp,1000);assert.equal(card.respawnSeconds,1500);
-assert.equal(f.meleeDamage,2);assert.equal(f.minotaur.impact.damage,4);
-assert.equal(f.minotaur.double_attack.damage*f.minotaur.double_attack.hits.length,4);
-assert.equal(f.minotaur.throws_the_ground.damage,4);assert.equal(f.minotaur.minotaur_rush.damage,5);
+assert.deepEqual(generated.fight,f);assert.equal(card.hp,430);assert.equal(card.respawnSeconds,1500);
+assert.equal(f.meleeDamage,4);assert.equal(f.minotaur.impact.damage,7);
+assert.equal(f.minotaur.double_attack.damage*f.minotaur.double_attack.hits.length,8);
+assert.equal(f.minotaur.throws_the_ground.damage,7);assert.equal(f.minotaur.minotaur_rush.damage,9);
 for(const name of ['impact','double_attack','throws_the_ground','minotaur_rush']){
   const c=f.minotaur[name];assert(Math.abs(c.duration-base.clips[name].length)<.0001);
   assert((c.release||c.hits.at(-1))<c.duration);

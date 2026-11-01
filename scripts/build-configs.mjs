@@ -245,7 +245,7 @@ const bosses = bossWiki.entries.map((e) => {
 	};
 });
 for (const [id, b] of Object.entries(decisions.bosses)) if (b.name && !bosses.some((x) => x.id === id)) bosses.push({ id, name: b.name, location: b.location, unlockLevel: b.unlockLevel, locationId: b.locationId ?? null, nameEn: b.nameEn ?? null, fight: b.fight ?? null, money: b.money, ancientStars: b.ancientStars ?? null, powderChance: b.powderChance ?? null, shard: null, hp: b.hp, damage: b.damage, respawnSeconds: b.respawnSeconds });
-write("bosses.json", { source: "boss-menu-recovery.json [меню]; hp/damage/respawn [решение]", rewards: decisions.bossRewards, bosses });
+write("bosses.json", { source: "boss-menu-recovery.json [меню]; hp/damage/respawn [решение]", safety: decisions.bossSafety, rewards: decisions.bossRewards, bosses });
 
 // ---------------------------------------------------------------- pure decisions
 write("mobs.json", { source: "[решение]", mobs: decisions.mobs });

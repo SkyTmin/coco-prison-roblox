@@ -26,11 +26,11 @@ assert.equal(d.clips.melee.length,f.meleeDuration);assert.equal(d.clips.melee.im
 assert.equal(f.deathDuration,d.clips.death.length);
 for(const name of ['sword_slash','sword_smash','sword_spike']){
   const c=f.basalt[name];assert.equal(c.duration,d.clips[name].length);assert.equal(c.release,d.clips[name].impact);
-  assert(c.release>0&&c.release<c.duration);assert.equal(c.damage,.5);
+  assert(c.release>0&&c.release<c.duration);assert.equal(c.damage,4);
   assert(c.duration<f.abilityCooldown*f.phase2CooldownScale);
 }
 assert(f.basalt.sword_slash.release+f.basalt.sword_slash.length/f.basalt.sword_slash.speed<f.basalt.sword_slash.duration);
-assert.equal(card.hp,200);assert.equal(f.meleeDamage,.2);assert.equal(card.respawnSeconds,1200);
+assert.equal(card.hp,280);assert.equal(f.meleeDamage,2);assert.equal(card.respawnSeconds,1200);
 assert.equal(f.glowBrightness,0);
 assert.equal(f.texture,JSON.parse(fs.readFileSync('assets/models/basalt_guardian/ids.json','utf8'))['noise.png']);
 for(const n of ['body','chest','head','armL','armR','shinL','shinR','sword'])assert(d.clips.death.tracks[n]?.length>4,`${n}: articulated collapse`);

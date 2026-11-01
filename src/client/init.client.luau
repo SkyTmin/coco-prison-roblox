@@ -2618,8 +2618,7 @@ end)
 -- target, the character turns to it and the blow is aimed at it (the server re-aims at where it is when the
 -- blow lands); a press a little early is buffered instead of lost; hit feedback follows server confirmation.
 local attackState: Combat.ComboState = { lastAt = -math.huge, index = 0 }
-local attackQueued = false
-local BUFFER = 0.2 -- s before the weapon is ready in which a press is kept for later
+
 local function heldKind(): (string, number)
 	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
 	local toolId = if stack and Config.tools[stack.id] then stack.id else nil
@@ -2633,21 +2632,17 @@ local function attack(repeating: boolean?)
 	end
 	local kind, duration = heldKind()
 	local now = os.clock()
-	local readyAt = attackState.lastAt + duration * 0.85
-	if now < readyAt then
-		-- Weapon recovery limits damage, never the hand. Held input finishes each short cycle;
-		-- a fresh tap can restart its return half without pinning the arm at the first frame.
+	local reset = player.Character and tonumber(player.Character:GetAttribute("AttackResetAt"))
+		or -math.huge
+	local elapsed = math.min(now - attackState.lastAt, workspace:GetServerTimeNow() - reset)
+	if
+		(repeating and elapsed < duration)
+		or now - attackState.lastAt < Config.rules.combat.attackIntentMinSeconds
+	then
 		if HeldItem.Swing(repeating) then
 			CombatFeel.OnSwing()
 		end
-		if readyAt - now <= BUFFER and not attackQueued then
-			attackQueued = true
-			task.delay(readyAt - now + 0.01, function()
-				attackQueued = false
-				attack(true)
-			end)
-		end
-		return -- the next server attack must still respect the weapon's recovery
+		return
 	end
 	local _, blow = Combat.next(attackState, kind, duration, now)
 	local target = CombatFeel.Target()
@@ -2671,7 +2666,33 @@ local function attack(repeating: boolean?)
 		require(script.Motion).viewTime()
 	)
 end
--- Held input keeps the short hand cycles going; damage stays at the weapon's pace.
+-- Small Java-style recovery meter below the crosshair, independent of the fast hand animation.
+do
+	local meter = Instance.new("Frame")
+	meter.Name, meter.AnchorPoint, meter.Position =
+		"AttackRecovery", Vector2.new(0.5, 0), UDim2.new(0.5, 0, 1, 6)
+	meter.Size, meter.BackgroundColor3, meter.BorderSizePixel =
+		UDim2.fromOffset(24, 4), Color3.new(0, 0, 0), 0
+	meter.Parent = crosshair
+	local fill = Instance.new("Frame")
+	fill.Position, fill.Size, fill.BorderSizePixel =
+		UDim2.fromOffset(1, 1), UDim2.new(0, 0, 1, -2), 0
+	fill.Parent = meter
+	RunService.RenderStepped:Connect(function()
+		local _, duration = heldKind()
+		local reset = player.Character and tonumber(player.Character:GetAttribute("AttackResetAt"))
+			or -math.huge
+		local elapsed =
+			math.min(os.clock() - attackState.lastAt, workspace:GetServerTimeNow() - reset)
+		local p = math.clamp(elapsed / duration, 0, 1)
+		meter.Visible = p < 1 and not currentWindowKind and not holding
+		fill.Size = UDim2.new(p, -2 * p, 1, -2)
+		fill.BackgroundColor3 = if Combat.charge(elapsed, duration) > 0.9
+			then Color3.fromRGB(239, 202, 108)
+			else Color3.fromRGB(220, 220, 220)
+	end)
+end
+-- Holding keeps fast hand cycles and sends a fully recovered hit each weapon period.
 local attackHeld = false
 RunService.Heartbeat:Connect(function()
 	if attackHeld and not currentWindowKind and not holding then
@@ -3287,7 +3308,7 @@ do
 			return
 		end
 		local _, duration = heldKind()
-		local left = math.clamp(1 - (os.clock() - attackState.lastAt) / (duration * 0.85), 0, 1)
+		local left = math.clamp(1 - (os.clock() - attackState.lastAt) / duration, 0, 1)
 		cooldown.Size = UDim2.fromScale(left * 1.4, left * 1.4)
 	end)
 end

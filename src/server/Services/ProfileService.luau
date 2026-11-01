@@ -556,10 +556,11 @@ function ProfileService.Replicate(player: Player)
 		local character = player.Character
 		local stack = session.profile.inventory[session.profile.selectedSlot]
 		if character then
-			character:SetAttribute(
-				"HeldItem",
-				if stack then stack.id .. ":" .. tostring(stack.level or 0) else ""
-			)
+			local held = if stack then stack.id .. ":" .. tostring(stack.level or 0) else ""
+			if character:GetAttribute("HeldItem") ~= held then
+				character:SetAttribute("AttackResetAt", workspace:GetServerTimeNow())
+			end
+			character:SetAttribute("HeldItem", held)
 			local armor: { string } = {}
 			for _, id in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
 				local piece = session.profile.armor[id]

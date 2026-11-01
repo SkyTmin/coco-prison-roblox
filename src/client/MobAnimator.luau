@@ -120,7 +120,11 @@ local function step(dt: number)
 			e.clipAt = at
 		elseif name == "walk" then
 			local v = e.root.AssemblyLinearVelocity
-			e.clipAt += dt * math.clamp(Vector3.new(v.X, 0, v.Z).Magnitude / WALK_SPEED, 0.5, 2)
+			e.clipAt += dt * math.clamp(
+				Vector3.new(v.X, 0, v.Z).Magnitude / (e.rig.walkSpeed or WALK_SPEED),
+				0.5,
+				if e.rig.walkSpeed then 4 else 2
+			)
 		else
 			e.clipAt += dt
 		end

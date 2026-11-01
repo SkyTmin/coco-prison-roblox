@@ -15,6 +15,11 @@ local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
 local MotionService = require(script.Parent.MotionService)
 local Combat = require(Shared.Combat)
+local BossDamage = require(script.Parent.BossDamage)
+local DamageImmunity = require(script.Parent.DamageImmunity)
+local Effects = require(Shared.Effects)
+local Ladders = require(Shared.Ladders)
+local Cobweb = require(Shared.Cobweb)
 local Types = require(Shared.Types)
 
 local CombatService = {}
@@ -46,9 +51,9 @@ function CombatService.ApplyDamage(
 	source: "player" | "boss" | "mob",
 	attacker: Player?,
 	attackerModel: Model?
-)
+): boolean
 	if amount ~= amount or amount <= 0 or amount == math.huge or humanoid.Health <= 0 then
-		return
+		return false
 	end
 	local character = humanoid.Parent
 	if
@@ -58,11 +63,15 @@ function CombatService.ApplyDamage(
 			or character:GetAttribute("Shielded") == true -- a boss casting a skill
 		)
 	then
-		return
+		return false
 	end
 	local victim = if character and character:IsA("Model")
 		then Players:GetPlayerFromCharacter(character)
 		else nil
+	amount = DamageImmunity.Accept(humanoid, amount)
+	if amount <= 0 then
+		return false
+	end
 	if victim then
 		CombatService.MarkHit(victim, source, attacker)
 		-- worn armor and Protection soften blows from players, mobs and bosses [ваниль]
@@ -72,10 +81,16 @@ function CombatService.ApplyDamage(
 			-- the armor's ancient books: Шныр, Халк, and the answers to the attacker
 			local by = attackerModel or (if attacker then attacker.Character else nil)
 			amount = BookService.incoming(victim, profile, amount, source, by)
+			if source == "boss" then
+				amount = BossDamage.Limit(humanoid, amount)
+			end
 			local before = humanoid.Health
 			HurtService.Damage(humanoid, amount)
 			BookService.afterHurt(victim, profile, before - humanoid.Health, by)
-			return
+			return amount > 0
+		end
+		if source == "boss" then
+			amount = BossDamage.Limit(humanoid, amount)
 		end
 	else
 		humanoid:SetAttribute(
@@ -85,6 +100,7 @@ function CombatService.ApplyDamage(
 		humanoid:SetAttribute("LastHitAt", os.clock())
 	end
 	HurtService.Damage(humanoid, amount)
+	return amount > 0
 end
 
 function CombatService.remainingSeconds(player: Player): number
@@ -103,21 +119,18 @@ local function weapon(profile): (number, number)
 	local toolId, level = InventoryService.heldTool(profile)
 	local vanilla = Config.vanilla
 	if not toolId then
-		return vanilla.handDamage or 1, (vanilla.attackSpeed and vanilla.attackSpeed.hand) or 4
+		return vanilla.handDamage or 1, 0
 	end
 	local material = Config.materialForLevel(level)
 	local damage = 1
-	local speed = 4
+	local enchant = 0
 	if toolId == "sword" then
 		damage = vanilla.swordDamage[material]
-			+ Config.sharpnessBonus(Config.enchantPower("sword", level))
-		speed = vanilla.attackSpeed.sword
+		enchant = Config.sharpnessBonus(Config.enchantPower("sword", level))
 	elseif vanilla.toolDamage and vanilla.toolDamage[toolId] then
 		damage = vanilla.toolDamage[toolId][material]
-		local s = vanilla.attackSpeed[toolId]
-		speed = if typeof(s) == "table" then s[material] else s
 	end
-	return damage, speed
+	return damage, enchant
 end
 
 -- Better Combat-style melee [владелец 22.10]: the attack hits along an arc in front of the player, measured
@@ -234,12 +247,21 @@ function CombatService.HitModel(
 	crit: boolean,
 	look: Vector3,
 	weapon: Types.ItemStack?, -- the bow an arrow left (melee: the held item)
-	ranged: boolean?
+	ranged: boolean?,
+	melee: { prepared: boolean?, sweep: boolean?, sprint: boolean? }?
 ): string
 	-- the weapon's ancient books (BookService): Берсерк, Боксёр, Ярость before the blow, the rest after it
 	weapon = weapon or profile.inventory[profile.selectedSlot]
 	local bookHit
-	damage, bookHit = BookService.outgoing(player, weapon, model, damage)
+	if not (melee and melee.sweep) then
+		damage, bookHit = BookService.outgoing(
+			player,
+			weapon,
+			model,
+			damage,
+			ranged ~= true and not (melee and melee.prepared)
+		)
+	end
 	local target = model:FindFirstChildOfClass("Humanoid")
 	if not target or target.Health <= 0 then
 		return "blocked"
@@ -265,8 +287,10 @@ function CombatService.HitModel(
 		if mine and mine.pvp and other and other.pvp and not sameFaction then
 			local before = target.Health
 			CombatService.ApplyDamage(target, damage, "player", player)
-			HurtService.Knockback(model, look)
 			local dealt = before - target.Health
+			if dealt > 0 then
+				HurtService.Knockback(model, look, if melee and melee.sprint then 2 else 1)
+			end
 			local result = if target.Health <= 0
 				then "killed"
 				elseif dealt > 0 then "hit"
@@ -275,16 +299,18 @@ function CombatService.HitModel(
 			if crit and dealt > 0 then
 				critBurst(model, player)
 			end
-			BookService.afterHit(
-				player,
-				profile,
-				weapon,
-				model,
-				dealt,
-				look,
-				ranged == true,
-				bookHit
-			)
+			if not (melee and melee.sweep) then
+				BookService.afterHit(
+					player,
+					profile,
+					weapon,
+					model,
+					dealt,
+					look,
+					ranged == true,
+					bookHit
+				)
+			end
 			return result
 		end
 		local result = if sameFaction then "ally" else "nopvp"
@@ -295,18 +321,31 @@ function CombatService.HitModel(
 		confirm:FireClient(player, model, 0, false, "blocked")
 		return "blocked"
 	end
+	damage = DamageImmunity.Accept(
+		target,
+		damage,
+		if CollectionService:HasTag(model, "Boss") then player.UserId else nil
+	)
+	if damage <= 0 then
+		confirm:FireClient(player, model, 0, false, "blocked")
+		return "blocked"
+	end
 	target:SetAttribute("LastHitBy", player.UserId)
 	target:SetAttribute("LastHitAt", os.clock())
 	local before = target.Health
 	HurtService.Damage(target, damage)
-	HurtService.Knockback(model, look)
 	local dealt = before - target.Health
+	if dealt > 0 then
+		HurtService.Knockback(model, look, if melee and melee.sprint then 2 else 1)
+	end
 	local result = if target.Health <= 0 then "killed" else "hit"
 	confirm:FireClient(player, model, dealt, crit, result)
 	if crit and dealt > 0 then
 		critBurst(model, player)
 	end
-	BookService.afterHit(player, profile, weapon, model, dealt, look, ranged == true, bookHit)
+	if not (melee and melee.sweep) then
+		BookService.afterHit(player, profile, weapon, model, dealt, look, ranged == true, bookHit)
+	end
 	return result
 end
 
@@ -331,31 +370,88 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 	local now = os.clock()
 	local state = combos[player] or { lastAt = -math.huge, index = 0 }
 	combos[player] = state
-	if now - state.lastAt < duration * 0.7 then
-		return -- still swinging: attacks come at the weapon's pace (lenient: the client clock jitters)
+	if now - state.lastAt < Config.rules.combat.attackIntentMinSeconds then
+		return -- network flood limit; ordinary early clicks still make weak attacks
 	end
+	local resetAt = tonumber(character:GetAttribute("AttackResetAt")) or -math.huge
+	local elapsed = math.min(now - state.lastAt, workspace:GetServerTimeNow() - resetAt)
+	local charge = Combat.charge(elapsed, duration)
 	local _, attack = Combat.next(state, kind, duration, now)
-	local baseDamage = weapon(profile)
-	-- critical hit like Minecraft: struck while falling after a jump (not on a ladder, not in water). The
-	-- client knows its own fall exactly (here the velocity arrives late); the server checks it is airborne.
+	local held = profile.inventory[profile.selectedSlot]
+	local base, enchant = weapon(profile)
+	base = math.max(
+		0,
+		base + 3 * Effects.level(character, "Strength") - 4 * Effects.level(character, "Weakness")
+	)
 	local stateNow = humanoid:GetState()
-	local crit = falling == true
-		and humanoid.FloorMaterial == Enum.Material.Air
-		and stateNow ~= Enum.HumanoidStateType.Climbing
-		and stateNow ~= Enum.HumanoidStateType.Swimming
-	if crit then
-		baseDamage *= Config.rules.combat.crit.multiplier
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local sprint = character:GetAttribute("Sprinting") == true and charge > 0.9
+	local restricted = sprint
+		or humanoid.Sit
+		or stateNow == Enum.HumanoidStateType.Climbing
+		or stateNow == Enum.HumanoidStateType.Swimming
+		or stateNow == Enum.HumanoidStateType.Flying
+		or Ladders.near(character) ~= nil
+		or Cobweb.holds(character)
+		or Effects.level(character, "Blindness") > 0
+		or Effects.level(character, "SlowFalling") > 0
+		or Effects.level(character, "Levitation") > 0
+	local function observedGrounded(): boolean
+		if not root or not root:IsA("BasePart") then
+			return true
+		end
+		local cf = MotionService.rootAt(player) or root.CFrame
+		local ray = RaycastParams.new()
+		ray.FilterType, ray.FilterDescendantsInstances =
+			Enum.RaycastFilterType.Exclude, { character }
+		ray.RespectCanCollide = true
+		return workspace:Raycast(
+			cf.Position,
+			Vector3.new(0, -root.Size.Y / 2 - humanoid.HipHeight - 0.18, 0),
+			ray
+		) ~= nil
 	end
+	local function observedCrit(): boolean
+		if not root or not root:IsA("BasePart") then
+			return false
+		end
+		local speed = MotionService.verticalSpeed(player) or root.AssemblyLinearVelocity.Y
+		return Combat.canCrit(
+			charge,
+			falling == true and speed < -0.5,
+			observedGrounded(),
+			restricted
+		)
+	end
+	local crit = observedCrit()
+	local baseDamage = Combat.meleeDamage(base, enchant, charge, crit)
+	local sweep = kind == "sword"
+		and charge > 0.9
+		and not crit
+		and not sprint
+		and observedGrounded()
 	local look = direction.Unit
-	-- Hit on the short visible swing; weapon recovery still controls how often damage can land.
+	-- Hit on the short visible swing; weapon recovery controls damage strength, not visual cadence.
 	local upswing = math.min(duration, Combat.SWING_SECONDS) * attack.upswing
 	-- lag compensation: the blow lands upswing seconds after the moment the attacker was looking at
 	local seen = MotionService.viewTime(viewTime)
 	local at = if seen then seen + upswing else nil
 	task.delay(upswing, function()
 		local head = character:FindFirstChild("Head")
-		if not character.Parent or humanoid.Health <= 0 or not head or not head:IsA("BasePart") then
+		if
+			player.Character ~= character
+			or not character.Parent
+			or humanoid.Health <= 0
+			or not head
+			or not head:IsA("BasePart")
+			or profile.inventory[profile.selectedSlot] ~= held
+		then
 			return
+		end
+		-- Recheck at visible contact as well: a fall just after the apex may arrive after Attack.
+		if not crit and observedCrit() then
+			crit, sweep = true, false
+			baseDamage = Combat.meleeDamage(base, enchant, charge, true)
 		end
 		local eye = head.Position
 		local range = Combat.range(kind)
@@ -387,19 +483,74 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 				end
 			end
 		end
+		local valid = {}
+		local visited = {}
+		local ray = RaycastParams.new()
+		ray.FilterType = Enum.RaycastFilterType.Exclude
+		ray.FilterDescendantsInstances = { character }
+		ray.RespectCanCollide = true
 		for _, model in ipairs(candidates) do
 			local target = model:FindFirstChildOfClass("Humanoid")
-			if target and target.Health > 0 then
+			if target and target.Health > 0 and not visited[model] then
+				visited[model] = true
 				local cf, size = CombatService.targetBox(model, at)
-				if insideArc(attack, eye, look, cf, size, range) then
-					CombatService.HitModel(
-						player,
-						profile,
-						model,
-						baseDamage * attack.damage,
-						crit,
-						look
-					)
+				local point = closestPoint(cf, size, eye)
+				local obstacle = workspace:Raycast(eye, point - eye, ray)
+				if
+					insideArc(attack, eye, look, cf, size, range)
+					and (not obstacle or obstacle.Instance:IsDescendantOf(model))
+				then
+					table.insert(valid, { model = model, distance = (point - eye).Magnitude })
+				end
+			end
+		end
+		table.sort(valid, function(a, b)
+			if a.model == hint then
+				return true
+			end
+			if b.model == hint then
+				return false
+			end
+			return a.distance < b.distance
+		end)
+		local primary = valid[1]
+		if primary then
+			local outcome = CombatService.HitModel(
+				player,
+				profile,
+				primary.model,
+				baseDamage,
+				crit,
+				look,
+				held,
+				false,
+				{ prepared = true, sprint = sprint }
+			)
+			if outcome == "hit" or outcome == "killed" then
+				if sprint then
+					character:SetAttribute("StopSprint", true)
+				end
+				if sweep then
+					local primaryCf, primarySize = CombatService.targetBox(primary.model, at)
+					for i = 2, #valid do
+						local cf = CombatService.targetBox(valid[i].model, at)
+						if
+							(closestPoint(primaryCf, primarySize, cf.Position) - cf.Position).Magnitude
+							<= Config.rules.combat.blockStuds
+						then
+							CombatService.HitModel(
+								player,
+								profile,
+								valid[i].model,
+								1,
+								false,
+								look,
+								held,
+								false,
+								{ prepared = true, sweep = true }
+							)
+						end
+					end
 				end
 			end
 		end

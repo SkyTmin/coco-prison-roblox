@@ -27,6 +27,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local BossLoot = require(Shared.BossLoot)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -41,6 +42,7 @@ local CollisionGroups = require(script.Parent.CollisionGroups)
 local SplinterAbilities = require(script.Parent.SplinterAbilities)
 local BasaltAbilities = require(script.Parent.BasaltAbilities)
 local MinotaurAbilities = require(script.Parent.MinotaurAbilities)
+local PiglinAbilities = require(script.Parent.PiglinAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -556,7 +558,9 @@ local function publish(boss: Boss)
 	boss.state:SetAttribute("MaxHealth", boss.card.hp)
 	boss.state:SetAttribute(
 		"Invulnerable",
-		os.clock() < boss.busyUntil and os.clock() >= boss.stunnedUntil
+		boss.model ~= nil
+			and boss.model:GetAttribute("Shielded") == true
+			and os.clock() >= boss.stunnedUntil
 	)
 	boss.state:SetAttribute("Stunned", os.clock() < boss.stunnedUntil)
 	boss.dirty = true
@@ -685,7 +689,9 @@ local function hurt(
 	amount: number,
 	from: Vector3
 )
-	CombatService.ApplyDamage(f.humanoid, amount, "boss", nil, boss.model)
+	if not CombatService.ApplyDamage(f.humanoid, amount, "boss", nil, boss.model) then
+		return
+	end
 	HurtService.Knockback(
 		f.player.Character :: Model,
 		(f.root.Position - from) * Vector3.new(1, 0, 1)
@@ -978,11 +984,6 @@ local spawnBoss: (boss: Boss, saved: Saved?) -> ()
 -- hitter the powder (chance from the card's «1–N %», higher with a bigger damage share [решение]) and the shard of the
 -- late bosses. Items that do not fit go to the storage [B] (p.stash).
 local random = Random.new()
-local LAST_HIT_SHARDS: { [string]: { string } } = {
-	forest_spirit = { "moon_steel" }, -- Лесной дух
-	ent = { "moon_steel" }, -- Грут
-	the_lovers = { "fire_shard" }, -- Самурай
-}
 local function grant(p: any, id: string, count: number)
 	local left = InventoryService.add(p, id, count)
 	if left > 0 then
@@ -1000,28 +1001,6 @@ local function grant(p: any, id: string, count: number)
 		p.stash = stash
 	end
 end
-local function killItems(boss: Boss, share: number, isLast: boolean): { [string]: number }
-	local items: { [string]: number } = {}
-	local stars = boss.card.ancientStars
-	if typeof(stars) == "table" and #stars == 2 then
-		items.ancient_star = random:NextInteger(stars[1], stars[2])
-	end
-	if isLast then
-		local powder = boss.card.powderChance
-		local q = typeof(powder) == "table" and powder.percentQualifier or nil
-		if q and typeof(q.min) == "number" and typeof(q.max) == "number" then
-			local chance = (q.min + (q.max - q.min) * math.clamp(share, 0, 1)) / 100
-			if random:NextNumber() < chance then
-				items.ancient_powder = 1
-			end
-		end
-		for _, shard in ipairs(LAST_HIT_SHARDS[boss.card.id] or {}) do
-			items[shard] = (items[shard] or 0) + 1
-		end
-	end
-	return items
-end
-
 local function reward(boss: Boss, lastHit: number?)
 	local total = 0
 	for _, dealt in pairs(boss.damageBy) do
@@ -1073,7 +1052,7 @@ local function reward(boss: Boss, lastHit: number?)
 						* (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
 				)
 			)
-			local items = killItems(boss, share, lastHit == player.UserId)
+			local items = BossLoot.Roll(boss.card, share, lastHit == player.UserId, random)
 			if items.ancient_star and starMult > 1 then
 				local stars = items.ancient_star * starMult
 				items.ancient_star = math.floor(stars)
@@ -1146,6 +1125,7 @@ local function died(boss: Boss)
 	SplinterAbilities.Clear(boss)
 	BasaltAbilities.Clear(boss)
 	MinotaurAbilities.Clear(boss)
+	PiglinAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
 	end
@@ -1296,6 +1276,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 	boss.state:SetAttribute("RespawnAt", 0)
 	if boss.fight.minotaur and humanoid.Health == humanoid.MaxHealth then
 		MinotaurAbilities.Sleep(boss)
+	elseif boss.fight.piglin then
+		PiglinAbilities.Spawn(boss, { act = act })
 	else
 		if boss.fight.minotaur then
 			MinotaurAbilities.Bindings(boss, false)
@@ -1308,12 +1290,24 @@ function spawnBoss(boss: Boss, saved: Saved?)
 	-- the arena's countdown board (BossHud) shows when a boss is up
 end
 
-local function think(boss: Boss)
+local function think(boss: Boss, dt: number)
 	local root, humanoid = boss.root, boss.humanoid
-	if not root or not humanoid or humanoid.Health <= 0 or os.clock() < boss.busyUntil then
+	if not root or not humanoid or humanoid.Health <= 0 then
 		return
 	end
 	local list = fighters(boss)
+	local regen = boss.fight.combatRegenPerSecond or 0
+	if
+		regen > 0
+		and #list > 0
+		and next(boss.damageBy) ~= nil
+		and humanoid.Health < humanoid.MaxHealth
+	then
+		humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + regen * dt)
+	end
+	if os.clock() < boss.busyUntil then
+		return
+	end
 	if #list == 0 then
 		if boss.model and boss.model:GetAttribute("Sleeping") then
 			return
@@ -1347,11 +1341,21 @@ local function think(boss: Boss)
 			+ boss.fight.abilityCooldown
 				* (if phase2 then boss.fight.phase2CooldownScale else 1)
 		boss.nextAbility = boss.nextAbility
-				% (if boss.fight.splinter or boss.fight.minotaur then 4 else 3)
+				% (if boss.fight.piglin
+					then 7
+					elseif boss.fight.splinter or boss.fight.minotaur then 4
+					else 3)
 			+ 1
 		humanoid:MoveTo(root.Position)
 		if boss.fight.splinter then
 			SplinterAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.piglin then
+			PiglinAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1391,7 +1395,13 @@ local function think(boss: Boss)
 		)
 		if now >= boss.nextMeleeAt then
 			boss.nextMeleeAt = now + boss.fight.meleeCooldown
-			if boss.fight.minotaur then
+			if boss.fight.piglin then
+				PiglinAbilities.Melee(
+					boss,
+					target.root.Position,
+					{ act = act, hurt = hurt, fighters = fighters, telegraph = telegraphPart }
+				)
+			elseif boss.fight.minotaur then
 				MinotaurAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
@@ -1511,9 +1521,10 @@ function BossService.Start()
 	RunService.Heartbeat:Connect(function(dt)
 		thinkAt += dt
 		if thinkAt >= 0.15 then
+			local elapsed = math.min(thinkAt, 0.5) -- no large heal after a paused / stalled frame
 			thinkAt = 0
 			for _, boss in pairs(bosses) do
-				think(boss)
+				think(boss, elapsed)
 			end
 		end
 	end)

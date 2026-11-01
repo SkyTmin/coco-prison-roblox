@@ -20,6 +20,30 @@ local Combat = {}
 Combat.SWING_SECONDS = 0.22 -- [владелец 01.11; длительность — решение] visual strike, independent of damage recovery
 local rules = Config.rules.combat
 
+-- Java samples half a game tick ahead. Critical eligibility uses p > .9 (84.8% base damage).
+function Combat.charge(elapsed: number, duration: number): number
+	return math.clamp((math.max(0, elapsed) + 0.025) / math.max(0.05, duration), 0, 1)
+end
+
+function Combat.meleeDamage(
+	base: number,
+	enchant: number,
+	charge: number,
+	critical: boolean
+): number
+	local p = math.clamp(charge, 0, 1)
+	return math.max(0, base) * (0.2 + 0.8 * p * p) * (if critical then 1.5 else 1) + enchant * p
+end
+
+function Combat.canCrit(
+	charge: number,
+	falling: boolean,
+	grounded: boolean,
+	restricted: boolean
+): boolean
+	return charge > 0.9 and falling and not grounded and not restricted
+end
+
 -- the weapon kind of a held item id ("sword", "axe", "pickaxe", "shovel" or "hand")
 function Combat.kind(itemId: string?): string
 	if itemId and rules.weapons[itemId] then

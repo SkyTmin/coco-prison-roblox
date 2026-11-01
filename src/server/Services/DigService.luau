@@ -312,6 +312,9 @@ local function complete(player: Player, token: number)
 		return
 	end
 	queueBreakFx(player, brokenCFrame.Position, brokenSize, brokenColor, blockId)
+	if player.Character then
+		player.Character:SetAttribute("AttackResetAt", workspace:GetServerTimeNow())
+	end
 	local block = Config.block(blockId) :: Config.Block
 	-- Шёлковое касание: the block drops itself
 	local dropId = if BookService.silkTouch(profileNow) then blockId else block.dropsAs or blockId

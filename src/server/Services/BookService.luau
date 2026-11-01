@@ -385,7 +385,7 @@ local function enchantFx(owner: Player, kind: string, model: Model, power: numbe
 end
 
 -- ---------------------------------------------------------------- combat: blows given
-export type Hit = { boxer: boolean }
+export type Hit = { boxer: boolean, rageStep: number? }
 
 -- the damage of a blow after the weapon's books (before it lands): Берсерк, Боксёр, Ярость, and the attacker's
 -- Слабость
@@ -393,15 +393,18 @@ function BookService.outgoing(
 	attacker: Player,
 	weapon: Types.ItemStack?,
 	model: Model,
-	damage: number
+	damage: number,
+	applyStatuses: boolean?
 ): (number, Hit)
 	local hit: Hit = { boxer = false }
 	local character = attacker.Character
 	local humanoid = character and humanoidOf(character)
 	-- Сила: +3 per level [ваниль] (a potion, the random event)
-	damage += Potions.STRENGTH_DAMAGE * Effects.level(character, "Strength")
-	if character and BookService.active(character, "Weakness") > 0 then
-		damage *= 1 - Effects.WEAKNESS
+	if applyStatuses ~= false then
+		damage += Potions.STRENGTH_DAMAGE * Effects.level(character, "Strength")
+		if character and BookService.active(character, "Weakness") > 0 then
+			damage *= 1 - Effects.WEAKNESS
+		end
 	end
 	if humanoid and humanoid.Health < BERSERK_BELOW and roll(Books.value(weapon, "berserk")) then
 		damage *= 2
@@ -412,15 +415,11 @@ function BookService.outgoing(
 	end
 	local step = Books.value(weapon, "rage")
 	if step > 0 then
+		hit.rageStep = step
 		local streak = rage[attacker]
 		local t = os.clock()
 		if streak and streak.target == model and t - streak.at < RAGE_RESET then
 			damage *= 1 + step * streak.stacks
-			streak.stacks = math.min(RAGE_MAX, streak.stacks + 1)
-			streak.at = t
-			enchantFx(attacker, "rage", model, streak.stacks)
-		else
-			rage[attacker] = { target = model, stacks = 1, at = t }
 		end
 	end
 	return damage, hit
@@ -439,6 +438,16 @@ function BookService.afterHit(
 )
 	if dealt <= 0 then
 		return
+	end
+	-- Immune / failed weak clicks must not build a free rage streak.
+	if hit and hit.rageStep then
+		local streak, t = rage[attacker], os.clock()
+		if streak and streak.target == model and t - streak.at < RAGE_RESET then
+			streak.stacks, streak.at = math.min(RAGE_MAX, streak.stacks + 1), t
+			enchantFx(attacker, "rage", model, streak.stacks)
+		else
+			rage[attacker] = { target = model, stacks = 1, at = t }
+		end
 	end
 	local target = humanoidOf(model)
 	local alive = target ~= nil and target.Health > 0

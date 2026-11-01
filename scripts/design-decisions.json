@@ -1055,16 +1055,15 @@
   "bosses": {
     "basalt_guardian": {
       "_owner": "[владелец 22.10] босс каменоломни: урон почти нулевой (это 3-й уровень), появляется каждые 20 минут, сверху бар с именем и HP; арена в пещере каменоломни",
-      "_hp": "[владелец 22.10] у босса 200 HP",
-      "hp": 200,
-      "damage": 0.2,
+      "hp": 280,
+      "damage": 2,
       "respawnSeconds": 1200,
       "unlockLevel": 3,
       "locationId": "quarry",
       "nameEn": "Basalt Guardian",
       "_abilities": "[вики] клинок из лавы и шипы из земли; во время анимаций урон по боссу не проходит [клиент]. Параметры — [решение]",
       "fight": {
-        "meleeDamage": 0.2,
+        "meleeDamage": 2,
         "meleeRange": 6,
         "meleeCooldown": 2.5,
         "walkSpeed": 9,
@@ -1079,12 +1078,12 @@
           "length": 34,
           "width": 6,
           "speed": 55,
-          "damage": 0.5
+          "damage": 4
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 0.5,
+          "damage": 4,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1093,7 +1092,7 @@
           "speed": 42,
           "maxDistance": 40,
           "width": 6,
-          "damage": 0.5,
+          "damage": 5,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1107,21 +1106,42 @@
         "glowBrightness": 0,
         "basalt": {
           "_source": "[клиент RESOURCEPACK-BOSSES] attack_1 1,5 с; sword_slash 1,8; sword_smash 3,5; sword_spike 4; death 4. [вики BOSS-CARDS] клинок из застывшей лавы и базальтовые шипы. Точные контакты/геометрия/ограничение эффектов — [решение 01.11], прежний слабый урон сохранён; заменяет общий таран",
-          "sword_slash": { "duration": 1.8, "release": 0.7, "length": 34, "width": 6, "speed": 55, "damage": 0.5 },
-          "sword_smash": { "duration": 3.5, "release": 1.9, "forward": 1.2, "radius": 8, "damage": 0.5 },
-          "sword_spike": { "duration": 4, "release": 2.15, "radius": 4.5, "damage": 0.5, "perTarget": 1, "perTargetPhase2": 3, "maxSpots": 18 }
+          "sword_slash": {
+            "duration": 1.8,
+            "release": 0.7,
+            "length": 34,
+            "width": 6,
+            "speed": 55,
+            "damage": 4
+          },
+          "sword_smash": {
+            "duration": 3.5,
+            "release": 1.9,
+            "forward": 1.2,
+            "radius": 8,
+            "damage": 4
+          },
+          "sword_spike": {
+            "duration": 4,
+            "release": 2.15,
+            "radius": 4.5,
+            "damage": 4,
+            "perTarget": 1,
+            "perTargetPhase2": 3,
+            "maxSpots": 18
+          }
         },
         "template": "basalt_guardian",
         "scale": 0.55
       },
       "_charge": "[coco-instruments origin/prod, Минотавр этаж 5 / Древний страж этаж 11; docs/research/boss-from-instruments.md] таран по красной полосе; в колонну — оглушение 3,0 с, в стену — 2,3 с; оглушённый получает ×1,7 урона. Скорость/дальность — [решение]",
-      "_damage": "[владелец 22.10] «урон минимальный, практически без урона» (3-й уровень): удар 0,2 HP раз в 2,5 с, способности по 0,5 HP (у игрока 20 HP); первая проверка с 0,5/1 HP сняла 6 сердец за 40 с — слишком много",
       "_model": "[владелец 22.10] «слишком квадратный, слишком большой»: модель — Creator Store 12485514619 «Molten Golem» (DevynSSJ, бесплатно) из ServerStorage.BossTemplates, масштаб 0,55 (≈ 9,5 стада, меньше двух ростов игрока); запасной шаблон basalt_guardian_blocky (сгенерирован в Studio). Анимации — в коде клиента (BossAnimator)",
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "minotaur": {
-      "hp": 1000,
-      "damage": 5,
+      "hp": 430,
+      "damage": 4,
       "respawnSeconds": 1500,
       "name": "Минотавр",
       "nameEn": "Minotaur",
@@ -1133,7 +1153,7 @@
         450
       ],
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 4,
         "meleeRange": 8,
         "meleeCooldown": 2.4,
         "walkSpeed": 11,
@@ -1147,12 +1167,12 @@
           "length": 30,
           "width": 6,
           "speed": 45,
-          "damage": 4
+          "damage": 7
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 7,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1161,7 +1181,7 @@
           "speed": 48,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 9,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1205,7 +1225,7 @@
             "release": 0.6,
             "forward": 2,
             "radius": 4.5,
-            "damage": 4
+            "damage": 7
           },
           "double_attack": {
             "duration": 1.6666666666666667,
@@ -1215,7 +1235,7 @@
             ],
             "range": 8,
             "halfAngle": 65,
-            "damage": 2
+            "damage": 4
           },
           "throws_the_ground": {
             "duration": 3.5833333333333335,
@@ -1224,7 +1244,7 @@
             "range": 30,
             "flight": 0.85,
             "radius": 4.5,
-            "damage": 4
+            "damage": 7
           },
           "minotaur_rush": {
             "duration": 4.125,
@@ -1232,14 +1252,15 @@
             "speed": 48,
             "maxDistance": 44,
             "radius": 3.5,
-            "damage": 5
+            "damage": 9
           }
         }
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "piglin": {
-      "hp": 1500,
+      "hp": 580,
       "damage": 6,
       "respawnSeconds": 1080,
       "name": "Король Пиглинов",
@@ -1252,7 +1273,7 @@
         420
       ],
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 6,
         "meleeRange": 8,
         "meleeCooldown": 2.2,
         "walkSpeed": 12,
@@ -1266,12 +1287,12 @@
           "length": 32,
           "width": 6,
           "speed": 46,
-          "damage": 4
+          "damage": 10
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 10,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1280,7 +1301,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 12,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1307,13 +1328,101 @@
             60
           ]
         },
-        "_abilities": "[решение] взмах золотым топором (огненная полоса), удар об пол (обломки чернокамня из земли), таран — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
+        "_abilities": "[клиент RESOURCEPACK-BOSSES] девять именованных навыков и длительности. [решение 01.11] собственные позы/геометрия атак; уязвим во время навыков, лечение сбивается уроном; маленькая свита. assets/models/piglin_king/README.md",
+        "model": "piglin_king",
+        "texture": "rbxassetid://93131048217957",
+        "scale": 1,
+        "glowBrightness": 0,
+        "meleeDuration": 3.0246,
+        "meleeHitAt": 1.35,
+        "deathDuration": 5,
+        "piglin": {
+          "_source": "[клиент] имена/длительности; [решение] урон, попадания, дистанции, лечение и свита. Не серверная механика оригинала.",
+          "recovery": 2.5,
+          "spawnDuration": 5.6667,
+          "verticalatk": {
+            "duration": 3.0246,
+            "release": 1.35,
+            "radius": 8,
+            "forward": 0,
+            "halfAngle": 48,
+            "damage": 6
+          },
+          "horizontalatk": {
+            "duration": 3.0303,
+            "release": 1.4,
+            "radius": 8,
+            "forward": 0,
+            "halfAngle": 85,
+            "damage": 6
+          },
+          "footstomp": {
+            "duration": 2.5,
+            "release": 1.1,
+            "radius": 7,
+            "damage": 10
+          },
+          "spinslam": {
+            "duration": 5,
+            "release": 2.7,
+            "sweepAt": 1.8,
+            "sweepDamage": 5,
+            "radius": 10,
+            "damage": 10
+          },
+          "bodyslam": {
+            "duration": 5,
+            "release": 2.5,
+            "forward": 3,
+            "radius": 8,
+            "damage": 12
+          },
+          "upchuck": {
+            "duration": 6.0095,
+            "release": 2.5,
+            "range": 28,
+            "radius": 4.5,
+            "flight": 0.7,
+            "ticks": 3,
+            "tickInterval": 0.65,
+            "damage": 10
+          },
+          "charge": {
+            "duration": 10.0059,
+            "release": 2,
+            "speed": 40,
+            "maxDistance": 44,
+            "radius": 3.8,
+            "damage": 12
+          },
+          "healing": {
+            "duration": 7.0813,
+            "release": 3.6,
+            "fraction": 0.1,
+            "interruptFraction": 0.08
+          },
+          "summoningchant": {
+            "duration": 4.0064,
+            "release": 2.7,
+            "count": 2,
+            "phase2Count": 3,
+            "maxAlive": 4,
+            "hp": 18,
+            "speed": 9,
+            "lifetime": 18,
+            "reach": 4.5,
+            "hitAt": 0.2975748859353303,
+            "damage": 3,
+            "cooldown": 1.8
+          }
+        }
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "skeleton": {
-      "hp": 2500,
-      "damage": 7,
+      "hp": 740,
+      "damage": 8,
       "respawnSeconds": 2700,
       "name": "Скелетон",
       "nameEn": "Skeletron",
@@ -1321,7 +1430,7 @@
       "unlockLevel": 9,
       "_source": "[клиент] имя, описание («павший предводитель навеки забытой армии»), объявление о появлении, свита «Скелет-воин»; [меню] 0–2200 $, древние звёзды 1–3, порошок 1–5 %; hp/урон/респаун [решение]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 8,
         "meleeRange": 8,
         "meleeCooldown": 2,
         "walkSpeed": 12,
@@ -1335,12 +1444,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 13
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 13,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1349,7 +1458,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 16,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1378,7 +1487,8 @@
         },
         "_abilities": "[решение] волна проклятия (полоса), кости из пола гробницы (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "splinter": {
       "name": "Сплинтер",
@@ -1392,16 +1502,25 @@
         1,
         2
       ],
-      "powderChance": "1-5%",
-      "hp": 600,
-      "damage": 12,
+      "powderChance": {
+        "display": "1–5%",
+        "percentQualifier": {
+          "min": 1,
+          "max": 5,
+          "interpretation": null
+        },
+        "dropChance": null,
+        "count": null
+      },
+      "hp": 1800,
+      "damage": 18,
       "respawnSeconds": 1500,
       "_source": "[меню] награды и ~23 мин до респауна; [владелец 22.10] HP 600, урон в 2 раза больше",
       "locationId": "basement",
       "nameEn": "Splinter",
       "_fight": "[владелец 29.10] собственный концепт → Blender, модель и навыки Сплинтера. [клиент RESOURCEPACK-BOSSES] attack 1, swoop 1.1, potion 1.55, shoot 2.25, summon/death 4 с; [решение] реализация и численный баланс навыков, прежний урон 2/4 HP сохранён.",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 18,
         "meleeRange": 8,
         "meleeCooldown": 2.2,
         "walkSpeed": 11,
@@ -1415,12 +1534,12 @@
           "length": 30,
           "width": 6,
           "speed": 45,
-          "damage": 4
+          "damage": 28
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 28,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1429,7 +1548,7 @@
           "speed": 44,
           "maxDistance": 36,
           "width": 7,
-          "damage": 4,
+          "damage": 34,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1473,14 +1592,14 @@
             "travel": 0.5,
             "distance": 22,
             "radius": 3.5,
-            "damage": 4
+            "damage": 34
           },
           "potion": {
             "duration": 1.55,
             "release": 1,
             "range": 30,
             "radius": 4.5,
-            "damage": 4,
+            "damage": 28,
             "ticks": 4,
             "tickInterval": 0.7
           },
@@ -1490,7 +1609,7 @@
             "range": 40,
             "speed": 34,
             "radius": 1.1,
-            "damage": 4
+            "damage": 28
           },
           "summon": {
             "duration": 4,
@@ -1498,16 +1617,17 @@
             "count": 3,
             "phase2Count": 4,
             "maxAlive": 6,
-            "hp": 6,
+            "hp": 18,
             "speed": 10,
             "lifetime": 16,
             "reach": 4,
-            "damage": 1,
+            "damage": 5,
             "cooldown": 1.8
           }
         }
       },
-      "_respawn": "[меню Prison+] таймер 00:23:07, табло «22м 02с» → период ≈ 25–30 мин; 25 мин"
+      "_respawn": "[меню Prison+] таймер 00:23:07, табло «22м 02с» → период ≈ 25–30 мин; 25 мин",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "giant_zombie": {
       "name": "Зомбарь",
@@ -1518,8 +1638,8 @@
         400
       ],
       "ancientStars": null,
-      "hp": 300,
-      "damage": 5,
+      "hp": 340,
+      "damage": 3,
       "respawnSeconds": 600,
       "_source": "[владелец 22.10] HP 300, банк 400 монет, появляется каждые 20 минут; урон [решение]",
       "locationId": "fraction_base",
@@ -1527,7 +1647,7 @@
       "_model": "[решение] гигантский блочный зомби как в Minecraft (Giant): зелёная кожа, бирюзовая рубаха, синие штаны; строится кодом в ServerStorage.BossTemplates.giant_zombie (scripts/build-boss-zombie.luau)",
       "_fight": "[владелец 22.10] урон в 2 раза больше прежнего: удар 0,8, способности 1,6 HP (у игрока 20 HP); способности: рвота гноем (полоса), удар о землю (шипы), рывок",
       "fight": {
-        "meleeDamage": 0.8,
+        "meleeDamage": 3,
         "meleeRange": 7,
         "meleeCooldown": 2.4,
         "walkSpeed": 8,
@@ -1541,12 +1661,12 @@
           "length": 30,
           "width": 6,
           "speed": 45,
-          "damage": 1.6
+          "damage": 5
         },
         "earthSpikes": {
           "telegraph": 1.2,
           "radius": 4.5,
-          "damage": 1.6,
+          "damage": 5,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1555,7 +1675,7 @@
           "speed": 40,
           "maxDistance": 36,
           "width": 6,
-          "damage": 1.6,
+          "damage": 6,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1592,12 +1712,12 @@
           ]
         }
       },
-      "_hp": "[владелец 22.10] у Зомбаря 300 HP, с него 400 монет, раз в 20 минут",
-      "_respawn": "[меню Prison+] табло «возродится через 06м 36с», таймер 00:07:01 → период ≈ 7–10 мин; ставим 10 мин (было 20 мин [владелец 22.10], владелец 26.10: «у боссов также», как в оригинале)"
+      "_respawn": "[меню Prison+] табло «возродится через 06м 36с», таймер 00:07:01 → период ≈ 7–10 мин; ставим 10 мин (было 20 мин [владелец 22.10], владелец 26.10: «у боссов также», как в оригинале)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "knight": {
-      "hp": 3500,
-      "damage": 8,
+      "hp": 920,
+      "damage": 10,
       "respawnSeconds": 6300,
       "name": "Рыцарь",
       "nameEn": "Knight",
@@ -1605,7 +1725,7 @@
       "unlockLevel": 11,
       "_source": "[клиент] имя, описание («хладнокровный воин в сияющих доспехах»), объявление о появлении; [меню] 0–3100 $, древние звёзды 3–5, порошок 1–8 %; hp 3500 / урон 8 / респаун 45 мин [решение] по шкале боссов (Скелетон 2500)",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 10,
         "meleeRange": 8,
         "meleeCooldown": 1.9,
         "walkSpeed": 13,
@@ -1619,12 +1739,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 16
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 16,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1633,7 +1753,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 20,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1662,11 +1782,12 @@
         },
         "_abilities": "[решение] рубящая волна (полоса), удар мечом в землю (круги), рыцарский таран — о колонну ристалища оглушение 3 с; набор как у Минотавра, своя модель позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "poseidon": {
-      "hp": 4500,
-      "damage": 9,
+      "hp": 1120,
+      "damage": 12,
       "respawnSeconds": 7200,
       "name": "Посейдон",
       "nameEn": "Poseidon",
@@ -1674,7 +1795,7 @@
       "unlockLevel": 13,
       "_source": "[клиент] имя, описание («владыка морей, дремавший на дне Затопленного маяка»), объявление о появлении; [меню] 0–3800 $, древние звёзды 4–7, порошок 1–10 %; hp 4500 / урон 9 / респаун 50 мин [решение] по шкале боссов (Рыцарь 3500)",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 12,
         "meleeRange": 8,
         "meleeCooldown": 1.9,
         "walkSpeed": 13,
@@ -1688,12 +1809,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 19
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 19,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1702,7 +1823,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 24,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1731,11 +1852,12 @@
         },
         "_abilities": "[решение] волна прилива (полоса), удары трезубцем — молнии из-под пола (круги), рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "illusionist": {
-      "hp": 6000,
-      "damage": 10,
+      "hp": 1340,
+      "damage": 14,
       "respawnSeconds": 10800,
       "name": "Иллюзионист",
       "nameEn": "Illusionist",
@@ -1743,7 +1865,7 @@
       "unlockLevel": 15,
       "_source": "[клиент] имя, описание («хитрый маг, чьи иллюзии и острые как бритва клинки…»), объявление о появлении, свита «Кролик»; [меню] 0–6500 $, древние звёзды 5–9, порошок 1–12 %; hp 6000 / урон 10 / респаун 55 мин [решение] по шкале боссов (Посейдон 4500)",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 14,
         "meleeRange": 8,
         "meleeCooldown": 1.8,
         "walkSpeed": 14,
@@ -1757,12 +1879,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 22
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 22,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1771,7 +1893,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 28,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1800,11 +1922,12 @@
         },
         "_abilities": "[решение] волна иллюзий (полоса), клинки из пола (круги), рывок-телепорт — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Кролик» [клиент] позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "spider_queen": {
-      "hp": 7500,
-      "damage": 11,
+      "hp": 1570,
+      "damage": 16,
       "respawnSeconds": 14400,
       "name": "Паучья матка",
       "nameEn": "Spider Queen",
@@ -1812,7 +1935,7 @@
       "unlockLevel": 17,
       "_source": "[клиент] имя, описание («королева, скрывающаяся в тени своей армии…»), объявление о появлении; [меню] 0–7700 $, древние звёзды 7–12, порошок 1–25 %; hp 7500 / урон 11 / респаун 60 мин [решение] по шкале боссов (Иллюзионист 6000)",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 16,
         "meleeRange": 8,
         "meleeCooldown": 1.7,
         "walkSpeed": 15,
@@ -1826,12 +1949,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 25
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 25,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1840,7 +1963,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 32,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1869,11 +1992,12 @@
         },
         "_abilities": "[решение] волна паутины (полоса), паучьи жвала из-под пола (круги), прыжок-рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Паук» позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "mole": {
-      "hp": 9000,
-      "damage": 12,
+      "hp": 1820,
+      "damage": 18,
       "respawnSeconds": 21600,
       "name": "Моль",
       "nameEn": "Moth",
@@ -1881,7 +2005,7 @@
       "unlockLevel": 19,
       "_source": "[клиент] имя «Моль» (en Moth), описание («убийца, выходящая на охоту под покровом ночи…»), объявление о появлении и об оглушении; [меню] 0–7900 $, древние звёзды 8–13, порошок 1–35 %; hp 9000 / урон 12 / респаун 65 мин [решение] по шкале боссов (Паучья матка 7500)",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 18,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -1895,12 +2019,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 28
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 28,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1909,7 +2033,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 35,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -1938,11 +2062,12 @@
         },
         "_abilities": "[решение] вихрь пыльцы (полоса), ледяные шипы из-под озера (круги), бросок из тьмы — о фонарный столб оглушение 3 с; набор как у Минотавра, своя модель позже"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "un_king": {
-      "hp": 10000,
-      "damage": 13,
+      "hp": 2070,
+      "damage": 20,
       "respawnSeconds": 21600,
       "name": "Король нежити",
       "nameEn": "Undead King",
@@ -1950,7 +2075,7 @@
       "unlockLevel": 21,
       "_source": "[клиент] имя «Король нежити», описание, объявление «Земля под Рынком треснула… Король нежити восстал из могилы!»; [меню] 0–9500 $, древние звёзды 10–15, порошок 1–35 %; hp 10000 / урон 13 / респаун 70 мин [решение] по шкале боссов (Моль 9000), в справочнике респаун 6 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 20,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -1964,12 +2089,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 31
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 31,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -1978,7 +2103,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 38,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2007,11 +2132,12 @@
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10: «босса пока кидай как затычку, их отдельно будем»]: набор Минотавра (полоса, круги из-под пола, рывок — о колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: тёмные снаряды, взрывные черепа, призрачный меч, гули, метеоры (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "forest_spirit": {
-      "hp": 11000,
-      "damage": 14,
+      "hp": 2320,
+      "damage": 23,
       "respawnSeconds": 18000,
       "name": "Лесной дух",
       "nameEn": "Forest Spirit",
@@ -2019,7 +2145,7 @@
       "unlockLevel": 23,
       "_source": "[клиент] имя «Лесной дух», описание, объявление «Тотем пробудился… Лесной дух восстал в Лепреконовой долине!»; [меню] 0–8600 $, древние звёзды 9–14, за последний удар Лунная сталь; hp 11000 / урон 14 / респаун 75 мин [решение] по шкале боссов (Король нежити 10000), в справочнике респаун 5 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 23,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2033,12 +2159,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 34
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 34,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2047,7 +2173,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 42,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2076,11 +2202,12 @@
         },
         "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о колонну-тотем оглушение 3 с). Настоящие приёмы из ресурс-пака: тотем, корни, шипы, буря, молнии, летающие черепа, культисты — шаманы и заблудшие исследователи (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "raven_knight": {
-      "hp": 12000,
-      "damage": 15,
+      "hp": 2550,
+      "damage": 26,
       "respawnSeconds": 21600,
       "name": "Вороний рыцарь",
       "nameEn": "Raven Knight",
@@ -2088,7 +2215,7 @@
       "unlockLevel": 25,
       "_source": "[клиент] имя «Вороний рыцарь», описание, объявление «Небо почернело от стай воронов… Вороний рыцарь пробудился в Замке!», свита «Вороний жнец»; [меню] 0–9000 $, древние звёзды 9–15, порошок 1–35 %; hp 12000 / урон 15 / респаун 80 мин [решение] по шкале боссов, в справочнике респаун 6 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 26,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2102,12 +2229,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 37
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 37,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2116,7 +2243,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 46,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2143,13 +2270,16 @@
             200
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о кварцевую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: стаи воронов, чёрный туман, шипы из земли, призванный летающий топор, вторая форма «Вороний жнец» (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о кварцевую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: стаи воронов, чёрный туман, шипы из земли, призванный летающий топор, вторая форма «Вороний жнец» (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 4,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "vecna": {
-      "hp": 13000,
-      "damage": 16,
+      "hp": 2770,
+      "damage": 29,
       "respawnSeconds": 14400,
       "name": "Векна",
       "nameEn": "Vecna",
@@ -2157,7 +2287,7 @@
       "unlockLevel": 27,
       "_source": "[клиент] имя «Векна», объявление «Земля вздрогнула... Векна уже рядом!»; [меню] 0–6400 $, древние звёзды 7–12, порошок 1–25 %; hp 13000 / урон 16 / респаун 85 мин [решение] по шкале боссов, в справочнике респаун 4 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 29,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2171,12 +2301,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 40
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 40,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2185,7 +2315,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 50,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2212,13 +2342,16 @@
             40
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о сломанный фонарный столб оглушение 3 с). Настоящие приёмы из ресурс-пака (Stranger Things): атаки щупальцами, «цветок», часы Векны (отсчёт проклятия), порталы, миньоны демогоргон / демопёс / демолетучка (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о сломанный фонарный столб оглушение 3 с). Настоящие приёмы из ресурс-пака (Stranger Things): атаки щупальцами, «цветок», часы Векны (отсчёт проклятия), порталы, миньоны демогоргон / демопёс / демолетучка (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 6,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "the_lovers": {
-      "hp": 14000,
-      "damage": 17,
+      "hp": 2970,
+      "damage": 32,
       "respawnSeconds": 28800,
       "name": "Самурай",
       "nameEn": "Samurai",
@@ -2226,7 +2359,7 @@
       "unlockLevel": 29,
       "_source": "[клиент] имя «Самурай» (Ханасигуро и дух его возлюбленной), объявление «Лепестки сакуры кружатся над Киото... Самурай вышел на бой!»; [меню] 0–10000 $, древние звёзды 10–16, порошок 1–50 %, огненный осколок; hp 14000 / урон 17 / респаун 90 мин [решение] по шкале боссов, в справочнике респаун 8 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 32,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2240,12 +2373,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 43
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 43,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2254,7 +2387,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 54,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2281,13 +2414,16 @@
             205
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о красную колонну оглушение 3 с). Настоящие приёмы из ресурс-пака «The Lovers»: 3 фазы со сбросом доспеха, дождь стрел, большая стрела, призрачные копья, кусаригама, сюрикены, разрезы, призрак возлюбленной (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о красную колонну оглушение 3 с). Настоящие приёмы из ресурс-пака «The Lovers»: 3 фазы со сбросом доспеха, дождь стрел, большая стрела, призрачные копья, кусаригама, сюрикены, разрезы, призрак возлюбленной (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 7,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "ent": {
-      "hp": 15000,
-      "damage": 18,
+      "hp": 3160,
+      "damage": 35,
       "respawnSeconds": 19800,
       "name": "Грут",
       "nameEn": "Groot",
@@ -2295,7 +2431,7 @@
       "unlockLevel": 31,
       "_source": "[клиент] имя «Грут» (Ent King), объявление «Лес умолк… Грут поднялся из глубин корней.»; [меню] 0–15000 $, древние звёзды 11–17, лунная сталь; hp 15000 / урон 18 / респаун 95 мин [решение] по шкале боссов, в справочнике респаун 5 ч 30 мин [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 35,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2309,12 +2445,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 46
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 46,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2323,7 +2459,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 58,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2350,13 +2486,16 @@
             90
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старое дерево-колонну оглушение 3 с). Настоящие приёмы из ресурс-пака Ent King: удары, топот, крик, ветви из земли (Twisted Branch, Branch Wave), листовой шторм, древесные миньоны — воин, колдун, страж (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старое дерево-колонну оглушение 3 с). Настоящие приёмы из ресурс-пака Ent King: удары, топот, крик, ветви из земли (Twisted Branch, Branch Wave), листовой шторм, древесные миньоны — воин, колдун, страж (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 8,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "forest_guardian": {
-      "hp": 16000,
-      "damage": 19,
+      "hp": 3340,
+      "damage": 38,
       "respawnSeconds": 43200,
       "name": "Древесный хранитель",
       "nameEn": "Forest Guardian",
@@ -2364,7 +2503,7 @@
       "unlockLevel": 33,
       "_source": "[клиент] имя «Древесный хранитель», объявление «Корни земли пробудились — Древесный хранитель вышел на защиту леса!»; [меню] 0–17300 $, древние звёзды 11–18, порошок 1–50 %, огненный осколок; hp 16000 / урон 19 / респаун 100 мин [решение] по шкале боссов, в справочнике респаун 12 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 38,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2378,12 +2517,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 49
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 49,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2392,7 +2531,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 61,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2419,13 +2558,16 @@
             50
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старый силос оглушение 3 с). Настоящие приёмы из ресурс-пака: удар, большой удар, призыв созданий — «пока его создания живы, никакое оружие не способно ранить хранителя» (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старый силос оглушение 3 с). Настоящие приёмы из ресурс-пака: удар, большой удар, призыв созданий — «пока его создания живы, никакое оружие не способно ранить хранителя» (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 10,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     },
     "reaper": {
-      "hp": 17000,
-      "damage": 20,
+      "hp": 3500,
+      "damage": 40,
       "respawnSeconds": 43200,
       "name": "Жнец",
       "nameEn": "Reaper",
@@ -2433,7 +2575,7 @@
       "unlockLevel": 35,
       "_source": "[клиент] имя «Жнец», объявление «Холод смерти коснулся земли... Жнец пришёл за Вашими душами!»; [меню] 0–18500 $, древние звёзды 12–19, порошок 1–50 %, огненный осколок; hp 17000 / урон 20 / респаун 105 мин [решение] по шкале боссов, в справочнике респаун 12 ч [вики 26.10]",
       "fight": {
-        "meleeDamage": 2,
+        "meleeDamage": 40,
         "meleeRange": 8,
         "meleeCooldown": 1.6,
         "walkSpeed": 16,
@@ -2447,12 +2589,12 @@
           "length": 34,
           "width": 6,
           "speed": 48,
-          "damage": 4
+          "damage": 52
         },
         "earthSpikes": {
           "telegraph": 1.1,
           "radius": 4.5,
-          "damage": 4,
+          "damage": 52,
           "perTarget": 1,
           "perTargetPhase2": 3
         },
@@ -2461,7 +2603,7 @@
           "speed": 50,
           "maxDistance": 44,
           "width": 7,
-          "damage": 5,
+          "damage": 64,
           "stunPillar": 3,
           "stunWall": 2.3,
           "stunDamageMultiplier": 1.7
@@ -2488,16 +2630,38 @@
             220
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — об обсидиановую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: удары косой, круговая атака, удар в землю, телепорт к игроку и обратно, забор души, круг души на земле, вращение, взрыв (wiki/client-audit/RESOURCEPACK-BOSSES.md)"
+        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — об обсидиановую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: удары косой, круговая атака, удар в землю, телепорт к игроку и обратно, забор души, круг души на земле, вращение, взрыв (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "combatRegenPerSecond": 12,
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
       },
-      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)"
+      "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
+      "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."
     }
   },
   "bossRewards": {
     "lastHitBonus": 0.2,
     "minDamageShare": 0.05,
     "starsTopN": 3,
-    "bank": "[меню] «Банк за убийство» делится по доле урона; звезда каждому участнику у боссов с 9-го уровня; последний удар — порошок/осколок/сталь"
+    "bank": "[меню] «Банк за убийство» делится по доле урона; звезда каждому участнику у боссов с 9-го уровня; последний удар — порошок/осколок/сталь",
+    "lastHitItems": {
+      "forest_spirit": [
+        "moon_steel"
+      ],
+      "ent": [
+        "moon_steel"
+      ],
+      "the_lovers": [
+        "fire_shard"
+      ],
+      "forest_guardian": [
+        "fire_shard"
+      ],
+      "reaper": [
+        "fire_shard"
+      ]
+    },
+    "_lastHitItems": "[вики BOSS-CARDS.md] состав; [решение] по 1 предмету последнему ударившему при достаточной доле урона: количество/точный шанс осколка и стали в вики не указаны.",
+    "_powder": "[клиент BOSS-MENU-RECOVERY.md] показаны диапазоны 1–N%, их точное назначение не доказано. [решение, сохранено] вероятность порошка линейно от min до max по доле урона; только последний удар, 1 штука. Это не подтверждённая формула Cristalix."
   },
   "needs": {
     "hygiene": {
@@ -3728,7 +3892,10 @@
     },
     "_armor": "[ваниль, владелец 22.10] урон по игроку от игроков, мобов и боссов: броня по формуле Java — урон × (1 − min(20, max(броня/5, броня − урон/(2 + прочность/4)))/25), затем Защита −4 % за уровень каждой части, максимум 20 (80 %); очки брони и прочность — tools.json vanilla",
     "jumpBlocks": 1.05,
-    "_jump": "[владелец 28.10: «сделай обычный прыжок не выше 1 блока»] высота прыжка в блоках (1 блок = 4 стада); 1,05 — чтобы ещё запрыгивать на блок [решение]. [владелец 29.10] Пружины задают полную высоту прыжка: I 1,25 / II 1,5 / III 2 блока; сверху тот же допуск 0,05 блока для запрыгивания на уступ"
+    "_jump": "[владелец 28.10: «сделай обычный прыжок не выше 1 блока»] высота прыжка в блоках (1 блок = 4 стада); 1,05 — чтобы ещё запрыгивать на блок [решение]. [владелец 29.10] Пружины задают полную высоту прыжка: I 1,25 / II 1,5 / III 2 блока; сверху тот же допуск 0,05 блока для запрыгивания на уступ",
+    "hurtImmunitySeconds": 0.5,
+    "attackIntentMinSeconds": 0.1,
+    "_java": "[владелец 01.11; ваниль Minecraft Wiki / Melee_attack, Damage] заряд p=clamp((t+0.025)/T), база*(0.2+0.8*p^2), чары*p; крит при p>0.9 и падении: база*1.5 до чар. Ранний клик наносит слабый удар, взмах 0.22 с. Иммунитет 0.5 с до брони: сильный удар добавляет разницу, таймер не продлевает. [решение] у рейдового босса иммунитет отдельный для каждого игрока; лимит сетевых намерений 0.1 с."
   },
   "factions": {
     "_source": "[клиент] ru_RU-prison.json fraction.*: 4 фракции, вступление с 5-го уровня, «слишком много людей — вступите в %a», «покинуть фракцию за %s»; цена выхода 5000 $ [вики 26.10 CASES-ARTIFACTS-FACTIONS-BOOSTERS, HANDBOOK-WIKI — новее снимка меню 20.10 «за 2500 $»]; запас балансировки [решение]",
@@ -4691,5 +4858,10 @@
       "top_crown"
     ],
     "_legacy": "банды, созданные до правок по скринам оригинала (28.10; в документе нет флага v2), сохраняют старые значки и 1 уровень Сундуков [решение]"
+  },
+  "bossSafety": {
+    "maxHealthFraction": 0.65,
+    "windowSeconds": 0.75,
+    "_source": "[владелец 01.11] сильные удары, без убийства с полного HP. [решение] весь урон боссов/их свиты за скользящие 0,75 с ограничен 65% MaxHealth ПОСЛЕ брони/книг; PvP и обычных мобов не затрагивает."
   }
 }

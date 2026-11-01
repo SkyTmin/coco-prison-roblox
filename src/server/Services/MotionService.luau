@@ -103,6 +103,25 @@ end
 
 -- The player's root as their own client had it at server time `at` (clamped to the last MAX_REWIND; nil = the
 -- newest report), from the checked reports; nil when there is no fresh report (use the server's copy).
+-- Derive falling from validated position reports; replicated AssemblyLinearVelocity can lag a short jump.
+function MotionService.verticalSpeed(player: Player): number?
+	local list = history[player]
+	if not list or #list < 2 or os.clock() - (lastAt[player] or -math.huge) > FRESH then
+		return nil
+	end
+	local newest = list[#list]
+	for i = #list - 1, 1, -1 do
+		local elapsed = newest.t - list[i].t
+		if elapsed >= 0.025 then
+			if elapsed > 0.15 then
+				return nil
+			end
+			return (newest.cf.Position.Y - list[i].cf.Position.Y) / elapsed
+		end
+	end
+	return nil
+end
+
 function MotionService.rootAt(player: Player, at: number?): CFrame?
 	local list = history[player]
 	if not list or #list == 0 or os.clock() - (lastAt[player] or -math.huge) > FRESH then
