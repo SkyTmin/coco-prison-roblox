@@ -17,6 +17,13 @@ NOISE_FILE = "fur-noise.png"  # same seed/tile as the already uploaded rat fur
 TILE_STUDS = 2.6
 GAME_LIFT = {"saturate": 1.1, "gain": 1.04}
 BACKGROUND = (188, 191, 189)
+BAKE_CURVES = True
+GROUND_CLIPS = ['death']
+GROUND_SUBSTEPS = 4
+CLIP_IMPACTS = {'melee':13/30,'swoop':1/3,'potion':1,'shoot':1.5,'summon':3}
+CLIP_FILES = {'locomotion':['idle','walk','jump','stunned'],
+              'attacks':['melee','swoop','potion','shoot'],
+              'ritual':['roar','summon','death']}
 FUR = (100, 84, 72)
 BACK = (73, 61, 53)
 LIGHT = (152, 132, 114)
@@ -29,19 +36,25 @@ PARTS = []
 JOINTS = [
     ("root", None, (0, 0, 0)),
     ("body", "root", (0, 0, 3.0)),
-    ("head", "body", (0, .65, 5.9)),
+    ("chest", "body", (0, -.15, 4.3)),
+    ("head", "chest", (0, .65, 5.9)),
     ("jaw", "head", (0, 1.45, 5.65)),
     ("earL", "head", (1.0, .5, 6.65)),
     ("earR", "head", (-1.0, .5, 6.65)),
 ]
 for side, s in (("L", 1), ("R", -1)):
     JOINTS += [
-        ("arm" + side, "body", (2.0*s, 0, 5.45)),
+        ("arm" + side, "chest", (2.0*s, 0, 5.45)),
         ("fore" + side, "arm" + side, (2.5*s, .7, 4.05)),
         ("hand" + side, "fore" + side, (2.65*s, 1.7, 3.1)),
+        ("fingers" + side, "hand" + side, (2.65*s, 2.3, 3.05)),
+        ("thumb" + side, "hand" + side, (1.98*s, 1.84, 3.1)),
         ("leg" + side, "body", (1.2*s, -.2, 2.5)),
-        ("foot" + side, "leg" + side, (1.35*s, .15, .75)),
+        ("shin" + side, "leg" + side, (1.35*s, 0, 1.35)),
+        ("foot" + side, "shin" + side, (1.35*s, .15, .75)),
     ]
+JOINTS += [('clothFront','body',(0,1.15,3.0)),('clothL','body',(1.5,-.2,3.0)),
+           ('clothR','body',(-1.5,-.2,3.0))]
 
 
 def add(name, joint, x, y, z, color, **kw):
@@ -171,7 +184,7 @@ def silhouette(p, joint):
     if joint in ("head","jaw","earL","earR"):
         y += .38
         z -= .24
-    if joint.startswith(("leg","foot")):
+    if joint.startswith(("leg","shin","foot")):
         x += .22 if x>0 else -.22
     return x,y,z
 
@@ -179,58 +192,30 @@ def silhouette(p, joint):
 PARTS=[(n,j,silhouette(c,j),(s[0],s[1],s[2]*.91),co,t,r,fl) for n,j,c,s,co,t,r,fl in PARTS]
 JOINTS=[(n,p,silhouette(c,n)) for n,p,c in JOINTS]
 
+# Keep every visible cuboid in the same rest position. Only divide it among the new joints.
+rebound=[]
+for n,j,c,s,co,t,r,fl in PARTS:
+    if n.startswith('Hump') or (n.startswith(('Torso','Belly')) and c[2]>4.3*.91): j='chest'
+    for side in ['L','R']:
+        if n.startswith('Shin'+side) or (n.startswith('Haunch'+side) and c[2]<1.35*.91): j='shin'+side
+        if n.startswith(('Finger'+side,'Claw'+side,'ClawTip'+side)): j='fingers'+side
+        if n.startswith(('Thumb'+side,'ThumbClaw'+side)): j='thumb'+side
+    if n.startswith(('Apron','Rag')): j='clothFront'
+    elif n.startswith('Wrap'): j='clothL' if c[0]>0 else 'clothR'
+    rebound.append((n,j,c,s,co,t,r,fl))
+PARTS=rebound
 
-def pose(**kw):
-    return {k: ((v,0,0,None) if isinstance(v,(int,float)) else v) for k,v in kw.items()}
 
+# Geometry and motion have separate sources so animation revisions preserve the character.
+sys.path.insert(0,HERE)
+from motion import make_actions, release_origins
 
 def actions():
-    a={}
-    idle=[]
-    walk=[]
-    for f in range(0,61,10):
-        t=f/60*2*math.pi
-        idle.append((f,pose(body=(0,0,0,(0,0,.07*math.sin(t))),head=(2*math.sin(t),0,2*math.sin(t),None),
-                            jaw=2+2*math.sin(t),earL=(0,0,4*math.sin(t),None),earR=(0,0,-3*math.sin(t),None),
-                            tail1=(0,0,7*math.sin(t),None),tail3=(0,0,10*math.sin(t-.5),None),tail5=(0,0,12*math.sin(t-1),None))))
-    for f in range(0,31,5):
-        t=f/30*2*math.pi
-        s=math.sin(t)
-        walk.append((f,pose(body=(-3,0,3*s,(0,0,.13*abs(s))),head=(2,0,-3*s,None),
-                            legL=22*s,legR=-22*s,footL=-12*s,footR=12*s,
-                            armL=-14*s,armR=14*s,foreL=6*s,foreR=-6*s,
-                            tail1=(0,0,10*s,None),tail3=(0,0,12*math.sin(t-.7),None))))
-    a["idle"]=(idle,True)
-    a["walk"]=(walk,True)
-    a["melee"]=([(0,{}),(8,pose(body=(6,0,-17,None),armR=85,foreR=-40,head=8)),
-                   (13,pose(body=(-9,0,23,None),armR=32,foreR=0,handR=20,jaw=-12)),
-                   (19,pose(body=(-6,0,17,None),armR=-12,handR=15)),(30,{})],False)
-    a["swoop"]=([(0,{}),(10,pose(body=(-15,0,0,(0,0,-.5)),legL=25,legR=25,armL=-22,armR=-22)),
-                   (17,pose(body=(-18,0,0,(0,0,.8)),legL=-22,legR=-22,armL=75,armR=75,foreL=-20,foreR=-20,jaw=-18)),
-                   (25,pose(body=(-12,0,0,(0,0,-.32)),armL=35,armR=35)),(33,{})],False)
-    a["potion"]=([(0,{}),(13,pose(body=(0,0,-15,None),armL=-12,foreL=32,handL=15)),
-                   (24,pose(body=(7,0,-24,None),armL=145,foreL=-35,head=6)),
-                   (30,pose(body=(-9,0,16,None),armL=75,foreL=10,handL=-24)),(46.5,{})],False)
-    # 1.55s and 2.25s end at half-frames; the shared exporter preserves those subframes.
-    a["shoot"]=([(0,{}),(23,pose(body=8,head=18,jaw=-24,armL=-8,armR=-8)),
-                   (40,pose(body=10,head=24,jaw=-35)),(45,pose(body=-9,head=-12,jaw=-8)),
-                   (54,pose(body=-4,head=-5,jaw=-18)),(67.5,{})],False)
-    a["summon"]=([(0,{}),(24,pose(body=-10,head=-12,armL=22,armR=22,foreL=-15,foreR=-15)),
-                    (48,pose(body=12,head=22,jaw=-28,armL=155,armR=155,foreL=-30,foreR=-30)),
-                    (72,pose(body=9,head=16,jaw=-24,armL=147,armR=150)),
-                    (90,pose(body=(-16,0,0,(0,0,-.3)),head=-8,armL=28,armR=28,handL=20,handR=20)),(120,{})],False)
-    a["death"]=([(0,{}),(18,pose(body=(8,0,12,None),head=18,jaw=-24,armL=42,armR=10)),
-                   (42,pose(body=(-8,40,-8,(0,0,-.2)),armL=40,armR=35,legL=15,legR=10)),
-                   (65,pose(body=(0,91,-8,(0,0,.5)),head=12,jaw=-15,armL=45,armR=30,legL=15,legR=10,tail1=12)),
-                   (90,pose(body=(0,87,-8,(0,0,.5)),head=8,jaw=-12,armL=45,armR=30,legL=15,legR=10,tail1=5)),
-                   (120,pose(body=(0,87,-8,(0,0,.5)),head=8,jaw=-12,armL=45,armR=30,legL=15,legR=10,tail1=5))],False)
-    a["roar"]=([(0,{}),(16,pose(body=8,head=22,jaw=-30,armL=35,armR=35)),
-                  (38,pose(body=6,head=18,jaw=-24,armL=25,armR=25)),(54,{})],False)
-    a["jump"]=([(0,{}),(7,pose(body=(-10,0,0,(0,0,-.3)),legL=20,legR=20)),
-                  (14,pose(body=6,armL=35,armR=35,legL=-15,legR=-15)),(24,{})],False)
-    a["stunned"]=([(0,pose(head=-12,body=-5)),(15,pose(head=(-15,0,8,None),body=-5)),
-                     (30,pose(head=-12,body=-5))],True)
-    return a
+    return make_actions(JOINTS,PARTS)
+
+EXTRA_JSON={'walkSpeed':2.6667,'releaseOrigins':release_origins(JOINTS,PARTS)}
+PREVIEW_PREFIX='v2-preview-'
+COMPARE_PREFIX='v2-compare-'
 
 
 PREVIEW_CAMERA=((18,17,10),(0,-.5,3.4),48)

@@ -1,0 +1,24 @@
+{
+  "parts": 316,
+  "joints": 33,
+  "clips": 11,
+  "maxLocalPositionErrorStuds": 0.00799560546875,
+  "maxLocalRotationErrorDegrees": 0.36903494431776296,
+  "deathFloorMin": -0.010520348325371742,
+  "deathFloorMax": 0.008903563022613525,
+  "worstPositionAt": [
+    "jump",
+    "body",
+    0.08333333333333333
+  ],
+  "worstRotationAt": [
+    "potion",
+    "handL",
+    0.9666666666666667
+  ],
+  "maxReleaseOriginErrorStuds": 0.015312233320692923,
+  "deathStartFeetHeight": -6.338491948554292e-05,
+  "deathFinalTorsoFloor": 0.6695117354393005,
+  "deathFinalShoulderHipSupportHeight": 0.0012710615992546082,
+  "maxWalkStanceErrorStuds": 0.0767573352492538
+}

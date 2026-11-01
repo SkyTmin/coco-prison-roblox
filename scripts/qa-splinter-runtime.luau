@@ -10,6 +10,8 @@ assert(
 local SS = game:GetService("ServerStorage")
 local API = require(game.ServerScriptService.Server.Services.SplinterAbilities)
 local Config = require(game.ReplicatedStorage.Shared.Config)
+local BlockRig = require(game.ReplicatedStorage.Shared.BlockRig)
+local Definition = require(game.ReplicatedStorage.Shared.Models.splinter)
 local result = SS:FindFirstChild("QASplinterResult") or Instance.new("StringValue")
 result.Name, result.Value, result.Parent = "QASplinterResult", "running", SS
 local cfg
@@ -36,6 +38,13 @@ local function fixture()
 	local root =
 		part("HumanoidRootPart", origin + Vector3.new(0, 3, 0), Vector3.new(2, 2, 2), model)
 	model.PrimaryPart = root
+	-- Exercise the real hand/mouth socket path, with a deliberately different root height.
+	local groundJoint = part("J_root", origin, Vector3.new(0.2, 0.2, 0.2), model)
+	groundJoint.Anchored, groundJoint.CanCollide, groundJoint.CanQuery = false, false, false
+	groundJoint.Transparency, groundJoint.Massless = 1, true
+	local originMotor = Instance.new("Motor6D")
+	originMotor.Name, originMotor.C0 = "root", CFrame.new(0, -3, 0)
+	originMotor.Part0, originMotor.Part1, originMotor.Parent = root, groundJoint, groundJoint
 	local hum = Instance.new("Humanoid")
 	hum.RequiresNeck, hum.BreakJointsOnDeath = false, false
 	hum.Parent = model
@@ -83,6 +92,12 @@ local function check(name, condition, detail)
 	assert(condition, name .. ": " .. tostring(detail))
 end
 local ok, err = pcall(function()
+	local prepared = BlockRig.prepare(Definition)
+	local clipCount = 0
+	for _ in prepared.clips do
+		clipCount += 1
+	end
+	check("all split animation modules load", clipCount == 11, clipCount)
 	for index, name in { "swoop", "potion", "shoot", "summon" } do
 		local boss, target, hooks, hits, cleanup = fixture()
 		API.Cast(boss, index, target.Position, false, hooks)
@@ -96,6 +111,19 @@ local ok, err = pcall(function()
 	for index, name in { "swoop", "potion", "shoot" } do
 		for _, blocked in { false, true } do
 			local boss, target, hooks, hits, cleanup = fixture()
+			local observed
+			local connection = workspace.DescendantAdded:Connect(function(instance)
+				local expectedName = if name == "potion" then "SplinterBottle" else "SplinterSpit"
+				if
+					name ~= "swoop"
+					and instance:IsA("BasePart")
+					and instance.Name == expectedName
+				then
+					if (instance.Position - origin).Magnitude < 100 then
+						observed = instance.Position
+					end
+				end
+			end)
 			local wall
 			if blocked then
 				wall =
@@ -103,6 +131,18 @@ local ok, err = pcall(function()
 			end
 			API.Cast(boss, index, target.Position, false, hooks)
 			task.wait(if name == "potion" then 4.8 else 3.7)
+			connection:Disconnect()
+			if name ~= "swoop" then
+				local point = Definition.releaseOrigins[name]
+				local expected = (boss.root.CFrame * CFrame.new(0, -3, 0)):PointToWorldSpace(
+					Vector3.new(point[1], point[2], point[3])
+				)
+				check(
+					name .. " release socket",
+					observed and (observed - expected).Magnitude < 0.1,
+					if observed then tostring(observed) else "missing projectile"
+				)
+			end
 			local total = 0
 			for _, damage in hits do
 				total += damage

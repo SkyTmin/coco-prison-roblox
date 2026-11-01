@@ -7,11 +7,26 @@ local Debris = game:GetService("Debris")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local BlockRig = require(ReplicatedStorage.Shared.BlockRig)
+local ModelDefinition = require(ReplicatedStorage.Shared.Models.splinter) :: any
 local CollisionGroups = require(script.Parent.CollisionGroups)
 
 local SplinterAbilities = {}
 local GREEN = Color3.fromRGB(113, 163, 63)
 local sessions: { [any]: any } = {}
+
+-- Authored hand/mouth sockets at the existing release times, exported with the animation.
+-- C0 gives the model's ground origin relative to the physics root; no duplicate height constant.
+local function releasePoint(boss: any, action: string, fallback: Vector3): Vector3
+	local point = ModelDefinition.releaseOrigins and ModelDefinition.releaseOrigins[action]
+	local origin = boss.model and boss.model:FindFirstChild("J_root")
+	local joint = origin and origin:FindFirstChild("root")
+	if point and joint and joint:IsA("Motor6D") and boss.root then
+		return (boss.root.CFrame * joint.C0):PointToWorldSpace(
+			Vector3.new(point[1], point[2], point[3])
+		)
+	end
+	return fallback
+end
 
 function SplinterAbilities.Clear(boss: any)
 	local session = sessions[boss]
@@ -233,7 +248,7 @@ local function potion(boss: any, session: any, target: Vector3, hooks: any)
 		mark:Destroy()
 		return
 	end
-	local from = root.Position + dir * 2 + Vector3.new(0, 2, 0)
+	local from = releasePoint(boss, "potion", root.Position + dir * 2 + Vector3.new(0, 2, 0))
 	local launchWall = workspace:Raycast(root.Position, from - root.Position, params)
 	if launchWall then
 		mark:Destroy()
@@ -288,7 +303,7 @@ local function shoot(boss: any, session: any, target: Vector3, hooks: any)
 	local dir = direction(root.Position, target, root.CFrame.LookVector)
 	face(root, dir)
 	local params = rayParams(boss, session, hooks)
-	local from = root.Position + dir * 3.7 + Vector3.new(0, 0.65, 0)
+	local from = releasePoint(boss, "shoot", root.Position + dir * 3.7 + Vector3.new(0, 0.65, 0))
 	local delta = target - from
 	local aim = if delta.Magnitude > 0.1 then delta.Unit else dir
 	local floor = ground(boss, root.Position + dir * cfg.range / 2, params)

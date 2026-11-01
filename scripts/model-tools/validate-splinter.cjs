@@ -7,6 +7,18 @@ for (const name of ['splinter', 'splinter_spider']) {
   const text = fs.readFileSync(`src/shared/Models/${name}.json`, 'utf8');
   assert(text.length < 190000, `${name}: Roblox ModuleScript size budget`);
   const model = JSON.parse(text);
+  let largest=text.length,totalBytes=text.length;
+  for(const file of model.clipFiles||[]){
+    assert(/^splinter_[a-z]+$/.test(file),'local animation module name');
+    const chunkText=fs.readFileSync(`src/shared/Models/${file}.json`,'utf8');
+    assert(chunkText.length<180000,`${file}: ModuleScript size budget`);
+    largest=Math.max(largest,chunkText.length);totalBytes+=chunkText.length;
+    const chunk=JSON.parse(chunkText);assert.equal(chunk.packedKeys,model.packedKeys);
+    for(const [clip,c] of Object.entries(chunk.clips)){
+      assert(!model.clips[clip],`duplicate clip ${clip}`);model.clips[clip]=c;
+    }
+  }
+  const decode=k=>model.packedKeys?{t:k[0],p:k.slice(1,4),q:k.slice(4,8)}:k;
   const names = new Set();
   for (const joint of model.joints) {
     assert(!names.has(joint.name), 'duplicate joint');
@@ -23,7 +35,8 @@ for (const name of ['splinter', 'splinter_spider']) {
   }
   for (const [clip, value] of Object.entries(model.clips)) {
     assert(value.length > 0);
-    for (const [joint, keys] of Object.entries(value.tracks)) {
+    for (const [joint, raw] of Object.entries(value.tracks)) {
+      const keys=raw.map(decode);
       assert(names.has(joint), `${clip}: unknown joint`);
       let last = -1;
       for (const key of keys) {
@@ -40,12 +53,21 @@ for (const name of ['splinter', 'splinter_spider']) {
     }
   }
   if (name === 'splinter') {
+    const audit=JSON.parse(fs.readFileSync('wiki/client-audit/content-analysis/resourcepack/boss-model-animations.json','utf8'))['splinter/splinter.model'].anims;
+    for(const [clip,sourceClip] of Object.entries({idle:'idle',walk:'walk',melee:'attack',swoop:'swoop',potion:'potion',shoot:'shoot',summon:'summon',death:'death'})) assert.equal(model.clips[clip].length,audit[sourceClip].len);
+    for(const joint of ['chest','shinL','shinR','fingersL','fingersR','clothFront','tail7'])assert(names.has(joint));
     for (const [clip, seconds] of Object.entries({melee:1,swoop:1.1,potion:1.55,shoot:2.25,summon:4,death:4})) {
       assert.equal(model.clips[clip].length, seconds, `${clip}: wiki duration`);
       assert.equal(clip === 'death' ? fight.splinter.deathDuration : fight.splinter[clip].duration, seconds);
       assert(!model.clips[clip].loop);
     }
     assert.equal(fight.glowBrightness, 0);
+    assert.equal(model.clips.melee.impact,fight.splinter.melee.hitAt);
+    assert.equal(model.clips.swoop.impact,fight.splinter.swoop.windup);
+    for(const clip of ['potion','shoot','summon'])assert.equal(model.clips[clip].impact,fight.splinter[clip].release);
+    for(const point of Object.values(model.releaseOrigins))assert(point.length===3&&point.every(Number.isFinite));
+    assert.equal(model.parts.length,316,'preserve the existing sculpture');
+    for(const joint of ['body','chest','head','jaw','armR','foreR','shinL','shinR','tail7'])assert(model.clips.death.tracks[joint]?.length>4,`articulated death: ${joint}`);
     assert(fight.splinter.melee.hitAt < 1);
     for (const clip of ['potion','shoot','summon']) assert(fight.splinter[clip].release < model.clips[clip].length);
     assert(fight.splinter.swoop.windup + fight.splinter.swoop.travel < 1.1);
@@ -53,7 +75,7 @@ for (const name of ['splinter', 'splinter_spider']) {
     assert(fight.splinter.summon.maxAlive <= 6);
     assert.equal(fight.texture, JSON.parse(fs.readFileSync('assets/models/rat/ids.json','utf8'))['fur-noise.png']);
   }
-  console.log(`${name}: ${model.parts.length} parts, ${names.size} joints, ${Object.keys(model.clips).length} clips, ${text.length} chars — OK`);
+  console.log(`${name}: ${model.parts.length} parts, ${names.size} joints, ${Object.keys(model.clips).length} clips, ${totalBytes} chars total / ${largest} largest module — OK`);
 }
 // Generated configuration must agree with the source of truth (generator shape supports direct or nested maps).
 const generated = JSON.parse(fs.readFileSync('src/shared/Config/bosses.json', 'utf8'));

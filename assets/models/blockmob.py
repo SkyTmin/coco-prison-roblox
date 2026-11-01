@@ -419,13 +419,31 @@ class Mob:
             out["jointNames"] = names
             out["palette"] = palette
             out["parts"] = packed
+            groups = self.g.get('CLIP_FILES')
+            if groups:
+                # Dense articulated clips may exceed Roblox's per-ModuleScript limit. Keep
+                # the curve fidelity and split only the data; legacy models stay self-contained.
+                all_clips = out['clips']
+                listed = [clip for group in groups.values() for clip in group]
+                assert len(listed) == len(set(listed)) and set(listed) == set(all_clips), groups
+                out['clips'] = {}
+                out['clipFiles'] = []
+                for suffix, names_in_file in groups.items():
+                    name = self.name + '_' + suffix
+                    chunk = {'packedKeys': out.get('packedKeys', False),
+                             'clips': {name: all_clips[name] for name in names_in_file}}
+                    encoded = json.dumps(chunk, ensure_ascii=False, separators=(',', ':'))
+                    assert len(encoded) < 180000, (name, len(encoded))
+                    with open(os.path.join(os.path.dirname(self.json_out), name+'.json'), 'w', encoding='utf-8') as f:
+                        f.write(encoded)
+                    out['clipFiles'].append(name)
             with open(self.json_out, "w", encoding="utf-8") as f:
                 json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
         else:
             with open(self.json_out, "w", encoding="utf-8") as f:
                 json.dump(out, f, ensure_ascii=False, indent=1)
         self.save_noise()
-        self.log("exported", self.json_out, len(out["parts"]), "parts", list(out["clips"].keys()))
+        self.log("exported", self.json_out, len(out["parts"]), "parts", clips)
         self.render_previews(joints, order)
 
     # ---------------------------------------------------------------- renders

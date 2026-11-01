@@ -158,7 +158,16 @@ function BlockRig.prepare(def: any): Prepared
 		return hit
 	end
 	local clips: { [string]: Clip } = {}
-	for name, c in pairs(def.clips) do
+	local sourceClips = table.clone(def.clips or {})
+	for _, file in ipairs(def.clipFiles or {}) do
+		local chunk = require(script.Parent.Models:WaitForChild(file)) :: any
+		assert(chunk.packedKeys == def.packedKeys, "Animation key format mismatch: " .. file)
+		for name, clip in pairs(chunk.clips) do
+			assert(sourceClips[name] == nil, "Duplicate animation: " .. name)
+			sourceClips[name] = clip
+		end
+	end
+	for name, c in pairs(sourceClips) do
 		local tracks: { [string]: { Key } } = {}
 		for joint, keys in pairs(c.tracks) do
 			local list: { Key } = {}
