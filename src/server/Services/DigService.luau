@@ -21,6 +21,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local MiningStats = require(Shared.MiningStats)
 local Remotes = require(Shared.Remotes)
 local Skills = require(Shared.Skills)
 local Strings = require(Shared.Strings)
@@ -355,12 +356,7 @@ local function complete(player: Player, token: number)
 			* Boosters.multiplier(p, "blocks")
 		-- the gang perk Конверсия: the block counts twice in the stats [решение: +1 % за уровень]
 		local counted = if math.random() < GangService.perk(p, "conversion") then 2 else 1
-		p.blocksTotal += blockMult * comboMult * counted
-		-- «чистые» блоки: one per block, no multipliers (sidebar in brackets, the spawn top) [сеть: blocks_clean]
-		p.stats.blocksClean = (p.stats.blocksClean or 0) + 1
-		if block.upgradeCounter then
-			p.counters[block.upgradeCounter] = (p.counters[block.upgradeCounter] or 0) + counted
-		end
+		MiningStats.credit(p, blockId, 1, blockMult * comboMult * counted)
 		local toolId = InventoryService.heldTool(p)
 		if toolId == "pickaxe" then
 			ProfessionService.addXp(p, "mason", 1)
@@ -399,7 +395,15 @@ local function complete(player: Player, token: number)
 	end
 	sendCombo(player, combo)
 	-- the tool's ancient books: Барыга, Археолог, Молот, Пластолом
-	BookService.onDug(player, mine, i, dig.hit - brokenCFrame.Position, dropId, dropCount)
+	BookService.onDug(
+		player,
+		mine,
+		i,
+		dig.hit - brokenCFrame.Position,
+		dropId,
+		dropCount,
+		comboMult
+	)
 end
 
 -- Token bucket per player [docs/research/server-scaling.md]: instant mining is 20 blocks a second, a

@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Books = require(Shared.Books)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local MiningStats = require(Shared.MiningStats)
 local Effects = require(Shared.Effects)
 local Potions = require(Shared.Potions)
 local PrisPlus = require(Shared.PrisPlus)
@@ -53,7 +54,6 @@ local ENLIGHTENED_HEAL = 4 -- Просвещённый: +2 сердца (GAME-DE
 local BERSERK_BELOW = 20 -- Берсерк: below 10 hearts
 local RAGE_MAX, RAGE_RESET = 10, 5 -- Ярость: up to 10 blows, the streak ends after 5 s
 local FIRE_RADIUS, FIRE_SECONDS = 2 * BLOCK, 5 -- Пожар: 2 blocks, 5 s [сеть, патч 20.08.2022]
-local LAYER_STATS_CAP = 200 -- Пластолом: half the layer, not above 200 [клиент]
 local USE_COOLDOWN = 0.3
 
 local STATUSES = {
@@ -640,7 +640,8 @@ function BookService.onDug(
 	index: number,
 	face: Vector3,
 	dropId: string,
-	dropCount: number
+	dropCount: number,
+	comboMult: number?
 )
 	local profile = ProfileService.Get(player)
 	local tool = profile and Books.held(profile)
@@ -656,7 +657,6 @@ function BookService.onDug(
 	local toolId, toolLevel = tool.id, tool.level or 1
 	local extra: { string } = {}
 	local layer: { string } = {}
-	local layerStats = 0
 	local layerChance =
 		BookTuning.proc("plastolom", Books.level(tool, "plastolom"), Books.value(tool, "plastolom"))
 	if BookTuning.layerReady(player, now()) and roll(layerChance) then
@@ -672,7 +672,6 @@ function BookService.onDug(
 		if #layer > 0 then
 			BookTuning.layerStarted(player, now())
 		end
-		layerStats = math.min(LAYER_STATS_CAP, math.floor(#layer / 2))
 	elseif roll(Books.value(tool, "hammer")) then
 		-- 3×3 across the dug face
 		local x, y, z = MineService.coords(mine, index)
@@ -710,7 +709,7 @@ function BookService.onDug(
 	local sold, soldItems = 0, 0
 	if copy or #extra > 0 or #layer > 0 then
 		ProfileService.Mutate(player, function(p)
-			local mult = blockMultiplier(p)
+			local mult = blockMultiplier(p) * (comboMult or 1)
 			local moneyMult = ProfessionService.moneyMultiplier(p)
 			local function give(id: string, count: number, sellOnly: boolean?)
 				local amount, items = InventoryService.autoSell(p, id, count, moneyMult)
@@ -736,14 +735,13 @@ function BookService.onDug(
 			end
 			for _, id in ipairs(extra) do
 				giveBlock(id)
+				MiningStats.credit(p, id, 1, mult)
 			end
-			-- Пластолом keeps its half-layer stats cap; active auto-sell pays for every actual block removed.
+			-- Every removed cell is real mining; auto-sell and drop-copy quantities do not change its count.
 			for _, id in ipairs(layer) do
 				giveBlock(id, true)
+				MiningStats.credit(p, id, 1, mult)
 			end
-			local counted = #extra + layerStats
-			p.blocksTotal += mult * counted
-			p.stats.blocksClean = (p.stats.blocksClean or 0) + counted
 		end)
 	end
 	if sold > 0 then

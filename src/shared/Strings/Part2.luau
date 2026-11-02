@@ -633,10 +633,10 @@ return {
 		fr = "Chaque coup sur la même cible rend les suivants %s plus forts (jusqu’à 10 fois)",
 	},
 	book_desc_plastolom = {
-		ru = "При добыче шанс %s снести весь слой шахты под вами (в статистику — половина, до 200)",
-		en = "When mining, %s chance to clear the whole mine layer under you (half of it, up to 200, counts)",
-		es = "Al minar, %s de probabilidad de romper toda la capa de la mina bajo ti (cuenta la mitad, hasta 200)",
-		fr = "En minant, %s de chances de briser toute la couche de la mine sous vous (la moitié, jusqu’à 200, compte)",
+		ru = "При добыче шанс %s снести весь слой шахты под вами; каждый разрушенный блок засчитывается",
+		en = "When mining, %s chance to clear the whole mine layer under you; every broken block counts",
+		es = "Al minar, %s de probabilidad de romper toda la capa de la mina bajo ti; cuenta cada bloque roto",
+		fr = "En minant, %s de chances de briser toute la couche de la mine sous vous ; chaque bloc détruit compte",
 	},
 	book_desc_prospector = {
 		ru = "С босса на %s больше Древних звёзд, если ваш урон не меньше 35 %%",
