@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 02.11 — Reaper offline checkpoint; all 19 bosses have authored code/models [owner]
+
+Original Reaper755parts/43joints/15clips, matte circle38/4/1 and soul mask17/4/1. Two quick cuts, interruptible swept soul volley, circular/ground attacks, bounded warned teleport and gapped/jumpable explosion. HP3500/raw40/52/64/regen12/rewards unchanged; no immunity, clones or camera effects. Grounded4.28s death releases scythe and folds robe. All17 exported clips rendered, nine modules, offline curve/config/build/balance checks pass; source-only/headless work, no Studio or desktop access. Forest Guardian pending fixture arena boundary corrected without gameplay changes. `assets/models/reaper/README.md` contains media, uncertain official asset-shop candidate and QA limits.
+
+**Production route now19/19 in code; only13/19 have completed live QA.** Raven Knight, Vecna, Samurai, Ent, Forest Guardian and Reaper all await evening Studio suites/live encounters. Do not label those six tested. Next: sync only scripts/models into Katorga92594200898716 after owner resumes Studio work; preserve map, never publish, render preflight, restore Creative. Run each pending server/client suite, no-block/ordinary-mob regression, teleports and actual arenas, then real4–6-player/mobile/FPS checks. These were not run in this code-only session.
+
 ### 02.11 — Forest Guardian offline checkpoint; evening Studio QA pending [owner]
 
 Original root guardian1147parts/56joints/11clips, leaf-pod creature138/22/6 and root prop8/4/1. Alternating sweeps, heavy fist, warned shared-budget root fan, capped mortal summons; no wiki immunity [owner]. HP3340/raw38/49/61/regen10 and rewards unchanged. Grounded4.8s death and all18 exported clips rendered; curve/config/module/texture audits, Selene/StyLua/Rojo and boss-balance simulation pass. Three headless blends/eight modules; source/models only, no Studio tools or PC notifications. `assets/models/forest_guardian/README.md`; server/client fixtures prepared but **NOT RUN**, live4–6-player/mobile/FPS pending evening. Next: Reaper, then evening source-only sync/QA for all offline checkpoints; preserve Katorga map, never publish.

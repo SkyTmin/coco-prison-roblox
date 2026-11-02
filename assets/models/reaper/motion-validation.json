@@ -1,0 +1,22 @@
+{
+  "parts": 755,
+  "joints": 43,
+  "clips": 15,
+  "maxLocalPositionErrorStuds": 0.007931232667403618,
+  "maxLocalRotationErrorDegrees": 0.3669079222182352,
+  "maxWalkStanceErrorStuds": 0.02782470984095219,
+  "deathBodyFloor": [
+    -0.0016324245370924473,
+    -4.984019324183464e-05
+  ],
+  "detachedWeaponFloor": [
+    -0.0025127315893769264,
+    0.00017809783457778394
+  ],
+  "floorByClip": {
+    "death": [
+      -0.025405973196029663,
+      0.010011749342083931
+    ]
+  }
+}

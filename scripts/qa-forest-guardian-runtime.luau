@@ -155,7 +155,7 @@ for index, name in names do
 				tr.Position = o + Vector3.new(0, 3, -60)
 			end
 			if mode == "arena" then
-				b.arenaRadius = 1
+				b.arenaRadius = 0.5
 			end
 			if mode == "noFloor" then
 				g.Floor:Destroy()

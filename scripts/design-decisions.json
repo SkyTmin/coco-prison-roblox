@@ -3851,9 +3851,75 @@
             220
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — об обсидиановую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: удары косой, круговая атака, удар в землю, телепорт к игроку и обратно, забор души, круг души на земле, вращение, взрыв (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "_abilities": "[client/wiki] Reaper: two cuts, soul1, circleattack, groundattack, teleportinto/out, explosion. [decision] original hooded rig, jointed robe, detached scythe death, bounded soul projectiles and safe teleports. No shield, clones or camera effects. assets/models/reaper/README.md; Studio pending evening.",
         "combatRegenPerSecond": 12,
-        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает.",
+        "model": "reaper",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 4.28,
+        "reaper": {
+          "spawnDuration": 5.6,
+          "recovery": 1.8,
+          "attack1": {
+            "duration": 0.7273,
+            "release": 0.4,
+            "damage": 40,
+            "radius": 8,
+            "halfAngle": 75
+          },
+          "attack2": {
+            "duration": 0.6993,
+            "release": 0.38,
+            "damage": 40,
+            "radius": 8,
+            "halfAngle": 75
+          },
+          "soul1": {
+            "duration": 4.92,
+            "release": 1.4,
+            "damage": 52,
+            "range": 36,
+            "speed": 24,
+            "radius": 0.65,
+            "count": 3,
+            "phase2Count": 5,
+            "interval": 0.7,
+            "interruptDamage": 160
+          },
+          "circleattack": {
+            "duration": 1.0526,
+            "release": 0.67,
+            "damage": 52,
+            "radius": 10
+          },
+          "groundattack": {
+            "duration": 1.6941,
+            "release": 1.1,
+            "damage": 52,
+            "radius": 3,
+            "range": 20,
+            "spacing": 4,
+            "interval": 0.12
+          },
+          "explosion": {
+            "duration": 2.06,
+            "release": 1.5,
+            "damage": 64,
+            "radius": 18,
+            "innerRadius": 4,
+            "safeHalfAngle": 35,
+            "jumpHeight": 4.3
+          },
+          "teleport": {
+            "duration": 1.8604,
+            "release": 1.1271,
+            "intoDuration": 1.1271,
+            "outDuration": 0.7333,
+            "range": 18,
+            "flank": 8
+          }
+        }
       },
       "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
       "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."

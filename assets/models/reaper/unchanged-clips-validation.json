@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "Final robe-fold edit changed only the death clip; other exported modules byte-identical",
+  "modules": {
+    "reaper.json": "5106ee7ce62fc44bf551af009aa29cd001844b3cef7eadd80dee9e3df9494eb0",
+    "reaper_circle.json": "de9d054735c6cf610fd3b9f09263f44da924097631553318926d456c46071271",
+    "reaper_cuts.json": "76d2d36ddf2622e751fdb82d3e6c86f5e87138318c399d45e430acab70e07429",
+    "reaper_life.json": "f91b6830a14dd97ad10cc67bfef930d6ec68acc136a513acfd8ea45a0c8a6f79",
+    "reaper_loco.json": "48dfc4c1067ecd5653ae611c762ee9cf5983930535a21592ccfa29ace1a891ad",
+    "reaper_magic.json": "16a1853153ccc3ff391c594c44b7e8577123e567da5177901c154e120765d3fc",
+    "reaper_soul.json": "36e88cc4741614de3a5ed09e7ecc0b5db7975a9f97b8e8e52fa119470466b5d5",
+    "reaper_teleport.json": "a9e2c302f274a410f647bf2ce8207b4804e6f94ac27e21b54dbbc924eca21e90"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "parts": 17,
+  "joints": 4,
+  "clips": 1,
+  "maxLocalPositionErrorStuds": 0,
+  "maxLocalRotationErrorDegrees": 0.28530505199497014,
+  "maxWalkStanceErrorStuds": 0,
+  "deathBodyFloor": [],
+  "floorByClip": {}
+}

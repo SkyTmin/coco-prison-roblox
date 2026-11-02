@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "d51e07c",
+  "models": {
+    "reaper": {
+      "parts": 755,
+      "joints": 43,
+      "clips": {
+        "idle": 5.24,
+        "idle3": 3.24,
+        "walk": 3.28,
+        "attack1": 0.7273,
+        "attack2": 0.6993,
+        "circleattack": 1.0526,
+        "soul1": 4.92,
+        "groundattack": 1.6941,
+        "explosion": 2.06,
+        "teleportinto": 1.1271,
+        "teleportout": 0.7333,
+        "spawn": 5.6,
+        "hurt": 0.7,
+        "stun": 1.0,
+        "death": 4.28
+      }
+    },
+    "reaper_circle": {
+      "parts": 38,
+      "joints": 4,
+      "clips": {
+        "idle": 6.0
+      }
+    },
+    "reaper_soul": {
+      "parts": 17,
+      "joints": 4,
+      "clips": {
+        "flight": 0.8
+      }
+    }
+  },
+  "moduleCount": 9,
+  "largestModuleCharacters": 90325,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}

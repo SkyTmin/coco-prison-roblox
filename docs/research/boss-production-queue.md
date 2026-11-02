@@ -4,7 +4,9 @@ Owner request: finish every boss sequentially (2026-11-02). Each checkpoint incl
 
 Current owner steering: code/models only; Studio QA is deferred until evening. Offline checkpoints remain unchecked until their real in-game suites pass.
 
-Completed: Basalt Guardian, Giant Zombie, Splinter, Minotaur, Piglin King, Skeleton, Knight, Poseidon, Illusionist, Spider Queen, Moth, Undead King, Forest Spirit (13/19).
+Code/model production: **19/19 prepared**. The six unchecked checkpoints below still need Studio verification; live completion remains13/19.
+
+Completed live: Basalt Guardian, Giant Zombie, Splinter, Minotaur, Piglin King, Skeleton, Knight, Poseidon, Illusionist, Spider Queen, Moth, Undead King, Forest Spirit (13/19).
 
 Remaining route (source: boss location unlock levels; not difficulty ranking):
 
@@ -20,6 +22,6 @@ Remaining route (source: boss location unlock levels; not difficulty ranking):
 - [ ] The Lovers — offline Samurai874 parts/43 joints/21 clips and spirit archer483/39/9, four projectile rigs (six rigs/34 clips). Three vulnerable phases, bounded projectiles/summon. Code/export/build checks pass; Studio suites/live Kyoto fight **PENDING evening**. assets/models/the_lovers/README.md.
 - [ ] Ent — offline oak king1298 parts/54 joints/12 clips, minion164/22/6, branch/leaf props (four rigs/20 clips). Source-backed four skill families, original grounded death; offline checks pass, Studio server/client/live Farm QA **PENDING evening**. assets/models/ent/README.md.
 - [ ] Forest Guardian — offline root giant1147 parts/56 joints/11 clips, familiar138/22/6 and root8/4/1. Three rigs/18 clips, vulnerable summons and original4.8s death; offline checks pass, all Studio/Barn/mobile QA **PENDING evening**. assets/models/forest_guardian/README.md.
-- [ ] Reaper.
+- [ ] Reaper — offline scythe spirit755parts/43joints/15clips, circle38/4/1 and soul17/4/1. Three rigs/17 clips, five authored specials, grounded4.28s weapon-release death; offline checks pass, all Studio/Edge Gate/group/mobile QA **PENDING evening**. assets/models/reaper/README.md.
 
 QA limitations carried forward: real 4–6-player and phone/load combat remain untested. Skeleton's cold-start timed damage suite missed three totals; warm rerun passed 61 checks. Cause remains unestablished; investigate before treating startup timing as validated.
