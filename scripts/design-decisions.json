@@ -2985,9 +2985,120 @@
             200
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о кварцевую колонну оглушение 3 с). Настоящие приёмы из ресурс-пака: стаи воронов, чёрный туман, шипы из земли, призванный летающий топор, вторая форма «Вороний жнец» (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "_abilities": "[клиент] raven knight simplecombo1/2, fastcombo, comboflyattack, explosion; crow reaper basic/charge/fog/axe/spikes. [решение] original choreography, raven volley and phase-two killable retainer; no source-confirmed transformation. assets/models/raven_knight/README.md. Studio QA pending. [владелец] no boss blocks.",
         "combatRegenPerSecond": 4,
-        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает.",
+        "model": "raven_knight",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 5.2,
+        "ravenKnight": {
+          "spawnDuration": 2.2,
+          "recovery": 1.8,
+          "melee": {
+            "duration": 1.9,
+            "contacts": [
+              0.8,
+              1.4
+            ],
+            "damage": 26,
+            "radius": 8,
+            "halfAngle": 65
+          },
+          "fastcombo": {
+            "duration": 4.35,
+            "release": 1.2,
+            "contacts": [
+              1.2,
+              1.9,
+              2.6,
+              3.3
+            ],
+            "damage": 37,
+            "radius": 9,
+            "halfAngle": 70
+          },
+          "comboflyattack": {
+            "duration": 4.25,
+            "moveAt": 1.4,
+            "release": 2.5,
+            "damage": 37,
+            "range": 21,
+            "radius": 5.5
+          },
+          "explosion": {
+            "duration": 6,
+            "release": 3,
+            "damage": 46,
+            "radius": 12
+          },
+          "ravencall": {
+            "duration": 3.2,
+            "release": 1.6,
+            "damage": 37,
+            "range": 35,
+            "speed": 22,
+            "radius": 0.85,
+            "count": 3,
+            "phase2Count": 5,
+            "spread": 10,
+            "maxAlive": 5
+          },
+          "retainer": {
+            "hp": 160,
+            "speed": 11,
+            "spawnDuration": 2.2,
+            "lifetime": 42,
+            "deathDuration": 5.2,
+            "cooldown": 60,
+            "castRange": 30,
+            "recovery": 1.4,
+            "basicattack": {
+              "duration": 1.75,
+              "release": 0.9,
+              "contacts": [
+                0.9
+              ],
+              "damage": 14,
+              "radius": 7,
+              "halfAngle": 65
+            },
+            "chargeattack": {
+              "duration": 2.55,
+              "moveAt": 0.9,
+              "release": 1.45,
+              "damage": 18,
+              "range": 13,
+              "radius": 4.5
+            },
+            "fogcombo": {
+              "duration": 3,
+              "release": 1,
+              "contacts": [
+                1,
+                1.9
+              ],
+              "damage": 20,
+              "radius": 8,
+              "halfAngle": 75
+            },
+            "summonaxe": {
+              "duration": 2.04167,
+              "release": 1.1,
+              "damage": 18,
+              "range": 30,
+              "speed": 19,
+              "radius": 1
+            },
+            "spikesattack": {
+              "duration": 2.75,
+              "release": 1.6,
+              "damage": 18,
+              "range": 30,
+              "radius": 2.8
+            }
+          }
+        }
       },
       "_respawn": "[вики 26.10] справочник /wiki, время возрождения (HANDBOOK-WIKI.md)",
       "_balance": "[владелец 01.11] крайние HP 280/3500, поздние боссы для 4–6 игроков, Сплинтер средней силы. [решение] промежуточные HP и урон до брони: docs/research/boss-balance-2026-11-01.md; заменяет старые значения в исторических заметках."

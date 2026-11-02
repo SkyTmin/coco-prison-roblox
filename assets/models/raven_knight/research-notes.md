@@ -1,0 +1,11 @@
+# Raven Knight — evidence and authored implementation plan
+
+Status: code/model production; Studio QA deferred until evening at the owner's explicit request (02.11). No Studio/desktop-control calls. Headless Blender only, one process/two threads.
+
+[wiki/menu] HANDBOOK-WIKI.md94/116/136, BOSS-CARDS.md42/64, BOSS-MENU-RECOVERY.md22: Castle unlock25, six-hour respawn, bank$0–9000, stars9–15 and Ancient Powder1–35%. Existing reward interpretation and contribution gates are retained; do not announce loot in chat [owner]. Existing balance2550HP, melee26/special37/heavy46, active-combat regeneration4HP/s remains [decision: boss-balance-2026-11-01].
+
+[client] boss-model-animations.json `raven/`: knight idle4/walk2, simplecombo1.9, simplecombo2=1.9, fastcombo4.35, comboflyattack4.25, explosion6, death10.83333. Crow Reaper idle4/walk2, basicattack1.75, chargeattack2.55, fogcombo3, summonaxe2.04167, spikesattack2.75, death10.83333. Crow axe updown2.3/sideattack3.5; fog, crowspike, reaperspikes, crowswarm also present. These are names/durations, not complete server timing or damage evidence.
+
+[primary web, checked02.11] https://mcmodels.net/products/12369/raven-knights-boss-pack — Ryyk's product lists Crow Knight and Crow Reaper as two bosses, with matching VFX families. The older local RESOURCEPACK-BOSSES summary calls the reaper a second form, but names/model co-occurrence do not establish an HP-based transformation. Our existing localization notes call it a retainer. Do not present transformation as confirmed. No paid files purchased/downloaded; original geometry/poses only.
+
+[decision, pending implementation] Main knight uses alternating sword combos, a longer fast combo, warned swept fly-strike, outward explosion and raven-call. Phase two strengthens patterns and can call one killable Crow Reaper with its own five source-backed attack families; no companion shields the boss. Original articulated ravens and floating axe props; all spawns/damage/effects bounded and cancellable. Main and retainer deaths deliberately condensed for our combat pacing while preserving staged collapse, weapon release and feather settling. Preserve shared armor/hurt/burst protections and server-owned movement.

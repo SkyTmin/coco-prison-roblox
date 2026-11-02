@@ -2,6 +2,8 @@
 
 Owner request: finish every boss sequentially (2026-11-02). Each checkpoint includes original Blender geometry and motion, source-backed skill names, authored server mechanics, exported-curve/render review, Studio QA, and a commit. Existing HP/rewards remain governed by the 2026-11-01 balance audit. Never publish the game or launch Blender's GUI.
 
+Current owner steering: code/models only; Studio QA is deferred until evening. Offline checkpoints remain unchecked until their real in-game suites pass.
+
 Completed: Basalt Guardian, Giant Zombie, Splinter, Minotaur, Piglin King, Skeleton, Knight, Poseidon, Illusionist, Spider Queen, Moth, Undead King, Forest Spirit (13/19).
 
 Remaining route (source: boss location unlock levels; not difficulty ranking):
@@ -13,8 +15,8 @@ Remaining route (source: boss location unlock levels; not difficulty ranking):
 - [x] Moth (Моль, config id `mole`) — 693 parts/39 joints/19 clips; 150 server/15 client/43 no-block checks and a 90-second live fight. Videos in assets/models/moth.
 - [x] Undead King — 382 parts/38 joints/13 clips plus ghoul, skull and sword rigs; 169 server/17 client/43 no-block checks, 90-second live fight. Videos in assets/models/undead_king.
 - [x] Forest Spirit — 752 parts/47 joints/17 clips plus four original summon rigs;234 server/22 client/43 no-block assertions,90-second moving-target live fight and actual arena view. Videos in assets/models/forest_spirit.
-- [ ] Raven Knight — next; continue without stopping after each checkpoint [owner].
-- [ ] Vecna.
+- [ ] Raven Knight — code/model checkpoint prepared:721 parts/40 joints/14 clips, retainer671/40/10, raven48/11/3 and axe20/2/2. Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/raven_knight/README.md.
+- [ ] Vecna — next code/model production.
 - [ ] The Lovers.
 - [ ] Ent.
 - [ ] Forest Guardian.

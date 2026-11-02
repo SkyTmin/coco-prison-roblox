@@ -51,6 +51,13 @@
 
 ## Журнал
 
+### 02.11 — Raven Knight code/model checkpoint; Studio deferred until evening [owner]
+
+Owner explicitly requested code-only work and evening Studio checks. No Studio/desktop-control calls for this checkpoint. Prepared original Raven Knight721 parts/40 joints/14 clips, Crow Reaper retainer671/40/10, raven48/11/3, axe20/2/2;29 exported clips reviewed,16 JSON modules, four blends and videos. Alternating normal cuts, fast combo, guarded fly-strike, explosion, bounded raven volley and one vulnerable phase-two retainer with five attack families. Retainer is our authored interpretation, not a claimed source-confirmed transformation. HP2550/damage budgets26/37/46, regen4HP/s and all existing rewards/chat retained. Normal contacts.8/1.4s leave margin beyond hurt immunity. MobAnimator supports server-timed custom minion clips; ordinary Mob regression prepared.
+
+Local Selene/StyLua/Rojo, Python/JSON/module/config and measured exported-curve audits pass. Visual review fixed ankle/blade gaps and retainer axe placement; torso settles on the floor after staged5.2s collapse. Reference/prompt/source notes, artifacts and exact offline reports: assets/models/raven_knight/README.md. **Studio server/client/live/no-block suites not run; studio-validation.json explicitly PENDING.** Evening: sync scripts/models only into Katorga92594200898716, run prepared qa-raven-knight suites, inspect Castle combat/ownership/death/leash and ordinary Mob regression, then record actual outcomes. No publish/map replacement/GUI/notifications. Full completed count remains13/19; Raven is awaiting QA. Next code/model boss: Vecna, then Lovers/Ent/Forest Guardian/Reaper.
+
+
 ### 02.11 — Forest Spirit complete; continue Raven Knight [owner]
 
 Finished original headless Blender Forest Spirit752 parts/47 joints/17 clips and four original summon rigs (shaman137/21/6, explorer144/21/6, mask45/7/6, totem83/8/5). Seven spells: roots, spikes, arrows, lightning, gapped/jumpable pulse, interruptible storm and destructible ritual. No immunity/blocks. HP2320, damage23/34/42, rewards/chat policy retained. Intact6.2s collapse releases the seed; corrected leaf/arm support and explorer lantern grounding. Forty clips rendered; reference, prompt, five blends,20 JSON modules, videos and measured audit: assets/models/forest_spirit/README.md.

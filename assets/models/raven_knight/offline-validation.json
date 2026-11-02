@@ -1,0 +1,64 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "c9ab15e",
+  "models": {
+    "raven_knight": {
+      "parts": 721,
+      "joints": 40,
+      "clips": {
+        "idle": 4.0,
+        "walk": 1.05,
+        "run": 0.72,
+        "simplecombo": 1.9,
+        "simplecombo2": 1.9,
+        "fastcombo": 4.35,
+        "comboflyattack": 4.25,
+        "explosion": 6.0,
+        "ravencall": 3.2,
+        "spawn": 2.2,
+        "hurt": 0.6667,
+        "jump": 1.0333,
+        "stun": 0.6,
+        "death": 5.2
+      }
+    },
+    "crow_reaper": {
+      "parts": 671,
+      "joints": 40,
+      "clips": {
+        "idle": 4.0,
+        "walk": 1.05,
+        "basicattack": 1.75,
+        "chargeattack": 2.55,
+        "fogcombo": 3.0,
+        "summonaxe": 2.0417,
+        "spikesattack": 2.75,
+        "spawn": 2.2,
+        "hurt": 0.6667,
+        "death": 5.2
+      }
+    },
+    "raven": {
+      "parts": 48,
+      "joints": 11,
+      "clips": {
+        "dive": 0.9,
+        "flight": 0.55,
+        "idle": 0.7
+      }
+    },
+    "crow_axe": {
+      "parts": 20,
+      "joints": 2,
+      "clips": {
+        "idle": 2.0,
+        "spin": 1.0
+      }
+    }
+  },
+  "moduleCount": 16,
+  "largestModuleCharacters": 72796,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}

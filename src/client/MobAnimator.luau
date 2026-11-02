@@ -33,6 +33,7 @@ type Entry = {
 	hurtAt: number,
 	diedAt: number?,
 	health: number,
+	actionKey: string,
 }
 local entries: { [Model]: Entry } = {}
 
@@ -68,6 +69,7 @@ local function track(model: Instance)
 		hurtAt = -1,
 		diedAt = nil,
 		health = humanoid.Health,
+		actionKey = "",
 	}
 end
 
@@ -81,6 +83,19 @@ local function choose(e: Entry, now: number, serverNow: number): (string, number
 	local spawn = e.rig.clips.spawn
 	if typeof(spawnAt) == "number" and spawn and serverNow - spawnAt < spawn.length then
 		return "spawn", math.max(0, serverNow - spawnAt)
+	end
+	-- Authored combat minions (e.g. Crow Reaper) use the server's exact clip clock.
+	-- They remain ordinary Mob targets, with one animator and no Boss reward registration.
+	local action = e.model:GetAttribute("Action")
+	local at = e.model:GetAttribute("ActionAt")
+	local duration = e.model:GetAttribute("ActionLen")
+	local clip = if typeof(action) == "string" then e.rig.clips[action] else nil
+	if clip and typeof(at) == "number" and typeof(duration) == "number" and duration > 0 then
+		local elapsed = serverNow - at
+		if elapsed >= 0 and elapsed < duration then
+			e.health = h.Health
+			return action :: string, if clip.loop then elapsed else elapsed / duration * clip.length
+		end
 	end
 	local windup = e.model:GetAttribute("MobWindup")
 	local bite = e.rig.clips.bite
@@ -115,11 +130,13 @@ local function step(dt: number)
 			continue
 		end
 		local name, at = choose(e, now, serverNow)
-		if name ~= e.clip then
+		local actionKey = tostring(model:GetAttribute("ActionAt") or "")
+		if name ~= e.clip or actionKey ~= e.actionKey then
 			e.from = table.clone(e.last)
 			e.fadeAt = now
 			e.clip = name
 			e.clipAt = 0
+			e.actionKey = actionKey
 		end
 		if at then
 			e.clipAt = at
