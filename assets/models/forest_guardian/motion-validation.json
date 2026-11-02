@@ -1,0 +1,18 @@
+{
+  "parts": 1147,
+  "joints": 56,
+  "clips": 11,
+  "maxLocalPositionErrorStuds": 0.007867336143138979,
+  "maxLocalRotationErrorDegrees": 0.3538774132280195,
+  "maxWalkStanceErrorStuds": 0.013788942238675344,
+  "deathBodyFloor": [
+    -7.503293454647064e-05,
+    2.0954757928848267e-06
+  ],
+  "floorByClip": {
+    "death": [
+      -0.013283787295222282,
+      0.014895150437951088
+    ]
+  }
+}

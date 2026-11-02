@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "598a6c9",
+  "models": {
+    "forest_guardian": {
+      "parts": 1147,
+      "joints": 56,
+      "clips": {
+        "idle": 1.5,
+        "walk": 1.5,
+        "attack": 2.0,
+        "attack_left": 2.0,
+        "big_punch": 1.0833,
+        "root_sweep": 2.8,
+        "summon": 3.0,
+        "spawn": 2.4,
+        "hurt": 0.7,
+        "stun": 1.0,
+        "death": 4.8
+      }
+    },
+    "guardian_minion": {
+      "parts": 138,
+      "joints": 22,
+      "clips": {
+        "bite": 1.0833,
+        "death": 1.8333,
+        "hurt": 0.7,
+        "idle": 1.5,
+        "spawn": 1.625,
+        "walk": 1.5
+      }
+    },
+    "guardian_root": {
+      "parts": 8,
+      "joints": 4,
+      "clips": {
+        "spawn": 1.6667
+      }
+    }
+  },
+  "moduleCount": 8,
+  "largestModuleCharacters": 145443,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}

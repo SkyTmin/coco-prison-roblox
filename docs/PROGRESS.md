@@ -51,6 +51,10 @@
 
 ## Журнал
 
+### 02.11 — Forest Guardian offline checkpoint; evening Studio QA pending [owner]
+
+Original root guardian1147parts/56joints/11clips, leaf-pod creature138/22/6 and root prop8/4/1. Alternating sweeps, heavy fist, warned shared-budget root fan, capped mortal summons; no wiki immunity [owner]. HP3340/raw38/49/61/regen10 and rewards unchanged. Grounded4.8s death and all18 exported clips rendered; curve/config/module/texture audits, Selene/StyLua/Rojo and boss-balance simulation pass. Three headless blends/eight modules; source/models only, no Studio tools or PC notifications. `assets/models/forest_guardian/README.md`; server/client fixtures prepared but **NOT RUN**, live4–6-player/mobile/FPS pending evening. Next: Reaper, then evening source-only sync/QA for all offline checkpoints; preserve Katorga map, never publish.
+
 ### 02.11 — Groot/Ent offline checkpoint; evening Studio QA pending [owner]
 
 Continued code/models only. Original stocky oak1298 parts/54 joints/12 clips, young oak164/22/6 and two small branch/leaf rigs; four blends/20 exported clips/10 modules. Primary SamusDev Ent King source confirms two punches and four skill families; authored Twisted Branch/Branch Wave/interruptible Leaf Storm/Tree Minions. Planted gait, hand IK, crown/vines/root fingers, multi-stage4.4s grounded fall; no glow/blocks/camera takeover. Shared hit budgets, dynamic support/headroom/cover, storm safe wedge/inner zone/jump, finite capped mortal summons and cleanup. Existing3160HP,35/46/58,8HP/s regen/rewards/chat retained.

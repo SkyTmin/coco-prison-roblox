@@ -19,7 +19,7 @@ Remaining route (source: boss location unlock levels; not difficulty ranking):
 - [ ] Vecna — code/model checkpoint prepared:725 parts/64 joints/13 clips; three original minions, clock and portal (six rigs/38 clips). Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/vecna/README.md.
 - [ ] The Lovers — offline Samurai874 parts/43 joints/21 clips and spirit archer483/39/9, four projectile rigs (six rigs/34 clips). Three vulnerable phases, bounded projectiles/summon. Code/export/build checks pass; Studio suites/live Kyoto fight **PENDING evening**. assets/models/the_lovers/README.md.
 - [ ] Ent — offline oak king1298 parts/54 joints/12 clips, minion164/22/6, branch/leaf props (four rigs/20 clips). Source-backed four skill families, original grounded death; offline checks pass, Studio server/client/live Farm QA **PENDING evening**. assets/models/ent/README.md.
-- [ ] Forest Guardian.
+- [ ] Forest Guardian — offline root giant1147 parts/56 joints/11 clips, familiar138/22/6 and root8/4/1. Three rigs/18 clips, vulnerable summons and original4.8s death; offline checks pass, all Studio/Barn/mobile QA **PENDING evening**. assets/models/forest_guardian/README.md.
 - [ ] Reaper.
 
 QA limitations carried forward: real 4–6-player and phone/load combat remain untested. Skeleton's cold-start timed damage suite missed three totals; warm rerun passed 61 checks. Cause remains unestablished; investigate before treating startup timing as validated.

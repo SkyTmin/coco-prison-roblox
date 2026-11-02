@@ -184,9 +184,72 @@
             50
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о старый силос оглушение 3 с). Настоящие приёмы из ресурс-пака: удар, большой удар, призыв созданий — «пока его создания живы, никакое оружие не способно ранить хранителя» (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "_abilities": "[client/wiki] Forest Guardian: attack, big_punch and summon. [owner] No immunity while summons live. [decision] original root/leaf rig, authored root sweep, finite mortal creatures and side collapse. Timings/contact/counterplay in assets/models/forest_guardian/README.md; Studio pending evening.",
         "combatRegenPerSecond": 10,
-        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает.",
+        "model": "forest_guardian",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 4.8,
+        "forestGuardian": {
+          "spawnDuration": 2.4,
+          "recovery": 1.8,
+          "attack": {
+            "duration": 2,
+            "release": 1.1,
+            "damage": 38,
+            "radius": 8,
+            "halfAngle": 75
+          },
+          "attack_left": {
+            "duration": 2,
+            "release": 1.1,
+            "damage": 38,
+            "radius": 8,
+            "halfAngle": 75
+          },
+          "big_punch": {
+            "duration": 1.08333,
+            "release": 0.72,
+            "damage": 61,
+            "radius": 9,
+            "halfAngle": 65
+          },
+          "root_sweep": {
+            "duration": 2.8,
+            "release": 1.5,
+            "rootHitAt": 0.4333,
+            "damage": 49,
+            "radius": 3.1,
+            "minRange": 6,
+            "range": 18,
+            "fanHalfAngle": 35,
+            "count": 3,
+            "phase2Count": 5
+          },
+          "summon": {
+            "duration": 3,
+            "release": 1.65,
+            "count": 2,
+            "phase2Count": 3,
+            "stagger": 0.2,
+            "maxAlive": 4,
+            "minion": {
+              "hp": 80,
+              "damage": 14,
+              "speed": 8,
+              "width": 1.5,
+              "depth": 1.3,
+              "lift": 1.7,
+              "reach": 4.1,
+              "hitAt": 0.65,
+              "cooldown": 1.7,
+              "spawnDuration": 1.625,
+              "deathDuration": 1.83333,
+              "lifetime": 24
+            }
+          }
+        }
       },
       "money": [
         0,
