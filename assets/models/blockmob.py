@@ -273,8 +273,22 @@ class Mob:
             end = max(act['frames'])
             offsets = []
             detached = self.g.get('GROUND_DETACHED', {}).get(clip, {})
+            # A dropped prop can be articulated (bow limbs/string/arrow). Treat its entire
+            # descendant joint tree as one object: otherwise a child holds the torso above
+            # the floor, and correcting only the handle pushes the string through it.
+            detached_joints = {}
+            for name in detached:
+                descendants = {joints[name]}
+                pending = [joints[name]]
+                while pending:
+                    for child in pending.pop().children:
+                        if child.name.startswith('Joint_'):
+                            descendants.add(child)
+                            pending.append(child)
+                detached_joints[name] = descendants
+            excluded = set().union(*detached_joints.values()) if detached_joints else set()
             meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')
-                      and o.parent.name.removeprefix('Joint_') not in detached]
+                      and o.parent not in excluded]
             steps = max(1, int(self.g.get('GROUND_SUBSTEPS', 1)))
             sample_frames = [sample / steps for sample in range(math.floor(end*steps)+1)]
             if end > sample_frames[-1] + 1e-6:
@@ -303,7 +317,8 @@ class Mob:
             # bake the prop's world-floor contact into its local joint (no runtime detached physics).
             for name, (release, landed) in detached.items():
                 obj = joints[name]; prop_act = bpy.data.actions[clip + '|' + name]
-                prop_meshes = [o for o in bpy.data.objects if o.name.startswith('Part_') and o.parent == obj]
+                prop_meshes = [o for o in bpy.data.objects if o.name.startswith('Part_')
+                               and o.parent in detached_joints[name]]
                 values = []
                 for frame, _ in offsets:
                     self.pose(joints, order, clip, frame)

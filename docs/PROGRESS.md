@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 02.11 — Samurai and spirit archer offline checkpoint; evening Studio QA pending [owner]
+
+Continued code/models only; no Studio/desktop calls or notifications. Original Samurai874 parts/43 joints/21 clips, spirit483/39/9 and four tiny projectile rigs; six blends/34 exported clips/20 JSON modules. Three vulnerable50/25% phases, alternating cuts, combo/sweep/grounded rushes, swept stars/returning sickle/spears and paired rain. Mortal110HP spirit, finite lifetime/resummon, shared hit budgets/projectile cap; no boss shields. Existing2970HP,32/43/54 damage,7HP/s regen, rewards and damage/dollars chat retained. Source families distinguished from authored condensed mechanics. Armor stays worn; separate four-box nock avoids full-rig visibility changes. Shared exporter fixed compound dropped-prop subtree grounding; eight old detached-prop rigs are leaf-only and retain identical grouping. Fixed sleeves/folds in the spirit's final pose, spell recovery after paired-rain interruption, and nine-special dispatch.
+
+Exported-curve/floor/stance/config/module audits, Selene/StyLua/Rojo and balance simulation pass. Media and measured reports: assets/models/the_lovers/README.md. Prepared qa-lovers-runtime/animation-client are **NOT RUN**; Studio validation remains PENDING. Evening: source/models-only sync into Katorga92594200898716, fixture/client/no-block suites, live Kyoto all phases, nock replication, cover/damage/ownership/lifetime/leash/death/respawn and console. Preserve map/no publication. Full completed count remains13/19; Raven Knight, Vecna and Samurai await Studio. Next code/model route: Ent, Forest Guardian, Reaper. Real group/mobile/load testing remains open.
+
 ### 02.11 — Vecna code/model checkpoint; evening Studio QA pending [owner]
 
 Continued entirely offline under the owner's code-only instruction; no Studio/desktop-control calls. Original Vecna725 parts/64 joints/13 clips, stalker112/22/6, hound85/24/6, bat57/15/6, clock31/6/4, portal48/10/3. Six headless blends,38 exported clips,14 JSON modules; videos and measured reports in assets/models/vecna/README.md. Six articulated tendrils, claw, warned patches, gapped/jumpable flower wave, destroyable clock curse and interruptible portal with three capped killable minion types. Original4.7s grounded collapse; no shielding/camera takeover/player clones/glow. HP2770, damage budgets29/40/50, regen6HP/s, existing rewards and public chat policy unchanged. Source families/durations separated from authored rules; unknown flower source duration not invented.

@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "95e3852",
+  "existingDetachedLeafRigs": [
+    "raven_knight",
+    "crow_reaper",
+    "royal_knight",
+    "piglin_king",
+    "forest_spirit",
+    "illusionist",
+    "poseidon",
+    "undead_king"
+  ],
+  "models": {
+    "the_lovers": {
+      "parts": 874,
+      "joints": 43,
+      "clips": {
+        "idle": 4.0,
+        "walk": 1.05,
+        "run": 0.72,
+        "drawcut": 1.5,
+        "reversecut": 1.65,
+        "triplecut": 3.6,
+        "sweep": 2.8,
+        "thrust": 2.32,
+        "dashcut": 2.48,
+        "skycut": 3.0,
+        "stars": 3.0,
+        "sickle": 3.48,
+        "spears": 2.8,
+        "arrowcall": 3.72,
+        "phase2": 3.6,
+        "phase3": 3.3,
+        "spawn": 2.8,
+        "hurt": 0.6667,
+        "stun": 0.6,
+        "jump": 1.0333,
+        "death": 5.2
+      }
+    },
+    "lover_spirit": {
+      "parts": 483,
+      "joints": 39,
+      "clips": {
+        "idle": 3.36,
+        "walk": 1.0,
+        "bowshot": 3.0,
+        "fan": 3.68,
+        "rain": 4.56,
+        "spear": 2.92,
+        "spawn": 3.24,
+        "hurt": 0.7,
+        "death": 4.0
+      }
+    },
+    "lover_arrow": {
+      "parts": 5,
+      "joints": 2,
+      "clips": {
+        "idle": 1.0
+      }
+    },
+    "lover_spear": {
+      "parts": 3,
+      "joints": 2,
+      "clips": {
+        "idle": 1.0
+      }
+    },
+    "lover_star": {
+      "parts": 9,
+      "joints": 2,
+      "clips": {
+        "spin": 0.8
+      }
+    },
+    "lover_sickle": {
+      "parts": 11,
+      "joints": 2,
+      "clips": {
+        "spin": 1.0
+      }
+    }
+  },
+  "moduleCount": 20,
+  "largestModuleCharacters": 70325,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}

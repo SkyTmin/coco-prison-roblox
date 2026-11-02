@@ -274,9 +274,161 @@
             205
           ]
         },
-        "_abilities": "[решение 26.10] ЗАТЫЧКА [владелец 26.10]: набор Минотавра (полоса, круги из-под пола, рывок — о красную колонну оглушение 3 с). Настоящие приёмы из ресурс-пака «The Lovers»: 3 фазы со сбросом доспеха, дождь стрел, большая стрела, призрачные копья, кусаригама, сюрикены, разрезы, призрак возлюбленной (wiki/client-audit/RESOURCEPACK-BOSSES.md)",
+        "_abilities": "[клиент/вики] Samurai Hanashiguro and spirit archer, three phases, sword/arrow/spear/shuriken/sickle families. [решение] original vulnerable three-phase encounter,50/25% thresholds,21 main clips plus mortal archer; no blocks. Timings/counterplay are authored, not recovered server values. assets/models/the_lovers/README.md; Studio QA pending.",
         "combatRegenPerSecond": 7,
-        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает."
+        "_combatRegen": "[решение 01.11] восстановление в активном бою, включая подготовку навыка; даёт группе 4–6 цель по устойчивому DPS. Нет лечения без противников, не воскрешает.",
+        "model": "the_lovers",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 5.2,
+        "lovers": {
+          "spawnDuration": 2.8,
+          "recovery": 1.7,
+          "phase3At": 0.25,
+          "phase2Duration": 3.6,
+          "phase3Duration": 3.3,
+          "drawcut": {
+            "duration": 1.5,
+            "release": 0.75,
+            "damage": 32,
+            "radius": 8,
+            "halfAngle": 70
+          },
+          "reversecut": {
+            "duration": 1.65,
+            "release": 0.85,
+            "damage": 32,
+            "radius": 8,
+            "halfAngle": 70
+          },
+          "triplecut": {
+            "duration": 3.6,
+            "release": 1.1,
+            "contacts": [
+              1.1,
+              1.8,
+              2.5
+            ],
+            "damage": 43,
+            "radius": 9,
+            "halfAngle": 70
+          },
+          "sweep": {
+            "duration": 2.8,
+            "release": 1.35,
+            "damage": 43,
+            "radius": 10,
+            "halfAngle": 180
+          },
+          "thrust": {
+            "duration": 2.32,
+            "release": 1.2,
+            "moveAt": 0.65,
+            "range": 12,
+            "radius": 5.5,
+            "halfAngle": 35,
+            "damage": 43
+          },
+          "dashcut": {
+            "duration": 2.48,
+            "release": 1.65,
+            "moveAt": 0.8,
+            "range": 24,
+            "radius": 5.5,
+            "halfAngle": 60,
+            "damage": 54
+          },
+          "skycut": {
+            "duration": 3,
+            "release": 1.75,
+            "moveAt": 0.9,
+            "range": 14,
+            "radius": 6.5,
+            "damage": 54,
+            "omnidirectional": true
+          },
+          "stars": {
+            "duration": 3,
+            "release": 1.15,
+            "range": 34,
+            "speed": 30,
+            "radius": 0.8,
+            "damage": 43,
+            "count": 5,
+            "spread": 9
+          },
+          "sickle": {
+            "duration": 3.48,
+            "release": 1.35,
+            "range": 24,
+            "speed": 26,
+            "radius": 1,
+            "damage": 43,
+            "count": 1,
+            "returning": true
+          },
+          "spears": {
+            "duration": 2.8,
+            "release": 1.4,
+            "range": 32,
+            "speed": 26,
+            "radius": 0.7,
+            "damage": 43,
+            "count": 3,
+            "spread": 7
+          },
+          "arrowcall": {
+            "duration": 3.72,
+            "release": 1.45,
+            "damage": 43
+          },
+          "spirit": {
+            "hp": 110,
+            "speed": 8,
+            "spawnDuration": 3.24,
+            "deathDuration": 4,
+            "lifetime": 60,
+            "resummonDelay": 25,
+            "recovery": 2.2,
+            "bowshot": {
+              "duration": 3,
+              "release": 1.5,
+              "range": 36,
+              "speed": 29,
+              "radius": 0.65,
+              "damage": 16,
+              "count": 1
+            },
+            "fan": {
+              "duration": 3.68,
+              "release": 1.68,
+              "range": 34,
+              "speed": 26,
+              "radius": 0.7,
+              "damage": 18,
+              "count": 3,
+              "spread": 10
+            },
+            "rain": {
+              "duration": 4.56,
+              "release": 2.24,
+              "range": 30,
+              "speed": 24,
+              "radius": 1,
+              "damage": 21,
+              "count": 3
+            },
+            "spear": {
+              "duration": 2.92,
+              "release": 1.35,
+              "range": 34,
+              "speed": 27,
+              "radius": 0.8,
+              "damage": 19,
+              "count": 1
+            }
+          }
+        }
       },
       "money": [
         0,
