@@ -51,6 +51,10 @@
 
 ## Журнал
 
+### 02.11 — View button beside the hotbar [owner]
+
+Reused the existing localized camera button: visible by default on PC/mobile, immediately right of the nine slots. Responsive layout reserves its44px tap target [decision], shifts/scales the bar on narrow screens, and places the mobile inventory opener above it. Desktop hints leave room for both. The button uses the same first/third-person toggle as V/F5; hidden while windows are open, editable in HUD settings. Explicit saved HUD customizations remain authoritative. Selene/StyLua, Rojo build, client Luau compilation, and layout bounds at320–1440px on desktop/mobile pass [offline checks]. Code-only; Studio/visual QA deferred to evening.
+
 ### 02.11 — Дворы readability and ancient case delivery, source only [owner]
 
 `WarzoneLayout` repairs the existing scenery before MineService and is shared by the builder: side-mounted beacons, connected approaches, matte mine borders/localized signs, full-canopy clearance, disjoint grass/road/path/rim footprints. No whole-map replacement. `AncientCase` guarantees level III for improved keys and favors low application chances: 90% in10–70,10% in71–100 [decision following owner]. Ancient books go directly into the bag, including a slot freed by the last consumed key; full bag uses the chest. Cosmetic roulette has no modal window. Ancient overflow survives closing, walking away and rejoin; reopen without a key to claim, no item deposits. Failed capacity checks leave the key/profile untouched. Other case behavior is unchanged.

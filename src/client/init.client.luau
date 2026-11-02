@@ -95,8 +95,7 @@ for _, size in ipairs({ Vector2.new(12, 2), Vector2.new(2, 12) }) do
 	line.BorderSizePixel = 0
 	line.Parent = crosshair
 end
--- [владелец 22.10: «кнопку 3 лица кинь в меню»] no camera button on the HUD: the view switches from the
--- touch menu (Touch_camera) or with V / F5 like Minecraft
+-- The view switches with the hotbar-side button, settings, or V / F5.
 local function renderCameraButton()
 	crosshair.Visible = firstPerson or isMobile() or BowController.Drawing()
 end
@@ -3233,23 +3232,29 @@ do
 		localizedLabels[caption] = "touch_layout"
 	end
 end
--- [владелец 28.10: «добавить кнопку вид или убрать её»] the first / third person button: off at the start (the view
--- lives in the settings, V / F5 on a computer); «Добавить» in the layout editor puts it on the screen, where it is
--- moved and resized like the others, on a phone and on a computer
-do
-	local button =
-		touchIconButton(gui, Config.icons.icons["menu_camera"], "", 56, T("touch_camera"))
-	button.Name = "HudView"
-	button.AnchorPoint = Vector2.new(1, 1)
-	button.Position = UDim2.new(1, -16, 1, -210)
-	button.Visible = false
-	button.Activated:Connect(toggleFirstPerson)
-	HudLayout.register("view", button, true, true)
-	HudLayout.setOptional("view", false)
-	local caption = button:FindFirstChild("Caption")
-	if caption and caption:IsA("TextLabel") then
-		localizedLabels[caption] = "touch_camera"
+-- [owner 02.11] «Вид» starts beside the nine hotbar slots on both phone and desktop.
+local viewButton = touchIconButton(
+	gui,
+	Config.icons.icons["menu_camera"],
+	T("touch_camera"),
+	44,
+	T("touch_camera")
+)
+viewButton.Name = "HudView"
+viewButton.AnchorPoint = Vector2.new(1, 1)
+viewButton.Activated:Connect(function()
+	if currentWindowKind == nil and not HudLayout.isEditing() then
+		toggleFirstPerson()
 	end
+end)
+HudLayout.register("view", viewButton, true, true)
+HudLayout.setOptional("view", true)
+local viewShown = true
+local viewCaption = viewButton:FindFirstChild("Caption")
+if viewCaption and viewCaption:IsA("TextLabel") then
+	localizedLabels[viewCaption] = "touch_camera"
+else
+	localizedLabels[viewButton] = "touch_camera"
 end
 local touchActions = Instance.new("Frame")
 touchActions.Name = "TouchActions"
@@ -3487,15 +3492,26 @@ local function updateLayout()
 	local width = 9 * (size + 4) + 8
 	hotbar.Size = UDim2.fromOffset(width, size + 12)
 	hotbar.AnchorPoint = Vector2.new(0.5, 1)
-	hotbar.Position = UDim2.new(0.5, 0, 1, -8)
-	hotbarScale.Scale = if mobile then math.min(1, (viewport.X - 20) / width) else 1
+	-- Reserve a real tap target to the right; shift the bar only when the viewport is too narrow.
+	local viewSize, viewGap, edge = 44, 6, 10
+	hotbarScale.Scale = math.min(1, math.max(1, viewport.X - 2 * edge - viewSize - viewGap) / width)
+	local barWidth = width * hotbarScale.Scale
+	local barHeight = (size + 12) * hotbarScale.Scale
+	local barCenter =
+		math.min(viewport.X / 2, viewport.X - edge - viewSize - viewGap - barWidth / 2)
+	local barRight = barCenter + barWidth / 2
+	hotbar.Position = UDim2.new(0, barCenter, 1, -8)
 	survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
-	-- the key hints right of the hotbar, short of the language button: Roblox's chat window owns the bottom-left corner
-	local hintsLeft = width / 2 * hotbarScale.Scale + 12
-	hints.Position = UDim2.new(0.5, hintsLeft, 1, -10)
-	hints.Size = UDim2.new(0.5, -hintsLeft - 84, 0, 0)
-	inventoryButton.Position = UDim2.new(0.5, width / 2 * hotbarScale.Scale + 6, 1, -8 - size - 4)
+	viewButton.Position =
+		UDim2.new(0, barRight + viewGap + viewSize, 1, -8 - math.max(0, (barHeight - viewSize) / 2))
+	-- Keep the inventory opener above «Вид» and desktop key hints beyond both buttons.
+	inventoryButton.Position = UDim2.new(0, barRight + viewGap, 1, -8 - barHeight - 6 - 40)
 	inventoryButton.AnchorPoint = Vector2.new(0, 0)
+	local hintsLeft = barRight + viewGap + viewSize + 8
+	local hintsWidth = math.max(0, viewport.X - hintsLeft - 84)
+	hints.Visible = not mobile and hintsWidth >= 100
+	hints.Position = UDim2.new(0, hintsLeft, 1, -10)
+	hints.Size = UDim2.fromOffset(hintsWidth, 0)
 	for i, slot in ipairs(hotbarSlots) do
 		slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
 		slotScales[i].Scale = size / SLOT
@@ -3524,10 +3540,12 @@ local function updateLayout()
 	local layout = if edited ~= nil then (if edited then edited else nil) else saved
 	HudLayout.setDefault(stats)
 	HudLayout.setDefault(inventoryButton)
+	HudLayout.setDefault(viewButton)
 	HudLayout.setDefault(toast)
 	HudLayout.setDefault(boosterHud)
 	HudLayout.setDefault(effectsHud)
 	HudLayout.apply(mode, layout)
+	viewShown = viewButton.Visible
 	-- the status effect icons stay just left of the stats panel wherever it goes, unless moved themselves
 	if layout and layout.stats and not layout.effects then
 		effectsHud.Position = UDim2.new(
@@ -3589,6 +3607,7 @@ RunService.RenderStepped:Connect(function()
 		and openWindow.Visible
 		and (currentWindowKind == "inventory" or currentWindowKind == "case")
 	hotbar.Visible = not hasInventoryRow
+	viewButton.Visible = HudLayout.isEditing() or (viewShown and currentWindowKind == nil)
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
 	local food, needItem = isFood(), isNeedConsumable()
