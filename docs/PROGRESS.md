@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 02.11 — Separate Ghetto/Warzone from overlapping progression locations [owner bug]
+
+Owner's teleport to Leprechaun Valley appeared to enter Ghetto. Edit inspection established that both maps occupied origin `(11400,15000,0)`; Kyoto and Warzone also overlapped at `(14400,19500,0)`. Teleport selected the correct LocationId. Corrected the two side-location builders to Z=4000 and translated the existing cloud Ghetto5108 parts/Warzone2966 parts with an idempotent, bounded migration. All scenery, mine/NPC/spawn tags, lighting volumes and model pivots are preserved; no map rebuild or publish. Re-running the migration is a no-op. Static all-destination bounds audit PASS:30 roots/434 distinct-location pairs, zero overlaps. Scripts: `repair-location-overlap.luau`, `qa-location-separation.luau`. Normal in-game teleport recheck pending: after the owner's phone disconnect Studio reported the profile locked on another server; do not bypass profile ownership.
+
+Forest Spirit production remains active (not yet complete):17 primary clips/four summon rigs,22 client animation assertions PASS. Initial89-case server suite found a pulse support recheck omission, now fixed; three lethal-summon assertions used HP==0 although immediate TakeDamage can produce negative HP, now <=0. Repeat server/live suites after the profile session becomes available, then finish/push Forest and continue Raven Knight.
+
 ### 02.11 — Undead King complete; continue to Forest Spirit [owner]
 
 Original headless Blender king382 parts/38 joints/13 clips, plus ghoul132/20/six, skull51/five/five and sword74/five/two. Dark missiles, killable .9s-fuse skulls, warned eight-second ghost-sword prop, capped server-owned ghouls and meteors replace the template. HP2070/damage20/31/38 and wiki loot unchanged; no ghoul immunity, chat damage+$ only. Three-second fall, released crown, planted feet, layered robe/cape; corrected stiff cape and panel gaps in visual review. Reference, exact image_gen prompt, four blends, ten JSONs, exported-track videos and audit: assets/models/undead_king/README.md.

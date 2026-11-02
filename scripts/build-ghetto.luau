@@ -1,7 +1,7 @@
 --!nocheck
 -- Builds the Гетто (ghetto: «Нужна банда и улучшение Гетто», PvP, own gang members may hit each other
 -- [вики LOCATIONS-MENU]; docs/research/remaining-features-design.md «Этап 1в. Гетто») — Workspace.Ghetto at X 11400,
--- height Y 15000. A walled city block at dusk: a main street (north–south) crossed by a second one, thirty-six lots
+-- height Y 15000, Z 4000 (separate from Leprechaun Valley). A walled city block at dusk: a main street crossed by a second one, thirty-six lots
 -- between them with 8-stud back alleys. Most lots hold brick blocks of 2–4 storeys (lit / dark / boarded windows,
 -- fire escapes, shop shutters with signs, roof parapets, water towers, chimneys); two lots are wastelands (zombies,
 -- wrecked cars, fences), one is a fenced basketball court, one the walled yard of the Чёрный рынок (tag BlackMarket).
@@ -22,7 +22,7 @@ root.Name = "Ghetto"
 root:SetAttribute("LocationId", "ghetto")
 root.Parent = workspace
 
-local OX, OZ = 11400, 0
+local OX, OZ = 11400, 4000
 local BY = 15000 -- the location's own height [CLAUDE.md: new locations float at their own height]
 local HALF = 220 -- the inner half size of the walled block
 local FLOOR = 9 -- one storey

@@ -15,6 +15,8 @@
 
 Каждый новый этаж стоит на своём X и своей высоте Y, чтобы этажи не видели друг друга [владелец 23.10]. Шаг: X +1000, Y +1500.
 
+02.11 correction [decision, owner bug report]: the side locations use a separate Z=4000 lane: Ghetto origin `(11400,15000,4000)`, Warzone `(14400,19500,4000)`. Their previous Z=0 origins overlapped Leprechaun Valley and Kyoto. Builders now reserve this lane; `scripts/repair-location-overlap.luau` translates existing cloud scenery without rebuilding it. `scripts/qa-location-separation.luau` audits different destination folders' world bounds.
+
 | № | id | Название | Ур. | BX, BY | Босс (id) | Концепт |
 | --- | --- | --- | ---: | --- | --- | --- |
 | 1 | market | Рынок | 21 | 10400, 13500 | un_king | готово |

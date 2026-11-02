@@ -1,6 +1,6 @@
 --!nocheck
 -- Builds the Дворы (warzone: 7 ур. + фракция, PvP, крысы [вики LOCATIONS-MENU, HANDBOOK-WIKI]; docs/research/
--- remaining-features-design.md «Этап 2») — Workspace.Warzone at X 14400, height Y 19500. A Soviet block of flats on a
+-- remaining-features-design.md «Этап 2») — Workspace.Warzone at X 14400, height Y 19500, Z 4000 (separate from Kyoto). A Soviet block of flats on a
 -- summer evening: two streets cross at a small square (the arrival), and each of the four quarters is a yard closed by
 -- an L of five-storey panel houses (windows, balconies, entrances with canopies). In the middle of every yard stands a
 -- faction point: a beacon (tag WarzonePoint on its top, WarzoneBeam on its light beam, attribute Point) and next to it
@@ -21,7 +21,7 @@ root.Name = "Warzone"
 root:SetAttribute("LocationId", "warzone")
 root.Parent = workspace
 
-local OX, OZ = 14400, 0
+local OX, OZ = 14400, 4000
 local BY = 19500 -- the location's own height [CLAUDE.md: new locations float at their own height]
 local HALF = 150 -- the inner half size of the block of flats
 local B = 4 -- block size
