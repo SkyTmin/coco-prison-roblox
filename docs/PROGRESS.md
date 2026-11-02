@@ -51,6 +51,10 @@
 
 ## Журнал
 
+### 02.11 — Rechecked the reported removal latency with two clients [owner/live QA]
+
+The owner correctly challenged the 183–185 ms startup removal samples [сеть]. Added `qa-network-latency-{server,client}.luau`: paired ordinary deletion, isolated fast confirmation and production (both) routes; no profile mutation, a warmup period, server-only `os.clock` RTT, same-PC wall-clock observations and client removal-to-next-render timing. All 90 removals reached each client; 26 steady-state samples per route/client [сеть: live QA]. Steady production delivery averaged 17.42 / 17.81 ms, p95 22 / 27 ms; the next render step added mean 25.96 / 23.27 ms. Background frame intervals had median about 66.6 ms (15 FPS). Both delivery routes tied in the steady run; no fast-lane advantage over ordinary deletion is claimed from it. Startup stalls reached about 2.2 seconds, so the original samples must not be presented as steady-state or guaranteed WAN latency. `GetServerTimeNow` is an estimated clock, not a precise benchmarking clock. [Raw evidence and distributions](research/network-latency-2026-11-02.json). Production behavior unchanged in this diagnostic follow-up; fixtures removed and normal Creative Play restored.
+
 ### 02.11 — Fast mining confirmations and lower movement/PvP delay [owner/decision]
 
 Added server-authorized `MineRemoved` buffers alongside the existing `Motion`/`MotionFx` lane. Ordinary digs and AoE books share `MineService.breakBlock`; nearby clients remove confirmed cells immediately, while normal Instance deletion covers missed fast packets. Unique IDs per Part lifetime prevent old packets deleting regenerated cells. Streaming-before-identity, confirmation-before-streaming, duplicate packets and bounded queues are handled. A live QA failure exposed destruction during the engine Parent assignment; deferred destruction fixed it.

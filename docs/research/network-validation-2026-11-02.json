@@ -3,6 +3,7 @@
   "placeId": 92594200898716,
   "status": "PARTIAL",
   "studioLocalStatus": "PASS_TWO_CLIENTS",
+  "timingCaveat": "fastRemovalSeconds and meanClientToServerMs use GetServerTimeNow clock estimates. They are local diagnostic samples, not precise network latency measurements. See network-latency-2026-11-02.json for repeated baseline comparisons, server-clock RTT and render-step timing after warmup.",
   "scope": "Fast mining confirmations, movement and PvP; local Studio QA after PC restart",
   "miningSolo": {
     "clients": {

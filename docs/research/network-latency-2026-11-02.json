@@ -1,0 +1,1861 @@
+{
+  "status": "PASS",
+  "clients": {
+    "Player1": {
+      "raw": {
+        "production19": {
+          "renderWaitMs": 17.670300000190764,
+          "roundTripMs": 14.112899999872752,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 7.63392448425293,
+          "sameMachineWallMs": 6
+        },
+        "production22": {
+          "renderWaitMs": 34.30419999995138,
+          "roundTripMs": 30.784099999891623,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.667978286743164,
+          "sameMachineWallMs": 22
+        },
+        "ordinary11": {
+          "renderWaitMs": 52.9354999998759,
+          "roundTripMs": 30.193400000371184,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.442983627319336,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly3": {
+          "renderWaitMs": 43.75909999998839,
+          "roundTripMs": 288.92359999963446,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 79.02097702026367,
+          "sameMachineWallMs": 69
+        },
+        "ordinary13": {
+          "renderWaitMs": 34.80859999990571,
+          "roundTripMs": 30.07049999996525,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.611068725585938,
+          "sameMachineWallMs": 21
+        },
+        "ordinary23": {
+          "renderWaitMs": 35.249000000021624,
+          "roundTripMs": 29.481200000191166,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.563934326171875,
+          "sameMachineWallMs": 20
+        },
+        "production30": {
+          "renderWaitMs": 34.48549999984607,
+          "roundTripMs": 29.764200000045093,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.35500717163086,
+          "sameMachineWallMs": 21
+        },
+        "ordinary20": {
+          "renderWaitMs": 1.9240000001445878,
+          "roundTripMs": 29.766200000267418,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.188901901245117,
+          "sameMachineWallMs": 20
+        },
+        "production7": {
+          "renderWaitMs": 51.593099999990955,
+          "roundTripMs": 14.138000000002648,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 6.793022155761719,
+          "sameMachineWallMs": 4
+        },
+        "fastOnly17": {
+          "renderWaitMs": 34.917699999823526,
+          "roundTripMs": 13.057499999831634,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 5.757808685302734,
+          "sameMachineWallMs": 3
+        },
+        "ordinary9": {
+          "renderWaitMs": 18.024599999989732,
+          "roundTripMs": 29.891499999848747,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.885011672973633,
+          "sameMachineWallMs": 22
+        },
+        "ordinary25": {
+          "renderWaitMs": 19.112200000108714,
+          "roundTripMs": 30.06180000011227,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.63784408569336,
+          "sameMachineWallMs": 20
+        },
+        "ordinary4": {
+          "renderWaitMs": 49.27379999980985,
+          "roundTripMs": 181.44119999988106,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 66.3900375366211,
+          "sameMachineWallMs": 56
+        },
+        "production8": {
+          "renderWaitMs": 35.852800000157,
+          "roundTripMs": 29.619299999922077,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.192955017089844,
+          "sameMachineWallMs": 20
+        },
+        "ordinary27": {
+          "renderWaitMs": 1.7050000001290755,
+          "roundTripMs": 31.325400000241643,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.198843002319336,
+          "sameMachineWallMs": 21
+        },
+        "ordinary22": {
+          "renderWaitMs": 34.369599999990896,
+          "roundTripMs": 30.777999999827443,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.618148803710938,
+          "sameMachineWallMs": 22
+        },
+        "production1": {
+          "renderWaitMs": 101.52100000004793,
+          "roundTripMs": 2023.638099999971,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 1943.317174911499,
+          "sameMachineWallMs": 1935
+        },
+        "fastOnly25": {
+          "renderWaitMs": 18.96809999971083,
+          "roundTripMs": 30.070599999817205,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.773027420043945,
+          "sameMachineWallMs": 20
+        },
+        "ordinary5": {
+          "renderWaitMs": 35.20500000013271,
+          "roundTripMs": 30.709900000147172,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.07016944885254,
+          "sameMachineWallMs": 22
+        },
+        "ordinary7": {
+          "renderWaitMs": 51.65809999971316,
+          "roundTripMs": 14.131299999917246,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 6.735086441040039,
+          "sameMachineWallMs": 4
+        },
+        "fastOnly9": {
+          "renderWaitMs": 17.919200000051205,
+          "roundTripMs": 29.90170000020953,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.98085594177246,
+          "sameMachineWallMs": 22
+        },
+        "fastOnly13": {
+          "renderWaitMs": 34.700100000009115,
+          "roundTripMs": 30.07999999999811,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.70905876159668,
+          "sameMachineWallMs": 21
+        },
+        "production15": {
+          "renderWaitMs": 34.65349999987666,
+          "roundTripMs": 29.323800000383926,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.884845733642578,
+          "sameMachineWallMs": 21
+        },
+        "ordinary2": {
+          "renderWaitMs": 17.057000000022526,
+          "roundTripMs": 243.3298000000832,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 106.32991790771484,
+          "sameMachineWallMs": 97
+        },
+        "fastOnly16": {
+          "renderWaitMs": 18.011699999988195,
+          "roundTripMs": 30.486499999824446,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.669004440307617,
+          "sameMachineWallMs": 21
+        },
+        "production6": {
+          "renderWaitMs": 34.11439999990762,
+          "roundTripMs": 30.100299999958224,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.340152740478516,
+          "sameMachineWallMs": 23
+        },
+        "fastOnly26": {
+          "renderWaitMs": 1.6920999996727915,
+          "roundTripMs": 30.456599999979517,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.30891990661621,
+          "sameMachineWallMs": 22
+        },
+        "production11": {
+          "renderWaitMs": 52.8494000000137,
+          "roundTripMs": 30.19960000028732,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.52118492126465,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly19": {
+          "renderWaitMs": 17.63249999976324,
+          "roundTripMs": 14.11999999982072,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 7.668972015380859,
+          "sameMachineWallMs": 6
+        },
+        "fastOnly14": {
+          "renderWaitMs": 35.4683999998997,
+          "roundTripMs": 30.198599999948783,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.983074188232422,
+          "sameMachineWallMs": 21
+        },
+        "ordinary3": {
+          "renderWaitMs": 51.35909999989963,
+          "roundTripMs": 288.91029999977036,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 71.42806053161621,
+          "sameMachineWallMs": 62
+        },
+        "production3": {
+          "renderWaitMs": 51.30209999970248,
+          "roundTripMs": 288.9165999999932,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 71.47812843322754,
+          "sameMachineWallMs": 62
+        },
+        "production14": {
+          "renderWaitMs": 35.51819999984218,
+          "roundTripMs": 30.19529999983206,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.935152053833008,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly23": {
+          "renderWaitMs": 35.10740000001533,
+          "roundTripMs": 29.4914000000972,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.693872451782227,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly29": {
+          "renderWaitMs": 50.884299999779614,
+          "roundTripMs": 29.99039999986053,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.410009384155273,
+          "sameMachineWallMs": 22
+        },
+        "ordinary30": {
+          "renderWaitMs": 34.54830000009679,
+          "roundTripMs": 29.758399999991525,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.298978805541992,
+          "sameMachineWallMs": 21
+        },
+        "ordinary17": {
+          "renderWaitMs": 35.01319999986663,
+          "roundTripMs": 13.047899999946821,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 5.668878555297852,
+          "sameMachineWallMs": 3
+        },
+        "ordinary12": {
+          "renderWaitMs": 34.43710000010469,
+          "roundTripMs": 30.87279999999737,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.865222930908203,
+          "sameMachineWallMs": 21
+        },
+        "ordinary29": {
+          "renderWaitMs": 51.05040000034933,
+          "roundTripMs": 29.981000000134372,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.25408363342285,
+          "sameMachineWallMs": 22
+        },
+        "production24": {
+          "renderWaitMs": 18.963299999995797,
+          "roundTripMs": 32.39910000002055,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.858070373535156,
+          "sameMachineWallMs": 21
+        },
+        "production10": {
+          "renderWaitMs": 2.0054999999956635,
+          "roundTripMs": 31.206200000269746,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.59294891357422,
+          "sameMachineWallMs": 22
+        },
+        "ordinary14": {
+          "renderWaitMs": 35.5968999997458,
+          "roundTripMs": 30.189299999619834,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.86505699157715,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly28": {
+          "renderWaitMs": 17.376899999817397,
+          "roundTripMs": 12.32350000009319,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 6.9980621337890625,
+          "sameMachineWallMs": 5
+        },
+        "production12": {
+          "renderWaitMs": 34.37830000029862,
+          "roundTripMs": 30.878600000050938,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.917198181152344,
+          "sameMachineWallMs": 21
+        },
+        "production28": {
+          "renderWaitMs": 17.41700000002311,
+          "roundTripMs": 12.320499999987078,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 6.9599151611328125,
+          "sameMachineWallMs": 5
+        },
+        "production17": {
+          "renderWaitMs": 34.958499999902415,
+          "roundTripMs": 13.054099999862956,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 5.71894645690918,
+          "sameMachineWallMs": 3
+        },
+        "production4": {
+          "renderWaitMs": 49.211799999739014,
+          "roundTripMs": 181.44789999996647,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 66.44487380981445,
+          "sameMachineWallMs": 56
+        },
+        "fastOnly27": {
+          "renderWaitMs": 1.5999000002011599,
+          "roundTripMs": 31.335699999999633,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.294925689697266,
+          "sameMachineWallMs": 21
+        },
+        "production27": {
+          "renderWaitMs": 1.6458999998576473,
+          "roundTripMs": 31.332200000179,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.250818252563477,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly6": {
+          "renderWaitMs": 34.0369999998984,
+          "roundTripMs": 30.104799999662646,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.415016174316406,
+          "sameMachineWallMs": 23
+        },
+        "production26": {
+          "renderWaitMs": 1.7631000000619679,
+          "roundTripMs": 30.45320000001084,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.24001693725586,
+          "sameMachineWallMs": 22
+        },
+        "ordinary26": {
+          "renderWaitMs": 1.8410000002404558,
+          "roundTripMs": 30.447299999650568,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.168968200683594,
+          "sameMachineWallMs": 22
+        },
+        "ordinary18": {
+          "renderWaitMs": 17.926299999999173,
+          "roundTripMs": 13.767599999937374,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 8.111953735351562,
+          "sameMachineWallMs": 7
+        },
+        "fastOnly24": {
+          "renderWaitMs": 18.91539999996894,
+          "roundTripMs": 32.402900000306545,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.904085159301758,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly1": {
+          "renderWaitMs": 16.970900000160327,
+          "roundTripMs": 2364.4168999999238,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 2226.6690731048584,
+          "sameMachineWallMs": 2218
+        },
+        "ordinary24": {
+          "renderWaitMs": 19.046700000217243,
+          "roundTripMs": 32.39260000009381,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.78106117248535,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly30": {
+          "renderWaitMs": 34.44020000006276,
+          "roundTripMs": 29.767099999844504,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.396968841552734,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly7": {
+          "renderWaitMs": 51.54309999988982,
+          "roundTripMs": 14.14119999981267,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 6.839990615844727,
+          "sameMachineWallMs": 4
+        },
+        "production23": {
+          "renderWaitMs": 35.17220000003363,
+          "roundTripMs": 29.487600000265957,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.63188362121582,
+          "sameMachineWallMs": 20
+        },
+        "ordinary19": {
+          "renderWaitMs": 17.723800000112533,
+          "roundTripMs": 14.106499999797961,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 7.587909698486328,
+          "sameMachineWallMs": 6
+        },
+        "fastOnly10": {
+          "renderWaitMs": 1.9272999998065643,
+          "roundTripMs": 31.210100000407692,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.666858673095703,
+          "sameMachineWallMs": 22
+        },
+        "fastOnly21": {
+          "renderWaitMs": 1.811000000088825,
+          "roundTripMs": 14.259099999890168,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 6.812095642089844,
+          "sameMachineWallMs": 5
+        },
+        "production16": {
+          "renderWaitMs": 18.070500000249012,
+          "roundTripMs": 30.483300000014424,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.61297607421875,
+          "sameMachineWallMs": 21
+        },
+        "production21": {
+          "renderWaitMs": 1.8538999997872452,
+          "roundTripMs": 14.255600000069535,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 6.771087646484375,
+          "sameMachineWallMs": 5
+        },
+        "fastOnly18": {
+          "renderWaitMs": 17.83690000002025,
+          "roundTripMs": 13.78519999980199,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 8.191823959350586,
+          "sameMachineWallMs": 7
+        },
+        "production9": {
+          "renderWaitMs": 17.96379999996134,
+          "roundTripMs": 29.89849999994476,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.938894271850586,
+          "sameMachineWallMs": 22
+        },
+        "production20": {
+          "renderWaitMs": 1.8660999999156047,
+          "roundTripMs": 29.772000000320986,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.240877151489258,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly20": {
+          "renderWaitMs": 1.8215999998574262,
+          "roundTripMs": 29.774900000120397,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.282838821411133,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly5": {
+          "renderWaitMs": 35.07399999989502,
+          "roundTripMs": 30.718700000306853,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.190093994140625,
+          "sameMachineWallMs": 22
+        },
+        "fastOnly22": {
+          "renderWaitMs": 34.26190000027418,
+          "roundTripMs": 30.789699999786535,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.708032608032227,
+          "sameMachineWallMs": 22
+        },
+        "fastOnly2": {
+          "renderWaitMs": 8.994900000288908,
+          "roundTripMs": 243.3456000003389,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 114.38202857971191,
+          "sameMachineWallMs": 105
+        },
+        "production18": {
+          "renderWaitMs": 17.87369999965449,
+          "roundTripMs": 13.778399999864632,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 8.157968521118164,
+          "sameMachineWallMs": 7
+        },
+        "fastOnly4": {
+          "renderWaitMs": 40.4513999997107,
+          "roundTripMs": 181.45099999992453,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 75.20484924316406,
+          "sameMachineWallMs": 65
+        },
+        "ordinary6": {
+          "renderWaitMs": 34.20219999998153,
+          "roundTripMs": 30.092899999999645,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.260997772216797,
+          "sameMachineWallMs": 23
+        },
+        "production13": {
+          "renderWaitMs": 34.74579999965499,
+          "roundTripMs": 30.076599999574682,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 23.6661434173584,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly8": {
+          "renderWaitMs": 35.774400000263995,
+          "roundTripMs": 29.626499999722,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.269010543823242,
+          "sameMachineWallMs": 20
+        },
+        "fastOnly12": {
+          "renderWaitMs": 34.330899999986286,
+          "roundTripMs": 30.881399999998393,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.962020874023438,
+          "sameMachineWallMs": 21
+        },
+        "fastOnly15": {
+          "renderWaitMs": 34.604099999796745,
+          "roundTripMs": 29.326900000341993,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 22.931814193725586,
+          "sameMachineWallMs": 21
+        },
+        "ordinary10": {
+          "renderWaitMs": 2.0891999997729727,
+          "roundTripMs": 31.1996000000363,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.514986038208008,
+          "sameMachineWallMs": 22
+        },
+        "production25": {
+          "renderWaitMs": 19.037199999729637,
+          "roundTripMs": 30.067499999859137,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.706031799316406,
+          "sameMachineWallMs": 20
+        },
+        "ordinary8": {
+          "renderWaitMs": 35.94629999997778,
+          "roundTripMs": 29.60609999990993,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.108793258666992,
+          "sameMachineWallMs": 20
+        },
+        "ordinary21": {
+          "renderWaitMs": 1.9030999997085019,
+          "roundTripMs": 14.248999999836087,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 6.726980209350586,
+          "sameMachineWallMs": 5
+        },
+        "ordinary28": {
+          "renderWaitMs": 17.468900000039866,
+          "roundTripMs": 12.315099999796075,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 6.911993026733398,
+          "sameMachineWallMs": 5
+        },
+        "ordinary16": {
+          "renderWaitMs": 18.14650000005713,
+          "roundTripMs": 30.47619999961171,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 23.545026779174805,
+          "sameMachineWallMs": 21
+        },
+        "production29": {
+          "renderWaitMs": 50.96549999962008,
+          "roundTripMs": 29.987200000050507,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.331092834472656,
+          "sameMachineWallMs": 22
+        },
+        "ordinary15": {
+          "renderWaitMs": 34.70999999990454,
+          "roundTripMs": 29.318100000182312,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 22.83477783203125,
+          "sameMachineWallMs": 21
+        },
+        "production2": {
+          "renderWaitMs": 16.994399999930465,
+          "roundTripMs": 243.3375000000524,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 106.3849925994873,
+          "sameMachineWallMs": 97
+        },
+        "fastOnly11": {
+          "renderWaitMs": 52.69990000033431,
+          "roundTripMs": 30.203000000255997,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 23.669004440307617,
+          "sameMachineWallMs": 22
+        },
+        "production5": {
+          "renderWaitMs": 35.14709999990373,
+          "roundTripMs": 30.715800000052695,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 22.119998931884766,
+          "sameMachineWallMs": 22
+        },
+        "ordinary1": {
+          "renderWaitMs": 101.61770000013348,
+          "roundTripMs": 2023.6323999997694,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 1943.230152130127,
+          "sameMachineWallMs": 1935
+        }
+      },
+      "ordinaryMinusFastMs": {
+        "count": 26,
+        "median": 0,
+        "max": 0,
+        "p95": 0,
+        "mean": -0.07692307692307693
+      },
+      "count": 90,
+      "renderIntervalsMs": {
+        "count": 383,
+        "median": 66.65900349617004,
+        "max": 1601.418375968933,
+        "p95": 68.60130280256271,
+        "mean": 73.07941516175593
+      },
+      "groups": {
+        "steady_production": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 21,
+            "max": 23,
+            "p95": 22,
+            "mean": 17.423076923076923
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 22.935152053833008,
+            "max": 24.667978286743164,
+            "p95": 24.340152740478516,
+            "mean": 19.61688811962421
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 34.11439999990762,
+            "max": 52.8494000000137,
+            "p95": 51.593099999990955,
+            "mean": 25.95649230763159
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.987200000050507,
+            "max": 32.39910000002055,
+            "p95": 31.332200000179,
+            "mean": 26.477073076945928
+          }
+        },
+        "early_production": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 62,
+            "max": 1935,
+            "p95": 1935,
+            "mean": 537.5
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 71.47812843322754,
+            "max": 1943.317174911499,
+            "p95": 1943.317174911499,
+            "mean": 546.9062924385071
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 49.211799999739014,
+            "max": 101.52100000004793,
+            "p95": 101.52100000004793,
+            "mean": 54.75732499985497
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.3375000000524,
+            "max": 2023.638099999971,
+            "p95": 2023.638099999971,
+            "mean": 684.3350249999958
+          }
+        },
+        "early_fastOnly": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 69,
+            "max": 2218,
+            "p95": 2218,
+            "mean": 614.25
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 79.02097702026367,
+            "max": 2226.6690731048584,
+            "p95": 2226.6690731048584,
+            "mean": 623.8192319869995
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 16.970900000160327,
+            "max": 43.75909999998839,
+            "p95": 43.75909999998839,
+            "mean": 27.544075000037083
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.3456000003389,
+            "max": 2364.4168999999238,
+            "p95": 2364.4168999999238,
+            "mean": 769.5342749999554
+          }
+        },
+        "steady_ordinary": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 21,
+            "max": 23,
+            "p95": 22,
+            "mean": 17.423076923076923
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 22.86505699157715,
+            "max": 24.618148803710938,
+            "p95": 24.260997772216797,
+            "mean": 19.556063872117264
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 34.20219999998153,
+            "max": 52.9354999998759,
+            "p95": 51.65809999971316,
+            "mean": 26.024673076930274
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.981000000134372,
+            "max": 32.39260000009381,
+            "p95": 31.325400000241643,
+            "mean": 26.470369230747355
+          }
+        },
+        "early_ordinary": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 62,
+            "max": 1935,
+            "p95": 1935,
+            "mean": 537.5
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 71.42806053161621,
+            "max": 1943.230152130127,
+            "p95": 1943.230152130127,
+            "mean": 546.8445420265198
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 49.27379999980985,
+            "max": 101.61770000013348,
+            "p95": 101.61770000013348,
+            "mean": 54.82689999996637
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.3298000000832,
+            "max": 2023.6323999997694,
+            "p95": 2023.6323999997694,
+            "mean": 684.328424999876
+          }
+        },
+        "steady_fastOnly": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 21,
+            "max": 23,
+            "p95": 22,
+            "mean": 17.5
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 22.983074188232422,
+            "max": 24.708032608032227,
+            "p95": 24.415016174316406,
+            "mean": 19.672586367680477
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 34.0369999998984,
+            "max": 52.69990000033431,
+            "p95": 51.54309999988982,
+            "mean": 25.898307692264446
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.99039999986053,
+            "max": 32.402900000306545,
+            "p95": 31.335699999999633,
+            "mean": 26.480923076913033
+          }
+        }
+      }
+    },
+    "Player2": {
+      "raw": {
+        "production19": {
+          "renderWaitMs": 1.6303000002153567,
+          "roundTripMs": 14.132799999970302,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 9.860992431640625,
+          "sameMachineWallMs": 10
+        },
+        "production22": {
+          "renderWaitMs": 18.18379999986064,
+          "roundTripMs": 30.800900000031106,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 26.82805061340332,
+          "sameMachineWallMs": 26
+        },
+        "ordinary11": {
+          "renderWaitMs": 35.59720000021116,
+          "roundTripMs": 30.213800000183255,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 26.26514434814453,
+          "sameMachineWallMs": 26
+        },
+        "fastOnly3": {
+          "renderWaitMs": 45.3668000000107,
+          "roundTripMs": 288.9979999999923,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 76.47013664245605,
+          "sameMachineWallMs": 73
+        },
+        "ordinary13": {
+          "renderWaitMs": 18.171199999869714,
+          "roundTripMs": 30.0889999998617,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.730133056640625,
+          "sameMachineWallMs": 25
+        },
+        "ordinary23": {
+          "renderWaitMs": 33.89070000002903,
+          "roundTripMs": 13.096000000132335,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 10.046958923339844,
+          "sameMachineWallMs": 10
+        },
+        "production30": {
+          "renderWaitMs": 33.964900000228226,
+          "roundTripMs": 13.740799999595765,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 8.86392593383789,
+          "sameMachineWallMs": 8
+        },
+        "ordinary20": {
+          "renderWaitMs": 50.880700000107026,
+          "roundTripMs": 29.78320000011081,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.17080307006836,
+          "sameMachineWallMs": 25
+        },
+        "production7": {
+          "renderWaitMs": 35.12110000019675,
+          "roundTripMs": 14.153799999803596,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 11.992216110229492,
+          "sameMachineWallMs": 8
+        },
+        "fastOnly17": {
+          "renderWaitMs": 18.37130000012621,
+          "roundTripMs": 13.071599999875616,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 8.725881576538086,
+          "sameMachineWallMs": 8
+        },
+        "ordinary9": {
+          "renderWaitMs": 18.696000000090862,
+          "roundTripMs": 13.434899999992922,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 9.387016296386719,
+          "sameMachineWallMs": 9
+        },
+        "ordinary25": {
+          "renderWaitMs": 1.573500000176864,
+          "roundTripMs": 30.118799999854673,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.684906005859375,
+          "sameMachineWallMs": 24
+        },
+        "ordinary4": {
+          "renderWaitMs": 52.0331000002443,
+          "roundTripMs": 181.5099000000373,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 62.13498115539551,
+          "sameMachineWallMs": 58
+        },
+        "production8": {
+          "renderWaitMs": 19.755699999677745,
+          "roundTripMs": 29.656799999884242,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.28889274597168,
+          "sameMachineWallMs": 24
+        },
+        "ordinary27": {
+          "renderWaitMs": 1.6154000004462432,
+          "roundTripMs": 13.399800000115647,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 9.315967559814453,
+          "sameMachineWallMs": 9
+        },
+        "ordinary22": {
+          "renderWaitMs": 18.255299999964336,
+          "roundTripMs": 30.79810000008365,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 26.78203582763672,
+          "sameMachineWallMs": 26
+        },
+        "production1": {
+          "renderWaitMs": 41.563200000382494,
+          "roundTripMs": 2023.7751999998181,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 1940.643072128296,
+          "sameMachineWallMs": 1938
+        },
+        "fastOnly25": {
+          "renderWaitMs": 1.4512999996441067,
+          "roundTripMs": 30.12459999990824,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.801015853881836,
+          "sameMachineWallMs": 24
+        },
+        "ordinary5": {
+          "renderWaitMs": 17.126100000041333,
+          "roundTripMs": 30.72999999994863,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 31.193017959594727,
+          "sameMachineWallMs": 27
+        },
+        "ordinary7": {
+          "renderWaitMs": 35.17250000004424,
+          "roundTripMs": 14.151099999708094,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 11.94906234741211,
+          "sameMachineWallMs": 8
+        },
+        "fastOnly9": {
+          "renderWaitMs": 18.597300000237738,
+          "roundTripMs": 13.444300000173826,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 9.476900100708008,
+          "sameMachineWallMs": 9
+        },
+        "fastOnly13": {
+          "renderWaitMs": 18.0728000000272,
+          "roundTripMs": 30.094699999608565,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.820016860961914,
+          "sameMachineWallMs": 25
+        },
+        "production15": {
+          "renderWaitMs": 18.235600000025443,
+          "roundTripMs": 29.338100000131817,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.226831436157227,
+          "sameMachineWallMs": 25
+        },
+        "ordinary2": {
+          "renderWaitMs": 35.54719999965528,
+          "roundTripMs": 243.365900000299,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 104.42805290222168,
+          "sameMachineWallMs": 101
+        },
+        "fastOnly16": {
+          "renderWaitMs": 17.86439999978029,
+          "roundTripMs": 13.711599999624013,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 8.786916732788086,
+          "sameMachineWallMs": 8
+        },
+        "production6": {
+          "renderWaitMs": 35.17620000002353,
+          "roundTripMs": 13.852199999746517,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 13.495206832885742,
+          "sameMachineWallMs": 9
+        },
+        "fastOnly26": {
+          "renderWaitMs": 51.3743000001341,
+          "roundTripMs": 30.469799999991665,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.978803634643555,
+          "sameMachineWallMs": 25
+        },
+        "production11": {
+          "renderWaitMs": 35.541100000045844,
+          "roundTripMs": 30.216900000141322,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 26.31402015686035,
+          "sameMachineWallMs": 26
+        },
+        "fastOnly19": {
+          "renderWaitMs": 1.5948000000207685,
+          "roundTripMs": 14.136299999790936,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 9.89389419555664,
+          "sameMachineWallMs": 10
+        },
+        "fastOnly14": {
+          "renderWaitMs": 17.312800000127027,
+          "roundTripMs": 30.217999999877065,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.65598487854004,
+          "sameMachineWallMs": 25
+        },
+        "ordinary3": {
+          "renderWaitMs": 51.28520000016579,
+          "roundTripMs": 288.99060000003374,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 70.5571174621582,
+          "sameMachineWallMs": 67
+        },
+        "production3": {
+          "renderWaitMs": 51.23079999975744,
+          "roundTripMs": 288.9936999999918,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 70.60503959655762,
+          "sameMachineWallMs": 67
+        },
+        "production14": {
+          "renderWaitMs": 17.35129999997298,
+          "roundTripMs": 30.215599999792175,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.619983673095703,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly23": {
+          "renderWaitMs": 33.798899999965215,
+          "roundTripMs": 13.105800000175805,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 10.129928588867188,
+          "sameMachineWallMs": 10
+        },
+        "fastOnly29": {
+          "renderWaitMs": 34.76799999998548,
+          "roundTripMs": 30.004700000063167,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.986194610595703,
+          "sameMachineWallMs": 25
+        },
+        "ordinary30": {
+          "renderWaitMs": 34.01239999993777,
+          "roundTripMs": 13.73459999967963,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 8.82101058959961,
+          "sameMachineWallMs": 8
+        },
+        "ordinary17": {
+          "renderWaitMs": 18.450400000347145,
+          "roundTripMs": 13.066299999991315,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 8.65483283996582,
+          "sameMachineWallMs": 8
+        },
+        "ordinary12": {
+          "renderWaitMs": 18.463899999915157,
+          "roundTripMs": 30.892499999936263,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 26.214122772216797,
+          "sameMachineWallMs": 26
+        },
+        "ordinary29": {
+          "renderWaitMs": 34.86250000014479,
+          "roundTripMs": 29.999100000168255,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.899171829223633,
+          "sameMachineWallMs": 25
+        },
+        "production24": {
+          "renderWaitMs": 1.609800000096584,
+          "roundTripMs": 32.415300000138814,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.97188949584961,
+          "sameMachineWallMs": 25
+        },
+        "production10": {
+          "renderWaitMs": 50.34059999979945,
+          "roundTripMs": 31.221500000356173,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 27.675867080688477,
+          "sameMachineWallMs": 28
+        },
+        "ordinary14": {
+          "renderWaitMs": 17.398399999819958,
+          "roundTripMs": 30.213000000003376,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.578022003173828,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly28": {
+          "renderWaitMs": 1.5530000000580912,
+          "roundTripMs": 12.339500000052794,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 8.046865463256836,
+          "sameMachineWallMs": 8
+        },
+        "production12": {
+          "renderWaitMs": 18.41439999998329,
+          "roundTripMs": 30.89529999988372,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 26.257991790771484,
+          "sameMachineWallMs": 26
+        },
+        "production28": {
+          "renderWaitMs": 1.5887999998085434,
+          "roundTripMs": 12.337199999819859,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 8.01396369934082,
+          "sameMachineWallMs": 8
+        },
+        "production17": {
+          "renderWaitMs": 18.405299999812996,
+          "roundTripMs": 13.069099999938771,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 8.694887161254883,
+          "sameMachineWallMs": 8
+        },
+        "production4": {
+          "renderWaitMs": 51.94040000014866,
+          "roundTripMs": 181.51290000014342,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 62.22391128540039,
+          "sameMachineWallMs": 58
+        },
+        "fastOnly27": {
+          "renderWaitMs": 1.524400000107562,
+          "roundTripMs": 13.409600000159116,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 9.399890899658203,
+          "sameMachineWallMs": 9
+        },
+        "production27": {
+          "renderWaitMs": 1.566599999932805,
+          "roundTripMs": 13.406000000031781,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 9.35983657836914,
+          "sameMachineWallMs": 9
+        },
+        "fastOnly6": {
+          "renderWaitMs": 35.10049999977127,
+          "roundTripMs": 13.857500000085565,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 13.56816291809082,
+          "sameMachineWallMs": 9
+        },
+        "production26": {
+          "renderWaitMs": 51.414999999906286,
+          "roundTripMs": 30.467299999600073,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.940895080566406,
+          "sameMachineWallMs": 25
+        },
+        "ordinary26": {
+          "renderWaitMs": 51.46809999996549,
+          "roundTripMs": 30.46459999995932,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.8939266204834,
+          "sameMachineWallMs": 25
+        },
+        "ordinary18": {
+          "renderWaitMs": 1.8301999998584506,
+          "roundTripMs": 13.80509999989954,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 10.238885879516602,
+          "sameMachineWallMs": 11
+        },
+        "fastOnly24": {
+          "renderWaitMs": 1.5665000000808504,
+          "roundTripMs": 32.417700000223704,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 26.012897491455078,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly1": {
+          "renderWaitMs": 35.472699999900215,
+          "roundTripMs": 2364.4492999997055,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 2224.755048751831,
+          "sameMachineWallMs": 2222
+        },
+        "ordinary24": {
+          "renderWaitMs": 1.6602000000602857,
+          "roundTripMs": 32.4124000003394,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.927066802978516,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly30": {
+          "renderWaitMs": 33.92489999987447,
+          "roundTripMs": 13.744099999712489,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 8.900880813598633,
+          "sameMachineWallMs": 8
+        },
+        "fastOnly7": {
+          "renderWaitMs": 35.081199999694945,
+          "roundTripMs": 14.156399999592395,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 12.026071548461914,
+          "sameMachineWallMs": 8
+        },
+        "production23": {
+          "renderWaitMs": 33.83819999999105,
+          "roundTripMs": 13.102100000196515,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 10.092973709106445,
+          "sameMachineWallMs": 10
+        },
+        "ordinary19": {
+          "renderWaitMs": 1.6789999999673455,
+          "roundTripMs": 14.12979999986419,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 9.817838668823242,
+          "sameMachineWallMs": 10
+        },
+        "fastOnly10": {
+          "renderWaitMs": 50.29839999997421,
+          "roundTripMs": 31.223899999986315,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 27.714967727661133,
+          "sameMachineWallMs": 28
+        },
+        "fastOnly21": {
+          "renderWaitMs": 52.179399999658926,
+          "roundTripMs": 14.341699999931734,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 9.123086929321289,
+          "sameMachineWallMs": 9
+        },
+        "production16": {
+          "renderWaitMs": 17.91559999992387,
+          "roundTripMs": 13.708399999813992,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 8.738040924072266,
+          "sameMachineWallMs": 8
+        },
+        "production21": {
+          "renderWaitMs": 52.24739999994199,
+          "roundTripMs": 14.339099999688187,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 9.057998657226562,
+          "sameMachineWallMs": 9
+        },
+        "fastOnly18": {
+          "renderWaitMs": 1.7573000000083994,
+          "roundTripMs": 13.817900000049121,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 10.30588150024414,
+          "sameMachineWallMs": 11
+        },
+        "production9": {
+          "renderWaitMs": 18.637199999830045,
+          "roundTripMs": 13.441099999909056,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 9.439945220947266,
+          "sameMachineWallMs": 9
+        },
+        "production20": {
+          "renderWaitMs": 50.77949999986231,
+          "roundTripMs": 29.786000000058266,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.264978408813477,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly20": {
+          "renderWaitMs": 50.706199999694945,
+          "roundTripMs": 29.78849999999511,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.334835052490234,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly5": {
+          "renderWaitMs": 17.014000000017404,
+          "roundTripMs": 30.73500000027707,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 31.29720687866211,
+          "sameMachineWallMs": 27
+        },
+        "fastOnly22": {
+          "renderWaitMs": 18.14399999966554,
+          "roundTripMs": 30.804999999872962,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 26.865005493164062,
+          "sameMachineWallMs": 26
+        },
+        "fastOnly2": {
+          "renderWaitMs": 29.93109999988519,
+          "roundTripMs": 243.37800000012066,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 110.03303527832031,
+          "sameMachineWallMs": 106
+        },
+        "production18": {
+          "renderWaitMs": 1.78860000005443,
+          "roundTripMs": 13.811999999688851,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 10.27679443359375,
+          "sameMachineWallMs": 11
+        },
+        "fastOnly4": {
+          "renderWaitMs": 44.02930000014749,
+          "roundTripMs": 181.51570000009087,
+          "phase": "early",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 70.1289176940918,
+          "sameMachineWallMs": 66
+        },
+        "ordinary6": {
+          "renderWaitMs": 35.25790000003326,
+          "roundTripMs": 13.84669999970356,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 13.42010498046875,
+          "sameMachineWallMs": 9
+        },
+        "production13": {
+          "renderWaitMs": 18.116700000064156,
+          "roundTripMs": 30.09189999966111,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.779008865356445,
+          "sameMachineWallMs": 25
+        },
+        "fastOnly8": {
+          "renderWaitMs": 19.70759999994698,
+          "roundTripMs": 29.663399999662943,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 24.333953857421875,
+          "sameMachineWallMs": 24
+        },
+        "fastOnly12": {
+          "renderWaitMs": 18.3697000002212,
+          "roundTripMs": 30.898400000296533,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 26.30019187927246,
+          "sameMachineWallMs": 26
+        },
+        "fastOnly15": {
+          "renderWaitMs": 18.19629999999961,
+          "roundTripMs": 29.34080000022732,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 25.26378631591797,
+          "sameMachineWallMs": 25
+        },
+        "ordinary10": {
+          "renderWaitMs": 50.39390000001731,
+          "roundTripMs": 31.218900000112626,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 27.62889862060547,
+          "sameMachineWallMs": 28
+        },
+        "production25": {
+          "renderWaitMs": 1.5257999998539162,
+          "roundTripMs": 30.121799999960785,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 24.728059768676758,
+          "sameMachineWallMs": 24
+        },
+        "ordinary8": {
+          "renderWaitMs": 19.82140000018262,
+          "roundTripMs": 29.649499999777618,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 24.230003356933594,
+          "sameMachineWallMs": 24
+        },
+        "ordinary21": {
+          "renderWaitMs": 52.32000000023618,
+          "roundTripMs": 14.336400000047433,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 8.99195671081543,
+          "sameMachineWallMs": 9
+        },
+        "ordinary28": {
+          "renderWaitMs": 1.6313999999510997,
+          "roundTripMs": 12.334300000020448,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 7.976055145263672,
+          "sameMachineWallMs": 8
+        },
+        "ordinary16": {
+          "renderWaitMs": 17.965800000183663,
+          "roundTripMs": 13.702399999601766,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 8.693933486938477,
+          "sameMachineWallMs": 8
+        },
+        "production29": {
+          "renderWaitMs": 34.80949999993754,
+          "roundTripMs": 30.00190000011571,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 25.94614028930664,
+          "sameMachineWallMs": 25
+        },
+        "ordinary15": {
+          "renderWaitMs": 18.2847999999467,
+          "roundTripMs": 29.33500000017375,
+          "phase": "steady",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 25.18296241760254,
+          "sameMachineWallMs": 25
+        },
+        "production2": {
+          "renderWaitMs": 35.49550000025192,
+          "roundTripMs": 243.37000000014086,
+          "phase": "early",
+          "kind": "production",
+          "serverTimeEstimateMs": 104.47192192077637,
+          "sameMachineWallMs": 101
+        },
+        "fastOnly11": {
+          "renderWaitMs": 35.4962000001251,
+          "roundTripMs": 30.21950000038487,
+          "phase": "steady",
+          "kind": "fastOnly",
+          "serverTimeEstimateMs": 26.356220245361328,
+          "sameMachineWallMs": 26
+        },
+        "production5": {
+          "renderWaitMs": 17.072799999823474,
+          "roundTripMs": 30.73260000019218,
+          "phase": "steady",
+          "kind": "production",
+          "serverTimeEstimateMs": 31.241178512573242,
+          "sameMachineWallMs": 27
+        },
+        "ordinary1": {
+          "renderWaitMs": 41.64330000003247,
+          "roundTripMs": 2023.77209999986,
+          "phase": "early",
+          "kind": "ordinary",
+          "serverTimeEstimateMs": 1940.5710697174072,
+          "sameMachineWallMs": 1938
+        }
+      },
+      "ordinaryMinusFastMs": {
+        "count": 26,
+        "median": 0,
+        "max": 0,
+        "p95": 0,
+        "mean": 0
+      },
+      "count": 90,
+      "renderIntervalsMs": {
+        "count": 389,
+        "median": 66.64159893989563,
+        "max": 653.8410186767578,
+        "p95": 73.08109849691391,
+        "mean": 71.029054944267
+      },
+      "groups": {
+        "steady_production": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 24,
+            "max": 28,
+            "p95": 27,
+            "mean": 17.807692307692307
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 24.28889274597168,
+            "max": 31.241178512573242,
+            "p95": 27.675867080688477,
+            "mean": 18.65271421579214
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 18.405299999812996,
+            "max": 52.24739999994199,
+            "p95": 51.414999999906286,
+            "mean": 23.270453846110357
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.338100000131817,
+            "max": 32.415300000138814,
+            "p95": 31.221500000356173,
+            "mean": 22.656019230698103
+          }
+        },
+        "early_production": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 67,
+            "max": 1938,
+            "p95": 1938,
+            "mean": 541
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 70.60503959655762,
+            "max": 1940.643072128296,
+            "p95": 1940.643072128296,
+            "mean": 544.4859862327576
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 41.563200000382494,
+            "max": 51.94040000014866,
+            "p95": 51.94040000014866,
+            "mean": 45.05747500013513
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.37000000014086,
+            "max": 2023.7751999998181,
+            "p95": 2023.7751999998181,
+            "mean": 684.4129500000236
+          }
+        },
+        "early_fastOnly": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 73,
+            "max": 2222,
+            "p95": 2222,
+            "mean": 616.75
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 76.47013664245605,
+            "max": 2224.755048751831,
+            "p95": 2224.755048751831,
+            "mean": 620.3467845916748
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 35.472699999900215,
+            "max": 45.3668000000107,
+            "p95": 45.3668000000107,
+            "mean": 38.6999749999859
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.37800000012066,
+            "max": 2364.4492999997055,
+            "p95": 2364.4492999997055,
+            "mean": 769.5852499999773
+          }
+        },
+        "steady_ordinary": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 24,
+            "max": 28,
+            "p95": 27,
+            "mean": 17.807692307692307
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 24.230003356933594,
+            "max": 31.193017959594727,
+            "p95": 27.62889862060547,
+            "mean": 18.60360915844257
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 18.450400000347145,
+            "max": 52.32000000023618,
+            "p95": 51.46809999996549,
+            "mean": 23.32611153852108
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.33500000017375,
+            "max": 32.4124000003394,
+            "p95": 31.218900000112626,
+            "mean": 22.652126923048854
+          }
+        },
+        "early_ordinary": {
+          "sameMachineWallMs": {
+            "count": 4,
+            "median": 67,
+            "max": 1938,
+            "p95": 1938,
+            "mean": 541
+          },
+          "serverTimeEstimateMs": {
+            "count": 4,
+            "median": 70.5571174621582,
+            "max": 1940.5710697174072,
+            "p95": 1940.5710697174072,
+            "mean": 544.4228053092957
+          },
+          "renderWaitMs": {
+            "count": 4,
+            "median": 41.64330000003247,
+            "max": 52.0331000002443,
+            "p95": 52.0331000002443,
+            "mean": 45.12720000002446
+          },
+          "roundTripMs": {
+            "count": 4,
+            "median": 243.365900000299,
+            "max": 2023.77209999986,
+            "p95": 2023.77209999986,
+            "mean": 684.4096250000575
+          }
+        },
+        "steady_fastOnly": {
+          "sameMachineWallMs": {
+            "count": 26,
+            "median": 24,
+            "max": 28,
+            "p95": 27,
+            "mean": 17.807692307692307
+          },
+          "serverTimeEstimateMs": {
+            "count": 26,
+            "median": 24.333953857421875,
+            "max": 31.29720687866211,
+            "p95": 27.714967727661133,
+            "mean": 18.696363155658428
+          },
+          "renderWaitMs": {
+            "count": 26,
+            "median": 18.3697000002212,
+            "max": 52.179399999658926,
+            "p95": 51.3743000001341,
+            "mean": 23.224057692267216
+          },
+          "roundTripMs": {
+            "count": 26,
+            "median": 29.34080000022732,
+            "max": 32.417700000223704,
+            "p95": 31.223899999986315,
+            "mean": 22.659242307676884
+          }
+        }
+      }
+    }
+  },
+  "measurements": "All processes on one PC. RTT uses only server os.clock; paired arrival differences use one client clock. Wall time is a same-PC diagnostic; GetServerTimeNow is an estimate. No injected latency/loss.",
+  "date": "2026-11-02",
+  "placeId": 92594200898716,
+  "sources": [
+    "https://create.roblox.com/docs/reference/engine/classes/Workspace#GetServerTimeNow"
+  ],
+  "interpretation": [
+    "The earlier 183-185 ms samples were startup observations, not a steady-state network benchmark.",
+    "Steady-state server-to-client removal on the same PC averaged 17-18 ms; p95 was 22-27 ms. This is not an internet estimate.",
+    "Background client render intervals had median about 66.6 ms (about 15 FPS). Removal-to-next-RenderStepped added mean 23-26 ms for the production route.",
+    "Ordinary deletion and fast confirmation tied in this controlled steady-state run; no throughput or latency win over baseline is claimed here.",
+    "The first samples included startup stalls up to about 2.2 seconds. High startup latency remains distinct from the steady-state values.",
+    "GetServerTimeNow is an estimated clock. The benchmark retains server os.clock round trips, same-PC wall-time observations, paired per-client differences and first subsequent render-step timing."
+  ]
+}
