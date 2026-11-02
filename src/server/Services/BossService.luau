@@ -48,6 +48,7 @@ local SkeletonAbilities = require(script.Parent.SkeletonAbilities)
 local KnightAbilities = require(script.Parent.KnightAbilities)
 local PoseidonAbilities = require(script.Parent.PoseidonAbilities)
 local IllusionistAbilities = require(script.Parent.IllusionistAbilities)
+local SpiderQueenAbilities = require(script.Parent.SpiderQueenAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
 
@@ -66,6 +67,7 @@ type Fight = {
 	knight: any?,
 	poseidon: any?,
 	illusionist: any?,
+	spiderQueen: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
 	meleeHitAt: number?,
@@ -1132,6 +1134,7 @@ local function died(boss: Boss)
 	KnightAbilities.Clear(boss)
 	PoseidonAbilities.Clear(boss)
 	IllusionistAbilities.Clear(boss)
+	SpiderQueenAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
 	end
@@ -1295,6 +1298,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		PoseidonAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.illusionist then
 		IllusionistAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.spiderQueen then
+		SpiderQueenAbilities.Spawn(boss, { act = act })
 	else
 		if boss.fight.minotaur then
 			MinotaurAbilities.Bindings(boss, false)
@@ -1325,6 +1330,7 @@ local function think(boss: Boss, dt: number)
 		KnightAbilities.Clear(boss)
 		PoseidonAbilities.Clear(boss)
 		IllusionistAbilities.Clear(boss)
+		SpiderQueenAbilities.Clear(boss)
 		boss.model, boss.root, boss.humanoid = nil, nil, nil
 		if old then
 			old:Destroy()
@@ -1414,6 +1420,13 @@ local function think(boss: Boss, dt: number)
 				fighters = fighters,
 				telegraph = telegraphPart,
 			})
+		elseif boss.fight.spiderQueen then
+			SpiderQueenAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
 		elseif boss.fight.knight then
 			KnightAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
@@ -1482,6 +1495,13 @@ local function think(boss: Boss, dt: number)
 				})
 			elseif boss.fight.illusionist then
 				IllusionistAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.spiderQueen then
+				SpiderQueenAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
 					fighters = fighters,

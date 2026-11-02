@@ -51,6 +51,14 @@
 
 ## Журнал
 
+### 02.11 — Spider Queen complete; next Moth [owner]
+
+Finished original headless Blender Spider Queen (863 parts/38 joints/12 clips) and huntsman add (93 parts/38 joints/six clips). Source-backed fang/web/add names and durations; authored alternating bites, heavy fangs, swept silk projectile, capped slowing webs and capped killable army. Progressive6.25s queen collapse/leg curl, two-second add death. HP1570, damage16/25/32, wiki respawn/rewards retained; no blocks, chat damage+$ only. Reference, exact built-in image_gen prompt, blend sources, exports, videos, comparisons and detailed audit: assets/models/spider_queen/README.md.
+
+Installed in the confirmed Katorga place, scripts only. Final34-scenario/101-assertion server suite,11 actual client animation checks and43 no-block checks PASS. Live90-second fight:421 samples/100 unanchored, all specials and both bites, complete single boss, explicit server ownership, constantY10504.49707; encounter caps held. Exported queen stance error .040135 studs, minion .011459; body/death floor checks pass. Corrected first death's hovering body and minion collider's .3-stud sinking. Initial34-way fixture build missed one summon count; isolated count passed, concurrency bounded to six with exact counts retained. Loaded-server timing remains unvalidated.
+
+Studio screenshots reviewed; exactly one of each19 server bosses and one client character, zero equipment glints, Bloom off. Returned owner to spawn, Creative ON, mouse.5 preserved. Existing asset203785492 and transient startup Sfx warning remain. Selene/StyLua/Rojo/Python/size/staged-diff checks pass. No Blender GUI, desktop notifications or Roblox publishing. Completed10/19; next Моль / Moth (config id `mole`). Real4–6-player/mobile combat remains open.
+
 ### 02.11 — Illusionist finished; glow/duplicates rechecked in Katorga
 
 Original built-in image_gen reference and exact prompt, headless Blender model359 parts/34 joints/16 clips, separate rabbit72 parts/12 joints/5 clips. Six source-named skills replace the generic fallback: dagger, card fan, marked box, exploding rabbits, lateral card phase, interruptible regeneration. HP1340 and wiki rewards unchanged; no block/immunity, chat damage+$ only. Projectiles cancel on encounter death, use hand sockets/swept walls and a per-fan hit budget; max4 living rabbits, killable fuse; ground skills and card step reject unsupported endpoints. Death8s articulates knees/spine/head/hands and separately drops dagger/cards/hat. Videos/exported-curve review and all sources in assets/models/illusionist/README.md.

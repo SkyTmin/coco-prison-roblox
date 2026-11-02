@@ -1523,7 +1523,72 @@
             120
           ]
         },
-        "_abilities": "[решение] волна паутины (полоса), паучьи жвала из-под пола (круги), прыжок-рывок — о колонну оглушение 3 с; набор как у Минотавра, своя модель позже; свита «Паук» позже"
+        "_abilities": "[клиент] spider: fangattack1.45, webattack1.85, death6.25, spider_web spawn/despawn.7, hunstman_spider add. [решение] original rig, gait, mechanics/timings; assets/models/spider_queen/README.md. [владелец] no blocks/immunity.",
+        "model": "spider_queen",
+        "texture": "rbxassetid://93131048217957",
+        "glowBrightness": 0,
+        "deathDuration": 6.25,
+        "spiderQueen": {
+          "recovery": 1.5,
+          "spawnDuration": 1.8,
+          "melee": [
+            {
+              "name": "bite",
+              "duration": 1,
+              "release": 0.5,
+              "damage": 16,
+              "radius": 8,
+              "halfAngle": 65
+            },
+            {
+              "name": "bite_2",
+              "duration": 1,
+              "release": 0.53,
+              "damage": 16,
+              "radius": 8,
+              "halfAngle": 65
+            }
+          ],
+          "fangattack": {
+            "duration": 1.45,
+            "release": 0.83,
+            "damage": 32,
+            "radius": 10,
+            "halfAngle": 50
+          },
+          "webattack": {
+            "duration": 1.85,
+            "release": 1.05,
+            "damage": 25,
+            "range": 26,
+            "radius": 4,
+            "flight": 0.7,
+            "arc": 7,
+            "grow": 0.7,
+            "fade": 0.7,
+            "lifetime": 6,
+            "phase2Count": 2,
+            "maxZones": 3,
+            "slowLevel": 3,
+            "slowSeconds": 0.65
+          },
+          "broodcall": {
+            "duration": 2.6,
+            "release": 1.65,
+            "range": 9,
+            "count": 3,
+            "phase2Count": 4,
+            "maxAlive": 6,
+            "hp": 12,
+            "speed": 10,
+            "lifetime": 18,
+            "damage": 6,
+            "reach": 3.8,
+            "cooldown": 1.4,
+            "hitAt": 0.302,
+            "spawnDuration": 0.7
+          }
+        }
       },
       "money": [
         0,
