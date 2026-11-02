@@ -45,6 +45,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 **Owner authorization (02.11): always restart Play when needed for fixes/QA, even while the owner is playing; do not ask again. Restore the owner's enabled Creative mode after each restart through its normal client remote.**
 
+**Latest owner steering (02.11, after Forest Spirit): continue development in code only; Studio verification is deferred until evening. Do not call Studio or desktop-control tools under this instruction. Headless model/code preparation continues; explicitly mark new bosses as awaiting in-game QA. This supersedes the earlier permission to restart Play for now.**
+
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
 2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync-part.luau`
    (the comma list limits it to changed files). Keep `node scripts/serve-repo.mjs` running (serves the
@@ -137,7 +139,12 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    `locations.json` → `mines` → MineService.
 4. Test: `start_stop_play`, then `execute_luau` on the Server/Client datamodels (fire remotes from the
    Client, read ProfileUpdated), `get_console_output`, `screen_capture` (only renders when the Studio
-   window is not minimized — restore it via PowerShell ShowWindow if the capture is blank).
+   window is not minimized). Before Play screenshots, run `scripts/qa-studio-render-state.luau`: zero RenderStepped
+   frames means skip visual capture, not a white-world game defect. Do not steal foreground focus to recover a
+   minimized window while someone is working. Ordinary background windows may still render; prefer the existing
+   Studio MCP and defer visual QA until frames resume. Server/Heartbeat checks can continue while minimized.
+   Sources: [Roblox render-step explanation](https://devforum.roblox.com/t/renderstepped-doesnt-fire-when-minimized-or-script-tab-open/1095186),
+   [Microsoft window-capture sample](https://github.com/microsoft/Windows.UI.Composition-Win32-Samples/blob/master/cpp/ScreenCaptureforHWND/README.md).
 5. `require()` inside `execute_luau` gets a separate module instance. QA hooks (Studio only):
    `ServerStorage.ProfileDebug` BindableFunction (Wire-encoded tables: `Wire.decode` what `get` returns,
    `Wire.encode` what you `set`; `get` userId → profile copy, `give` userId id count

@@ -1,0 +1,56 @@
+{
+  "placeId": 92594200898716,
+  "server": {
+    "cases": 90,
+    "checks": 234,
+    "status": "PASS"
+  },
+  "client": {
+    "checks": 22,
+    "status": "PASS",
+    "maxPosition": 0.00023111701011657715,
+    "maxAngleDegrees": 0.3238513117424654
+  },
+  "noBlock": {
+    "checks": 43,
+    "status": "PASS"
+  },
+  "live": {
+    "samples": 424,
+    "summonPeaks": {
+      "forest_skull": 1,
+      "forest_totem": 1,
+      "forest_shaman": 1,
+      "forest_explorer": 1
+    },
+    "peak": {
+      "y": 15004.5498046875,
+      "anchored": true,
+      "action": "attack1",
+      "state": "Running"
+    },
+    "maxY": 15004.5498046875,
+    "unanchored": 71,
+    "status": "PASS",
+    "failures": [],
+    "minY": 15004.5458984375,
+    "actions": {
+      "attack8": true,
+      "attack3": true,
+      "attack7": true,
+      "attack5": true,
+      "attack1": true,
+      "attack6": true,
+      "attack4": true,
+      "attack2": true
+    },
+    "settled": true
+  },
+  "visual": "Actual arena screenshot inspected after render-frame preflight resumed; main model matte and grounded. Native capture stopped after user Escape.",
+  "teleports": "Normal client Teleport passed for leprechaun_valley, ghetto, warzone, kyoto after separate map-overlap repair.",
+  "limitations": [
+    "4–6 player encounter not exercised",
+    "Phone and loaded-server performance not measured",
+    "Original commercial server skill numbers unavailable; documented authored mechanics"
+  ]
+}
