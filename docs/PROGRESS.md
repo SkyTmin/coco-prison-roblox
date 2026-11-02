@@ -53,7 +53,8 @@
 
 ### 02.11 — View button beside the hotbar [owner]
 
-Reused the existing localized camera button: visible by default on PC/mobile, immediately right of the nine slots. Responsive layout reserves its44px tap target [decision], shifts/scales the bar on narrow screens, and places the mobile inventory opener above it. Desktop hints leave room for both. The button uses the same first/third-person toggle as V/F5; hidden while windows are open, editable in HUD settings. Explicit saved HUD customizations remain authoritative. Selene/StyLua, Rojo build, client Luau compilation, and layout bounds at320–1440px on desktop/mobile pass [offline checks]. Code-only; Studio/visual QA deferred to evening.
+Reused the existing localized camera button: visible by default on PC/mobile, immediately right of the nine slots. Responsive layout reserves its44px tap target [decision], shifts/scales the bar on narrow screens, and places the mobile inventory opener above it. Desktop hints leave room for both. The button uses the same first/third-person toggle as V/F5; hidden while windows are open, editable in HUD settings. Explicit saved HUD customizations remain authoritative. Selene/StyLua, Rojo build, client Luau compilation, and layout bounds at320–1440px on desktop/mobile pass [offline checks]. Code-only; Studio/visual QA deferred to evening. Main-client compile check also reproduced a pre-existing Luau200-register overflow in the previous commit [offline compiler]. Scoreboard references are now grouped and one-time HUD construction locals scoped; client compilation passes with the new button. This is required before the evening sync.
+
 
 ### 02.11 — Дворы readability and ancient case delivery, source only [owner]
 

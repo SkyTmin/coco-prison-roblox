@@ -123,51 +123,55 @@ end
 -- ---------------------------------------------------------------- HUD: stats panel (right), hints, toast, combo
 -- [владелец 22.10, скриншот; клиент prison.classic.scoreboard.*] «PRISON CLASSIC», then icon · label · value:
 -- Уровень, Баланс, Блоки (чистые in brackets), a divider, Фракция, Крыс (чистые in brackets), У / С.
-local SB_ROW = 20
-local stats =
-	Ui.panel(gui, UDim2.fromOffset(214, 30 + SB_ROW * 6 + 10), UDim2.new(1, -224, 0.40, 0))
-local sbTitle = Ui.label(
-	stats,
-	"",
-	UDim2.new(1, -12, 0, 22),
-	UDim2.fromOffset(6, 3),
-	14,
-	Color3.fromRGB(90, 150, 255)
-)
-sbTitle.TextXAlignment = Enum.TextXAlignment.Center
-local function sbRow(index: number, icon: string): (TextLabel, TextLabel)
-	local y = 28 + (index - 1) * SB_ROW + (if index >= 4 then 8 else 0)
-	local image = Instance.new("ImageLabel")
-	image.Size = UDim2.fromOffset(14, 14)
-	image.Position = UDim2.fromOffset(8, y + 3)
-	image.BackgroundTransparency = 1
-	image.Image = (Config.icons.icons :: any)[icon] or ""
-	image.ResampleMode = Enum.ResamplerMode.Pixelated
-	image.Parent = stats
-	local label = Ui.label(
+-- Keep construction helpers scoped: the client entry point must stay below Luau's register limit.
+local stats: Frame
+local statText: { [string]: TextLabel } = {}
+do
+	local SB_ROW = 20
+	stats = Ui.panel(gui, UDim2.fromOffset(214, 30 + SB_ROW * 6 + 10), UDim2.new(1, -224, 0.40, 0))
+	statText.sbTitle = Ui.label(
 		stats,
 		"",
-		UDim2.fromOffset(100, SB_ROW),
-		UDim2.fromOffset(28, y),
+		UDim2.new(1, -12, 0, 22),
+		UDim2.fromOffset(6, 3),
 		14,
-		Ui.colors.text
+		Color3.fromRGB(90, 150, 255)
 	)
-	local value = Ui.rich(stats, "", UDim2.new(1, -36, 0, SB_ROW), UDim2.fromOffset(28, y), 14)
-	value.TextXAlignment = Enum.TextXAlignment.Right
-	return label, value
+	statText.sbTitle.TextXAlignment = Enum.TextXAlignment.Center
+	local function sbRow(index: number, icon: string): (TextLabel, TextLabel)
+		local y = 28 + (index - 1) * SB_ROW + (if index >= 4 then 8 else 0)
+		local image = Instance.new("ImageLabel")
+		image.Size = UDim2.fromOffset(14, 14)
+		image.Position = UDim2.fromOffset(8, y + 3)
+		image.BackgroundTransparency = 1
+		image.Image = (Config.icons.icons :: any)[icon] or ""
+		image.ResampleMode = Enum.ResamplerMode.Pixelated
+		image.Parent = stats
+		local label = Ui.label(
+			stats,
+			"",
+			UDim2.fromOffset(100, SB_ROW),
+			UDim2.fromOffset(28, y),
+			14,
+			Ui.colors.text
+		)
+		local value = Ui.rich(stats, "", UDim2.new(1, -36, 0, SB_ROW), UDim2.fromOffset(28, y), 14)
+		value.TextXAlignment = Enum.TextXAlignment.Right
+		return label, value
+	end
+	statText.statLevelLabel, statText.statLevel = sbRow(1, "hud_level")
+	statText.statMoneyLabel, statText.statMoney = sbRow(2, "hud_money")
+	statText.statBlocksLabel, statText.statBlocks = sbRow(3, "hud_blocks")
+	local divider = Instance.new("Frame")
+	divider.Size = UDim2.new(1, -16, 0, 1)
+	divider.Position = UDim2.fromOffset(8, 28 + SB_ROW * 3 + 3)
+	divider.BackgroundColor3 = Ui.colors.border
+	divider.BorderSizePixel = 0
+	divider.Parent = stats
+	statText.statFactionLabel, statText.statFaction = sbRow(4, "hud_faction")
+	statText.statRatsLabel, statText.statRats = sbRow(5, "hud_rat")
+	statText.statKDLabel, statText.statKD = sbRow(6, "hud_kd")
 end
-local statLevelLabel, statLevel = sbRow(1, "hud_level")
-local statMoneyLabel, statMoney = sbRow(2, "hud_money")
-local statBlocksLabel, statBlocks = sbRow(3, "hud_blocks")
-local divider = Instance.new("Frame")
-divider.Size = UDim2.new(1, -16, 0, 1)
-divider.Position = UDim2.fromOffset(8, 28 + SB_ROW * 3 + 3)
-divider.BackgroundColor3 = Ui.colors.border
-divider.BorderSizePixel = 0
-divider.Parent = stats
-local statFactionLabel, statFaction = sbRow(4, "hud_faction")
-local statRatsLabel, statRats = sbRow(5, "hud_rat")
-local statKDLabel, statKD = sbRow(6, "hud_kd")
 local function sbColor(text: string, color: Color3): string
 	return string.format('<font color="%s">%s</font>', Ui.hex(color), text)
 end
@@ -450,39 +454,42 @@ armorMeter.group.Position = UDim2.fromOffset(0, -22)
 
 -- Minecraft's experience bar between the meters and the hotbar [владелец 27.10]: the number is the player's level, the
 -- green fill how close the next level is (the blocks since the last level and the money it costs, the lower of the two)
-local XP_GREEN = Color3.fromRGB(128, 255, 32)
-local xpBar = Instance.new("Frame")
-xpBar.Name = "ExperienceBar"
-xpBar.AnchorPoint = Vector2.new(0, 1)
-xpBar.Position = UDim2.fromOffset(6, -4)
-xpBar.Size = UDim2.new(1, -12, 0, 7)
-xpBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-xpBar.BorderSizePixel = 0
-xpBar.Parent = hotbar
-local xpTrack = Instance.new("Frame")
-xpTrack.Position = UDim2.fromOffset(1, 1)
-xpTrack.Size = UDim2.new(1, -2, 1, -2)
-xpTrack.BackgroundColor3 = Color3.fromRGB(46, 58, 30)
-xpTrack.BorderSizePixel = 0
-xpTrack.Parent = xpBar
-local xpFill = Instance.new("Frame")
-xpFill.Size = UDim2.fromScale(0, 1)
-xpFill.BackgroundColor3 = XP_GREEN
-xpFill.BorderSizePixel = 0
-xpFill.Parent = xpTrack
-local xpShine = Instance.new("Frame") -- the lighter top pixel row of the fill
-xpShine.Size = UDim2.new(1, 0, 0, 1)
-xpShine.BackgroundColor3 = Color3.fromRGB(200, 255, 140)
-xpShine.BorderSizePixel = 0
-xpShine.Parent = xpFill
-local xpLevel =
-	Ui.label(hotbar, "", UDim2.fromOffset(60, 18), UDim2.new(0.5, 0, 0, -8), 18, XP_GREEN)
-xpLevel.AnchorPoint = Vector2.new(0.5, 1)
-xpLevel.TextXAlignment = Enum.TextXAlignment.Center
-xpLevel.Font = Enum.Font.SourceSansBold
-xpLevel.TextStrokeTransparency = 0
-xpLevel.TextStrokeColor3 = Color3.new(0, 0, 0)
-xpLevel.ZIndex = 3
+local xpFill: Frame
+local xpLevel: TextLabel
+do
+	local XP_GREEN = Color3.fromRGB(128, 255, 32)
+	local xpBar = Instance.new("Frame")
+	xpBar.Name = "ExperienceBar"
+	xpBar.AnchorPoint = Vector2.new(0, 1)
+	xpBar.Position = UDim2.fromOffset(6, -4)
+	xpBar.Size = UDim2.new(1, -12, 0, 7)
+	xpBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	xpBar.BorderSizePixel = 0
+	xpBar.Parent = hotbar
+	local xpTrack = Instance.new("Frame")
+	xpTrack.Position = UDim2.fromOffset(1, 1)
+	xpTrack.Size = UDim2.new(1, -2, 1, -2)
+	xpTrack.BackgroundColor3 = Color3.fromRGB(46, 58, 30)
+	xpTrack.BorderSizePixel = 0
+	xpTrack.Parent = xpBar
+	xpFill = Instance.new("Frame")
+	xpFill.Size = UDim2.fromScale(0, 1)
+	xpFill.BackgroundColor3 = XP_GREEN
+	xpFill.BorderSizePixel = 0
+	xpFill.Parent = xpTrack
+	local xpShine = Instance.new("Frame") -- the lighter top pixel row of the fill
+	xpShine.Size = UDim2.new(1, 0, 0, 1)
+	xpShine.BackgroundColor3 = Color3.fromRGB(200, 255, 140)
+	xpShine.BorderSizePixel = 0
+	xpShine.Parent = xpFill
+	xpLevel = Ui.label(hotbar, "", UDim2.fromOffset(60, 18), UDim2.new(0.5, 0, 0, -8), 18, XP_GREEN)
+	xpLevel.AnchorPoint = Vector2.new(0.5, 1)
+	xpLevel.TextXAlignment = Enum.TextXAlignment.Center
+	xpLevel.Font = Enum.Font.SourceSansBold
+	xpLevel.TextStrokeTransparency = 0
+	xpLevel.TextStrokeColor3 = Color3.new(0, 0, 0)
+	xpLevel.ZIndex = 3
+end
 
 -- Above the meters, bottom to top (all inside the hotbar so they share its scale): combo, the held
 -- item's name, the hint of a harmful effect.
@@ -2179,32 +2186,33 @@ local function render(p: Types.Profile)
 	hints.Text = T("keys_hint")
 	renderTeleportCountdown()
 	renderCombo()
-	sbTitle.Text = T("sb_title")
-	statLevelLabel.Text = T("level")
-	statMoneyLabel.Text = T("coins")
-	statBlocksLabel.Text = T("blocks")
-	statFactionLabel.Text = T("sb_faction")
-	statRatsLabel.Text = T("sb_rats")
-	statKDLabel.Text = T("sb_kd")
-	statLevel.Text = sbColor(tostring(p.level), Ui.colors.yellow)
+	statText.sbTitle.Text = T("sb_title")
+	statText.statLevelLabel.Text = T("level")
+	statText.statMoneyLabel.Text = T("coins")
+	statText.statBlocksLabel.Text = T("blocks")
+	statText.statFactionLabel.Text = T("sb_faction")
+	statText.statRatsLabel.Text = T("sb_rats")
+	statText.statKDLabel.Text = T("sb_kd")
+	statText.statLevel.Text = sbColor(tostring(p.level), Ui.colors.yellow)
 	-- balance like the original: 8,507; below 1 000 the exact "0.500" format [владелец 22.10]
-	statMoney.Text = sbColor(
+	statText.statMoney.Text = sbColor(
 		if p.coins >= 1000 * Config.moneyScale
 			then Strings.grouped(math.floor(p.coins / Config.moneyScale), 0)
 			else Strings.money(p.coins),
 		Ui.colors.green
 	)
-	statBlocks.Text = sbColor(Strings.big(p.blocksTotal), Ui.colors.orange)
+	statText.statBlocks.Text = sbColor(Strings.big(p.blocksTotal), Ui.colors.orange)
 		.. " "
 		.. sbColor("(" .. Strings.big(p.stats.blocksClean or 0) .. ")", Ui.colors.gray)
-	statFaction.Text = sbColor(
+	statText.statFaction.Text = sbColor(
 		if Config.faction(p.faction) then T("faction_" .. p.faction) else T("faction_none"),
 		Ui.colors.gray
 	)
-	statRats.Text = sbColor(Strings.big(p.stats.ratsTotal or p.stats.rats or 0), Ui.colors.orange)
-		.. " "
-		.. sbColor("(" .. Strings.big(p.stats.rats or 0) .. ")", Ui.colors.gray)
-	statKD.Text = sbColor(tostring(p.stats.kills or 0), Ui.colors.green)
+	statText.statRats.Text = sbColor(
+		Strings.big(p.stats.ratsTotal or p.stats.rats or 0),
+		Ui.colors.orange
+	) .. " " .. sbColor("(" .. Strings.big(p.stats.rats or 0) .. ")", Ui.colors.gray)
+	statText.statKD.Text = sbColor(tostring(p.stats.kills or 0), Ui.colors.green)
 		.. sbColor(" / ", Ui.colors.text)
 		.. sbColor(tostring(p.stats.deaths or 0), Ui.colors.red)
 	renderHotbar()
@@ -3250,11 +3258,13 @@ end)
 HudLayout.register("view", viewButton, true, true)
 HudLayout.setOptional("view", true)
 local viewShown = true
-local viewCaption = viewButton:FindFirstChild("Caption")
-if viewCaption and viewCaption:IsA("TextLabel") then
-	localizedLabels[viewCaption] = "touch_camera"
-else
-	localizedLabels[viewButton] = "touch_camera"
+do
+	local viewCaption = viewButton:FindFirstChild("Caption")
+	if viewCaption and viewCaption:IsA("TextLabel") then
+		localizedLabels[viewCaption] = "touch_camera"
+	else
+		localizedButtons[viewButton] = "touch_camera"
+	end
 end
 local touchActions = Instance.new("Frame")
 touchActions.Name = "TouchActions"
