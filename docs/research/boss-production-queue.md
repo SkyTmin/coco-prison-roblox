@@ -18,7 +18,7 @@ Remaining route (source: boss location unlock levels; not difficulty ranking):
 - [ ] Raven Knight — code/model checkpoint prepared:721 parts/40 joints/14 clips, retainer671/40/10, raven48/11/3 and axe20/2/2. Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/raven_knight/README.md.
 - [ ] Vecna — code/model checkpoint prepared:725 parts/64 joints/13 clips; three original minions, clock and portal (six rigs/38 clips). Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/vecna/README.md.
 - [ ] The Lovers — offline Samurai874 parts/43 joints/21 clips and spirit archer483/39/9, four projectile rigs (six rigs/34 clips). Three vulnerable phases, bounded projectiles/summon. Code/export/build checks pass; Studio suites/live Kyoto fight **PENDING evening**. assets/models/the_lovers/README.md.
-- [ ] Ent.
+- [ ] Ent — offline oak king1298 parts/54 joints/12 clips, minion164/22/6, branch/leaf props (four rigs/20 clips). Source-backed four skill families, original grounded death; offline checks pass, Studio server/client/live Farm QA **PENDING evening**. assets/models/ent/README.md.
 - [ ] Forest Guardian.
 - [ ] Reaper.
 

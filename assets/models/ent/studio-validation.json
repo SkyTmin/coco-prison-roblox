@@ -1,0 +1,16 @@
+{
+  "status": "PENDING",
+  "reason": "Owner explicitly deferred Studio checks until evening; code/model work only.",
+  "intendedPlaceId": 92594200898716,
+  "serverSuite": "scripts/qa-ent-runtime.luau",
+  "clientSuite": "scripts/qa-ent-animation-client.luau",
+  "required": [
+    "Sync repository scripts/models only into the owner-confirmed Katorga place; never replace its map or publish.",
+    "Run server fixture suite and actual-client Motor6D suite; record real outcomes, fix failures.",
+    "Run qa-boss-no-block.luau and ordinary Mob animation regression.",
+    "Observe Farm in both phases: two punches, twisted roots, branch wave, leaf-storm gap/jump/cover/interruption, finite ordinary minions/cap/ownership, real damage timing, death/leash/respawn; profile dense bark on mobile.",
+    "Inspect arena appearance after qa-studio-render-state.luau reports frames; skip minimized-window captures.",
+    "Restore owner Creative/camera, remove all fixtures; review console.",
+    "Real 4\u20136-player/mobile/load testing remains open."
+  ]
+}

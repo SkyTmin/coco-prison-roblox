@@ -54,6 +54,7 @@ local ForestSpiritAbilities = require(script.Parent.ForestSpiritAbilities)
 local RavenKnightAbilities = require(script.Parent.RavenKnightAbilities)
 local VecnaAbilities = require(script.Parent.VecnaAbilities)
 local LoversAbilities = require(script.Parent.LoversAbilities)
+local EntAbilities = require(script.Parent.EntAbilities)
 local SpiderQueenAbilities = require(script.Parent.SpiderQueenAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
@@ -79,6 +80,7 @@ type Fight = {
 	ravenKnight: any?,
 	vecna: any?,
 	lovers: any?,
+	ent: any?,
 	spiderQueen: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
@@ -1152,6 +1154,7 @@ local function died(boss: Boss)
 	RavenKnightAbilities.Clear(boss)
 	VecnaAbilities.Clear(boss)
 	LoversAbilities.Clear(boss)
+	EntAbilities.Clear(boss)
 	SpiderQueenAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
@@ -1328,6 +1331,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		VecnaAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.lovers then
 		LoversAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.ent then
+		EntAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.spiderQueen then
 		SpiderQueenAbilities.Spawn(boss, { act = act })
 	else
@@ -1366,6 +1371,7 @@ local function think(boss: Boss, dt: number)
 		RavenKnightAbilities.Clear(boss)
 		VecnaAbilities.Clear(boss)
 		LoversAbilities.Clear(boss)
+		EntAbilities.Clear(boss)
 		SpiderQueenAbilities.Clear(boss)
 		boss.model, boss.root, boss.humanoid = nil, nil, nil
 		if old then
@@ -1399,6 +1405,9 @@ local function think(boss: Boss, dt: number)
 		end
 		if boss.fight.lovers and os.clock() - boss.lastTargetAt > boss.fight.leashSeconds then
 			LoversAbilities.Clear(boss)
+		end
+		if boss.fight.ent and os.clock() - boss.lastTargetAt > boss.fight.leashSeconds then
+			EntAbilities.Clear(boss)
 		end
 		if boss.model and boss.model:GetAttribute("Sleeping") then
 			return
@@ -1445,6 +1454,7 @@ local function think(boss: Boss, dt: number)
 						or boss.fight.undeadKing
 						or boss.fight.ravenKnight
 						or boss.fight.vecna
+						or boss.fight.ent
 					then 4
 					else 3)
 			+ 1
@@ -1507,6 +1517,13 @@ local function think(boss: Boss, dt: number)
 			})
 		elseif boss.fight.lovers then
 			LoversAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.ent then
+			EntAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1629,6 +1646,13 @@ local function think(boss: Boss, dt: number)
 				})
 			elseif boss.fight.lovers then
 				LoversAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.ent then
+				EntAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
 					fighters = fighters,

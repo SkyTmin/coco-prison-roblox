@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 02.11 — Groot/Ent offline checkpoint; evening Studio QA pending [owner]
+
+Continued code/models only. Original stocky oak1298 parts/54 joints/12 clips, young oak164/22/6 and two small branch/leaf rigs; four blends/20 exported clips/10 modules. Primary SamusDev Ent King source confirms two punches and four skill families; authored Twisted Branch/Branch Wave/interruptible Leaf Storm/Tree Minions. Planted gait, hand IK, crown/vines/root fingers, multi-stage4.4s grounded fall; no glow/blocks/camera takeover. Shared hit budgets, dynamic support/headroom/cover, storm safe wedge/inner zone/jump, finite capped mortal summons and cleanup. Existing3160HP,35/46/58,8HP/s regen/rewards/chat retained.
+
+Exported-curve/ground/stance/model/config audit, Selene/StyLua/Rojo and balance simulation pass. Prepared qa-ent-runtime/animation-client **NOT RUN**; studio-validation.json PENDING. Media/source/rebuild/limits: assets/models/ent/README.md. Evening: source/models-only Katorga92594200898716 sync, both suites/no-block/live Farm phases and console; verify real damage/counterplay/cap/lifetime/ownership/death/leash/respawn and mobile cost of dense bark. Preserve map/no publish. Full completed count remains13/19; Raven/Vecna/Samurai/Ent await Studio. Next code/model route: Forest Guardian, then Reaper. Actual4–6-player/mobile/load testing remains open.
+
 ### 02.11 — Samurai and spirit archer offline checkpoint; evening Studio QA pending [owner]
 
 Continued code/models only; no Studio/desktop calls or notifications. Original Samurai874 parts/43 joints/21 clips, spirit483/39/9 and four tiny projectile rigs; six blends/34 exported clips/20 JSON modules. Three vulnerable50/25% phases, alternating cuts, combo/sweep/grounded rushes, swept stars/returning sickle/spears and paired rain. Mortal110HP spirit, finite lifetime/resummon, shared hit budgets/projectile cap; no boss shields. Existing2970HP,32/43/54 damage,7HP/s regen, rewards and damage/dollars chat retained. Source families distinguished from authored condensed mechanics. Armor stays worn; separate four-box nock avoids full-rig visibility changes. Shared exporter fixed compound dropped-prop subtree grounding; eight old detached-prop rigs are leaf-only and retain identical grouping. Fixed sleeves/folds in the spirit's final pose, spell recovery after paired-rain interruption, and nine-special dispatch.

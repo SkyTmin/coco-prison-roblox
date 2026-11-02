@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "450a60c",
+  "models": {
+    "ent": {
+      "parts": 1298,
+      "joints": 54,
+      "clips": {
+        "idle": 2.0,
+        "walk": 1.0288,
+        "rightpunch": 1.5292,
+        "leftpunch": 1.5358,
+        "stomp": 2.2931,
+        "rise": 2.4173,
+        "shout": 1.9355,
+        "leafstorm": 5.2,
+        "spawn": 2.4,
+        "hurt": 0.7,
+        "stun": 1.0,
+        "death": 4.4
+      }
+    },
+    "ent_minion": {
+      "parts": 164,
+      "joints": 22,
+      "clips": {
+        "bite": 1.0833,
+        "death": 2.2917,
+        "hurt": 0.7,
+        "idle": 2.0,
+        "spawn": 1.8333,
+        "walk": 0.6667
+      }
+    },
+    "ent_branch": {
+      "parts": 8,
+      "joints": 4,
+      "clips": {
+        "spawn": 1.6667
+      }
+    },
+    "ent_leaves": {
+      "parts": 24,
+      "joints": 4,
+      "clips": {
+        "idle": 1.0
+      }
+    }
+  },
+  "moduleCount": 10,
+  "largestModuleCharacters": 152231,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}
