@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Каторга — иллюстрации 30 локаций</title>
+  <style>
+    :root{color-scheme:dark;--bg:#111815;--panel:#1a231e;--line:#34433a;--text:#f2f5ee;--muted:#a5b5a9;--accent:#d4eea0;--ink:#1b2814;font-family:Segoe UI,system-ui,-apple-system,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}button,input{font:inherit}button,a,input{-webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}button{cursor:pointer}a{color:var(--accent);text-underline-offset:4px}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:4px}[hidden]{display:none!important}
+    .shell{width:min(1540px,100%);margin:0 auto;padding:36px 28px 32px}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:.2em;font-weight:700;margin:0 0 15px}h1{font-size:clamp(28px,4vw,46px);line-height:1.12;letter-spacing:-.035em;margin:0 0 14px}.intro{color:var(--muted);max-width:740px;line-height:1.6;margin:0}.hero{display:flex;gap:24px;justify-content:space-between;align-items:flex-end;padding-bottom:28px;border-bottom:1px solid var(--line)}.count-tile{min-width:132px;text-align:right;color:var(--muted);font-size:13px}.count-tile strong{display:block;color:var(--accent);font-size:58px;font-weight:600;line-height:1.1;letter-spacing:-.06em}
+    .toolbar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:24px 0 12px}.search-label{flex:1;min-width:220px}.search-label span{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}input[type=search]{display:block;width:100%;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px 14px;min-height:46px;color:var(--text)}input::placeholder{color:#84968a}.global-view{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.global-view>span{font-size:13px;color:var(--muted)}
+    .segmented{display:inline-flex;background:#101812;border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px}.segmented button{border:0;background:transparent;color:var(--muted);padding:10px 12px;min-height:40px;border-radius:6px;font-size:13px;white-space:nowrap}.segmented button[aria-pressed=true]{background:var(--accent);color:var(--ink);font-weight:650}.segmented button:hover{color:var(--text);background:#304333}.segmented button[aria-pressed=true]:hover{color:var(--ink);background:#e2f6bd}
+    .result-note{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:0 0 20px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}.preview{width:100%;padding:0;display:block;position:relative;border:0;aspect-ratio:16/9;background:#070c09;overflow:hidden;color:#fff}.preview img{width:100%;height:100%;object-fit:contain;display:block}.preview:hover .expand{background:var(--accent);color:var(--ink)}.view-badge{position:absolute;top:12px;left:12px;padding:6px 9px;border:1px solid #ffffff25;border-radius:6px;background:#0d1710d9;font-size:11px}.expand{position:absolute;bottom:12px;right:12px;border-radius:7px;background:#0d1710dd;width:32px;height:32px;display:grid;place-items:center;font-size:22px}.card-body{padding:16px}.title-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}h2{font-size:17px;line-height:1.3;margin:0;font-weight:600;letter-spacing:-.01em}.number{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}.card-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.source-link{font-size:11px;color:var(--muted)}.source-link:hover{color:var(--accent)}.empty{padding:48px 20px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+    footer{margin-top:30px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:12px;line-height:1.7}footer p{margin:0 0 8px}.footer-links{display:flex;gap:8px 18px;flex-wrap:wrap}footer a{color:var(--muted)}
+    dialog{width:min(1540px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid #55685a;border-radius:15px;background:var(--bg);color:var(--text);overflow:auto}dialog::backdrop{background:#020805ed}.viewer-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 20px;border-bottom:1px solid var(--line)}.viewer-head h2{font-size:19px}.viewer-meta{margin:4px 0 0;font-size:12px;color:var(--muted)}.close{border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);width:44px;height:44px;flex:0 0 44px;font-size:25px}.viewer-image{width:100%;height:min(69dvh,850px);object-fit:contain;display:block;background:#050a07}.viewer-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;flex-wrap:wrap}.navigation{display:flex;gap:8px}.navigation button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;min-width:44px;min-height:44px;padding:8px 14px}.viewer-links{display:flex;gap:16px;font-size:12px}.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(min-width:1800px){.shell{width:min(1760px,100%)}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media(max-width:1100px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:650px){.shell{padding:24px 14px}.hero{gap:12px;align-items:flex-start}.count-tile{min-width:55px;font-size:10px}.count-tile strong{font-size:38px}.intro{font-size:14px}.grid{grid-template-columns:1fr;gap:18px}.toolbar{gap:14px}.search-label{flex-basis:100%}.global-view{width:100%;justify-content:space-between}.card-body{padding:14px}.viewer-head{padding:12px}.viewer-head h2{font-size:17px}.viewer-foot{padding:12px}.viewer-links{width:100%;justify-content:space-between}.viewer-image{height:55dvh}dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}}
+    @media(prefers-reduced-motion:no-preference){.card{transition:border-color .15s}.card:hover{border-color:#617c67}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="hero"><div><p class="eyebrow">КАТОРГА · ЛОКАЦИИ</p><h1>Все локации, рядом с оригиналом.</h1><p class="intro">Сравните иллюстрации с тем, как карты выглядят в игре. Переключайте вид у каждой локации или сразу у всех. Нажмите на изображение, чтобы рассмотреть его крупнее.</p></div><div class="count-tile"><strong>30</strong>локаций</div></header>
+  <div class="toolbar">
+    <label class="search-label"><span>Найти локацию</span><input id="search" type="search" placeholder="Название локации…" autocomplete="off"></label>
+    <div class="global-view"><span>Все изображения</span><div id="all-modes" class="segmented" role="group" aria-label="Вид для всех локаций"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div></div>
+  </div>
+  <div class="result-note"><span id="result-count" role="status" aria-live="polite">Показано 30 из 30</span><span>Финальные версии · 03.11.2026 · изображения без обрезки</span></div>
+  <div class="grid" id="gallery">
+      <article class="card" data-index="0" data-search="начальная локация prison" id="location-prison">
+        <button class="preview" type="button" data-open="0" aria-label="Открыть крупно: Начальная локация">
+          <img class="art" src="illustration-prison-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Начальная локация — иллюстрация">
+          <img class="reference" src="topdown-prison.png" loading="lazy" decoding="async" alt="Начальная локация — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Начальная локация</h2><span class="number">01</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Начальная локация"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Начальная локация">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="1" data-search="каменоломня quarry" id="location-quarry">
+        <button class="preview" type="button" data-open="1" aria-label="Открыть крупно: Каменоломня">
+          <img class="art" src="illustration-quarry-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Каменоломня — иллюстрация">
+          <img class="reference" src="topdown-quarry.png" loading="lazy" decoding="async" alt="Каменоломня — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Каменоломня</h2><span class="number">02</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Каменоломня"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Каменоломня">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="2" data-search="подножье горы mountain_foot" id="location-mountain_foot">
+        <button class="preview" type="button" data-open="2" aria-label="Открыть крупно: Подножье горы">
+          <img class="art" src="illustration-mountain_foot-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Подножье горы — иллюстрация">
+          <img class="reference" src="topdown-mountain_foot.png" loading="lazy" decoding="async" alt="Подножье горы — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Подножье горы</h2><span class="number">03</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Подножье горы"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Подножье горы">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="3" data-search="преисподняя underworld" id="location-underworld">
+        <button class="preview" type="button" data-open="3" aria-label="Открыть крупно: Преисподняя">
+          <img class="art" src="illustration-underworld-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Преисподняя — иллюстрация">
+          <img class="reference" src="topdown-underworld.png" loading="lazy" decoding="async" alt="Преисподняя — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Преисподняя</h2><span class="number">04</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Преисподняя"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Преисподняя">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="4" data-search="пирамида pyramid" id="location-pyramid">
+        <button class="preview" type="button" data-open="4" aria-label="Открыть крупно: Пирамида">
+          <img class="art" src="illustration-pyramid-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Пирамида — иллюстрация">
+          <img class="reference" src="topdown-pyramid.png" loading="lazy" decoding="async" alt="Пирамида — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Пирамида</h2><span class="number">05</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Пирамида"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Пирамида">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="5" data-search="королевский сад royal_garden" id="location-royal_garden">
+        <button class="preview" type="button" data-open="5" aria-label="Открыть крупно: Королевский сад">
+          <img class="art" src="illustration-royal_garden-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Королевский сад — иллюстрация">
+          <img class="reference" src="topdown-royal_garden.png" loading="lazy" decoding="async" alt="Королевский сад — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Королевский сад</h2><span class="number">06</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Королевский сад"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Королевский сад">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="6" data-search="затопленный маяк sunken_lighthouse" id="location-sunken_lighthouse">
+        <button class="preview" type="button" data-open="6" aria-label="Открыть крупно: Затопленный маяк">
+          <img class="art" src="illustration-sunken_lighthouse-2026-11-03.png" width="1731" height="909" loading="lazy" decoding="async" alt="Затопленный маяк — иллюстрация">
+          <img class="reference" src="topdown-sunken_lighthouse.png" loading="lazy" decoding="async" alt="Затопленный маяк — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Затопленный маяк</h2><span class="number">07</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Затопленный маяк"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Затопленный маяк">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="7" data-search="пустотная крепость end_castle" id="location-end_castle">
+        <button class="preview" type="button" data-open="7" aria-label="Открыть крупно: Пустотная крепость">
+          <img class="art" src="illustration-end_castle-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Пустотная крепость — иллюстрация">
+          <img class="reference" src="topdown-end_castle.png" loading="lazy" decoding="async" alt="Пустотная крепость — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Пустотная крепость</h2><span class="number">08</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Пустотная крепость"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Пустотная крепость">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="8" data-search="паучье логово spider_lair" id="location-spider_lair">
+        <button class="preview" type="button" data-open="8" aria-label="Открыть крупно: Паучье логово">
+          <img class="art" src="illustration-spider_lair-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Паучье логово — иллюстрация">
+          <img class="reference" src="topdown-spider_lair.png" loading="lazy" decoding="async" alt="Паучье логово — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Паучье логово</h2><span class="number">09</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Паучье логово"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Паучье логово">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="9" data-search="снежная длань snowy_hand" id="location-snowy_hand">
+        <button class="preview" type="button" data-open="9" aria-label="Открыть крупно: Снежная длань">
+          <img class="art" src="illustration-snowy_hand-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Снежная длань — иллюстрация">
+          <img class="reference" src="topdown-snowy_hand.png" loading="lazy" decoding="async" alt="Снежная длань — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Снежная длань</h2><span class="number">10</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Снежная длань"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Снежная длань">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="10" data-search="рынок market" id="location-market">
+        <button class="preview" type="button" data-open="10" aria-label="Открыть крупно: Рынок">
+          <img class="art" src="illustration-market-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Рынок — иллюстрация">
+          <img class="reference" src="topdown-market.png" loading="lazy" decoding="async" alt="Рынок — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Рынок</h2><span class="number">11</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Рынок"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Рынок">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="11" data-search="лепреконовая долина leprechaun_valley" id="location-leprechaun_valley">
+        <button class="preview" type="button" data-open="11" aria-label="Открыть крупно: Лепреконовая долина">
+          <img class="art" src="illustration-leprechaun_valley-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Лепреконовая долина — иллюстрация">
+          <img class="reference" src="topdown-leprechaun_valley.png" loading="lazy" decoding="async" alt="Лепреконовая долина — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Лепреконовая долина</h2><span class="number">12</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Лепреконовая долина"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Лепреконовая долина">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="12" data-search="замок castle" id="location-castle">
+        <button class="preview" type="button" data-open="12" aria-label="Открыть крупно: Замок">
+          <img class="art" src="illustration-castle-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Замок — иллюстрация">
+          <img class="reference" src="topdown-castle.png" loading="lazy" decoding="async" alt="Замок — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Замок</h2><span class="number">13</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Замок"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Замок">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="13" data-search="изнанка inside_out" id="location-inside_out">
+        <button class="preview" type="button" data-open="13" aria-label="Открыть крупно: Изнанка">
+          <img class="art" src="illustration-inside_out-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Изнанка — иллюстрация">
+          <img class="reference" src="topdown-inside_out.png" loading="lazy" decoding="async" alt="Изнанка — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Изнанка</h2><span class="number">14</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Изнанка"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Изнанка">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="14" data-search="киото kyoto" id="location-kyoto">
+        <button class="preview" type="button" data-open="14" aria-label="Открыть крупно: Киото">
+          <img class="art" src="illustration-kyoto-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Киото — иллюстрация">
+          <img class="reference" src="topdown-kyoto.png" loading="lazy" decoding="async" alt="Киото — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Киото</h2><span class="number">15</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Киото"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Киото">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="15" data-search="ферма farm" id="location-farm">
+        <button class="preview" type="button" data-open="15" aria-label="Открыть крупно: Ферма">
+          <img class="art" src="illustration-farm-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Ферма — иллюстрация">
+          <img class="reference" src="topdown-farm.png" loading="lazy" decoding="async" alt="Ферма — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Ферма</h2><span class="number">16</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Ферма"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-b.json" title="Промпт и референсы: Ферма">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="16" data-search="амбар barn" id="location-barn">
+        <button class="preview" type="button" data-open="16" aria-label="Открыть крупно: Амбар">
+          <img class="art" src="illustration-barn-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Амбар — иллюстрация">
+          <img class="reference" src="topdown-barn.png" loading="lazy" decoding="async" alt="Амбар — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Амбар</h2><span class="number">17</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Амбар"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Амбар">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="17" data-search="врата края edge_gate" id="location-edge_gate">
+        <button class="preview" type="button" data-open="17" aria-label="Открыть крупно: Врата края">
+          <img class="art" src="illustration-edge_gate-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Врата края — иллюстрация">
+          <img class="reference" src="topdown-edge_gate.png" loading="lazy" decoding="async" alt="Врата края — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Врата края</h2><span class="number">18</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Врата края"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Врата края">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="18" data-search="древо tree" id="location-tree">
+        <button class="preview" type="button" data-open="18" aria-label="Открыть крупно: Древо">
+          <img class="art" src="illustration-tree-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Древо — иллюстрация">
+          <img class="reference" src="topdown-tree.png" loading="lazy" decoding="async" alt="Древо — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Древо</h2><span class="number">19</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Древо"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Древо">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="19" data-search="церковь church" id="location-church">
+        <button class="preview" type="button" data-open="19" aria-label="Открыть крупно: Церковь">
+          <img class="art" src="illustration-church-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Церковь — иллюстрация">
+          <img class="reference" src="topdown-church.png" loading="lazy" decoding="async" alt="Церковь — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Церковь</h2><span class="number">20</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Церковь"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Церковь">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="20" data-search="чистилище purgatory" id="location-purgatory">
+        <button class="preview" type="button" data-open="20" aria-label="Открыть крупно: Чистилище">
+          <img class="art" src="illustration-purgatory-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Чистилище — иллюстрация">
+          <img class="reference" src="topdown-purgatory.png" loading="lazy" decoding="async" alt="Чистилище — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Чистилище</h2><span class="number">21</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Чистилище"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Чистилище">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="21" data-search="эдем eden" id="location-eden">
+        <button class="preview" type="button" data-open="21" aria-label="Открыть крупно: Эдем">
+          <img class="art" src="illustration-eden-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Эдем — иллюстрация">
+          <img class="reference" src="topdown-eden.png" loading="lazy" decoding="async" alt="Эдем — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Эдем</h2><span class="number">22</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Эдем"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Эдем">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="22" data-search="херувимы cherubim" id="location-cherubim">
+        <button class="preview" type="button" data-open="22" aria-label="Открыть крупно: Херувимы">
+          <img class="art" src="illustration-cherubim-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Херувимы — иллюстрация">
+          <img class="reference" src="topdown-cherubim.png" loading="lazy" decoding="async" alt="Херувимы — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Херувимы</h2><span class="number">23</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Херувимы"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Херувимы">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="23" data-search="врата gate" id="location-gate">
+        <button class="preview" type="button" data-open="23" aria-label="Открыть крупно: Врата">
+          <img class="art" src="illustration-gate-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Врата — иллюстрация">
+          <img class="reference" src="topdown-gate.png" loading="lazy" decoding="async" alt="Врата — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Врата</h2><span class="number">24</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Врата"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Врата">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="24" data-search="рай paradise" id="location-paradise">
+        <button class="preview" type="button" data-open="24" aria-label="Открыть крупно: Рай">
+          <img class="art" src="illustration-paradise-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="Рай — иллюстрация">
+          <img class="reference" src="topdown-paradise.png" loading="lazy" decoding="async" alt="Рай — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Рай</h2><span class="number">25</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Рай"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-c.json" title="Промпт и референсы: Рай">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="25" data-search="подвал basement" id="location-basement">
+        <button class="preview" type="button" data-open="25" aria-label="Открыть крупно: Подвал">
+          <img class="art" src="illustration-basement-2026-11-03.png" width="1730" height="909" loading="lazy" decoding="async" alt="Подвал — иллюстрация">
+          <img class="reference" src="topdown-basement.png" loading="lazy" decoding="async" alt="Подвал — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Подвал</h2><span class="number">26</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Подвал"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: Подвал">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="26" data-search="база фракций fraction_base" id="location-fraction_base">
+        <button class="preview" type="button" data-open="26" aria-label="Открыть крупно: База фракций">
+          <img class="art" src="illustration-fraction_base-2026-11-03.png" width="1672" height="941" loading="lazy" decoding="async" alt="База фракций — иллюстрация">
+          <img class="reference" src="topdown-fraction_base.png" loading="lazy" decoding="async" alt="База фракций — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>База фракций</h2><span class="number">27</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: База фракций"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-group-a.json" title="Промпт и референсы: База фракций">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="27" data-search="база банды gang_base" id="location-gang_base">
+        <button class="preview" type="button" data-open="27" aria-label="Открыть крупно: База банды">
+          <img class="art" src="illustration-gang_base-2026-11-03-v2.png" width="2170" height="725" loading="lazy" decoding="async" alt="База банды — иллюстрация">
+          <img class="reference" src="reference-gang_base-2026-11-03.jpg" loading="lazy" decoding="async" alt="База банды — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>База банды</h2><span class="number">28</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: База банды"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-root-v2.json" title="Промпт и референсы: База банды">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="28" data-search="гетто ghetto" id="location-ghetto">
+        <button class="preview" type="button" data-open="28" aria-label="Открыть крупно: Гетто">
+          <img class="art" src="illustration-ghetto-2026-11-03-v2.png" width="2170" height="725" loading="lazy" decoding="async" alt="Гетто — иллюстрация">
+          <img class="reference" src="reference-ghetto-2026-11-03.jpg" loading="lazy" decoding="async" alt="Гетто — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Гетто</h2><span class="number">29</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Гетто"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-root-v2.json" title="Промпт и референсы: Гетто">Промпт ↗</a></div>
+        </div>
+      </article>
+      <article class="card" data-index="29" data-search="дворы warzone" id="location-warzone">
+        <button class="preview" type="button" data-open="29" aria-label="Открыть крупно: Дворы">
+          <img class="art" src="illustration-warzone-2026-11-03-v2.png" width="1672" height="941" loading="lazy" decoding="async" alt="Дворы — иллюстрация">
+          <img class="reference" src="reference-warzone-2026-11-03.jpg" loading="lazy" decoding="async" alt="Дворы — снимок из игры" hidden>
+          <span class="view-badge">Иллюстрация</span><span class="expand" aria-hidden="true">↗</span>
+        </button>
+        <div class="card-body"><div class="title-row"><h2>Дворы</h2><span class="number">30</span></div>
+          <div class="card-controls"><div class="segmented" role="group" aria-label="Вид: Дворы"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><a class="source-link" href="release-art-root-v2.json" title="Промпт и референсы: Дворы">Промпт ↗</a></div>
+        </div>
+      </article>
+  </div>
+  <p class="empty" id="empty" hidden>Локаций с таким названием нет. Попробуйте другой запрос.</p>
+  <footer><p>Локальная галерея для проверки иллюстраций. Все изображения и данные находятся рядом с этим файлом; подключение к интернету не требуется.</p><div class="footer-links"><a href="release-art-final-manifest.json">Все 30 файлов и исходники</a><a href="release-art-group-a.json">Промпты · группа A</a><a href="release-art-group-b.json">Промпты · группа B</a><a href="release-art-group-c.json">Промпты · группа C</a><a href="release-art-root-v2.json">Промпты · Гетто, Дворы, база банды</a></div></footer>
+</main>
+<dialog id="viewer" aria-labelledby="viewer-title">
+  <div class="viewer-head"><div><h2 id="viewer-title"></h2><p id="viewer-meta" class="viewer-meta"></p></div><button class="close" id="close-viewer" type="button" aria-label="Закрыть просмотр">×</button></div>
+  <img id="viewer-image" class="viewer-image" alt="">
+  <div class="viewer-foot"><div class="navigation"><button id="previous" type="button" aria-label="Предыдущая локация">←</button><button id="next" type="button" aria-label="Следующая локация">→</button></div><div id="viewer-modes" class="segmented" role="group" aria-label="Вид в просмотре"><button type="button" data-mode="reference" aria-pressed="false">В игре</button><button type="button" data-mode="art" aria-pressed="true">Иллюстрация</button></div><div class="viewer-links"><a id="open-original" href="">Открыть файл ↗</a><a id="open-prompt" href="">Промпт и референсы ↗</a></div></div>
+</dialog>
+<script id="gallery-data" type="application/json">
+[
+  {
+    "id": "prison",
+    "nameRu": "Начальная локация",
+    "illustration": "illustration-prison-2026-11-03.png",
+    "reference": "topdown-prison.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 2907338
+  },
+  {
+    "id": "quarry",
+    "nameRu": "Каменоломня",
+    "illustration": "illustration-quarry-2026-11-03.png",
+    "reference": "topdown-quarry.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 3031341
+  },
+  {
+    "id": "mountain_foot",
+    "nameRu": "Подножье горы",
+    "illustration": "illustration-mountain_foot-2026-11-03.png",
+    "reference": "topdown-mountain_foot.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2724905
+  },
+  {
+    "id": "underworld",
+    "nameRu": "Преисподняя",
+    "illustration": "illustration-underworld-2026-11-03.png",
+    "reference": "topdown-underworld.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 2608647
+  },
+  {
+    "id": "pyramid",
+    "nameRu": "Пирамида",
+    "illustration": "illustration-pyramid-2026-11-03.png",
+    "reference": "topdown-pyramid.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 2746710
+  },
+  {
+    "id": "royal_garden",
+    "nameRu": "Королевский сад",
+    "illustration": "illustration-royal_garden-2026-11-03.png",
+    "reference": "topdown-royal_garden.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 2979850
+  },
+  {
+    "id": "sunken_lighthouse",
+    "nameRu": "Затопленный маяк",
+    "illustration": "illustration-sunken_lighthouse-2026-11-03.png",
+    "reference": "topdown-sunken_lighthouse.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1731,
+    "height": 909,
+    "bytes": 2639523
+  },
+  {
+    "id": "end_castle",
+    "nameRu": "Пустотная крепость",
+    "illustration": "illustration-end_castle-2026-11-03.png",
+    "reference": "topdown-end_castle.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2581843
+  },
+  {
+    "id": "spider_lair",
+    "nameRu": "Паучье логово",
+    "illustration": "illustration-spider_lair-2026-11-03.png",
+    "reference": "topdown-spider_lair.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2598870
+  },
+  {
+    "id": "snowy_hand",
+    "nameRu": "Снежная длань",
+    "illustration": "illustration-snowy_hand-2026-11-03.png",
+    "reference": "topdown-snowy_hand.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2339856
+  },
+  {
+    "id": "market",
+    "nameRu": "Рынок",
+    "illustration": "illustration-market-2026-11-03.png",
+    "reference": "topdown-market.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2941781
+  },
+  {
+    "id": "leprechaun_valley",
+    "nameRu": "Лепреконовая долина",
+    "illustration": "illustration-leprechaun_valley-2026-11-03.png",
+    "reference": "topdown-leprechaun_valley.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2931252
+  },
+  {
+    "id": "castle",
+    "nameRu": "Замок",
+    "illustration": "illustration-castle-2026-11-03.png",
+    "reference": "topdown-castle.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2741191
+  },
+  {
+    "id": "inside_out",
+    "nameRu": "Изнанка",
+    "illustration": "illustration-inside_out-2026-11-03.png",
+    "reference": "topdown-inside_out.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2604717
+  },
+  {
+    "id": "kyoto",
+    "nameRu": "Киото",
+    "illustration": "illustration-kyoto-2026-11-03.png",
+    "reference": "topdown-kyoto.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 3153394
+  },
+  {
+    "id": "farm",
+    "nameRu": "Ферма",
+    "illustration": "illustration-farm-2026-11-03.png",
+    "reference": "topdown-farm.png",
+    "promptManifest": "release-art-group-b.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 3201813
+  },
+  {
+    "id": "barn",
+    "nameRu": "Амбар",
+    "illustration": "illustration-barn-2026-11-03.png",
+    "reference": "topdown-barn.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 2257655
+  },
+  {
+    "id": "edge_gate",
+    "nameRu": "Врата края",
+    "illustration": "illustration-edge_gate-2026-11-03.png",
+    "reference": "topdown-edge_gate.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2048330
+  },
+  {
+    "id": "tree",
+    "nameRu": "Древо",
+    "illustration": "illustration-tree-2026-11-03.png",
+    "reference": "topdown-tree.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 1960620
+  },
+  {
+    "id": "church",
+    "nameRu": "Церковь",
+    "illustration": "illustration-church-2026-11-03.png",
+    "reference": "topdown-church.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2279316
+  },
+  {
+    "id": "purgatory",
+    "nameRu": "Чистилище",
+    "illustration": "illustration-purgatory-2026-11-03.png",
+    "reference": "topdown-purgatory.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 1984913
+  },
+  {
+    "id": "eden",
+    "nameRu": "Эдем",
+    "illustration": "illustration-eden-2026-11-03.png",
+    "reference": "topdown-eden.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2438779
+  },
+  {
+    "id": "cherubim",
+    "nameRu": "Херувимы",
+    "illustration": "illustration-cherubim-2026-11-03.png",
+    "reference": "topdown-cherubim.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2180316
+  },
+  {
+    "id": "gate",
+    "nameRu": "Врата",
+    "illustration": "illustration-gate-2026-11-03.png",
+    "reference": "topdown-gate.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2411330
+  },
+  {
+    "id": "paradise",
+    "nameRu": "Рай",
+    "illustration": "illustration-paradise-2026-11-03.png",
+    "reference": "topdown-paradise.png",
+    "promptManifest": "release-art-group-c.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2488575
+  },
+  {
+    "id": "basement",
+    "nameRu": "Подвал",
+    "illustration": "illustration-basement-2026-11-03.png",
+    "reference": "topdown-basement.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1730,
+    "height": 909,
+    "bytes": 3170196
+  },
+  {
+    "id": "fraction_base",
+    "nameRu": "База фракций",
+    "illustration": "illustration-fraction_base-2026-11-03.png",
+    "reference": "topdown-fraction_base.png",
+    "promptManifest": "release-art-group-a.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 3071381
+  },
+  {
+    "id": "gang_base",
+    "nameRu": "База банды",
+    "illustration": "illustration-gang_base-2026-11-03-v2.png",
+    "reference": "reference-gang_base-2026-11-03.jpg",
+    "promptManifest": "release-art-root-v2.json",
+    "width": 2170,
+    "height": 725,
+    "bytes": 1990144
+  },
+  {
+    "id": "ghetto",
+    "nameRu": "Гетто",
+    "illustration": "illustration-ghetto-2026-11-03-v2.png",
+    "reference": "reference-ghetto-2026-11-03.jpg",
+    "promptManifest": "release-art-root-v2.json",
+    "width": 2170,
+    "height": 725,
+    "bytes": 2669677
+  },
+  {
+    "id": "warzone",
+    "nameRu": "Дворы",
+    "illustration": "illustration-warzone-2026-11-03-v2.png",
+    "reference": "reference-warzone-2026-11-03.jpg",
+    "promptManifest": "release-art-root-v2.json",
+    "width": 1672,
+    "height": 941,
+    "bytes": 2362129
+  }
+]
+</script>
+<script>
+"use strict";
+const assets = JSON.parse(document.getElementById("gallery-data").textContent);
+const cards = Array.from(document.querySelectorAll(".card"));
+const dialog = document.getElementById("viewer");
+const allModes = document.getElementById("all-modes");
+let viewerIndex = 0;
+let viewerMode = "art";
+const modeLabel = mode => mode === "art" ? "Иллюстрация" : "В игре";
+const pressMode = (group,mode) => group.querySelectorAll("[data-mode]").forEach(button => button.setAttribute("aria-pressed",String(button.dataset.mode === mode)));
+function setCardMode(card,mode) {
+  card.dataset.mode = mode;
+  card.querySelector(".art").hidden = mode !== "art";
+  card.querySelector(".reference").hidden = mode !== "reference";
+  card.querySelector(".view-badge").textContent = modeLabel(mode);
+  pressMode(card.querySelector(".segmented"),mode);
+}
+function refreshAllModes() {
+  const modes = new Set(cards.map(card => card.dataset.mode || "art"));
+  pressMode(allModes,modes.size === 1 ? modes.values().next().value : "");
+}
+document.getElementById("gallery").addEventListener("click",event => {
+  const modeButton = event.target.closest("[data-mode]");
+  if (modeButton && modeButton.tagName === "BUTTON") {
+    setCardMode(modeButton.closest(".card"),modeButton.dataset.mode);
+    refreshAllModes();
+    return;
+  }
+  const preview = event.target.closest("[data-open]");
+  if (preview) openViewer(Number(preview.dataset.open),preview.closest(".card").dataset.mode || "art");
+});
+allModes.addEventListener("click",event => {
+  const button = event.target.closest("button[data-mode]");
+  if (!button) return;
+  cards.forEach(card => setCardMode(card,button.dataset.mode));
+  refreshAllModes();
+});
+document.getElementById("search").addEventListener("input",event => {
+  const query = event.target.value.trim().toLocaleLowerCase("ru");
+  let count = 0;
+  cards.forEach(card => { card.hidden = !card.dataset.search.includes(query); if (!card.hidden) count++; });
+  document.getElementById("result-count").textContent = "Показано " + count + " из " + assets.length;
+  document.getElementById("empty").hidden = count !== 0;
+});
+function renderViewer() {
+  const asset = assets[viewerIndex];
+  const file = viewerMode === "art" ? asset.illustration : asset.reference;
+  document.getElementById("viewer-title").textContent = asset.nameRu;
+  document.getElementById("viewer-meta").textContent = (viewerIndex + 1) + " / " + assets.length + " · " + modeLabel(viewerMode);
+  const image = document.getElementById("viewer-image");
+  image.src = file;
+  image.alt = asset.nameRu + " — " + modeLabel(viewerMode).toLocaleLowerCase("ru");
+  document.getElementById("open-original").href = file;
+  document.getElementById("open-prompt").href = asset.promptManifest;
+  pressMode(document.getElementById("viewer-modes"),viewerMode);
+}
+function openViewer(index,mode) {
+  viewerIndex = index;
+  viewerMode = mode;
+  renderViewer();
+  if (!dialog.open) dialog.showModal();
+}
+function stepViewer(direction) {
+  const visible = cards.filter(card => !card.hidden).map(card => Number(card.dataset.index));
+  if (!visible.length) return;
+  const position = visible.indexOf(viewerIndex);
+  viewerIndex = visible[(position + direction + visible.length) % visible.length];
+  renderViewer();
+}
+document.getElementById("viewer-modes").addEventListener("click",event => {
+  const button = event.target.closest("button[data-mode]");
+  if (button) { viewerMode = button.dataset.mode; renderViewer(); }
+});
+document.getElementById("close-viewer").addEventListener("click",() => dialog.close());
+document.getElementById("previous").addEventListener("click",() => stepViewer(-1));
+document.getElementById("next").addEventListener("click",() => stepViewer(1));
+dialog.addEventListener("click",event => { if (event.target === dialog) { const box = dialog.getBoundingClientRect(); if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.close(); } });
+dialog.addEventListener("keydown",event => {
+  if (event.key === "ArrowLeft") { event.preventDefault(); stepViewer(-1); }
+  if (event.key === "ArrowRight") { event.preventDefault(); stepViewer(1); }
+});
+</script>
+</body>
+</html>

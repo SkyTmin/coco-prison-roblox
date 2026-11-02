@@ -1,0 +1,119 @@
+[
+  {
+    "id": "barn",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-barn-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-barn.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case: style-transfer. Faithfully polish Image1 into a 16:9 voxel game location illustration, 'Barn'. IMAGE1 IS THE GEOMETRY AND CAMERA MASTER: copy its same elevated oblique camera, screen-space positions, silhouette, scale and crop of every major object. Keep the single deep red, black-framed barn with stepped dark roof at the upper center-left, the HUGE uninterrupted flat orange/golden block mining rectangle occupying the foreground/right with its simple dark border, the narrow dark-red paths and the same sparse chunky orange autumn trees at their existing positions. Keep the actual fence and tower fragments only where visible. The mining square must remain much larger than the barn, as in Image1. Images2/3 provide ONLY polished voxel surface quality and restrained soft lighting, never their architecture, vegetation or layout. Add readable pixel-textured materials and gentle shading, but do not redesign anything or decorate the scene. Do not add extra trees, dense forest, flowers, crates, hay stacks, porch, new windows, fence rails around the mine, chimneys or buildings. Preserve the source palette and environment; no cinematic sunset. No people, lettering, UI, logos or bloom. Aim for an immediately recognizable, almost one-to-one illustrated rendering of the actual screenshot, rather than a new imagined barn.",
+    "review": "PASS visual reference comparison: same camera, huge foreground-right mine, red barn upper center-left, sparse autumn trees and visible tower fragments; no new landmark. Surface detail improved; small border rail detail retained.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "edge_gate",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-edge_gate-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-edge_gate.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case: style-transfer. Produce a faithful landscape voxel illustration of the actual Roblox level 'Edge Gate' from Image1. Image1 is the exact geometry, camera and layout master: retain its elevated three-quarter framing, the same huge flat purple mining rectangle scattered with small black blocks, low pale lilac crenellated railing along its four edges, pale yellow end-stone platform around it, black starry void backdrop, and the same small purple/black structures and luminous magenta crystals around the perimeter. Preserve the small back-center upright gateway and the low dark rectangular object at the front-right in their original locations and sizes. Keep all major objects at the same screen-space positions, preserve the mine footprint and black-block distribution. Images2/3 are only quality/style references for crisp pixel-textured block surfaces and clean soft shading; none of their city architecture, trees, lamps or colors should be copied. Improve clarity and reduce fuzzy neon glare while retaining restrained magenta light from the existing crystals. Do not add landmarks, trees, houses, bridges, pillars, landscaping or new decoration. No people, lettering, logos or UI. This is a near one-to-one polished rendering of the screenshot, not a redesigned fantasy temple. Prefer 16:9 without cropping away any original map content.",
+    "review": "PASS: preserved purple/black mine, low pale rail, outer yellow platform, crystal and small structure locations, upright rear gateway and front-right low dark object. Light bloom reduced without changing theme.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "tree",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-tree-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-tree.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case: style-transfer. Faithfully polish Image1, the actual Roblox 'Tree' location screenshot, into a landscape voxel illustration. Image1 controls the exact camera, composition, layout, size and color of everything. Preserve the three main floating grassy islands at the same screen positions: left foreground island contains the large perfectly flat pale-white square mine edged by tan wooden railing; central slightly rear island holds one enormous straight brown tree with dark green cubic crown and large patches of pink blossoms; right island has the small wooden garden structure and blue pool/path details. Keep the exact connecting narrow wooden bridges, island silhouettes, hanging dark stone/soil undersides, small pink/green trees and scattered tiny floating fragments against a pale cyan sky with flat block clouds. The giant tree must keep its source canopy shape and scale, not turn into a new fantasy treehouse. Images2/3 only show polished crisp voxel textures and gentle lighting quality; do not borrow their city objects. Do not add islands, bridges, houses, waterfalls, mushrooms, roots, railings or lush new vegetation. Improve texture readability and soft shadows, retaining source palette and geometry. No people, lettering, UI, logos, bloom or glaring lights. Near one-to-one illustrated screenshot, not a redesigned environment. Prefer16:9 while keeping all source map content visible.",
+    "review": "PASS visual comparison: original three-island layout, white mine left, giant pink/green canopy tree center, garden island right and connecting bridges preserved; no new major structure.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "church",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-church-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-church.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case: style-transfer. Faithfully polish Image1, the actual Roblox Church location screenshot, into a landscape 16:9 voxel illustration. Image1 is the strict authority for exact camera, composition, all geometry, object placement, scale and palette. Keep the tall white block-built church centered toward the back, main facade with colored circular window, dark pitched brown roof and small spires, tall narrow bell tower on its RIGHT with golden bell and dark pointed top cropped at image top exactly as source. Keep its front arch door and pale checkerboard entrance, small white/gray posts and lamps, rectangular blue-gray perfectly FLAT mine filling lower-left foreground and cropped by bottom/left edge, low fence, gray perimeter paths, sparse tall dark green trees and the small side blue water channels. Keep the cyan sky, tiny floating islands and flat white block clouds, keeping horizon and camera angle. DO NOT invent more buildings, gardens, decorations, towers, stained glass, walls, bridges or people. Do not resize or redesign the church or mine. Images2/3 supply crisp pixel/voxel texture rendering and soft readable lighting only, not their layout or objects. Improve material readability while preserving all source surfaces and their relative colors. No text/UI/logos, no glow/bloom or white glare. Near-one-to-one illustrated screenshot fidelity takes precedence over decorative beauty. Keep all original content visible; only minimally extend sky if16:9 needs it.",
+    "review": "PASS: original facade, circular window, tall right-hand bell tower, gray foreground mine, side cemetery paths, trees and water channels retained. No additional building; camera and cropped tower top preserved.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "purgatory",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-purgatory-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-purgatory.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case style-transfer. Image1 is the actual Roblox Purgatory map screenshot; create a faithful polished voxel illustration of exactly that screenshot, no redesign. Camera angle, perspective, screen-space placement, sizes and all map geometry MUST follow image1. Pale warm golden stepped plaza with very large perfectly flat golden square mine in the lower foreground extending beyond bottom edge, thin dark fence around mine; central rising staircase/path behind mine climbs between two symmetrical terrace platforms toward a SMALL white winged monument with golden halo at top center. Preserve this exact winged monument shape, size and stairs. Narrow red-orange channels/surfaces along both sides; sparse slim dark green conifer-like trees; small golden capped pillars, white/red/dark upright markers and scattered black rectangular frames in the same numbers and places. Cyan softly warm sky background, map edges cropped exactly as source. Do not add temples, buildings, arches, statues, vegetation, lava fountains, bridges, decorations or characters; do not make mine textured gravel or change flat tan fill. Images2/3 are only visual quality/style references for crisp voxel pixel textures and soft light, not designs to borrow. All source colors and relative lightness should remain recognizable; improve visibility of surfaces, no bloom or glaring whites, no strong glowing lava. No text, UI, logos or borders. The result must be one-to-one recognizable as original gameplay layout. Landscape16:9 only if achievable without removing map content.",
+    "review": "PASS: preserved foreground tan mine, black fence, stepped terrace, small wing-and-halo monument, red side surfaces, dark rectangular frames and sparse trees; original camera and main proportions retained.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "eden",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-eden-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-eden.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case style-transfer. Faithfully polish the ACTUAL Roblox Eden map screenshot in image1 into a crisp voxel illustration, maintaining EXACT source layout, camera, perspective, geometry, screen-space proportions and all object counts. Image1 is authoritative, references2/3 only supply pixel texture/detail and gentle lighting quality, never their city layout. Keep the very large flat TAN square mine lower-left foreground, cropped at bottom and left, same dark perimeter fence. Behind the mine is lush garden ground with narrow winding BLUE river, small pink paths and crossing bridges, central enormous PINK blossom tree canopy with sparse dark green patches and dangling vine strands on thick brown trunk; keep source canopy silhouette and height. Preserve the large reddish brown white-spotted mushroom left of mine, the next mushroom behind it and the right-center foreground mushroom, all other tiny mushrooms, small pink canopy trees, rows of colored planted blocks at bottom/right, sparse dark green trees and paths exactly where they are in image1. This is an existing map, NOT opportunity to redesign fantasy garden: no new islands, cottages, gazebos, waterfalls, mushrooms, flowers, bridges, roots or decorations. The river, bridges and crops must have the source paths/counts. Keep cyan sky and ground extent; improve legibility and texture quality, soft non-glaring light, no bloom. No people, text, UI, logos or borders. Landscape16:9 without cutting original content, preserve near-one-to-one screenshot composition.",
+    "review": "PASS: foreground tan mine, giant pink tree, mushroom placements, blue river route, pink bridges and planted rows match screenshot composition; no new major landmark.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "cherubim",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-cherubim-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-cherubim.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case style-transfer. Create a faithful illustrated version of image1, the actual Roblox Cherubim map screenshot. Every shape, size, position, camera angle and major block color must follow image1 exactly; this is a polish, not a redesign. Main scene: gray-and-gold checkerboard celestial platform, large flat pale-gray rectangular mine in lower center/left and cropped by lower edge, modest white-and-gold domed temple behind it upper center. The temple has a round GOLD dome, slim white walls with gold trim, centered gold decorated doorway, and a small attached square white tower with peaked gold cap on its right. Preserve the gigantic intersecting GOLD orbital ring beams sweeping across the image diagonally and curling around its edges exactly as original; keep their source thickness, curve geometry, black square markers, overlapping order, and cropped endpoints. Keep the small slim gold/gray pillars, scattered black little markers/lamps, small right-hand bridge visible at edge and cyan empty sky. Do not add angel statues, fancy ornament, buildings, floating islands, trees, water, people, extra rings, extra towers or spires. The screenshot must remain recognizable one-to-one at the same perspective. Image2/3 are only rendering quality references for crisp polished voxel pixel surfaces and restrained soft lighting. Keep gold bright but solid readable material; no bloom, glare, sparks, magic particles or blinding highlights. No UI/text/logos/border. Landscape16:9 if possible without cropping original contents.",
+    "review": "PASS: same gold orbital ring trajectories and overlap, white/gold dome behind gray mine, checkerboard platform and right-side bridge. Structure count and relative scale preserved.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "gate",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-gate-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-gate.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case style-transfer. Faithfully polish image1, an actual Roblox Gate location screenshot, into a crisp voxel pixel-textured illustration. Keep exact source perspective, camera, screen-space arrangement, scale and object shapes. Main structure is the small gray-white castle gateway upper center, horizontal castle wall with dark green horizontal stripes, square gold-capped turrets at both ends, stepped gray buttresses around a central pointed gold-trimmed doorway. Preserve the proportions and all visible towers. The center doorway is a plain white opening and thin vertical white beam continues upward offscreen at the same location; make those softly luminous without bloom/glare spilling on neighboring blocks. Keep gold central approach ramp from lower-left foreground to gateway, parallel stepped gray path, rows of little gold-capped posts and red/blue decorations; small bright BLUE rectangular waterfall/pool to right of ramp, tall slim dark green trees on both sides, tan platform, small black-topped lamps, same front border crop. No extra palace, building, giant stairs, gardens, clouds over land, characters, statues, trees, fences, bridges or ornaments. Image2/3 only supply polish of block textures and soft legible lighting, never new environment content. All source locations and color grouping must be preserved one-to-one. No text/UI/logos/frame, no harsh gold reflection or overexposure. Landscape16:9 preserving original composition.",
+    "review": "PASS: same castle gate facade, side gold-topped turrets, gold/gray approach, right-hand blue cascade and slim trees. Portal beam kept but glare removed from neighboring surfaces.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  },
+  {
+    "id": "paradise",
+    "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-paradise-2026-11-03.png",
+    "references": [
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-paradise.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+      "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+    ],
+    "prompt": "Use case style-transfer. Recreate image1, the actual Roblox Paradise map screenshot, as a faithful polished voxel illustration with EXACT source composition, camera, geometry, relative sizes, positions, white-gray-yellow palette and cropping. Main scene is a large gray/white checkerboard platform in cyan sky. Central circular stepped white-and-gold dais surrounds a tall straight white beam at image center continuing beyond top edge, held by slim white-and-gold spires at back; the source beam is the only luminous area, no glare on architecture. Around dais are the SAME angular white winglike ornamental structures on tall block pillars and radiating short stairways at the same positions. The lower LEFT foreground shows only the cropped corner of a large flat RED-and-white speckled square mine with gray low rim and gold corner blocks; keep its size and location. Preserve the evenly scattered WHITE block trees, red/green tiny planted areas beneath those trees, small black lamp posts with gold/white tops, pale yellow path strips, source empty sky and tiny floating white trees/cloud objects. Do not add a giant temple, walls, new circles, more trees or pillars, statues, bridge, characters, gardens or extra celestial structures. These are chunky voxel ornaments as shown, not detailed new angels. Images2/3 are only pixel-texture/lighting polish references, not scene content. Make all bright surfaces readable with subtle gray edges and soft shadows, no bloom or blinding reflections, no particles. No text/UI/logos/frame. Near one-to-one illustrated screenshot, landscape16:9 preserving source map content.",
+    "review": "PASS: central beam and stepped circular dais, angular white wing ornaments, checkerboard platform, white trees and cropped red mine all retain source layout. No new major landmark; bright architecture remains readable.",
+    "generation_tool": "image_gen__imagegen",
+    "review_scope": "Visual comparison against actual topdown screenshot: camera, major geometry, map palette and landmarks. Minor texture/detail interpretation is inherent to generated artwork."
+  }
+]

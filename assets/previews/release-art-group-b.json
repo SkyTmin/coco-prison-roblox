@@ -1,0 +1,124 @@
+{
+  "tool": "built-in image_gen__imagegen",
+  "style": "stylized-concept",
+  "assets": [
+    {
+      "id": "end_castle",
+      "prompt": "Use case: stylized-concept. Create a 16:9 landscape location-card illustration for a voxel prison adventure game. IMAGE 1 is the factual location reference: preserve its landmarks, connected-island arrangement, materials and palette. IMAGES 2 and 3 are STYLE REFERENCES ONLY: borrow polished crisp voxel geometry, pixel textures, clear elevated three-quarter composition and softly modeled light; do not borrow any city buildings, roads, apartments or playgrounds. Subject: Void Fortress, suspended pale yellow-green end-stone islands in a nearly black star-speckled void. A large rectangular mine with a crisp purple purpur border and patterned yellow-green/purple blocks dominates the foreground main island; glowing short end-rod lamps line paths. Left island has the tall tapering stepped purple pagoda tower; back island has a small circular arena with dark pillars and a thin purple ring overhead; right island has clusters of tall irregular dark obsidian-like spires with violet accents. Narrow purple bridges with pale railings connect the islands. Frame closely from above at three-quarter angle, fill the frame with these actual islands and readable mine surfaces, retaining some black negative space between islands to show their floating character. Rich but restrained violet and warm pale stone, soft ambient fantasy light, sharp edges, no bloom, no haze covering details. No characters, enemies, UI, writing, logos or watermarks. No urban architecture. New illustration, not a screenshot with added overlays.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-end_castle.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-end_castle-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-1fc5fbf2-8a7e-43e4-bd2f-7e3af4977643.png",
+      "visualReview": "PASS: main patterned mine, pale floating islands, purple bridges/tower and ring arena match factual reference; no urban architecture or text."
+    },
+    {
+      "id": "spider_lair",
+      "prompt": "Use case: stylized-concept. Make a polished 16:9 landscape location-card illustration of Spider Lair for a voxel adventure game. Reference 1 is FACTUAL: preserve its purple-gray stone cavern, square pale-white mining floor enclosed by dark brown timber, clustered stone pillars, abundant delicate white cobwebs between pillars, dark timber mine gantries and side walkways, hanging green vines with tiny yellow-green accents, and rectangular cool-white ceiling lamps. References 2 and 3 are STYLE ONLY: crisp voxel forms and individual pixel textures, coherent elevated three-quarter camera, soft dimensional light and attractive game-card clarity. Do NOT import their apartment blocks, roads, playgrounds or outdoor city environment. Create an elevated three-quarter cutaway view into the actual cavern, close composition filling the frame, the large rectangular white mine clearly readable in the foreground, cave walls and dense web-covered pillars surrounding it, timber structures visible left, right and at the back. Keep it recognizably an enclosed underground purple cavern, not a castle or forest. Refine the reference's harsh screenshot lighting into soft lavender ambient light with restrained white highlights; no bloom or fog hiding detail. Pixel-textured stone, white wool-like mine blocks and dark wood; block geometry stays sharp. No text (remove the reference's yellow label), UI, logos, watermark, player characters, spiders, or other creatures.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-spider_lair.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-spider_lair-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-89c77f08-cf8a-4836-9324-13b818f4ca96.png",
+      "visualReview": "PASS: purple enclosed cavern, white web-marked mine, dark timber gantries, stone pillars, hanging vines and lamps preserved; labels and characters absent."
+    },
+    {
+      "id": "snowy_hand",
+      "prompt": "Use case: style-transfer. Produce a 16:9 landscape illustration of this EXACT existing voxel game location, Snowy Hand. IMAGE 1 is the controlling factual screenshot: preserve its exact camera angle, perspective, composition, terrain silhouette, object locations, relative scale, mine footprint and block pattern, building shapes and counts. This is a faithful illustration of the real map, NOT a redesign or imaginative variation. IMAGES 2/3 control ONLY rendering quality: crisp pixel-textured voxel surfaces, clean edge definition and soft modeled illumination. Never copy their urban subject matter. In image 1, the large rectangular two-tone blue ice mine occupies the lower-left foreground and is cut off by the bottom edge; maintain this exact framing and its dark rim. Keep the snowy island and paths immediately behind it, thin evenly placed black lamp posts, existing snow-covered conifers, the raised central icy pavilion/arena with its existing dark supports and warm orange central feature, the blue ice formations behind it, and the tiny warm-lit timber structures at the far left. Keep the broad surrounding frozen blue sea, scattered pale ice patches and jagged outer ice silhouette under a black starry polar-night sky. Preserve actual tree/structure counts and positions as closely as visible. Do not add aurora, mountains, buildings, decorations, lakes, new terrain, characters or enemies. Same cool blue-white palette, softer clear lighting but no bloom, glare or hazy fog. Remove the yellow mine text label only; no text/UI/logos/watermarks. Preserve the actual location's layout even if it is less symmetrical than a postcard composition.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-snowy_hand.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-snowy_hand-2026-11-03.png",
+      "revisions": [
+        {
+          "prompt": "Edit IMAGE 1 only: remove the small brown boat from the frozen sea at the back-right (near the upper-right shoreline, just behind the snowy trees). Replace only that boat with the same unobstructed blue frozen-sea surface and pixel-textured ice patches as its surroundings. The factual screenshot IMAGE 2 does not contain this boat. Preserve every other pixel region as closely as possible: camera, crop, sky, mine, island, trees, buildings, lanterns, pavilion and colors. No additional objects or text. Keep the same 16:9 dimensions and illustration quality. IMAGE 2 is factual correction reference, not a style-change request.",
+          "references": [
+            "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-86f7e916-4bee-4278-ba7c-41e2ac23c693.png",
+            "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-snowy_hand.png"
+          ],
+          "reason": "Remove unreferenced boat introduced by first generation."
+        }
+      ],
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-dc991080-dfc6-49c8-aa03-518f4700a5d8.png",
+      "visualReview": "PASS after targeted revision: cropped foreground ice mine, snow island, pavilion, conifers, distant huts and frozen sea retain screenshot composition; invented boat removed."
+    },
+    {
+      "id": "market",
+      "prompt": "Use case: style-transfer. Make a faithful 16:9 landscape illustration of the REAL Market voxel location in IMAGE 1. Preserve image 1's exact high overhead tilted camera, tight crop, rectangular mine footprint, all relative object positions, building shapes and counts, pathways and palette. It must look like the same map, not a new market design. IMAGES 2 and 3 are STYLE-QUALITY REFERENCES ONLY: borrow crisp pixel textures, sharp voxel geometry and soft appealing light, never their urban architecture or composition. The main subject is the HUGE uniform RED WOOL square mine occupying the left-center and foreground, with a dark gray block border, gray cobblestone promenade and a low fence. Keep its surface solid rich red with subtle wool pixel texture, NOT red ore, lava, water or a pattern of other blocks. Preserve the dense market stalls around its edges: the left strip of dark/red wooden canopies; right-side rows of red-white, yellow-white and green-white striped awnings, the small red-roof shop in the upper-right, blocky leafy trees and existing crates/goods exactly where visible. Keep the far and near stalls cropped by the same image boundaries; do not zoom out or reveal a new skyline. No added trees, buildings, streets, terrain, canals or decor. Brighten enough for readable wood, wool and stone textures, soft natural light, no bloom/glare. Remove any existing labels and tiny characters; no people, UI, writing, logos or watermark. Image 1's spatial facts always override the style references.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-market.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-market-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-c15ad239-59c6-40d6-8644-6a464e47a396.png",
+      "visualReview": "PASS: high tilted overhead crop, single red-wool mine, border/fence, striped stall rows, upper-right red roof and two right-side trees track factual screenshot closely."
+    },
+    {
+      "id": "leprechaun_valley",
+      "prompt": "Use case: style-transfer. Create a polished 16:9 landscape illustration of the EXACT Leprechaun Valley voxel map in IMAGE 1. This factual screenshot is the controlling reference: preserve camera, perspective, crop, terrain, building shapes/counts, relative object positions, mine footprint and actual block colors. Do not redesign or add anything. IMAGES 2 and 3 are style references ONLY for crisp voxel geometry, pixel textures, soft attractive lighting and visual clarity. Never import their city buildings/roads. Keep the huge uniformly golden-YELLOW rectangular wool mine in the lower foreground, cropped by the bottom image edge; its dark gray promenade, dark low fence and small four-color block sample remain in their original places. Keep the central branching gray stone path. At upper-left retain the same steep multicolored rainbow arch ending at the black pot with bright gold blocks, surrounding stepped green hills, oversized red-and-white mushroom caps and existing block trees. At upper-right retain the same compact gray-green turreted castle/round ruin on its platform and its thin blue moat/streams with bridges. Do not move the castle, rainbow or mine or make them larger hero objects. Preserve the screenshot's small blue water channels, shrubs, existing lamps and scattered items exactly as seen; no new buildings, trees, flowers, bridges, cliffs or ponds. No skyline or expanded view. Clean pixel-textured green foliage, yellow wool, gray stone and bright rainbow blocks under soft daylight, no bloom or haze. Remove only any people and UI/text labels; no characters, logos or text.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-leprechaun_valley.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-leprechaun_valley-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-f467f096-dc0a-477c-8541-49864480e890.png",
+      "visualReview": "PASS: same tight overhead composition with cropped yellow-wool mine, upper-left rainbow/pot/mushrooms and upper-right gray-green turret platform/moat; path and stream positions preserved."
+    },
+    {
+      "id": "castle",
+      "prompt": "Use case: style-transfer. Faithfully illustrate the EXACT Castle voxel game map in IMAGE 1, 16:9 landscape. Image 1 controls the camera, crop, object shapes and counts, spatial arrangement, mine footprint and materials. Do not redesign, zoom out or recompose. Images 2 and 3 are STYLE ONLY for polished crisp voxel/pixel textures and soft clear lighting; do not import their city scenery. Preserve the screenshot's large smooth white QUARTZ-BLOCK mine filling the cropped lower foreground, pale block rim, low white fence, black vertical foreground post with its small plain dark flag, rows of slender dark lamp posts along the right-side walkway, and the white/gray ground with occasional dark tiles. In the upper-right keep the same cluster of tall white square crenellated towers with black horizontal bands and narrow dark windows, standing on the same black-and-white checkerboard terrace. Keep the white and black castle wall/building silhouettes at the back, the existing deep-green block-canopy trees to both sides and the same small gray statue-like block at left. These white materials are pale stone/quartz, NOT snow: do not add snow, ice, wintry scenery or mountains. Maintain exact relative sizes and positions; do not invent extra towers, flags, trees, paths, buildings or decor. Render the actual simple block geometry cleanly with attractive restrained shading and sharp pixel texture. No characters, writing, UI, logos, watermarks, bloom or fog. Preserve factual composition over cinematic invention.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-castle.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-castle-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-0fe70d75-21f8-4bac-b10a-82b85cf4fb52.png",
+      "visualReview": "PASS: same cropped white-quartz foreground mine, black flag/post, green block trees, right lamp promenade, checkerboard tower terrace and rear black-white walls; no winter redesign."
+    },
+    {
+      "id": "inside_out",
+      "prompt": "Use case: style-transfer. Re-render the EXACT Inside Out voxel game location in IMAGE 1 as a faithful polished 16:9 landscape illustration. Image 1 controls the exact camera, perspective, crop, building shapes/counts/positions, road layout, mine footprint, colors and unusual floating geometry. Do not redesign the town. Images 2 and 3 are rendering-quality references only: crisp individual pixel textures, sharp voxel edges, clean subtle shading. Never import their apartment blocks or courtyard layout. Preserve the large rectangular dark-green DARK OAK LEAF mine at the center-left, surrounded by its dark retaining border and the same asphalt rectangle of streets with dashed yellow lines. Preserve the surrounding small white/cream timber houses with steep dark-red roofs and chimneys, the tall white chapel with its thin pointed steeple at the back-right, the existing yellow school bus beside it, the one orange/red car in the near-right street and the same scattered orange crates/red patches on the near sidewalk. Keep the reference's detached upside-down floating fragments of red-roof buildings in the upper-right sky: these are actual map landmarks, not an error to repair. Keep the foreground houses cropped at right/bottom and the exact pale dusty pink dusk sky. No new buildings, trees, decorations, roads or floating islands. Preserve the dark eerie red-brown mood while improving texture legibility; soft light, no bloom, no fog obscuring the map. No player characters, text (including bus lettering), UI, logos or watermarks.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-inside_out.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-inside_out-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-af2c5db0-f208-40a4-a458-160ebd63406a.png",
+      "visualReview": "PASS: dark leaf mine and surrounding street rectangle retained, same red-roof town/chapel/school-bus landmarks and cropped foreground houses; actual floating upper-right fragments preserved."
+    },
+    {
+      "id": "kyoto",
+      "prompt": "Use case: style-transfer. Faithfully illustrate the exact Kyoto voxel game scene from IMAGE 1 in 16:9 landscape. The factual screenshot dictates camera angle, perspective, tight crop, placement, relative scale, architecture shapes/counts, mine footprint and all materials. Do not redesign it. References 2 and 3 are ONLY rendering style: polished crisp voxel geometry, readable pixel textures and soft modeled light, never their urban buildings. Preserve the huge PINK WOOL mine with sparse pale cyan/white SEA LANTERN blocks at the left foreground, cropped by the left and bottom edges, its gray promenade and low dark fence. Preserve the tall red-and-black tiered-roof pagoda centered behind the mine, the elevated red-and-white shrine with its broad brown timber veranda at the upper-right, the THREE narrow blue waterfalls beneath that veranda, the small blue pond with sparse lily pads, and the long red curved footbridge crossing the pond at right. Keep the existing black-roof white lantern/building forms beside the mine near the foreground, the small yellow-roof pavilion just below the bridge and the pink blocky cherry-blossom trees around all edges exactly where visible. No added ponds, torii gates, buildings, trees, lanterns, gardens, mountains or sky; do not zoom out. Same rich red, dark roof, pink blossom and green foliage palette; soft clear daylight without bloom or haze. Remove any characters or text only. No UI, logos or watermark. The result must be immediately recognizable as this actual screenshot's layout.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-kyoto.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-kyoto-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-91d92513-a4f2-4f44-9a21-496cdb540c56.png",
+      "visualReview": "PASS: same pink/sea-lantern mine, central red pagoda, upper-right timber veranda and three waterfalls, red bridge, yellow-roof foreground pavilion and cherry trees; no extra torii/city elements."
+    },
+    {
+      "id": "farm",
+      "prompt": "Use case: style-transfer. Create a faithful polished 16:9 illustration of the exact Farm voxel location in IMAGE 1. Its camera angle, tight crop, scene layout, relative object positions, terrain heights, building shapes and counts, mine footprint and actual block types are mandatory. No redesign. IMAGES 2 and 3 only guide rendering quality: crisp voxel edges, detailed pixel textures, soft natural lighting. Do not borrow their buildings/roads or move toward a city. Keep the enormous rectangular FLAT MINING SURFACE in the center-right: a dense irregular mosaic of lime-green melon blocks, orange pumpkin blocks and occasional green wool blocks, with dark gray rim and low wooden fence. This is not a planted crop field, not grass, not water: preserve the screenshot's flat bright green-orange block mosaic. Preserve the wide brown dirt paths around it; gray stone stairs at the upper center; existing fenced wheat beds at lower-left and lower-right edges; the small dark-brown roof hut, blocky green tree and stacked golden hay bales in the lower-left; the left fenced pen with its small existing white block chicken-like environmental shapes; the red-and-white barn cropped at upper-right; and the circular timber/tree area partially visible upper-left. Preserve every structure's placement and do not add barns, windmills, towers, ponds, trees, new animals or decorations. No widened view or new skyline. Same warm earthy brown, green and golden-yellow palette, clear soft daylight, no bloom/haze. No people or player/NPC characters, UI, labels, writing, logos or watermark. Prioritize resemblance to the real screenshot over added artistic detail.",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-farm.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-farm-2026-11-03.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-d3d2-7f72-9552-6f42ab0c632b\\exec-a00a2a59-d15d-4500-9cdd-d0ef1bba1bb6.png",
+      "visualReview": "PASS: same green/orange mixed melon-pumpkin mine, dirt paths, left pen/wheat, lower-left hut/hay/tree, upper-right cropped red barn and rear circular tree platform; no added new landmark."
+    }
+  ]
+}

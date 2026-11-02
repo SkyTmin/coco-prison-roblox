@@ -1,0 +1,59 @@
+{
+  "tool": "built-in image_gen__imagegen",
+  "date": "2026-11-03",
+  "policy": "Strict factual camera/layout/object preservation; original style images are unchanged. Warzone permits camera-preserving zoom only. Soft matte gang window lighting replaces screenshot glare without architectural edits.",
+  "assets": [
+    {
+      "id": "ghetto",
+      "prompt": "Use case: style-transfer. Produce a faithful illustrated rendering of the actual game screenshot IMAGE 1. Image 1 is the absolute geometry/camera/layout/object-count authority, not loose inspiration. Image 2 is ONLY a rendering-style sample: use its crisp voxel geometry, fine pixel-textured materials, soft readable illumination and polished game-illustration finish. Do NOT borrow the second image's layout, objects, architectural redesign, vegetation, window design or decoration. Preserve every factual landmark's position, relative size and shape, visible building/room-object counts and original palette. No invented objects, cars, furniture, plants, ornament or scenery. No UI, text, labels, logos, watermarks, NPCs, players or creatures. Improve only clarity, surface rendering and gentle lighting. No bloom, glare, blown highlights or pitch-black unreadable geometry. The result must look like the same real map photographed from the same camera, not a newly designed level.\nExact location constraints: Keep the exact high oblique camera and neighborhood footprint from Image1: tall dark-red rectangular perimeter wall, exact grid of narrow dark asphalt streets with sparse short yellow lane markings, same uneven-height orange/red-brick and charcoal buildings, flat gray roofs, the same small brick chimneys and cylindrical dark roof tanks. Foreground building roofs are cropped at the frame edge as in the source. Preserve the black fenced basketball court near foreground-left-of-center at its source position/size, without adding court markings or equipment absent from the screenshot. Preserve the pale cyan daytime sky, rather than the dusk sky of Image2. A thin distant beacon may stay in its source position. Do not add parked cars, trees, benches, outdoor furniture, more windows or more streetlights. Maintain camera scale and building arrangement exactly; only increase image clarity and lightly soften illumination.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-ghetto-2026-11-03.jpg",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-ghetto-2026-11-03.jpg",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png"
+      ],
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03-v2.png",
+      "target": "assets/previews/illustration-ghetto-2026-11-03-v2.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-bc0447bd-ea45-458a-8206-c1f76dd3ddb1.png",
+      "visualReview": "PASS factual comparison: source camera and complete neighborhood arrangement retained, foreground roof cropping, perimeter wall, varying building heights/colors, roof tanks and court at source position; daytime cyan sky retained and no cars/trees/extra court décor.",
+      "width": 2170,
+      "height": 725,
+      "bytes": 2669677,
+      "sha256": "3c157edb92dd61b594464688cd7e826e1a3dfc83da3c1643baed2e550c5c7894"
+    },
+    {
+      "id": "warzone",
+      "prompt": "Use case: faithful style-transfer and camera-preserving enlargement. IMAGE1 IS THE ONLY MAP AND CAMERA MASTER. Enlarge/crop toward the small existing neighborhood visible in IMAGE1, keeping the exact same elevated diagonal viewing direction and perspective. Fill a landscape frame with that same neighborhood. Preserve its actual geometry, original building shapes/count, foreground blank apartment rear-wall occlusion, roads, trees, playgrounds, mine positions and scale. Do not reconstruct or uncover anything hidden by the foreground buildings. Give existing surfaces crisp fine pixel textures, restrained warm/cool soft light, clear block edges, polished voxel game illustration quality, but never redesign. Exact layout: eight apartment wings in four corner L arrangements around four green courtyards, cross-shaped black streets and original center paved square. Left courtyard has red-brick apartments; other visible fronts are pale gray. Exactly ONE original SMALL mine bed in EACH of the four courtyards: red mineral bed left, green mineral bed in the REAR courtyard between the far pale apartment wings, gold mineral bed right near the single active white beacon, blue mineral bed in the FRONT courtyard. Do not put green and blue mines together in front. Mines retain screenshot footprint and scale: small flat rectangular/square inset block grids, no added boulder walls, no showcase pits, no enlarged exposed ore chunks. Preserve only original tiny beacons in their source positions; no new beacons. Preserve existing tiny playground equipment and sparse trees only, no invented furniture, lamps or extra vegetation. No cars, no people/NPCs, no text/UI/logos/watermarks. Keep original cyan daytime surrounding sky. Make the result an immediately recognizable, almost one-to-one illustrated enlargement of IMAGE1, not an artistic redesign.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-warzone-2026-11-03.jpg",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-warzone-2026-11-03.jpg"
+      ],
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03-v2.png",
+      "target": "assets/previews/illustration-warzone-2026-11-03-v2.png",
+      "rejectedDraft": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-ee9d0938-6ef9-41ec-b14f-452105dee77c.png",
+      "rejectionReason": "Style image contaminated mine placement: two pits in foreground quarter and none in rear quarter. Rejected, not copied.",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-d60c5923-7544-4e5e-8083-d1217c0bd233.png",
+      "visualReview": "PASS major factual layout after rejecting contaminated draft: same diagonal overview enlarged, eight apartment wings with original plain foreground rear walls, crossed roads and central colored blocks, one SMALL flat mine per quadrant (rear green/left red/right gold/front blue), no cars, single active right beacon. Fine playground/vegetation details remain bounded by the tiny factual screenshot resolution; no claim of pixel-exact reconstruction.",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2362129,
+      "sha256": "c50ee4f1dfe88c803d57c2213b48fc922f687212f5c4a3d72ea0fb3b9f0cbea0"
+    },
+    {
+      "id": "gang_base",
+      "prompt": "Use case: style-transfer. Produce a faithful illustrated rendering of the actual game screenshot IMAGE 1. Image 1 is the absolute geometry/camera/layout/object-count authority, not loose inspiration. Image 2 is ONLY a rendering-style sample: use its crisp voxel geometry, fine pixel-textured materials, soft readable illumination and polished game-illustration finish. Do NOT borrow the second image's layout, objects, architectural redesign, vegetation, window design or decoration. Preserve every factual landmark's position, relative size and shape, visible building/room-object counts and original palette. No invented objects, cars, furniture, plants, ornament or scenery. No UI, text, labels, logos, watermarks, NPCs, players or creatures. Improve only clarity, surface rendering and gentle lighting. No bloom, glare, blown highlights or pitch-black unreadable geometry. The result must look like the same real map photographed from the same camera, not a newly designed level.\nExact location constraints: Preserve the exact first-person/elevated-corner interior camera from Image1 and the partly obstructing tall timber railing/wall across the lower-left foreground. Keep the compact dark timber room, original ceiling beams, horizontal plank walls and gray stone lower courses. The SAME small plain wooden table with a tiny white paper remains just left of center on the existing bright-purple floor rug; do not enlarge the table or add benches, chairs, extra papers or ornaments. Retain the existing small purple bed partly hidden at the far left, one short colorful bookshelf against the far-left/back wall, original barrels/chests only where actually visible, four plain purple rear banners, two original simple ceiling light clusters, and the right cobblestone forge base with straight dark-stone chimney. Remove both actual NPCs (one beside bookshelf and the yellow-headed worker near forge) without replacing them with objects. Keep original window/panel rectangles EXACTLY as in Image1: same number, positions, dimensions and plain geometry. ONLY change their harsh white emissive glare to a matte softly lit warm cream surface, no bloom. Do not add panes, frames, outdoor views, plants, hearth fire openings, ornate lanterns or extra furnishings. Use gentle ambient fill so dark wood remains legible but the room is not redesigned.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-gang_base-2026-11-03.jpg",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/reference-gang_base-2026-11-03.jpg",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-gang_base-2026-11-03.png"
+      ],
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-gang_base-2026-11-03-v2.png",
+      "target": "assets/previews/illustration-gang_base-2026-11-03-v2.png",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-53572548-fdb3-42d9-8920-5176e13142e0.png",
+      "visualReview": "PASS factual comparison: same partly obstructing foreground timber partition, compact table and purple rug, partial left bed/bookcase, four plain purple banners, rear chests and right cobblestone/straight chimney kept in place. Windows remain plain rectangles with only matte cream lighting; NPCs removed; no added plants, window panes, fireplace opening or enlarged furnishings.",
+      "width": 2170,
+      "height": 725,
+      "bytes": 1990144,
+      "sha256": "51238bf37ab3161111135d1ffdbfa1184d50532c1a22088e92d4a7121f53bb2a"
+    }
+  ]
+}

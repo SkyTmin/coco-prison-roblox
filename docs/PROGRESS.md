@@ -51,6 +51,10 @@
 
 ## Журнал
 
+### 03.11 — Thirty faithful location illustrations [owner/art]
+
+Generated and uploaded illustrations for all 30 locations, with three parallel art agents after the explicit request to speed up the artwork. Actual in-game screenshots govern camera/layout/landmarks; misleading added objects were removed in revised outputs. Final PNGs, source references, exact prompts and a searchable comparison gallery are in `assets/previews`; `ids.json` and generated `Config/previews.json` now contain all 30 uploaded ids. [Art report](research/release-location-art-2026-11-03.md). No publication. Runtime asset loading/menu review remains part of the ongoing release QA; the larger release code changes are still in progress.
+
 ### 02.11 — All confirmed audit source fixes; durable shared storage; Studio verification [owner/live QA]
 
 Owner said “Исправь все!” after `a1f0465`. Implemented all 23 confirmed findings (E1–E4, SB-01–SB-04, S1–S4, CW-01–CW-06, UI-01–UI-05), conditional teleport fall reset and additional integration races. [Correction/status report](research/audit-fixes-2026-11-02.md), [validation evidence](research/audit-fixes-validation-2026-11-02.json), detailed economy/combat/UI/storage review reports. Three reviewers completed their assigned corrections and independently exercised root's persistence integration.

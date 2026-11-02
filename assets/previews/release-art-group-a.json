@@ -1,0 +1,220 @@
+{
+  "tool": "built-in image_gen__imagegen",
+  "style": "faithful style-transfer",
+  "date": "2026-11-03",
+  "reviewPolicy": "Owner's latest steering: actual screenshot geometry, camera and landmark scale take precedence over style; initial decorative drafts rejected and replaced. All final images visually reviewed. Native framing retained instead of cropping landmarks to force 16:9.",
+  "assets": [
+    {
+      "id": "prison",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Prison: actual central square blue-water fountain, pale path grid, large sand/gravel/earth mining rectangle behind it, low orange-roofed service buildings at image edges. Keep the screenshot's exact spacing and existing trees; no additional flower beds or lamps.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-prison.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-prison-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "draftSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-87215d9a-dd27-4466-8b00-d9792f00ae03.png",
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-e55cf448-3375-49b4-9dd6-b59169878292.png",
+      "visualCheck": "PASS faithful replacement: exact screenshot-like camera/framing, fountain courtyard and rear mine proportions, cream path grid, original edge buildings and sparse lawn/tree groups; removed invented dense flowers/lamps from draft.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2907338,
+      "sha256": "0d766b9dd65774e2ca2250a7b3c10c6da5a39f998a7248fb6ac1d9673d6a001e",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-prison.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-prison-2026-11-03.png"
+    },
+    {
+      "id": "quarry",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Quarry: actual huge flat rectangular gray stone/coal ore bed left-center with its existing dark/wood rim, partial circular pillared orange-spoke arena at right, existing rails/carts at lower-left and cavern walls. Preserve the right arena's cropping, mine scale and sparse ground; do not raise the mine or add support walls/lamps.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-quarry.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-quarry-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "draftSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-a29eabb7-1220-45e4-85ac-48e9b695872f.png",
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-ca383c52-613d-4e07-85e4-415c8821e51c.png",
+      "visualCheck": "PASS faithful replacement: actual flat mine footprint/camera and thin timber rim, partial right arena crop, sparse ground/rubble/frames, lower-left cart rail; discarded invented cavern walls/support masonry from draft.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 3031341,
+      "sha256": "9d267a71bbe07649239bec4c27283647fcede17543383e7165a64251076a3c9d",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-quarry.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-quarry-2026-11-03.png"
+    },
+    {
+      "id": "basement",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Basement: exact camera inside stone-brick cellar, rectangular pale-sand/gray-gravel/brown-earth mine floor, existing wood railing, dark stone rim, doorway and corridor, blue/green banners, chandelier and torches. Keep original wall/ceiling geometry and opening sizes; only remove visible zombies.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-basement.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-basement-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "draftSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-dda59917-6008-487e-9b6f-d2338d1a76d2.png",
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-28825cec-7c7f-475e-a391-e5a48d7044a1.png",
+      "visualCheck": "PASS faithful replacement: retained original camera, straight stone/cobble wall structure, mine palette/size, narrow rear corridor, side banners, wood rail and chandelier; removed invented grand arches and zombies.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 3170196,
+      "sha256": "6e52807d481662efaadef00bf2c3c2287f27727a135a9a2c33a1d7ec9888cc1c",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-basement.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-basement-2026-11-03.png"
+    },
+    {
+      "id": "fraction_base",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Faction base: exact overhead-three-quarter view of circular gray arena with diagonal X approaches, center brown patch, far stone monument, stepped green hills exposing red/gray layers, existing blue water accents and two visible rustic houses at upper edges. Keep sparse terrain and arena scale; remove creatures without replacing them with rocks. No added mines, flower beds, railings or buildings.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-fraction_base.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-fraction_base-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-c0f60c61-36f4-467f-9e5c-4d52dca6e99e.png",
+      "visualCheck": "PASS faithful final: same circular arena/camera, X approaches, central brown patch/pedestal, rear monument, terraced hills, existing houses and blue-water accents; all small brown creature flecks removed in isolated edit.",
+      "editInput": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-eba198ea-0fb6-47e0-8f56-7ea009e6ede2.png",
+      "editPrompt": "Precise object removal from this image. Preserve the image exactly: same camera, crop, terrain, two houses, gray circular arena size, central brown circle and small pedestal, rear stone monument, X-shaped paths, blue water accents, lighting, textures, all architecture and vegetation. Remove ONLY every tiny scattered brown rat/animal/creature-like fleck inside the large circular gray arena, and remove any actual characters elsewhere. Replace those tiny flecks with the same continuous gray gravel floor already surrounding them. Do not alter the brown central circular patch or its pedestal. Do not add any decoration or objects, do not redesign, do not change scale or palette. Result is this same factual map illustration, with no characters or creatures, no text.",
+      "width": 1672,
+      "height": 941,
+      "bytes": 3071381,
+      "sha256": "cc74708b528cede7a98392977d5c267cea847cf4eb2255bd75e65939593ff3cc",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-fraction_base.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-fraction_base-2026-11-03.png"
+    },
+    {
+      "id": "mountain_foot",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Mountain foot: same orange/red stepped badlands basin, large orange mine in foreground with sparse gray mineral squares, round golden-orange pillared arena behind-right, smaller stepped outcrop behind-left, existing scattered columns and fence/path. Exact camera, scale and cropping. No added lava rivers, architecture, plants or objects.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-mountain_foot.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-mountain_foot-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-cf84a0f4-8d8a-4e60-89cb-66f236eaa55d.png",
+      "visualCheck": "PASS faithful: matching canyon tiers/camera, foreground orange mine footprint and sparse ore, circular arena behind-right, tiered outcrop, white fossil/right trench; no added landscape.",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2724905,
+      "sha256": "fb263e7cd2b0165c7885ff6c1179ade38f161c0b0ba5834a8c9aed368db540f8",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-mountain_foot.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-mountain_foot-2026-11-03.png"
+    },
+    {
+      "id": "underworld",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Underworld: same dark red cave, foreground-right rectangular red ore mine, low black fortress behind it with small amber lights and central entry, existing teal fungal-tree mass on right, narrow lava falls. Lift only shadow visibility. Remove text label and flying white creature, do not replace with scenery.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-underworld.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-underworld-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-b66493c6-c70e-4924-95a7-94d0a947287f.png",
+      "visualCheck": "PASS faithful: same cavern perspective, foreground-right mine, far-center black fortress, teal forest at right, vertical dark column and lava falls; text/ghast removed, shadows lifted.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2608647,
+      "sha256": "9965a045e3c1ab06b3e2def7c0640c83866f269aa7183b96a824f8394dd9020a",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-underworld.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-underworld-2026-11-03.png"
+    },
+    {
+      "id": "pyramid",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Pyramid: exact cream stepped pyramid with terracotta bands, small gold apex, paired decorated front entrance pylons, column avenue, small lower-left oasis, sparse cacti and red canyon rim. Preserve framing, giant pyramid scale and visible tier count. No invented mine or extra temples/palms.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-pyramid.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-pyramid-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-c48b8676-c61c-4d77-9814-7a94c0ba9fc2.png",
+      "visualCheck": "PASS faithful: same monumental stepped pyramid/bands, double entrance pylons, column avenue, lower-left oasis and terracotta canyon; no invented mine or extra temple.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2746710,
+      "sha256": "109b3cf67aad746ba6429fbcfec8c3150ea0d7cbbdf8c7167e770f02cd730f19",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-pyramid.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-pyramid-2026-11-03.png"
+    },
+    {
+      "id": "royal_garden",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Royal garden: exact large pink-purple mine with white rim in foreground-center, small white blue-turret castle at rear, existing pink block trees, gazebos, formal flower beds and right pond with red bridge, green cliff basin. Same camera and relative scale, exact original architecture, no extra landscaping.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-royal_garden.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-royal_garden-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-67b5095a-ecad-400c-86a9-0b1b4b2e5e98.png",
+      "visualCheck": "PASS faithful: matching pink mine/white rim, small rear blue-turret castle and forecourt, left blossom grove, gazebos, right pond/red bridge, sparse lawn and cliff basin.",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2979850,
+      "sha256": "c5ffd1253a24120161e4bf9aa8b4a85bad94a2f5e89d71fa178c58760921a777",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-royal_garden.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-royal_garden-2026-11-03.png"
+    },
+    {
+      "id": "sunken_lighthouse",
+      "prompt": "Use case: style-transfer. Make a faithful high-quality illustration of IMAGE 1, the actual in-game screenshot, in a crisp voxel/pixel-textured rendering style. IMAGE 1 is the edit target and ABSOLUTE FACTUAL AUTHORITY. Match its SAME CAMERA, viewing direction, framing, perspective, relative scale and exact placement of all visible landmarks. Preserve the exact visible building count, building shapes and roof colors, mine footprint and relative size, block types and patchwork, paths, water, terrain contours, sparse areas and original palette. Do not redesign, rearrange, beautify the map with new objects, add vegetation, houses, rivers, roads, lamp posts, crates, extra architecture or other decoration. Do not invent scenery outside the screenshot. Images 2 and 3 show rendering style ONLY: crisp voxel surfaces, fine pixel material textures and soft readable illumination; do NOT copy any objects, geometry, vegetation, composition or colors from them. Only improve surface rendering, clarity and subtle lighting of the existing screenshot geometry. Retain the original location's character and believable game appearance, with enough fill light to read the mine, no bloom or glare. Wide 16:9 destination image, no UI/text/labels/logos/watermarks, remove visible characters and creatures but do not replace them with new objects. The final image must be immediately recognizable as the same exact map and camera, not a newly designed interpretation.\nRecognize and preserve: Sunken lighthouse: exact turquoise square mine in foreground island, original red-white lighthouse far-center, teal walkways, surrounding gray broken sea pillars, sandy tree islets, near-right bridge and dark-roofed huts. Same camera and landmark scale/count. No new boats, islands, coral, buildings or decorative geometry.",
+      "source": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-sunken_lighthouse.png",
+      "file": "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-sunken_lighthouse-2026-11-03.png",
+      "styleReferences": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "status": "complete_faithful",
+      "generatedSource": "C:\\Users\\user\\.codex\\generated_images\\01a19dc9-fe60-7353-abdd-35cba285a0cb\\exec-095ab949-e767-48a3-96bb-139322428e20.png",
+      "visualCheck": "PASS faithful: exact lagoon camera and major geometry, large turquoise mine, rear striped lighthouse, teal paths, ring of broken sea pillars, right five huts/bridge and sandy islets.",
+      "width": 1731,
+      "height": 909,
+      "bytes": 2639523,
+      "sha256": "1530b70de4cf0b464db3d406b467695c21fe01a6a8983a3ab926764e01b82fcd",
+      "references": [
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/topdown-sunken_lighthouse.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-ghetto-2026-11-03.png",
+        "C:/Users/user/Documents/coco-prison-roblox/assets/previews/illustration-warzone-2026-11-03.png"
+      ],
+      "target": "assets/previews/illustration-sunken_lighthouse-2026-11-03.png"
+    }
+  ]
+}

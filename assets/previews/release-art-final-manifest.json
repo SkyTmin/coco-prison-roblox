@@ -1,0 +1,316 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "purpose": "Final local location-art review; all asset paths are relative to this manifest.",
+  "count": 30,
+  "locationConfig": "../../src/shared/Config/locations.json",
+  "gallery": "release-art-gallery.html",
+  "promptManifests": [
+    "release-art-group-a.json",
+    "release-art-group-b.json",
+    "release-art-group-c.json",
+    "release-art-root-v2.json"
+  ],
+  "assets": [
+    {
+      "id": "prison",
+      "nameRu": "Начальная локация",
+      "illustration": "illustration-prison-2026-11-03.png",
+      "reference": "topdown-prison.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2907338
+    },
+    {
+      "id": "quarry",
+      "nameRu": "Каменоломня",
+      "illustration": "illustration-quarry-2026-11-03.png",
+      "reference": "topdown-quarry.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 3031341
+    },
+    {
+      "id": "mountain_foot",
+      "nameRu": "Подножье горы",
+      "illustration": "illustration-mountain_foot-2026-11-03.png",
+      "reference": "topdown-mountain_foot.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2724905
+    },
+    {
+      "id": "underworld",
+      "nameRu": "Преисподняя",
+      "illustration": "illustration-underworld-2026-11-03.png",
+      "reference": "topdown-underworld.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2608647
+    },
+    {
+      "id": "pyramid",
+      "nameRu": "Пирамида",
+      "illustration": "illustration-pyramid-2026-11-03.png",
+      "reference": "topdown-pyramid.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2746710
+    },
+    {
+      "id": "royal_garden",
+      "nameRu": "Королевский сад",
+      "illustration": "illustration-royal_garden-2026-11-03.png",
+      "reference": "topdown-royal_garden.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2979850
+    },
+    {
+      "id": "sunken_lighthouse",
+      "nameRu": "Затопленный маяк",
+      "illustration": "illustration-sunken_lighthouse-2026-11-03.png",
+      "reference": "topdown-sunken_lighthouse.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1731,
+      "height": 909,
+      "bytes": 2639523
+    },
+    {
+      "id": "end_castle",
+      "nameRu": "Пустотная крепость",
+      "illustration": "illustration-end_castle-2026-11-03.png",
+      "reference": "topdown-end_castle.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2581843
+    },
+    {
+      "id": "spider_lair",
+      "nameRu": "Паучье логово",
+      "illustration": "illustration-spider_lair-2026-11-03.png",
+      "reference": "topdown-spider_lair.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2598870
+    },
+    {
+      "id": "snowy_hand",
+      "nameRu": "Снежная длань",
+      "illustration": "illustration-snowy_hand-2026-11-03.png",
+      "reference": "topdown-snowy_hand.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2339856
+    },
+    {
+      "id": "market",
+      "nameRu": "Рынок",
+      "illustration": "illustration-market-2026-11-03.png",
+      "reference": "topdown-market.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2941781
+    },
+    {
+      "id": "leprechaun_valley",
+      "nameRu": "Лепреконовая долина",
+      "illustration": "illustration-leprechaun_valley-2026-11-03.png",
+      "reference": "topdown-leprechaun_valley.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2931252
+    },
+    {
+      "id": "castle",
+      "nameRu": "Замок",
+      "illustration": "illustration-castle-2026-11-03.png",
+      "reference": "topdown-castle.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2741191
+    },
+    {
+      "id": "inside_out",
+      "nameRu": "Изнанка",
+      "illustration": "illustration-inside_out-2026-11-03.png",
+      "reference": "topdown-inside_out.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2604717
+    },
+    {
+      "id": "kyoto",
+      "nameRu": "Киото",
+      "illustration": "illustration-kyoto-2026-11-03.png",
+      "reference": "topdown-kyoto.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 3153394
+    },
+    {
+      "id": "farm",
+      "nameRu": "Ферма",
+      "illustration": "illustration-farm-2026-11-03.png",
+      "reference": "topdown-farm.png",
+      "promptManifest": "release-art-group-b.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 3201813
+    },
+    {
+      "id": "barn",
+      "nameRu": "Амбар",
+      "illustration": "illustration-barn-2026-11-03.png",
+      "reference": "topdown-barn.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 2257655
+    },
+    {
+      "id": "edge_gate",
+      "nameRu": "Врата края",
+      "illustration": "illustration-edge_gate-2026-11-03.png",
+      "reference": "topdown-edge_gate.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2048330
+    },
+    {
+      "id": "tree",
+      "nameRu": "Древо",
+      "illustration": "illustration-tree-2026-11-03.png",
+      "reference": "topdown-tree.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 1960620
+    },
+    {
+      "id": "church",
+      "nameRu": "Церковь",
+      "illustration": "illustration-church-2026-11-03.png",
+      "reference": "topdown-church.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2279316
+    },
+    {
+      "id": "purgatory",
+      "nameRu": "Чистилище",
+      "illustration": "illustration-purgatory-2026-11-03.png",
+      "reference": "topdown-purgatory.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 1984913
+    },
+    {
+      "id": "eden",
+      "nameRu": "Эдем",
+      "illustration": "illustration-eden-2026-11-03.png",
+      "reference": "topdown-eden.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2438779
+    },
+    {
+      "id": "cherubim",
+      "nameRu": "Херувимы",
+      "illustration": "illustration-cherubim-2026-11-03.png",
+      "reference": "topdown-cherubim.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2180316
+    },
+    {
+      "id": "gate",
+      "nameRu": "Врата",
+      "illustration": "illustration-gate-2026-11-03.png",
+      "reference": "topdown-gate.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2411330
+    },
+    {
+      "id": "paradise",
+      "nameRu": "Рай",
+      "illustration": "illustration-paradise-2026-11-03.png",
+      "reference": "topdown-paradise.png",
+      "promptManifest": "release-art-group-c.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2488575
+    },
+    {
+      "id": "basement",
+      "nameRu": "Подвал",
+      "illustration": "illustration-basement-2026-11-03.png",
+      "reference": "topdown-basement.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1730,
+      "height": 909,
+      "bytes": 3170196
+    },
+    {
+      "id": "fraction_base",
+      "nameRu": "База фракций",
+      "illustration": "illustration-fraction_base-2026-11-03.png",
+      "reference": "topdown-fraction_base.png",
+      "promptManifest": "release-art-group-a.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 3071381
+    },
+    {
+      "id": "gang_base",
+      "nameRu": "База банды",
+      "illustration": "illustration-gang_base-2026-11-03-v2.png",
+      "reference": "reference-gang_base-2026-11-03.jpg",
+      "promptManifest": "release-art-root-v2.json",
+      "width": 2170,
+      "height": 725,
+      "bytes": 1990144
+    },
+    {
+      "id": "ghetto",
+      "nameRu": "Гетто",
+      "illustration": "illustration-ghetto-2026-11-03-v2.png",
+      "reference": "reference-ghetto-2026-11-03.jpg",
+      "promptManifest": "release-art-root-v2.json",
+      "width": 2170,
+      "height": 725,
+      "bytes": 2669677
+    },
+    {
+      "id": "warzone",
+      "nameRu": "Дворы",
+      "illustration": "illustration-warzone-2026-11-03-v2.png",
+      "reference": "reference-warzone-2026-11-03.jpg",
+      "promptManifest": "release-art-root-v2.json",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2362129
+    }
+  ]
+}
