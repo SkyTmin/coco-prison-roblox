@@ -24,7 +24,7 @@ local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
-local BookTuning = require(script.Parent.BookTuning)
+local AncientCase = require(script.Parent.AncientCase)
 local ArtifactService = require(script.Parent.ArtifactService)
 local FactionStorage = require(script.Parent.FactionStorageService)
 local GangChest = require(script.Parent.GangChestService)
@@ -52,6 +52,7 @@ type Session = {
 	id: string,
 	part: BasePart,
 	rolledAt: number,
+	revealPending: boolean?,
 	tokens: number,
 	tokenAt: number,
 	faction: string?, -- factionChest: whose storage and which of the 8 chests
@@ -79,6 +80,7 @@ local RANGE = 12
 local random = Random.new()
 local bindings: { [Instance]: Binding } = {}
 local sessions: { [Player]: Session } = {}
+local ancientRollUntil: { [Player]: number } = {}
 local started = false
 local CaseService = {}
 
@@ -160,10 +162,9 @@ local function near(player: Player, part: BasePart): boolean
 		and (root.Position - part.Position).Magnitude <= RANGE
 end
 
--- [владелец 21.10] a case is not storage: whatever is left inside (rewards not taken, items put in)
--- is gone once it closes; the ender chest keeps its contents
+-- Ordinary cases empty on close. Ancient overflow survives walking away during the roulette [owner 02.11].
 local function emptyCase(player: Player, id: string)
-	if id ~= "enderChest" and ProfileService.Get(player) then
+	if id ~= "enderChest" and id ~= "ancientCase" and ProfileService.Get(player) then
 		ProfileService.Mutate(player, function(p)
 			p.caseContents[id] = {}
 		end)
@@ -329,7 +330,13 @@ local function openChest(player: Player, part: BasePart)
 		if not shared then
 			return
 		end
-	elseif id ~= "enderChest" then
+	elseif
+		id ~= "enderChest"
+		and not (id == "ancientCase" and next(profile.caseContents.ancientCase or {}))
+	then
+		if id == "ancientCase" and os.clock() < (ancientRollUntil[player] or 0) then
+			return
+		end
 		local keys = acceptedKeys(id)
 		local held = profile.inventory[profile.selectedSlot]
 		heldKey = if held and table.find(keys, held.id) then held.id else nil
@@ -367,62 +374,15 @@ local function openChest(player: Player, part: BasePart)
 			p.caseContents[id] = p.caseContents[id] or {}
 		end
 	end)
-	Remotes.event("CaseOpened"):FireClient(player, id)
+	if id ~= "ancientCase" or not heldKey then
+		Remotes.event("CaseOpened"):FireClient(player, id)
+	end
 	if part and part:IsA("BasePart") then
 		Sfx.broadcast(if id == "enderChest" then "ender_open" else "chest_open", part, 0.6)
 	end
 	if heldKey then
 		openCase(player, id, heldKey) -- spend the key in hand and roll right away
 	end
-end
-
-local function weightedKey(weights: { [string]: number }): string
-	local choices: { Reward } = {}
-	for key, weight in pairs(weights) do
-		table.insert(choices, { id = key, weight = weight })
-	end
-	table.sort(choices, function(a, b)
-		return a.id < b.id
-	end)
-	return roll(choices).id
-end
-
-local function ancientBook(improved: boolean): Types.ItemStack
-	local rules = Config.keys.ancientCase
-	-- rarity belongs to the book type [меню]: roll the rarity, then a book of that rarity
-	local rarity = weightedKey(rules.rarity)
-	local effects: { string } = {}
-	local any: { string } = {}
-	for id in pairs(Config.books.effects) do
-		local entry = Config.books.catalog[id]
-		table.insert(any, id)
-		if entry and entry.rarity == rarity then
-			table.insert(effects, id)
-		end
-	end
-	if #effects == 0 then
-		effects = any
-	end
-	table.sort(effects)
-	local effect = effects[random:NextInteger(1, #effects)]
-	local maxLevel = #Config.books.effects[effect]
-	local level = if improved
-		then maxLevel
-		else math.min(maxLevel, tonumber(weightedKey(rules.level)) :: number)
-	effect = BookTuning.roll(effect, level, effects, random)
-	level = if improved
-		then #Config.books.effects[effect]
-		else math.min(level, #Config.books.effects[effect])
-	local catalogEntry = Config.books.catalog[effect]
-	local chance = if improved then rules.improvedApplyChance else rules.applyChance
-	return {
-		id = "ancient_book",
-		count = 1,
-		level = level,
-		books = { { id = effect, level = level } },
-		rarity = if catalogEntry then catalogEntry.rarity else rarity,
-		applyChance = random:NextInteger(chance[1], chance[2]),
-	}
 end
 
 openCase = function(player: Player, id: any, requestedKey: any)
@@ -443,7 +403,11 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		end
 		return
 	end
-	if isStorage(session.id) or os.clock() - session.rolledAt < 0.4 then
+	if
+		isStorage(session.id)
+		or os.clock() - session.rolledAt < 0.4
+		or (session.id == "ancientCase" and os.clock() < (ancientRollUntil[player] or 0))
+	then
 		if player:GetAttribute("CreativeAllowed") and not isStorage(session.id) then
 			warn(
 				"[кейс] нажато слишком быстро после прошлого открытия — пропущено"
@@ -516,6 +480,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 	local failure: string? = nil
 	local artifactNotices: { ArtifactService.Notice } = {}
 	local rolledBook: Types.ItemStack? = nil
+	local bookDestination: string? = nil
 	local ok, err = pcall(ProfileService.Mutate, player, function(p)
 		local key: string? = nil
 		for _, candidate in ipairs(accepted) do
@@ -536,13 +501,16 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		local staged = table.clone(p)
 		staged.inventory = {}
 		if session.id == "ancientCase" then
-			staged.inventory[1] = ancientBook(key == "improved_ancient_key")
-			rolledBook = staged.inventory[1]
+			local book = AncientCase.roll(key == "improved_ancient_key", random)
+			local destination = AncientCase.deliver(p, key, book)
+			if destination ~= "inventory" and destination ~= "case" then
+				failure = destination
+				return
+			end
+			rolledBook, bookDestination = book, destination
+			return
 		end
-		local rolls = if session.id == "ancientCase"
-			then 0
-			elseif session.id == "ordinaryCase" then random:NextInteger(2, 4)
-			else 1
+		local rolls = if session.id == "ordinaryCase" then random:NextInteger(2, 4) else 1
 		for _ = 1, rolls do
 			local reward = roll(rewards :: { Reward })
 			local item, count, level = reward.id, 1, nil :: number?
@@ -559,7 +527,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 				end
 			elseif item == "ancient_book" then
 				-- the artifact case's book: an ordinary-key roll of the Ancient case [меню: «порошок/книга»]
-				staged.inventory[1] = ancientBook(false)
+				staged.inventory[1] = AncientCase.roll(false, random)
 			else
 				if reward.count then
 					count = random:NextInteger(reward.count[1], reward.count[2])
@@ -675,12 +643,19 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		)
 	end
 	ArtifactService.Notify(player, artifactNotices)
-	-- the Ancient case roulette [владелец 28.10: «вокруг кейса крутятся книги с названием, как рулетка, и
-	-- останавливается сверху та книга, которая выпала»]: the client spins books round the case, then shows the window
+	-- The reward is already delivered; roulette is cosmetic and never locks movement.
 	local book = rolledBook and rolledBook.books and rolledBook.books[1]
 	if not failure and book then
-		Remotes.event("AncientRoll")
-			:FireClient(player, session.part, book.id, book.level, rolledBook and rolledBook.rarity)
+		ancientRollUntil[player] = os.clock() + 7
+		session.revealPending = bookDestination == "case"
+		Remotes.event("AncientRoll"):FireClient(
+			player,
+			session.part,
+			book.id,
+			book.level,
+			rolledBook and rolledBook.rarity,
+			bookDestination == "case"
+		)
 	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
@@ -751,6 +726,12 @@ local function move(
 		local contents = shared or contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
+		-- Persistent ancient slots hold unclaimed rewards, not a second free storage chest.
+		if session.id == "ancientCase" and from.container ~= to.container then
+			if from.container == "inv" or (not quick and target[toIndex] ~= nil) then
+				return
+			end
+		end
 		if not source[fromIndex] then
 			return
 		end
@@ -1031,6 +1012,19 @@ function CaseService.Start()
 		end
 		return n
 	end)
+	Remotes.event("CaseReveal").OnServerEvent:Connect(function(player: Player)
+		local session = validate(player, "ancientCase")
+		local profile = ProfileService.Get(player)
+		if
+			session
+			and session.revealPending
+			and profile
+			and next(profile.caseContents.ancientCase or {})
+		then
+			session.revealPending = nil
+			Remotes.event("CaseOpened"):FireClient(player, "ancientCase")
+		end
+	end)
 	Remotes.event("CaseClose").OnServerEvent:Connect(function(player: Player, id: any)
 		if validate(player, id) then
 			close(player)
@@ -1038,6 +1032,7 @@ function CaseService.Start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		sessions[player] = nil
+		ancientRollUntil[player] = nil
 		unlockAt[player] = nil
 	end)
 	local elapsed = 0

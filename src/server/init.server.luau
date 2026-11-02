@@ -125,6 +125,16 @@ ProfileService.Start()
 FactionService.Start()
 ProfessionService.Start()
 TextureService.Start()
+local warzoneScenery = workspace:FindFirstChild("Warzone")
+if warzoneScenery then
+	local ok, err = pcall(
+		require(game:GetService("ReplicatedStorage").Shared.WarzoneLayout).apply,
+		warzoneScenery
+	)
+	if not ok then
+		warn("[WarzoneLayout] " .. tostring(err))
+	end
+end
 MineService.Start()
 DigService.Start()
 EconomyService.Start()

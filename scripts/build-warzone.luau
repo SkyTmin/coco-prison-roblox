@@ -1580,6 +1580,8 @@ for _, anchor in ipairs(anchors) do
 	CollectionService:AddTag(anchor, "MineAnchor")
 end
 
+require(game:GetService("ReplicatedStorage").Shared.WarzoneLayout).apply(root)
+
 local total = #root:GetDescendants()
 print(("[build-warzone] built: %d instances"):format(total))
 return ("built %d instances"):format(total)

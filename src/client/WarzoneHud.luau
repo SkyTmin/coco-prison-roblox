@@ -15,7 +15,7 @@ local Warzone = require(Shared.Warzone)
 local Ui = require(script.Parent.Ui)
 
 local WarzoneHud = {}
-local NEAR = 28 -- studs (flat) from the beacon where the hint shows: the 20 × 20 pad lies right next to it
+local NEAR = 36 -- covers the full pad with its beacon beside it
 local FREE = Color3.fromRGB(120, 230, 120)
 
 type Board = { title: TextLabel, status: TextLabel, fill: Frame, back: Frame, point: string }
@@ -88,6 +88,29 @@ function WarzoneHud.Start(gui: ScreenGui)
 		attach(part)
 	end
 	CollectionService:GetInstanceAddedSignal(Warzone.POINT_TAG):Connect(attach)
+
+	local function attachMineSign(part: Instance)
+		if not part:IsA("BasePart") or part:FindFirstChild("MineHint") then
+			return
+		end
+		local board = Instance.new("BillboardGui")
+		board.Name, board.Size, board.MaxDistance = "MineHint", UDim2.fromOffset(148, 28), 55
+		board.LightInfluence = 0
+		board.Parent = part
+		local text = label(board, UDim2.fromScale(1, 1), UDim2.new(), Color3.fromRGB(245, 205, 85))
+		local function translate()
+			text.Text = "⛏ " .. t("warzone_mine_hint")
+		end
+		translate()
+		local connection = player:GetAttributeChangedSignal("Locale"):Connect(translate)
+		part.Destroying:Connect(function()
+			connection:Disconnect()
+		end)
+	end
+	for _, part in ipairs(CollectionService:GetTagged("WarzoneMineSign")) do
+		attachMineSign(part)
+	end
+	CollectionService:GetInstanceAddedSignal("WarzoneMineSign"):Connect(attachMineSign)
 
 	local nextAt = 0
 	RunService.Heartbeat:Connect(function()

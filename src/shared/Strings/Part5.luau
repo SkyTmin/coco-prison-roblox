@@ -2,6 +2,12 @@
 -- Player-facing strings, part 5 (split: a ModuleScript holds at most 200 000 characters). Add new strings to the last part.
 
 return {
+	warzone_mine_hint = {
+		ru = "Копать здесь",
+		en = "Dig here",
+		es = "Excava aquí",
+		fr = "Creusez ici",
+	},
 	-- paid auction announcements (AuctionService, AuctionBanner) [владелец 28.10]
 	auction_announce_chat = {
 		ru = "[Аукцион] %s выставил «%s» за %s",

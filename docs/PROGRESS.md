@@ -51,6 +51,14 @@
 
 ## Журнал
 
+### 02.11 — Дворы readability and ancient case delivery, source only [owner]
+
+`WarzoneLayout` repairs the existing scenery before MineService and is shared by the builder: side-mounted beacons, connected approaches, matte mine borders/localized signs, full-canopy clearance, disjoint grass/road/path/rim footprints. No whole-map replacement. `AncientCase` guarantees level III for improved keys and favors low application chances: 90% in10–70,10% in71–100 [decision following owner]. Ancient books go directly into the bag, including a slot freed by the last consumed key; full bag uses the chest. Cosmetic roulette has no modal window. Ancient overflow survives closing, walking away and rejoin; reopen without a key to claim, no item deposits. Failed capacity checks leave the key/profile untouched. Other case behavior is unchanged.
+
+PASS: `scripts/qa-case-warzone-offline.luau` executes actual reward modules and CaseService session/move logic, plus the full scenery builder in Lune (geometry only). 50,000 improved rolls: all III,10.00% above70 [offline sample]; key-slot reuse, full-container rollback, non-modal direct/overflow routing, cooldown, distance closure, no-key recovery and replay-safe claims pass. Four clear mine tops,178 disjoint ground pieces and idempotent repair pass [offline geometry]. Selene/StyLua across src, Rojo validation build, git diff check and economy simulation through level10 pass. Studio/desktop/sync/publish were not used; evening checks below remain required.
+
+Evening QA in Каторга92594200898716: sync source; restart Play; inspect all four Дворы pits and approaches at ground level (flicker, mine raycasts, exit ladders, point capture), desktop/phone labels. Ancient case: walk/jump/look throughout roulette on PC/mobile; immediate inventory reward; full bag and key stack>1 → chest after roulette; last key frees its slot; full chest/bag spends no key; walk out of range, die/rejoin, return without a key and claim once; opening another menu during roulette must not replace it. Existing ordinary/artifact/ender chest flows and inventory drag remain smoke tests. No visual/runtime acceptance yet.
+
 ### 02.11 — Reaper offline checkpoint; all 19 bosses have authored code/models [owner]
 
 Original Reaper755parts/43joints/15clips, matte circle38/4/1 and soul mask17/4/1. Two quick cuts, interruptible swept soul volley, circular/ground attacks, bounded warned teleport and gapped/jumpable explosion. HP3500/raw40/52/64/regen12/rewards unchanged; no immunity, clones or camera effects. Grounded4.28s death releases scythe and folds robe. All17 exported clips rendered, nine modules, offline curve/config/build/balance checks pass; source-only/headless work, no Studio or desktop access. Forest Guardian pending fixture arena boundary corrected without gameplay changes. `assets/models/reaper/README.md` contains media, uncertain official asset-shop candidate and QA limits.

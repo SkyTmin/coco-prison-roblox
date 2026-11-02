@@ -1,12 +1,6 @@
 --!strict
--- The Ancient case roulette [владелец 28.10: «когда открывают древний кейс, я хочу анимацию для игрока. Вокруг кейса
--- крутятся книги с названием, как рулетка, и останавливается сверху та книга, которая выпала … пусть крутятся
--- рандомные книги, штук 7 или больше, и книга, которая выпадет»]. The server has already put the book into the case
--- (CaseService) and sends AncientRoll(part, bookId, level, rarity); here, for this player only: the case window hides,
--- a wheel of 8 books (7 random + the dropped one) stands over the case facing the camera, each with its name in its
--- rarity colour, spins fast, slows down and stops with the dropped book at the top under a golden frame; the others
--- fade, the winner flashes and sinks into the case, the window comes back with the book inside. The window must not
--- close meanwhile: closing a case empties it.
+-- Cosmetic, non-modal roulette. The server already delivered the book to the bag or overflow chest.
+-- onFinished is called exactly once, including when the streamed case or camera is unavailable.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -138,15 +132,13 @@ local function fade(gui: BillboardGui, seconds: number)
 	end
 end
 
--- Plays the roulette over `part`; setWindowVisible hides the case window while it runs (called every frame: the
--- window may be rebuilt by a profile update) and shows it at the end.
 function AncientRoulette.play(
 	part: any,
 	bookId: any,
 	level: any,
 	rarity: any,
 	locale: string,
-	setWindowVisible: (boolean) -> ()
+	onFinished: () -> ()
 )
 	if
 		playing
@@ -155,10 +147,12 @@ function AncientRoulette.play(
 		or typeof(bookId) ~= "string"
 		or typeof(level) ~= "number"
 	then
+		onFinished()
 		return
 	end
 	local camera = workspace.CurrentCamera
 	if not camera then
+		onFinished()
 		return
 	end
 	playing = true
@@ -284,8 +278,28 @@ function AncientRoulette.play(
 	local started = os.clock()
 	local lastSlot = math.floor(total / step)
 	local connection: RBXScriptConnection? = nil
+	local sink: RBXScriptConnection? = nil
+	local finished = false
+	local function finish()
+		if finished then
+			return
+		end
+		finished = true
+		if connection then
+			connection:Disconnect()
+		end
+		if sink then
+			sink:Disconnect()
+		end
+		folder:Destroy()
+		playing = false
+		onFinished()
+	end
 	connection = RunService.RenderStepped:Connect(function()
-		setWindowVisible(false)
+		if not part:IsDescendantOf(workspace) then
+			finish()
+			return
+		end
 		local t = math.clamp((os.clock() - started) / SPIN_SECONDS, 0, 1)
 		local offset = total * (1 - easeOut(t))
 		place(offset)
@@ -342,11 +356,13 @@ function AncientRoulette.play(
 				{ Size = UDim2.fromScale(BOOK_SIZE.X * 1.5, BOOK_SIZE.Y * 1.5) }
 			):Play()
 			task.delay(1.4, function()
+				if finished then
+					return
+				end
 				-- into the case
 				local winnerHolder = holders[1]
 				local from = winnerHolder.Position
 				local sinkStart = os.clock()
-				local sink: RBXScriptConnection? = nil
 				sink = RunService.RenderStepped:Connect(function()
 					local k = math.clamp((os.clock() - sinkStart) / 0.45, 0, 1)
 					local at = from:Lerp(part.Position, k * k)
@@ -364,25 +380,12 @@ function AncientRoulette.play(
 					:Create(winnerGui, TweenInfo.new(0.45), { Size = UDim2.fromScale(0.4, 0.5) })
 					:Play()
 				fade(frameGui, 0.3)
-				task.delay(0.5, function()
-					folder:Destroy()
-					playing = false
-					setWindowVisible(true)
-				end)
+				task.delay(0.5, finish)
 			end)
 		end
 	end)
-	-- never leave the window hidden (a broken part, a teleport): give up after a while
-	task.delay(SPIN_SECONDS + 4, function()
-		if playing then
-			if connection then
-				connection:Disconnect()
-			end
-			folder:Destroy()
-			playing = false
-			setWindowVisible(true)
-		end
-	end)
+	-- Each watchdog owns only its own wheel, never the next roll.
+	task.delay(SPIN_SECONDS + 4, finish)
 end
 
 return AncientRoulette

@@ -68,7 +68,7 @@ local function rewardEntries(rewards: { any }): { Entry }
 	return out
 end
 
--- every book of the Ancient case at its top level (the improved key's book), common → rare → legendary
+-- every book of the Ancient case at its supported top level (ordinary-key catalog), common → rare → legendary
 local function bookEntries(): { Entry }
 	local ids: { string } = {}
 	for id in pairs(Config.books.effects) do

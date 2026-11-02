@@ -128,8 +128,11 @@ local function migrate(data: any): Profile
 				profile.enderChest[slot] = nil
 			end
 		end
-		-- cases are emptied when they close [владелец 21.10]: nothing survives a rejoin either
-		profile.caseContents = {}
+		-- Ancient overflow remains claimable if the player leaves during its non-modal roulette.
+		local ancient = if typeof(data.caseContents) == "table"
+			then data.caseContents.ancientCase
+			else nil
+		profile.caseContents = { ancientCase = decodeInventory(ancient) }
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
