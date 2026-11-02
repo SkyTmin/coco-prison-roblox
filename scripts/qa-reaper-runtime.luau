@@ -28,7 +28,7 @@ local function part(name, at, size, parent)
 end
 local function fixture()
 	number += 1
-	local o = Vector3.new(245000 + number * 500, 30000, 0)
+	local o = Vector3.new(245000 + number * 500, 30000, 5000)
 	local g = Instance.new("Folder")
 	g.Parent = folder
 	part("Floor", o - Vector3.new(0, 1, 0), Vector3.new(150, 2, 150), g)

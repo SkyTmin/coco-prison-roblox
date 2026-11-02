@@ -306,7 +306,11 @@ local function twisted(
 	end
 	local seen = {}
 	for _, at in points do
-		task.spawn(branch, b, e, hooks, at, cfg, seen)
+		-- A wall can appear during the windup; recheck the path before roots emerge.
+		local current = ground(b, e, hooks, at + Vector3.new(0, 2, 0), cfg.range, cfg.radius)
+		if current and math.abs(current.Y - at.Y) <= 0.3 then
+			task.spawn(branch, b, e, hooks, at, cfg, seen)
+		end
 	end
 end
 local function branchWave(b: any, e: any, s: any, hooks: any, start: number, cfg: any)

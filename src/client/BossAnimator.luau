@@ -446,7 +446,9 @@ function BossAnimator.Start()
 		end
 		CollectionService:GetInstanceAddedSignal(tag):Connect(track)
 	end
-	RunService.RenderStepped:Connect(function(dt)
+	-- Motor6D transforms are applied after PreSimulation, just like our player and mob rigs.
+	-- Updating at render time leaves fast projectile/wing clips a physics frame behind.
+	RunService.PreSimulation:Connect(function(dt)
 		for _, rig in pairs(rigs) do
 			animate(rig, dt)
 		end

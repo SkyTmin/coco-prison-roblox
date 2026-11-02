@@ -45,7 +45,7 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 **Owner authorization (02.11): always restart Play when needed for fixes/QA, even while the owner is playing; do not ask again. Restore the owner's enabled Creative mode after each restart through its normal client remote.**
 
-**Latest owner steering (02.11, after Forest Spirit): continue development in code only; Studio verification is deferred until evening. Do not call Studio or desktop-control tools under this instruction. Headless model/code preparation continues; explicitly mark new bosses as awaiting in-game QA. This supersedes the earlier permission to restart Play for now.**
+**Latest owner steering (02.11): Studio is connected; resume live QA in the confirmed Katorga place. The owner subsequently restarted Studio. Source/models-only sync and Play restarts remain authorized; preserve the cloud map, never publish, and restore enabled Creative. No PC notifications or visible Blender. The camera button now belongs LEFT of the hotbar. Record server fixtures, client animation checks and real arena/group/mobile checks separately; a fixture pass alone is not full boss acceptance.**
 
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
 2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync-part.luau`
@@ -115,7 +115,7 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
    Ground items: `ItemDropService` (thrown items via DropItem, death loot, ClearLag sweep every 5 min, cap 400);
    the profile reaches the client once whole (ProfileUpdated), then as deltas (ProfilePatch) at most 10×/s — never
    send it per action. Cosmetic broadcasts go to nearby players only, batched, via `Remotes.unreliable`.
-   Cases are temporary: contents vanish when the case closes (`CaseService.emptyCase`); the ender chest keeps them.
+   Ordinary cases are temporary: contents vanish when closed (`CaseService.emptyCase`). Ancient unclaimed rewards and the ender chest persist; ancient overflow can be reopened without a key and is withdrawal-only.
    Server warnings/errors reach CreativeAllowed players (`ServerLog` → creative window) — the owner has no chat.
    Creative test mode: `CreativeService` (player attributes `CreativeAllowed` / `Creative`; Studio, place creator,
    `creative.admins`) + `src/client/CreativeWindow.luau` (menu button, key K); Dig/Hunger/Needs read `Creative`.

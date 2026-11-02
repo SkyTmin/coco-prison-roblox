@@ -1,6 +1,6 @@
 # Samurai Hanashiguro / The Lovers — offline checkpoint
 
-Prepared 02 November 2026 under the owner's code-only instruction. **Studio QA is deferred until evening. No in-game pass is claimed.** Blender ran headlessly, two threads, no GUI or desktop notifications.
+Prepared 02 November 2026 under the owner's code-only instruction. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Blender ran headlessly, two threads, no GUI or desktop notifications.
 
 ## Sources and retained balance
 
@@ -55,7 +55,7 @@ All34 clips rendered from exported Roblox tracks, not only source Blender action
 
 `audit.py` checks model hierarchy, finite/ordered curves, quaternions, module budgets, timing/config correspondence, walk playback caps, reused texture, all clip renders and target-only changes against95e3852. Selene/StyLua/Rojo and boss-balance simulation pass. These establish offline consistency, not actual FPS, live counterplay or group balance.
 
-**PENDING in Katorga92594200898716:** source/model sync only; `qa-lovers-runtime.luau`, `qa-lovers-animation-client.luau`, no-block/ordinary Mob regression; real Kyoto encounter through both thresholds, all nine specials, damage timing, cover/dodges, nocked-arrow attachment, phase/respawn/leash, spirit lifetime and projectile cap; console and arena visuals. Check render preflight before captures. Preserve map/no publication; restore Creative/camera and remove fixtures. Real4–6-player and phone/load testing remains open. `studio-validation.json` is deliberately PENDING.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-lovers-runtime.luau` PASS: 80cases/318checks; `qa-lovers-animation-client.luau` PASS: 29checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Files and rebuild
 

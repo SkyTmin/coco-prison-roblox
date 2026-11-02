@@ -1,6 +1,6 @@
 # Groot / Ent King — original offline checkpoint
 
-02 November2026, baseline450a60c. **Code/models only at the owner's request; all Studio verification pending evening.** Blender ran headlessly with two threads; no desktop controls, GUI launch or notifications.
+02 November2026, baseline450a60c. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Blender ran headlessly with two threads; no desktop controls, GUI launch or notifications.
 
 ## Evidence and balance
 
@@ -42,7 +42,7 @@ All20 clips rendered from the exported Roblox tracks. Four blends/10 JSON module
 
 `audit.py` checks target-only settings against450a60c, finite/sorted curves, normalized quaternions, module names/budgets, contact/death timing, gait playback rates, texture hash and complete render manifests. Selene/StyLua/Rojo and boss balance simulation pass. This is offline consistency, not live combat/FPS/multiplayer validation.
 
-**PENDING evening:** source/models-only sync into Katorga92594200898716; run `qa-ent-runtime.luau`, `qa-ent-animation-client.luau` and no-block/ordinary Mob regression. Live Farm encounter: both phases, four skills, real damage/cover/dodge/jump/gap/interrupt, summon cap/lifetime/ownership, full death/respawn/leash, appearance and console. Render preflight before screenshots. Preserve map, never publish, restore Creative/camera and remove fixtures. Real4–6-player and mobile/load tests remain open; `studio-validation.json` remains PENDING.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-ent-runtime.luau` PASS: 41cases/123checks; `qa-ent-animation-client.luau` PASS: 15checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Media / rebuild
 

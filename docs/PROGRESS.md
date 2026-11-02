@@ -51,6 +51,24 @@
 
 ## Журнал
 
+### 02.11 — Six pending bosses: Studio fixture/animation checkpoint [live QA]
+
+Raven Knight46cases/222checks, Vecna60/189, Samurai80/318, Ent41/123, Forest Guardian27/85 and Reaper54/172: all server suites PASS (308cases/1109checks). Actual client Motor6D suites also PASS (115checks), including ordinary-mob bite. No-block43checks pass; established Zombie/Basalt/Splinter/Minotaur animation regression39checks passes. Each `assets/models/<id>/studio-validation.json` now records real measurements with overall PARTIAL status. Full completed arena acceptance remains13/19: the six actual arena/group/mobile/load checks are still pending and must not be inferred from fixture results.
+
+Fixed real defects found live: Raven retainer floor ray mistook a low ceiling for support; Ent root patches did not recheck a wall added during windup; BossAnimator wrote Motor6D.Transform in RenderStepped instead of PreSimulation (fast raven/star phase mismatch disappeared after correction; final measured maxima below0.31° in these six suites). Corrected QA setup too: isolated suite coordinates, Ent dodge after facing locks, spirit ownership check after its intentional anchored cast. All temporary fixtures/scripts removed. Studio remains in Play, correct place/map, normal viewport/camera, owner Creative enabled. Console has no script errors; pre-existing asset-type warning203785492 remains. Selene/StyLua/Rojo and client compilation pass; no publish.
+
+
+### 02.11 — Live Katorga QA: left camera button, ancient case and Дворы [owner]
+
+Owner resumed Studio QA and confirmed the same cloud place92594200898716; scripts/models synced without replacing its map or publishing. «Вид» moved LEFT of the nine slots on both platforms,44px target/6px gap [decision]. One-time hudLayoutVersion2 removes only legacy view placement/hidden state; future customization remains valid. Saved buttons that overlap hotbar slots fall back to the responsive default for that viewport without changing the saved layout. Chat leaves room for the left control.
+
+Desktop native click toggles first person; inventory unlocks the pointer and blocks movement. Final left layout measured on desktop1809×633, iPhone17Pro750×381 and GalaxyA06705×338; view/inventory controls clear all nine slots, screenshots inspected. LandscapeSensor/DeviceSafeInsets retained; simulator/ForceMobile reset. Real phone touch remains unverified because Studio mouse injection is not native touch.
+
+Ancient case live checks: immediate levelIII book in bag, full-bag overflow and reveal after roulette, movement4.79studs during spinning, last key frees a slot, full bag+chest preserves key, walking away retains overflow, reopening without key, claim replay cannot duplicate the book. Temporary inventory/profile fields restored before later gameplay; backup retained outside repo. Offline179735 assertions also pass, including50000 improved rolls/allIII/10% above70 application chance [configured decision]. Live rejoin recovery is still a separate pending check.
+
+Дворы: normal teleport reached the correct location, actual mine block broke and credited faction capture.64 sampled rays across four pits reached MineBlocks,178 horizontal terrain pieces have no XZ overlap, runtime repair is idempotent; mine approach screenshot inspected. Ordinary/artifact/ender case regression and real-phone interactions remain open. Boss fixture/animation results and remaining arena/group/load work are tracked separately in each studio-validation.json.
+
+
 ### 02.11 — View button beside the hotbar [owner]
 
 Reused the existing localized camera button: visible by default on PC/mobile, immediately right of the nine slots. Responsive layout reserves its44px tap target [decision], shifts/scales the bar on narrow screens, and places the mobile inventory opener above it. Desktop hints leave room for both. The button uses the same first/third-person toggle as V/F5; hidden while windows are open, editable in HUD settings. Explicit saved HUD customizations remain authoritative. Selene/StyLua, Rojo build, client Luau compilation, and layout bounds at320–1440px on desktop/mobile pass [offline checks]. Code-only; Studio/visual QA deferred to evening. Main-client compile check also reproduced a pre-existing Luau200-register overflow in the previous commit [offline compiler]. Scoreboard references are now grouped and one-time HUD construction locals scoped; client compilation passes with the new button. This is required before the evening sync.

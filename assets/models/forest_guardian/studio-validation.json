@@ -1,1 +1,44 @@
-{"status":"PENDING","reason":"Owner requested code/models only; evening Studio QA deferred","placeId":92594200898716,"serverSuite":"scripts/qa-forest-guardian-runtime.luau","clientSuite":"scripts/qa-forest-guardian-animation-client.luau","liveArena":"Barn; two phases, 4–6 players and mobile performance still untested"}
+{
+  "status": "PARTIAL",
+  "date": "2026-11-02",
+  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "placeId": 92594200898716,
+  "serverSuite": "scripts/qa-forest-guardian-runtime.luau",
+  "serverResult": {
+    "status": "PASS",
+    "cases": 27,
+    "checks": 85,
+    "errors": []
+  },
+  "clientSuite": "scripts/qa-forest-guardian-animation-client.luau",
+  "clientResult": {
+    "maxAngleDegrees": 0.13122123414852796,
+    "checks": 13,
+    "status": "PASS",
+    "maxPosition": 0.0007243156433105469
+  },
+  "sharedChecks": {
+    "noBossBlock": {
+      "status": "PASS",
+      "checks": 43
+    },
+    "ordinaryMobBite": "PASS (raven-knight client suite)",
+    "legacyBossAnimations": {
+      "status": "PASS",
+      "checks": 39,
+      "bosses": [
+        "giant_zombie",
+        "basalt_guardian",
+        "splinter",
+        "minotaur"
+      ]
+    }
+  },
+  "remaining": [
+    "Observe complete live Barn encounter: all phases, real character contacts, death, leash and respawn.",
+    "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
+    "Owner visual/feel acceptance."
+  ],
+  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+}

@@ -78,8 +78,8 @@ local function floor(
 	end
 	local ray = rayFor(actor, e, hooks)
 	local hit = workspace:Raycast(target + Vector3.new(0, 6, 0), Vector3.new(0, -24, 0), ray)
-	local base =
-		workspace:Raycast(actor.root.Position + Vector3.new(0, 3, 0), Vector3.new(0, -20, 0), ray)
+	-- Start below overhead geometry: a low ceiling is not the actor's supporting floor.
+	local base = workspace:Raycast(actor.root.Position, Vector3.new(0, -20, 0), ray)
 	if
 		not hit
 		or not base

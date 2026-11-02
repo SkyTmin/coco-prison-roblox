@@ -28,7 +28,7 @@ local function part(name, at, size, parent)
 end
 local function fixture()
 	number += 1
-	local o = Vector3.new(235000 + number * 500, 30000, 0)
+	local o = Vector3.new(235000 + number * 500, 30000, 2000)
 	local g = Instance.new("Folder")
 	g.Parent = folder
 	part("Floor", o - Vector3.new(0, 1, 0), Vector3.new(150, 2, 150), g)
@@ -265,6 +265,11 @@ run("phases, mortal spirit, nock, lifecycle", function()
 			and #summons(o, "LoverNockedArrow") == 1
 	)
 	task.wait(cfg.lovers.spirit.spawnDuration + 0.5)
+	-- The first bow windup intentionally anchors the spirit; inspect ownership after it releases.
+	local releasedBy = os.clock() + cfg.lovers.spirit.bowshot.duration + 1
+	while ghost.Parent and ghost.PrimaryPart.Anchored and os.clock() < releasedBy do
+		task.wait(0.05)
+	end
 	check(
 		"spirit server owned",
 		not ghost.PrimaryPart.Anchored and ghost.PrimaryPart:GetNetworkOwner() == nil

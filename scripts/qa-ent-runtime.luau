@@ -28,7 +28,7 @@ local function part(name, at, size, parent)
 end
 local function fixture()
 	number += 1
-	local o = Vector3.new(245000 + number * 500, 30000, 0)
+	local o = Vector3.new(245000 + number * 500, 30000, 3000)
 	local g = Instance.new("Folder")
 	g.Parent = folder
 	part("Floor", o - Vector3.new(0, 1, 0), Vector3.new(150, 2, 150), g)
@@ -199,9 +199,6 @@ for _, mode in { "gap", "inner", "jump", "interruptBefore", "interruptAfter" } d
 	run("storm " .. mode, function()
 		local b, tr, hooks, hits, actions, g, o = fixture()
 		tr.Position = o + Vector3.new(0, 3, -8)
-		if mode == "gap" then
-			tr.Position = o + Vector3.new(8, 3, 0)
-		end
 		if mode == "inner" then
 			tr.Position = o + Vector3.new(0, 3, -2)
 		end
@@ -209,6 +206,10 @@ for _, mode in { "gap", "inner", "jump", "interruptBefore", "interruptAfter" } d
 			tr.Position = o + Vector3.new(0, 6, -8)
 		end
 		API.Cast(b, 3, tr.Position, true, hooks)
+		if mode == "gap" then
+			-- The cast turns toward its initial target. Dodge into the announced side gap afterwards.
+			tr.Position = o + Vector3.new(8, 3, 0)
+		end
 		task.wait(if mode == "interruptAfter" then 2.25 else 0.4)
 		if string.find(mode, "interrupt") then
 			b.humanoid.Health -= 150

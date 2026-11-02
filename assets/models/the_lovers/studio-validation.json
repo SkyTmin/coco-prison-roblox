@@ -1,16 +1,44 @@
 {
-  "status": "PENDING",
-  "reason": "Owner explicitly deferred Studio checks until evening; code/model work only.",
-  "intendedPlaceId": 92594200898716,
+  "status": "PARTIAL",
+  "date": "2026-11-02",
+  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "placeId": 92594200898716,
   "serverSuite": "scripts/qa-lovers-runtime.luau",
+  "serverResult": {
+    "status": "PASS",
+    "cases": 80,
+    "checks": 318,
+    "errors": []
+  },
   "clientSuite": "scripts/qa-lovers-animation-client.luau",
-  "required": [
-    "Sync repository scripts/models only into the owner-confirmed Katorga place; never replace its map or publish.",
-    "Run server fixture suite and actual-client Motor6D suite; record real outcomes, fix failures.",
-    "Run qa-boss-no-block.luau and ordinary Mob animation regression.",
-    "Observe Kyoto through50/25% phases: all nine specials, contact/cover/dodge timing, spirit server ownership/lifetime/resummon/paired-rain recovery,16-projectile cap, external nock attachment, death/leash/respawn cleanup.",
-    "Inspect arena appearance after qa-studio-render-state.luau reports frames; skip minimized-window captures.",
-    "Restore owner Creative/camera, remove all fixtures; review console.",
-    "Real 4\u20136-player/mobile/load testing remains open."
-  ]
+  "clientResult": {
+    "maxAngleDegrees": 0.30518744630943534,
+    "checks": 29,
+    "status": "PASS",
+    "maxPosition": 0.0001773238182067871
+  },
+  "sharedChecks": {
+    "noBossBlock": {
+      "status": "PASS",
+      "checks": 43
+    },
+    "ordinaryMobBite": "PASS (raven-knight client suite)",
+    "legacyBossAnimations": {
+      "status": "PASS",
+      "checks": 39,
+      "bosses": [
+        "giant_zombie",
+        "basalt_guardian",
+        "splinter",
+        "minotaur"
+      ]
+    }
+  },
+  "remaining": [
+    "Observe complete live Kyoto encounter: all phases, real character contacts, death, leash and respawn.",
+    "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
+    "Owner visual/feel acceptance."
+  ],
+  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
 }

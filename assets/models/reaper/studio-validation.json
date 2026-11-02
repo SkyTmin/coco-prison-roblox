@@ -1,1 +1,44 @@
-{"status":"PENDING","reason":"Owner requested code/models only; evening Studio QA deferred","placeId":92594200898716,"serverSuite":"scripts/qa-reaper-runtime.luau","clientSuite":"scripts/qa-reaper-animation-client.luau","liveArena":"Edge Gate; both phases, real4–6-player and mobile/load checks pending"}
+{
+  "status": "PARTIAL",
+  "date": "2026-11-02",
+  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "placeId": 92594200898716,
+  "serverSuite": "scripts/qa-reaper-runtime.luau",
+  "serverResult": {
+    "status": "PASS",
+    "cases": 54,
+    "checks": 172,
+    "errors": []
+  },
+  "clientSuite": "scripts/qa-reaper-animation-client.luau",
+  "clientResult": {
+    "maxAngleDegrees": 0.055952909680744456,
+    "checks": 14,
+    "status": "PASS",
+    "maxPosition": 2.384185791015625e-07
+  },
+  "sharedChecks": {
+    "noBossBlock": {
+      "status": "PASS",
+      "checks": 43
+    },
+    "ordinaryMobBite": "PASS (raven-knight client suite)",
+    "legacyBossAnimations": {
+      "status": "PASS",
+      "checks": 39,
+      "bosses": [
+        "giant_zombie",
+        "basalt_guardian",
+        "splinter",
+        "minotaur"
+      ]
+    }
+  },
+  "remaining": [
+    "Observe complete live Edge Gate encounter: all phases, real character contacts, death, leash and respawn.",
+    "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
+    "Owner visual/feel acceptance."
+  ],
+  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+}
