@@ -12,6 +12,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
+local PlayerPreferences = require(script.Parent.PlayerPreferences)
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local SettingsWindow = {}
 local LANGUAGES = { ru = "Русский", en = "English", es = "Español", fr = "Français" }
@@ -60,7 +61,7 @@ function SettingsWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local current = profile
-	local settings: any = SettingsWindow.of(profile)
+	local settings: any = PlayerPreferences.WithPreview(SettingsWindow.of(profile))
 	local viewport = workspace.CurrentCamera.ViewportSize
 	local inset = GuiService:GetGuiInset().Y
 	local width = math.clamp(viewport.X - 24, 300, 540)
@@ -89,6 +90,7 @@ function SettingsWindow.build(
 	local renderPage: (boolean?) -> ()
 	local function send(key: string, value: any)
 		settings[key] = value
+		PlayerPreferences.Preview(key, value)
 		Remotes.event("SetSetting"):FireServer(key, value)
 		renderPage(true)
 	end
@@ -406,10 +408,17 @@ function SettingsWindow.build(
 		local nextStamp = stamp(p)
 		if nextStamp ~= previous then
 			previous = nextStamp
-			settings = SettingsWindow.of(p)
+			settings = PlayerPreferences.WithPreview(SettingsWindow.of(p))
 			renderPage(true)
 		end
 	end
+	local previewExpired = PlayerPreferences.PreviewExpired.Event:Connect(function()
+		settings = PlayerPreferences.WithPreview(SettingsWindow.of(current))
+		renderPage(true)
+	end)
+	win.Destroying:Once(function()
+		previewExpired:Disconnect()
+	end)
 	renderPage(false)
 	return win, refresh
 end

@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-02",
+  "baseline": "a3ffec7",
+  "placeId": 92594200898716,
+  "scope": "Whole-game source/integration audit with focused settings runtime checks",
+  "settingsPreviewFixture": {
+    "status": "PASS",
+    "realPlayerStateChanged": false,
+    "count": 17,
+    "checks": [
+      "baseline neutral",
+      "brightness immediately previews",
+      "stale profile cannot override effect",
+      "stale profile cannot override label or mutate profile",
+      "confirmed value survives reconciliation",
+      "rapid return-to-value ignores matching intermediate response",
+      "rapid return-to-value label remains newest",
+      "rapid return-to-value settles without rollback",
+      "superseded timeout cannot clear newer preview",
+      "unanswered preview rolls back to latest server value",
+      "rollback label uses latest confirmed profile",
+      "mouse preview survives older patch",
+      "mouse rotation is not additionally multiplied",
+      "touch preview changes existing rotation wrapper",
+      "independent mouse and touch acknowledgements settle",
+      "invalid or unrelated previews do nothing",
+      "repeated preview keeps one correction and one camera adapter"
+    ]
+  },
+  "factionStorageFailureFixture": {
+    "readFailureWarned": true,
+    "previousStackLost": true,
+    "test": "actual faction module with fake storage",
+    "writes": 1,
+    "realDataStoresUsed": false,
+    "exposedEmptyAfterFailure": true
+  },
+  "liveSettings": {
+    "brightnessFixedScene": {
+      "before": 0.5,
+      "after": 1.5,
+      "effectBefore": -0.15,
+      "effectAfter": 0.15,
+      "result": "Visible difference in identical Courtyards camera scene with menu open; original permanent no-effect symptom not reproduced"
+    },
+    "menuAfterSync": {
+      "mouseLabel": "60%",
+      "mouseEngineValue": 0.6000000238418579,
+      "touchLabel": "300%",
+      "brightnessLabel": "130%",
+      "brightnessEffect": 0.09000000357627869
+    },
+    "restoredServerPreferences": {
+      "brightness": 1.2,
+      "mouseSensitivity": 0.5,
+      "touchSensitivity": 2.9
+    },
+    "restartPersistence": "Original preferences loaded correctly after source-only sync and Play restart",
+    "physicalMouseTest": "INCONCLUSIVE: Studio mouse tool moved Position but every movement Delta was zero",
+    "nativePhone": "NOT RUN"
+  },
+  "gangMineArrivals": {
+    "count": 4,
+    "allMissingLocationSpawn": true,
+    "realPassSpent": false
+  },
+  "checks": {
+    "selene": "PASS: 0 errors, 0 warnings, 0 parse errors",
+    "styluaSrc": "PASS",
+    "rojoBuild": "PASS: place/audit-2026-11-02.rbxl (validation artifact only)",
+    "diffWhitespace": "PASS"
+  },
+  "runtimeConsole": {
+    "newSettingsErrors": false,
+    "existingAssetWarning": "rbxassetid://203785492 asset type does not match requested type"
+  },
+  "limitations": [
+    "Source/model findings are not all reproduced engine exploits.",
+    "No real persistence fault injection, real economic exploit, group boss balance, WAN or native-mobile test was performed.",
+    "Existing boss/mining/network evidence retains its original limits."
+  ],
+  "publishing": false,
+  "mapReplacement": false
+}
