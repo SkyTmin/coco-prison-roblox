@@ -48,6 +48,7 @@ local SkeletonAbilities = require(script.Parent.SkeletonAbilities)
 local KnightAbilities = require(script.Parent.KnightAbilities)
 local PoseidonAbilities = require(script.Parent.PoseidonAbilities)
 local IllusionistAbilities = require(script.Parent.IllusionistAbilities)
+local MothAbilities = require(script.Parent.MothAbilities)
 local SpiderQueenAbilities = require(script.Parent.SpiderQueenAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
@@ -67,6 +68,7 @@ type Fight = {
 	knight: any?,
 	poseidon: any?,
 	illusionist: any?,
+	moth: any?,
 	spiderQueen: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
@@ -1134,6 +1136,7 @@ local function died(boss: Boss)
 	KnightAbilities.Clear(boss)
 	PoseidonAbilities.Clear(boss)
 	IllusionistAbilities.Clear(boss)
+	MothAbilities.Clear(boss)
 	SpiderQueenAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
@@ -1298,6 +1301,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		PoseidonAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.illusionist then
 		IllusionistAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.moth then
+		MothAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.spiderQueen then
 		SpiderQueenAbilities.Spawn(boss, { act = act })
 	else
@@ -1330,6 +1335,7 @@ local function think(boss: Boss, dt: number)
 		KnightAbilities.Clear(boss)
 		PoseidonAbilities.Clear(boss)
 		IllusionistAbilities.Clear(boss)
+		MothAbilities.Clear(boss)
 		SpiderQueenAbilities.Clear(boss)
 		boss.model, boss.root, boss.humanoid = nil, nil, nil
 		if old then
@@ -1390,6 +1396,7 @@ local function think(boss: Boss, dt: number)
 				% (if boss.fight.piglin or boss.fight.knight
 					then 7
 					elseif boss.fight.illusionist then 6
+					elseif boss.fight.moth then 5
 					elseif
 						boss.fight.splinter
 						or boss.fight.minotaur
@@ -1415,6 +1422,13 @@ local function think(boss: Boss, dt: number)
 			})
 		elseif boss.fight.illusionist then
 			IllusionistAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.moth then
+			MothAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1495,6 +1509,13 @@ local function think(boss: Boss, dt: number)
 				})
 			elseif boss.fight.illusionist then
 				IllusionistAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.moth then
+				MothAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
 					fighters = fighters,

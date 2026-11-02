@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 02.11 — Moth complete; continue directly to Undead King [owner]
+
+Owner said continue without stopping between bosses. Finished original headless Blender Moth,693 parts/39 joints/19 clips: articulated four-lobed wings, antennae, claws, collar and abdomen. Three claw motions, bolt fan, low-wall-clipped ground beam, meteors, jumpable/gapped wave, vulnerable four-stud aerial shooting with60-damage interruption into .75s stun. Death2s relaxes knees/arms/wings/abdomen; corrected hovering support poses and erect tail before export approval. HP1820, damage18/28/36 and wiki rewards unchanged; no block, chat damage+$ only. Sources/review videos/prompt/full audit: assets/models/moth/README.md.
+
+Katorga installed:60 cases/150 server assertions,15 actual client animation checks,43 no-block regression PASS. Live90s:424 samples/124 unanchored, all specials and shooting/landing stages, intact single boss, server ownership, finite rootY12004.49707–12008.49707. Exported stance error .02014 studs, late chest/collar-floor .002451. First startup bridge said unreachable but suite ran; resend hit fixture guard; initial shadowlight count missed. Isolated warm diagnostic hit28 at1.24855s; full warm rerun passed. Cold/load timing remains open. Existing asset203785492 warning retained. Owner returned, Creative ON, mouse.5, one character/no QA clone. Selene/StyLua/Rojo/Python/size/diff pass; no publish/Blender GUI. Completed11/19; next Undead King (`un_king`). Real group/mobile tests remain open.
+
 ### 02.11 — Spider Queen complete; next Moth [owner]
 
 Finished original headless Blender Spider Queen (863 parts/38 joints/12 clips) and huntsman add (93 parts/38 joints/six clips). Source-backed fang/web/add names and durations; authored alternating bites, heavy fangs, swept silk projectile, capped slowing webs and capped killable army. Progressive6.25s queen collapse/leg curl, two-second add death. HP1570, damage16/25/32, wiki respawn/rewards retained; no blocks, chat damage+$ only. Reference, exact built-in image_gen prompt, blend sources, exports, videos, comparisons and detailed audit: assets/models/spider_queen/README.md.
