@@ -78,16 +78,11 @@ local ok, err = xpcall(function()
 		local t = if name == "death" then clip.length else clip.length * 0.55
 		model:SetAttribute("Action", name)
 		model:SetAttribute("ActionLen", 10000)
-		model:SetAttribute(
-			"ActionAt",
-			workspace:GetServerTimeNow() - (if clip.loop then t else t / clip.length * 10000)
-		)
+		model:SetAttribute("ActionAt", workspace:GetServerTimeNow() - t / clip.length * 10000)
 		task.wait(0.2)
 		RS.PostSimulation:Wait()
 		local elapsed = workspace:GetServerTimeNow() - model:GetAttribute("ActionAt")
-		local at = if clip.loop
-			then elapsed
-			else math.min(clip.length, elapsed / 10000 * clip.length)
+		local at = math.min(clip.length, elapsed / 10000 * clip.length)
 		local p, a = compare(prepared, name, at, motors)
 		check("Vecna " .. name, p < 0.03 and a < 0.025)
 	end
