@@ -1,7 +1,7 @@
 {
   "status": "PARTIAL",
   "date": "2026-11-02",
-  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "reason": "Server fixtures, actual-client animation suites and automated solo encounters on the real cloud arenas passed. Group/mobile/load and owner acceptance remain open.",
   "placeId": 92594200898716,
   "serverSuite": "scripts/qa-ent-runtime.luau",
   "serverResult": {
@@ -35,13 +35,247 @@
     }
   },
   "remaining": [
-    "Observe complete live Farm encounter: all phases, real character contacts, death, leash and respawn.",
     "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
     "Owner visual/feel acceptance."
   ],
-  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
+  "limits": "One equipped real character, automatic HP refill, forced HP phase thresholds, accelerated leash/respawn waits. Natural AI, arena geometry and damage path retained. No solo-survival or 4–6-player balance claim. Cloud map preserved; no publishing.",
   "fixes": [
     "Revalidate line of sight before releasing locked root patches when a wall appeared during windup."
   ],
-  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D",
+  "arenaStatus": "PASS_STUDIO_SOLO",
+  "arenaServerSuite": "scripts/qa-boss-arena-live.luau",
+  "arenaServerResult": {
+    "checks": [
+      {
+        "name": "natural AI: rise",
+        "pass": true
+      },
+      {
+        "name": "natural AI: stomp",
+        "pass": true
+      },
+      {
+        "name": "natural AI: leafstorm",
+        "pass": true
+      },
+      {
+        "name": "natural AI: shout",
+        "pass": true
+      },
+      {
+        "name": "actual damage reaches equipped player",
+        "pass": true
+      },
+      {
+        "name": "physical server-owned chase",
+        "pass": true
+      },
+      {
+        "name": "phase two exercised",
+        "pass": true
+      },
+      {
+        "name": "leash heals",
+        "pass": true
+      },
+      {
+        "name": "leash clears summons/props",
+        "pass": true
+      },
+      {
+        "name": "leash returns to spawn",
+        "pass": true
+      },
+      {
+        "name": "death action",
+        "pass": true
+      },
+      {
+        "name": "corpse anchored and non-colliding",
+        "pass": true
+      },
+      {
+        "name": "respawn countdown published",
+        "pass": true
+      },
+      {
+        "name": "corpse removed",
+        "pass": true
+      },
+      {
+        "name": "death clears encounter",
+        "pass": true
+      },
+      {
+        "name": "scheduled respawn creates fresh boss",
+        "pass": true
+      },
+      {
+        "name": "respawn full HP",
+        "pass": true
+      },
+      {
+        "name": "one respawned model",
+        "pass": true
+      },
+      {
+        "name": "unattributed QA death gives no rewards",
+        "pass": true
+      }
+    ],
+    "id": "ent",
+    "phases": {
+      "1": true,
+      "2": true
+    },
+    "summonPeaks": {
+      "ent_minion": 4,
+      "ent_branch": 5
+    },
+    "maxY": 21020.49609375,
+    "unanchored": 60,
+    "limits": "One equipped player, automated waypoint movement and health refill; timers accelerated only for lifecycle checks. No group/mobile balance claim.",
+    "status": "PASS",
+    "minY": 21020.494140625,
+    "samples": 396,
+    "actions": {
+      "rise": 64,
+      "stomp": 48,
+      "shout": 34,
+      "leftpunch": 61,
+      "leafstorm": 117,
+      "rightpunch": 72
+    },
+    "hitSummary": {
+      "count": 39,
+      "minimumDamage": 2.1887969970703125,
+      "maximumDamage": 23.07360076904297,
+      "note": "Actual health decreases through equipped armor/books; includes summons and persistent effects, not isolated raw skill damage."
+    }
+  },
+  "arenaClientSuite": "scripts/qa-boss-arena-client.luau",
+  "arenaClientResult": {
+    "maxCopies": 1,
+    "renderFrames": 3400,
+    "movingJoints": [
+      "armL",
+      "armR",
+      "beard1",
+      "beard2",
+      "body",
+      "chest",
+      "crownL0",
+      "crownL1",
+      "crownL2",
+      "crownR0",
+      "crownR1",
+      "crownR2",
+      "fingerL0",
+      "fingerL1",
+      "fingerL2",
+      "fingerL3",
+      "fingerR0",
+      "fingerR1",
+      "fingerR2",
+      "fingerR3",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "jaw",
+      "legL",
+      "legR",
+      "root",
+      "shinL",
+      "shinR",
+      "thumbL",
+      "thumbR",
+      "twigL0",
+      "twigL1",
+      "twigL2",
+      "twigR0",
+      "twigR1",
+      "twigR2",
+      "vineL1",
+      "vineL2",
+      "vineL3",
+      "vineR1",
+      "vineR2",
+      "vineR3"
+    ],
+    "deathFrames": 65,
+    "deathsMovingJoints": [
+      "armL",
+      "armR",
+      "beard1",
+      "beard2",
+      "body",
+      "chest",
+      "crownL0",
+      "crownL1",
+      "crownL2",
+      "crownR0",
+      "crownR1",
+      "crownR2",
+      "fingerL0",
+      "fingerL1",
+      "fingerL2",
+      "fingerL3",
+      "fingerR0",
+      "fingerR1",
+      "fingerR2",
+      "fingerR3",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "jaw",
+      "legL",
+      "legR",
+      "root",
+      "shinL",
+      "shinR",
+      "thumbL",
+      "thumbR",
+      "twigL0",
+      "twigL1",
+      "twigL2",
+      "twigR0",
+      "twigR1",
+      "twigR2",
+      "vineL1",
+      "vineL2",
+      "vineL3",
+      "vineR1",
+      "vineR2",
+      "vineR3"
+    ],
+    "modelsSeen": 2,
+    "actions": {
+      "rise": true,
+      "rightpunch": true,
+      "shout": true,
+      "death": true,
+      "leafstorm": true,
+      "leftpunch": true,
+      "stomp": true,
+      "spawn": true
+    },
+    "framesOver100ms": 21,
+    "status": "PASS",
+    "limits": "Background Studio viewport 1168x338; render counters are observations, not mobile/server-load benchmarks."
+  },
+  "hurtCamera": {
+    "bossId": "ent",
+    "samples": 21,
+    "maxPitchDeltaRadians": 0,
+    "method": "HurtFlash replication sampled camera pitch at contact and after 0.25 s, normal game camera, no mouse movement. Not a native input test."
+  }
 }

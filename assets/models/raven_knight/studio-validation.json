@@ -1,7 +1,7 @@
 {
   "status": "PARTIAL",
   "date": "2026-11-02",
-  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "reason": "Server fixtures, actual-client animation suites and automated solo encounters on the real cloud arenas passed. Group/mobile/load and owner acceptance remain open.",
   "placeId": 92594200898716,
   "serverSuite": "scripts/qa-raven-knight-runtime.luau",
   "serverResult": {
@@ -35,13 +35,226 @@
     }
   },
   "remaining": [
-    "Observe complete live Castle encounter: all phases, real character contacts, death, leash and respawn.",
     "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
     "Owner visual/feel acceptance."
   ],
-  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
+  "limits": "One equipped real character, automatic HP refill, forced HP phase thresholds, accelerated leash/respawn waits. Natural AI, arena geometry and damage path retained. No solo-survival or 4–6-player balance claim. Cloud map preserved; no publishing.",
   "fixes": [
     "Retainer support ray begins at the actor root so a low ceiling is not mistaken for floor."
   ],
-  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D",
+  "arenaStatus": "PASS_STUDIO_SOLO",
+  "arenaServerSuite": "scripts/qa-boss-arena-live.luau",
+  "arenaServerResult": {
+    "checks": [
+      {
+        "name": "natural AI: fastcombo",
+        "pass": true
+      },
+      {
+        "name": "natural AI: comboflyattack",
+        "pass": true
+      },
+      {
+        "name": "natural AI: explosion",
+        "pass": true
+      },
+      {
+        "name": "natural AI: ravencall",
+        "pass": true
+      },
+      {
+        "name": "actual damage reaches equipped player",
+        "pass": true
+      },
+      {
+        "name": "physical server-owned chase",
+        "pass": true
+      },
+      {
+        "name": "phase two exercised",
+        "pass": true
+      },
+      {
+        "name": "leash heals",
+        "pass": true
+      },
+      {
+        "name": "leash clears summons/props",
+        "pass": true
+      },
+      {
+        "name": "leash returns to spawn",
+        "pass": true
+      },
+      {
+        "name": "death action",
+        "pass": true
+      },
+      {
+        "name": "corpse anchored and non-colliding",
+        "pass": true
+      },
+      {
+        "name": "respawn countdown published",
+        "pass": true
+      },
+      {
+        "name": "corpse removed",
+        "pass": true
+      },
+      {
+        "name": "death clears encounter",
+        "pass": true
+      },
+      {
+        "name": "scheduled respawn creates fresh boss",
+        "pass": true
+      },
+      {
+        "name": "respawn full HP",
+        "pass": true
+      },
+      {
+        "name": "one respawned model",
+        "pass": true
+      },
+      {
+        "name": "unattributed QA death gives no rewards",
+        "pass": true
+      }
+    ],
+    "id": "raven_knight",
+    "phases": {
+      "1": true,
+      "2": true
+    },
+    "summonPeaks": {
+      "crow_reaper": 1,
+      "raven": 5
+    },
+    "maxY": 16504.59375,
+    "unanchored": 48,
+    "limits": "One equipped player, automated waypoint movement and health refill; timers accelerated only for lifecycle checks. No group/mobile balance claim.",
+    "status": "PASS",
+    "minY": 16504.59375,
+    "samples": 398,
+    "actions": {
+      "comboflyattack": 66,
+      "fastcombo": 81,
+      "simplecombo2": 46,
+      "ravencall": 52,
+      "explosion": 108,
+      "simplecombo": 45
+    },
+    "hitSummary": {
+      "count": 23,
+      "minimumDamage": 2.0562744140625,
+      "maximumDamage": 16.028400421142578,
+      "note": "Actual health decreases through equipped armor/books; includes summons and persistent effects, not isolated raw skill damage."
+    }
+  },
+  "arenaClientSuite": "scripts/qa-boss-arena-client.luau",
+  "arenaClientResult": {
+    "maxCopies": 1,
+    "renderFrames": 1182,
+    "movingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "cape1",
+      "cape2",
+      "cape3",
+      "capeL1",
+      "capeL2",
+      "capeL3",
+      "capeR1",
+      "capeR2",
+      "capeR3",
+      "chest",
+      "clothFront",
+      "crest1",
+      "crest2",
+      "fingersL",
+      "fingersR",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "legL",
+      "legR",
+      "neck",
+      "root",
+      "shinL",
+      "shinR",
+      "shoulderL",
+      "shoulderR",
+      "tassetL",
+      "tassetR",
+      "thumbL",
+      "thumbR",
+      "weapon",
+      "wingL",
+      "wingR"
+    ],
+    "deathFrames": 77,
+    "deathsMovingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "cape1",
+      "cape2",
+      "cape3",
+      "capeL1",
+      "capeL2",
+      "capeL3",
+      "capeR1",
+      "capeR2",
+      "capeR3",
+      "chest",
+      "clothFront",
+      "crest1",
+      "crest2",
+      "fingersL",
+      "fingersR",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "legL",
+      "legR",
+      "neck",
+      "root",
+      "shinL",
+      "shinR",
+      "shoulderL",
+      "shoulderR",
+      "tassetL",
+      "tassetR",
+      "thumbR",
+      "weapon",
+      "wingL",
+      "wingR"
+    ],
+    "modelsSeen": 2,
+    "actions": {
+      "comboflyattack": true,
+      "simplecombo": true,
+      "fastcombo": true,
+      "death": true,
+      "simplecombo2": true,
+      "ravencall": true,
+      "explosion": true,
+      "spawn": true
+    },
+    "framesOver100ms": 9,
+    "status": "PASS",
+    "limits": "Background Studio viewport 1168x338; render counters are observations, not mobile/server-load benchmarks. Raven observer began during phase two; its complete server action cycle and dedicated client clip suite were checked separately."
+  }
 }

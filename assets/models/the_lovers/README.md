@@ -1,6 +1,6 @@
 # Samurai Hanashiguro / The Lovers — offline checkpoint
 
-Prepared 02 November 2026 under the owner's code-only instruction. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Blender ran headlessly, two threads, no GUI or desktop notifications.
+Prepared 02 November 2026 under the owner's code-only instruction. **Studio fixtures, client animation suites and actual-arena solo lifecycle checks passed on 02.11. Group/mobile/load and owner acceptance remain open.** Blender ran headlessly, two threads, no GUI or desktop notifications.
 
 ## Sources and retained balance
 
@@ -24,7 +24,7 @@ Original imagegen turnarounds and exact prompts are retained. Complete red/gold 
 
 Established original pipeline/gait/IK is reused; sword choreography, two vulnerable phase changes, bow draw/release and layered secondary motion are authored here. Samurai death5.2s recoils, buckles, releases the katana, lands forward and relaxes the hands/cloth. Spirit death4s folds the knees, rolls forward, releases the bow and settles. Weapon drops are baked joint movement, no per-box physics. Armor remains worn in all three phases: transitions change stance and attacks, without rebuilding/fading the full rendered rig.
 
-The spirit's four nocked-arrow boxes are separated before the rig enters Workspace:479 immutable body boxes plus a tiny external four-box prop welded to J_arrow. Reload/release creates/destroys only this prop. Animation still drives the original arrow joint. Review renders hide it at the matching release; final live attachment/replication is explicitly pending QA.
+The spirit's four nocked-arrow boxes are separated before the rig enters Workspace:479 immutable body boxes plus a tiny external four-box prop welded to J_arrow. Reload/release creates/destroys only this prop. Animation still drives the original arrow joint. Review renders hide it at the matching release; Studio fixtures and the live Kyoto encounter confirm the separate nocked prop without changing the main body part count.
 
 Shared `blockmob.py` grounding now treats a detached articulated prop's full joint subtree as one object. Previously the bow limbs/string held the torso off the floor while only the handle was corrected. All eight previous detached-prop rigs have leaf-only detached joints, so their group membership/calculation is unchanged; the structural regression is recorded in `offline-validation.json`. Spirit sleeves/front folds were adjusted so they do not hold up the torso.
 
@@ -55,7 +55,7 @@ All34 clips rendered from exported Roblox tracks, not only source Blender action
 
 `audit.py` checks model hierarchy, finite/ordered curves, quaternions, module budgets, timing/config correspondence, walk playback caps, reused texture, all clip renders and target-only changes against95e3852. Selene/StyLua/Rojo and boss-balance simulation pass. These establish offline consistency, not actual FPS, live counterplay or group balance.
 
-**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-lovers-runtime.luau` PASS: 80cases/318checks; `qa-lovers-animation-client.luau` PASS: 29checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-lovers-runtime.luau` PASS: 80cases/318checks; `qa-lovers-animation-client.luau` PASS: 29checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Actual-arena solo lifecycle now PASS: 27 checks, 32 real damage samples, all required natural AI actions, phase thresholds, server-owned chase, leash cleanup/heal, articulated death and scheduled fresh respawn. No duplicate model or body-part loss observed. Automatic HP refill and shortened lifecycle waits mean this is not a survival/balance test. Real4–6-player combat, native phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Files and rebuild
 

@@ -1,6 +1,6 @@
-# Raven Knight — original code/model checkpoint, Studio pending
+# Raven Knight — original code/model and Studio solo QA
 
-Prepared 02 November 2026. The owner explicitly deferred Studio until evening. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Four headless Blender rigs and server/client code are ready for that verification.
+Prepared 02 November 2026. The owner explicitly deferred Studio until evening. **Studio fixtures, client animation suites and actual-arena solo lifecycle checks passed on 02.11. Group/mobile/load and owner acceptance remain open.** Four headless Blender rigs and server/client code are ready for that verification.
 
 ## Evidence and authorship
 
@@ -47,7 +47,7 @@ The fly arc is visual, with a grounded collision root. Destination/path checks r
 
 Offline: Selene src0 errors/warnings/parse errors; StyLua src check; Rojo build; Python AST, finite/sorted tracks, normalized quaternions, module limits, no-glow geometry, exact clip/config durations and target-only decision diff pass. `audit.py` checks changes against c9ab15e and records `offline-validation.json`. Sixteen JSON modules, all below180000 characters. Primary motion error <.0081stud/<.36°; walk stance error <.016stud; final torso floor <.002stud; full death silhouette penetration <.031stud. Retainer/raven/axe each have their own measured curve reports. These measurements do not establish Roblox runtime behavior or mobile performance.
 
-**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-raven-knight-runtime.luau` PASS: 46cases/222checks; `qa-raven-knight-animation-client.luau` PASS: 20checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-raven-knight-runtime.luau` PASS: 46cases/222checks; `qa-raven-knight-animation-client.luau` PASS: 20checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Actual-arena solo lifecycle now PASS: 19 checks, 23 real damage samples, all required natural AI actions, phase thresholds, server-owned chase, leash cleanup/heal, articulated death and scheduled fresh respawn. No duplicate model or body-part loss observed. Automatic HP refill and shortened lifecycle waits mean this is not a survival/balance test. Real4–6-player combat, native phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Rebuild
 

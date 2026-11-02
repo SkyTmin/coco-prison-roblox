@@ -1,7 +1,7 @@
 {
   "status": "PARTIAL",
   "date": "2026-11-02",
-  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "reason": "Server fixtures, actual-client animation suites and automated solo encounters on the real cloud arenas passed. Group/mobile/load and owner acceptance remain open.",
   "placeId": 92594200898716,
   "serverSuite": "scripts/qa-forest-guardian-runtime.luau",
   "serverResult": {
@@ -35,10 +35,238 @@
     }
   },
   "remaining": [
-    "Observe complete live Barn encounter: all phases, real character contacts, death, leash and respawn.",
     "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
     "Owner visual/feel acceptance."
   ],
-  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
-  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+  "limits": "One equipped real character, automatic HP refill, forced HP phase thresholds, accelerated leash/respawn waits. Natural AI, arena geometry and damage path retained. No solo-survival or 4–6-player balance claim. Cloud map preserved; no publishing.",
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D",
+  "arenaStatus": "PASS_STUDIO_SOLO",
+  "arenaServerSuite": "scripts/qa-boss-arena-live.luau",
+  "arenaServerResult": {
+    "checks": [
+      {
+        "name": "natural AI: big_punch",
+        "pass": true
+      },
+      {
+        "name": "natural AI: root_sweep",
+        "pass": true
+      },
+      {
+        "name": "natural AI: summon",
+        "pass": true
+      },
+      {
+        "name": "actual damage reaches equipped player",
+        "pass": true
+      },
+      {
+        "name": "physical server-owned chase",
+        "pass": true
+      },
+      {
+        "name": "phase two exercised",
+        "pass": true
+      },
+      {
+        "name": "leash heals",
+        "pass": true
+      },
+      {
+        "name": "leash clears summons/props",
+        "pass": true
+      },
+      {
+        "name": "leash returns to spawn",
+        "pass": true
+      },
+      {
+        "name": "death action",
+        "pass": true
+      },
+      {
+        "name": "corpse anchored and non-colliding",
+        "pass": true
+      },
+      {
+        "name": "respawn countdown published",
+        "pass": true
+      },
+      {
+        "name": "corpse removed",
+        "pass": true
+      },
+      {
+        "name": "death clears encounter",
+        "pass": true
+      },
+      {
+        "name": "scheduled respawn creates fresh boss",
+        "pass": true
+      },
+      {
+        "name": "respawn full HP",
+        "pass": true
+      },
+      {
+        "name": "one respawned model",
+        "pass": true
+      },
+      {
+        "name": "unattributed QA death gives no rewards",
+        "pass": true
+      }
+    ],
+    "id": "forest_guardian",
+    "phases": {
+      "1": true,
+      "2": true
+    },
+    "summonPeaks": {
+      "guardian_minion": 4,
+      "guardian_root": 5
+    },
+    "maxY": 22505.59375,
+    "unanchored": 59,
+    "limits": "One equipped player, automated waypoint movement and health refill; timers accelerated only for lifecycle checks. No group/mobile balance claim.",
+    "status": "PASS",
+    "minY": 22504.4921875,
+    "samples": 395,
+    "actions": {
+      "root_sweep": 85,
+      "big_punch": 43,
+      "summon": 93,
+      "attack_left": 86,
+      "attack": 88
+    },
+    "hitSummary": {
+      "count": 34,
+      "minimumDamage": 2.7132034301757812,
+      "maximumDamage": 37.55160140991211,
+      "note": "Actual health decreases through equipped armor/books; includes summons and persistent effects, not isolated raw skill damage."
+    }
+  },
+  "arenaClientSuite": "scripts/qa-boss-arena-client.luau",
+  "arenaClientResult": {
+    "maxCopies": 1,
+    "renderFrames": 1885,
+    "movingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "chest",
+      "crownL0",
+      "crownL1",
+      "crownL2",
+      "crownR0",
+      "crownR1",
+      "crownR2",
+      "fingerL0",
+      "fingerL1",
+      "fingerL2",
+      "fingerR0",
+      "fingerR1",
+      "fingerR2",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "jaw",
+      "legL",
+      "legR",
+      "mantleBackL",
+      "mantleBackR",
+      "mantleL1",
+      "mantleL2",
+      "mantleR1",
+      "mantleR2",
+      "root",
+      "shinL",
+      "shinR",
+      "twigL0",
+      "twigL1",
+      "twigL2",
+      "twigR0",
+      "twigR1",
+      "twigR2",
+      "vineL1",
+      "vineL2",
+      "vineL3",
+      "vineR1",
+      "vineR2",
+      "vineR3"
+    ],
+    "deathFrames": 72,
+    "deathsMovingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "chest",
+      "crownL0",
+      "crownL1",
+      "crownL2",
+      "crownR0",
+      "crownR1",
+      "crownR2",
+      "fingerL0",
+      "fingerL1",
+      "fingerL2",
+      "fingerR0",
+      "fingerR1",
+      "fingerR2",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "jaw",
+      "legL",
+      "legR",
+      "mantleBackL",
+      "mantleBackR",
+      "mantleL1",
+      "mantleL2",
+      "mantleR1",
+      "mantleR2",
+      "root",
+      "shinL",
+      "shinR",
+      "twigL0",
+      "twigL1",
+      "twigL2",
+      "twigR0",
+      "twigR1",
+      "twigR2",
+      "vineL1",
+      "vineL2",
+      "vineL3",
+      "vineR1",
+      "vineR2",
+      "vineR3"
+    ],
+    "modelsSeen": 2,
+    "actions": {
+      "root_sweep": true,
+      "summon": true,
+      "death": true,
+      "big_punch": true,
+      "attack": true,
+      "attack_left": true,
+      "spawn": true
+    },
+    "framesOver100ms": 24,
+    "status": "PASS",
+    "limits": "Background Studio viewport 1168x338; render counters are observations, not mobile/server-load benchmarks."
+  },
+  "hurtCamera": {
+    "bossId": "forest_guardian",
+    "samples": 30,
+    "maxPitchDeltaRadians": 0,
+    "method": "HurtFlash replication sampled camera pitch at contact and after 0.25 s, normal game camera, no mouse movement. Not a native input test."
+  }
 }

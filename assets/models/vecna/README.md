@@ -1,6 +1,6 @@
 # Vecna — original rig and encounter
 
-Prepared 02 November 2026 under the owner's code-only instruction. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Blender ran headlessly with two threads, no notifications.
+Prepared 02 November 2026 under the owner's code-only instruction. **Studio fixtures, client animation suites and actual-arena solo lifecycle checks passed on 02.11. Group/mobile/load and owner acceptance remain open.** Blender ran headlessly with two threads, no notifications.
 
 ## Evidence and scope
 
@@ -48,7 +48,7 @@ Stalker42HP/10damage/speed10/life22s; hound30HP/9damage/speed13/life22s; bat16HP
 
 Offline Selene/StyLua/Rojo plus Python/JSON/model/config checks pass. `audit.py` compares decisions against checkpoint bee4a8c, permits only this boss's authored model/mechanics fields, checks finite sorted curves, quaternion normalization, 14 modules (largest118782 characters), clip/config timings, companion filename separation and review manifests. Main position error<.0081stud, rotation<.36°, planted-foot error<.018stud, final torso floor error<.00005stud; full death silhouette error<.017stud. Each companion has its own measured report. These checks do not establish Roblox behavior, actual FPS or multiplayer balance.
 
-**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-vecna-runtime.luau` PASS: 60cases/189checks; `qa-vecna-animation-client.luau` PASS: 24checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-vecna-runtime.luau` PASS: 60cases/189checks; `qa-vecna-animation-client.luau` PASS: 24checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Actual-arena solo lifecycle now PASS: 19 checks, 45 real damage samples, all required natural AI actions, phase thresholds, server-owned chase, leash cleanup/heal, articulated death and scheduled fresh respawn. No duplicate model or body-part loss observed. Automatic HP refill and shortened lifecycle waits mean this is not a survival/balance test. Real4–6-player combat, native phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Rebuild
 

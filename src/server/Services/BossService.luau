@@ -595,7 +595,10 @@ end
 -- ---------------------------------------------------------------- the boss outlives its server (MemoryStore)
 local SAVE_EVERY = 3
 local storeOk, store = pcall(function()
-	return MemoryStoreService:GetHashMap("BossState")
+	-- Studio deaths and accelerated QA respawns must not change live-server boss timers.
+	return MemoryStoreService:GetHashMap(
+		if RunService:IsStudio() then "BossState_Studio" else "BossState"
+	)
 end)
 
 local function snapshot(boss: Boss): Saved
@@ -1882,6 +1885,12 @@ function BossService.Start()
 				spawnBoss(boss)
 			elseif op == "kill" and boss.humanoid then
 				boss.humanoid.Health = 0
+			elseif op == "clearDamage" then
+				-- Clear test attribution before an unattributed lifecycle probe.
+				table.clear(boss.damageBy)
+				if boss.humanoid then
+					boss.humanoid:SetAttribute("LastHitBy", nil)
+				end
 			end
 			local h = boss.humanoid
 			return string.format(

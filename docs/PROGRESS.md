@@ -51,6 +51,14 @@
 
 ## Журнал
 
+### 02.11 — All 19 bosses have Studio checks; final six real arenas passed [owner/live QA]
+
+Raven Knight, Vecna, Samurai, Ent, Forest Guardian and Reaper completed their actual cloud-arena solo encounters, following the earlier 13 bosses. All 123 action/lifecycle assertions pass, 219 real equipped-character damage samples recorded. Natural specials and phases, server-owned chase, immutable body parts/no duplicate boss, no shields, leash heal/cleanup, articulated death, encounter cleanup and scheduled fresh respawn checked. Client death motion reached 37–64 joints per boss; all six streamed a fresh replacement with at most one simultaneous copy. Reaper received two normal sword hits confirmed by the server (11.5 each). Ent third-person 21 and Guardian first-person 30 hurt-camera samples had zero pitch drift over 0.25 s. Evidence: each `assets/models/<id>/studio-validation.json`, arenaStatus PASS_STUDIO_SOLO; overall PARTIAL intentionally retained.
+
+Harnesses `qa-boss-arena-live.luau`/`qa-boss-arena-client.luau` use one real character with HP refill, forced phase thresholds and temporarily shortened leash/respawn waits. This does NOT establish solo survivability, real 4–6-player balance, native phone input or performance under load. Those and owner visual/feel acceptance remain open. Background Studio rendered at 1168x338; no foreground stealing or notifications. All temporary scripts/attributes removed, timers restored, owner at prison with Creative/ForceField, full HP, original selected slot 9 and normal third-person camera. No inventory fixture or attributed boss kill reward was left behind.
+
+Separated Studio boss MemoryStore (`BossState_Studio`) from production (`BossState`) so accelerated QA cannot rewrite live-server boss timers. Studio-only clearDamage removes test reward attribution before artificial deaths. Source-only sync preserved the cloud map; no publishing. Selene/StyLua/Rojo pass. Console showed transient Roblox asset HTTP 503/profile-save HTTP 500 errors; final explicit profile save succeeded; all 19 runtime leash/respawn timers match the repository configs. Existing asset-type warning 203785492 remains.
+
 ### 02.11 — Six pending bosses: Studio fixture/animation checkpoint [live QA]
 
 Raven Knight46cases/222checks, Vecna60/189, Samurai80/318, Ent41/123, Forest Guardian27/85 and Reaper54/172: all server suites PASS (308cases/1109checks). Actual client Motor6D suites also PASS (115checks), including ordinary-mob bite. No-block43checks pass; established Zombie/Basalt/Splinter/Minotaur animation regression39checks passes. Each `assets/models/<id>/studio-validation.json` now records real measurements with overall PARTIAL status. Full completed arena acceptance remains13/19: the six actual arena/group/mobile/load checks are still pending and must not be inferred from fixture results.

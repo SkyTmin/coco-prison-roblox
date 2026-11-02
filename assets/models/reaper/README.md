@@ -1,6 +1,6 @@
 # Reaper — original offline checkpoint
 
-02 November 2026, baseline d51e07c. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Headless Blender with two threads, no desktop controls or notifications.
+02 November 2026, baseline d51e07c. **Studio fixtures, client animation suites and actual-arena solo lifecycle checks passed on 02.11. Group/mobile/load and owner acceptance remain open.** Headless Blender with two threads, no desktop controls or notifications.
 
 ## Evidence and balance
 
@@ -41,7 +41,7 @@ Special recovery 1.8 s, existing phase-two cooldown scaling retained. Teleport i
 
 Three blends, 17 exported clips rendered, nine JSON modules. Main curve comparison at 60 Hz: position error <.008 stud, rotation <.367°, planted stance <.028 stud; final torso and released scythe floor errors <.003 stud. Full death silhouette floor error <.03 stud. Companion curve reports retained. `audit.py` checks finite/sorted curves, normalized quaternions, module names/budgets, timings/gait, full render manifests, texture hash and target-only config against d51e07c. Hash comparison confirms the final robe-fold edit changes only the death clip. Selene, StyLua, Rojo and boss balance simulation pass. These are offline checks, not live combat/replication/FPS results.
 
-**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-reaper-runtime.luau` PASS: 54cases/172checks; `qa-reaper-animation-client.luau` PASS: 14checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-reaper-runtime.luau` PASS: 54cases/172checks; `qa-reaper-animation-client.luau` PASS: 14checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Actual-arena solo lifecycle now PASS: 21 checks, 46 real damage samples, all required natural AI actions, phase thresholds, server-owned chase, leash cleanup/heal, articulated death and scheduled fresh respawn. No duplicate model or body-part loss observed. Automatic HP refill and shortened lifecycle waits mean this is not a survival/balance test. Real4–6-player combat, native phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Media and rebuild
 

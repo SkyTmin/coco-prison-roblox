@@ -1,7 +1,7 @@
 {
   "status": "PARTIAL",
   "date": "2026-11-02",
-  "reason": "Server fixture and actual-client animation suites passed in Studio. Full arena/group/mobile/load acceptance remains open.",
+  "reason": "Server fixtures, actual-client animation suites and automated solo encounters on the real cloud arenas passed. Group/mobile/load and owner acceptance remain open.",
   "placeId": 92594200898716,
   "serverSuite": "scripts/qa-lovers-runtime.luau",
   "serverResult": {
@@ -35,10 +35,274 @@
     }
   },
   "remaining": [
-    "Observe complete live Kyoto encounter: all phases, real character contacts, death, leash and respawn.",
     "Real 4–6-player combat, native phone input and mobile frame-time/load checks.",
     "Owner visual/feel acceptance."
   ],
-  "limits": "Fixture geometry and targets are disposable. Source/models-only sync; cloud map preserved; no publishing.",
-  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D"
+  "limits": "One equipped real character, automatic HP refill, forced HP phase thresholds, accelerated leash/respawn waits. Natural AI, arena geometry and damage path retained. No solo-survival or 4–6-player balance claim. Cloud map preserved; no publishing.",
+  "animationTiming": "BossAnimator writes Motor6D.Transform in PreSimulation. Reference: https://create.roblox.com/docs/reference/engine/classes/Motor6D",
+  "arenaStatus": "PASS_STUDIO_SOLO",
+  "arenaServerSuite": "scripts/qa-boss-arena-live.luau",
+  "arenaServerResult": {
+    "checks": [
+      {
+        "name": "natural AI: triplecut",
+        "pass": true
+      },
+      {
+        "name": "natural AI: sweep",
+        "pass": true
+      },
+      {
+        "name": "natural AI: thrust",
+        "pass": true
+      },
+      {
+        "name": "natural AI: dashcut",
+        "pass": true
+      },
+      {
+        "name": "natural AI: skycut",
+        "pass": true
+      },
+      {
+        "name": "natural AI: stars",
+        "pass": true
+      },
+      {
+        "name": "natural AI: sickle",
+        "pass": true
+      },
+      {
+        "name": "natural AI: spears",
+        "pass": true
+      },
+      {
+        "name": "natural AI: arrowcall",
+        "pass": true
+      },
+      {
+        "name": "natural AI: phase2",
+        "pass": true
+      },
+      {
+        "name": "natural AI: phase3",
+        "pass": true
+      },
+      {
+        "name": "actual damage reaches equipped player",
+        "pass": true
+      },
+      {
+        "name": "physical server-owned chase",
+        "pass": true
+      },
+      {
+        "name": "phase two exercised",
+        "pass": true
+      },
+      {
+        "name": "phase three exercised",
+        "pass": true
+      },
+      {
+        "name": "leash heals",
+        "pass": true
+      },
+      {
+        "name": "leash clears summons/props",
+        "pass": true
+      },
+      {
+        "name": "leash returns to spawn",
+        "pass": true
+      },
+      {
+        "name": "death action",
+        "pass": true
+      },
+      {
+        "name": "corpse anchored and non-colliding",
+        "pass": true
+      },
+      {
+        "name": "respawn countdown published",
+        "pass": true
+      },
+      {
+        "name": "corpse removed",
+        "pass": true
+      },
+      {
+        "name": "death clears encounter",
+        "pass": true
+      },
+      {
+        "name": "scheduled respawn creates fresh boss",
+        "pass": true
+      },
+      {
+        "name": "respawn full HP",
+        "pass": true
+      },
+      {
+        "name": "one respawned model",
+        "pass": true
+      },
+      {
+        "name": "unattributed QA death gives no rewards",
+        "pass": true
+      }
+    ],
+    "id": "the_lovers",
+    "phases": {
+      "1": true,
+      "2": true,
+      "3": true
+    },
+    "summonPeaks": {
+      "lover_star": 5,
+      "lover_sickle": 1,
+      "lover_spirit": 1,
+      "lover_arrow": 3,
+      "LoverNockedArrow": 1,
+      "lover_spear": 3
+    },
+    "maxY": 19536.59375,
+    "unanchored": 55,
+    "limits": "One equipped player, automated waypoint movement and health refill; timers accelerated only for lifecycle checks. No group/mobile balance claim.",
+    "status": "PASS",
+    "minY": 19536.59375,
+    "samples": 398,
+    "actions": {
+      "drawcut": 65,
+      "thrust": 22,
+      "spears": 13,
+      "triplecut": 17,
+      "sickle": 20,
+      "stars": 35,
+      "phase3": 21,
+      "skycut": 36,
+      "dashcut": 24,
+      "phase2": 24,
+      "arrowcall": 23,
+      "reversecut": 65,
+      "sweep": 33
+    },
+    "hitSummary": {
+      "count": 32,
+      "minimumDamage": 3.7400436401367188,
+      "maximumDamage": 30.369598388671875,
+      "note": "Actual health decreases through equipped armor/books; includes summons and persistent effects, not isolated raw skill damage."
+    }
+  },
+  "arenaClientSuite": "scripts/qa-boss-arena-client.luau",
+  "arenaClientResult": {
+    "maxCopies": 1,
+    "renderFrames": 2373,
+    "movingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "cape1",
+      "cape2",
+      "cape3",
+      "capeL1",
+      "capeL2",
+      "capeL3",
+      "capeR1",
+      "capeR2",
+      "capeR3",
+      "chest",
+      "clothFront",
+      "crest1",
+      "crest2",
+      "fingersL",
+      "fingersR",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "legL",
+      "legR",
+      "neck",
+      "root",
+      "scabbard",
+      "shinL",
+      "shinR",
+      "shoulderL",
+      "shoulderR",
+      "tassetL",
+      "tassetR",
+      "thumbR",
+      "weapon",
+      "wingL",
+      "wingR"
+    ],
+    "deathFrames": 78,
+    "deathsMovingJoints": [
+      "armL",
+      "armR",
+      "body",
+      "cape1",
+      "cape2",
+      "cape3",
+      "capeL1",
+      "capeL2",
+      "capeL3",
+      "capeR1",
+      "capeR2",
+      "capeR3",
+      "chest",
+      "clothFront",
+      "crest1",
+      "crest2",
+      "fingersL",
+      "fingersR",
+      "footL",
+      "footR",
+      "foreL",
+      "foreR",
+      "handL",
+      "handR",
+      "head",
+      "legL",
+      "legR",
+      "neck",
+      "root",
+      "shinL",
+      "shinR",
+      "shoulderL",
+      "shoulderR",
+      "tassetL",
+      "tassetR",
+      "thumbR",
+      "weapon",
+      "wingL",
+      "wingR"
+    ],
+    "modelsSeen": 2,
+    "actions": {
+      "death": true,
+      "phase3": true,
+      "drawcut": true,
+      "sweep": true,
+      "spears": true,
+      "triplecut": true,
+      "sickle": true,
+      "stars": true,
+      "thrust": true,
+      "phase2": true,
+      "dashcut": true,
+      "skycut": true,
+      "arrowcall": true,
+      "reversecut": true,
+      "spawn": true
+    },
+    "framesOver100ms": 7,
+    "status": "PASS",
+    "limits": "Background Studio viewport 1168x338; render counters are observations, not mobile/server-load benchmarks."
+  }
 }

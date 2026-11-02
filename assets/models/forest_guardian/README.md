@@ -1,6 +1,6 @@
 # Forest Guardian — original offline checkpoint
 
-02 November2026, baseline598a6c9. **Studio fixture/animation suites passed on 02.11 after the owner resumed QA; full arena/group/mobile acceptance remains open.** Blender ran headlessly with two threads; no desktop control, GUI or notifications.
+02 November2026, baseline598a6c9. **Studio fixtures, client animation suites and actual-arena solo lifecycle checks passed on 02.11. Group/mobile/load and owner acceptance remain open.** Blender ran headlessly with two threads; no desktop control, GUI or notifications.
 
 ## Evidence and balance
 
@@ -37,7 +37,7 @@ Special recovery1.8s. Summons spawn1.625s, live at most24s afterwards, death1.83
 
 All18 exported Roblox clips rendered. Three blends/eight JSON modules; largest145443 characters. Main60Hz curve comparison: position<.008stud, rotation<.354°, planted stance<.014stud, final torso-floor error<.001stud; full death floor error<.015stud. Familiar: position<.008stud, rotation<.348°, stance<.008stud, torso-floor error<.001stud. `audit.py` validates curves, module budgets/names, timings, gait rates, texture hash, render completeness and target-only config against598a6c9. Selene, StyLua, Rojo build and boss-balance simulation pass. This does not establish live damage, replication or mobile performance.
 
-**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-forest-guardian-runtime.luau` PASS: 27cases/85checks; `qa-forest-guardian-animation-client.luau` PASS: 13checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Full live arena encounters, real4–6-player combat, phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
+**Studio update02.11, Katorga92594200898716:** source/models-only sync preserved the cloud map. `qa-forest-guardian-runtime.luau` PASS: 27cases/85checks; `qa-forest-guardian-animation-client.luau` PASS: 13checks on actual client Motor6Ds. No-block43checks and ordinary-mob bite regression pass. Boss transforms now update in PreSimulation (see [Roblox timing](https://create.roblox.com/docs/reference/engine/classes/Motor6D)); all six pending client suites pass, including fast props. Actual-arena solo lifecycle now PASS: 18 checks, 34 real damage samples, all required natural AI actions, phase thresholds, server-owned chase, leash cleanup/heal, articulated death and scheduled fresh respawn. No duplicate model or body-part loss observed. Automatic HP refill and shortened lifecycle waits mean this is not a survival/balance test. Real4–6-player combat, native phone/load tests and owner visual acceptance remain open. `studio-validation.json` is PARTIAL and lists the remaining work. Fixtures removed, default viewport/camera and Creative restored; no publishing.
 
 ## Deliverables
 

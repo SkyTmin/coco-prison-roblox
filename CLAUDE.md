@@ -47,6 +47,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 **Latest owner steering (02.11): Studio is connected; resume live QA in the confirmed Katorga place. The owner subsequently restarted Studio. Source/models-only sync and Play restarts remain authorized; preserve the cloud map, never publish, and restore enabled Creative. No PC notifications or visible Blender. The camera button now belongs LEFT of the hotbar. Record server fixtures, client animation checks and real arena/group/mobile checks separately; a fixture pass alone is not full boss acceptance.**
 
+Boss lifecycle QA uses the separate `BossState_Studio` MemoryStore namespace; production remains `BossState`. Run `scripts/qa-boss-arena-client.luau` as a LocalScript in PlayerGui before the encounter. Teleport normally to the boss location, then run `scripts/qa-boss-arena-live.luau` as a server Script with its `BossId` attribute already set. Run only one encounter at a time. The harness temporarily removes ForceFields, refills health and accelerates leash/respawn waits, then restores them; it tests real arena AI/lifecycle, not survival or group balance. Read `ServerStorage.QAArena_<id>` and the client's `QAArenaClientReports` player attribute, save evidence and remove the temporary scripts/attributes. `BossDebug.clearDamage` is Studio-only and prevents artificial test deaths from granting attributed rewards.
+
 1. `rojo build -o place/coco-prison.rbxl` and open it in Studio (or keep the open one).
 2. After editing code: `node scripts/make-studio-sync.mjs [init.client,Strings,...] > sync-part.luau`
    (the comma list limits it to changed files). Keep `node scripts/serve-repo.mjs` running (serves the
