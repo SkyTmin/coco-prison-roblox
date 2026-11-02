@@ -7,6 +7,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 -- Create every remote up front so clients never block on WaitForChild.
 for _, name in ipairs({
+	"Sfx",
 	"DigStart",
 	"DigFinish",
 	"Sell",
@@ -184,8 +185,8 @@ require(script.Services.PlayerCardService).Start() -- the TAB list / chat player
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character
--- (the profile may load after the first spawn) starts full, a level-up adds the new hearts full [2-player test 27.10:
--- the first spawn came before the profile, a level 50 player had 10 hearts]
+-- (the profile may load after the first spawn) starts full. EconomyService heals explicitly on level-up;
+-- equipment capacity changes preserve current HP. [2-player test 27.10: first spawn preceded the profile]
 local freshCharacters: { [Model]: boolean } = {}
 local function watchPlayer(player: Player)
 	player.AutoJumpEnabled = false -- [владелец] no auto-jump on touch
@@ -218,11 +219,10 @@ task.spawn(function()
 			local target = (if rule then rule.hearts else 10) * 2
 				+ require(script.Services.BookService).bonusHealth(profile)
 			if humanoid.MaxHealth ~= target then
-				local gained = target - humanoid.MaxHealth
 				humanoid.MaxHealth = target
 				humanoid.Health = if freshCharacters[character]
 					then target
-					else math.clamp(humanoid.Health + math.max(0, gained), 0, target)
+					else math.clamp(humanoid.Health, 0, target)
 			end
 			freshCharacters[character] = nil
 		end

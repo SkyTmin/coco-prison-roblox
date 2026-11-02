@@ -636,6 +636,10 @@ local function canAct(player: Player): boolean
 end
 
 local function sell(player: Player, slot: number, amount: number, value: number, currency: any)
+	if not ProfileService.CanExport(player) then
+		toast(player, "auction_try_later")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return
@@ -747,6 +751,10 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 end
 
 local function buy(player: Player, id: string, price: number)
+	if not ProfileService.CanExport(player) then
+		toast(player, "auction_try_later")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return

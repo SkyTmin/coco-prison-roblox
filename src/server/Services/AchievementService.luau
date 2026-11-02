@@ -7,6 +7,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Achievements = require(Shared.Achievements)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local Numbers = require(Shared.Numbers)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
@@ -36,40 +37,58 @@ function AchievementService.rewardText(reward: Achievements.Reward, locale: stri
 	)
 end
 
--- After DigService counted the block (p.counters for counter cards); blocks without a counter count here.
-function AchievementService.OnDug(player: Player, blockId: string)
-	local card = Achievements.cardFor(blockId)
-	if not card or not ProfileService.Get(player) then
+-- After MiningStats credited the actual cells. A batch evaluates each affected card once.
+-- Zero counts are used only for catch-up: they never manufacture mined cells.
+function AchievementService.OnDugMany(player: Player, counts: { [string]: number })
+	if not ProfileService.Get(player) then
 		return
 	end
-	local rewards: { Achievements.Reward } = {}
-	ProfileService.Mutate(player, function(p)
-		if not card.counter then
-			p.dug = p.dug or {}
-			p.dug[card.id] = (p.dug[card.id] or 0) + 1
+	local cards: { [string]: Achievements.Card } = {}
+	local increments: { [string]: number } = {}
+	for blockId, count in pairs(counts) do
+		local card = Achievements.cardFor(blockId)
+		if card and Numbers.integer(count) then
+			cards[card.id] = card
+			increments[card.id] = (increments[card.id] or 0) + count
 		end
-		local progress = Achievements.progress(p, card)
-		for tier = Achievements.claimed(p, card) + 1, Achievements.tiers do
-			if progress < Achievements.threshold(tier) then
-				break
+	end
+	if next(cards) == nil then
+		return
+	end
+	local rewards: { { card: Achievements.Card, reward: Achievements.Reward } } = {}
+	ProfileService.Mutate(player, function(p)
+		for _, card in pairs(cards) do
+			if not card.counter then
+				p.dug = p.dug or {}
+				p.dug[card.id] = (p.dug[card.id] or 0) + increments[card.id]
 			end
-			local reward = Achievements.reward(card, tier)
-			if reward.booster then
-				Boosters.store(p, reward.booster, reward.scope)
-			else
-				p.coins += reward.money or 0
+			local progress = Achievements.progress(p, card)
+			for tier = Achievements.claimed(p, card) + 1, Achievements.tiers do
+				if not Numbers.finite(progress) or progress < Achievements.threshold(tier) then
+					break
+				end
+				local reward = Achievements.reward(card, tier)
+				if reward.booster then
+					Boosters.store(p, reward.booster, reward.scope, nil, nil, nil, true)
+				else
+					if not Numbers.canCredit(p.coins, reward.money or 0) then
+						break
+					end
+					p.coins += reward.money or 0
+				end
+				p.achievements[card.id] = tier
+				table.insert(rewards, { card = card, reward = reward })
 			end
-			p.achievements[card.id] = tier
-			table.insert(rewards, reward)
 		end
 	end)
 	if #rewards == 0 then
 		return
 	end
 	local locale = Strings.localeOf(player)
-	local name = AchievementService.cardName(card, locale)
 	local toast = Remotes.event("Toast")
-	for _, reward in ipairs(rewards) do
+	for _, entry in ipairs(rewards) do
+		local name = AchievementService.cardName(entry.card, locale)
+		local reward = entry.reward
 		toast:FireClient(player, Strings.t("achievement_done", locale, name))
 		toast:FireClient(
 			player,
@@ -83,6 +102,10 @@ function AchievementService.OnDug(player: Player, blockId: string)
 	end
 end
 
+function AchievementService.OnDug(player: Player, blockId: string)
+	AchievementService.OnDugMany(player, { [blockId] = 1 })
+end
+
 -- After p.stats[stat] grew (WarzoneService: warzonePoints): pays every step of the counter achievements now reached.
 function AchievementService.OnStat(player: Player, stat: string)
 	for _, card in ipairs(Achievements.statCards) do
@@ -93,13 +116,16 @@ function AchievementService.OnStat(player: Player, stat: string)
 		ProfileService.Mutate(player, function(p)
 			local have = Achievements.statProgress(p, card)
 			for step = Achievements.statClaimed(p, card) + 1, #card.steps do
-				if have < card.steps[step].count then
+				if not Numbers.finite(have) or have < card.steps[step].count then
 					break
 				end
 				local reward = Achievements.statReward(card.steps[step])
 				if reward.booster then
-					Boosters.store(p, reward.booster, reward.scope)
+					Boosters.store(p, reward.booster, reward.scope, nil, nil, nil, true)
 				else
+					if not Numbers.canCredit(p.coins, reward.money or 0) then
+						break
+					end
 					p.coins += reward.money or 0
 				end
 				p.achievements[card.id] = step
@@ -124,6 +150,23 @@ function AchievementService.OnStat(player: Player, stat: string)
 	end
 end
 
-function AchievementService.Start() end
+function AchievementService.CatchUp(player: Player)
+	local counts = {}
+	for _, card in ipairs(Achievements.cards) do
+		counts[card.blocks[1]] = 0
+	end
+	AchievementService.OnDugMany(player, counts)
+	local seen = {}
+	for _, card in ipairs(Achievements.statCards) do
+		if not seen[card.stat] then
+			seen[card.stat] = true
+			AchievementService.OnStat(player, card.stat)
+		end
+	end
+end
+
+function AchievementService.Start()
+	ProfileService.OnLoaded(AchievementService.CatchUp)
+end
 
 return AchievementService

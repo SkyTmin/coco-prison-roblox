@@ -6,6 +6,8 @@ Read `CLAUDE.md`, the latest `docs/PROGRESS.md` journal entries and relevant `do
 
 ## Confirmed defects
 
+**Follow-up status:** the owner subsequently requested all five corrections. UI-01–UI-05 are now implemented in the working tree; see `audit-fixes-ui-2026-11-02.md` for the changes, offline checks and remaining native/visual acceptance. The descriptions and line numbers below preserve the original audited baseline.
+
 ### UI-01 — P2: third-person bow crosshair is hidden every frame
 
 - **Confidence:** high; conflicting assignments in the same script.
@@ -104,4 +106,4 @@ Focused working-tree change requested after those results:
 - Sustained full multiplayer/mobile load, streaming in/out of avatars, items and mobs, repeated menu opening and memory/connection trends.
 - Owner acceptance of first-person hand scale, hurt/sale text prominence, no duplicate character, equipment-glow removal and current category icons.
 
-The focused settings-preview change above was applied in the working tree at the parent's request; UI-01–UI-05 remain audit findings. Findings and offline checks are not claims of completed native-phone acceptance.
+The focused settings-preview change above was applied at the parent's request. UI-01–UI-05 were subsequently corrected after the owner said “Исправь все!”; see the companion correction report. Findings and offline checks are not claims of completed native-phone acceptance.

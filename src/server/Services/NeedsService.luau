@@ -155,11 +155,28 @@ local function applyEffects(player: Player, state: State, needs: Types.Needs)
 	for _, name in ipairs(EVENTS) do
 		local attribute = string.upper(string.sub(name, 1, 1)) .. string.sub(name, 2)
 		local mine = own[attribute]
+		local level: number? = nil
+		local ends: number? = nil
 		if mine and (eventName ~= name or mine.level > 1) then
-			setEffect(character, attribute, mine.level, mine.endsAtServer)
+			level, ends = mine.level, mine.endsAtServer
 		else
-			setEffect(character, attribute, if eventName == name then 1 else nil, eventEnds)
+			level, ends = if eventName == name then 1 else nil, eventEnds
 		end
+		-- Warzone owns this source independently of potions and random events. Revoking the point
+		-- must reveal any remaining personal Haste, rather than erase it or keep an ex-member buff.
+		if attribute == "Haste" then
+			local factionLevel = tonumber(character:GetAttribute("WarzoneHaste")) or 0
+			local factionEnds = tonumber(character:GetAttribute("WarzoneHasteUntil")) or 0
+			if factionLevel > 0 and factionEnds > workspace:GetServerTimeNow() then
+				if
+					factionLevel > (level or 0)
+					or (factionLevel == level and factionEnds > (ends or 0))
+				then
+					level, ends = factionLevel, factionEnds
+				end
+			end
+		end
+		setEffect(character, attribute, level, ends)
 	end
 	local fireproof = own.FireResistance
 	setEffect(
@@ -565,6 +582,22 @@ function NeedsService.Refresh(player: Player)
 	if state and profile then
 		applyEffects(player, state, profile.needs)
 	end
+end
+
+function NeedsService.SetWarzoneHaste(player: Player, level: number?, endsAt: number?)
+	local character = player.Character
+	if not character then
+		return
+	end
+	if
+		character:GetAttribute("WarzoneHaste") == level
+		and character:GetAttribute("WarzoneHasteUntil") == endsAt
+	then
+		return
+	end
+	character:SetAttribute("WarzoneHaste", level)
+	character:SetAttribute("WarzoneHasteUntil", endsAt)
+	NeedsService.Refresh(player)
 end
 
 -- [ваниль] Regeneration heals 1 HP every 50 >> (level − 1) ticks: level I 2,5 s, II 1,25 s

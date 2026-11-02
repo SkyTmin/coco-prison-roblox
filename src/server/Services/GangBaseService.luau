@@ -128,7 +128,11 @@ function GangBaseService.forgeOffer(effect: string, level: number): (number?, nu
 end
 
 local function library(player: Player, slot: any)
-	if not InventoryService.isSlot(slot) or not nearTag(player, "GangLibrarian") then
+	if
+		not ProfileService.CanExport(player)
+		or not InventoryService.isSlot(slot)
+		or not nearTag(player, "GangLibrarian")
+	then
 		return
 	end
 	local refusal, arg = upgradeRefusal(player, base.library.upgrade)

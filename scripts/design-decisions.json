@@ -1002,7 +1002,8 @@
       "statKey": "bats",
       "locations": [
         "basement",
-        "fraction_base"
+        "fraction_base",
+        "ghetto"
       ],
       "respawnSeconds": 120,
       "_respawn": "[решение 26.10] как крысы и зомби Подвала — 2 минуты",

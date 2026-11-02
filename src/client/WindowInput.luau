@@ -5,6 +5,20 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local WindowInput = {}
 
+-- All gameplay intents share this gate; pointer/movement ownership alone does not stop remotes.
+function WindowInput.GameplayBlocked(windowOpen: boolean): boolean
+	if
+		windowOpen
+		or require(script.Parent.HudLayout).isEditing()
+		or UserInputService:GetFocusedTextBox()
+	then
+		return true
+	end
+	local character = Players.LocalPlayer.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	return humanoid == nil or humanoid.Health <= 0
+end
+
 function WindowInput.Start(isOpen: () -> boolean)
 	local player = Players.LocalPlayer
 	local controls: any = nil

@@ -1637,6 +1637,8 @@ for index = 1, 4 do
 	CollectionService:AddTag(anchor, "MineAnchor")
 	local spawn = part("Arrival", Vector3.new(4, 0.2, 4), at(x, y + 0.1, z + 29), IRON, nil, room)
 	spawn:SetAttribute("LocationId", "ghetto")
+	spawn:SetAttribute("PrivateArrival", true)
+	CollectionService:AddTag(spawn, "LocationSpawn")
 	CollectionService:AddTag(spawn, "GhettoMineExit")
 	local bounds = decor(part("Bounds", Vector3.new(72, 64, 72), at(x, y - 6, z), nil, nil, room))
 	bounds.Transparency = 1
@@ -1733,6 +1735,7 @@ do
 	end
 end
 
+require(game:GetService("ReplicatedStorage").Shared.GhettoLayout).apply(root, Vector3.new(OX, BY, OZ))
 local total = #root:GetDescendants()
 print(("[build-ghetto] built: %d instances"):format(total))
 return ("built %d instances"):format(total)

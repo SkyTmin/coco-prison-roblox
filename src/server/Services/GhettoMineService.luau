@@ -14,6 +14,7 @@ local Gangs = require(script.Parent.GangService)
 local Locations = require(script.Parent.LocationService)
 local Mines = require(script.Parent.MineService)
 local Combat = require(script.Parent.CombatService)
+local FallService = require(script.Parent.FallService)
 local Service = {}
 local cfg = Config.ghetto
 local last: { [Player]: number } = {}
@@ -29,6 +30,62 @@ local function rooms(): { Instance }
 	return if folder then folder:GetChildren() else {}
 end
 
+local function enoughMembers(gangId: string): boolean
+	local online = 0
+	for _, member in ipairs(Players:GetPlayers()) do
+		local doc = Gangs.gangOf(Profile.Get(member))
+		if doc and doc.id == gangId then
+			online += 1
+		end
+	end
+	return online >= cfg.gangMine.minMembers
+end
+
+-- No yielding: the pass is charged only when LocationService has finished its validated channel.
+-- Two gangs can approach the last room at once; the first successful arrival owns it, the other pays nothing.
+local function claim(player: Player, gangId: string, anchor: BasePart, allowNew: boolean): boolean
+	local profile = Profile.Get(player)
+	local gang = Gangs.gangOf(profile)
+	if not profile or not gang or gang.id ~= gangId or Gangs.level(profile, "ghetto") < 1 then
+		return false
+	end
+	local untilAt = tonumber(anchor:GetAttribute("GangMineUntil")) or 0
+	if untilAt > os.time() then
+		if anchor:GetAttribute("GangMineOwner") == gangId then
+			return true -- a member already opened it while this player was channeling
+		end
+		toast(player, "ghetto_mine_busy")
+		return false
+	end
+	if not allowNew then
+		toast(player, "ghetto_mine_busy")
+		return false
+	end
+	if not enoughMembers(gangId) then
+		toast(player, "ghetto_mine_members", cfg.gangMine.minMembers)
+		return false
+	end
+	local mine = Mines.get(anchor:GetAttribute("MineId") :: string)
+	if not mine or mine.rebuilding then
+		toast(player, "ghetto_mine_busy")
+		return false
+	end
+	local used = false
+	Profile.Mutate(player, function(p)
+		used = Inventory.remove(p, "gang_mine_pass", 1) == 1
+	end)
+	if not used then
+		toast(player, "ghetto_mine_pass_needed")
+		return false
+	end
+	anchor:SetAttribute("GangMineOwner", gangId)
+	anchor:SetAttribute("GangMineUntil", os.time() + cfg.gangMine.seconds)
+	mine.dug = math.max(1, mine.dug)
+	mine.resetAt = os.clock()
+	toast(player, "ghetto_mine_open", cfg.gangMine.seconds / 60)
+	return true
+end
+
 local function enter(player: Player, gang: any)
 	if Combat.inCombat(player) then
 		toast(player, "teleport_in_combat", math.ceil(Combat.remainingSeconds(player)))
@@ -38,10 +95,12 @@ local function enter(player: Player, gang: any)
 	for _, room in ipairs(rooms()) do
 		local anchor = room:FindFirstChild("Anchor")
 		local arrival = room:FindFirstChild("Arrival")
-		if anchor and arrival and arrival:IsA("BasePart") then
+		if anchor and anchor:IsA("BasePart") and arrival and arrival:IsA("BasePart") then
 			local untilAt = tonumber(anchor:GetAttribute("GangMineUntil")) or 0
 			if untilAt > os.time() and anchor:GetAttribute("GangMineOwner") == gang.id then
-				Locations.Request(player, "ghetto", arrival)
+				Locations.Request(player, "ghetto", arrival, function()
+					return claim(player, gang.id, anchor, false)
+				end)
 				return
 			elseif untilAt <= os.time() then
 				free = room
@@ -52,14 +111,7 @@ local function enter(player: Player, gang: any)
 		toast(player, "ghetto_mine_busy")
 		return
 	end
-	local online = 0
-	for _, member in ipairs(Players:GetPlayers()) do
-		local doc = Gangs.gangOf(Profile.Get(member))
-		if doc and doc.id == gang.id then
-			online += 1
-		end
-	end
-	if online < cfg.gangMine.minMembers then
+	if not enoughMembers(gang.id) then
 		toast(player, "ghetto_mine_members", cfg.gangMine.minMembers)
 		return
 	end
@@ -71,20 +123,14 @@ local function enter(player: Player, gang: any)
 		toast(player, "ghetto_mine_busy")
 		return
 	end
-	local used = false
-	Profile.Mutate(player, function(p)
-		used = Inventory.remove(p, "gang_mine_pass", 1) == 1
-	end)
-	if not used then
+	local profile = Profile.Get(player)
+	if not profile or Inventory.count(profile, "gang_mine_pass") < 1 then
 		toast(player, "ghetto_mine_pass_needed")
 		return
 	end
-	anchor:SetAttribute("GangMineOwner", gang.id)
-	anchor:SetAttribute("GangMineUntil", os.time() + cfg.gangMine.seconds)
-	mine.dug = math.max(1, mine.dug)
-	mine.resetAt = os.clock()
-	toast(player, "ghetto_mine_open", cfg.gangMine.seconds / 60)
-	Locations.Request(player, "ghetto", arrival)
+	Locations.Request(player, "ghetto", arrival, function()
+		return claim(player, gang.id, anchor, true)
+	end)
 end
 
 local function act(player: Player, tag: string)
@@ -224,6 +270,7 @@ function Service.Start()
 						or (tonumber(anchor:GetAttribute("GangMineUntil")) or 0) <= os.time()
 					then
 						root.AssemblyLinearVelocity = Vector3.zero
+						FallService.Reset(player)
 						character:PivotTo(home.CFrame + Vector3.new(0, 4, 0))
 					end
 				end

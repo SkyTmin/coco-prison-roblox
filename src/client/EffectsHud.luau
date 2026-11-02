@@ -266,6 +266,16 @@ function EffectsHud.start(
 				return
 			end
 			local character = player.Character
+			if not character then
+				nausea, blind, fovFactor = 0, 0, 1
+				hurtAt = -math.huge
+				darkness.Visible = false
+				if fovApplied then
+					camera.FieldOfView = BASE_FOV
+					fovApplied = false
+				end
+				return
+			end
 			local function level(attribute: string): number
 				local value = if character then character:GetAttribute(attribute) else nil
 				return if typeof(value) == "number" then value else 0

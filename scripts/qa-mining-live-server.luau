@@ -8,8 +8,8 @@ local Mine = require(S.MineService)
 local Config = require(game.ReplicatedStorage.Shared.Config)
 local p = game.Players:GetPlayers()[1]
 local before = P.Get(p)
-assert(p:GetAttribute("Creative") and before.location == "prison")
-local mine = Mine.get("prison")
+local mine = Mine.get(script:GetAttribute("MineId") or "prison")
+assert(p:GetAttribute("Creative") and mine and before.location == mine.location.id)
 local part, key
 for i, candidate in mine.parts do
 	local x, y, z = Mine.coords(mine, i)
@@ -26,6 +26,7 @@ local start = {
 	counter = Config.requirementHave(before, key),
 }
 local original = p.Character:GetPivot()
+require(S.FallService).Reset(p)
 p.Character:PivotTo(CFrame.new(part.Position + Vector3.new(0, 6, 0)))
 p:RequestStreamAroundAsync(part.Position)
 local target = Instance.new("ObjectValue")
@@ -55,6 +56,7 @@ local report = {
 	limits = "One ordinary live DigStart. This legitimately mines one cell and keeps its normal rewards; no upgrade purchase was made.",
 }
 target:Destroy()
+require(S.FallService).Reset(p)
 p.Character:PivotTo(original)
 p.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
 local output = Instance.new("StringValue")

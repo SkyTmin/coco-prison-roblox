@@ -866,6 +866,9 @@ local function canEnter(p: Profile): (string?, any)
 end
 
 local function note(player: Player, op: string, entry: any, take: number?): boolean
+	if not ProfileService.CanExport(player) then
+		return false
+	end
 	local done = false
 	ProfileService.Mutate(player, function(q)
 		local crystals = entry.cur == "crystals"

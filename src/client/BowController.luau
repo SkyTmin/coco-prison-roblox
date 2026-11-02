@@ -140,6 +140,11 @@ function BowController.Release()
 	if not drawnAt then
 		return
 	end
+	-- A release can arrive before the next Heartbeat cancels a draw behind an opened menu.
+	if isBlocked() then
+		BowController.Cancel()
+		return
+	end
 	local seconds = workspace:GetServerTimeNow() - drawnAt
 	local stack = heldBow()
 	stop()

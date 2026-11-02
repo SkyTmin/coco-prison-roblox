@@ -37,6 +37,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Chat = require(Shared.Chat)
 local Config = require(Shared.Config)
+local Numbers = require(Shared.Numbers)
 local PrisPlus = require(Shared.PrisPlus)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -117,6 +118,10 @@ end
 -- ── /pay ────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 local function pay(player: Player, args: { string })
+	if not ProfileService.CanExport(player) then
+		ChatService.fail(player, "chat_not_ready")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not args[1] or not args[2] then
 		ChatService.fail(player, "chat_pay_usage")
@@ -136,7 +141,9 @@ local function pay(player: Player, args: { string })
 		return
 	end
 	local sum = units(math.floor(amount * 100 + 1e-6) / 100) -- whole cents
-	if profile.coins < sum then
+	if
+		not Numbers.canAfford(profile.coins, sum) or not Numbers.canCredit(targetProfile.coins, sum)
+	then
 		ChatService.fail(player, "chat_pay_no_money", Strings.money(profile.coins))
 		return
 	end
@@ -164,6 +171,10 @@ end
 -- ── /rubb, /stats ник (этап 8) ──────────────────────────────────────────────────────────────────────────────────
 
 local function rubb(player: Player, args: { string })
+	if not ProfileService.CanExport(player) then
+		ChatService.fail(player, "chat_not_ready")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not args[1] or not args[2] then
 		ChatService.fail(player, "chat_rubb_usage")
@@ -189,7 +200,10 @@ local function rubb(player: Player, args: { string })
 		ChatService.fail(player, "chat_pay_off", target.DisplayName)
 		return
 	end
-	if PrisPlus.rubies(profile) < amount then
+	if
+		not Numbers.canAfford(PrisPlus.rubies(profile), amount)
+		or not Numbers.canCredit(PrisPlus.rubies(targetProfile), amount)
+	then
 		ChatService.fail(player, "chat_rubb_no_rubies", PrisPlus.rubies(profile))
 		return
 	end
@@ -294,6 +308,10 @@ local function give(profile: Types.Profile, stack: Types.ItemStack)
 end
 
 local function gift(player: Player, args: { string })
+	if not ProfileService.CanExport(player) then
+		ChatService.fail(player, "chat_not_ready")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not args[1] then
 		ChatService.fail(player, "chat_gift_usage")

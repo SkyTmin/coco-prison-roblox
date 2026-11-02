@@ -12,15 +12,17 @@ local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Types = require(Shared.Types)
 local Remotes = require(Shared.Remotes)
 local Wire = require(Shared.Wire)
-local Achievements = require(Shared.Achievements)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Vault = require(Shared.Vault)
+local Persistence = require(Shared.Persistence)
+local Numbers = require(Shared.Numbers)
 
 type Profile = Types.Profile
 -- fresh: nothing was stored for this player before this load (a brand-new profile — ReferralService)
@@ -29,6 +31,7 @@ type Session = {
 	loadFailed: boolean,
 	dirty: boolean,
 	saving: boolean,
+	token: string,
 	fresh: boolean?,
 }
 
@@ -94,7 +97,7 @@ end
 local function encodeInventory(inv: { [number]: Types.ItemStack }): { [string]: Types.ItemStack }
 	local out = {}
 	for slot, stack in pairs(inv) do
-		out[tostring(slot)] = stack
+		out[tostring(slot)] = Persistence.copy(stack)
 	end
 	return out
 end
@@ -294,7 +297,7 @@ local function migrate(data: any): Profile
 	split(profile.inventory, 36, profile.enderChest)
 	split(profile.enderChest, chestSlots)
 	-- v3 remains compatible. «Копатель (<блок>)» cards [27.10] replace the tool chains (21.10) and the digger_*
-	-- keys: tiers the block counters already reach are marked claimed without paying them out.
+	-- keys. Existing claimed tiers stay; unclaimed counters are evaluated by AchievementService.
 	for _, old in ipairs({ "pickaxe", "shovel", "axe", "sword" }) do
 		profile.achievements[old] = nil
 		profile.counters[old .. (if old == "sword" then "_kills" else "_blocks")] = nil
@@ -304,14 +307,8 @@ local function migrate(data: any): Profile
 			profile.achievements[id] = nil
 		end
 	end
-	for _, card in ipairs(Achievements.cards) do
-		if profile.achievements[card.id] == nil then
-			local satisfied = Achievements.satisfied(Achievements.progress(profile, card))
-			if satisfied > 0 then
-				profile.achievements[card.id] = satisfied
-			end
-		end
-	end
+	-- Current v3 counters may cross a milestone through AoE while offline catch-up is pending.
+	-- Missing claimed tiers are unclaimed, never silently converted into paid rewards.
 	if typeof(profile.dug) ~= "table" then
 		profile.dug = nil
 	end
@@ -350,7 +347,7 @@ end
 
 -- Takes the profile's session lock and returns the stored data. Retries while another live server holds it (asking
 -- it to let go); false + "locked" when it never does.
-local function acquire(player: Player): (boolean, any)
+local function acquire(player: Player, token: string): (boolean, any)
 	local deadline = os.clock() + LOCK_WAIT_SECONDS
 	local asked = false
 	while true do
@@ -361,7 +358,7 @@ local function acquire(player: Player): (boolean, any)
 				local lock = if typeof(old) == "table" then old._lock else nil
 				if
 					typeof(lock) == "table"
-					and lock.job ~= JOB_ID
+					and not Persistence.owns(lock, JOB_ID, token)
 					and os.time() - (tonumber(lock.at) or 0) < LOCK_STALE_SECONDS
 				then
 					lockedBy = lock.job
@@ -369,8 +366,8 @@ local function acquire(player: Player): (boolean, any)
 				end
 				lockedBy = nil
 				data = old
-				local new = if typeof(old) == "table" then old else {}
-				new._lock = { job = JOB_ID, at = os.time() }
+				local new = if typeof(old) == "table" then Persistence.copy(old) else {}
+				new._lock = { job = JOB_ID, token = token, at = os.time() }
 				return new
 			end)
 		end)
@@ -400,9 +397,10 @@ local function acquire(player: Player): (boolean, any)
 end
 
 local function load(player: Player)
+	local token = HttpService:GenerateGUID(false)
 	local ok, result = false, nil
 	if store then
-		ok, result = acquire(player)
+		ok, result = acquire(player, token)
 		if not ok and result == "locked" then
 			player:Kick(
 				"Профиль ещё открыт на другом сервере. Зайдите через минуту. / Your profile is still open on another server, rejoin in a minute."
@@ -410,7 +408,11 @@ local function load(player: Player)
 			return
 		end
 	end
+	if ok and not Persistence.finiteTree(result) then
+		ok, result = false, "non-finite saved profile; refusing replacement"
+	end
 	local session: Session = {
+		token = token,
 		profile = migrate(if ok then result else nil),
 		loadFailed = not ok,
 		dirty = false,
@@ -435,7 +437,7 @@ local function load(player: Player)
 					if
 						typeof(old) == "table"
 						and typeof(old._lock) == "table"
-						and old._lock.job == JOB_ID
+						and Persistence.owns(old._lock, JOB_ID, token)
 					then
 						old._lock = nil
 						return old
@@ -458,19 +460,29 @@ local function load(player: Player)
 	end
 end
 
-local function save(player: Player, session: Session, release: boolean?): boolean
+local function save(player: Player, session: Session, release: boolean?, transformed: any?): boolean
 	if session.loadFailed or session.saving or not store then
+		return false
+	end
+	if
+		not Persistence.finiteTree(session.profile)
+		or not Numbers.integer(session.profile.coins)
+		or not Numbers.integer((session.profile :: any).crystals or 0)
+		or not Numbers.integer((session.profile :: any).rubies or 0)
+	then
+		warn("[ProfileService] invalid numeric state; save refused for " .. player.Name)
 		return false
 	end
 	session.saving = true
 	local dirtyBefore = session.dirty
 	session.dirty = false -- a Mutate during the write marks it dirty again
-	local snapshot = table.clone(session.profile) :: any
-	snapshot.inventory = encodeInventory(session.profile.inventory)
-	snapshot.enderChest = encodeInventory(session.profile.enderChest)
+	local snapshot = Persistence.copy(transformed or session.profile) :: any
+	snapshot.inventory = encodeInventory(snapshot.inventory)
+	snapshot.enderChest = encodeInventory(snapshot.enderChest)
+	local cases, artifacts = snapshot.caseContents, snapshot.artifacts
 	snapshot.caseContents = {}
 	snapshot.artifacts = {}
-	for tier, state in pairs(session.profile.artifacts) do
+	for tier, state in pairs(artifacts) do
 		local fragments: { [string]: number } = {}
 		for index, amount in pairs(state.fragments) do
 			fragments[tostring(index)] = amount
@@ -481,18 +493,20 @@ local function save(player: Player, session: Session, release: boolean?): boolea
 			completed = state.completed,
 		}
 	end
-	for id, contents in pairs(session.profile.caseContents) do
+	for id, contents in pairs(cases) do
 		snapshot.caseContents[id] = encodeInventory(contents)
 	end
 	local stolen = false
 	local ok, err = pcall(function()
 		(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
 			local lock = if typeof(old) == "table" then old._lock else nil
-			if typeof(lock) == "table" and lock.job ~= JOB_ID then
+			if not Persistence.owns(lock, JOB_ID, session.token) then
 				stolen = true
 				return nil
 			end
-			snapshot._lock = if release then nil else { job = JOB_ID, at = os.time() }
+			snapshot._lock = if release
+				then nil
+				else { job = JOB_ID, token = session.token, at = os.time() }
 			return snapshot
 		end)
 	end)
@@ -536,6 +550,34 @@ function ProfileService.SaveNow(player: Player): boolean
 	return save(player, session)
 end
 
+-- Confirm a transformed checkpoint before making its grants spendable. The transform must be
+-- synchronous and side-effect-free outside its supplied profile; it runs once on a deep copy
+-- and, after successful persistence, once on current live state (which may have changed meanwhile).
+function ProfileService.MutateDurable(player: Player, transform: (any) -> ()): boolean
+	local session = sessions[player]
+	if not session or session.loadFailed or not store then
+		return false
+	end
+	while session.saving do
+		task.wait(0.1)
+	end
+	if sessions[player] ~= session then
+		return false
+	end
+	local staged = Persistence.copy(session.profile)
+	transform(staged)
+	if not Persistence.finiteTree(staged) or not Numbers.integer(staged.coins) then
+		return false
+	end
+	if not save(player, session, false, staged) or sessions[player] ~= session then
+		return false
+	end
+	transform(session.profile)
+	session.dirty = true
+	ProfileService.Replicate(player)
+	return true
+end
+
 -- Runs fn(player) after each successful profile load (pending booster / auction steps are settled there).
 function ProfileService.OnLoaded(fn: (Player) -> ())
 	table.insert(loadedHooks, fn)
@@ -550,6 +592,15 @@ end
 function ProfileService.IsReal(player: Player): boolean
 	local session = sessions[player]
 	return session ~= nil and not session.loadFailed
+end
+
+-- An unfinished shared transfer cannot be exported into another durable account or world item.
+function ProfileService.CanExport(player: Player): boolean
+	local session = sessions[player]
+	return session ~= nil
+		and not session.loadFailed
+		and (session.profile :: any).storageTransfer == nil
+		and (session.profile :: any).storageDeath == nil
 end
 
 -- true when this session started a brand-new profile (no record existed): the invite reward is for new players only
@@ -968,6 +1019,7 @@ function ProfileService.Start()
 			pcall(player.RequestStreamAroundAsync, player, Vector3.new(pos[1], pos[2], pos[3]), 5)
 		end
 		if root and root:IsA("BasePart") and player.Character == character then
+			require(script.Parent.FallService).Reset(player)
 			character:PivotTo(CFrame.new(pos[1], pos[2] + 1, pos[3]))
 		end
 	end

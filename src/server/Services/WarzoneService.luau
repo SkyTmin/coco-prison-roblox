@@ -7,7 +7,7 @@
 --     captureScore points capture it [решение 60]; with nobody digging for idleSeconds the scores melt.
 --   * A captured point is held for holdMinutes [вики: «обновляется каждые 30 минут»], then it is free again.
 --     While held, the owner's members on this server get +bonus to the point's kind (Boosters.runningAll) or
---     the point's effect (Спешка I until the hold ends, NeedsService.GiveEffect) [сеть TG/10].
+--     the point's effect (Спешка I until the hold ends, independent NeedsService source) [сеть TG/10].
 --   * Everyone on the server hears the start of a capture, the capture and the release [клиент]. Each member who dug
 --     at the beacon during the capture counts it in p.stats.warzonePoints («Взято точек», the Захватчик /
 --     Штурмовик / Полководец achievements).
@@ -50,7 +50,6 @@ type PointState = {
 }
 
 local points: { [string]: PointState } = {}
-local hasteGiven: { [Player]: number } = {} -- the hold end the player's Спешка already runs to
 local started = false
 
 local function now(): number
@@ -101,24 +100,22 @@ local function resetCapture(point: PointState)
 	point.started = {}
 end
 
--- Спешка I for the owner's members on this server, the timer = what is left of the hold
-local function giveHaste(point: PointState)
-	if point.def.effect == nil or not point.owner then
-		return
-	end
-	local left = point.untilAt - now()
-	if left <= 1 then
-		return
-	end
-	for _, player in ipairs(Players:GetPlayers()) do
-		if
-			hasteGiven[player] ~= point.untilAt
-			and player.Character
-			and FactionService.Of(player) == point.owner
-		then
-			hasteGiven[player] = point.untilAt
-			NeedsService.GiveEffect(player, point.def.effect, cfg.hasteLevel, left)
+-- Reconcile the current character and faction, not a per-player timestamp cached across deaths.
+local function refreshHaste(onlyPlayer: Player?)
+	for _, player in ipairs(if onlyPlayer then { onlyPlayer } else Players:GetPlayers()) do
+		local untilAt: number? = nil
+		local faction = FactionService.Of(player)
+		for _, point in pairs(points) do
+			if
+				point.def.effect == "haste"
+				and point.owner ~= nil
+				and point.owner == faction
+				and point.untilAt > now()
+			then
+				untilAt = math.max(untilAt or 0, point.untilAt)
+			end
 		end
+		NeedsService.SetWarzoneHaste(player, if untilAt then cfg.hasteLevel else nil, untilAt)
 	end
 end
 
@@ -150,7 +147,7 @@ local function capture(point: PointState, faction: string, credit: boolean)
 			AchievementService.OnStat(player, "warzonePoints")
 		end
 	end
-	giveHaste(point)
+	refreshHaste()
 end
 
 local function release(point: PointState)
@@ -160,6 +157,7 @@ local function release(point: PointState)
 	resetCapture(point)
 	mirror(point)
 	paintBeams(point)
+	refreshHaste()
 	local id = point.def.id
 	announce(function(locale)
 		return Strings.t("warzone_available", locale, pointName(id, locale))
@@ -213,8 +211,6 @@ local function tick()
 		if point.owner then
 			if t >= point.untilAt then
 				release(point)
-			else
-				giveHaste(point)
 			end
 		elseif
 			clock - point.lastDigAt >= cfg.idleSeconds
@@ -235,6 +231,7 @@ local function tick()
 			mirror(point)
 		end
 	end
+	refreshHaste()
 end
 
 local function debugApi(op: any, a: any, b: any, c: any): any
@@ -306,9 +303,19 @@ function WarzoneService.Start()
 	for _, point in pairs(points) do
 		paintBeams(point)
 	end
-	Players.PlayerRemoving:Connect(function(player)
-		hasteGiven[player] = nil
-	end)
+	local function watch(player: Player)
+		player.CharacterAdded:Connect(function()
+			task.defer(refreshHaste, player)
+		end)
+		player:GetAttributeChangedSignal("Faction"):Connect(function()
+			refreshHaste(player)
+		end)
+		refreshHaste(player)
+	end
+	Players.PlayerAdded:Connect(watch)
+	for _, player in ipairs(Players:GetPlayers()) do
+		watch(player)
+	end
 	if RunService:IsStudio() then
 		local api = Instance.new("BindableFunction")
 		api.Name = "WarzoneDebug"

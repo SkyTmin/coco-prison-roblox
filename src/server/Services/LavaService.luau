@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Effects = require(ReplicatedStorage:WaitForChild("Shared").Effects)
 local HurtService = require(script.Parent.HurtService)
+local FallService = require(script.Parent.FallService)
 
 local LAVA_DAMAGE = 4 -- [ваниль] per 0.5 s in lava
 local LAVA_PERIOD = 0.5
@@ -78,6 +79,7 @@ function LavaService.Start()
 				p:IsA("BasePart")
 				and p:GetAttribute("LocationId") == locationId
 				and p:GetAttribute("Spot") == nil
+				and p:GetAttribute("PrivateArrival") ~= true
 			then
 				spawn = p
 				break
@@ -93,6 +95,7 @@ function LavaService.Start()
 			end)
 			if root.Parent then
 				root.AssemblyLinearVelocity = Vector3.zero
+				FallService.Reset(player)
 				root.CFrame = (spawn :: BasePart).CFrame + Vector3.new(0, 4, 0)
 				humanoid:SetAttribute("LastHitBy", nil)
 				HurtService.Damage(humanoid, VOID_DAMAGE)

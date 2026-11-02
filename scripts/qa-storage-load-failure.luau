@@ -1,93 +1,49 @@
 --!nocheck
--- Privileged execute_luau, Server. Actual source with in-memory-only storage/scheduler.
--- No loadstring or changes to real profiles, shared storage, or LoadStringEnabled.
-local source = game.ServerScriptService.Server.Services.FactionStorageService.Source
+-- Privileged Studio Server: actual shared-storage source, fake DataStore only.
+-- Verifies fail-closed reads and recovery without any real key or profile mutation.
+local source = game.ServerScriptService.Server.Services.SharedStorageService.Source
 local setup = [==[
+local realPersistence = require(game.ReplicatedStorage.Shared.Persistence)
+local realRecord = require(game.ServerScriptService.Server.Services.SharedStorageRecord)
 local saved = { ["1"] = { ["1"] = { id = "diamond", count = 12 } } }
-local warnings, jobs, writes = {}, {}, 0
+local reads, writes = 0, 0
 local store = {}
-function store:GetAsync(_key)
-	error("QA injected read failure")
+function store:GetAsync(_id)
+ reads += 1
+ if reads == 1 then error("QA injected read failure") end
+ return realPersistence.copy(saved)
 end
-function store:SetAsync(_key, value)
-	writes += 1
-	saved = value
+function store:UpdateAsync(_id, _fn)
+ writes += 1
+ error("No writes are permitted in this read-recovery fixture")
 end
-local config = {
-	factions = { list = { { id = "qa_faction" } } },
-	faction = function(id)
-		return id == "qa_faction"
-	end,
-}
-local shared = { Config = {}, Types = {} }
+local persistenceToken, recordToken = {}, {}
 local services = {
-	DataStoreService = {
-		GetDataStore = function()
-			return store
-		end,
-	},
-	ReplicatedStorage = {
-		WaitForChild = function(_, name)
-			assert(name == "Shared")
-			return shared
-		end,
-	},
+ DataStoreService = { GetDataStore = function() return store end },
+ ReplicatedStorage = { Shared = { Persistence = persistenceToken } },
 }
-local game = {}
-function game:GetService(name)
-	assert(services[name], "Unexpected service: " .. name)
-	return services[name]
-end
-function game:BindToClose(_callback) end
+local game = { GetService = function(_, name) return assert(services[name]) end }
+local script = { Parent = { SharedStorageRecord = recordToken } }
 local function require(module)
- assert(module == shared.Config or module == shared.Types, "Unexpected require")
- return if module == shared.Config then config else {}
+ if module == persistenceToken then return realPersistence end
+ assert(module == recordToken)
+ return realRecord
 end
-local function warn(...)
- table.insert(warnings, { ... })
-end
-local task = {
- spawn = function(fn, ...)
-  local args = table.pack(...)
-  table.insert(jobs, coroutine.create(function() fn(table.unpack(args,1,args.n)) end))
- end,
- wait = function() coroutine.yield() end,
-}
-local function runModule()
+local function warn(...) end
+local function module()
 ]==]
 local checks = [==[
 end
-local service = runModule()
-local chest = service.Chest("qa_faction", 1)
-local exposedEmptyAfterFailure = chest ~= nil and next(chest) == nil
--- Mirrors CaseService's dirty notification after an attempted move.
-service.MarkDirty("qa_faction")
-service.Start()
-local timer
-for _, job in jobs do
-	assert(coroutine.resume(job))
-	if coroutine.status(job) == "suspended" then
-		timer = job
-	end
-end
-assert(timer, "Missing save loop")
-assert(coroutine.resume(timer))
-for _, job in jobs do
-	if job ~= timer and coroutine.status(job) == "suspended" then
-		assert(coroutine.resume(job))
-	end
-end
-return {
-	test = "actual faction module with fake storage",
-	readFailureWarned = #warnings == 1,
-	exposedEmptyAfterFailure = exposedEmptyAfterFailure,
-	writes = writes,
-	previousStackLost = saved["1"]["1"] == nil,
-	realDataStoresUsed = false,
-}
+local storage = module()
+local first = storage.Snapshot("faction", "qa_faction", 1)
+local recovered, revision = storage.Snapshot("faction", "qa_faction", 1)
+assert(first == nil, "Failed read must not expose writable empty slots")
+assert(recovered[1].id == "diamond" and recovered[1].count == 12, "Retry preserves seed")
+assert(writes == 0 and reads == 2 and revision == 0)
+return { status = "PASS", checks = 4, failedReadClosed = true, recoveredCount = recovered[1].count, writes = writes, realDataStoresUsed = false }
 ]==]
 local isolated = Instance.new("ModuleScript")
-isolated.Name = "QAIsolatedFactionStorage"
+isolated.Name = "QAIsolatedSharedReadFailure"
 isolated.Source = setup .. source .. checks
 isolated.Parent = game.ServerStorage
 local ok, result = pcall(require, isolated)

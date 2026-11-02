@@ -634,6 +634,12 @@ local function fitWindow(win: Frame, layout: WindowLayout)
 			math.clamp(viewport.Y - inset - 24, 260, 580)
 		)
 		win.Size = layout.size
+	elseif win.Name == "Window_Auction" then
+		local width, height = require(script.AuctionLayout).window(viewport.X, viewport.Y, inset)
+		layout.size = UDim2.fromOffset(width, height)
+		layout.anchor = Vector2.new(0.5, 0.5)
+		layout.position = UDim2.new(0.5, 0, 0.5, (inset - 4) / 2)
+		win.Size = layout.size
 	end
 	local width = layout.size.X.Offset + layout.size.X.Scale * viewport.X
 	local height = layout.size.Y.Offset + layout.size.Y.Scale * viewport.Y
@@ -2364,7 +2370,11 @@ local pending: { [BasePart]: number } = {}
 local function aimAt(point: Vector2?): Aim?
 	local character = player.Character
 	local currentCamera = workspace.CurrentCamera
-	if not character or not currentCamera or currentWindowKind then
+	if
+		not character
+		or not currentCamera
+		or require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+	then
 		return nil
 	end
 	local ray: Ray
@@ -2554,7 +2564,7 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 	end
-	if currentWindowKind then
+	if require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
 		holding = false
 		tapTarget = nil
 		stopDig(true)
@@ -2635,7 +2645,9 @@ local function heldKind(): (string, number)
 end
 local function attack(repeating: boolean?)
 	local currentCamera = workspace.CurrentCamera
-	if not currentCamera or currentWindowKind then
+	if
+		not currentCamera or require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+	then
 		return
 	end
 	local kind, duration = heldKind()
@@ -2703,7 +2715,11 @@ end
 -- Holding keeps fast hand cycles and sends a fully recovered hit each weapon period.
 local attackHeld = false
 RunService.Heartbeat:Connect(function()
-	if attackHeld and not currentWindowKind and not holding then
+	if
+		attackHeld
+		and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+		and not holding
+	then
 		attack(true)
 	end
 end)
@@ -2712,7 +2728,7 @@ end)
 local function onDig(_: string, state: Enum.UserInputState, input: InputObject?)
 	if state == Enum.UserInputState.Begin then
 		if
-			currentWindowKind
+			require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
 			-- a phone turns taps into MouseButton1 too: those are handled by the touch code. Without a touch screen the
 			-- mouse is real and digs, also under Studio's ForceMobile [владелец 28.10: «не могу копать в Studio»]
 			or (
@@ -2758,7 +2774,7 @@ ContextActionService:BindAction(
 )
 
 local function useConsumable()
-	if profile and not currentWindowKind and not HudLayout.isEditing() then
+	if profile and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
 		local stack = profile.inventory[profile.selectedSlot]
 		if stack and require(Shared.Books).isUsable(stack.id) then
 			require(script.BookWindow).sourceSlot = profile.selectedSlot
@@ -2776,13 +2792,13 @@ end
 BowController.Start(function()
 	return profile
 end, function()
-	return currentWindowKind ~= nil
+	return require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
 end, renderCameraButton)
 -- Eating [ваниль, владелец 27.10]: hold the right mouse button / L2 / F (or the «Съесть» button, a resting finger)
 Eating.Start(function()
 	return profile
 end, function()
-	return currentWindowKind ~= nil or HudLayout.isEditing()
+	return require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
 end)
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	if
@@ -2879,6 +2895,7 @@ local function isNeedConsumable(): boolean
 	return location ~= nil and location.requiresPass == true
 end
 local function cancelDigInput()
+	attackHeld = false
 	activeTouch = nil
 	tapTarget = nil
 	holding = false
@@ -2892,7 +2909,7 @@ UserInputService.TouchStarted:Connect(function(input: InputObject, processed: bo
 	if
 		processed
 		or not isMobile()
-		or currentWindowKind
+		or require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
 		or activeTouch
 		or not touchOnRightHalf(input)
 	then
@@ -2937,6 +2954,13 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 	end
 end)
 RunService.Heartbeat:Connect(function()
+	if require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
+		cancelDigInput()
+		touchBow, touchAim = false, nil
+		BowController.Cancel()
+		Eating.Hold("touch", false)
+		return
+	end
 	-- a finger resting on a block starts digging and keeps digging the next blocks while held
 	if
 		activeTouch
@@ -3421,7 +3445,7 @@ end
 -- Throw the held item like Minecraft: Q one item, Ctrl+Q the whole stack; on a phone hold a hotbar
 -- slot. Tools and armor stay (the server refuses them with a toast) [владелец 21.10]
 local function throwSelected(wholeStack: boolean)
-	if profile and not currentWindowKind then
+	if profile and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
 		Remotes.event("DropItem"):FireServer(profile.selectedSlot, if wholeStack then nil else 1)
 	end
 end
@@ -3596,6 +3620,9 @@ openHudEditor = function()
 		return
 	end
 	closeWindow()
+	cancelDigInput()
+	touchBow, touchAim = false, nil
+	BowController.Cancel()
 	toastToken += 1 -- a sample in the notification panel while it is placed (no pending hide)
 	toastText.Text = T("layout_toasts")
 	toast.Visible = true
@@ -3663,8 +3690,9 @@ RunService.RenderStepped:Connect(function()
 			eatCaption.Text = T(key)
 		end
 	end
-	crosshair.Visible = (firstPerson or isMobile()) and currentWindowKind == nil
-	if currentWindowKind then
+	crosshair.Visible = (firstPerson or isMobile() or BowController.Drawing())
+		and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+	if require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
 		cancelDigInput()
 	end
 end)
@@ -3770,9 +3798,13 @@ for i = 1, 9 do
 				input.UserInputState ~= Enum.UserInputState.End
 				and input.UserInputState ~= Enum.UserInputState.Cancel
 				and (input.Position - start).Magnitude < 20 -- a finger sliding along the bar throws nothing
+				and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
 			then
 				selectSlot(i)
-				if profile and not currentWindowKind then
+				if
+					profile
+					and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+				then
 					Remotes.event("DropItem"):FireServer(i, nil)
 				end
 			end

@@ -54,7 +54,8 @@ function DragDrop.new(
 	getStack: (Address) -> Types.ItemStack?,
 	move: (Address, Address, number?) -> (),
 	quick: (Address) -> (),
-	throw: ((Address, number?) -> ())?
+	throw: ((Address, number?) -> ())?,
+	moveMany: ((Address, { Address }, number) -> ())?
 )
 	local bindings: { Binding } = {}
 	local connections: { RBXScriptConnection } = {}
@@ -253,8 +254,12 @@ function DragDrop.new(
 		if each == 0 then
 			return
 		end
-		for _, target in ipairs(targets) do
-			move(h.from, target, each)
+		if moveMany then
+			moveMany(h.from, targets, each)
+		else
+			for _, target in ipairs(targets) do
+				move(h.from, target, each)
+			end
 		end
 		setHeld(nil)
 	end

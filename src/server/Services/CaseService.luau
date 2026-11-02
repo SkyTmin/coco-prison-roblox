@@ -33,6 +33,9 @@ local GangHouse = require(script.Parent.GangHouseService)
 local NicknameService = require(script.Parent.NicknameService) -- клички (этап 9): the shown name, the «Ваши клички» window
 local Types = require(Shared.Types)
 local Vault = require(Shared.Vault)
+local Persistence = require(Shared.Persistence)
+local Storage = require(script.Parent.SharedStorageService)
+local Transfers = require(script.Parent.StorageTransferService)
 
 type Reward = {
 	id: string,
@@ -80,6 +83,7 @@ local RANGE = 12
 local random = Random.new()
 local bindings: { [Instance]: Binding } = {}
 local sessions: { [Player]: Session } = {}
+local openEpoch: { [Player]: number } = {}
 local ancientRollUntil: { [Player]: number } = {}
 local started = false
 local CaseService = {}
@@ -165,13 +169,14 @@ end
 -- Ordinary cases empty on close. Ancient overflow survives walking away during the roulette [owner 02.11].
 local function emptyCase(player: Player, id: string)
 	if id ~= "enderChest" and id ~= "ancientCase" and ProfileService.Get(player) then
-		ProfileService.Mutate(player, function(p)
+		ProfileService.Mutate(player, function(p: any)
 			p.caseContents[id] = {}
 		end)
 	end
 end
 
 local function close(player: Player)
+	openEpoch[player] = (openEpoch[player] or 0) + 1
 	local session = sessions[player]
 	if session then
 		sessions[player] = nil
@@ -204,7 +209,11 @@ local function validate(player: Player, id: any): Session?
 		or (id == "factionChest" and profile.faction ~= session.faction) -- left the faction meanwhile
 		or (
 			id == "gangChest"
-			and (gangIdOf(profile) ~= session.gang or not GangChest.Valid(session.gang))
+			and (
+				gangIdOf(profile) ~= session.gang
+				or not GangChest.Valid(session.gang)
+				or not GangHouse.allowed(session.part, player)
+			)
 		)
 	then
 		close(player)
@@ -285,9 +294,15 @@ local function openChest(player: Player, part: BasePart)
 	if not id or not near(player, part) or not profile then
 		return
 	end
+	local epoch = (openEpoch[player] or 0) + 1
+	openEpoch[player] = epoch
 	local heldKey: string? = nil
 	local shared: { [number]: Types.ItemStack }? = nil
 	local gang: string? = nil
+	if (id == "factionChest" or id == "gangChest") and not ProfileService.IsReal(player) then
+		toast(player, "gang_chest_unavailable")
+		return
+	end
 	if id == "factionChest" then
 		-- [клиент] «Вы не можете открывать сундуки на чужой базе фракции!»
 		if profile.faction == nil or part:GetAttribute("Faction") ~= profile.faction then
@@ -349,6 +364,24 @@ local function openChest(player: Player, part: BasePart)
 			return
 		end
 	end
+	local pageCount = if gang
+		then GangChest.PageCount(GangService.gangOf(ProfileService.Get(player)))
+		else 0
+	if openEpoch[player] ~= epoch then
+		return
+	end
+	if shared then
+		local latest = ProfileService.Get(player)
+		if
+			not latest
+			or not ProfileService.IsReal(player)
+			or not near(player, part)
+			or (id == "factionChest" and part:GetAttribute("Faction") ~= latest.faction)
+			or (gang and (gangIdOf(latest) ~= gang or not GangHouse.allowed(part, player)))
+		then
+			return
+		end
+	end
 	local previous = sessions[player]
 	if previous then
 		emptyCase(player, previous.id) -- another case opened over this one: the old one closes
@@ -365,11 +398,13 @@ local function openChest(player: Player, part: BasePart)
 	}
 	if gang then
 		player:SetAttribute("GangChestPage", 1)
-		player:SetAttribute("GangChestPages", GangChest.PageCount(GangService.gangOf(profile)))
+		player:SetAttribute("GangChestPages", pageCount)
 	end
-	ProfileService.Mutate(player, function(p)
+	ProfileService.Mutate(player, function(p: any)
 		if shared then
 			p.caseContents[id] = deepCopy(shared)
+			p.casePages = p.casePages or {}
+			p.casePages[id] = sessions[player].index
 		elseif id ~= "enderChest" then
 			p.caseContents[id] = p.caseContents[id] or {}
 		end
@@ -386,6 +421,7 @@ local function openChest(player: Player, part: BasePart)
 end
 
 openCase = function(player: Player, id: any, requestedKey: any)
+	openEpoch[player] = (openEpoch[player] or 0) + 1
 	local session = validate(player, id)
 	if not session then
 		-- [владелец 21.10: «пусто после открытия»] the window is up but this server has no session for
@@ -434,7 +470,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		-- The list (46 like the original [клиент], names ours) and the tier weights: Shared/Nicknames [решение].
 		local granted: string? = nil
 		local failure: string? = nil
-		ProfileService.Mutate(player, function(p)
+		ProfileService.Mutate(player, function(p: any)
 			local key: string? = nil
 			for _, candidate in ipairs(accepted) do
 				if
@@ -481,7 +517,7 @@ openCase = function(player: Player, id: any, requestedKey: any)
 	local artifactNotices: { ArtifactService.Notice } = {}
 	local rolledBook: Types.ItemStack? = nil
 	local bookDestination: string? = nil
-	local ok, err = pcall(ProfileService.Mutate, player, function(p)
+	local ok, err = pcall(ProfileService.Mutate, player, function(p: any)
 		local key: string? = nil
 		for _, candidate in ipairs(accepted) do
 			if
@@ -701,6 +737,9 @@ local function move(
 	then
 		return
 	end
+	if session.id == "gangChest" and rawSection ~= session.index then
+		return -- a held slot belongs to the acknowledged page, never a new page at the same index
+	end
 	local section = moveSection(player, session.id, rawSection)
 	if not section then
 		return
@@ -718,11 +757,27 @@ local function move(
 	end
 	session.tokens -= 1
 	local claimedMoney = 0
-	local shared = sharedSlots(session)
-	if (session.id == "factionChest" or session.id == "gangChest") and not shared then
-		return
+	local isShared = session.id == "factionChest" or session.id == "gangChest"
+	local shared, revision = nil, nil
+	local kind = if session.id == "gangChest" then "gang" else "faction"
+	local key = session.gang or session.faction
+	local page = session.index
+	if isShared then
+		if not ProfileService.IsReal(player) or Transfers.Pending(player) or not key then
+			return
+		end
+		shared, revision = Storage.Snapshot(kind, key, page :: number)
+		if
+			not shared
+			or validate(player, id) ~= session
+			or session.index ~= page
+			or Transfers.Pending(player)
+		then
+			return
+		end
 	end
-	ProfileService.Mutate(player, function(p)
+	local originalPage = Persistence.copy(shared)
+	local function applyMove(p: Types.Profile)
 		local contents = shared or contentsFor(p, session.id)
 		local source = if from.container == "case" then contents else p.inventory
 		local target = if to.container == "case" then contents else p.inventory
@@ -779,31 +834,41 @@ local function move(
 		staged.inventory = { [1] = source[fromIndex], [2] = target[toIndex] }
 		InventoryService.move(staged, 1, 2, count)
 		source[fromIndex], target[toIndex] = staged.inventory[1], staged.inventory[2]
-	end)
-	if claimedMoney > 0 then
-		toast(player, "case_money", Strings.money(claimedMoney))
 	end
-	if shared then
-		-- a shared storage: every member who has this chest / page open sees the change
-		if session.id == "gangChest" and session.gang then
-			GangChest.MarkDirty(session.gang)
-		elseif session.faction then
-			FactionStorage.MarkDirty(session.faction)
+	if isShared then
+		local profile = ProfileService.Get(player)
+		if not profile then
+			return
 		end
-		for viewer, other in pairs(sessions) do
-			if
-				other.id == session.id
-				and other.faction == session.faction
-				and other.gang == session.gang
-				and other.index == session.index
-			then
-				ProfileService.Mutate(viewer, function(p)
-					p.caseContents[session.id] = deepCopy(shared)
-				end)
-				Remotes.event("CaseUpdated"):FireClient(viewer, session.id, true)
-			end
+		local before = Persistence.copy(profile.inventory)
+		local staged = table.clone(profile)
+		staged.inventory = Persistence.copy(before)
+		applyMove(staged)
+		if not Persistence.equal(originalPage, shared) then
+			Transfers.Begin(
+				player,
+				kind,
+				key :: string,
+				page :: number,
+				revision :: number,
+				before,
+				staged.inventory,
+				shared,
+				claimedMoney
+			)
+		else
+			ProfileService.Mutate(player, function(p: any)
+				p.inventory = staged.inventory
+				p.storageSettled = (p.storageSettled or 0) + 1
+				p.caseContents[session.id] = deepCopy(shared)
+			end)
+			Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 		end
 		return
+	end
+	ProfileService.Mutate(player, applyMove)
+	if claimedMoney > 0 then
+		toast(player, "case_money", Strings.money(claimedMoney))
 	end
 	Remotes.event("CaseUpdated"):FireClient(player, session.id, true)
 end
@@ -811,20 +876,33 @@ end
 -- «◀ / ▶» in the gang storage window: show another page of 27 slots
 local function turnPage(player: Player, rawPage: any)
 	local session = validate(player, "gangChest")
-	if not session or typeof(rawPage) ~= "number" or rawPage ~= math.floor(rawPage) then
+	if
+		not session
+		or Transfers.Pending(player)
+		or typeof(rawPage) ~= "number"
+		or rawPage ~= math.floor(rawPage)
+	then
 		return
 	end
+	local previous = session.index
 	local pages = GangChest.PageCount(GangService.gangOf(ProfileService.Get(player)))
 	if rawPage < 1 or rawPage > pages or rawPage == session.index then
 		return
 	end
 	local slots = GangChest.Page(session.gang, rawPage)
-	if not slots then
+	if
+		not slots
+		or validate(player, "gangChest") ~= session
+		or session.index ~= previous
+		or Transfers.Pending(player)
+	then
 		return
 	end
 	session.index = rawPage
-	ProfileService.Mutate(player, function(p)
+	ProfileService.Mutate(player, function(p: any)
 		p.caseContents.gangChest = deepCopy(slots)
+		p.casePages = p.casePages or {}
+		p.casePages.gangChest = rawPage
 	end)
 	player:SetAttribute("GangChestPage", rawPage)
 	player:SetAttribute("GangChestPages", pages)
@@ -847,7 +925,7 @@ local function unlockSection(player: Player, rawSection: any, currency: any)
 	unlockAt[player] = os.clock()
 	local price = Vault.price(rawSection)
 	local result: string? = nil
-	ProfileService.Mutate(player, function(p)
+	ProfileService.Mutate(player, function(p: any)
 		local open = Vault.unlocked(p)
 		if open >= Vault.MAX then
 			result = "vault_max"
@@ -898,7 +976,7 @@ local function debugHook()
 			return nil
 		end
 		if op == "sections" and typeof(n) == "number" then
-			ProfileService.Mutate(player, function(p)
+			ProfileService.Mutate(player, function(p: any)
 				p.vaultSections = math.clamp(math.floor(n), 1, Vault.MAX)
 			end)
 			Remotes.event("CaseUpdated"):FireClient(player, "enderChest", true)
@@ -1003,14 +1081,28 @@ function CaseService.Start()
 	Remotes.event("GangChestPage").OnServerEvent:Connect(turnPage)
 	Remotes.event("VaultUnlock").OnServerEvent:Connect(unlockSection)
 	debugHook()
-	GangChest.SetViewerCounter(function(gangId: string): number
-		local n = 0
-		for _, session in pairs(sessions) do
-			if session.id == "gangChest" and session.gang == gangId then
-				n += 1
+	local function refreshShared(_actor: Player)
+		for viewer, session in pairs(sessions) do
+			if session.id == "gangChest" or session.id == "factionChest" then
+				local index = session.index
+				local slots = sharedSlots(session)
+				if slots and sessions[viewer] == session and session.index == index then
+					ProfileService.Mutate(viewer, function(p: any)
+						p.caseContents[session.id] = deepCopy(slots)
+						p.casePages = p.casePages or {}
+						p.casePages[session.id] = index
+					end)
+					Remotes.event("CaseUpdated"):FireClient(viewer, session.id, true)
+				end
 			end
 		end
-		return n
+	end
+	Transfers.Start(refreshShared)
+	task.spawn(function()
+		while true do
+			task.wait(5)
+			refreshShared(nil :: any)
+		end
 	end)
 	Remotes.event("CaseReveal").OnServerEvent:Connect(function(player: Player)
 		local session = validate(player, "ancientCase")
@@ -1032,6 +1124,7 @@ function CaseService.Start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		sessions[player] = nil
+		openEpoch[player] = nil
 		ancientRollUntil[player] = nil
 		unlockAt[player] = nil
 	end)

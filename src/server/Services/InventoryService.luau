@@ -5,6 +5,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Numbers = require(Shared.Numbers)
 local Types = require(Shared.Types)
 
 type Profile = Types.Profile
@@ -16,6 +17,19 @@ local ARMOR_SLOTS = { helmet = true, chestplate = true, leggings = true, boots =
 
 local InventoryService = {}
 InventoryService.SLOTS = SLOTS
+
+function InventoryService.isCount(count: any): boolean
+	return Numbers.integer(count, 1)
+end
+
+local function validSlots(slots: { [number]: ItemStack }): boolean
+	for _, stack in pairs(slots) do
+		if not InventoryService.isCount(stack.count) then
+			return false
+		end
+	end
+	return true
+end
 
 function InventoryService.isStackable(id: string): boolean
 	-- location passes are single items [владелец 22.10: «пропуск в подвал не должен стакаться»], so are the
@@ -32,6 +46,10 @@ end
 
 -- Adds `count` of item; returns the amount that did not fit.
 function InventoryService.add(profile: Profile, id: string, count: number, level: number?): number
+	assert(Numbers.integer(count), "Inventory.add requires a finite nonnegative integer")
+	if not validSlots(profile.inventory) then
+		return count
+	end
 	local remaining = count
 	if InventoryService.isStackable(id) then
 		for slot = 1, SLOTS do
@@ -66,6 +84,9 @@ end
 
 -- True when `count` of the item fits without dropping anything.
 function InventoryService.canAdd(profile: Profile, id: string, count: number): boolean
+	if not Numbers.integer(count) or not validSlots(profile.inventory) then
+		return false
+	end
 	local room = 0
 	local stackable = InventoryService.isStackable(id)
 	for slot = 1, SLOTS do
@@ -83,6 +104,9 @@ function InventoryService.canAdd(profile: Profile, id: string, count: number): b
 end
 
 function InventoryService.count(profile: Profile, id: string): number
+	if not validSlots(profile.inventory) then
+		return 0
+	end
 	local total = 0
 	for _, stack in pairs(profile.inventory) do
 		if stack.id == id then
@@ -94,6 +118,9 @@ end
 
 -- Removes up to `count`; returns how many were removed.
 function InventoryService.remove(profile: Profile, id: string, count: number): number
+	if not Numbers.integer(count) or not validSlots(profile.inventory) then
+		return 0
+	end
 	local left = count
 	for slot = SLOTS, 1, -1 do
 		local stack = profile.inventory[slot]
@@ -125,7 +152,7 @@ function InventoryService.transfer(
 	last: number
 ): number
 	local stack = source[from]
-	if not stack or source == target then
+	if not stack or source == target or not validSlots(source) or not validSlots(target) then
 		return 0
 	end
 	local remaining = stack.count
@@ -165,6 +192,11 @@ function InventoryService.transfer(
 end
 
 function InventoryService.move(profile: Profile, from: number, to: number, count: number?): boolean
+	if
+		not validSlots(profile.inventory) or (count ~= nil and not InventoryService.isCount(count))
+	then
+		return false
+	end
 	if from == to or not InventoryService.isSlot(from) or not InventoryService.isSlot(to) then
 		return false
 	end
@@ -235,6 +267,9 @@ function InventoryService.findTool(profile: Profile, id: string): (number?, Item
 end
 
 function InventoryService.equipArmor(profile: Profile, slot: number): boolean
+	if not validSlots(profile.inventory) then
+		return false
+	end
 	if not InventoryService.isSlot(slot) then
 		return false
 	end
@@ -251,7 +286,11 @@ end
 -- Takes a worn piece off into an inventory slot (a given empty slot, else the first free one).
 function InventoryService.unequipArmor(profile: Profile, part: string, slot: number?): boolean
 	local worn = profile.armor[part]
-	if not worn then
+	if
+		not worn
+		or not InventoryService.isCount(worn.count)
+		or not validSlots(profile.inventory)
+	then
 		return false
 	end
 	local target = if slot
@@ -293,11 +332,19 @@ function InventoryService.autoSell(
 	count: number,
 	multiplier: number
 ): (number, number)
-	if count <= 0 or not InventoryService.canAutoSell(profile, id) then
+	if
+		not InventoryService.isCount(count)
+		or not Numbers.finite(multiplier)
+		or multiplier <= 0
+		or not InventoryService.canAutoSell(profile, id)
+	then
 		return 0, 0
 	end
 	local block = Config.block(id) :: Config.Block
 	local amount = math.floor(block.basePrice * Config.moneyScale * multiplier * count + 0.5)
+	if not Numbers.canCredit(profile.coins, amount) then
+		return 0, 0
+	end
 	profile.coins += amount
 	return amount, count
 end
@@ -306,7 +353,16 @@ end
 -- blocks from mines far above the player stay in the bag [сеть TG/25]; the second result counts them
 -- sells every sellable block: (money, items kept because their block is locked, items sold)
 function InventoryService.sellAll(profile: Profile, multiplier: number): (number, number, number)
+	if
+		not validSlots(profile.inventory)
+		or not Numbers.integer(profile.coins)
+		or not Numbers.finite(multiplier)
+		or multiplier <= 0
+	then
+		return 0, 0, 0
+	end
 	local total, locked, count = 0, 0, 0
+	local soldSlots = {}
 	for slot, stack in pairs(profile.inventory) do
 		local block = Config.block(stack.id)
 		if block and block.sellable ~= false and Config.blockLocked(stack.id, profile.level) then
@@ -316,8 +372,14 @@ function InventoryService.sellAll(profile: Profile, multiplier: number): (number
 				block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5
 			)
 			count += stack.count
-			profile.inventory[slot] = nil
+			table.insert(soldSlots, slot)
 		end
+	end
+	if not Numbers.canCredit(profile.coins, total) then
+		return 0, locked, 0
+	end
+	for _, slot in ipairs(soldSlots) do
+		profile.inventory[slot] = nil
 	end
 	return total, locked, count
 end

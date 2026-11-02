@@ -16,6 +16,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local CombatService = require(script.Parent.CombatService)
 local InventoryService = require(script.Parent.InventoryService)
 local GangService = require(script.Parent.GangService)
+local FallService = require(script.Parent.FallService)
 
 local LocationService = {}
 local started = false
@@ -43,6 +44,7 @@ type Channel = {
 	position: Vector3,
 	finishesAt: number,
 	died: RBXScriptConnection?,
+	onArrive: (() -> boolean)?, -- trusted server commit, only after the channel/destination recheck
 }
 local pending: { [Player]: Channel } = {}
 
@@ -111,7 +113,13 @@ end
 -- locations whose arrival depends on the player (База банды: the copy of his own gang, GangHouseService)
 local arrivals: { [string]: (Player) -> BasePart? } = {}
 
-local function teleport(player: Player, locationId: any, spot: any, arrival: BasePart?)
+local function teleport(
+	player: Player,
+	locationId: any,
+	spot: any,
+	arrival: BasePart?,
+	onArrive: (() -> boolean)?
+)
 	if
 		typeof(locationId) ~= "string"
 		or (spot ~= nil and (typeof(spot) ~= "string" or not SPOTS[spot]))
@@ -183,8 +191,14 @@ local function teleport(player: Player, locationId: any, spot: any, arrival: Bas
 	local spawn: BasePart? = if arrival
 			and spot == nil
 			and arrival:GetAttribute("LocationId") == locationId
+			and arrival:IsDescendantOf(workspace)
+			and CollectionService:HasTag(arrival, "LocationSpawn")
 		then arrival
 		else nil
+	if arrival and not spawn then
+		toast(player, "location_no_spawn")
+		return
+	end
 	for _, part in ipairs(CollectionService:GetTagged("LocationSpawn")) do
 		if spawn then
 			break
@@ -194,6 +208,7 @@ local function teleport(player: Player, locationId: any, spot: any, arrival: Bas
 			and part:IsDescendantOf(workspace)
 			and part:GetAttribute("LocationId") == locationId
 			and part:GetAttribute("HouseSpawn") == nil
+			and part:GetAttribute("PrivateArrival") ~= true
 			and matchesSpot(part, spot)
 			and matchesFaction(part, profile.faction)
 		then
@@ -224,6 +239,7 @@ local function teleport(player: Player, locationId: any, spot: any, arrival: Bas
 		if player.Character ~= character or humanoid.Health <= 0 then
 			return
 		end
+		FallService.Reset(player)
 		character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
 		root.AssemblyLinearVelocity = Vector3.zero
 		root.AssemblyAngularVelocity = Vector3.zero
@@ -239,6 +255,7 @@ local function teleport(player: Player, locationId: any, spot: any, arrival: Bas
 		spot = spot,
 		position = root.Position,
 		finishesAt = os.clock() + Config.rules.teleport.channelSeconds,
+		onArrive = onArrive,
 	}
 	pending[player] = channel
 	channel.died = humanoid.Died:Connect(function()
@@ -285,7 +302,18 @@ local function updateChannels()
 				cancel(player)
 				continue
 			end
+			if channel.onArrive then
+				local ok, committed = pcall(channel.onArrive)
+				if not ok or not committed then
+					if not ok then
+						warn("[LocationService] arrival commit: " .. tostring(committed))
+					end
+					cancel(player)
+					continue
+				end
+			end
 			clearChannel(player)
+			FallService.Reset(player)
 			channel.character:PivotTo(channel.spawn.CFrame + Vector3.new(0, 4, 0))
 			channel.root.AssemblyLinearVelocity = Vector3.zero
 			channel.root.AssemblyAngularVelocity = Vector3.zero
@@ -353,6 +381,7 @@ local function evictStrangers()
 		if player.Character ~= character then
 			continue
 		end
+		FallService.Reset(player)
 		character:PivotTo(home.CFrame + Vector3.new(0, 4, 0))
 		root.AssemblyLinearVelocity = Vector3.zero
 		ProfileService.Mutate(player, function(p)
@@ -397,8 +426,13 @@ function LocationService.SetArrival(locationId: string, resolve: (Player) -> Bas
 	arrivals[locationId] = resolve
 end
 
-function LocationService.Request(player: Player, locationId: string, arrival: BasePart?)
-	teleport(player, locationId, nil, arrival)
+function LocationService.Request(
+	player: Player,
+	locationId: string,
+	arrival: BasePart?,
+	onArrive: (() -> boolean)?
+)
+	teleport(player, locationId, nil, arrival, onArrive)
 end
 
 function LocationService.Start()

@@ -29,6 +29,7 @@ local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
 local GangService = require(script.Parent.GangService)
 local LocationService = require(script.Parent.LocationService)
+local FallService = require(script.Parent.FallService)
 
 local GangHouseService = {}
 local LOCATION = "gang_base"
@@ -212,6 +213,7 @@ local function place(player: Player, target: BasePart)
 	if player.Character ~= character then
 		return
 	end
+	FallService.Reset(player)
 	character:PivotTo(target.CFrame + Vector3.new(0, 4, 0))
 	root.AssemblyLinearVelocity = Vector3.zero
 end

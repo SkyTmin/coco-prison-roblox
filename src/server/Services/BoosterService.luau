@@ -23,10 +23,15 @@ local function toast(player: Player, key: string, ...: any)
 end
 
 local function giveBack(p: any, b: Boosters.Stored)
-	Boosters.store(p, b.kind, b.scope, b.mult, b.minutes)
+	-- A failed activation returns an owned booster even if an earned reward filled the bag meanwhile.
+	Boosters.store(p, b.kind, b.scope, b.mult, b.minutes, nil, true)
 end
 
 local function activateShared(player: Player, index: number, stored: Boosters.Stored)
+	if not ProfileService.CanExport(player) then
+		toast(player, "booster_try_later")
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return

@@ -190,14 +190,16 @@ function Boosters.store(
 	scope: string?,
 	mult: number?,
 	minutes: number?,
-	count: number?
+	count: number?,
+	guaranteedReward: boolean?
 )
 	local m = mult or Config.boosters.localMultiplier
 	local min = minutes or Config.boosters.minutes
 	local sc = if scope == "local" then nil else scope
 	local n = count or 1
 	p.boosters = p.boosters or {}
-	if Boosters.storedCount(p) + n > Config.boosters.maxStored then
+	-- Earned rewards must survive a full store. This overflow still blocks further purchases.
+	if not guaranteedReward and Boosters.storedCount(p) + n > Config.boosters.maxStored then
 		return
 	end
 	for _, s in ipairs(p.boosters) do

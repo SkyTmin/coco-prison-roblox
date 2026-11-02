@@ -1,8 +1,10 @@
 # Whole-game omission audit — 2026-11-02
 
+**Follow-up delivery:** after “Исправь все!”, all 23 confirmed source findings below were corrected, together with the conditional fall-history risk and shared-storage integration races. See the [consolidated corrections](audit-fixes-2026-11-02.md) and [800-check plus Studio evidence](audit-fixes-validation-2026-11-02.json). The original findings/line references below preserve the audited baseline. Source repair is complete; real phone gestures, distributed-service failures and group balance acceptance remain separate.
+
 Baseline: `stage-1` at `a3ffec7`. Requested by the owner after the mining-counter changes; three parallel reviewers covered economy, combat/world and UI/mobile. The parent coordinated persistence/network follow-ups, independently checked the strongest findings and investigated the owner's settings report in the confirmed Katorga Studio place (`92594200898716`).
 
-This is a broad source/integration audit, **not a claim that every feature passed a live playthrough**. Findings below remain open unless explicitly marked fixed. Existing boss, network and mining QA evidence is retained with its original limits.
+This is a broad source/integration audit, **not a claim that every feature passed a live playthrough**. Findings below describe the pre-fix baseline; use the follow-up delivery record above for current status. Existing boss, network and mining QA evidence is retained with its original limits.
 
 ## Fix first
 
@@ -53,4 +55,4 @@ The Studio mouse automation tool changed pointer positions but emitted only zero
 
 ## Delivery record
 
-Production edits in this audit are limited to the owner's brightness/sensitivity responsiveness issue. The remaining findings form the next repair backlog. No publishing or map replacement was performed. Final checks and settings regression results are recorded in `audit-validation-2026-11-02.json` and the session journal.
+The initial audit commit limited production edits to the owner's brightness/sensitivity responsiveness issue. The subsequent owner-authorized repair batch implements the remaining confirmed findings; current checks and Studio results are in `audit-fixes-validation-2026-11-02.json` and the session journal. No publishing or map replacement was performed. Initial settings results remain in `audit-validation-2026-11-02.json`.

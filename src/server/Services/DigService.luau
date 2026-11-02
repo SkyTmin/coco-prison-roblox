@@ -22,6 +22,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local MiningStats = require(Shared.MiningStats)
+local MiningDrops = require(Shared.MiningDrops)
+local Numbers = require(Shared.Numbers)
 local Remotes = require(Shared.Remotes)
 local Skills = require(Shared.Skills)
 local Strings = require(Shared.Strings)
@@ -67,6 +69,16 @@ local insomniaToastAt: { [Player]: number } = {} -- holding dig must not spam th
 local shotToastAt: { [Player]: number } = {} -- the same for the shot mine's «only this tool» toast
 local random = Random.new()
 local nextToken = 0
+local queuedStarts: { [Player]: { part: any, hit: any } } = {}
+local beginDig: (Player, any, any) -> ()
+
+local function advanceQueued(player: Player)
+	local queued = queuedStarts[player]
+	queuedStarts[player] = nil
+	if queued then
+		beginDig(player, queued.part, queued.hit)
+	end
+end
 
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
@@ -91,6 +103,11 @@ local function onSurface(part: BasePart, hit: Vector3): boolean
 	return math.abs(offset.X) <= half.X + tolerance
 		and math.abs(offset.Y) <= half.Y + tolerance
 		and math.abs(offset.Z) <= half.Z + tolerance
+		and (
+			math.abs(math.abs(offset.X) - half.X) <= tolerance
+			or math.abs(math.abs(offset.Y) - half.Y) <= tolerance
+			or math.abs(math.abs(offset.Z) - half.Z) <= tolerance
+		)
 end
 
 -- Minecraft reach and line of sight, both measured to the hit point on the face the player aims at.
@@ -109,17 +126,12 @@ local function inRange(player: Player, part: BasePart, hit: Vector3): boolean
 	if delta.Magnitude > REACH + REACH_SLACK + math.min(speed, 80) * lag then
 		return false
 	end
-	-- line of sight against the static world only, not the mine's own blocks [docs/research/server-scaling.md]:
-	-- with ping the client has already hidden the block in front and digs the next one, while here
-	-- that front block still stands for a moment — the ray hit it, the dig was refused ("Слишком
-	-- далеко"), the block popped back and the first blocks of every row looked slow [владелец 22.10]
+	-- Intact mine cells block sight too. A jitter-adjacent next intent waits for its predecessor's
+	-- server deadline, so that confirmed removal clears this ray without exempting an entire mine.
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = if part.Parent
-		then { character, part.Parent }
-		else { character }
-	-- stop a hair before the face: a clear path means nothing is in the way
-	local result = workspace:Raycast(eye, delta * 0.98, params)
+	params.FilterDescendantsInstances = { character }
+	local result = workspace:Raycast(eye, delta, params)
 	return result == nil or result.Instance == part
 end
 
@@ -128,7 +140,7 @@ local function check(player: Player, part: any, hit: any): (number?, MineService
 	if typeof(part) ~= "Instance" or not part:IsA("BasePart") or typeof(hit) ~= "Vector3" then
 		return nil, nil, nil
 	end
-	if hit ~= hit or hit.Magnitude == math.huge then
+	if not Numbers.finite(hit.X) or not Numbers.finite(hit.Y) or not Numbers.finite(hit.Z) then
 		return nil, nil, nil
 	end
 	local mine, i = MineService.lookup(part)
@@ -291,17 +303,24 @@ local function complete(player: Player, token: number)
 	if not dig or dig.token ~= token then
 		return -- cancelled or replaced by another dig
 	end
+	local remaining = dig.startedAt + (dig.needed + dig.pause) - os.clock()
+	if remaining > 0 then
+		task.delay(remaining, complete, player, token)
+		return
+	end
 	digs[player] = nil
 	local part = dig.part
 	local needed, mine, i = check(player, part, dig.hit)
 	if not needed or not mine or not i or mine.generation ~= dig.generation then
 		Remotes.event("DigRejected"):FireClient(player, part)
+		advanceQueued(player)
 		return
 	end
 	local profileNow = ProfileService.Get(player) :: Types.Profile
 	local toolNow, levelNow = InventoryService.heldTool(profileNow)
 	if toolNow ~= dig.toolId or levelNow ~= dig.toolLevel then
 		Remotes.event("DigRejected"):FireClient(player, part) -- tool changed mid-dig: start over
+		advanceQueued(player)
 		return
 	end
 	local brokenCFrame, brokenSize, brokenColor = part.CFrame, part.Size, part.Color
@@ -310,6 +329,7 @@ local function complete(player: Player, token: number)
 	lastPause[player] = Config.pauseAfter(mine.location, dig.needed) -- shot mines: 8 blocks a second at most
 	if not blockId then
 		Remotes.event("DigRejected"):FireClient(player, part)
+		advanceQueued(player)
 		return
 	end
 	queueBreakFx(player, brokenCFrame.Position, brokenSize, brokenColor, blockId)
@@ -318,12 +338,7 @@ local function complete(player: Player, token: number)
 	end
 	local block = Config.block(blockId) :: Config.Block
 	-- Шёлковое касание: the block drops itself
-	local dropId = if BookService.silkTouch(profileNow) then blockId else block.dropsAs or blockId
-	local dropCount = 1
-	local range = (block :: any).dropCount
-	if typeof(range) == "table" and #range == 2 then
-		dropCount = random:NextInteger(range[1], range[2]) -- [ваниль] e.g. melon → 3–7 slices
-	end
+	local dropId, dropCount = MiningDrops.resolve(block, BookService.silkTouch(profileNow), random)
 
 	-- combo: every block extends it; it resets after rules.combo.breakAfterIdleSeconds without digging
 	local now = os.clock()
@@ -404,6 +419,7 @@ local function complete(player: Player, token: number)
 		dropCount,
 		comboMult
 	)
+	advanceQueued(player)
 end
 
 -- Token bucket per player [docs/research/server-scaling.md]: instant mining is 20 blocks a second, a
@@ -423,20 +439,8 @@ local function takeDigToken(player: Player): boolean
 	return true
 end
 
-local function onDigStart(player: Player, part: any, hit: any)
-	if not takeDigToken(player) then
-		if typeof(part) == "Instance" then
-			Remotes.event("DigRejected"):FireClient(player, part)
-		end
-		return
-	end
-	-- The client's timer starts when it sends DigStart, ours when it arrives, so with no pause
-	-- (instant mining) the next DigStart races our timer of the previous block: finish that block
-	-- first if its time is up (one tick of grace for jitter) instead of dropping it.
+beginDig = function(player: Player, part: any, hit: any)
 	local previous = digs[player]
-	if previous and os.clock() - previous.startedAt >= previous.needed + previous.pause - TICK then
-		complete(player, previous.token)
-	end
 	digs[player] = nil
 	local needed, mine = check(player, part, hit)
 	if not needed or not mine then
@@ -478,7 +482,31 @@ local function onDigStart(player: Player, part: any, hit: any)
 	task.delay(needed + pause, complete, player, token)
 end
 
+local function onDigStart(player: Player, part: any, hit: any)
+	if not takeDigToken(player) then
+		if typeof(part) == "Instance" then
+			Remotes.event("DigRejected"):FireClient(player, part)
+		end
+		return
+	end
+	local previous = digs[player]
+	queuedStarts[player] = nil -- at most one next intent; never accumulate a burst of free mining
+	if previous then
+		local remaining = previous.startedAt + (previous.needed + previous.pause) - os.clock()
+		if remaining <= 0 then
+			complete(player, previous.token)
+		elseif previous.part == part then
+			return -- retrying the same target cannot shorten or restart its deadline
+		elseif remaining <= TICK then
+			queuedStarts[player] = { part = part, hit = hit }
+			return -- jitter tolerance queues work; complete still enforces the full timer
+		end
+	end
+	beginDig(player, part, hit)
+end
+
 local function onDigCancel(player: Player)
+	queuedStarts[player] = nil
 	local dig = digs[player]
 	digs[player] = nil
 	if dig and dig.needed >= CRACK_MIN then
@@ -504,6 +532,7 @@ function DigService.Start()
 	-- Legacy name kept for older clients: the server timer decides, the message itself does nothing.
 	Remotes.event("DigFinish").OnServerEvent:Connect(function() end)
 	Players.PlayerRemoving:Connect(function(player)
+		queuedStarts[player] = nil
 		digs[player] = nil
 		combos[player] = nil
 		lastBreakAt[player] = nil

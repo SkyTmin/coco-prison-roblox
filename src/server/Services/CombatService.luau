@@ -14,6 +14,7 @@ local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local HurtService = require(script.Parent.HurtService)
 local MotionService = require(script.Parent.MotionService)
+local TrainerService = require(script.Parent.TrainerService)
 local Combat = require(Shared.Combat)
 local BossDamage = require(script.Parent.BossDamage)
 local DamageImmunity = require(script.Parent.DamageImmunity)
@@ -50,7 +51,8 @@ function CombatService.ApplyDamage(
 	amount: number,
 	source: "player" | "boss" | "mob",
 	attacker: Player?,
-	attackerModel: Model?
+	attackerModel: Model?,
+	dodgeable: boolean?
 ): boolean
 	if amount ~= amount or amount <= 0 or amount == math.huge or humanoid.Health <= 0 then
 		return false
@@ -69,6 +71,14 @@ function CombatService.ApplyDamage(
 	local victim = if character and character:IsA("Model")
 		then Players:GetPlayerFromCharacter(character)
 		else nil
+	local victimProfile = if victim then ProfileService.Get(victim) else nil
+	if
+		dodgeable ~= false
+		and victimProfile
+		and math.random() < TrainerService.dodgeChance(victimProfile)
+	then
+		return false -- a dodge consumes neither health nor the target's hurt-immunity window
+	end
 	amount = DamageImmunity.Accept(humanoid, amount)
 	if amount <= 0 then
 		return false
@@ -76,7 +86,7 @@ function CombatService.ApplyDamage(
 	if victim then
 		CombatService.MarkHit(victim, source, attacker)
 		-- worn armor and Protection soften blows from players, mobs and bosses [ваниль]
-		local profile = ProfileService.Get(victim)
+		local profile = victimProfile
 		amount = Combat.armorReduce(amount, profile and profile.armor)
 		if profile then
 			-- the armor's ancient books: Шныр, Халк, and the answers to the attacker
@@ -255,6 +265,7 @@ function CombatService.HitModel(
 	weapon = weapon or profile.inventory[profile.selectedSlot]
 	local bookHit
 	if not (melee and melee.sweep) then
+		damage *= TrainerService.multiplier(profile, "strength")
 		damage, bookHit = BookService.outgoing(
 			player,
 			weapon,
@@ -405,7 +416,9 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 		if not root or not root:IsA("BasePart") then
 			return true
 		end
-		local cf = MotionService.rootAt(player) or root.CFrame
+		-- Target rewind uses render history; the attacker's own critical needs physical evidence.
+		-- A finite cosmetic report up to 30 studs away must not turn a grounded player airborne.
+		local cf = root.CFrame
 		local ray = RaycastParams.new()
 		ray.FilterType, ray.FilterDescendantsInstances =
 			Enum.RaycastFilterType.Exclude, { character }
@@ -420,7 +433,7 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 		if not root or not root:IsA("BasePart") then
 			return false
 		end
-		local speed = MotionService.verticalSpeed(player) or root.AssemblyLinearVelocity.Y
+		local speed = root.AssemblyLinearVelocity.Y
 		return Combat.canCrit(
 			charge,
 			falling == true and speed < -0.5,

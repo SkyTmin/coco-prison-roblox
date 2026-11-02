@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Numbers = require(Shared.Numbers)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -161,7 +162,7 @@ local function buy(player: Player, id: any, bulk: any)
 		toast(player, "too_far")
 		return
 	end
-	if profile.coins < units(price) * count then
+	if not Numbers.canAfford(profile.coins, units(price) * count) then
 		toast(player, "not_enough_money")
 		return
 	end
@@ -208,12 +209,12 @@ local function upgrade(player: Player, target: any)
 		return
 	end
 	local missing = {}
-	if profile.coins < units(up.cost) then
+	if not Numbers.canAfford(profile.coins, units(up.cost)) then
 		table.insert(missing, Strings.money(units(up.cost)) .. " $")
 	end
 	for counter, needed in pairs(up.requirements) do
 		local have = Config.requirementHave(profile, counter)
-		if needed and have < needed then
+		if needed and (not Numbers.finite(have) or have < needed) then
 			table.insert(
 				missing,
 				string.format("%s %s/%s", counter, Strings.big(have), Strings.big(needed))
@@ -245,7 +246,7 @@ local function levelUp(player: Player)
 		toast(player, "level_max")
 		return
 	end
-	if profile.blocksTotal < rule.blocks then
+	if not Numbers.finite(profile.blocksTotal) or profile.blocksTotal < rule.blocks then
 		toast(
 			player,
 			"level_need_blocks",
@@ -254,7 +255,7 @@ local function levelUp(player: Player)
 		)
 		return
 	end
-	if profile.coins < units(rule.money) then
+	if not Numbers.canAfford(profile.coins, units(rule.money)) then
 		toast(player, "level_need_money", Strings.money(profile.coins), Strings.big(rule.money))
 		return
 	end

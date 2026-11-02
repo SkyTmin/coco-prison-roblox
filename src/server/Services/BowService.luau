@@ -22,6 +22,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Effects = require(Shared.Effects)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
@@ -464,10 +465,20 @@ local function burn()
 			burning[humanoid] = nil
 		elseif now >= entry.nextAt then
 			entry.nextAt = now + 1
+			if Effects.level(entry.model, "FireResistance") > 0 then
+				continue -- immunity acquired after impact protects subsequent fire ticks too
+			end
 			local by = entry.by
 			local victim = Players:GetPlayerFromCharacter(entry.model)
 			if victim then
-				CombatService.ApplyDamage(humanoid, BOW.flameDamagePerSecond, "player", by)
+				CombatService.ApplyDamage(
+					humanoid,
+					BOW.flameDamagePerSecond,
+					"player",
+					by,
+					nil,
+					false
+				)
 			elseif by then
 				humanoid:SetAttribute("LastHitBy", by.UserId)
 				humanoid:SetAttribute("LastHitAt", now)

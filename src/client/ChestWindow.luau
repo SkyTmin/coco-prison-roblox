@@ -21,6 +21,7 @@ local CreativeWindow = require(script.Parent.CreativeWindow)
 local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
 local SlotView = require(script.Parent.SlotView)
+local StorageTransferUi = require(script.Parent.StorageTransferUi)
 
 type Address = DragDrop.Address
 type SlotView = { address: Address, name: TextLabel, count: TextLabel, icon: ImageLabel }
@@ -50,10 +51,33 @@ function ChestWindow.build(
 	end
 	local isEnder = id == "enderChest"
 	local isGang = id == "gangChest"
+	local isShared = isGang or id == "factionChest"
+	local transfer = StorageTransferUi.new()
+	local moveQueue: { { from: Address, to: Address, count: number } }? = nil
+	local queuePage: number? = nil
+	local requestedPage: number? = nil
+	local pageRequestVersion = 0
+	local section = 1 -- the Хранилище section on screen
+	local localPlayer = Players.LocalPlayer
+	local function busy(): boolean
+		return requestedPage ~= nil
+			or transfer.pending ~= nil
+			or (isShared and localPlayer:GetAttribute("SharedStorageBusy") == true)
+	end
+	local function settled(): number
+		local p = getProfile()
+		return if p then tonumber((p :: any).storageSettled) or 0 else 0
+	end
+	local function moveSection(): number?
+		if isEnder then
+			return section
+		end
+		local p = getProfile()
+		return if isGang and p then (p :: any).casePages and (p :: any).casePages.gangChest else nil
+	end
 	local isStorage = isEnder or id == "factionChest" or isGang -- keeps items, no key, no Open button
 	local gridWidth = 9 * SLOT + 8 * GAP
 	local caseY = if isEnder then 38 else 4 -- the ender chest: the section tabs above
-	local section = 1 -- the Хранилище section on screen
 	local bagY = caseY + 18 + 3 * (SLOT + GAP) + 10
 	local barY = bagY + 18 + 3 * (SLOT + GAP) + 10
 	local rowY = barY + 18 + SLOT + 14
@@ -80,7 +104,34 @@ function ChestWindow.build(
 		then { configuredKeys }
 		else configuredKeys or {}
 	local selectedKey = accepted[1]
-	local function stackAt(address: Address): Types.ItemStack?
+	local refresh: () -> () = function() end
+	local pumpTakeAll: () -> () = function() end
+	local drag: any
+	local function beginTransfer()
+		if not isShared then
+			return
+		end
+		local token = StorageTransferUi.begin(transfer, settled(), moveSection() or 1)
+		drag.Clear()
+		-- DragDrop.place may recreate a partial-stack ghost after this callback returns.
+		task.defer(function()
+			if win.Parent and transfer.pending == token then
+				drag.Clear()
+			end
+		end)
+		task.delay(15, function()
+			if win.Parent and StorageTransferUi.expire(transfer, token) then
+				moveQueue, queuePage = nil, nil
+				drag.Clear()
+				refresh()
+			end
+		end)
+		refresh()
+	end
+	local function stackAt(address: Address, display: boolean?): Types.ItemStack?
+		if busy() and not display then
+			return nil -- no new selection while page contents are in flight
+		end
 		local profile = getProfile()
 		if not profile then
 			return nil
@@ -98,21 +149,66 @@ function ChestWindow.build(
 		return not isEnder or section <= Vault.unlocked(getProfile())
 	end
 	local function move(from: Address, to: Address, count: number?)
+		if busy() then
+			return
+		end
 		if (from.container == "case" or to.container == "case") and not sectionOpen() then
 			return
 		end
-		Remotes.event("CaseMove"):FireServer(id, from, to, count, if isEnder then section else nil)
+		if from.container == "case" or to.container == "case" then
+			beginTransfer()
+		end
+		Remotes.event("CaseMove"):FireServer(id, from, to, count, moveSection())
 	end
 	local function quick(from: Address)
-		if not sectionOpen() then
+		if busy() or not sectionOpen() then
 			return
 		end
-		Remotes.event("CaseMove")
-			:FireServer(id, from, "quick", nil, if isEnder then section else nil)
+		beginTransfer()
+		Remotes.event("CaseMove"):FireServer(id, from, "quick", nil, moveSection())
 	end
-	local drag = DragDrop.new(win, stackAt, move, quick, function(from: Address, count: number?)
+	drag = DragDrop.new(win, stackAt, move, quick, function(from: Address, count: number?)
+		if busy() then
+			return
+		end
 		Remotes.event("DropItem"):FireServer(from.index, count) -- only bag slots are thrown
+	end, function(from: Address, targets: { Address }, count: number)
+		if busy() then
+			return
+		end
+		if not isShared then
+			for _, target in ipairs(targets) do
+				move(from, target, count)
+			end
+			return
+		end
+		moveQueue, queuePage = {}, moveSection() or 1
+		for _, target in ipairs(targets) do
+			table.insert(moveQueue :: any, { from = from, to = target, count = count })
+		end
+		pumpTakeAll()
 	end)
+	pumpTakeAll = function()
+		if busy() then
+			return
+		end
+		while moveQueue and #moveQueue > 0 do
+			local queued = table.remove(moveQueue, 1)
+			move(queued.from, queued.to, queued.count)
+			if busy() then
+				return
+			end
+		end
+		moveQueue, queuePage = nil, nil
+		local index = StorageTransferUi.next(transfer)
+		while index do
+			if stackAt({ container = "case", index = index }) then
+				quick({ container = "case", index = index })
+				return
+			end
+			index = StorageTransferUi.next(transfer)
+		end
+	end
 	local function grid(container: "case" | "inv", first: number, rows: number, y: number)
 		for row = 0, rows - 1 do
 			for column = 0, 8 do
@@ -139,8 +235,6 @@ function ChestWindow.build(
 	grid("case", 1, 3, caseY + 18)
 	grid("inv", 10, 3, bagY + 18)
 	grid("inv", 1, 1, barY + 18)
-	local refresh: () -> ()
-
 	-- the Хранилище section tabs
 	local tabs: { TextButton } = {}
 	if isEnder then
@@ -193,9 +287,9 @@ function ChestWindow.build(
 	-- the gang storage pages
 	local pageLabel: TextLabel? = nil
 	local prevPage: TextButton?, nextPage: TextButton? = nil, nil
-	local localPlayer = Players.LocalPlayer
+	local acknowledgedPage = moveSection() or 1
 	local function pageInfo(): (number, number)
-		local page = localPlayer:GetAttribute("GangChestPage")
+		local page = moveSection()
 		local pages = localPlayer:GetAttribute("GangChestPages")
 		return if typeof(page) == "number" then page else 1,
 			if typeof(pages) == "number" then pages else 1
@@ -214,10 +308,29 @@ function ChestWindow.build(
 		labelRef.TextXAlignment = Enum.TextXAlignment.Center
 		nextPage = button("▶", x + third - 44, 44, Ui.colors.buttonGrey)
 		local function turn(delta: number)
+			if busy() then
+				return
+			end
 			local page, pages = pageInfo()
 			local target = math.clamp(page + delta, 1, pages)
 			if target ~= page then
+				drag.Clear()
+				requestedPage = target
+				pageRequestVersion += 1
+				local requestVersion = pageRequestVersion
+				refresh()
 				Remotes.event("GangChestPage"):FireServer(target)
+				task.delay(5, function()
+					if
+						win.Parent
+						and requestedPage == target
+						and pageRequestVersion == requestVersion
+					then
+						requestedPage = nil
+						drag.Clear()
+						refresh()
+					end
+				end)
 			end
 		end
 		(prevPage :: TextButton).Activated:Connect(function()
@@ -286,6 +399,14 @@ function ChestWindow.build(
 		end
 	end)
 	take.Activated:Connect(function()
+		if busy() then
+			return
+		end
+		if isShared then
+			transfer.queue = { page = moveSection() or 1, index = 1 }
+			pumpTakeAll()
+			return
+		end
 		-- The server processes each intent against the updated inventory, including partial stacks.
 		for index = 1, 27 do
 			if stackAt({ container = "case", index = index }) then
@@ -335,8 +456,25 @@ function ChestWindow.build(
 			else t("vault_buy_hint", section)
 	end
 	refresh = function()
+		if queuePage and queuePage ~= (moveSection() or 1) then
+			moveQueue, queuePage = nil, nil
+		end
+		StorageTransferUi.observe(
+			transfer,
+			settled(),
+			localPlayer:GetAttribute("SharedStorageBusy") == true,
+			moveSection() or 1
+		)
+		if isGang then
+			local page = pageInfo()
+			if page ~= acknowledgedPage then
+				acknowledgedPage = page
+				requestedPage = nil
+				drag.Clear()
+			end
+		end
 		for _, view in ipairs(views) do
-			local stack = stackAt(view.address)
+			local stack = stackAt(view.address, true)
 			SlotView.render(view.name, view.count, view.icon, stack)
 			-- a money bag shows whole dollars ("74$"): "74.156$" ran into the next slots; the tooltip has the exact sum
 			if stack and stack.coins then
@@ -349,6 +487,8 @@ function ChestWindow.build(
 		end
 		if isGang and pageLabel then
 			local page, pages = pageInfo()
+			setActive(prevPage :: TextButton, not busy() and page > 1)
+			setActive(nextPage :: TextButton, not busy() and page < pages)
 			pageLabel.Text = t("gang_chest_page", page, pages)
 			-- two pages of 27 per level of «Сундуки» (a double chest) [сеть S7]
 			local maxPages = 0
@@ -363,6 +503,8 @@ function ChestWindow.build(
 			refreshVault()
 		end
 		if isStorage then
+			setActive(take, not busy())
+			pumpTakeAll()
 			return
 		end
 		local config = Config.keys[id]
@@ -397,6 +539,23 @@ function ChestWindow.build(
 			refresh()
 		end)
 	end
+	local busyChanged = localPlayer
+		:GetAttributeChangedSignal("SharedStorageBusy")
+		:Connect(function()
+			drag.Clear()
+			refresh()
+		end)
+	local removing = localPlayer.CharacterRemoving:Connect(function()
+		transfer.pending, transfer.queue = nil, nil
+		moveQueue, queuePage = nil, nil
+		drag.Clear()
+	end)
+	win.Destroying:Connect(function()
+		transfer.pending, transfer.queue = nil, nil
+		moveQueue, queuePage = nil, nil
+		busyChanged:Disconnect()
+		removing:Disconnect()
+	end)
 	refresh()
 	return win, refresh
 end

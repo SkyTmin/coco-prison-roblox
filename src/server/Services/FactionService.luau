@@ -17,6 +17,7 @@ local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local FallService = require(script.Parent.FallService)
 
 local FactionService = {}
 local started = false
@@ -158,6 +159,7 @@ local function leave(player: Player)
 		local character = player.Character
 		if spawn and character then
 			pcall(player.RequestStreamAroundAsync, player, spawn.Position, 3)
+			FallService.Reset(player)
 			character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
 		end
 	end

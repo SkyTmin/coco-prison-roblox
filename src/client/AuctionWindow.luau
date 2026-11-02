@@ -24,6 +24,7 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local ItemTooltip = require(script.Parent.ItemTooltip)
 local Ui = require(script.Parent.Ui)
+local Layout = require(script.Parent.AuctionLayout)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 type ItemStack = Types.ItemStack
@@ -37,8 +38,7 @@ AuctionWindow.pendingSearch = nil :: string?
 local SLOT, GAP, COLS, ROWS = 46, 4, 10, 6
 local LEFT_W = 196
 local GRID_X = LEFT_W + 12
-local WIN_W = GRID_X + COLS * (SLOT + GAP) + 16
-local WIN_H = 500
+
 local POLL_SECONDS = 10
 local cfg = Auction.cfg
 local RUBY = Color3.fromRGB(255, 80, 95)
@@ -114,9 +114,22 @@ function AuctionWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local current: Types.Profile? = profile
+	local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize
+		or Vector2.new(1024, 768)
+	local width, height =
+		Layout.window(viewport.X, viewport.Y, game:GetService("GuiService"):GetGuiInset().Y)
 	local win, content =
-		createWindow(parent, T("auction_title"), UDim2.fromOffset(WIN_W, WIN_H), onClose)
+		createWindow(parent, T("auction_title"), UDim2.fromOffset(width, height), onClose)
 	win.Name = "Window_Auction"
+	content.Position, content.Size = UDim2.fromOffset(6, 52), UDim2.new(1, -12, 1, -58)
+	local close = win:FindFirstChild("Close")
+	if close and close:IsA("GuiButton") then
+		close.Size, close.Position = UDim2.fromOffset(44, 44), UDim2.new(1, -50, 0, 4)
+	end
+	local titleBar = win:FindFirstChild("TitleBar")
+	if titleBar and titleBar:IsA("Frame") then
+		titleBar.Size = UDim2.new(1, -58, 0, 44)
+	end
 	local offset = 0 -- server os.time() − ours, from the last answer
 	local function serverNow(): number
 		return os.time() + offset
@@ -156,7 +169,7 @@ function AuctionWindow.build(
 	-- ── top bar: tabs, money, «Продать» ──
 	local tab = "auction"
 	local tabButtons: { [string]: TextButton } = {}
-	local pages: { [string]: Frame } = {}
+	local pages: { [string]: any } = {}
 	local show: (string) -> ()
 	for i, kind in ipairs({ "auction", "mine" }) do
 		local button = Ui.button(
@@ -209,9 +222,15 @@ function AuctionWindow.build(
 		end
 	end
 	for _, kind in ipairs({ "auction", "mine", "sell" }) do
-		local page = Instance.new("Frame")
+		local page = Instance.new(if kind == "auction" then "Frame" else "ScrollingFrame")
 		page.Name = "Page_" .. kind
 		page.BackgroundTransparency = 1
+		page.BorderSizePixel = 0
+		if page:IsA("ScrollingFrame") then
+			page.ScrollBarThickness = 6
+			page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			page.CanvasSize = UDim2.new()
+		end
 		page.Size = UDim2.new(1, 0, 1, -36)
 		page.Position = UDim2.fromOffset(0, 36)
 		page.Visible = false
@@ -227,10 +246,12 @@ function AuctionWindow.build(
 	local page, pageCount = 1, 1
 	local lots: { Summary } = {}
 	local requestN = 0
+	local filtersOpen = false
 	local query: () -> ()
 
+	local headings: { [string]: TextLabel } = {}
 	local function heading(parentFrame: Instance, key: string, y: number)
-		Ui.label(
+		headings[key] = Ui.label(
 			parentFrame,
 			T(key),
 			UDim2.fromOffset(LEFT_W, 18),
@@ -339,7 +360,10 @@ function AuctionWindow.build(
 		end)
 	end
 
-	local grid = Instance.new("Frame")
+	local grid = Instance.new("ScrollingFrame")
+	grid.BorderSizePixel = 0
+	grid.ScrollBarThickness = 6
+	grid.CanvasSize = UDim2.new()
 	grid.Name = "Grid"
 	grid.BackgroundTransparency = 1
 	grid.Position = UDim2.fromOffset(GRID_X, 0)
@@ -545,7 +569,8 @@ function AuctionWindow.build(
 			paint(view, if lots[i] then lots[i].item else nil)
 		end
 		pageLabel.Text = T("auction_page", page, pageCount)
-		prev.Visible, nextButton.Visible = page > 1, page < pageCount
+		local showGrid = content.AbsoluteSize.X >= 700 or not filtersOpen
+		prev.Visible, nextButton.Visible = showGrid and page > 1, showGrid and page < pageCount
 		if hovered and not lots[hovered] then
 			hovered = nil
 			ItemTooltip.hide()
@@ -606,22 +631,19 @@ function AuctionWindow.build(
 		15,
 		Ui.colors.header
 	)
-	local mineList = Instance.new("ScrollingFrame")
+	local mineList = Instance.new("Frame")
 	mineList.Name = "List"
 	mineList.Size = UDim2.new(1, 0, 1, -110)
 	mineList.Position = UDim2.fromOffset(0, 28)
 	mineList.BackgroundTransparency = 1
 	mineList.BorderSizePixel = 0
-	mineList.ScrollBarThickness = 6
-	mineList.ScrollBarImageColor3 = Ui.colors.border
-	mineList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	mineList.CanvasSize = UDim2.new()
+	mineList.AutomaticSize = Enum.AutomaticSize.Y
 	mineList.Parent = minePage
 	local listLayout = Instance.new("UIListLayout")
 	listLayout.Padding = UDim.new(0, 6)
 	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	listLayout.Parent = mineList
-	local returnsBox = Ui.card(minePage, UDim2.new(1, 0, 0, 74), UDim2.new(0, 0, 1, -76))
+	local returnsBox = Ui.card(minePage, UDim2.new(1, -8, 0, 104), UDim2.fromOffset(0, 28))
 	returnsBox.Name = "Returns"
 	local returnsLabel = Ui.label(
 		returnsBox,
@@ -631,17 +653,26 @@ function AuctionWindow.build(
 		14,
 		Ui.colors.text
 	)
+	local returnScroll = Instance.new("ScrollingFrame")
+	returnScroll.BackgroundTransparency = 1
+	returnScroll.BorderSizePixel = 0
+	returnScroll.ScrollBarThickness = 4
+	returnScroll.ScrollingDirection = Enum.ScrollingDirection.X
+	returnScroll.Size = UDim2.new(1, -16, 0, 50)
+	returnScroll.Position = UDim2.fromOffset(8, 50)
+	returnScroll.CanvasSize = UDim2.fromOffset(480, 0)
+	returnScroll.Parent = returnsBox
 	local returnViews: { SlotView } = {}
 	for i = 1, 10 do
-		local view = slotView(returnsBox, 40, UDim2.fromOffset(10 + (i - 1) * 44, 28))
+		local view = slotView(returnScroll, 44, UDim2.fromOffset((i - 1) * 48, 0))
 		view.frame.Visible = false
 		returnViews[i] = view
 	end
 	local claimButton = Ui.button(
 		returnsBox,
 		T("auction_claim"),
-		UDim2.fromOffset(130, 32),
-		UDim2.new(1, -140, 0.5, -16),
+		UDim2.fromOffset(130, 44),
+		UDim2.new(1, -138, 0, 4),
 		Ui.colors.buttonGreen
 	)
 	claimButton.Name = "Claim"
@@ -656,7 +687,12 @@ function AuctionWindow.build(
 		button: string?,
 		onClick: (() -> ())?
 	)
-		local card = Ui.card(mineList, UDim2.new(1, -10, 0, 56), UDim2.new())
+		local compact = content.AbsoluteSize.X < 700
+		local card = Ui.card(
+			mineList,
+			UDim2.new(1, 0, 0, if compact and button then 116 else 72),
+			UDim2.new()
+		)
 		card.LayoutOrder = order_
 		local view = slotView(card, 44, UDim2.fromOffset(6, 6))
 		view.button.MouseMoved:Connect(function()
@@ -666,18 +702,28 @@ function AuctionWindow.build(
 			ItemTooltip.hide()
 		end)
 		paint(view, stack)
-		local label = Ui.rich(card, text, UDim2.new(1, -230, 1, -8), UDim2.fromOffset(58, 4), 14)
+		local label = Ui.rich(
+			card,
+			text,
+			UDim2.new(1, if compact then -66 else -230, 0, 60),
+			UDim2.fromOffset(58, 4),
+			14
+		)
 		label.TextWrapped = true
 		if button and onClick then
 			local b = Ui.button(
 				card,
 				button,
-				UDim2.fromOffset(150, 30),
-				UDim2.new(1, -160, 0.5, -15),
+				if compact then UDim2.new(1, -12, 0, 44) else UDim2.fromOffset(150, 44),
+				if compact then UDim2.new(0, 6, 1, -50) else UDim2.new(1, -156, 0.5, -22),
 				Ui.colors.close
 			)
 			b.Name = "Withdraw"
 			b.TextSize = 14
+			local fit = b:FindFirstChildOfClass("UITextSizeConstraint")
+			if fit then
+				fit.MinTextSize = 13
+			end
 			b.Activated:Connect(onClick)
 		end
 		return card
@@ -773,12 +819,13 @@ function AuctionWindow.build(
 		end
 		claimButton.Visible = #returns > 0
 		returnsBox.Visible = #returns > 0
-		mineList.Size = if #returns > 0 then UDim2.new(1, 0, 1, -110) else UDim2.new(1, 0, 1, -30)
+		mineList.Size = UDim2.new(1, -8, 0, 0)
+		mineList.Position = UDim2.fromOffset(0, if #returns > 0 then 140 else 28)
 	end
 
 	-- ── Продать ──
 	local sellPage = pages.sell
-	Ui.label(
+	local chooseLabel = Ui.label(
 		sellPage,
 		T("auction_choose_item"),
 		UDim2.fromOffset(400, 22),
@@ -786,7 +833,8 @@ function AuctionWindow.build(
 		15,
 		Ui.colors.header
 	)
-	local INV = 40
+	local INV = 44
+	local form: Frame
 	local invViews: { SlotView } = {}
 	local chosen: number? = nil
 	local drawSell: () -> ()
@@ -819,12 +867,15 @@ function AuctionWindow.build(
 				chosen = slot
 				countBox.Text = tostring(stack.count)
 				drawSell()
+				if content.AbsoluteSize.X < 700 then
+					sellPage.CanvasPosition = Vector2.new(0, form.Position.Y.Offset)
+				end
 			end
 		end)
 		invViews[slot] = view
 	end
 	local formX = 9 * (INV + 4) + 16
-	local form = Ui.card(sellPage, UDim2.new(1, -formX, 0, 300), UDim2.fromOffset(formX, 28))
+	form = Ui.card(sellPage, UDim2.new(1, -formX, 0, 400), UDim2.fromOffset(formX, 28))
 	form.Name = "SellForm"
 	Ui.label(
 		form,
@@ -856,7 +907,7 @@ function AuctionWindow.build(
 		Ui.colors.buttonGrey
 	)
 	allButton.TextSize = 13
-	Ui.label(
+	local priceCaption = Ui.label(
 		form,
 		T("auction_price_input"),
 		UDim2.fromOffset(160, 20),
@@ -1060,6 +1111,158 @@ function AuctionWindow.build(
 		end
 	end)
 
+	-- Keep pixel-sized controls readable. Narrow screens switch between filters and lots;
+	-- every long pane scrolls independently without shrinking its fonts or touch targets.
+	local filters = Instance.new("ScrollingFrame")
+	filters.Name = "Filters"
+	filters.BackgroundTransparency = 1
+	filters.BorderSizePixel = 0
+	filters.ScrollBarThickness = 6
+	filters.CanvasSize = UDim2.fromOffset(0, 480)
+	filters.Parent = auctionPage
+	local filterButton = Ui.button(
+		auctionPage,
+		T("auction_filters"),
+		UDim2.fromOffset(116, 44),
+		UDim2.new(),
+		Ui.colors.buttonGrey
+	)
+	filterButton.Name = "FiltersToggle"
+	for _, label in pairs(headings) do
+		label.Parent = filters
+	end
+	for _, button in pairs(categoryButtons) do
+		button.Parent = filters
+	end
+	for _, button in pairs(sortButtons) do
+		button.Parent = filters
+	end
+	for _, object in ipairs({ minPrice, maxPrice, minLevel, maxLevel, search, order, note }) do
+		object.Parent = filters
+	end
+	local function arrange()
+		local w, h = content.AbsoluteSize.X, content.AbsoluteSize.Y
+		if w <= 0 or h <= 0 then
+			return
+		end
+		local tabWidth = (w - 12) / 3
+		for i, button in ipairs({ tabButtons.auction, tabButtons.mine, sellButton }) do
+			button.Size = UDim2.fromOffset(tabWidth, 44)
+			button.Position = UDim2.fromOffset((i - 1) * (tabWidth + 6), 0)
+		end
+		money.Size, money.Position = UDim2.new(1, 0, 0, 20), UDim2.fromOffset(0, 46)
+		for _, frame in pairs(pages) do
+			frame.Size, frame.Position = UDim2.new(1, 0, 1, -70), UDim2.fromOffset(0, 70)
+		end
+		local plan = Layout.plan(w, h - 70)
+		local gx, gw, ph = plan.gridX, plan.gridWidth, h - 70
+		filterButton.Visible = not plan.wide
+		filterButton.Text = T(if filtersOpen then "auction_back_btn" else "auction_filters")
+		filterButton.Position = UDim2.fromOffset(gx, 0)
+		refreshButton.Size, refreshButton.Position =
+			UDim2.fromOffset(104, 44), UDim2.fromOffset(gx + gw - 104, 0)
+		totalLabel.Size = UDim2.fromOffset(gw - (if plan.wide then 112 else 232), 44)
+		totalLabel.Position = UDim2.fromOffset(gx + (if plan.wide then 0 else 122), 0)
+		totalLabel.TextWrapped = true
+		local showGrid = plan.wide or not filtersOpen
+		grid.Visible, prev.Visible, nextButton.Visible, pageLabel.Visible =
+			showGrid, showGrid and page > 1, showGrid and page < pageCount, showGrid
+		grid.Position, grid.Size = UDim2.fromOffset(gx, 48), UDim2.fromOffset(gw, plan.gridHeight)
+		grid.CanvasSize = UDim2.fromOffset(0, plan.gridCanvas)
+		for i, view in ipairs(views) do
+			view.frame.Position = UDim2.fromOffset(
+				((i - 1) % plan.columns) * 50,
+				math.floor((i - 1) / plan.columns) * 50
+			)
+		end
+		prev.Size, nextButton.Size = UDim2.fromOffset(44, 44), UDim2.fromOffset(44, 44)
+		prev.Position, nextButton.Position =
+			UDim2.fromOffset(gx, ph - 44), UDim2.fromOffset(gx + gw - 44, ph - 44)
+		pageLabel.Position, pageLabel.Size =
+			UDim2.fromOffset(gx + 48, ph - 44), UDim2.fromOffset(gw - 96, 44)
+		filters.Visible = plan.wide or filtersOpen
+		filters.Position = UDim2.fromOffset(0, if plan.wide then 0 else 48)
+		filters.Size =
+			UDim2.fromOffset(if plan.wide then 220 else w, ph - (if plan.wide then 0 else 48))
+		local fw = (if plan.wide then 220 else w) - 8
+		local halfWidth = (fw - 6) / 2
+		local yFilter = 0
+		headings.auction_type.Position = UDim2.fromOffset(0, yFilter)
+		for i, kind in ipairs(Auction.CATEGORIES) do
+			categoryButtons[kind].Size = UDim2.fromOffset(halfWidth, 44)
+			categoryButtons[kind].Position =
+				UDim2.fromOffset(((i - 1) % 2) * (halfWidth + 6), 22 + math.floor((i - 1) / 2) * 48)
+		end
+		yFilter = 22 + math.ceil(#Auction.CATEGORIES / 2) * 48
+		for _, range in ipairs({
+			{ key = "auction_price", low = minPrice, high = maxPrice },
+			{ key = "auction_level", low = minLevel, high = maxLevel },
+		}) do
+			headings[range.key].Position = UDim2.fromOffset(0, yFilter)
+			for i, box in ipairs({ range.low, range.high }) do
+				box.Size = UDim2.fromOffset(halfWidth, 44)
+				box.Position = UDim2.fromOffset((i - 1) * (halfWidth + 6), yFilter + 22)
+			end
+			yFilter += 72
+		end
+		headings.auction_sort.Position = UDim2.fromOffset(0, yFilter)
+		for i, kind in ipairs({ "time", "price", "level" }) do
+			sortButtons[kind].Size = UDim2.fromOffset((fw - 8) / 3, 44)
+			sortButtons[kind].Position =
+				UDim2.fromOffset((i - 1) * ((fw - 8) / 3 + 4), yFilter + 22)
+		end
+		order.Position, order.Size = UDim2.fromOffset(0, yFilter + 68), UDim2.fromOffset(fw, 20)
+		search.Position, search.Size = UDim2.fromOffset(0, yFilter + 92), UDim2.fromOffset(fw, 44)
+		note.Position, note.Size = UDim2.fromOffset(0, yFilter + 142), UDim2.fromOffset(fw, 48)
+		filters.CanvasSize = UDim2.fromOffset(0, yFilter + 192)
+		local askWidth = math.min(340, w - 16)
+		ask.Size, ask.Position =
+			UDim2.fromOffset(askWidth, 164), UDim2.new(0.5, -askWidth / 2, 0.5, -82)
+		askText.Size = UDim2.new(1, -78, 0, 96)
+		buyButton.Size, noButton.Size =
+			UDim2.fromOffset((askWidth - 30) / 2, 44), UDim2.fromOffset((askWidth - 30) / 2, 44)
+		buyButton.Position, noButton.Position = UDim2.new(0, 12, 1, -56), UDim2.new(0.5, 3, 1, -56)
+		chooseLabel.Size = UDim2.new(1, -8, 0, 24)
+		for slot, view in ipairs(invViews) do
+			local x, yInv = Layout.inventory(slot, plan.inventoryColumns)
+			view.frame.Position = UDim2.fromOffset(x, yInv)
+		end
+		form.Position, form.Size =
+			UDim2.fromOffset(plan.formX, plan.formY), UDim2.fromOffset(plan.formWidth, 400)
+		countBox.Size, allButton.Size = UDim2.fromOffset(90, 44), UDim2.fromOffset(70, 44)
+		priceCaption.Position = UDim2.fromOffset(10, 166)
+		priceBox.Position, priceBox.Size =
+			UDim2.fromOffset(10, 188), UDim2.fromOffset(plan.formWidth - 144, 44)
+		currencyButton.Position, currencyButton.Size =
+			UDim2.new(1, -126, 0, 188), UDim2.fromOffset(116, 44)
+		net.Position, net.Size = UDim2.fromOffset(10, 240), UDim2.new(1, -20, 0, 48)
+		listButton.Size, listButton.Position = UDim2.new(1, -20, 0, 44), UDim2.new(0, 10, 1, -106)
+		backButton.Size, backButton.Position = UDim2.new(1, -20, 0, 44), UDim2.new(0, 10, 1, -54)
+		drawMine()
+	end
+	filterButton.Activated:Connect(function()
+		filtersOpen = not filtersOpen
+		ask.Visible = false
+		ItemTooltip.hide()
+		arrange()
+	end)
+	local resized = content:GetPropertyChangedSignal("AbsoluteSize"):Connect(arrange)
+	win.Destroying:Connect(function()
+		resized:Disconnect()
+	end)
+	for _, object in ipairs(content:GetDescendants()) do
+		if object:IsA("TextButton") then
+			object.TextWrapped = true
+			local fit = object:FindFirstChildOfClass("UITextSizeConstraint")
+			if fit then
+				fit.MinTextSize = 13
+			end
+		elseif object:IsA("TextLabel") and object.TextSize < 14 then
+			object.TextSize = 14
+		end
+	end
+	ask.Active = true
+	arrange()
 	drawMoney()
 	show("auction")
 	return win,

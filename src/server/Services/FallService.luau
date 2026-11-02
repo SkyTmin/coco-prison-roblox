@@ -18,10 +18,16 @@ local SAFE_BLOCKS = 3
 -- 10-block fall measured 9.9 blocks
 local LANDING_SLACK = 0.1
 
-type Track = { apex: number?, history: { number } } -- history: last positions (replication lag)
+type Track = { character: Model, apex: number?, history: { number } } -- recent positions, one character only
 local HISTORY = 8
 local tracks: { [Player]: Track } = {}
 local FallService = {}
+
+-- Call immediately before an authoritative reposition. This discards only the old trajectory;
+-- a new fall from the destination still accumulates and deals ordinary fall damage.
+function FallService.Reset(player: Player)
+	tracks[player] = nil
+end
 
 local function step()
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -34,8 +40,8 @@ local function step()
 		end
 		local y = root.Position.Y
 		local track = tracks[player]
-		if not track then
-			track = { apex = nil, history = {} }
+		if not track or track.character ~= character then
+			track = { character = character :: Model, apex = nil, history = {} }
 			tracks[player] = track
 		end
 		local state = humanoid:GetState()

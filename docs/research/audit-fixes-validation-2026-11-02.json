@@ -1,0 +1,297 @@
+{
+  "date": "2026-11-02",
+  "baseline": "a1f0465",
+  "placeId": 92594200898716,
+  "scope": "All 23 confirmed audit source corrections, conditional fall reset, shared-storage integration",
+  "source": "[сеть: actual-source fixtures and Studio QA, 02.11]",
+  "offline": {
+    "status": "PASS",
+    "totalAssertions": 800,
+    "realProfiles": false,
+    "realDataStores": false,
+    "suites": [
+      {
+        "script": "scripts/qa-economy-audit-offline.luau",
+        "passed": 49
+      },
+      {
+        "script": "scripts/qa-storage-transfers-offline.luau",
+        "passed": 54
+      },
+      {
+        "script": "scripts/qa-shared-case-offline.luau",
+        "passed": 17
+      },
+      {
+        "script": "scripts/qa-profile-persistence-offline.luau",
+        "passed": 39
+      },
+      {
+        "script": "scripts/qa-ui-regressions.luau",
+        "passed": 579
+      },
+      {
+        "script": "scripts/qa-combat-world-offline.luau",
+        "passed": 44
+      },
+      {
+        "script": "scripts/qa-death-storage-offline.luau",
+        "passed": 18
+      }
+    ]
+  },
+  "checks": {
+    "selene": "0 errors, 0 warnings, 0 parse errors",
+    "stylua": "PASS",
+    "rojo": "PASS",
+    "whitespace": "PASS",
+    "economySimulation": "Executed with maximum level 50; existing unboosted/no-book model reaches 26 within its time cap; not complete progression acceptance",
+    "bossSimulation": "Existing analytical model passes; excludes new Trainer/book/potion/profession effects, not 4–6-player acceptance"
+  },
+  "studio": {
+    "sourceSync": {
+      "count": 51,
+      "result": "true:synced 51 scripts",
+      "restarted": true,
+      "mapReplaced": false,
+      "published": false
+    },
+    "ghettoPatch": {
+      "privateArrivals": 4,
+      "batSpawns": 5,
+      "repeatCreated": 0,
+      "sceneryRebuilt": false
+    },
+    "sharedReadFailure": {
+      "passed": 4,
+      "failedReadClosed": true,
+      "recoveredCount": 12,
+      "writes": 0,
+      "realDataStoresUsed": false
+    },
+    "miningFixture": {
+      "limits": "Isolated profile fixtures; real MiningStats/MineService and cloned BookService with forced procs. No owner data mutation.",
+      "checks": [
+        {
+          "name": "100 real with x2 is 100 clean and 200 orange",
+          "pass": true
+        },
+        {
+          "name": "upgrade requirement sees the boosted 200",
+          "pass": true
+        },
+        {
+          "name": "different block types stay separate",
+          "pass": true
+        },
+        {
+          "name": "full mixed layer clean equals removed cells",
+          "pass": true
+        },
+        {
+          "name": "full mixed layer orange includes booster and combo",
+          "pass": true
+        },
+        {
+          "name": "full mixed layer upgrade counter Земля",
+          "pass": true
+        },
+        {
+          "name": "full mixed layer upgrade counter Камень",
+          "pass": true
+        },
+        {
+          "name": "full layer exceeds former half/200 cap",
+          "pass": true
+        },
+        {
+          "name": "empty cells and repeat proc do not duplicate credit",
+          "pass": true
+        },
+        {
+          "name": "hammer clean equals removed cells",
+          "pass": true
+        },
+        {
+          "name": "hammer orange includes booster and combo",
+          "pass": true
+        },
+        {
+          "name": "hammer upgrade counter Камень",
+          "pass": true
+        },
+        {
+          "name": "hammer counts exactly nine real cells",
+          "pass": true
+        },
+        {
+          "name": "autosold layer clean equals removed cells",
+          "pass": true
+        },
+        {
+          "name": "autosold layer orange includes booster and combo",
+          "pass": true
+        },
+        {
+          "name": "autosold layer upgrade counter Камень",
+          "pass": true
+        },
+        {
+          "name": "fractional credits reach the exact 60-block upgrade gate",
+          "pass": true
+        },
+        {
+          "name": "auto-sell pays without changing block accounting",
+          "pass": true
+        },
+        {
+          "name": "seven copied drops do not add mined blocks",
+          "pass": true
+        }
+      ],
+      "status": "PASS",
+      "cases": [
+        {
+          "removed": 1024,
+          "name": "full mixed layer",
+          "counters": {
+            "Земля": 1126.4,
+            "Камень": 1126.4
+          },
+          "multiplier": 2.2,
+          "orange": 2252.8,
+          "clean": 1024
+        },
+        {
+          "removed": 9,
+          "name": "hammer",
+          "counters": {
+            "Камень": 27
+          },
+          "multiplier": 3,
+          "orange": 27,
+          "clean": 9
+        },
+        {
+          "removed": 25,
+          "name": "autosold layer",
+          "counters": {
+            "Камень": 60
+          },
+          "multiplier": 2.4,
+          "orange": 60,
+          "clean": 25
+        }
+      ]
+    },
+    "ordinaryLiveDig": {
+      "blockCounter": "Камень",
+      "cleanAfter": 53865,
+      "limits": "One ordinary live DigStart. This legitimately mines one cell and keeps its normal rewards; no upgrade purchase was made.",
+      "orangeAfter": 74001.9611,
+      "status": "PASS",
+      "orangeDelta": 1.1300000000046566,
+      "upgradeCounterDelta": 1.1299999999991996,
+      "cleanDelta": 1
+    },
+    "desktopUi": {
+      "auctionRendered": true,
+      "compactWindowRendered": true,
+      "compactFiltersRendered": true,
+      "bow": {
+        "thirdPerson": true,
+        "drawStarted": true,
+        "crosshairVisible": true,
+        "menuReleaseCancelled": true,
+        "arrowsBefore": 4,
+        "arrowsAfter": 4,
+        "freeCursor": true
+      }
+    },
+    "deviceSimulator": {
+      "api": "StudioDeviceSimulatorService",
+      "screenOrientation": "LandscapeSensor",
+      "screenInsets": "DeviceSafeInsets",
+      "devices": [
+        {
+          "name": "Samsung Galaxy A06",
+          "preset": [
+            800,
+            360
+          ],
+          "viewport": [
+            705,
+            338
+          ],
+          "auctionWindow": [
+            681,
+            256
+          ],
+          "screens": [
+            "auction",
+            "sale inventory",
+            "selected item",
+            "sale actions after mouse-wheel scroll"
+          ]
+        },
+        {
+          "name": "iPhone 17 Pro",
+          "preset": [
+            874,
+            402
+          ],
+          "viewport": [
+            750,
+            381
+          ],
+          "auctionWindow": [
+            726,
+            299
+          ],
+          "screens": [
+            "personal listings"
+          ]
+        }
+      ],
+      "lotCellPixels": 46,
+      "inventoryCellPixels": 44,
+      "actionHeightPixels": 44,
+      "realTouchInput": false,
+      "portrait": "Not emulated: experience is landscape-only; portrait geometry covered offline",
+      "limitations": "Some automated instance clicks missed after viewport scaling. The attempted iPhone filter click did not change the tab; it is not a passing interaction check.",
+      "captures": [
+        "audit_final_auction_galaxy_a06",
+        "audit_final_auction_galaxy_sell",
+        "audit_final_auction_galaxy_selected",
+        "audit_final_auction_galaxy_form_scroll",
+        "audit_final_auction_iphone_mine"
+      ],
+      "resetDevice": "default"
+    },
+    "final": {
+      "creative": true,
+      "camera": "Custom",
+      "windowsClosed": true,
+      "heldDig": false,
+      "selectedSlotRestored": 9,
+      "device": "default",
+      "viewport": [
+        1168,
+        338
+      ]
+    },
+    "console": {
+      "newProductionErrors": 0,
+      "sfxInfiniteYield": false,
+      "existingAssetWarning": "203785492: asset type does not match requested type",
+      "toolDiagnostic": "MCP temporarily restored Scriptable camera during a debug menu close; final camera explicitly verified Custom"
+    }
+  },
+  "limits": [
+    "No real multi-server DataStore outage/crash test. Concurrent writes, stale sessions and unknown acknowledgements are deterministic actual-source fixtures.",
+    "Native phone gestures, keyboard overlap, physical sensitivity ratios, low-end frame time and real group boss balance remain acceptance work.",
+    "Deferred death exports are at-most-once, not atomic across durable victim profile, killer profile and world loot. A crash after durable consumption may lose ephemeral loot/payout.",
+    "Shared-storage rollout must not mix old whole-cache writers with the new revision/journal protocol.",
+    "Earlier brightness/sensitivity preview fix and its 17 checks are in a1f0465 and audit-validation-2026-11-02.json."
+  ]
+}

@@ -300,7 +300,9 @@ local function evacuate(mine: Mine)
 		if root and root:IsA("BasePart") then
 			local d = root.Position - centre
 			if math.abs(d.X) <= half.X and math.abs(d.Y) <= half.Y and math.abs(d.Z) <= half.Z then
+				require(script.Parent.FallService).Reset(player)
 				root.CFrame = CFrame.new(root.Position.X, top + 4, root.Position.Z)
+				root.AssemblyLinearVelocity = Vector3.zero
 			end
 		end
 	end
@@ -515,6 +517,8 @@ local function rescue(mine: Mine)
 				-- still fine while standing on a rendered block: only the root centre deep inside counts
 				local depthInCell = (y - 1) * BLOCK + local_.Y + BLOCK / 2 -- 0 at the cell top, BLOCK at its bottom
 				if below or depthInCell > 1.5 then
+					require(script.Parent.FallService).Reset(player)
+					root.AssemblyLinearVelocity = Vector3.zero
 					root.CFrame =
 						CFrame.new(root.Position.X, mine.origin.Y + BLOCK * 1.5, root.Position.Z)
 				end

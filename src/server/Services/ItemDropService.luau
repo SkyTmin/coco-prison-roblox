@@ -53,6 +53,9 @@ end
 -- Puts a picked-up stack into the bag as far as it fits (the rest stays on the ground, like Minecraft); returns what
 -- is left. Unstackable items keep their extra data (book effects, coins).
 local function give(profile: Types.Profile, stack: Types.ItemStack): number
+	if not InventoryService.isCount(stack.count) then
+		return 0 -- malformed server-only loot is never inserted into another inventory
+	end
 	if InventoryService.isStackable(stack.id) then
 		return InventoryService.add(profile, stack.id, stack.count, stack.level)
 	end
@@ -92,6 +95,9 @@ function ItemDropService.Spawn(
 	pickupDelay: number,
 	from: Player?
 )
+	if not InventoryService.isCount(stack.count) then
+		return
+	end
 	local gang = gangOf(from)
 	local drop = Instance.new("Part")
 	drop.Name = "ItemDrop"
@@ -276,7 +282,11 @@ local function merge()
 end
 
 local function onDropItem(player: Player, slot: any, count: any)
-	if not InventoryService.isSlot(slot) or (count ~= nil and typeof(count) ~= "number") then
+	if
+		not ProfileService.CanExport(player)
+		or not InventoryService.isSlot(slot)
+		or (count ~= nil and not InventoryService.isCount(count))
+	then
 		return
 	end
 	local character = player.Character
@@ -303,7 +313,7 @@ local function onDropItem(player: Player, slot: any, count: any)
 		return
 	end
 	local stack = profile.inventory[slot]
-	if not stack then
+	if not stack or not InventoryService.isCount(stack.count) then
 		return
 	end
 	if Config.tools[stack.id] then

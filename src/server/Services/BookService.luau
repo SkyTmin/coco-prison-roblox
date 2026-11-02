@@ -16,6 +16,7 @@ local Books = require(Shared.Books)
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local MiningStats = require(Shared.MiningStats)
+local MiningDrops = require(Shared.MiningDrops)
 local Effects = require(Shared.Effects)
 local Potions = require(Shared.Potions)
 local PrisPlus = require(Shared.PrisPlus)
@@ -29,6 +30,7 @@ local MineService = require(script.Parent.MineService)
 local NeedsService = require(script.Parent.NeedsService)
 local ProfileService = require(script.Parent.ProfileService)
 local GangService = require(script.Parent.GangService)
+local AchievementService = require(script.Parent.AchievementService)
 local ProfessionService = require(script.Parent.ProfessionService)
 
 local BookTuning = require(script.Parent.BookTuning)
@@ -707,6 +709,7 @@ function BookService.onDug(
 	end
 	local copy = roll(Books.value(tool, "trader"))
 	local sold, soldItems = 0, 0
+	local dugCounts: { [string]: number } = {}
 	if copy or #extra > 0 or #layer > 0 then
 		ProfileService.Mutate(player, function(p)
 			local mult = blockMultiplier(p) * (comboMult or 1)
@@ -721,14 +724,12 @@ function BookService.onDug(
 			end
 			local function giveBlock(id: string, sellOnly: boolean?)
 				local block = Config.block(id)
-				local drop = if BookService.silkTouch(p)
-					then id
-					else if block then block.dropsAs or id else id
-				local range = if block then (block :: any).dropCount else nil
-				local count = if typeof(range) == "table" and #range == 2
-					then random:NextInteger(range[1], range[2])
-					else 1
+				if not block then
+					return
+				end
+				local drop, count = MiningDrops.resolve(block, BookService.silkTouch(p), random)
 				give(drop, count, sellOnly)
+				dugCounts[id] = (dugCounts[id] or 0) + 1
 			end
 			if copy then
 				give(dropId, dropCount)
@@ -744,6 +745,7 @@ function BookService.onDug(
 			end
 		end)
 	end
+	AchievementService.OnDugMany(player, dugCounts)
 	if sold > 0 then
 		Remotes.event("AutoSold"):FireClient(player, sold, #extra > 0 or #layer > 0)
 	end

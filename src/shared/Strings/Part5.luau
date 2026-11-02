@@ -817,4 +817,5 @@ return {
 		fr = "Les changements sont enregistrés automatiquement",
 	},
 	settings_reset_value = { ru = "Сброс", en = "Reset", es = "Restabl.", fr = "Rétablir" },
+	auction_filters = { ru = "Фильтры", en = "Filters", es = "Filtros", fr = "Filtres" },
 }

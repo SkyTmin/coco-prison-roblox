@@ -5,7 +5,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Boosters = require(Shared.Boosters)
+local Selling = require(Shared.Selling)
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
@@ -38,8 +38,7 @@ end
 
 -- selling: the «Деньги» upgrade times a running local money booster (shared/Boosters)
 function ProfessionService.moneyMultiplier(profile: Profile): number
-	return (1 + profile.professions.upgrades.money * Config.professions.upgrades.money)
-		* Boosters.multiplier(profile, "money")
+	return Selling.multiplier(profile)
 end
 
 local function onSpendPoint(player: Player, kind: any)

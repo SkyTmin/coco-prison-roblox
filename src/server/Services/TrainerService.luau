@@ -3,8 +3,7 @@
 -- [меню] the first requirements (strength: 30 zombies, 15 kills, 500 $; agility: 50 $, 5 bats;
 -- needs: 450 $). Later levels are our decision: every requirement grows ×costGrowth per level [решение].
 -- Money is paid on upgrade; kill counters are thresholds and are not consumed [решение].
--- Effects: needs → NeedsService drains needs slower; strength / agility are stored in the profile and
--- exposed through TrainerService.multiplier for the combat code (no player-vs-mob damage yet).
+-- Needs drains slower; CombatService applies Strength to weapon damage and Agility before a hit lands.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -50,6 +49,11 @@ end
 function TrainerService.multiplier(profile: Types.Profile, stat: string): number
 	local rule = Config.trainer[stat]
 	return 1 + level(profile, stat) * (rule.perLevel :: number)
+end
+
+function TrainerService.dodgeChance(profile: Types.Profile): number
+	local rule = Config.trainer.agility
+	return math.clamp(level(profile, "agility"), 0, rule.maxLevel) * rule.perLevel
 end
 
 local function nearTrainer(player: Player): boolean
