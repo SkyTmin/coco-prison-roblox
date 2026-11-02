@@ -49,6 +49,7 @@ local KnightAbilities = require(script.Parent.KnightAbilities)
 local PoseidonAbilities = require(script.Parent.PoseidonAbilities)
 local IllusionistAbilities = require(script.Parent.IllusionistAbilities)
 local MothAbilities = require(script.Parent.MothAbilities)
+local UndeadKingAbilities = require(script.Parent.UndeadKingAbilities)
 local SpiderQueenAbilities = require(script.Parent.SpiderQueenAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
@@ -69,6 +70,7 @@ type Fight = {
 	poseidon: any?,
 	illusionist: any?,
 	moth: any?,
+	undeadKing: any?,
 	spiderQueen: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
@@ -1137,6 +1139,7 @@ local function died(boss: Boss)
 	PoseidonAbilities.Clear(boss)
 	IllusionistAbilities.Clear(boss)
 	MothAbilities.Clear(boss)
+	UndeadKingAbilities.Clear(boss)
 	SpiderQueenAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
@@ -1303,6 +1306,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		IllusionistAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.moth then
 		MothAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.undeadKing then
+		UndeadKingAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.spiderQueen then
 		SpiderQueenAbilities.Spawn(boss, { act = act })
 	else
@@ -1336,6 +1341,7 @@ local function think(boss: Boss, dt: number)
 		PoseidonAbilities.Clear(boss)
 		IllusionistAbilities.Clear(boss)
 		MothAbilities.Clear(boss)
+		UndeadKingAbilities.Clear(boss)
 		SpiderQueenAbilities.Clear(boss)
 		boss.model, boss.root, boss.humanoid = nil, nil, nil
 		if old then
@@ -1402,6 +1408,7 @@ local function think(boss: Boss, dt: number)
 						or boss.fight.minotaur
 						or boss.fight.skeleton
 						or boss.fight.poseidon
+						or boss.fight.undeadKing
 					then 4
 					else 3)
 			+ 1
@@ -1429,6 +1436,13 @@ local function think(boss: Boss, dt: number)
 			})
 		elseif boss.fight.moth then
 			MothAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.undeadKing then
+			UndeadKingAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1516,6 +1530,13 @@ local function think(boss: Boss, dt: number)
 				})
 			elseif boss.fight.moth then
 				MothAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.undeadKing then
+				UndeadKingAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
 					fighters = fighters,

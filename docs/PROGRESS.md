@@ -51,6 +51,13 @@
 
 ## Журнал
 
+### 02.11 — Undead King complete; continue to Forest Spirit [owner]
+
+Original headless Blender king382 parts/38 joints/13 clips, plus ghoul132/20/six, skull51/five/five and sword74/five/two. Dark missiles, killable .9s-fuse skulls, warned eight-second ghost-sword prop, capped server-owned ghouls and meteors replace the template. HP2070/damage20/31/38 and wiki loot unchanged; no ghoul immunity, chat damage+$ only. Three-second fall, released crown, planted feet, layered robe/cape; corrected stiff cape and panel gaps in visual review. Reference, exact image_gen prompt, four blends, ten JSONs, exported-track videos and audit: assets/models/undead_king/README.md.
+
+Katorga54 cases/169 server checks,17 actual client animation checks,43 no-block PASS; shared BossProp animation addition also passed Moth15-client regression. Live90s421 samples/136 unanchored, all four specials/two claws, intact single boss, finite constantY13456.49707, server ownership; peak three ghouls/two skulls/one sword. Owner returned, Creative ON. Full server tests use disposable distant fixtures, no live kills/rewards/profile mutations. Exported king stance error .019892 studs, late body floor .003142; all26 clips rendered. Real group/mobile/load validation still open. No GUI/desktop notifications/publish/map replacement. Completed12/19; next Forest Spirit, then Raven Knight, Vecna, Lovers, Ent, Forest Guardian, Reaper.
+
+
 ### 02.11 — Moth complete; continue directly to Undead King [owner]
 
 Owner said continue without stopping between bosses. Finished original headless Blender Moth,693 parts/39 joints/19 clips: articulated four-lobed wings, antennae, claws, collar and abdomen. Three claw motions, bolt fan, low-wall-clipped ground beam, meteors, jumpable/gapped wave, vulnerable four-stud aerial shooting with60-damage interruption into .75s stun. Death2s relaxes knees/arms/wings/abdomen; corrected hovering support poses and erect tail before export approval. HP1820, damage18/28/36 and wiki rewards unchanged; no block, chat damage+$ only. Sources/review videos/prompt/full audit: assets/models/moth/README.md.

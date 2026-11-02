@@ -439,10 +439,13 @@ local function animate(rig: Rig, dt: number)
 end
 
 function BossAnimator.Start()
-	for _, model in ipairs(CollectionService:GetTagged("Boss")) do
-		track(model)
+	-- Authored encounter props animate through the same clips without becoming combat targets.
+	for _, tag in { "Boss", "BossProp" } do
+		for _, model in ipairs(CollectionService:GetTagged(tag)) do
+			track(model)
+		end
+		CollectionService:GetInstanceAddedSignal(tag):Connect(track)
 	end
-	CollectionService:GetInstanceAddedSignal("Boss"):Connect(track)
 	RunService.RenderStepped:Connect(function(dt)
 		for _, rig in pairs(rigs) do
 			animate(rig, dt)
