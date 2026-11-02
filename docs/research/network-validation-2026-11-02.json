@@ -1,0 +1,399 @@
+{
+  "date": "2026-11-02",
+  "placeId": 92594200898716,
+  "status": "PARTIAL",
+  "studioLocalStatus": "PASS_TWO_CLIENTS",
+  "scope": "Fast mining confirmations, movement and PvP; local Studio QA after PC restart",
+  "miningSolo": {
+    "clients": {
+      "coco_shamill": {
+        "largestPacket": 777,
+        "fastRemovalSeconds": 0.035471200942993164
+      }
+    },
+    "checks": [
+      {
+        "name": "authoritative part held for delayed-replication test",
+        "pass": true
+      },
+      {
+        "name": "fast removal reaches coco_shamill",
+        "pass": true
+      },
+      {
+        "name": "reset cell has a fresh ID",
+        "pass": true
+      },
+      {
+        "name": "duplicate/old packet preserves reset coco_shamill",
+        "pass": true
+      },
+      {
+        "name": "packet before streaming coco_shamill",
+        "pass": true
+      },
+      {
+        "name": "lost fast packet uses normal deletion coco_shamill",
+        "pass": true
+      },
+      {
+        "name": "1024-cell AoE batch coco_shamill",
+        "pass": true
+      },
+      {
+        "name": "codec uint32 extremes",
+        "pass": true
+      },
+      {
+        "name": "expired packet refused",
+        "pass": true
+      },
+      {
+        "name": "future packet refused",
+        "pass": true
+      },
+      {
+        "name": "malformed packet refused",
+        "pass": true
+      },
+      {
+        "name": "non-buffer refused",
+        "pass": true
+      },
+      {
+        "name": "NaN timestamp refused",
+        "pass": true
+      },
+      {
+        "name": "prediction spatial cap",
+        "pass": true
+      },
+      {
+        "name": "idle gap never extrapolates",
+        "pass": true
+      },
+      {
+        "name": "normal dig removes and credits one cell",
+        "pass": true
+      },
+      {
+        "name": "real dig fast ID delivered coco_shamill",
+        "pass": true
+      }
+    ],
+    "status": "PASS",
+    "mode": "single observer",
+    "bufferComparison": {
+      "newMilliseconds": 35.83333333333334,
+      "oldMilliseconds": 76.66666666666667,
+      "note": "Same 50ms transit/5ms jitter inputs, formula comparison, not WAN measurement"
+    }
+  },
+  "motionWireSolo": {
+    "samples": 84,
+    "stopRepeatGapMs": 17.43793487548828,
+    "burstHistoryMatches": {
+      "short": {
+        "seen": 5,
+        "matched": 5
+      },
+      "flood": {
+        "seen": 100,
+        "matched": 5
+      }
+    },
+    "validatedSamples": 84,
+    "limits": "One actual client to server; background viewport. No second observer or WAN PvP benchmark.",
+    "status": "PASS",
+    "maxProjectionStuds": 0.31096935272216797,
+    "maxSnapshotErrorStuds": 0,
+    "meanClientToServerMs": 16.24103103365217
+  },
+  "multiplayer": {
+    "clients": {
+      "Player1": {
+        "largestPacket": 777,
+        "fastRemovalSeconds": 0.18341588973999023
+      },
+      "Player2": {
+        "largestPacket": 777,
+        "fastRemovalSeconds": 0.1847379207611084
+      }
+    },
+    "checks": [
+      {
+        "name": "authoritative part held for delayed-replication test",
+        "pass": true
+      },
+      {
+        "name": "fast removal reaches Player1",
+        "pass": true
+      },
+      {
+        "name": "fast removal reaches Player2",
+        "pass": true
+      },
+      {
+        "name": "reset cell has a fresh ID",
+        "pass": true
+      },
+      {
+        "name": "duplicate/old packet preserves reset Player1",
+        "pass": true
+      },
+      {
+        "name": "duplicate/old packet preserves reset Player2",
+        "pass": true
+      },
+      {
+        "name": "packet before streaming Player1",
+        "pass": true
+      },
+      {
+        "name": "packet before streaming Player2",
+        "pass": true
+      },
+      {
+        "name": "lost fast packet uses normal deletion Player1",
+        "pass": true
+      },
+      {
+        "name": "lost fast packet uses normal deletion Player2",
+        "pass": true
+      },
+      {
+        "name": "1024-cell AoE batch Player1",
+        "pass": true
+      },
+      {
+        "name": "1024-cell AoE batch Player2",
+        "pass": true
+      },
+      {
+        "name": "codec uint32 extremes",
+        "pass": true
+      },
+      {
+        "name": "expired packet refused",
+        "pass": true
+      },
+      {
+        "name": "future packet refused",
+        "pass": true
+      },
+      {
+        "name": "malformed packet refused",
+        "pass": true
+      },
+      {
+        "name": "non-buffer refused",
+        "pass": true
+      },
+      {
+        "name": "NaN timestamp refused",
+        "pass": true
+      },
+      {
+        "name": "prediction spatial cap",
+        "pass": true
+      },
+      {
+        "name": "idle gap never extrapolates",
+        "pass": true
+      },
+      {
+        "name": "stop settles without idle wait",
+        "pass": true
+      },
+      {
+        "name": "actual second client uses fast motion",
+        "pass": true
+      },
+      {
+        "name": "normal PvP Attack receives damaging HitConfirm",
+        "pass": true
+      },
+      {
+        "name": "two dig intents remove one authoritative cell",
+        "pass": true
+      },
+      {
+        "name": "real dig fast ID delivered Player1",
+        "pass": true
+      },
+      {
+        "name": "real dig fast ID delivered Player2",
+        "pass": true
+      }
+    ],
+    "motion": {
+      "note": "Rendered age is the selected snapshot timestamp, not measured end-to-end latency. Position error compares the observer with the scheduled sinusoidal path after warmup.",
+      "meanPositionErrorStuds": 0.06405587374608089,
+      "samples": 104,
+      "meanRenderedAgeMs": 19.345888724693886,
+      "maxPositionErrorStuds": 0.24046724722676238
+    },
+    "pvpHealthLost": 4,
+    "stopErrorStuds": 0,
+    "status": "PASS",
+    "mode": "two clients",
+    "bufferComparison": {
+      "newMilliseconds": 35.83333333333334,
+      "oldMilliseconds": 76.66666666666667,
+      "note": "Same 50ms transit/5ms jitter inputs, formula comparison, not WAN measurement"
+    },
+    "pvp": [
+      {
+        "seconds": 0.1501893999998174,
+        "result": "hit",
+        "amount": 4
+      }
+    ]
+  },
+  "multiplayerFixtureCorrection": {
+    "reason": "Gang-only Ghetto evicts simulated users without gang access. Corrected isolated PvP fixture to Warzone; no production permission changes.",
+    "previousResult": {
+      "clients": {
+        "Player1": {
+          "largestPacket": 777,
+          "fastRemovalSeconds": 0.2017519474029541
+        },
+        "Player2": {
+          "largestPacket": 777,
+          "fastRemovalSeconds": 0.19283199310302734
+        }
+      },
+      "checks": [
+        {
+          "name": "authoritative part held for delayed-replication test",
+          "pass": true
+        },
+        {
+          "name": "fast removal reaches Player1",
+          "pass": true
+        },
+        {
+          "name": "fast removal reaches Player2",
+          "pass": true
+        },
+        {
+          "name": "reset cell has a fresh ID",
+          "pass": true
+        },
+        {
+          "name": "duplicate/old packet preserves reset Player1",
+          "pass": true
+        },
+        {
+          "name": "duplicate/old packet preserves reset Player2",
+          "pass": true
+        },
+        {
+          "name": "packet before streaming Player1",
+          "pass": true
+        },
+        {
+          "name": "packet before streaming Player2",
+          "pass": true
+        },
+        {
+          "name": "lost fast packet uses normal deletion Player1",
+          "pass": true
+        },
+        {
+          "name": "lost fast packet uses normal deletion Player2",
+          "pass": true
+        },
+        {
+          "name": "1024-cell AoE batch Player1",
+          "pass": true
+        },
+        {
+          "name": "1024-cell AoE batch Player2",
+          "pass": true
+        },
+        {
+          "name": "codec uint32 extremes",
+          "pass": true
+        },
+        {
+          "name": "expired packet refused",
+          "pass": true
+        },
+        {
+          "name": "future packet refused",
+          "pass": true
+        },
+        {
+          "name": "malformed packet refused",
+          "pass": true
+        },
+        {
+          "name": "non-buffer refused",
+          "pass": true
+        },
+        {
+          "name": "NaN timestamp refused",
+          "pass": true
+        },
+        {
+          "name": "prediction spatial cap",
+          "pass": true
+        },
+        {
+          "name": "idle gap never extrapolates",
+          "pass": true
+        },
+        {
+          "name": "stop settles without idle wait",
+          "pass": true
+        },
+        {
+          "name": "actual second client uses fast motion",
+          "pass": true
+        },
+        {
+          "name": "normal PvP Attack receives damaging HitConfirm",
+          "pass": false
+        }
+      ],
+      "motion": {
+        "meanRenderedAgeMs": 16.059220374167502,
+        "samples": 111
+      },
+      "stopErrorStuds": 0,
+      "bufferComparison": {
+        "newMilliseconds": 35.83333333333334,
+        "oldMilliseconds": 76.66666666666667,
+        "note": "Same 50ms transit/5ms jitter inputs, formula comparison, not WAN measurement"
+      },
+      "status": "FAIL",
+      "mode": "two clients",
+      "error": "ServerScriptService.QANetworkServer:94: normal PvP Attack receives damaging HitConfirm\nServerScriptService.QANetworkServer:94\nServerScriptService.QANetworkServer:97\n",
+      "pvp": [
+        {
+          "seconds": 0.16571399999997993,
+          "result": "nopvp",
+          "amount": 0
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Final local two-client suite passed. WAN latency/jitter/loss, real phone input and player-count load acceptance remain pending.",
+    "An earlier full-map two-client attempt became unresponsive with no completed result. The owner later restarted the PC and freed memory before the successful retry; no causal claim about the reboot.",
+    "The completed two-client run briefly had about 0.34 GB free physical memory on a 16 GB PC. Local millisecond observations are not internet latency guarantees or directly comparable to the lighter solo run.",
+    "The movement rendered-age figure describes the selected snapshot timestamp, not end-to-end latency. Observer position error is also recorded against a scheduled sinusoidal path.",
+    "The 1024-cell test uses authoritative MineService.breakBlock on disposable cells; it does not force a random book proc.",
+    "PvP uses normal Attack/HitConfirm and real HP loss on an isolated platform with Warzone permissions. This is not a live arena/group balance test."
+  ],
+  "fixesFoundDuringQA": [
+    "Removal before streaming required deferred destruction outside the engine Parent assignment.",
+    "Minimum arrival-gap limiter rejected legitimate movement bursts; token bucket accepts short bursts and limits floods."
+  ],
+  "sources": [
+    "https://create.roblox.com/docs/scripting/events/remote",
+    "https://create.roblox.com/docs/reference/engine/classes/UnreliableRemoteEvent",
+    "https://create.roblox.com/docs/reference/engine/classes/StudioTestService"
+  ]
+}

@@ -14,6 +14,7 @@ local Strings = require(Shared.Strings)
 local BlockColors = require(Shared.BlockColors)
 local Cobweb = require(Shared.Cobweb)
 local TextureService = require(script.Parent.TextureService)
+local MineReplicationService = require(script.Parent.MineReplicationService)
 
 local BLOCK = 4 -- studs per block
 local ANCHOR_TAG = "MineAnchor"
@@ -211,6 +212,7 @@ local function makePart(mine: Mine, i: number)
 	part.BottomSurface = Enum.SurfaceType.Smooth
 	part:SetAttribute("Index", i)
 	part:SetAttribute("MineId", mine.id)
+	MineReplicationService.Register(part)
 	CollectionService:AddTag(part, BLOCK_TAG)
 	part.Parent = mine.folder
 	mine.parts[i] = part
@@ -343,6 +345,7 @@ function MineService.breakBlock(mine: Mine, i: number): string?
 	mine.dug += 1
 	local part = mine.parts[i]
 	if part then
+		MineReplicationService.Removed(part)
 		blockLookup[part] = nil
 		mine.parts[i] = nil
 		part:Destroy()
@@ -521,6 +524,7 @@ local function rescue(mine: Mine)
 end
 
 function MineService.Start()
+	MineReplicationService.Start()
 	for _, anchor in ipairs(CollectionService:GetTagged(ANCHOR_TAG)) do
 		register(anchor)
 	end

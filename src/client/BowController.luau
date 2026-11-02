@@ -110,10 +110,10 @@ function BowController.Cancel()
 end
 
 -- where the crosshair points: the ray through the middle of the screen, from the eyes to what it meets
-local function aim(head: BasePart): Vector3
+local function aim(head: BasePart): (Vector3, Model?)
 	local camera = workspace.CurrentCamera
 	if not camera then
-		return head.CFrame.LookVector
+		return head.CFrame.LookVector, nil
 	end
 	local size = camera.ViewportSize
 	local ray = camera:ViewportPointToRay(size.X / 2, size.Y / 2)
@@ -123,7 +123,16 @@ local function aim(head: BasePart): Vector3
 	local hit = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
 	local point = if hit then hit.Position else ray.Origin + ray.Direction * 1000
 	local offset = point - head.Position
-	return if offset.Magnitude > 3 then offset.Unit else ray.Direction
+	local target: Model? = nil
+	local ancestor: Instance? = if hit then hit.Instance else nil
+	while ancestor and ancestor ~= workspace do
+		if ancestor:IsA("Model") and Players:GetPlayerFromCharacter(ancestor) then
+			target = ancestor
+			break
+		end
+		ancestor = ancestor.Parent
+	end
+	return if offset.Magnitude > 3 then offset.Unit else ray.Direction, target
 end
 
 function BowController.Release()
@@ -141,8 +150,8 @@ function BowController.Release()
 		Remotes.event("BowCancel"):FireServer()
 		return
 	end
-	local direction = aim(head)
-	Remotes.event("BowRelease"):FireServer(direction, Motion.viewTime()) -- the arrow tests players where we see them
+	local direction, target = aim(head)
+	Remotes.event("BowRelease"):FireServer(direction, Motion.viewTime(target)) -- test the aimed player's render time
 	local level = stack.level or 1
 	Arrows.FireLocal(
 		head.Position + direction * 1.2,

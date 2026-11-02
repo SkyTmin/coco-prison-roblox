@@ -4,9 +4,8 @@
 -- Sending: our root (position, yaw, server-clock stamp) 60 times a second while we move or turn, 4 times a second
 -- standing still, over the unreliable "Motion" remote (MotionService checks and relays it).
 -- Drawing: other characters come from those snapshots ("MotionFx") instead of Roblox's buffer — shown at
--- server time minus a small adaptive delay (the measured one-way lateness + its jitter + the measured gap between
--- snapshots), interpolated between snapshots and extrapolated for at most EXTRAPOLATE when one is late.
--- Measured in Studio Server & Clients (27.10): Roblox ≈ 250 ms behind, this ≈ 85 ms at 30 Hz with the relay
+-- server time minus the adaptive MotionTiming delay, with at most 50 ms / 3 studs of extrapolation.
+-- Historical measurement in Studio (27.10, before the current tuning): Roblox ≈ 250 ms behind, ours ≈ 85 ms at 30 Hz with the relay
 -- queued to the frame's end; the snapshots themselves arrive ≈ 50 ms after they are taken there.
 -- Without fresh snapshots (dead, far away, the sender stalled) Roblox replication shows the character again.
 
@@ -15,13 +14,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Remotes = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"))
+local MotionTiming = require(ReplicatedStorage.Shared.MotionTiming)
 
 local Motion = {}
 
 local SEND_MOVING = 1 / 60
 local SEND_IDLE = 1 / 4
-local MIN_DELAY, MAX_DELAY = 0.035, 0.3
-local EXTRAPOLATE = 0.1 -- s past the newest snapshot
 local STALE = 0.6 -- s without snapshots: back to Roblox replication
 local TELEPORT = 20 -- studs between snapshots: jump, do not slide
 local KEEP = 24 -- snapshots per player
@@ -35,6 +33,7 @@ type Track = {
 	gap: number, -- EMA of the time between moving snapshots
 	arrivedAt: number,
 	velocity: Vector3,
+	viewAt: number?,
 }
 local tracks: { [number]: Track } = {}
 local shownDelay: number? = nil -- the largest delay others were drawn with this frame (nil: none drawn by us)
@@ -121,9 +120,8 @@ local function sample(track: Track, at: number): (Vector3?, number?, Vector3?)
 			return newest.pos, newest.yaw, Vector3.zero
 		end
 		local prev = snaps[n - 1]
-		local v = (newest.pos - prev.pos) / math.max(newest.t - prev.t, 1 / 120)
-		local ahead = math.min(at - newest.t, EXTRAPOLATE)
-		return newest.pos + v * ahead, newest.yaw, v
+		local pos, v = MotionTiming.project(newest.pos, prev.pos, newest.t - prev.t, at - newest.t)
+		return pos, newest.yaw, v
 	end
 	for i = n - 1, 1, -1 do
 		local a = snaps[i]
@@ -158,23 +156,33 @@ local function draw()
 			or clock - track.arrivedAt > STALE
 		then
 			track.velocity = Vector3.zero
+			track.viewAt = nil
 			continue -- Roblox replication draws it
 		end
-		local delay =
-			math.clamp(track.lateAvg + 2 * track.lateDev + track.gap, MIN_DELAY, MAX_DELAY)
+		local delay = MotionTiming.delay(track.lateAvg, track.lateDev, track.gap)
 		local pos, yaw, v = sample(track, now - delay)
 		if pos and yaw then
 			root.CFrame = CFrame.new(pos) * CFrame.Angles(0, yaw, 0)
 			track.velocity = v or Vector3.zero
+			track.viewAt = now - delay
 			largest = math.max(largest or 0, delay)
 		end
 	end
 	shownDelay = largest
 end
 
--- The server time the other players are drawn at right now; sent with a blow or an arrow so the server tests
--- them where we saw them (MotionService lag compensation). nil when none is drawn from our snapshots.
-function Motion.viewTime(): number?
+-- A locked PvP target uses its own render timestamp, not the slowest unrelated player's buffer.
+-- Without a target, retain the aggregate fallback for an untargeted sweep/arrow.
+function Motion.viewTime(target: Model?): number?
+	if target then
+		local player = Players:GetPlayerFromCharacter(target)
+		local track = player and tracks[player.UserId]
+		return if track
+				and track.character == target
+				and os.clock() - track.arrivedAt <= STALE
+			then track.viewAt
+			else nil
+	end
 	return if shownDelay then workspace:GetServerTimeNow() - shownDelay else nil
 end
 
@@ -191,6 +199,7 @@ end
 function Motion.Start()
 	local send = Remotes.unreliable("Motion")
 	local lastSent, lastPos, lastYaw = 0, Vector3.zero, 0
+	local wasMoving = false
 	RunService.Heartbeat:Connect(function()
 		local character = Players.LocalPlayer.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
@@ -202,10 +211,12 @@ function Motion.Start()
 		local pos, yaw = root.Position, yawOf(root.CFrame)
 		local moved = (pos - lastPos).Magnitude > 0.01
 			or math.abs(angleLerp(lastYaw, yaw, 1) - lastYaw) > 0.005
-		if clock - lastSent < (if moved then SEND_MOVING else SEND_IDLE) - 0.002 then
+		-- Send the stop immediately too; waiting for the 250 ms idle heartbeat causes overshoot.
+		if clock - lastSent < (if moved or wasMoving then SEND_MOVING else SEND_IDLE) - 0.002 then
 			return
 		end
 		lastSent, lastPos, lastYaw = clock, pos, yaw
+		wasMoving = moved
 		send:FireServer(pos, yaw, workspace:GetServerTimeNow())
 	end)
 	Remotes.unreliable("MotionFx").OnClientEvent:Connect(function(batch: any)

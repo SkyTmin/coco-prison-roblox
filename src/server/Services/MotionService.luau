@@ -15,11 +15,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Remotes"))
+local MotionTiming = require(ReplicatedStorage.Shared.MotionTiming)
 
 local MotionService = {}
 
 local MAX_DRIFT = 30 -- studs between the report and the server's copy (its copy is ~0.1–0.25 s old; falls are fast)
-local MIN_GAP = 1 / 75 -- s: reports faster than this are dropped (clients send at most 60 a second)
+local REPORT_RATE, REPORT_BURST = 75, 5 -- allow legitimate 60 Hz packets delivered together by the engine
 local RELAY_RANGE = 250 -- studs: further away a character is small enough for the plain Roblox replication
 local NEAR = 80 -- studs: closer players (a fight, a trade) get every report
 local FAR_EVERY = 3 -- further ones get every third (20 a second)
@@ -32,6 +33,7 @@ type Snap = { t: number, cf: CFrame }
 local history: { [Player]: { Snap } } = {}
 local lastAt: { [Player]: number } = {} -- os.clock of the last accepted report
 local counts: { [Player]: number } = {} -- accepted reports, for the far players' share
+local budgets: { [Player]: { tokens: number, at: number } } = {}
 local relay: UnreliableRemoteEvent? = nil
 local started = false
 
@@ -55,9 +57,14 @@ local function onMotion(player: Player, position: any, yaw: any, stamp: any)
 		return
 	end
 	local now = os.clock()
-	if now - (lastAt[player] or -math.huge) < MIN_GAP then
+	local budget = budgets[player] or { tokens = REPORT_BURST, at = now }
+	budgets[player] = budget
+	budget.tokens = math.min(REPORT_BURST, budget.tokens + (now - budget.at) * REPORT_RATE)
+	budget.at = now
+	if budget.tokens < 1 then
 		return
 	end
+	budget.tokens -= 1
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -69,18 +76,19 @@ local function onMotion(player: Player, position: any, yaw: any, stamp: any)
 	end
 	local serverNow = workspace:GetServerTimeNow()
 	stamp = math.clamp(stamp, serverNow - 1, serverNow) -- the sender's clock cannot be ahead of ours
-	lastAt[player] = now
 	local list = history[player]
 	if not list then
 		list = {}
 		history[player] = list
 	end
 	local newest = list[#list]
-	if newest and (newest.cf.Position - position).Magnitude > TELEPORT then
-		table.clear(list)
-	elseif newest and stamp <= newest.t then
+	if newest and stamp <= newest.t then
 		return -- out of order (unreliable)
 	end
+	if newest and (newest.cf.Position - position).Magnitude > TELEPORT then
+		table.clear(list)
+	end
+	lastAt[player] = now -- rejected/replayed reports must not keep stale history fresh
 	table.insert(list, { t = stamp, cf = CFrame.new(position) * CFrame.Angles(0, yaw, 0) })
 	while #list > 2 and list[1].t < serverNow - KEEP do
 		table.remove(list, 1)
@@ -134,7 +142,17 @@ function MotionService.rootAt(player: Player, at: number?): CFrame?
 	local now = workspace:GetServerTimeNow()
 	at = math.clamp(at, now - MAX_REWIND, now)
 	if at >= newest.t then
-		return newest.cf
+		local prev = list[#list - 1]
+		if not prev then
+			return newest.cf
+		end
+		local pos = MotionTiming.project(
+			newest.cf.Position,
+			prev.cf.Position,
+			newest.t - prev.t,
+			at - newest.t
+		)
+		return newest.cf.Rotation + pos
 	end
 	for i = #list - 1, 1, -1 do
 		local a = list[i]
@@ -164,6 +182,7 @@ function MotionService.Start()
 	relay = Remotes.unreliable("MotionFx")
 	Players.PlayerRemoving:Connect(function(player)
 		history[player], lastAt[player], counts[player] = nil, nil, nil
+		budgets[player] = nil
 	end)
 end
 

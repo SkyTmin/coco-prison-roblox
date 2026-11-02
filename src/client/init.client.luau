@@ -49,6 +49,7 @@ BlockBreak.Start()
 require(script.Nameplates).Start() -- «lvl N [кличка] Ник» over the other players
 require(script.GroundItems).Start() -- items on the ground drawn like Minecraft (ItemDropService keeps the boxes)
 require(script.Motion).Start() -- other players drawn from our own fast movement snapshots
+require(script.MineReplication).Start() -- confirmed block removals, including other players and AoE books
 require(script.Audio).Start() -- the master volume (SettingsWindow)
 
 local player = Players.LocalPlayer
@@ -2504,6 +2505,10 @@ end
 
 Remotes.event("DigAccepted").OnClientEvent
 	:Connect(function(part: BasePart, needed: number, pause: number?)
+		-- A fast removal can beat this reliable reply; destroyed Instance arguments may become nil.
+		if typeof(part) ~= "Instance" or not part:IsA("BasePart") or not part.Parent then
+			return
+		end
 		accepted[part] = true
 		if digging and digTarget == part then
 			digNeeded = needed -- the server's number is the truth; progress keeps its local start
@@ -2526,6 +2531,9 @@ task.spawn(function() -- the remote may appear only after the first mine build
 	end)
 end)
 Remotes.event("DigRejected").OnClientEvent:Connect(function(part: BasePart)
+	if typeof(part) ~= "Instance" or not part:IsA("BasePart") then
+		return
+	end
 	restoreLocally(part)
 	if digTarget == part then
 		stopDig(false)
@@ -2663,7 +2671,7 @@ local function attack(repeating: boolean?)
 		aimed or currentCamera.CFrame.LookVector,
 		falling,
 		target,
-		require(script.Motion).viewTime()
+		require(script.Motion).viewTime(target)
 	)
 end
 -- Small Java-style recovery meter below the crosshair, independent of the fast hand animation.

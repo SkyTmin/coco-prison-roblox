@@ -16,6 +16,8 @@
 --                          CaseOpened(caseId), CaseUpdated(caseId, active)
 --                          BlockBrokenFx({ {position, size, color, blockId} }) — unreliable, one batch per
 --                          frame, only to players within FX_RANGE of the block (DigService)
+--                          MineRemoved(buffer) — unreliable confirmed removals by immutable Part IDs;
+--                          ordinary Instance deletion is the fallback (Shared.MineNet)
 --                          DigAccepted(part, needed), DigRejected(part) — server-side dig timer
 -- Client → server:        Exchange(kind, id, count?), TrainerUpgrade(stat), Attack(lookDirection, falling)
 -- Server → client:        Sfx(name, anchorPart?, volume?, pitch?) — play an atlas sound locally (Sfx.luau)
