@@ -144,6 +144,30 @@ function HudLayout.moved(id: string): boolean
 	return moved[id] == true
 end
 
+-- Saved screen fractions can land on hotbar slots after switching to a narrower device.
+-- Fall back to the current responsive default, without overwriting the saved customization.
+function HudLayout.keepClear(id: string, obstacle: GuiObject)
+	if editing or not obstacle.Visible then
+		return
+	end
+	local b, bs = obstacle.AbsolutePosition, obstacle.AbsoluteSize
+	for _, entry in ipairs(entries) do
+		if entry.id == id and entry.object.Visible then
+			local a, size = entry.object.AbsolutePosition, entry.object.AbsoluteSize
+			if
+				a.X < b.X + bs.X
+				and a.X + size.X > b.X
+				and a.Y < b.Y + bs.Y
+				and a.Y + size.Y > b.Y
+			then
+				entry.object.Position = entry.default
+				uiScale(entry.object).Scale = entry.base
+			end
+			return
+		end
+	end
+end
+
 function HudLayout.isEditing(): boolean
 	return editing
 end

@@ -137,6 +137,7 @@ export type Profile = {
 		},
 	}?,
 	hudLayout: { [string]: { [string]: { number } } }?, -- mode → element id → {x, y, shown, size} (HudLayout); schema stays v3
+	hudLayoutVersion: number?, -- one-time migration to the visible hotbar-side camera control
 	settings: Settings?, -- the settings window (SettingsWindow); nil = the defaults; schema stays v3
 	-- «Пригласить друга» (ReferralService): by = the inviter's userId, set once on a brand-new profile that joined
 	-- through an invite; credited = this friend reached Config.referrals.friendLevel and is in the inviter's record

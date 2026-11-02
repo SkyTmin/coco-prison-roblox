@@ -196,6 +196,21 @@ local function migrate(data: any): Profile
 		local settings = profile.settings :: any
 		settings.chatFade, settings.chatGlobalOff, settings.chatButton = nil, nil, nil
 	end
+	-- [owner 02.11] Move the formerly hidden/right-hand camera control to the LEFT of the hotbar once.
+	-- Other HUD positions survive; later edits of the new view button remain authoritative.
+	if profile.hudLayoutVersion ~= 2 then
+		if typeof(profile.hudLayout) == "table" then
+			local layouts = table.clone(profile.hudLayout)
+			for _, mode in ipairs({ "desktop", "mobile" }) do
+				if typeof(layouts[mode]) == "table" then
+					layouts[mode] = table.clone(layouts[mode])
+					layouts[mode].view = nil
+				end
+			end
+			profile.hudLayout = layouts
+		end
+		profile.hudLayoutVersion = 2
+	end
 	-- PRIS+ and the rubies (этап 8, Shared/PrisPlus)
 	if
 		typeof(profile.prisPlusUntil) ~= "number"

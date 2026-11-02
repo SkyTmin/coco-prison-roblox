@@ -170,7 +170,12 @@ function ChatWindow.start(api: Api)
 					break -- not drawn yet: the next fit (viewport, settings, the hotbar moving) tries again
 				end
 				local right = windowCfg.AbsolutePosition.X + size.X
-				if right + GAP <= hotbar.AbsolutePosition.X then
+				local left = hotbar.AbsolutePosition.X
+				local view = hudObjects.view
+				if view and view.Visible then
+					left = math.min(left, view.AbsolutePosition.X)
+				end
+				if right + GAP <= left then
 					break
 				end
 				if w <= cfg.windowMinWidth + 1e-3 then

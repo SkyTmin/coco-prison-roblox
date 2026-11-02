@@ -3240,7 +3240,7 @@ do
 		localizedLabels[caption] = "touch_layout"
 	end
 end
--- [owner 02.11] «Вид» starts beside the nine hotbar slots on both phone and desktop.
+-- [owner 02.11] «Вид» starts LEFT of the nine hotbar slots on both phone and desktop.
 local viewButton = touchIconButton(
 	gui,
 	Config.icons.icons["menu_camera"],
@@ -3471,7 +3471,7 @@ do
 	sprintButton.Visible = false
 end
 -- Roblox's chat window stays left of the hotbar band (the meters are drawn over the hotbar, as wide as it)
-require(script.ChatWindow).hud({ hotbar = hotbar })
+require(script.ChatWindow).hud({ hotbar = hotbar, view = viewButton })
 
 Instance.new("UIScale").Parent = stats -- HudLayout sets it: the mode's base × the player's size
 local hotbarScale = Instance.new("UIScale")
@@ -3502,22 +3502,36 @@ local function updateLayout()
 	local width = 9 * (size + 4) + 8
 	hotbar.Size = UDim2.fromOffset(width, size + 12)
 	hotbar.AnchorPoint = Vector2.new(0.5, 1)
-	-- Reserve a real tap target to the right; shift the bar only when the viewport is too narrow.
+	-- Reserve «Вид» on the left and the mobile inventory opener on the right.
 	local viewSize, viewGap, edge = 44, 6, 10
-	hotbarScale.Scale = math.min(1, math.max(1, viewport.X - 2 * edge - viewSize - viewGap) / width)
+	local leftSpace, rightSpace = viewSize + viewGap, if mobile then 40 + viewGap else 0
+	hotbarScale.Scale =
+		math.min(1, math.max(1, viewport.X - 2 * edge - leftSpace - rightSpace) / width)
 	local barWidth = width * hotbarScale.Scale
 	local barHeight = (size + 12) * hotbarScale.Scale
-	local barCenter =
-		math.min(viewport.X / 2, viewport.X - edge - viewSize - viewGap - barWidth / 2)
+	local barCenter = math.clamp(
+		viewport.X / 2,
+		edge + leftSpace + barWidth / 2,
+		math.max(edge + leftSpace + barWidth / 2, viewport.X - edge - rightSpace - barWidth / 2)
+	)
 	local barRight = barCenter + barWidth / 2
 	hotbar.Position = UDim2.new(0, barCenter, 1, -8)
 	survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
-	viewButton.Position =
-		UDim2.new(0, barRight + viewGap + viewSize, 1, -8 - math.max(0, (barHeight - viewSize) / 2))
-	-- Keep the inventory opener above «Вид» and desktop key hints beyond both buttons.
-	inventoryButton.Position = UDim2.new(0, barRight + viewGap, 1, -8 - barHeight - 6 - 40)
+	viewButton.Position = UDim2.new(
+		0,
+		barCenter - barWidth / 2 - viewGap,
+		1,
+		-8 - math.max(0, (barHeight - viewSize) / 2)
+	)
+	-- The inventory opener stays to the right, separated from the view control.
+	inventoryButton.Position = UDim2.new(
+		0,
+		barRight + viewGap,
+		1,
+		-8 - math.max(barHeight, 40) + math.max(0, (barHeight - 40) / 2)
+	)
 	inventoryButton.AnchorPoint = Vector2.new(0, 0)
-	local hintsLeft = barRight + viewGap + viewSize + 8
+	local hintsLeft = barRight + 12
 	local hintsWidth = math.max(0, viewport.X - hintsLeft - 84)
 	hints.Visible = not mobile and hintsWidth >= 100
 	hints.Position = UDim2.new(0, hintsLeft, 1, -10)
@@ -3618,6 +3632,10 @@ RunService.RenderStepped:Connect(function()
 		and (currentWindowKind == "inventory" or currentWindowKind == "case")
 	hotbar.Visible = not hasInventoryRow
 	viewButton.Visible = HudLayout.isEditing() or (viewShown and currentWindowKind == nil)
+	HudLayout.keepClear("view", hotbar)
+	if isMobile() then
+		HudLayout.keepClear("inventory", hotbar)
+	end
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
 	local food, needItem = isFood(), isNeedConsumable()
