@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "scope": "offline geometry/curves/config only; Studio not run",
+  "baseline": "bee4a8c",
+  "models": {
+    "vecna": {
+      "parts": 725,
+      "joints": 64,
+      "clips": {
+        "idle": 4.0,
+        "walk": 1.25,
+        "run": 0.8,
+        "attack1": 0.85,
+        "hurt": 0.7,
+        "stun": 1.0,
+        "jump": 1.0333,
+        "attack2": 4.0,
+        "flower": 5.5,
+        "clockcast": 2.7,
+        "portalcast": 3.5,
+        "spawn": 2.4,
+        "death": 4.7
+      }
+    },
+    "vecna_stalker": {
+      "parts": 112,
+      "joints": 22,
+      "clips": {
+        "bite": 1.0667,
+        "death": 2.6,
+        "hurt": 0.5,
+        "idle": 2.0,
+        "spawn": 1.0,
+        "walk": 1.0
+      }
+    },
+    "vecna_hound": {
+      "parts": 85,
+      "joints": 24,
+      "clips": {
+        "bite": 0.9,
+        "death": 2.3,
+        "hurt": 0.4667,
+        "idle": 2.0,
+        "spawn": 0.9,
+        "walk": 0.6
+      }
+    },
+    "vecna_bat": {
+      "parts": 57,
+      "joints": 15,
+      "clips": {
+        "bite": 0.8,
+        "death": 1.8,
+        "hurt": 0.4333,
+        "idle": 0.75,
+        "spawn": 0.6,
+        "walk": 0.75
+      }
+    },
+    "vecna_clock": {
+      "parts": 31,
+      "joints": 6,
+      "clips": {
+        "death": 2.2,
+        "hurt": 0.4667,
+        "idle": 3.0,
+        "spawn": 0.7
+      }
+    },
+    "vecna_portal": {
+      "parts": 48,
+      "joints": 10,
+      "clips": {
+        "close": 0.7667,
+        "idle": 2.0,
+        "spawn": 1.0
+      }
+    }
+  },
+  "moduleCount": 14,
+  "largestModuleCharacters": 118782,
+  "noiseSha256": "c96ee737af82b491e29978f5415e662c98684f38e64dad0804d7bc3799b84d7d",
+  "studioStatus": "PENDING evening QA per owner"
+}

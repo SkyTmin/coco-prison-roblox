@@ -16,8 +16,8 @@ Remaining route (source: boss location unlock levels; not difficulty ranking):
 - [x] Undead King — 382 parts/38 joints/13 clips plus ghoul, skull and sword rigs; 169 server/17 client/43 no-block checks, 90-second live fight. Videos in assets/models/undead_king.
 - [x] Forest Spirit — 752 parts/47 joints/17 clips plus four original summon rigs;234 server/22 client/43 no-block assertions,90-second moving-target live fight and actual arena view. Videos in assets/models/forest_spirit.
 - [ ] Raven Knight — code/model checkpoint prepared:721 parts/40 joints/14 clips, retainer671/40/10, raven48/11/3 and axe20/2/2. Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/raven_knight/README.md.
-- [ ] Vecna — next code/model production.
-- [ ] The Lovers.
+- [ ] Vecna — code/model checkpoint prepared:725 parts/64 joints/13 clips; three original minions, clock and portal (six rigs/38 clips). Offline curves/build pass; server/client/live Studio QA **PENDING evening**. assets/models/vecna/README.md.
+- [ ] The Lovers — next code/model production (Kyoto).
 - [ ] Ent.
 - [ ] Forest Guardian.
 - [ ] Reaper.

@@ -51,6 +51,13 @@
 
 ## Журнал
 
+### 02.11 — Vecna code/model checkpoint; evening Studio QA pending [owner]
+
+Continued entirely offline under the owner's code-only instruction; no Studio/desktop-control calls. Original Vecna725 parts/64 joints/13 clips, stalker112/22/6, hound85/24/6, bat57/15/6, clock31/6/4, portal48/10/3. Six headless blends,38 exported clips,14 JSON modules; videos and measured reports in assets/models/vecna/README.md. Six articulated tendrils, claw, warned patches, gapped/jumpable flower wave, destroyable clock curse and interruptible portal with three capped killable minion types. Original4.7s grounded collapse; no shielding/camera takeover/player clones/glow. HP2770, damage budgets29/40/50, regen6HP/s, existing rewards and public chat policy unchanged. Source families/durations separated from authored rules; unknown flower source duration not invented.
+
+Offline curve/ground/stance/module/config audits, Selene/StyLua/Rojo and balance simulation pass. Fixed fingers/wing/leg support in final death poses, longer minion strides, clock/portal module-name collision, dynamic clock headroom and persistent floor-height checks. Matched contact/death timing, closing portal clip, server-owned grounded summons; bounded effects and death/leash cleanup. **Prepared qa-vecna-runtime/animation-client suites have NOT RUN; studio-validation.json PENDING.** Evening: scripts/models-only sync to Katorga92594200898716, server/client/no-block suites and live Inside Out fight, console, real damage/counterplay/ownership/leash/respawn. Preserve map/no publish. Full completed count remains13/19; Raven Knight and Vecna await Studio. Next: The Lovers (Kyoto), then Ent/Forest Guardian/Reaper. Real group/mobile/load testing remains open.
+
+
 ### 02.11 — Raven Knight code/model checkpoint; Studio deferred until evening [owner]
 
 Owner explicitly requested code-only work and evening Studio checks. No Studio/desktop-control calls for this checkpoint. Prepared original Raven Knight721 parts/40 joints/14 clips, Crow Reaper retainer671/40/10, raven48/11/3, axe20/2/2;29 exported clips reviewed,16 JSON modules, four blends and videos. Alternating normal cuts, fast combo, guarded fly-strike, explosion, bounded raven volley and one vulnerable phase-two retainer with five attack families. Retainer is our authored interpretation, not a claimed source-confirmed transformation. HP2550/damage budgets26/37/46, regen4HP/s and all existing rewards/chat retained. Normal contacts.8/1.4s leave margin beyond hurt immunity. MobAnimator supports server-timed custom minion clips; ordinary Mob regression prepared.

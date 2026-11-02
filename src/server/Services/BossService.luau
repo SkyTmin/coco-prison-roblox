@@ -52,6 +52,7 @@ local MothAbilities = require(script.Parent.MothAbilities)
 local UndeadKingAbilities = require(script.Parent.UndeadKingAbilities)
 local ForestSpiritAbilities = require(script.Parent.ForestSpiritAbilities)
 local RavenKnightAbilities = require(script.Parent.RavenKnightAbilities)
+local VecnaAbilities = require(script.Parent.VecnaAbilities)
 local SpiderQueenAbilities = require(script.Parent.SpiderQueenAbilities)
 local BlockRig = require(Shared.BlockRig)
 local Models = Shared:WaitForChild("Models")
@@ -75,6 +76,7 @@ type Fight = {
 	undeadKing: any?,
 	forestSpirit: any?,
 	ravenKnight: any?,
+	vecna: any?,
 	spiderQueen: any?,
 	combatRegenPerSecond: number?,
 	meleeDuration: number?,
@@ -1146,6 +1148,7 @@ local function died(boss: Boss)
 	UndeadKingAbilities.Clear(boss)
 	ForestSpiritAbilities.Clear(boss)
 	RavenKnightAbilities.Clear(boss)
+	VecnaAbilities.Clear(boss)
 	SpiderQueenAbilities.Clear(boss)
 	if boss.fight.minotaur then
 		MinotaurAbilities.Bindings(boss, false)
@@ -1318,6 +1321,8 @@ function spawnBoss(boss: Boss, saved: Saved?)
 		ForestSpiritAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.ravenKnight then
 		RavenKnightAbilities.Spawn(boss, { act = act })
+	elseif boss.fight.vecna then
+		VecnaAbilities.Spawn(boss, { act = act })
 	elseif boss.fight.spiderQueen then
 		SpiderQueenAbilities.Spawn(boss, { act = act })
 	else
@@ -1354,6 +1359,7 @@ local function think(boss: Boss, dt: number)
 		UndeadKingAbilities.Clear(boss)
 		ForestSpiritAbilities.Clear(boss)
 		RavenKnightAbilities.Clear(boss)
+		VecnaAbilities.Clear(boss)
 		SpiderQueenAbilities.Clear(boss)
 		boss.model, boss.root, boss.humanoid = nil, nil, nil
 		if old then
@@ -1381,6 +1387,9 @@ local function think(boss: Boss, dt: number)
 	if #list == 0 then
 		if boss.fight.ravenKnight and os.clock() - boss.lastTargetAt > boss.fight.leashSeconds then
 			RavenKnightAbilities.Clear(boss)
+		end
+		if boss.fight.vecna and os.clock() - boss.lastTargetAt > boss.fight.leashSeconds then
+			VecnaAbilities.Clear(boss)
 		end
 		if boss.model and boss.model:GetAttribute("Sleeping") then
 			return
@@ -1427,6 +1436,7 @@ local function think(boss: Boss, dt: number)
 						or boss.fight.poseidon
 						or boss.fight.undeadKing
 						or boss.fight.ravenKnight
+						or boss.fight.vecna
 					then 4
 					else 3)
 			+ 1
@@ -1475,6 +1485,13 @@ local function think(boss: Boss, dt: number)
 			})
 		elseif boss.fight.ravenKnight then
 			RavenKnightAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
+				act = act,
+				hurt = hurt,
+				fighters = fighters,
+				telegraph = telegraphPart,
+			})
+		elseif boss.fight.vecna then
+			VecnaAbilities.Cast(boss, boss.nextAbility, target.root.Position, phase2, {
 				act = act,
 				hurt = hurt,
 				fighters = fighters,
@@ -1583,6 +1600,13 @@ local function think(boss: Boss, dt: number)
 				})
 			elseif boss.fight.ravenKnight then
 				RavenKnightAbilities.Melee(boss, target.root.Position, {
+					act = act,
+					hurt = hurt,
+					fighters = fighters,
+					telegraph = telegraphPart,
+				})
+			elseif boss.fight.vecna then
+				VecnaAbilities.Melee(boss, target.root.Position, {
 					act = act,
 					hurt = hurt,
 					fighters = fighters,
