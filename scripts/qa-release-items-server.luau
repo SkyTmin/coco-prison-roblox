@@ -645,8 +645,13 @@ local ok, err = xpcall(function()
 				end
 				local eye = Vector3.new(at.X, ground.Position.Y + 5, at.Z)
 				local target = part.Position + Vector3.new(0, part.Size.Y / 2, 0)
-				local hit = workspace:Raycast(eye, target - eye, params)
-				if (target - eye).Magnitude <= 18 and hit and hit.Instance == part then
+				local direction = target - eye
+				-- The exact surface endpoint may be excluded by the engine ray. Cross it by
+				-- 0.1 stud; range is still measured to the original face, never the extended end.
+				local hit = if direction.Magnitude > 0
+					then workspace:Raycast(eye, direction + direction.Unit * 0.1, params)
+					else nil
+				if direction.Magnitude <= 18 and hit and hit.Instance == part then
 					return part, index, CFrame.new(at)
 				end
 			end
@@ -700,7 +705,10 @@ local ok, err = xpcall(function()
 					local params = RaycastParams.new()
 					params.FilterType = Enum.RaycastFilterType.Exclude
 					params.FilterDescendantsInstances = { c }
-					ray = workspace:Raycast(eye, targetHit - eye, params)
+					local direction = targetHit - eye
+					if direction.Magnitude > 0 then
+						ray = workspace:Raycast(eye, direction + direction.Unit * 0.1, params)
+					end
 				end
 				local function v(value)
 					return if value then { x = value.X, y = value.Y, z = value.Z } else nil

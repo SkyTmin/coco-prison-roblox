@@ -99,6 +99,81 @@ check(
 		or server:find("mine.resetAt - os.clock()", 1, true) ~= nil
 )
 check("real support block selected separately", server:find("local support", 1, true) ~= nil)
+do
+	-- Actual chooseCell closure, with a top-face intersection that excludes the ray's
+	-- exact endpoint, matching the observed native miss at (-58, 0, -178).
+	local rb = require("@lune/roblox")
+	local source =
+		assert(server:match("\tlocal function chooseCell%(counter%)(.-)\n\tlocal function digOne"))
+	local target =
+		{ Parent = true, Position = rb.Vector3.new(-58, -2, -178), Size = rb.Vector3.new(4, 4, 4) }
+	local support =
+		{ Parent = true, Position = rb.Vector3.new(-54, -2, -178), Size = rb.Vector3.new(4, 4, 4) }
+	local wrongPart, mode, lastRay = {}, "target", nil
+	local env = {
+		Vector3 = rb.Vector3,
+		Enum = rb.Enum,
+		RaycastParams = {
+			new = function()
+				return {}
+			end,
+		},
+		player = { Character = {} },
+		mine = {
+			size = { 3, 1, 3 },
+			cells = { [22] = "gravel" },
+			parts = { [22] = target, [23] = support },
+		},
+		Mine = {
+			index = function(_, x, _, z)
+				return z * 10 + x
+			end,
+		},
+		Config = {
+			block = function()
+				return { upgradeCounter = "gravel" }
+			end,
+		},
+		workspace = {
+			Raycast = function(_, origin, direction)
+				lastRay = { origin = origin, direction = direction }
+				local t = -origin.Y / direction.Y
+				if t <= 0 or t >= 1 or mode == "missing" then
+					return nil
+				end
+				return { Instance = if mode == "blocked" then wrongPart else target }
+			end,
+		},
+	}
+	setmetatable(env, { __index = getfenv() })
+	local function choose(body)
+		local chunk = assert(loadstring("return function(counter)" .. body))
+		setfenv(chunk, env)
+		return chunk()
+	end
+	local old = choose((source:gsub("direction %+ direction.Unit %* 0%.1", "direction")))
+	check("old exact-endpoint fixture ray reproduces the native miss", old("gravel") == nil)
+	local selectCell = choose(source)
+	local selected, index, at = selectCell("gravel")
+	check(
+		"extended fixture ray selects the actual exposed target",
+		selected == target and index == 22
+	)
+	check(
+		"fixture still stands on the separate real support cell",
+		at == rb.Vector3.new(-54, 4, -178)
+	)
+	local raw = rb.Vector3.new(-58, 0, -178) - lastRay.origin
+	check(
+		"fixture probe extends only 0.1 stud along the same ray",
+		math.abs(lastRay.direction.Magnitude - raw.Magnitude - 0.1) < 0.00001
+			and lastRay.direction.Unit:Dot(raw.Unit) > 0.99999
+	)
+	mode = "blocked"
+	check("extended ray still rejects a different occluding instance", selectCell("gravel") == nil)
+	mode = "missing"
+	check("extended ray never accepts a nil raycast", selectCell("gravel") == nil)
+end
 check(
 	"VirtualInput drives actual shovel selection",
 	client:find("CreateVirtualInput", 1, true) ~= nil

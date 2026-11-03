@@ -212,6 +212,8 @@ local coordinates =
 	{ { 1, 1, 1 }, { 2, 2, 2 }, { 3, 1, 2 }, { 4, 1, 2 }, { 5, 1, 2 }, { 6, 1, 2 }, { 7, 1, 2 } }
 local covered = { Name = "gantry" }
 local positionMap = {}
+local rayEvidence = {}
+local groundHeight = 2
 local function positionKey(v)
 	return string.format("%d,%d,%d", v.X, v.Y, v.Z)
 end
@@ -221,6 +223,9 @@ for i, xyz in coordinates do
 		CanCollide = true,
 		Position = rb.Vector3.new((xyz[1] - 1) * 4, -(xyz[2] - 1) * 4, (xyz[3] - 1) * 4),
 		Size = rb.Vector3.new(4, 4, 4),
+		GetFullName = function()
+			return "Mine_quarry.Cell" .. i
+		end,
 	}
 	positionMap[positionKey(mine.parts[i].Position)] = mine.parts[i]
 	mine.cells[i] = if i == 3 or i == 7 then "coal_ore" else "stone"
@@ -256,10 +261,23 @@ local selectCell = load(
 				if delta == rb.Vector3.new(0, -12, 0) then
 					local support = positionMap[positionKey(at - rb.Vector3.new(0, 6, 0))]
 					return if support
-						then { Instance = support, Position = rb.Vector3.new(at.X, 2, at.Z) }
+						then {
+							Instance = support,
+							Position = rb.Vector3.new(at.X, groundHeight, at.Z),
+						}
 						else nil
 				end
-				local target = positionMap[positionKey(at + delta - rb.Vector3.new(0, 2, 0))]
+				-- An open-end ray must cross the top plane, not merely end exactly on it.
+				if delta.Y >= 0 then
+					return nil
+				end
+				local fraction = (2 - at.Y) / delta.Y
+				if fraction < 0 or fraction >= 1 - 1e-6 then
+					return nil
+				end
+				local surface = at + delta * fraction
+				local target = positionMap[positionKey(surface - rb.Vector3.new(0, 2, 0))]
+				table.insert(rayEvidence, { overrun = delta.Magnitude - (surface - at).Magnitude })
 				return { Instance = if target == mine.parts[4] then covered else target }
 			end,
 		},
@@ -274,6 +292,123 @@ check(
 	"actual selector stands on a different real solid top cell",
 	standing.Position == mine.parts[6].Position + rb.Vector3.new(0, 6, 0)
 		and standing.Position.X ~= part.Position.X
+)
+check(
+	"selector ray crosses open endpoint by exactly0point1stud",
+	#rayEvidence > 0 and math.abs(rayEvidence[#rayEvidence].overrun - 0.1) < 1e-5
+)
+groundHeight = 20
+check(
+	"extended selector still rejects an original face beyond18studs",
+	not pcall(selectCell, mine, "stone")
+)
+groundHeight = 2
+-- Execute the actual per-trial diagnostics closure with the same open-end engine boundary.
+local diagnosticTarget = part
+local targetHit = part.Position + rb.Vector3.new(0, 2, 0)
+local eyePosition = targetHit + rb.Vector3.new(4, 5, 0)
+local obstruction = false
+local diagnosticRays = 0
+local lastDirection
+local h = {
+	Health = 20,
+	FloorMaterial = rb.Enum.Material.Plastic,
+	GetState = function()
+		return rb.Enum.HumanoidStateType.Running
+	end,
+}
+local c = {}
+function c:FindFirstChild(name)
+	return if name == "Head"
+		then { Position = eyePosition }
+		else {
+			Position = eyePosition - rb.Vector3.new(0, 1.5, 0),
+			AssemblyLinearVelocity = rb.Vector3.zero,
+		}
+end
+function c:FindFirstChildOfClass()
+	return h
+end
+local wall = {
+	GetFullName = function()
+		return "Quarry.RealWall"
+	end,
+}
+local diagnostic = load(
+	between(server, "local function diagnostics()", "\n\t\t\tlocal beforePose = diagnostics()")
+		.. "\nreturn diagnostics",
+	{
+		player = { Character = c },
+		character = c,
+		part = diagnosticTarget,
+		targetHit = targetHit,
+		spec = { tool = "pickaxe", level = 5, block = "stone" },
+		silk = false,
+		block = Config.block("stone"),
+		generation = 1,
+		mine = { generation = 1, rebuilding = false, location = { unlockLevel = 1 } },
+		P = {
+			Get = function()
+				return { level = 1, location = "quarry", needs = { sleep = 100 } }
+			end,
+		},
+		Inventory = {
+			heldTool = function()
+				return "pickaxe", 5
+			end,
+			canAutoSell = function()
+				return false
+			end,
+			canAdd = function()
+				return true
+			end,
+		},
+		RaycastParams = {
+			new = function()
+				return {}
+			end,
+		},
+		Enum = rb.Enum,
+		Vector3 = rb.Vector3,
+		workspace = {
+			GetServerTimeNow = function()
+				return 100
+			end,
+			Raycast = function(_, at, direction)
+				diagnosticRays += 1
+				lastDirection = direction
+				local fraction = (targetHit.Y - at.Y) / direction.Y
+				return if fraction >= 0 and fraction < 1 - 1e-6
+					then { Instance = if obstruction then wall else diagnosticTarget }
+					else nil
+			end,
+		},
+	}
+)
+local observed = diagnostic()
+check(
+	"actual diagnostics recognizes surface target after open-end extension",
+	observed.rayTarget
+		and #observed.inferredRefusalCandidates == 0
+		and observed.distance == (targetHit - eyePosition).Magnitude
+)
+check(
+	"diagnostic ray extends only0point1 and preserves measured face distance",
+	math.abs(lastDirection.Magnitude - observed.distance - 0.1) < 1e-5
+)
+obstruction = true
+observed = diagnostic()
+check(
+	"extended diagnostics still reports a real intervening obstruction",
+	not observed.rayTarget
+		and table.find(observed.inferredRefusalCandidates, "line_of_sight_blocked") ~= nil
+)
+eyePosition = targetHit
+local beforeRays = diagnosticRays
+observed = diagnostic()
+check(
+	"zero-length diagnostic direction avoids invalid Unit and raycast",
+	diagnosticRays == beforeRays and not observed.rayTarget and observed.distance == 0
 )
 mine.parts[5].Parent = nil
 part, index = selectCell(mine, "stone")

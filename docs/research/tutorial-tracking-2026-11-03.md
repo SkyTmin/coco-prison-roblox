@@ -37,7 +37,7 @@ All commands use the actual repository Luau modules/closures with fake GUI, stor
 | `qa-shared-case-offline.luau` | 17 PASS |
 | `qa-profile-persistence-offline.luau` | 39 PASS |
 | `qa-release-localization-offline.luau` | 1601 entries / 6404 translations, zero issues |
-| `qa-release-tutorial-harness-offline.luau` | 52 PASS; installer/embedded source/cleanup/all full-map helpers compile, bounded RPC execution and failure regressions |
+| `qa-release-tutorial-harness-offline.luau` | 58 PASS; compile, bounded RPC failures and native endpoint-ray regression |
 | `qa-release-map-safety-offline.luau` | 155 PASS; actual helper execution and synthetic binary place save/reopen, including interrupted runs |
 | Full `selene src`, `stylua --check src`, `rojo build` on the final shared source | PASS; zero Selene errors/warnings/parse errors |
 
@@ -74,7 +74,7 @@ Budgets are 20 seconds for inspect/upgrade, 10 seconds for pose/sell/level, 5 se
 
 The stream request now supplies an explicit 10-second engine timeout and records `StreamStatus`/`StreamTimeout`. Roblox documents the omitted/default timeout as effectively infinite and does not guarantee that a returned request contains every required object; the harness still validates the actual client mining target afterwards. Source: [Player.RequestStreamAroundAsync](https://create.roblox.com/docs/reference/engine/classes/Player#RequestStreamAroundAsync).
 
-The offline harness test executes the actual extracted RPC wrapper with a deterministic scheduler: timely response, hang, client exception, test abort, cancellation failure with a late reply, no retry, mining-time allowance and bounded history. It also compiles all full-map coordinators/preflight, the retired legacy entry point, unchanged recovery helper, installer, embedded scripts and cleanup. Result: **52/52 PASS**. These watchdog changes still require their first native STS execution after full-map recovery.
+The offline harness test executes the actual extracted RPC wrapper with a deterministic scheduler: timely response, hang, client exception, test abort, cancellation failure with a late reply, no retry, mining-time allowance and bounded history. It also compiles all full-map coordinators/preflight, the retired legacy entry point, unchanged recovery helper, installer, embedded scripts and cleanup. The subsequent isolated native run exposed a QA cell-selection ray ending exactly on a face; the fixture probe now extends 0.1 stud while still requiring the selected block. Six extracted-closure regressions cover that issue. Current result: **58/58 PASS**. See [the isolated workflow report](isolated-tutorial-qa-2026-11-03.md) for its native progress and session-memory limitations; full fresh-flow acceptance remains separate.
 
 ## Remaining acceptance
 

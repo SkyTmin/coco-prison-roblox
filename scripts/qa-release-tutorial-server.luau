@@ -514,7 +514,10 @@ local ok, err = xpcall(function()
 					local at = support.Position + Vector3.new(0, support.Size.Y / 2 + 4, 0)
 					local target = part.Position + Vector3.new(0, part.Size.Y / 2, 0)
 					local eye = at + Vector3.new(0, 1, 0)
-					local hit = workspace:Raycast(eye, target - eye, params)
+					-- Native rays ending exactly on the face can miss it. Extend only this
+					-- fixture probe; the real dig intent still uses the actual surface/reach checks.
+					local direction = target - eye
+					local hit = workspace:Raycast(eye, direction + direction.Unit * 0.1, params)
 					if hit and hit.Instance == part then
 						return part, index, at
 					end
