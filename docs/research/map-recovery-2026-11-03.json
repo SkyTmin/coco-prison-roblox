@@ -1,50 +1,281 @@
 {
-  "placeVersion": 430,
-  "recovery": {
-    "restored": false,
-    "note": "Presence check only. Review geometry and source versions before resuming QA; never publish here.",
-    "restoreDetail": "No live restore callback completed; do not save",
-    "status": "RECOVERY_REQUIRED",
-    "rebuildingAttempted": false,
-    "missing": {
-      "1": "InsideOut",
-      "2": "Barn",
-      "3": "Quarry",
-      "4": "EdgeGate",
-      "5": "Tree",
-      "6": "Church",
-      "7": "Purgatory",
-      "8": "Eden",
-      "9": "Cherubim",
-      "10": "Gate",
-      "11": "Basement",
-      "12": "Warzone",
-      "13": "Ghetto",
-      "14": "Showcase",
-      "15": "FactionBase",
-      "16": "Paradise",
-      "17": "SunkenLighthouse",
-      "18": "RoyalGarden",
-      "19": "Pyramid",
-      "20": "Underworld",
-      "21": "MountainFoot",
-      "22": "EndCastle",
-      "23": "SnowyHand",
-      "24": "SpiderLair",
-      "25": "Market",
-      "26": "LeprechaunValley",
-      "27": "Castle",
-      "28": "Farm",
-      "29": "Kyoto"
+  "schema": 2,
+  "date": "2026-11-03",
+  "updatedAtUtc": "2026-11-03T17:24:32Z",
+  "placeId": 92594200898716,
+  "universeId": 10772144679,
+  "status": "RECOVERY_CLOUD_SAVE_VERIFIED",
+  "initialObservation": {
+    "placeVersion": 430,
+    "recovery": {
+      "restored": false,
+      "note": "Presence check only. Review geometry and source versions before resuming QA; never publish here.",
+      "restoreDetail": "No live restore callback completed; do not save",
+      "status": "RECOVERY_REQUIRED",
+      "rebuildingAttempted": false,
+      "missing": {
+        "1": "InsideOut",
+        "2": "Barn",
+        "3": "Quarry",
+        "4": "EdgeGate",
+        "5": "Tree",
+        "6": "Church",
+        "7": "Purgatory",
+        "8": "Eden",
+        "9": "Cherubim",
+        "10": "Gate",
+        "11": "Basement",
+        "12": "Warzone",
+        "13": "Ghetto",
+        "14": "Showcase",
+        "15": "FactionBase",
+        "16": "Paradise",
+        "17": "SunkenLighthouse",
+        "18": "RoyalGarden",
+        "19": "Pyramid",
+        "20": "Underworld",
+        "21": "MountainFoot",
+        "22": "EndCastle",
+        "23": "SnowyHand",
+        "24": "SpiderLair",
+        "25": "Market",
+        "26": "LeprechaunValley",
+        "27": "Castle",
+        "28": "Farm",
+        "29": "Kyoto"
+      },
+      "activeLease": true
     },
-    "activeLease": true
+    "checkedAtUtc": "2026-11-03T16:09:30Z",
+    "workspaceRoots": {
+      "1": "Camera",
+      "2": "Prison",
+      "3": "QAReleaseStaging",
+      "4": "Terrain"
+    },
+    "placeId": 92594200898716
   },
-  "checkedAtUtc": "2026-11-03T16:09:30Z",
-  "workspaceRoots": {
-    "1": "Camera",
-    "2": "Prison",
-    "3": "QAReleaseStaging",
-    "4": "Terrain"
+  "sourceSelection": {
+    "selectedVersion": 428,
+    "rejectedVersion": 429,
+    "rejectedReason": "already partial",
+    "targetVersionAtImport": 433,
+    "localStudioName": "Place1 (Version 428)",
+    "localStudioPlaceId": 0,
+    "expectedLocationRoots": 30,
+    "fullBackupReadOnlyDescendants": 348448,
+    "quarry": {
+      "DesignVersion": "2026-11-03-open-air-accepted",
+      "WorldBaseY": 37500,
+      "descendants": 4779,
+      "basePartsReportedByNativeInspection": 4538
+    },
+    "extraNonLocationRoot": "WireframeHandleAdornment DebugDraw; not imported"
   },
-  "placeId": 92594200898716
+  "recovery": {
+    "restored": true,
+    "status": "COMPLETE",
+    "schema": 1,
+    "sourceVersion": 428,
+    "imported": 334755,
+    "roots": 29,
+    "subtrees": 171436,
+    "bytes": 7414591,
+    "sha256": "4cd2545858497ff4776d5656cfdc0e98b92089550c327c346ec98f7b22172fe8",
+    "expectedLocationRootsAfterImport": 30,
+    "preservedOriginals": [
+      "Prison",
+      "Terrain",
+      "Camera",
+      "QAReleaseStaging"
+    ],
+    "preservedCurrentSource": true,
+    "geometryRebuilt": false,
+    "rawBackupReserialized": false,
+    "cleanupConfirmed": true,
+    "sourceSyncConfirmed": true,
+    "cloudSaveConfirmed": true,
+    "published": false,
+    "verifiedCloudVersion": 439,
+    "displayedAuthoringVersion": 433,
+    "legacyLeaseRemoved": true,
+    "stagingRemoved": true,
+    "temporaryTutorialScriptsAbsent": true
+  },
+  "evidence": {
+    "nativeResult": "Parent agent /root reported the actual Studio RecoveryResult: COMPLETE after detached and mounted verification of all 29 roots. This reviewer made no Studio calls. Parent subsequently reopened saved cloud revision 439 separately and confirmed all 30 roots, no lease/staging/tutorial scripts, unchanged accepted Quarry, retained COMPLETE result, and identical 461-script digest.",
+    "independentReadOnlyVerification": [
+      "All four backup byte lengths and SHA-256 hashes checked on disk (three v428 artifacts and the saved v439 full-place payload).",
+      "Full v428 RBXL read-only inventory: 30 location folders, 348448 descendants.",
+      "Source extra root DebugDraw is a WireframeHandleAdornment, not missing world geometry."
+    ],
+    "offline": {
+      "assertions": 4325,
+      "status": "PASS",
+      "script": "scripts/qa-map-recovery-offline.luau",
+      "scope": "actual recovery scripts, synthetic instances, mocked native codec and HTTP; count includes each parenting-boundary assertion",
+      "repeatedAfterFreeze": false
+    },
+    "lint": {
+      "compile": "PASS",
+      "stylua": "PASS",
+      "seleneErrors": 0,
+      "intentionalImporterGlobalGuardWarnings": 4
+    }
+  },
+  "backups": [
+    {
+      "path": "place/recovery-2026-11-03/version-428/katorga-full-version-428.rbxl",
+      "bytes": 8078310,
+      "sha256": "da82e4c0a83933c0b074cafac50b447ecf73ea115fbb04739377373ecd8ca4a0",
+      "kind": "exact native full-place payload; no Lune reserialization"
+    },
+    {
+      "path": "place/recovery-2026-11-03/version-428/map.rbxm",
+      "bytes": 7414591,
+      "sha256": "4cd2545858497ff4776d5656cfdc0e98b92089550c327c346ec98f7b22172fe8",
+      "kind": "native SerializationService single-batch archive of 29 roots"
+    },
+    {
+      "path": "place/recovery-2026-11-03/version-428/manifest.json",
+      "bytes": 74103,
+      "sha256": "dcdb19fad6db405d536d92fa49d5ccc4df1bd9892349371dace19d4c68f685c4",
+      "kind": "write-once source manifest"
+    },
+    {
+      "path": "place/recovery-2026-11-03/version-439/katorga-recovered-version-439.rbxl",
+      "bytes": 7592394,
+      "sha256": "0fbb8794130e7b8c70c3326cb5258d98ea274c31e2fd35d9279f083ba5e94635",
+      "kind": "exact native cache payload from reopened cloud revision 439; no reserialization"
+    }
+  ],
+  "observedSafeFailures": [
+    {
+      "phase": "EXPORT",
+      "reason": "nonarchivable generated Humanoid.Status rejected",
+      "resolution": "only exact empty untagged attribute-free Status under Humanoid excluded; no flags or parents changed"
+    },
+    {
+      "phase": "VERIFY_DETACHED",
+      "root": "Barn",
+      "imported": 0,
+      "reason": "last-ULP decimal difference after engine JSON parsing",
+      "resolution": "deep comparison; fractional tolerance 1e-12*max(1,abs(a),abs(b)); integer counts, keys, types, strings and hashes exact"
+    },
+    {
+      "phase": "VERIFY_MOUNTED",
+      "root": "Basement",
+      "reason": "flattened incomplete R15 rigs caused engine to add 41 repair objects",
+      "addedClasses": {
+        "Vector3Value": 8,
+        "Attachment": 8,
+        "NoCollisionConstraint": 24,
+        "BallSocketConstraint": 1
+      },
+      "rollbackNativeRootCountConfirmed": 4,
+      "resolution": "hierarchical subtrees up to 1000 instances; intact Humanoid rigs; oversized rigs fail before mounting"
+    }
+  ],
+  "validation": {
+    "nativeBytesHash": true,
+    "rootNamesClassesAndDescendantCounts": true,
+    "rootAndDescendantAttributesTags": true,
+    "selectedReferencesAndModelPivots": true,
+    "anchorCFramesSizes": true,
+    "allInstancePropertiesIndependentlyCompared": false,
+    "referenceCoverage": "Model.PrimaryPart; ObjectValue.Value; JointInstance/WeldConstraint Part0/Part1; Constraint/Beam/Trail Attachment0/Attachment1; selected Adornee classes",
+    "numericFractionTolerance": 1e-12,
+    "generatedStatusExclusion": "only nonarchivable ClassName=Status, Name=Status, Parent Humanoid, no children/attributes/tags"
+  },
+  "limitations": [
+    "Recovery, cleanup, current source preservation and durable cloud save are confirmed by separately reopening revision 439. This is not full gameplay acceptance.",
+    "No publication was performed by the recovery helpers.",
+    "This validates restored authored data, not visual/gameplay acceptance, real phone interaction, boss behavior or multiplayer QA.",
+    "Manifest is not a full property-level diff of every part/material or every instance-reference property.",
+    "Rollback uses guarded destruction of newly decoded objects; the helper does not independently scan residual objects after swallowed Destroy errors. Native failed runs were separately inspected and confirmed back at the four original roots.",
+    "Target guard preserves original root identities; it is not a content hash of concurrent edits inside Prison or current scripts.",
+    "Scripts are a one-off v428-to-v433 recovery with exact preconditions, not a general migration or unattended restore tool.",
+    "The full RBXL was inventoried read-only; Lune reported unsupported Terrain.VoxelGridAssetContentMap, so it must never be round-tripped through that parser."
+  ],
+  "pending": [
+    "Run the outstanding fresh-player tutorial acceptance in a disposable local copy derived from verified revision 439, without changing the authoring map.",
+    "Resume the remaining release/gameplay acceptance checks; physical phone and cross-server tests remain separate."
+  ],
+  "review": {
+    "status": "No new critical blocker found for the completed native import",
+    "sourceScriptsFrozen": true,
+    "studioCallsByReviewer": 0
+  },
+  "cloudVerification": {
+    "source": "docs/research/map-recovery-saved-439-2026-11-03.json",
+    "method": "Official Studio CLI EditPlaceRevision, separate native reopen of cloud version 439",
+    "cloudVersion": 439,
+    "localName": "Place1 (Version 439)",
+    "localPlaceId": 0,
+    "localPlaceVersion": 0,
+    "locationRoots": 30,
+    "saveBy": "owner Save to Roblox",
+    "publicationPerformed": false,
+    "earlierSaveAttempt": {
+      "label": "AssetService SaveWithoutPublish attempt",
+      "outcome": "failed",
+      "reason": "Edit server-script-only restriction",
+      "countedAsSuccessfulSave": false
+    },
+    "legacyLease": false,
+    "staging": false,
+    "tutorialServer": false,
+    "tutorialClient": false,
+    "quarry": {
+      "baseParts": 4538,
+      "DesignVersion": "2026-11-03-open-air-accepted"
+    },
+    "nativeRecoveryResult": {
+      "schema": 1,
+      "sourceVersion": 428,
+      "status": "COMPLETE",
+      "imported": 334755,
+      "roots": 29,
+      "subtrees": 171436,
+      "bytes": 7414591,
+      "sha256": "4cd2545858497ff4776d5656cfdc0e98b92089550c327c346ec98f7b22172fe8"
+    },
+    "scriptComparison": {
+      "mainCount": 461,
+      "reopenedCount": 461,
+      "algorithm": "SHA-256 over full path, class and Source",
+      "sha256": "1f267f9ef25842465923b51c76af8ee2786bf06bc4d6d5119662089b11ee8249"
+    },
+    "rawDescendantCountNote": {
+      "cause": "Raw native reopened counts include autogenerated nonarchivable Humanoid.Status; the archive manifest excludes only the strict empty service Status. These deltas are not extra game geometry or a failed recovery.",
+      "examples": [
+        {
+          "root": "Quarry",
+          "archivableDescendants": 4779,
+          "nativeRawDescendants": 4780,
+          "generatedStatusDifference": 1
+        },
+        {
+          "root": "Basement",
+          "archivableDescendants": 12882,
+          "nativeRawDescendants": 12884,
+          "generatedStatusDifference": 2
+        },
+        {
+          "root": "Prison",
+          "archivableDescendants": 8167,
+          "nativeRawDescendants": 8177,
+          "generatedStatusDifference": 10
+        }
+      ]
+    },
+    "authoringVersionDisplayNote": "The still-open authoring DataModel reports 433; the separately fetched and reopened cloud revision 439 is durable-save evidence.",
+    "fullGameplayAcceptance": false
+  },
+  "currentOwnerConstraints": [
+    "No PC mouse or keyboard input.",
+    "No PC notifications.",
+    "No publication.",
+    "Next fresh tutorial QA in a disposable local copy; never detach the authoring map."
+  ]
 }

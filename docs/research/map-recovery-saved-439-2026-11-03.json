@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-11-03",
+  "sourceVersion": 439,
+  "method": "Official Studio CLI EditPlaceRevision, native reopen",
+  "place": 0,
+  "tutorialServer": false,
+  "recovered": "{\"bytes\":7414591,\"imported\":334755,\"sha256\":\"4cd2545858497ff4776d5656cfdc0e98b92089550c327c346ec98f7b22172fe8\",\"subtrees\":171436,\"status\":\"COMPLETE\",\"roots\":29,\"schema\":1,\"sourceVersion\":428}",
+  "tutorialClient": false,
+  "quarryParts": 4538,
+  "quarry": "2026-11-03-open-air-accepted",
+  "name": "Place1 (Version 439)",
+  "staging": false,
+  "roots": [
+    {
+      "name": "Barn",
+      "n": 9638
+    },
+    {
+      "name": "Basement",
+      "n": 12884
+    },
+    {
+      "name": "Castle",
+      "n": 16041
+    },
+    {
+      "name": "Cherubim",
+      "n": 10424
+    },
+    {
+      "name": "Church",
+      "n": 9938
+    },
+    {
+      "name": "Eden",
+      "n": 12813
+    },
+    {
+      "name": "EdgeGate",
+      "n": 6332
+    },
+    {
+      "name": "EndCastle",
+      "n": 3530
+    },
+    {
+      "name": "FactionBase",
+      "n": 19190
+    },
+    {
+      "name": "Farm",
+      "n": 8031
+    },
+    {
+      "name": "Gate",
+      "n": 10901
+    },
+    {
+      "name": "Ghetto",
+      "n": 6883
+    },
+    {
+      "name": "InsideOut",
+      "n": 11065
+    },
+    {
+      "name": "Kyoto",
+      "n": 10739
+    },
+    {
+      "name": "LeprechaunValley",
+      "n": 12537
+    },
+    {
+      "name": "Market",
+      "n": 22685
+    },
+    {
+      "name": "MountainFoot",
+      "n": 10339
+    },
+    {
+      "name": "Paradise",
+      "n": 16042
+    },
+    {
+      "name": "Prison",
+      "n": 8177
+    },
+    {
+      "name": "Purgatory",
+      "n": 9507
+    },
+    {
+      "name": "Pyramid",
+      "n": 7446
+    },
+    {
+      "name": "Quarry",
+      "n": 4780
+    },
+    {
+      "name": "RoyalGarden",
+      "n": 13359
+    },
+    {
+      "name": "Showcase",
+      "n": 6721
+    },
+    {
+      "name": "SnowyHand",
+      "n": 18794
+    },
+    {
+      "name": "SpiderLair",
+      "n": 27114
+    },
+    {
+      "name": "SunkenLighthouse",
+      "n": 6977
+    },
+    {
+      "name": "Tree",
+      "n": 10492
+    },
+    {
+      "name": "Underworld",
+      "n": 16452
+    },
+    {
+      "name": "Warzone",
+      "n": 3176
+    }
+  ],
+  "lease": false,
+  "version": 0,
+  "scriptComparison": {
+    "mainCount": 461,
+    "reopenedCount": 461,
+    "sha256": "1f267f9ef25842465923b51c76af8ee2786bf06bc4d6d5119662089b11ee8249"
+  },
+  "publicationPerformed": false,
+  "saveBy": "owner Save to Roblox",
+  "fullGameplayAcceptance": false
+}

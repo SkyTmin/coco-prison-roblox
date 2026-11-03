@@ -1,34 +1,73 @@
-# Incomplete authoring scene — recovery record, 3 November 2026
+# Восстановление карты «Каторга», 3 ноября 2026
 
-## Confirmed state
+**Карта восстановлена и сохранена в облаке: отдельно открытая версия 439 проверена нативно. Публикации не было.** Результат импорта: `COMPLETE`, восстановлены 29 отсутствовавших папок локаций, 334755 архивируемых объектов, 171436 поддеревьев. Все 29 папок прошли проверку до и после размещения. Существующая `Prison` сохранена; при повторном открытии подтверждены все 30 локаций. Машиночитаемый отчёт: [map-recovery-2026-11-03.json](map-recovery-2026-11-03.json).
 
-The owner renewed Studio access in the evening. The confirmed Katorga place `92594200898716`, version `430`, opened in Edit with four Workspace roots: `Prison`, `Terrain`, `Camera`, `QAReleaseStaging`. All29 other expected location roots were missing. The serialized `ServerStorage.QAReleaseMapLease` remained, but its Lua closure did not survive reopening. The bounded recovery invocation timed out without restoring any geometry. Evidence: [native report](map-recovery-2026-11-03.json).
+Нативный результат сообщил основной агент, управляющий Studio. Независимый reviewer проверил код, сохранённые evidence и резервные файлы только чтением; Studio не вызывал. Очистка старых QA-объектов, сохранение актуальных исходников и облачная запись теперь подтверждены отдельным открытием версии 439, а не только результатом `COMPLETE`.
 
-This is an agent QA infrastructure defect: the previous scene lease temporarily assigned non-retained Workspace roots to `Parent=nil`, holding the only references in a Lua closure. A save/reopen while the test was interrupted cannot retain those objects. The exact save mechanism (manual, automatic or recovery) is not established. Do not attribute it to the owner or claim that all cloud versions are damaged.
+## Подтверждение облачной записи 439
 
-No new Play test, geometry rebuild, cloud save or publication was performed in this recovery session. The source-sync installer was generated locally but not executed. Latest gameplay code remains committed in the repository.
+Владелец выполнил **Save to Roblox, без Publish**. Основной агент через официальный CLI отдельно открыл облачную версию 439: `Place1 (Version 439)`, локальные PlaceId/PlaceVersion равны 0. [Нативное evidence повторного открытия](map-recovery-saved-439-2026-11-03.json) подтверждает 30 папок локаций, отсутствие lease/staging и временных tutorial server/client scripts, Каменоломню с 4538 BasePart и принятым `DesignVersion`, а также сохранённый `RecoveryResult=COMPLETE`.
 
-## Preserved local files
+Все 461 скрипт в основной авторской сессии и повторно открытой версии имеют один SHA-256 по полному пути, классу и Source: `1f267f9ef25842465923b51c76af8ee2786bf06bc4d6d5119662089b11ee8249`. Отображаемая основной DataModel версия 433 не обновилась; доказательство долговечной записи — независимая загрузка облачной версии 439. Предшествовавшая попытка AssetService SaveWithoutPublish завершилась ошибкой ограничения server-script-only в Edit и **не учитывается как успешное сохранение**.
 
-These are exact byte copies, not Lune re-serializations, under the ignored `place/recovery-2026-11-03/` directory:
+Сырые native counts содержат автоматически созданные неархивируемые `Humanoid.Status`: Quarry 4780 вместо 4779 архивируемых descendants, Basement 12884 вместо 12882, Prison 8177 вместо 8167. Это соответственно 1, 2 и 10 служебных Status, не дополнительная игровая геометрия и не ошибка восстановления. Manifest исключает только точный пустой служебный Status; остальные объекты проверяются как раньше.
 
-| File | Bytes | Source timestamp, Moscow | SHA256 |
-|---|---:|---|---|
-| `katorga-full-autorecovery-2026-10-30.rbxl` | 5464731 | 30 October,00:02:00 | `F9CDF4C418267B428C6E7BCE9EBB8BA9C7FF5CF2C6CE0EC6B1155C064B02188D` |
-| `katorga-partial-sts-2026-11-03.rbxl` | 3231611 | 3 November,06:41:11 | `BE294E21B7B61180EEFFFF3CA37354559187697FB45D87F0520E9A9A6B6E0A5D` |
+## Что произошло
 
-Full-copy source: `C:/Users/user/AppData/Local/Roblox/RobloxStudio/AutoSaves/92594200898716_AutoRecovery_0.rbxl`. Independent read-only inventory found342995 descendants and all30 location roots, including Quarry, Ghetto, Warzone, Basement and late locations. This is an older fallback, not the accepted latest geometry. No newer complete local place was found; the Rojo validation files contain source only.
+Правильный плейс: `92594200898716`, universe `10772144679`. При первом осмотре версии 430, затем в текущей версии 433 в Workspace оставались `Prison`, `Terrain`, `Camera`, `QAReleaseStaging`. Остальные 29 локаций отсутствовали. Сериализованный `ServerStorage.QAReleaseMapLease` существовал, но его Lua callback не сохранился.
 
-Lune warned that `Terrain.VoxelGridAssetContentMap` has an unknown type. Use that parser for read-only inventory only; do not round-trip this real place through it because terrain fidelity is unverified. Native Studio should open any recovery candidate.
+Причина — дефект прежней инфраструктуры QA: папки временно получали `Parent=nil`, а ссылки на них оставались только в Lua closure. При сохранении и повторном открытии такая конструкция не является резервной копией. Как именно произошла запись — вручную, автоматически или через recovery — не установлено; приписывать это владельцу нельзя.
 
-## Required next action
+Версия 429 уже оказалась неполной. Через официальный [Studio CLI, EditPlaceRevision](https://create.roblox.com/docs/studio/cli) открыта локальная копия **версии 428**, `Place1 (Version 428)`, PlaceId 0. Подтверждены все 30 папок и принятая Каменоломня: `DesignVersion=2026-11-03-open-air-accepted`, `WorldBaseY=37500`, 4779 descendants; нативный осмотр сообщил 4538 BasePart. Независимая инвентаризация полного RBXL нашла 348448 descendants. Дополнительный корень исходной сцены — только `WireframeHandleAdornment DebugDraw`; он не является локацией.
 
-Use a recent complete cloud version from before the interrupted03.11 06:40 MSK test. Roblox documents opening it via **Window → Version History → ⋮ → Open Local Copy**, separately from restoring/saving/publishing: [official Version History](https://create.roblox.com/docs/projects/version-history). Open and inspect a candidate before applying it. Native window clicks returned `coordinate input geometry is unavailable` twice after fresh window selection; keyboard navigation did not open the menu. The owner has been asked to open the copy. The fallback browser reached sign-in and was closed without entering credentials.
+## Неизменённые резервные файлы
 
-Verify all30 roots, actual contents and accepted Quarry redesign. Retain current source and any newer geometry; do not blindly replace the whole place with the30October backup. Only after complete map recovery should source sync and fresh-player QA resume. Recovery is currently **NOT COMPLETED**.
+Три исходных артефакта находятся в `place/recovery-2026-11-03/version-428/`; точная полная копия сохранённой облачной версии — в `place/recovery-2026-11-03/version-439/`. Размеры и SHA-256 всех четырёх файлов независимо перепроверены чтением с диска. Экспорт обслуживался локальным transport на `127.0.0.1:8778`, который отклоняет перезапись существующего файла другими байтами.
 
-## Recurrence prevention
+| Файл | Байты | SHA-256 |
+|---|---:|---|
+| `katorga-full-version-428.rbxl` | 8078310 | `da82e4c0a83933c0b074cafac50b447ecf73ea115fbb04739377373ecd8ca4a0` |
+| `map.rbxm` | 7414591 | `4cd2545858497ff4776d5656cfdc0e98b92089550c327c346ec98f7b22172fe8` |
+| `manifest.json` | 74103 | `dcdb19fad6db405d536d92fa49d5ccc4df1bd9892349371dace19d4c68f685c4` |
+| `version-439/katorga-recovered-version-439.rbxl` | 7592394 | `0fbb8794130e7b8c70c3326cb5258d98ea274c31e2fd35d9279f083ba5e94635` |
 
-The old scene-lease entry point now fails without mutating instances. Tutorial, PvP and Actions coordinators retain the full authoring scene, reject missing/empty/duplicate map roots and legacy lease/staging, and check structure after the test. No `Parent=nil` or non-Archivable parking is used. Native memory demand is not reduced. A smaller test copy must be a separate file derived from a verified complete backup, never the cloud authoring scene.
+Полный RBXL — точная нативная полезная нагрузка из локального cache официального открытия версии, без 37-байтовой транспортной оболочки и без пересериализации. `map.rbxm` создан [SerializationService](https://create.roblox.com/docs/reference/engine/classes/SerializationService) одним пакетом из 29 папок; это сохраняет нативные связи между ними. Исходные родители и Archivable не изменялись.
 
-Offline verification:155 map-safety checks with synthetic binary save/reopen and cross-root references, plus52 tutorial-harness checks. These tests validate recurrence prevention; they do not restore the missing real map. Details: [QA safety](release-map-qa-safety-2026-11-03.md).
+Полный `katorga-recovered-version-439.rbxl` также сохранён точными нативными байтами из cache проверенного повторного открытия; он не пересериализован сторонним инструментом.
+
+Ранний fallback от 30 октября сохранён отдельно: `place/recovery-2026-11-03/katorga-full-autorecovery-2026-10-30.rbxl`, 5464731 байт, SHA-256 `f9cdf4c418267b428c6e7bce9ebb8ba9c7ff5cf2c6ce0ec6b1155c064b02188d`. Он **не использован** для успешного восстановления. Снимок неполной STS-сцены сохранён как `katorga-partial-sts-2026-11-03.rbxl`, 3231611 байт, SHA-256 `be294e21b7b61180eeffff3ca37354559187697fb45d87f0520e9a9a6b6e0a5d`.
+
+Lune использован только для чтения. Он предупредил о неподдерживаемом `Terrain.VoxelGridAssetContentMap`; пересохранять реальную карту этим парсером нельзя.
+
+## Как выполнен импорт
+
+[Экспорт](../../scripts/recover-map-export.luau) проверяет точную локальную ревизию 428, полноту 30 папок и маркер Каменоломни. [Импорт](../../scripts/recover-map-import.luau) разрешён только в Edit правильного плейса версии 433 с четырьмя ожидаемыми исходными корнями. Повторный запуск после успешного восстановления откажет до изменения карты.
+
+Перед размещением проверяются длина и SHA-256 нативных байтов, точные имена и классы всех 29 новых корней, counts/classes, attributes/tags, выбранные ссылки, WorldPivot и координаты/размеры anchors. В существующие `Prison`, `Terrain`, `Camera`, текущий код не выполняются записи. Старые QA lease/staging оставлены для отдельной контролируемой очистки.
+
+Данные собираются нативно в отсоединённой иерархии, затем размещаются поддеревьями с суммарным весом не больше 1000 объектов между уступками планировщику. NPC с Humanoid переносятся целиком; слишком большой риг вызывает отказ до монтажа. Делятся только большие Folder/Model, ссылки и pivot разделённых контейнеров восстанавливаются. После размещения все 29 корней повторно сверяются с manifest.
+
+Промежуточные отказы были безопасно диагностированы:
+
+- Неархивируемый служебный `Humanoid.Status`: допускается только точный пустой Status без attributes/tags; пользовательские неархивируемые объекты по-прежнему запрещены.
+- Последний разряд float после JSON: применяется рекурсивное сравнение с допуском `1e-12 × max(1, |a|, |b|)` только для дробных чисел. Целые counts, строки, типы, ключи и хеши сравниваются точно.
+- Первое пообъектное размещение временно разбирало R15. Движок создал в Basement 41 ремонтный объект: 8 Vector3Value, 8 Attachment, 24 NoCollisionConstraint, 1 BallSocketConstraint. Проверка отклонила результат, выполнен rollback; основной агент отдельно подтвердил возврат к четырём исходным корням. Финальная версия переносит риги целиком и прошла полную нативную проверку.
+
+## Проверки и границы результата
+
+[Offline fixture](../../scripts/qa-map-recovery-offline.luau): **4325 утверждений PASS**, включая проверки каждой границы parenting, целостность всех NPC, восстановление PrimaryPart/WorldPivot разделённого Model, отказ для oversized rig до монтажа, повреждённый архив/manifest, повторный запуск и rollback. Это синтетические instances с подменёнными native codec и HTTP; число включает повторяющиеся boundary assertions. Нативный результат `COMPLETE` — отдельное, более сильное подтверждение. Compile и StyLua прошли, Selene: 0 ошибок, 4 намеренных предупреждения о глобальном singleton guard импортера. После заморозки скриптов тесты без причины не повторялись.
+
+Критичных новых дефектов для завершённого импорта review не выявил. Сохраняются следующие пределы проверки:
+
+- Manifest не является независимым сравнением каждого свойства каждой детали. Полностью проверены структуры/counts/attributes/tags; геометрия сравнивается у anchors, instance refs — у явно перечисленных классов. В частности, не все виды reference properties представлены в digest.
+- Guard исходных объектов проверяет их идентичность и родителя, а не хеш содержимого при возможном параллельном редактировании.
+- В обработчике rollback ошибки Destroy перехватываются, но финальный поиск оставшихся новых объектов самим helper не выполняется. В нативных неудачных попытках исходные четыре корня были дополнительно проверены основным агентом. Будущая ошибка требует такой же проверки, а не доверия одному слову `ROLLED_BACK`.
+- Скрипты предназначены для конкретного восстановления 428 → 433, не для общей миграции или автоматического отката.
+- Визуальный обход, gameplay, физический телефон, боссы и multiplayer acceptance этим восстановлением не проверены. Готовность всей игры к релизу не заявляется.
+- Сохранение в Roblox и отдельное нативное открытие версии 439 подтверждены. Это не публикация и не игровая приёмка.
+
+## Предотвращение повторения и следующий шаг
+
+Прежний [scene lease](../../scripts/qa-release-scene-session.luau) завершает работу до изменения instances. Координаторы QA сохраняют авторскую сцену целиком и отклоняют отсутствующие, пустые, повторяющиеся корни и остатки lease/staging. Память таким способом не экономится; уменьшенная тестовая карта должна быть отдельным файлом из подтверждённой полной копии. Подробности: [QA safety](release-map-qa-safety-2026-11-03.md).
+
+Очистка, сохранение текущих исходников и облачная запись без публикации подтверждены. Следующий шаг — полный сценарий нового игрока до уровня 2 в одноразовой локальной копии из проверенной версии 439. Авторская карта остаётся целой. Последнее ограничение владельца: **не использовать мышь и клавиатуру ПК**, без уведомлений; продолжать через разрешённые программные инструменты Studio. Физическое управление и телефонные проверки остаются отдельной непроведённой приёмкой.
