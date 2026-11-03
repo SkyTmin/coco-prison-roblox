@@ -5,7 +5,8 @@
 --     it). «Вскопайте блоки возле маяка» [клиент]: DigService calls OnDug for every block of a pad; the digger's
 --     faction gets +1 capture point there, every other faction loses rivalLoss — a capture can be beaten back.
 --     captureScore points capture it [решение 60]; with nobody digging for idleSeconds the scores melt.
---   * A captured point is held for holdMinutes [вики: «обновляется каждые 30 минут»], then it is free again.
+--   * [владелец: release] Exactly one existing beacon is chosen at random on startup and after each hold.
+--     Inactive pads do not score; the chosen point is held for holdMinutes, then the next random round starts.
 --     While held, the owner's members on this server get +bonus to the point's kind (Boosters.runningAll) or
 --     the point's effect (Спешка I until the hold ends, independent NeedsService source) [сеть TG/10].
 --   * Everyone on the server hears the start of a capture, the capture and the release [клиент]. Each member who dug
@@ -39,6 +40,7 @@ local FREE_BEAM = Color3.fromRGB(235, 235, 245)
 type PointState = {
 	def: Warzone.Point,
 	folder: Configuration,
+	active: boolean,
 	owner: string?,
 	since: number,
 	untilAt: number,
@@ -51,6 +53,7 @@ type PointState = {
 
 local points: { [string]: PointState } = {}
 local started = false
+local random = Random.new()
 
 local function now(): number
 	return workspace:GetServerTimeNow()
@@ -75,6 +78,7 @@ end
 
 local function mirror(point: PointState)
 	local folder = point.folder
+	folder:SetAttribute("Active", point.active)
 	folder:SetAttribute("Owner", point.owner or "")
 	folder:SetAttribute("Since", point.since)
 	folder:SetAttribute("Until", point.untilAt)
@@ -90,6 +94,12 @@ local function paintBeams(point: PointState)
 	for _, beam in ipairs(CollectionService:GetTagged(Warzone.BEAM_TAG)) do
 		if beam:IsA("BasePart") and beam:GetAttribute("Point") == point.def.id then
 			beam.Color = color
+			beam.Transparency = if point.active then 0.35 else 1
+			for _, light in beam:GetDescendants() do
+				if light:IsA("Light") then
+					light.Enabled = point.active
+				end
+			end
 		end
 	end
 end
@@ -107,7 +117,8 @@ local function refreshHaste(onlyPlayer: Player?)
 		local faction = FactionService.Of(player)
 		for _, point in pairs(points) do
 			if
-				point.def.effect == "haste"
+				point.active
+				and point.def.effect == "haste"
 				and point.owner ~= nil
 				and point.owner == faction
 				and point.untilAt > now()
@@ -120,6 +131,9 @@ local function refreshHaste(onlyPlayer: Player?)
 end
 
 local function capture(point: PointState, faction: string, credit: boolean)
+	if not point.active then
+		return
+	end
 	local t = now()
 	point.owner = faction
 	point.since = t
@@ -131,10 +145,12 @@ local function capture(point: PointState, faction: string, credit: boolean)
 	local id = point.def.id
 	announce(function(locale)
 		return Strings.t(
-			"warzone_captured",
+			"warzone_round_won",
 			locale,
 			pointName(id, locale),
-			factionName(faction, locale)
+			factionName(faction, locale),
+			Strings.t("warzone_bonus_" .. id, locale, tostring(cfg.bonus)),
+			cfg.holdMinutes
 		)
 	end)
 	-- «Взято точек» for everyone of the faction who dug here during this capture and is still on the server
@@ -150,25 +166,54 @@ local function capture(point: PointState, faction: string, credit: boolean)
 	refreshHaste()
 end
 
-local function release(point: PointState)
-	point.owner = nil
-	point.since = 0
-	point.untilAt = 0
-	resetCapture(point)
-	mirror(point)
-	paintBeams(point)
+local function activate(selected: PointState)
+	for _, point in pairs(points) do
+		point.active = point == selected
+		point.owner, point.since, point.untilAt = nil, 0, 0
+		point.lastDigAt, point.lastDecayAt = os.clock(), os.clock()
+		resetCapture(point)
+		mirror(point)
+		paintBeams(point)
+	end
 	refreshHaste()
-	local id = point.def.id
 	announce(function(locale)
-		return Strings.t("warzone_available", locale, pointName(id, locale))
+		return Strings.t(
+			"warzone_round_active",
+			locale,
+			pointName(selected.def.id, locale),
+			Strings.t("warzone_direction_" .. selected.def.id, locale),
+			cfg.captureScore,
+			Strings.t("warzone_bonus_" .. selected.def.id, locale, tostring(cfg.bonus))
+		)
 	end)
+end
+
+local function nextRound(): boolean
+	local available = {}
+	for _, def in ipairs(Warzone.points) do
+		for _, beacon in CollectionService:GetTagged(Warzone.POINT_TAG) do
+			if
+				beacon:IsA("BasePart")
+				and beacon:IsDescendantOf(workspace)
+				and beacon:GetAttribute("Point") == def.id
+			then
+				table.insert(available, points[def.id])
+				break
+			end
+		end
+	end
+	if #available == 0 then
+		return false
+	end
+	activate(available[random:NextInteger(1, #available)])
+	return true
 end
 
 -- DigService: a block of the mine `mineId` was dug by `player` (any mine; only the pads of the points count)
 function WarzoneService.OnDug(player: Player, mineId: string)
 	local def = Warzone.pointOfMine(mineId)
 	local point = def and points[def.id]
-	if not point or point.owner then
+	if not point or not point.active or point.owner then
 		return -- not a pad, or the point is held: nothing to capture until it is free again
 	end
 	local faction = FactionService.Of(player)
@@ -208,9 +253,12 @@ local function tick()
 	local t = now()
 	local clock = os.clock()
 	for _, point in pairs(points) do
-		if point.owner then
+		if not point.active then
+			continue
+		elseif point.owner then
 			if t >= point.untilAt then
-				release(point)
+				nextRound()
+				break
 			end
 		elseif
 			clock - point.lastDigAt >= cfg.idleSeconds
@@ -237,13 +285,24 @@ end
 local function debugApi(op: any, a: any, b: any, c: any): any
 	local point = if typeof(a) == "string" then points[a] else nil
 	if op == "capture" and point and Config.faction(b) then
+		if not point.active then
+			activate(point) -- QA also preserves the one-active-point invariant
+		end
 		capture(point, b, false)
 		return true
 	elseif op == "expire" and point and point.owner then
 		point.untilAt = now() + 1
 		mirror(point)
 		return true
-	elseif op == "score" and point and Config.faction(b) and typeof(c) == "number" then
+	elseif
+		op == "score"
+		and point
+		and point.active
+		and Config.faction(b)
+		and typeof(c) == "number"
+		and c == c
+		and math.abs(c) < math.huge
+	then
 		point.scores[b] = math.max(0, math.floor(c))
 		point.lastDigAt = os.clock()
 		mirror(point)
@@ -252,6 +311,7 @@ local function debugApi(op: any, a: any, b: any, c: any): any
 		local out = {}
 		for id, p in pairs(points) do
 			out[id] = {
+				active = p.active,
 				owner = p.owner,
 				left = if p.owner then math.floor(p.untilAt - now()) else 0,
 				scores = p.scores,
@@ -281,6 +341,7 @@ function WarzoneService.Start()
 		local point: PointState = {
 			def = def,
 			folder = folder,
+			active = false,
 			owner = nil,
 			since = 0,
 			untilAt = 0,
@@ -303,6 +364,15 @@ function WarzoneService.Start()
 	for _, point in pairs(points) do
 		paintBeams(point)
 	end
+	nextRound()
+	CollectionService:GetInstanceAddedSignal(Warzone.POINT_TAG):Connect(function()
+		for _, point in points do
+			if point.active then
+				return
+			end
+		end
+		nextRound()
+	end)
 	local function watch(player: Player)
 		player.CharacterAdded:Connect(function()
 			task.defer(refreshHaste, player)

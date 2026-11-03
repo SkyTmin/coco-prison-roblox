@@ -1,0 +1,2218 @@
+{
+  "auctionStoreWrites": false,
+  "startup": {
+    "players": [
+      {
+        "profile": true,
+        "character": true,
+        "root": true,
+        "humanoid": true,
+        "userId": -1,
+        "ready": true
+      }
+    ],
+    "timeoutSeconds": 60,
+    "phase": "complete",
+    "readyMessages": 11,
+    "lastClient": {
+      "virtualInput": true,
+      "phase": "ready",
+      "attempt": 1,
+      "session": "54c03b39-4610-4342-9861-788844a43c7d",
+      "elapsed": 2.421623799997178
+    },
+    "elapsed": 7.232362499998999
+  },
+  "checks": [
+    {
+      "observed": {
+        "players": [
+          {
+            "profile": true,
+            "humanoid": true,
+            "root": true,
+            "character": true,
+            "userId": -1,
+            "ready": true
+          }
+        ],
+        "timeoutSeconds": 60,
+        "phase": "waiting_client_profile_character",
+        "readyMessages": 11,
+        "elapsed": 7.232362499998999,
+        "lastClient": {
+          "virtualInput": true,
+          "attempt": 1,
+          "elapsed": 2.421623799997178,
+          "session": "54c03b39-4610-4342-9861-788844a43c7d",
+          "phase": "ready"
+        }
+      },
+      "name": "startup client ACK/profile/character ready",
+      "pass": true
+    },
+    {
+      "name": "rotten early timer trial1",
+      "pass": true
+    },
+    {
+      "name": "rotten gives four food and saturation trial1",
+      "pass": true
+    },
+    {
+      "name": "rotten Hunger lasts thirty seconds",
+      "pass": true
+    },
+    {
+      "name": "observed real 80 percent Hunger branch",
+      "pass": true
+    },
+    {
+      "observed": 0.09703557179309463,
+      "name": "Hunger produces real extra exhaustion",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Running",
+        "y": 204.1499786376953,
+        "x": 0.6919587850570679,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.00041620436240918934
+      },
+      "name": "ordinary sprint jump started sprinting",
+      "pass": true
+    },
+    {
+      "name": "ordinary sprint jump real takeoff and landing",
+      "pass": true
+    },
+    {
+      "name": "ordinary sprint jump sprint survives takeoff",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Running",
+        "y": 204.1499786376953,
+        "x": 0.5198988318443298,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 19.71331787109375,
+        "vx": 19.71331787109375,
+        "vy": 0.0004161119577474892
+      },
+      "name": "ordinary rejects extra started sprinting",
+      "pass": true
+    },
+    {
+      "name": "ordinary rejects extra real takeoff and landing",
+      "pass": true
+    },
+    {
+      "name": "ordinary rejects extra sprint survives takeoff",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 4.199999809265137,
+        "state": "Freefall",
+        "y": 207.20802307128906,
+        "x": 7.171844005584717,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -21.5334415435791
+      },
+      "name": "ordinary rejects extra second press is actually airborne",
+      "pass": true
+    },
+    {
+      "observed": {
+        "before": {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "state": "Freefall",
+          "y": 207.20802307128906,
+          "x": 7.171844005584717,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -21.5334415435791
+        },
+        "after": {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "state": "Freefall",
+          "y": 206.8150634765625,
+          "x": 7.518510341644287,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -24.803438186645508
+        }
+      },
+      "name": "ordinary rejects extra horizontal velocity retained",
+      "pass": true
+    },
+    {
+      "name": "no airborne extra without Springs",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 204.1499786376953,
+        "state": "Running",
+        "springs": 5.199999999999999,
+        "x": 0.6919587254524231,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.0004161933029536158
+      },
+      "name": "Springs single jump started sprinting",
+      "pass": true
+    },
+    {
+      "name": "Springs single jump real takeoff and landing",
+      "pass": true
+    },
+    {
+      "name": "Springs single jump sprint survives takeoff",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 204.1499786376953,
+        "state": "Running",
+        "springs": 5.199999999999999,
+        "x": 0.6919587254524231,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.00041618343675509095
+      },
+      "name": "Springs second jump started sprinting",
+      "pass": true
+    },
+    {
+      "name": "Springs second jump real takeoff and landing",
+      "pass": true
+    },
+    {
+      "name": "Springs second jump sprint survives takeoff",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 209.04873657226562,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 6.842358589172363,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -12.053327560424805
+      },
+      "name": "Springs second jump second press is actually airborne",
+      "pass": true
+    },
+    {
+      "observed": {
+        "before": {
+          "sprint": true,
+          "floor": "Air",
+          "height": 5.199999809265137,
+          "y": 209.04873657226562,
+          "state": "Freefall",
+          "springs": 5.199999999999999,
+          "x": 6.842358589172363,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -12.053327560424805
+        },
+        "after": {
+          "sprint": true,
+          "floor": "Air",
+          "height": 5.199999809265137,
+          "y": 209.7675323486328,
+          "state": "Jumping",
+          "springs": 5.199999999999999,
+          "x": 7.189024925231934,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 41.901668548583984
+        }
+      },
+      "name": "Springs second jump horizontal velocity retained",
+      "pass": true
+    },
+    {
+      "name": "second Spring supplies positive vertical impulse",
+      "pass": true
+    },
+    {
+      "name": "second Spring retains sprint flag",
+      "pass": true
+    },
+    {
+      "observed": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 213.55592346191406,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 9.962366104125977,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 15.741671562194824
+      },
+      "name": "Spring third press is actually airborne",
+      "pass": true
+    },
+    {
+      "name": "Springs second jump rejects third jump",
+      "pass": true
+    },
+    {
+      "name": "Springs first jump rises higher than normal",
+      "pass": true
+    },
+    {
+      "name": "second Spring adds real airborne height",
+      "pass": true
+    },
+    {
+      "observed": {
+        "visible": true,
+        "selected": 12,
+        "canvas": 1023.0000610351562,
+        "enabled": true,
+        "scroll": 320,
+        "text": "Улучшить",
+        "exists": true,
+        "inside": true
+      },
+      "name": "upgrade selected slot12 and button visible",
+      "pass": true
+    },
+    {
+      "observed": [
+        12
+      ],
+      "name": "upgrade delivers one ordinary remote for selected slot at2",
+      "pass": true
+    },
+    {
+      "name": "upgrade selected item to2",
+      "pass": true
+    },
+    {
+      "observed": {
+        "visible": true,
+        "selected": 12,
+        "canvas": 1023.0000610351562,
+        "enabled": true,
+        "scroll": 320,
+        "text": "Улучшить",
+        "exists": true,
+        "inside": true
+      },
+      "name": "upgrade keeps next action slot and scroll at2",
+      "pass": true
+    },
+    {
+      "observed": [
+        12
+      ],
+      "name": "upgrade delivers one ordinary remote for selected slot at3",
+      "pass": true
+    },
+    {
+      "name": "upgrade selected item to3",
+      "pass": true
+    },
+    {
+      "observed": {
+        "visible": true,
+        "selected": 12,
+        "canvas": 1023.0000610351562,
+        "enabled": true,
+        "scroll": 320,
+        "text": "Улучшить",
+        "exists": true,
+        "inside": true
+      },
+      "name": "upgrade keeps next action slot and scroll at3",
+      "pass": true
+    },
+    {
+      "observed": [
+        "b",
+        "a",
+        "c",
+        "e",
+        "d"
+      ],
+      "name": "auction 1 price false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "a",
+        "c",
+        "b",
+        "d",
+        "e"
+      ],
+      "name": "auction 1 price true",
+      "pass": true
+    },
+    {
+      "observed": [
+        "d",
+        "e",
+        "b",
+        "a",
+        "c"
+      ],
+      "name": "auction 1 level false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "a",
+        "c",
+        "b",
+        "d",
+        "e"
+      ],
+      "name": "auction 1 level true",
+      "pass": true
+    },
+    {
+      "observed": [
+        "e",
+        "a",
+        "c",
+        "b",
+        "d"
+      ],
+      "name": "auction 1 time false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "d",
+        "b",
+        "a",
+        "c",
+        "e"
+      ],
+      "name": "auction 1 time true",
+      "pass": true
+    },
+    {
+      "observed": [
+        "new",
+        "b",
+        "a",
+        "c",
+        "e",
+        "d"
+      ],
+      "name": "auction 2 price false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "a",
+        "c",
+        "b",
+        "new",
+        "d",
+        "e"
+      ],
+      "name": "auction 2 price true",
+      "pass": true
+    },
+    {
+      "observed": [
+        "d",
+        "e",
+        "b",
+        "a",
+        "c",
+        "new"
+      ],
+      "name": "auction 2 level false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "new",
+        "a",
+        "c",
+        "b",
+        "d",
+        "e"
+      ],
+      "name": "auction 2 level true",
+      "pass": true
+    },
+    {
+      "observed": [
+        "e",
+        "a",
+        "c",
+        "b",
+        "d",
+        "new"
+      ],
+      "name": "auction 2 time false",
+      "pass": true
+    },
+    {
+      "observed": [
+        "new",
+        "d",
+        "b",
+        "a",
+        "c",
+        "e"
+      ],
+      "name": "auction 2 time true",
+      "pass": true
+    }
+  ],
+  "input": {
+    "virtualInput": true,
+    "phase": "ready",
+    "attempt": 1,
+    "session": "54c03b39-4610-4342-9861-788844a43c7d",
+    "elapsed": 2.421623799997178
+  },
+  "realPurchases": false,
+  "realProfiles": false,
+  "food": [
+    {
+      "remaining": 29.98326802253723,
+      "saturation": 0.8,
+      "elapsed": 1.6662555000002612,
+      "level": 1,
+      "hunger": 14
+    }
+  ],
+  "jumps": [
+    {
+      "rise": 4.28271484375,
+      "takeoff": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 4.199999809265137,
+        "state": "Freefall",
+        "y": 207.87335205078125,
+        "x": 3.638033151626587,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 15.254055976867676
+      },
+      "timeline": [
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.016912600000068778,
+          "x": 0,
+          "vz": 0,
+          "z": 0,
+          "speed": 16,
+          "horizontal": 0,
+          "vx": 0,
+          "vy": 0.00041620436240918934
+        },
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.04933969999910914,
+          "x": 0,
+          "vz": 0,
+          "z": 0,
+          "speed": 16,
+          "horizontal": 0,
+          "vx": 0,
+          "vy": 0.00041620436240918934
+        },
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.08378480000101263,
+          "x": 0.35562121868133545,
+          "vz": 0,
+          "z": 0,
+          "speed": 16,
+          "horizontal": 15.650152206420898,
+          "vx": 15.650152206420898,
+          "vy": 0.00041620436240918934
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.1158261999989918,
+          "x": 0.8651130199432373,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.77851104736328,
+          "vx": 20.77851104736328,
+          "vy": 0.00041620436240918934
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 205.5497283935547,
+          "state": "Freefall",
+          "at": 0.1495543999990332,
+          "x": 1.644701600074768,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.79983901977539,
+          "vx": 20.79983901977539,
+          "vy": 34.056541442871094
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 206.56231689453125,
+          "state": "Freefall",
+          "at": 0.1834473999988404,
+          "x": 2.3380343914031982,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 27.516544342041016
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 207.35690307617188,
+          "state": "Freefall",
+          "at": 0.21621270000105142,
+          "x": 3.031367063522339,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 20.976551055908203
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 207.87335205078125,
+          "state": "Freefall",
+          "at": 0.24959790000139037,
+          "x": 3.638033151626587,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 15.254055976867676
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.29209899902344,
+          "state": "Freefall",
+          "at": 0.28278169999975944,
+          "x": 4.418032646179199,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 7.896554946899414
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.4326934814453,
+          "state": "Freefall",
+          "at": 0.3163791000006313,
+          "x": 5.11136531829834,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 1.3565541505813599
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.37689208984375,
+          "state": "Freefall",
+          "at": 0.3489082000014605,
+          "x": 5.718031406402588,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -4.365945816040039
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.0598907470703,
+          "state": "Freefall",
+          "at": 0.3827167000017653,
+          "x": 6.498030662536621,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -11.7234468460083
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 207.54647827148438,
+          "state": "Freefall",
+          "at": 0.4161052000017662,
+          "x": 7.191363334655762,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -18.263444900512695
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 206.8150634765625,
+          "state": "Freefall",
+          "at": 0.44916860000012093,
+          "x": 7.884696006774902,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -24.803438186645508
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 205.86566162109375,
+          "state": "Landed",
+          "at": 0.4828239000016765,
+          "x": 8.578031539916992,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -31.34343147277832
+        }
+      ],
+      "before": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Running",
+        "y": 204.1499786376953,
+        "x": 0.6919587850570679,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.00041620436240918934
+      },
+      "landed": true,
+      "name": "ordinary sprint jump",
+      "mode": "VirtualInput",
+      "jumpRequestEvents": 2,
+      "finish": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Landed",
+        "y": 205.86566162109375,
+        "x": 8.578031539916992,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -31.34343147277832
+      }
+    },
+    {
+      "jumpRequestEvents": 4,
+      "takeoff": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 4.199999809265137,
+        "state": "Freefall",
+        "y": 207.87335205078125,
+        "x": 3.2718474864959717,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 15.254055976867676
+      },
+      "beforeSecond": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 4.199999809265137,
+        "state": "Freefall",
+        "y": 207.20802307128906,
+        "x": 7.171844005584717,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -21.5334415435791
+      },
+      "timeline": [
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.016118100000312552,
+          "x": 0.037533875554800034,
+          "vz": 0,
+          "z": 0,
+          "speed": 15.999999046325684,
+          "horizontal": 4.504065036773682,
+          "vx": 4.504065036773682,
+          "vy": 0.0004161119577474892
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 204.1499786376953,
+          "state": "Running",
+          "at": 0.049796499999501975,
+          "x": 0.5198988318443298,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 19.71331787109375,
+          "vx": 19.71331787109375,
+          "vy": 0.0004161119577474892
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 205.40782165527344,
+          "state": "Freefall",
+          "at": 0.08387190000212286,
+          "x": 1.1919132471084595,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.77411460876465,
+          "vx": 20.77411460876465,
+          "vy": 34.87404251098633
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 206.56231689453125,
+          "state": "Freefall",
+          "at": 0.11660850000043865,
+          "x": 1.9718486070632935,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.79999542236328,
+          "vx": 20.79999542236328,
+          "vy": 27.516544342041016
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 207.26950073242188,
+          "state": "Freefall",
+          "at": 0.14930889999959618,
+          "x": 2.578514814376831,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 21.794050216674805
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 207.87335205078125,
+          "state": "Freefall",
+          "at": 0.18269750000035856,
+          "x": 3.2718474864959717,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 15.254055976867676
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.2592010498047,
+          "state": "Freefall",
+          "at": 0.21626210000249557,
+          "x": 3.9651801586151123,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 8.714055061340332
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.4270477294922,
+          "state": "Freefall",
+          "at": 0.24948679999943124,
+          "x": 4.658513069152832,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 2.1740541458129883
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.37689208984375,
+          "state": "Freefall",
+          "at": 0.2826414000010118,
+          "x": 5.351845741271973,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -4.365945816040039
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 208.0598907470703,
+          "state": "Freefall",
+          "at": 0.3162049000020488,
+          "x": 6.131844997406006,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -11.7234468460083
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 207.62257385253906,
+          "state": "Freefall",
+          "at": 0.3498677999996289,
+          "x": 6.738511085510254,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -17.445945739746094
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "height": 4.199999809265137,
+          "y": 206.8150634765625,
+          "state": "Freefall",
+          "at": 0.38374670000121114,
+          "x": 7.518510341644287,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -24.803438186645508
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "height": 4.199999809265137,
+          "y": 205.86566162109375,
+          "state": "Landed",
+          "at": 0.4173217999996268,
+          "x": 8.211844444274902,
+          "vz": 0,
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -31.34343147277832
+        }
+      ],
+      "before": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Running",
+        "y": 204.1499786376953,
+        "x": 0.5198988318443298,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 19.71331787109375,
+        "vx": 19.71331787109375,
+        "vy": 0.0004161119577474892
+      },
+      "landed": true,
+      "name": "ordinary rejects extra",
+      "rise": 4.277069091796875,
+      "afterSecond": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 4.199999809265137,
+        "state": "Freefall",
+        "y": 206.8150634765625,
+        "x": 7.518510341644287,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -24.803438186645508
+      },
+      "mode": "VirtualInput",
+      "finish": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 4.199999809265137,
+        "state": "Landed",
+        "y": 205.86566162109375,
+        "x": 8.211844444274902,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -31.34343147277832
+      }
+    },
+    {
+      "rise": 5.2935638427734375,
+      "takeoff": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 208.03619384765625,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 3.02902889251709,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 23.916667938232422
+      },
+      "timeline": [
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "at": 0.016051100003096508,
+          "height": 5.199999809265137,
+          "y": 204.1499786376953,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 0.037533875554800034,
+          "state": "Running",
+          "z": 0,
+          "speed": 15.999999046325684,
+          "horizontal": 4.504065036773682,
+          "vx": 4.504065036773682,
+          "vy": 0.0004161933029536158
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.05002770000282908,
+          "height": 5.199999809265137,
+          "y": 204.1499786376953,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 0.6919587254524231,
+          "state": "Running",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.647184371948242,
+          "vx": 20.647184371948242,
+          "vy": 0.0004161933029536158
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.08267030000206432,
+          "height": 5.199999809265137,
+          "y": 205.3959503173828,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 1.295716643333435,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.791940689086914,
+          "vx": 20.791940689086914,
+          "vy": 40.26667022705078
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.1161569000032614,
+          "height": 5.199999809265137,
+          "y": 206.6155548095703,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 1.989029884338379,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.79999542236328,
+          "vx": 20.79999542236328,
+          "vy": 33.726661682128906
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.14920100000017555,
+          "height": 5.199999809265137,
+          "y": 207.6171417236328,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 2.6823625564575195,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 27.186664581298828
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.18334730000060517,
+          "height": 5.199999809265137,
+          "y": 208.48336791992188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 3.4623618125915527,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 19.829172134399414
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.21637850000115577,
+          "height": 5.199999809265137,
+          "y": 208.96633911132812,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 4.069027900695801,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 14.106675148010254
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.24930000000313157,
+          "height": 5.199999809265137,
+          "y": 209.31393432617188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 4.762360572814941,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 7.56667423248291
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.2827796000019589,
+          "height": 5.199999809265137,
+          "y": 209.44354248046875,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 5.455693244934082,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 1.0266735553741455
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.3166406000018469,
+          "height": 5.199999809265137,
+          "y": 209.32875061035156,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 6.235692501068115,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -6.330826759338379
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.34921400000166614,
+          "height": 5.199999809265137,
+          "y": 209.04873657226562,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 6.842358589172363,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -12.053327560424805
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.3844857000003685,
+          "height": 5.199999809265137,
+          "y": 208.44345092773438,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 7.6223578453063965,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -19.410823822021484
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.4177610000006098,
+          "height": 5.199999809265137,
+          "y": 207.67379760742188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 8.315691947937012,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -25.950817108154297
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.45119240000349237,
+          "height": 5.199999809265137,
+          "y": 206.68614196777344,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 9.009028434753418,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -32.49081039428711
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.4842275000009977,
+          "height": 5.199999809265137,
+          "y": 205.48048400878906,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 9.702364921569824,
+          "state": "Landed",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -39.030818939208984
+        }
+      ],
+      "before": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 204.1499786376953,
+        "state": "Running",
+        "springs": 5.199999999999999,
+        "x": 0.6919587254524231,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.0004161933029536158
+      },
+      "landed": true,
+      "name": "Springs single jump",
+      "mode": "VirtualInput",
+      "jumpRequestEvents": 3,
+      "finish": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 205.48048400878906,
+        "state": "Landed",
+        "springs": 5.199999999999999,
+        "x": 9.702364921569824,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -39.030818939208984
+      }
+    },
+    {
+      "jumpRequestEvents": 5,
+      "takeoff": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 208.03619384765625,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 3.02902889251709,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 23.916667938232422
+      },
+      "beforeSecond": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 209.04873657226562,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 6.842358589172363,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -12.053327560424805
+      },
+      "beforeThird": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 213.55592346191406,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 9.962366104125977,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 15.741671562194824
+      },
+      "timeline": [
+        {
+          "sprint": false,
+          "floor": "Plastic",
+          "at": 0.015657899999496294,
+          "height": 5.199999809265137,
+          "y": 204.1499786376953,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 0.1126016229391098,
+          "state": "Running",
+          "z": 0,
+          "speed": 15.999999046325684,
+          "horizontal": 9.008129119873047,
+          "vx": 9.008129119873047,
+          "vy": 0.00041618343675509095
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.04981150000094203,
+          "height": 5.199999809265137,
+          "y": 204.1499786376953,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 0.6919587254524231,
+          "state": "Running",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.647184371948242,
+          "vx": 20.647184371948242,
+          "vy": 0.00041618343675509095
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.0838807000000088,
+          "height": 5.199999809265137,
+          "y": 205.56031799316406,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 1.3823707103729248,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.796977996826172,
+          "vx": 20.796977996826172,
+          "vy": 39.44916915893555
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.11604839999927208,
+          "height": 5.199999809265137,
+          "y": 206.6155548095703,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 1.989029884338379,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.79999542236328,
+          "vx": 20.79999542236328,
+          "vy": 33.726661682128906
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.14971829999922193,
+          "height": 5.199999809265137,
+          "y": 207.72702026367188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 2.769029140472412,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 26.369165420532227
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.18298069999946165,
+          "height": 5.199999809265137,
+          "y": 208.40074157714844,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 3.37569522857666,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 20.646671295166016
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.21565519999785465,
+          "height": 5.199999809265137,
+          "y": 209.02171325683594,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 4.155694484710693,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 13.289175033569336
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.24918129999787197,
+          "height": 5.199999809265137,
+          "y": 209.31393432617188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 4.762360572814941,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 7.56667423248291
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.2836618000001181,
+          "height": 5.199999809265137,
+          "y": 209.4444122314453,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 5.542359828948975,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 0.2091735601425171
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.31598769999982323,
+          "height": 5.199999809265137,
+          "y": 209.35513305664062,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 6.149025917053223,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -5.513326644897461
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.3488581999990856,
+          "height": 5.199999809265137,
+          "y": 209.04873657226562,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 6.842358589172363,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -12.053327560424805
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.3822306000001845,
+          "height": 5.199999809265137,
+          "y": 210.43182373046875,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 7.535691261291504,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 38.63166427612305
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.41654689999995753,
+          "height": 5.199999809265137,
+          "y": 211.72723388671875,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 8.315691947937012,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 31.27415657043457
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.45016390000091633,
+          "height": 5.199999809265137,
+          "y": 212.64707946777344,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 9.009028434753418,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 24.734163284301758
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.4829491999989841,
+          "height": 5.199999809265137,
+          "y": 213.3489227294922,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 9.702364921569824,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 18.194169998168945
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.5167129000001296,
+          "height": 5.199999809265137,
+          "y": 213.7842254638672,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 10.30903434753418,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 12.471671104431152
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.5489783999983047,
+          "height": 5.199999809265137,
+          "y": 214.0773162841797,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 11.002370834350586,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": 5.931670188903809
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.5830767000006745,
+          "height": 5.199999809265137,
+          "y": 214.1524200439453,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 11.695707321166992,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -0.608330249786377
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.616404500000499,
+          "height": 5.199999809265137,
+          "y": 213.976318359375,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 12.47571086883545,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -7.9658308029174805
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.6499234000002616,
+          "height": 5.199999809265137,
+          "y": 213.58816528320312,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 13.169047355651855,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -14.505831718444824
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.6826184999990801,
+          "height": 5.199999809265137,
+          "y": 213.0697021484375,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 13.775716781616211,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -20.22832679748535
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.7163923000007344,
+          "height": 5.199999809265137,
+          "y": 212.27279663085938,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 14.469053268432617,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -26.768320083618164
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.7489749999986088,
+          "height": 5.199999809265137,
+          "y": 211.25790405273438,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 15.162389755249023,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -33.30831527709961
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.7830420999998751,
+          "height": 5.199999809265137,
+          "y": 210.02499389648438,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 15.85572624206543,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -39.848323822021484
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.8161131999986537,
+          "height": 5.199999809265137,
+          "y": 208.37741088867188,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 16.635723114013672,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -47.205833435058594
+        },
+        {
+          "sprint": true,
+          "floor": "Air",
+          "at": 0.8491041999986919,
+          "height": 5.199999809265137,
+          "y": 206.90518188476562,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 17.242385864257812,
+          "state": "Freefall",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -52.928340911865234
+        },
+        {
+          "sprint": true,
+          "floor": "Plastic",
+          "at": 0.8827104999982112,
+          "height": 5.199999809265137,
+          "y": 205.01828002929688,
+          "vz": 0,
+          "springs": 5.199999999999999,
+          "x": 17.935714721679688,
+          "state": "Landed",
+          "z": 0,
+          "speed": 20.799999237060547,
+          "horizontal": 20.799999237060547,
+          "vx": 20.799999237060547,
+          "vy": -59.46834945678711
+        }
+      ],
+      "before": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 204.1499786376953,
+        "state": "Running",
+        "springs": 5.199999999999999,
+        "x": 0.6919587254524231,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.647184371948242,
+        "vx": 20.647184371948242,
+        "vy": 0.00041618343675509095
+      },
+      "landed": true,
+      "name": "Springs second jump",
+      "rise": 10.00244140625,
+      "afterThird": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 213.7842254638672,
+        "state": "Freefall",
+        "springs": 5.199999999999999,
+        "x": 10.30903434753418,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 12.471671104431152
+      },
+      "afterSecond": {
+        "sprint": true,
+        "floor": "Air",
+        "height": 5.199999809265137,
+        "y": 209.7675323486328,
+        "state": "Jumping",
+        "springs": 5.199999999999999,
+        "x": 7.189024925231934,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": 41.901668548583984
+      },
+      "mode": "VirtualInput",
+      "finish": {
+        "sprint": true,
+        "floor": "Plastic",
+        "height": 5.199999809265137,
+        "y": 205.01828002929688,
+        "state": "Landed",
+        "springs": 5.199999999999999,
+        "x": 17.935714721679688,
+        "vz": 0,
+        "z": 0,
+        "speed": 20.799999237060547,
+        "horizontal": 20.799999237060547,
+        "vx": 20.799999237060547,
+        "vy": -59.46834945678711
+      }
+    }
+  ],
+  "upgrade": {
+    "before": {
+      "visible": true,
+      "selected": 12,
+      "canvas": 1023.0000610351562,
+      "enabled": true,
+      "scroll": 320,
+      "text": "Улучшить",
+      "exists": true,
+      "inside": true
+    },
+    "actions": [
+      {
+        "offset": "absolute",
+        "point": {
+          "y": 399,
+          "x": 170.79998779296875
+        },
+        "inset": {
+          "y": 58,
+          "x": 0
+        },
+        "inputEvents": [
+          {
+            "y": 341,
+            "x": 170,
+            "name": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 341,
+            "x": 170,
+            "name": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "mode": "VirtualInput",
+        "activated": false,
+        "hits": [
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame.TutorialUpgrade",
+            "active": true
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета",
+            "active": true
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ]
+      },
+      {
+        "offset": "inset",
+        "point": {
+          "y": 457,
+          "x": 170.79998779296875
+        },
+        "inset": {
+          "y": 58,
+          "x": 0
+        },
+        "inputEvents": [
+          {
+            "y": 399,
+            "x": 170,
+            "name": "target.InputBegan",
+            "processed": false
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "target.InputEnded",
+            "processed": false
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "mode": "VirtualInput",
+        "activated": true,
+        "hits": [
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame.TextLabel",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета",
+            "active": true
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ]
+      },
+      {
+        "visible": true,
+        "selected": 12,
+        "canvas": 1023.0000610351562,
+        "enabled": true,
+        "scroll": 320,
+        "text": "Улучшить",
+        "exists": true,
+        "inside": true
+      },
+      {
+        "offset": "inset",
+        "point": {
+          "y": 457,
+          "x": 170.79998779296875
+        },
+        "inset": {
+          "y": 58,
+          "x": 0
+        },
+        "inputEvents": [
+          {
+            "y": 399,
+            "x": 170,
+            "name": "target.InputBegan",
+            "processed": false
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "target.InputEnded",
+            "processed": false
+          },
+          {
+            "y": 399,
+            "x": 170,
+            "name": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "mode": "VirtualInput",
+        "activated": true,
+        "hits": [
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame.TextLabel",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content.Frame",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.Window_Улучшение предмета",
+            "active": true
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player1.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ]
+      },
+      {
+        "visible": true,
+        "selected": 12,
+        "canvas": 1023.0000610351562,
+        "enabled": true,
+        "scroll": 320,
+        "text": "Улучшить",
+        "exists": true,
+        "inside": true
+      }
+    ],
+    "coordinateMode": "inset"
+  },
+  "lifecycle": {
+    "deaths": 0,
+    "respawns": 0
+  },
+  "hungerDrain": {
+    "expected": 0.10040987499996845,
+    "baseline": {
+      "drain": 0,
+      "seconds": 4.000321299998177
+    },
+    "hungry": {
+      "drain": 0.09703557179309463,
+      "seconds": 4.016394999998738
+    },
+    "excess": 0.09703557179309463
+  },
+  "status": "FAIL",
+  "silk": {
+    "consumedCells": 0,
+    "pairs": [
+      {
+        "trials": [],
+        "level": 5,
+        "id": "stone_stone_tier",
+        "block": "stone",
+        "mine": "quarry",
+        "tool": "pickaxe"
+      }
+    ],
+    "mines": {
+      "quarry": {
+        "shares": {
+          "coal_block": 0.02,
+          "coal_ore": 0.12,
+          "stone": 0.81,
+          "iron_ore": 0.05
+        },
+        "shot": false,
+        "generation": 1,
+        "location": "quarry",
+        "exposedTop": {
+          "coal_block": 37,
+          "iron_ore": 69,
+          "stone": 1289,
+          "coal_ore": 189
+        },
+        "pvp": false
+      }
+    }
+  },
+  "error": "ServerScriptService.QAReleaseItemsServer:673: fixture_unavailable: no rim-accessible top stone in quarry\nServerScriptService.QAReleaseItemsServer:673 function exposedCell\nServerScriptService.QAReleaseItemsServer:688\nServerScriptService.QAReleaseItemsServer:118\n",
+  "limitations": [
+    "Negative simulated profile only; normal game services may access their configured stores.",
+    "Auction comparator clone uses isolated in-memory index; cross-server propagation is not covered.",
+    "VirtualInput availability and fallback boundary are recorded per client/trial; touchscreen needs device acceptance."
+  ]
+}

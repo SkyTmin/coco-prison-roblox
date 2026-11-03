@@ -394,6 +394,13 @@ local function complete(player: Player, token: number)
 		artifactNotices = ArtifactService.RollDig(p)
 	end)
 	HungerService.OnBlockDug(player)
+	require(script.Parent.TutorialService).OnDug(
+		player,
+		mine.id,
+		dropId,
+		math.max(0, dropCount - overflow),
+		soldItems
+	)
 	GangService.progress(player, "dig", 1) -- gang quests: blocks
 	GangService.progress(player, "sellItems", soldItems) -- gang quests: the auto-sell is selling too [решение]
 	AchievementService.OnDug(player, blockId)

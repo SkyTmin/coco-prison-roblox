@@ -1,0 +1,270 @@
+{
+  "checks": [
+    {
+      "name": "money review is read-only",
+      "pass": true
+    },
+    {
+      "name": "normal remote money confirmation",
+      "pass": false
+    },
+    {
+      "name": "coins conserved",
+      "pass": true
+    },
+    {
+      "name": "money token replay refused",
+      "pass": false
+    },
+    {
+      "name": "partial stack count conserved",
+      "pass": true
+    },
+    {
+      "name": "partial metadata stack preserved exactly",
+      "pass": true
+    },
+    {
+      "name": "gift token replay refused",
+      "pass": true
+    },
+    {
+      "name": "changed reviewed stack cannot be retargeted",
+      "pass": true
+    },
+    {
+      "name": "recipient payment preference enforced",
+      "pass": false
+    },
+    {
+      "name": "hide works through normal nonchat action",
+      "pass": true
+    },
+    {
+      "name": "simulated nonowner cannot prepare progress reset",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 390",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 390",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 844",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 844",
+      "pass": true
+    },
+    {
+      "name": "native mouse review and confirmation activate",
+      "pass": false
+    },
+    {
+      "name": "native UI confirmation transfers once",
+      "pass": false
+    },
+    {
+      "name": "first-login guide renders from server profile",
+      "pass": true
+    }
+  ],
+  "layouts": [
+    {
+      "h": 680,
+      "viewport": {
+        "y": 844,
+        "x": 390
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 340
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 346
+        }
+      ],
+      "w": 366,
+      "formHeight": 468
+    },
+    {
+      "h": 308,
+      "viewport": {
+        "y": 390,
+        "x": 844
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 534
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 540
+        }
+      ],
+      "w": 560,
+      "formHeight": 96
+    }
+  ],
+  "nativeTouchTested": false,
+  "realAccountsTouched": false,
+  "testScope": "Run_ccdd695b-b9b5-4d21-92fe-28098a81536d",
+  "status": "FAIL",
+  "ownerResetExecuted": false,
+  "guide": {
+    "visible": true,
+    "marker": false
+  },
+  "ui": {
+    "ok": false,
+    "clicks": [
+      {
+        "y": 278,
+        "x": 461.5,
+        "activated": false,
+        "name": "ActionRecipient_-1"
+      }
+    ],
+    "touchTested": false,
+    "text": "",
+    "error": "Players.Player2.PlayerScripts.QAReleaseActionsClient:125: ActionRecipient_-1 did not activate via VirtualInput\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:125 function click\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:129\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:128 function uiPay\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:168\n",
+    "nativeKeyboardTested": false
+  }
+}

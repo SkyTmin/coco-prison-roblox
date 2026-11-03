@@ -252,7 +252,7 @@ local function bindPrompt(instance: Instance, tag: string, need: Need)
 	end
 	local prompt = instance:FindFirstChildOfClass("ProximityPrompt")
 		or Instance.new("ProximityPrompt")
-	prompt.ActionText = Strings.t("restore_" .. need .. "_prompt")
+	require(Shared.PromptText).Set(prompt, "ActionText", "restore_" .. need .. "_prompt")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = PROMPT_DISTANCE
 	-- toilets sit in stalls and the pool zones under water: walls and water must not hide the prompt

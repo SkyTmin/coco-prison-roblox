@@ -124,8 +124,8 @@ local function bindCook(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "CanteenPrompt"
-	prompt.ActionText = Strings.t("canteen_prompt")
-	prompt.ObjectText = Strings.t("spot_canteen")
+	require(Shared.PromptText).Set(prompt, "ActionText", "canteen_prompt")
+	require(Shared.PromptText).Set(prompt, "ObjectText", "spot_canteen")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false -- the tag sits inside the rig's torso
@@ -215,7 +215,7 @@ local function bindDailyNpc(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "DailyPrompt"
-	prompt.ActionText = Strings.t("daily_prompt")
+	require(Shared.PromptText).Set(prompt, "ActionText", "daily_prompt")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false

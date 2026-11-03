@@ -267,7 +267,7 @@ local function bindPrompt(part: Instance, tag: string)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "GangNpcPrompt"
-	prompt.ActionText = Strings.t(npc.prompt)
+	require(Shared.PromptText).Set(prompt, "ActionText", npc.prompt)
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false -- the tag sits inside the rig's torso

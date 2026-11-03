@@ -10,3 +10,5 @@ Owner requested one consistent illustration style for every location, with very 
 - Native aspect ratios are retained. The gallery displays full images without cropping; the client location-preview renderer uses `Fit` so wide Ghetto and gang-interior landmarks remain visible.
 
 Validation: 30 unique location ids; all final files/references present; 30 successful upload ids; generated configuration rebuilt; gallery's 95 local links and inline JavaScript syntax checked. Roblox moderation/content loading and actual menu rendering are separate live checks, not implied by upload success. Publishing was not performed.
+
+Live follow-up: [typed client preload evidence](release-art-preload-2026-11-03.json) confirms30/30 configured illustration assets return Success. A control comparison found that raw string-ID requests incorrectly fail for both old working icons and new images, whereas ImageLabel requests succeed. The loading screen now uses typed instances. Gallery search, actual-reference toggle and full-image modal were checked interactively. In-game menu composition remains a separate visual acceptance step.

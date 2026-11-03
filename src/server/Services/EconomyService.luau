@@ -18,6 +18,7 @@ local ChatService = require(script.Parent.ChatService) -- announcements in the c
 local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfessionService = require(script.Parent.ProfessionService)
+local TutorialService = require(script.Parent.TutorialService)
 
 local SHOP_PRICES: { [string]: number } = { shovel = 4, axe = 4, pickaxe = 22.5, shears = 4000 } -- [меню]
 local FOOD_PRICES: { [string]: number } = { apple = 0.03, bread = 0.25, cooked_chicken = 0.5 } -- [меню]
@@ -127,6 +128,8 @@ local function sell(player: Player)
 		return
 	end
 	local total, locked, count = 0, 0, 0
+	local tutorialDrop = (profile :: any).tutorial and (profile :: any).tutorial.dropId
+	local tutorialBefore = if tutorialDrop then InventoryService.count(profile, tutorialDrop) else 0
 	ProfileService.Mutate(player, function(p)
 		total, locked, count = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
 		p.coins += total
@@ -135,6 +138,14 @@ local function sell(player: Player)
 		toast(player, "block_locked_sell", locked)
 	end
 	GangService.progress(player, "sellItems", count) -- gang quests: «Продать N предметов Надзирателю»
+	if tutorialDrop then
+		TutorialService.OnSold(player, {
+			[tutorialDrop] = math.max(
+				0,
+				tutorialBefore - InventoryService.count(profile, tutorialDrop)
+			),
+		})
+	end
 	if total > 0 then
 		toast(player, "sold", Strings.money(total))
 		Sfx.toPlayer(player, "xp", 0.5)
@@ -203,6 +214,7 @@ local function upgrade(player: Player, target: any)
 		return
 	end
 	local id = stack.id
+	local oldLevel = stack.level or 1
 	local up = Config.upgrade(id, stack.level or 1)
 	if not up then
 		toast(player, "upgrade_max")
@@ -233,6 +245,7 @@ local function upgrade(player: Player, target: any)
 		end
 	end)
 	Sfx.toPlayer(player, "enchant", 0.6)
+	TutorialService.OnUpgraded(player, id, oldLevel, up.to)
 	toast(player, "upgraded", Strings.itemName(id, up.to, Strings.localeOf(player)), up.to)
 end
 
@@ -241,6 +254,7 @@ local function levelUp(player: Player)
 	if not profile then
 		return
 	end
+	local oldLevel = profile.level
 	local rule = Config.levelRule(profile.level + 1)
 	if not rule then
 		toast(player, "level_max")
@@ -270,6 +284,7 @@ local function levelUp(player: Player)
 		humanoid.Health = humanoid.MaxHealth
 	end
 	toast(player, "level_reached", rule.level)
+	TutorialService.OnLevelUp(player, oldLevel, rule.level)
 	Sfx.toPlayer(player, "level_up", 0.7)
 	if rule.level >= Config.chat.levelAnnounceFrom then -- «новый уровень игрока» in the server chat [вики MENUS-SOCIAL]
 		ChatService.announce("chat_level_up", player.DisplayName, rule.level)
@@ -283,8 +298,11 @@ local function bindPrompt(part: Instance, kind: string, tag: string)
 		return
 	end
 	local prompt = part:FindFirstChildOfClass("ProximityPrompt") or Instance.new("ProximityPrompt")
-	prompt.ActionText =
-		Strings.t(if kind == "stars" or kind == "shards" then "exchange" else kind .. "_prompt")
+	require(Shared.PromptText).Set(
+		prompt,
+		"ActionText",
+		if kind == "stars" or kind == "shards" then "exchange" else kind .. "_prompt"
+	)
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	-- The tag sits on the rig's HumanoidRootPart, which is inside the torso: with line of sight the

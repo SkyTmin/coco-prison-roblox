@@ -16,9 +16,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Effects = require(Shared.Effects)
 local HudLayout = require(script.Parent.HudLayout)
-local Remotes = require(Shared.Remotes)
 local Ui = require(script.Parent.Ui)
 local BowState = require(script.Parent.BowState)
+local HurtFeedback = require(script.Parent.HurtFeedback)
 
 local BOX = 40
 local GAP = 4
@@ -185,42 +185,16 @@ function EffectsHud.start(
 	local HURT_SECONDS = 0.5
 	local hurtAt = -math.huge
 	local hurtDir = 0 -- degrees, Minecraft's: 0 = from the left, 90 = from the front, 180 = from the right
-	local function watchHealth(character: Model)
+	HurtFeedback.Start(gui)
+	player.CharacterAdded:Connect(function()
 		hurtAt, hurtDir = -math.huge, 0
-		local humanoid = character:WaitForChild("Humanoid", 10)
-		if not humanoid or not humanoid:IsA("Humanoid") then
-			return
-		end
-		local last = humanoid.Health
-		humanoid.HealthChanged:Connect(function(health)
-			if health < last - 0.01 then
-				hurtAt = os.clock()
-			end
-			last = health
-		end)
-		-- A hit absorbed entirely by golden health still has the normal hurt feedback.
-		character.ChildAdded:Connect(function(child)
-			if child.Name == "HurtFlash" and child:IsA("Highlight") and humanoid.Health > 0 then
-				hurtAt = os.clock()
-			end
-		end)
-	end
-	player.CharacterAdded:Connect(watchHealth)
-	if player.Character then
-		task.spawn(watchHealth, player.Character)
-	end
-	-- melee knockback from the server (the client owns its character physics)
-	Remotes.event("Knockback").OnClientEvent:Connect(function(velocity: any)
+	end)
+	HurtFeedback.Impact:Connect(function(packet: any)
+		hurtAt, hurtDir = os.clock(), 0
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-		if
-			typeof(velocity) == "Vector3"
-			and velocity.Magnitude < 60
-			and root
-			and root:IsA("BasePart")
-		then
-			root.AssemblyLinearVelocity = velocity
+		if typeof(packet.from) == "Vector3" and root and root:IsA("BasePart") then
 			local camera = workspace.CurrentCamera
-			local from = -Vector3.new(velocity.X, 0, velocity.Z) -- towards the attacker
+			local from = (packet.from - root.Position) * Vector3.new(1, 0, 1)
 			if camera and from.Magnitude > 0.01 then
 				local look = camera.CFrame.LookVector * Vector3.new(1, 0, 1)
 				if look.Magnitude > 0.01 then

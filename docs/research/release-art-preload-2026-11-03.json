@@ -1,0 +1,247 @@
+{
+  "placeId": 92594200898716,
+  "method": "Client ContentProvider.PreloadAsync with typed ImageLabel instances",
+  "renderedMenuVerified": false,
+  "rows": [
+    {
+      "ok": true,
+      "id": "barn",
+      "asset": "rbxassetid://83335891993599",
+      "status": {
+        "rbxassetid://83335891993599": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "basement",
+      "asset": "rbxassetid://134071326144905",
+      "status": {
+        "rbxassetid://134071326144905": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "castle",
+      "asset": "rbxassetid://73689360246588",
+      "status": {
+        "rbxassetid://73689360246588": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "cherubim",
+      "asset": "rbxassetid://139284842868276",
+      "status": {
+        "rbxassetid://139284842868276": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "church",
+      "asset": "rbxassetid://100640458437549",
+      "status": {
+        "rbxassetid://100640458437549": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "eden",
+      "asset": "rbxassetid://129156650282225",
+      "status": {
+        "rbxassetid://129156650282225": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "edge_gate",
+      "asset": "rbxassetid://76229225487034",
+      "status": {
+        "rbxassetid://76229225487034": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "end_castle",
+      "asset": "rbxassetid://86642834878198",
+      "status": {
+        "rbxassetid://86642834878198": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "farm",
+      "asset": "rbxassetid://117554640175827",
+      "status": {
+        "rbxassetid://117554640175827": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "fraction_base",
+      "asset": "rbxassetid://73391781275949",
+      "status": {
+        "rbxassetid://73391781275949": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "gang_base",
+      "asset": "rbxassetid://136242118036831",
+      "status": {
+        "rbxassetid://136242118036831": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "gate",
+      "asset": "rbxassetid://106474462621375",
+      "status": {
+        "rbxassetid://106474462621375": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "ghetto",
+      "asset": "rbxassetid://108835959907290",
+      "status": {
+        "rbxassetid://108835959907290": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "inside_out",
+      "asset": "rbxassetid://102565954057795",
+      "status": {
+        "rbxassetid://102565954057795": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "kyoto",
+      "asset": "rbxassetid://124545315056814",
+      "status": {
+        "rbxassetid://124545315056814": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "leprechaun_valley",
+      "asset": "rbxassetid://93979182628801",
+      "status": {
+        "rbxassetid://93979182628801": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "market",
+      "asset": "rbxassetid://117835836066762",
+      "status": {
+        "rbxassetid://117835836066762": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "mountain_foot",
+      "asset": "rbxassetid://103462251710278",
+      "status": {
+        "rbxassetid://103462251710278": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "paradise",
+      "asset": "rbxassetid://105992236231814",
+      "status": {
+        "rbxassetid://105992236231814": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "prison",
+      "asset": "rbxassetid://90917933143626",
+      "status": {
+        "rbxassetid://90917933143626": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "purgatory",
+      "asset": "rbxassetid://92788248823624",
+      "status": {
+        "rbxassetid://92788248823624": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "pyramid",
+      "asset": "rbxassetid://118034808738710",
+      "status": {
+        "rbxassetid://118034808738710": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "quarry",
+      "asset": "rbxassetid://134694238404466",
+      "status": {
+        "rbxassetid://134694238404466": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "royal_garden",
+      "asset": "rbxassetid://70616338633401",
+      "status": {
+        "rbxassetid://70616338633401": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "snowy_hand",
+      "asset": "rbxassetid://122452349367602",
+      "status": {
+        "rbxassetid://122452349367602": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "spider_lair",
+      "asset": "rbxassetid://88233523014577",
+      "status": {
+        "rbxassetid://88233523014577": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "sunken_lighthouse",
+      "asset": "rbxassetid://117551147331672",
+      "status": {
+        "rbxassetid://117551147331672": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "tree",
+      "asset": "rbxassetid://130072055115584",
+      "status": {
+        "rbxassetid://130072055115584": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "underworld",
+      "asset": "rbxassetid://78642705372088",
+      "status": {
+        "rbxassetid://78642705372088": "Success"
+      }
+    },
+    {
+      "ok": true,
+      "id": "warzone",
+      "asset": "rbxassetid://109573285119306",
+      "status": {
+        "rbxassetid://109573285119306": "Success"
+      }
+    }
+  ]
+}

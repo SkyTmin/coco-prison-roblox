@@ -29,6 +29,7 @@ function SlotView.render(
 	image.BackgroundColor3 = tile or Color3.new()
 	image.BackgroundTransparency = if tile then 0 else 1
 	name.Visible = false
+	require(script.Parent.EnchantmentVisual).slot(image, stack)
 end
 
 -- a thin rarity strip along the bottom of a slot (case drops, books)

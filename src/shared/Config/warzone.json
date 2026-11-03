@@ -34,5 +34,5 @@
   "decayEverySeconds": 3,
   "_decay": "[решение] если у маяка 90 с никто не копает, очки всех фракций на нём тают по 1 каждые 3 с",
   "perServer": true,
-  "_perServer": "[решение] точки свои у каждого сервера (Дворы — место на сервере), после перезапуска сервера все свободны"
+  "_perServer": "[владелец 03.11] Exactly one randomly selected available/held point per server; choose on startup and after hold expires."
 }

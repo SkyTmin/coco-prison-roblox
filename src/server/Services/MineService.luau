@@ -448,6 +448,7 @@ local function register(anchor: Instance)
 		then { sizeOverride.X, sizeOverride.Y, sizeOverride.Z }
 		else location.mine.size
 	local top = anchor.Position + Vector3.new(0, anchor.Size.Y / 2, 0)
+	require(Shared.MineLighting).Apply(anchor, size)
 	local origin = top
 		+ Vector3.new(-(size[1] - 1) * BLOCK / 2, -BLOCK / 2, -(size[3] - 1) * BLOCK / 2)
 	-- per-mine composition override from locations.json (e.g. prison_small: only melon + oak)

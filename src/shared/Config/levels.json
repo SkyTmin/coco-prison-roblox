@@ -447,7 +447,8 @@
     ],
     "splashLevel": 3,
     "splashRadiusBlocks": 4,
-    "hungerPerSecond": 0.5,
+    "hungerPerSecond": 0.025,
+    "_hungerPerSecond": "[ваниль] Hunger I: 0.005 exhaustion/tick, 20 ticks/s, 4 exhaustion per food point => 0.025 food points/s; minecraft.wiki/w/Hunger_(effect)",
     "strengthDamage": 3
   }
 }

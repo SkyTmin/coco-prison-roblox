@@ -195,8 +195,23 @@ tools.shears = {
 	upgrades: shearsWiki.upgrades.map((u) => ({ from: u.from, to: u.to, cost: u.cost, requirements: u.requirements, enchantAfter: u.enchantAfter, materialAfter: "wood" })),
 };
 // Sword upgrades beyond 12 need Оружейник from the sword table (field "Оружейник" is inside requirements already as a counter name).
+// Explicit owner-requested extensions stay separate from the immutable recovered screenshot data.
+for (const [id, extensions] of Object.entries(decisions.toolUpgradeExtensions ?? {})) {
+	const tool = tools[id];
+	if (!tool) throw new Error(`Unknown extended tool ${id}`);
+	for (const extension of extensions) {
+		const previous = tool.upgrades.at(-1)?.to ?? 1;
+		if (extension.from !== previous || extension.to !== previous + 1 || !Number.isFinite(extension.cost) || extension.cost < 0 || !extension.source) {
+			throw new Error(`Invalid or discontinuous tool extension ${id} ${extension.from}->${extension.to}`);
+		}
+		for (const value of Object.values(extension.requirements)) {
+			if (!Number.isFinite(value) || value < 0) throw new Error(`Invalid ${id} extension requirement`);
+		}
+		tool.upgrades.push(structuredClone(extension));
+	}
+}
 write("tools.json", {
-	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
+	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация; явные дополнительные ступени — design-decisions.toolUpgradeExtensions [владелец/решение]",
 	vanilla: {
 		// [ваниль] Java: attack speed per second and tool damage by material; hand 1 damage at 4/s
 		attackSpeed: { hand: 4, sword: 1.6, axe: { wood: 0.8, stone: 0.8, iron: 0.9, diamond: 1 }, pickaxe: 1.2, shovel: 1 },

@@ -1,6 +1,7 @@
 --!strict
 -- Server bootstrap: start services in dependency order.
 
+workspace:SetAttribute("RuntimeReady", false)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared").Config)
 
@@ -80,6 +81,22 @@ for _, name in ipairs({
 }) do
 	Remotes.event(name)
 end
+-- These listeners are part of client bootstrap. Create their channels before expensive
+-- scenery/service startup so loading does not stall waiting for cosmetic traffic.
+for _, name in ipairs({
+	"SwingFx",
+	"ItemPickupFx",
+	"CombatCritFx",
+	"EnchantFx",
+	"ArrowFired",
+	"DigCrackFx",
+	"BlockBrokenFx",
+	"Motion",
+	"MotionFx",
+}) do
+	Remotes.unreliable(name)
+end
+Remotes.unreliable(require(ReplicatedStorage.Shared.MineNet).REMOTE)
 
 local AvatarService = require(script.Services.AvatarService)
 local NpcBodyService = require(script.Services.NpcBodyService)
@@ -118,11 +135,16 @@ local CollisionGroups = require(script.Services.CollisionGroups)
 local LeaderboardService = require(script.Services.LeaderboardService)
 
 AvatarService.Start() -- first: the StarterCharacter must exist before anyone spawns
+local MatteWindows = require(ReplicatedStorage.Shared.MatteWindows)
+MatteWindows.Apply(workspace:FindFirstChild("Ghetto"))
+MatteWindows.Apply(game:GetService("ServerStorage"):FindFirstChild("GangHouseTemplate"))
 NpcBodyService.Start() -- the map's R15 NPCs → our block body in their costumes
 SignService.Start() -- sign posts no longer cover the text
 HungerService.Start()
 DeathService.Start()
+require(script.Services.TutorialService).Start()
 ProfileService.Start()
+require(script.Services.ServerAffinityService).Start()
 FactionService.Start()
 ProfessionService.Start()
 TextureService.Start()
@@ -163,6 +185,7 @@ require(script.Services.WarzoneService).Start() -- Дворы: four faction poin
 TrainerService.Start()
 require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
 require(script.Services.PotionService).Start() -- the potion stand: brewing, drinking, splash potions
+require(script.Services.WorldSafetyService).Start() -- exterior guards and same-location recovery below the map
 FallService.Start()
 LavaService.Start()
 LightingService.Start()
@@ -178,6 +201,7 @@ LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
 require(script.Services.ReferralService).Start() -- inviting friends (Referrals_v1), play time, the «Избранное» card
 require(script.Services.ChatService).Start() -- the chat (Roblox draws it): faction / gang TextChannels, announcements
 require(script.Services.ChatCommandService).Start() -- every chat command (TextChatCommands) and the bin (Rubbish)
+require(script.Services.ActionsService).Start()
 require(script.Services.DailyService).Start() -- the canteen portion and the daily rewards (/daily)
 require(script.Services.PrisService).Start() -- PRIS+: the PrisPlus attribute, the mine respawn board (PrisQuery)
 require(script.Services.NicknameService).Start() -- клички: «Ваши клички» (NicknameSet), the shown name (этап 9)
@@ -242,3 +266,4 @@ if game:GetService("RunService"):IsStudio() then
 		warn("[ItemInfo] missing translations: " .. table.concat(missing, ", "))
 	end
 end
+workspace:SetAttribute("RuntimeReady", true)

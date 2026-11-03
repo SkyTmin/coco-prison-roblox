@@ -1,0 +1,434 @@
+{
+  "checks": [
+    {
+      "name": "money review is read-only",
+      "pass": true
+    },
+    {
+      "name": "normal remote money confirmation",
+      "pass": true
+    },
+    {
+      "name": "coins conserved",
+      "pass": true
+    },
+    {
+      "name": "money token replay refused",
+      "pass": true
+    },
+    {
+      "name": "partial stack count conserved",
+      "pass": true
+    },
+    {
+      "name": "partial metadata stack preserved exactly",
+      "pass": true
+    },
+    {
+      "name": "gift token replay refused",
+      "pass": true
+    },
+    {
+      "name": "changed reviewed stack cannot be retargeted",
+      "pass": true
+    },
+    {
+      "name": "recipient payment preference enforced",
+      "pass": true
+    },
+    {
+      "name": "hide works through normal nonchat action",
+      "pass": true
+    },
+    {
+      "name": "simulated nonowner cannot prepare progress reset",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 390",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 390",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 844",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 844",
+      "pass": true
+    },
+    {
+      "name": "native mouse review and confirmation activate",
+      "pass": false
+    },
+    {
+      "name": "native UI confirmation transfers once",
+      "pass": false
+    },
+    {
+      "name": "first-login guide renders from server profile",
+      "pass": true
+    }
+  ],
+  "money": {
+    "replay": {
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "reply": {
+        "ok": false,
+        "key": "release_action_expired",
+        "args": []
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      }
+    },
+    "ui": {
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "actualUnits": {
+        "debited": 0,
+        "credited": 0
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "requestedAmount": 3,
+      "expectedUnits": 30000,
+      "result": ""
+    },
+    "remote": {
+      "before": {
+        "recipient": 100000,
+        "sender": 100000
+      },
+      "actualUnits": {
+        "debited": 25000,
+        "credited": 25000
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "requestedAmount": 2.5,
+      "expectedUnits": 25000,
+      "reply": {
+        "ok": true,
+        "key": "release_transfer_pending",
+        "args": []
+      },
+      "quote": {
+        "recipient": -1,
+        "ok": true,
+        "token": "069ae23e-9713-4513-9dc0-24a37467397e",
+        "amount": 2.5,
+        "display": "Player1",
+        "kind": "pay",
+        "expires": 45.71893859999909,
+        "name": "Player1"
+      }
+    },
+    "preference": {
+      "quote": {
+        "recipient": -1,
+        "ok": true,
+        "token": "1612131e-d551-4882-8d60-3797ed02626f",
+        "amount": 1,
+        "display": "Player1",
+        "kind": "pay",
+        "expires": 73.46811739999976,
+        "name": "Player1"
+      },
+      "reply": {
+        "ok": false,
+        "key": "chat_pay_off",
+        "args": [
+          "Player1"
+        ]
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      }
+    }
+  },
+  "nativeTouchTested": false,
+  "guide": {
+    "visible": true,
+    "marker": false
+  },
+  "ui": {
+    "ok": false,
+    "clicks": [
+      {
+        "visibleRect": {
+          "top": 256,
+          "right": 676,
+          "left": 142,
+          "bottom": 300
+        },
+        "inputEvents": [
+          {
+            "y": 220,
+            "x": 409,
+            "event": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 220,
+            "x": 409,
+            "event": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "originalDestroyed": false,
+        "activatedObserved": false,
+        "y": 278,
+        "x": 409,
+        "name": "ActionRecipient_-1",
+        "clips": [
+          {
+            "y": 256,
+            "x": 142,
+            "name": "ScrollingFrame",
+            "w": 540,
+            "h": 116
+          },
+          {
+            "y": 216,
+            "x": 142,
+            "name": "ActionForm",
+            "w": 542,
+            "h": 251
+          }
+        ],
+        "result": {
+          "ok": false,
+          "text": ""
+        },
+        "hits": [
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ScrollingFrame.ActionRecipient_-1",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ScrollingFrame",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ]
+      }
+    ],
+    "touchTested": false,
+    "text": "",
+    "error": "Players.Player2.PlayerScripts.QAReleaseActionsClient:212: ActionRecipient_-1 did not reach its successor UI state via VirtualInput\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:212 function click\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:217\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:215 function uiPay\nPlayers.Player2.PlayerScripts.QAReleaseActionsClient:269\n",
+    "nativeKeyboardTested": false
+  },
+  "realAccountsTouched": false,
+  "moneyScale": 10000,
+  "status": "FAIL",
+  "ownerResetExecuted": false,
+  "layouts": [
+    {
+      "h": 680,
+      "viewport": {
+        "y": 844,
+        "x": 390
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 340
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 346
+        }
+      ],
+      "w": 366,
+      "formHeight": 468
+    },
+    {
+      "h": 308,
+      "viewport": {
+        "y": 390,
+        "x": 844
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 534
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 540
+        }
+      ],
+      "w": 560,
+      "formHeight": 96
+    }
+  ],
+  "testScope": "Run_8de77d6f-2cd9-4074-abf0-0a4c3d388a48"
+}

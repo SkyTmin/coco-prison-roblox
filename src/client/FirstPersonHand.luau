@@ -168,10 +168,11 @@ function FirstPersonHand.Start()
 	local bob = 0
 
 	local itemId: string? = nil
-	local function setItem(attribute: any, variant: string?)
+	local function setItem(attribute: any, variant: string?, enchanted: boolean)
 		local key = (if typeof(attribute) == "string" then attribute else "")
 			.. "|"
 			.. (variant or "")
+			.. (if enchanted then "|enchanted" else "|plain")
 		if key == itemKey then
 			return
 		end
@@ -186,7 +187,7 @@ function FirstPersonHand.Start()
 			return
 		end
 		local container, primary, cube =
-			HeldItem.MakeVisual(id, tonumber(rawLevel) or 0, SPRITE_SCALE, variant)
+			HeldItem.MakeVisual(id, tonumber(rawLevel) or 0, SPRITE_SCALE, variant, enchanted)
 		for _, part in ipairs(container:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch =
@@ -223,7 +224,11 @@ function FirstPersonHand.Start()
 			sleeve.Color = partColor(character, { "RightUpperArm", "RightLowerArm", "Right Arm" })
 			local held = character:GetAttribute("HeldItem")
 			local isBow = typeof(held) == "string" and string.sub(held, 1, 4) == "bow:"
-			setItem(held, if isBow then BowState.ModelId(character) else nil)
+			setItem(
+				held,
+				if isBow then BowState.ModelId(character) else nil,
+				character:GetAttribute("HeldEnchanted") == true
+			)
 			arm.Transparency = if item then 1 else 0
 			sleeve.Transparency = arm.Transparency
 			-- walking bob (Minecraft view bobbing, small) and the swing

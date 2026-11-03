@@ -86,7 +86,8 @@ local function update(dt: number)
 				then rules.drainPerSprintSecond
 				else rules.drainPerWalkSecond) * dt
 		end
-		-- Голод from a splash potion [решение: hungerPerSecond]
+		-- Hunger I: 0.005 exhaustion/tick × 20 / 4 = 0.025 food points/s [vanilla].
+		-- Food and splash potions share the same timed effect, so they never drain twice.
 		cost += Potions.HUNGER_PER_SECOND * Effects.level(character, "Hunger") * dt
 		drain(player, cost)
 		local hunger = profile.hunger

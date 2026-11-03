@@ -9,6 +9,7 @@ local WindowInput = {}
 function WindowInput.GameplayBlocked(windowOpen: boolean): boolean
 	if
 		windowOpen
+		or Players.LocalPlayer:GetAttribute("LoadingBlocked") == true
 		or require(script.Parent.HudLayout).isEditing()
 		or UserInputService:GetFocusedTextBox()
 	then
@@ -37,7 +38,7 @@ function WindowInput.Start(isOpen: () -> boolean)
 		"PrisonWindowInput",
 		Enum.RenderPriority.Camera.Value + 1,
 		function()
-			local open = isOpen()
+			local open = isOpen() or player:GetAttribute("LoadingBlocked") == true
 			if open ~= blocked then
 				blocked = open
 				if open then

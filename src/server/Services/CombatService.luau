@@ -52,10 +52,11 @@ function CombatService.ApplyDamage(
 	source: "player" | "boss" | "mob",
 	attacker: Player?,
 	attackerModel: Model?,
-	dodgeable: boolean?
-): boolean
+	dodgeable: boolean?,
+	impactContext: any?
+): (boolean, number, string)
 	if amount ~= amount or amount <= 0 or amount == math.huge or humanoid.Health <= 0 then
-		return false
+		return false, 0, "protected"
 	end
 	local character = humanoid.Parent
 	if
@@ -66,7 +67,7 @@ function CombatService.ApplyDamage(
 			or character:GetAttribute("Shielded") == true
 		)
 	then
-		return false
+		return false, 0, "protected"
 	end
 	local victim = if character and character:IsA("Model")
 		then Players:GetPlayerFromCharacter(character)
@@ -77,11 +78,28 @@ function CombatService.ApplyDamage(
 		and victimProfile
 		and math.random() < TrainerService.dodgeChance(victimProfile)
 	then
-		return false -- a dodge consumes neither health nor the target's hurt-immunity window
+		return false, 0, "dodged" -- consumes neither health nor the target's hurt-immunity window
 	end
 	amount = DamageImmunity.Accept(humanoid, amount)
 	if amount <= 0 then
-		return false
+		return false, 0, "cooldown"
+	end
+	local by = attackerModel or (if attacker then attacker.Character else nil)
+	local byRoot = by and (by:FindFirstChild("HumanoidRootPart") or by.PrimaryPart)
+	local context = impactContext or {}
+	if not context.from and byRoot and byRoot:IsA("BasePart") then
+		context.from = byRoot.Position
+	end
+	local beforeHealth = humanoid.Health
+	local beforeGolden = if character
+		then tonumber(character:GetAttribute("AbsorptionHealth")) or 0
+		else 0
+	local function outcome(): (boolean, number, string)
+		local afterGolden = if character
+			then tonumber(character:GetAttribute("AbsorptionHealth")) or 0
+			else 0
+		local dealt = math.max(0, beforeHealth - humanoid.Health + beforeGolden - afterGolden)
+		return dealt > 0, dealt, if dealt > 0 then "hit" else "protected"
 	end
 	if victim then
 		CombatService.MarkHit(victim, source, attacker)
@@ -90,15 +108,14 @@ function CombatService.ApplyDamage(
 		amount = Combat.armorReduce(amount, profile and profile.armor)
 		if profile then
 			-- the armor's ancient books: Шныр, Халк, and the answers to the attacker
-			local by = attackerModel or (if attacker then attacker.Character else nil)
 			amount = BookService.incoming(victim, profile, amount, source, by)
 			if source == "boss" then
 				amount = BossDamage.Limit(humanoid, amount)
 			end
 			local before = humanoid.Health
-			HurtService.Damage(humanoid, amount)
+			HurtService.Damage(humanoid, amount, context)
 			BookService.afterHurt(victim, profile, before - humanoid.Health, by)
-			return amount > 0
+			return outcome()
 		end
 		if source == "boss" then
 			amount = BossDamage.Limit(humanoid, amount)
@@ -110,8 +127,8 @@ function CombatService.ApplyDamage(
 		)
 		humanoid:SetAttribute("LastHitAt", os.clock())
 	end
-	HurtService.Damage(humanoid, amount)
-	return amount > 0
+	HurtService.Damage(humanoid, amount, context)
+	return outcome()
 end
 
 function CombatService.remainingSeconds(player: Player): number
@@ -297,16 +314,28 @@ function CombatService.HitModel(
 			or model:GetAttribute("NoPvp") == true
 			or (player.Character ~= nil and player.Character:GetAttribute("NoPvp") == true)
 		if mine and mine.pvp and other and other.pvp and not sameFaction then
-			local before = target.Health
-			CombatService.ApplyDamage(target, damage, "player", player)
-			local dealt = before - target.Health
-			if dealt > 0 then
-				HurtService.Knockback(model, look, if melee and melee.sprint then 2 else 1)
-			end
+			local fromRoot = player.Character
+				and player.Character:FindFirstChild("HumanoidRootPart")
+			local targetRoot = model:FindFirstChild("HumanoidRootPart")
+			local direction = if not ranged
+					and fromRoot
+					and fromRoot:IsA("BasePart")
+					and targetRoot
+					and targetRoot:IsA("BasePart")
+				then targetRoot.Position - fromRoot.Position
+				else look
+			local _, dealt, verdict =
+				CombatService.ApplyDamage(target, damage, "player", player, nil, nil, {
+					push = HurtService.Impulse(
+						model,
+						direction,
+						if melee and melee.sprint then 2 else 1
+					),
+				})
 			local result = if target.Health <= 0
 				then "killed"
 				elseif dealt > 0 then "hit"
-				else "blocked"
+				else verdict
 			confirm:FireClient(player, model, dealt, crit, result)
 			if crit and dealt > 0 then
 				critBurst(model, player)
@@ -399,19 +428,21 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 		0,
 		base + 3 * Effects.level(character, "Strength") - 4 * Effects.level(character, "Weakness")
 	)
-	local stateNow = humanoid:GetState()
 	local root = character:FindFirstChild("HumanoidRootPart")
 	local sprint = character:GetAttribute("Sprinting") == true and charge > 0.9
-	local restricted = sprint
-		or humanoid.Sit
-		or stateNow == Enum.HumanoidStateType.Climbing
-		or stateNow == Enum.HumanoidStateType.Swimming
-		or stateNow == Enum.HumanoidStateType.Flying
-		or Ladders.near(character) ~= nil
-		or Cobweb.holds(character)
-		or Effects.level(character, "Blindness") > 0
-		or Effects.level(character, "SlowFalling") > 0
-		or Effects.level(character, "Levitation") > 0
+	local function criticalRestricted(): boolean
+		local stateNow = humanoid:GetState()
+		return character:GetAttribute("Sprinting") == true
+			or humanoid.Sit
+			or stateNow == Enum.HumanoidStateType.Climbing
+			or stateNow == Enum.HumanoidStateType.Swimming
+			or stateNow == Enum.HumanoidStateType.Flying
+			or Ladders.near(character) ~= nil
+			or Cobweb.holds(character)
+			or Effects.level(character, "Blindness") > 0
+			or Effects.level(character, "SlowFalling") > 0
+			or Effects.level(character, "Levitation") > 0
+	end
 	local function observedGrounded(): boolean
 		if not root or not root:IsA("BasePart") then
 			return true
@@ -434,11 +465,17 @@ local function onAttack(player: Player, direction: any, falling: any, hint: any,
 			return false
 		end
 		local speed = root.AssemblyLinearVelocity.Y
+		-- The replicated velocity can still show ascent after the owner has crossed the apex.
+		-- Prefer recent movement evidence during Freefall, as hit positions already do.
+		-- Reports remain client-owned input; the physical ground ray below is mandatory.
+		if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+			speed = MotionService.verticalSpeed(player) or speed
+		end
 		return Combat.canCrit(
 			charge,
 			falling == true and speed < -0.5,
 			observedGrounded(),
-			restricted
+			criticalRestricted()
 		)
 	end
 	local crit = observedCrit()

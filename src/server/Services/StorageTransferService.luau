@@ -20,13 +20,26 @@ local function hasDeath(player: Player): boolean
 	return profile ~= nil and (profile :: any).storageDeath ~= nil
 end
 
+local function hasOtherSettlement(player: Player): boolean
+	local profile = Profile.Get(player)
+	return profile ~= nil
+		and (
+			(profile :: any).bossRewardPending ~= nil
+			or (profile :: any).playerTransfer ~= nil
+			or (profile :: any).playerTransferIncoming ~= nil
+		)
+end
+
 local function pending(player: Player): any
 	local profile = Profile.Get(player)
 	return profile and (profile :: any).storageTransfer
 end
 
 function Transfers.Pending(player: Player): boolean
-	return pending(player) ~= nil or hasDeath(player) or busy[player] == true
+	return pending(player) ~= nil
+		or hasDeath(player)
+		or hasOtherSettlement(player)
+		or busy[player] == true
 end
 
 local function deliver(profile: any, remaining: any)
@@ -103,10 +116,16 @@ function Transfers.Resolve(player: Player)
 		return
 	end
 	busy[player] = true
-	player:SetAttribute("SharedStorageBusy", pending(player) ~= nil or hasDeath(player))
+	player:SetAttribute(
+		"SharedStorageBusy",
+		pending(player) ~= nil or hasDeath(player) or hasOtherSettlement(player)
+	)
 	local ok, err = pcall(resolve, player)
 	busy[player] = nil
-	player:SetAttribute("SharedStorageBusy", pending(player) ~= nil or hasDeath(player))
+	player:SetAttribute(
+		"SharedStorageBusy",
+		pending(player) ~= nil or hasDeath(player) or hasOtherSettlement(player)
+	)
 	if not ok then
 		warn("[StorageTransfer] recovery deferred: " .. tostring(err))
 	end

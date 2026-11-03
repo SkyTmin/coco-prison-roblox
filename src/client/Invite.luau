@@ -4,6 +4,7 @@
 -- the gifts. Used by the main menu tile and the level screen button.
 local Players = game:GetService("Players")
 local SocialService = game:GetService("SocialService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Invite = {}
 
@@ -21,9 +22,25 @@ function Invite.prompt(onUnavailable: () -> ())
 			return SocialService:CanSendGameInviteAsync(player)
 		end)
 		if ok and can then
+			local options: ExperienceInviteOptions? = nil
+			local folder = ReplicatedStorage:FindFirstChild("Remotes")
+			local route = folder and folder:FindFirstChild("ServerInviteRoute")
+			if route and route:IsA("RemoteFunction") then
+				local routed, launch = pcall(function()
+					return route:InvokeServer()
+				end)
+				if routed and typeof(launch) == "string" and #launch <= 200 then
+					local routedOptions = Instance.new("ExperienceInviteOptions")
+					routedOptions.LaunchData = launch
+					options = routedOptions
+				end
+			end
 			local shown = pcall(function()
-				SocialService:PromptGameInvite(player)
+				SocialService:PromptGameInvite(player, options)
 			end)
+			if options then
+				options:Destroy()
+			end
 			if not shown then
 				onUnavailable()
 			end

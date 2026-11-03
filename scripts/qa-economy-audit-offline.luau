@@ -227,6 +227,7 @@ modules.PrisPlus = {
 modules.Chat, modules.CollisionGroups = {}, {}
 modules.ChatService = { fail = function() end, reply = function() end }
 modules.WarzoneService = { OnDug = function() end }
+modules.TutorialService = { OnDug = function() end }
 for _, name in
 	{
 		"Numbers",
@@ -378,24 +379,42 @@ check(
 	"corrupt stack cannot poison coins through sale",
 	sold == 0 and p.coins == 0 and p.inventory[1] ~= nil
 )
+-- Command validation ends at the durable transport boundary. Actual delivery/crash/retry
+-- semantics are exercised by qa-player-transfer-offline.luau, never simulated by saveBoth.
+local transfers = {}
+modules.PlayerTransferService = {
+	Submit = function(sender, target, kind, amount)
+		table.insert(transfers, { sender = sender, target = target, kind = kind, amount = amount })
+		return true
+	end,
+}
 local commands = execute("src/server/Services/ChatCommandService.luau", function(src)
 	return src:gsub("return ChatCommandService%s*$", "return { pay = pay, rubb = rubb }")
 end)
 p.coins = 0 / 0
 fresh(recipient)
 commands.pay(actor, { "Recipient", "10" })
-check("corrupt balance cannot mint money to another player", profiles[recipient].coins == 0)
+check(
+	"corrupt balance cannot reach transfer transport",
+	#transfers == 0 and profiles[recipient].coins == 0
+)
 p.coins = 100000
 commands.pay(actor, { "Recipient", "5" })
 check(
-	"valid payment still transfers exact money",
-	p.coins == 50000 and profiles[recipient].coins == 50000
+	"valid payment submits exact money to durable transport",
+	#transfers == 1
+		and transfers[1].sender == actor
+		and transfers[1].target == recipient
+		and transfers[1].kind == "pay"
+		and transfers[1].amount == 50000
+		and p.coins == 100000
+		and profiles[recipient].coins == 0
 )
 p.storageTransfer = { phase = "delivered" }
 commands.pay(actor, { "Recipient", "1" })
 check(
 	"pending storage prevents payment export",
-	p.coins == 50000 and profiles[recipient].coins == 50000
+	#transfers == 1 and p.coins == 100000 and profiles[recipient].coins == 0
 )
 p.storageTransfer = nil
 local drops = execute("src/server/Services/ItemDropService.luau", function(src)

@@ -35,6 +35,7 @@ local Eating = require(script.Eating)
 local LevelWindow = require(script.LevelWindow)
 local BlockBreak = require(script.BlockBreak)
 local EffectsHud = require(script.EffectsHud)
+local HurtFeedback = require(script.HurtFeedback)
 local SettingsWindow = require(script.SettingsWindow)
 local Wire = require(Shared.Wire)
 local BlockColors = require(Shared.BlockColors)
@@ -130,6 +131,7 @@ local statText: { [string]: TextLabel } = {}
 do
 	local SB_ROW = 20
 	stats = Ui.panel(gui, UDim2.fromOffset(214, 30 + SB_ROW * 6 + 10), UDim2.new(1, -224, 0.40, 0))
+	stats.Name = "Scoreboard"
 	statText.sbTitle = Ui.label(
 		stats,
 		"",
@@ -566,11 +568,7 @@ local function levelProgress(): number
 end
 local function renderSurvival()
 	local humanoid = trackedHumanoid
-	local health = if humanoid then humanoid.Health else 0
-	local maxHealth = if humanoid then humanoid.MaxHealth else 20
-	local character = humanoid and humanoid.Parent
-	local golden = character and character:GetAttribute("AbsorptionHealth")
-	local absorbed = if typeof(golden) == "number" then math.max(0, golden) else 0
+	local health, maxHealth, absorbed = HurtFeedback.Health(humanoid)
 	survivalBars.health.update(health, maxHealth, absorbed)
 	survivalBars.health.tooltip.Text = T("health_tooltip", health, maxHealth)
 	local hunger = if profile then profile.hunger else Config.rules.survival.hunger.max
@@ -584,6 +582,7 @@ local function renderSurvival()
 	xpLevel.Text = tostring(if profile then profile.level else 1)
 	xpFill.Size = UDim2.fromScale(levelProgress(), 1)
 end
+HurtFeedback.Changed:Connect(renderSurvival)
 local function watchHealth(character: Model)
 	for _, connection in ipairs(healthConnections) do
 		connection:Disconnect()
@@ -636,6 +635,17 @@ local function fitWindow(win: Frame, layout: WindowLayout)
 		win.Size = layout.size
 	elseif win.Name == "Window_Auction" then
 		local width, height = require(script.AuctionLayout).window(viewport.X, viewport.Y, inset)
+		layout.size = UDim2.fromOffset(width, height)
+		layout.anchor = Vector2.new(0.5, 0.5)
+		layout.position = UDim2.new(0.5, 0, 0.5, (inset - 4) / 2)
+		win.Size = layout.size
+	elseif
+		win.Name == "Window_Actions"
+		or win.Name == "Window_ResetProgress"
+		or win.Name == "Window_Creative"
+	then
+		local width, height =
+			require(script.ReleaseLayout).window(win.Name, viewport.X, viewport.Y, inset)
 		layout.size = UDim2.fromOffset(width, height)
 		layout.anchor = Vector2.new(0.5, 0.5)
 		layout.position = UDim2.new(0.5, 0, 0.5, (inset - 4) / 2)
@@ -710,6 +720,7 @@ local function renderSlot(
 	image.BackgroundColor3 = tile or Color3.new()
 	image.BackgroundTransparency = if tile then 0 else 1
 	name.Visible = false
+	require(script.EnchantmentVisual).slot(image, stack)
 end
 
 local function renderHotbar()
@@ -1224,7 +1235,8 @@ local function locationPreview(
 		image.BackgroundColor3 = Ui.colors.slot
 		image.BorderSizePixel = 0
 		image.Image = previewId
-		image.ScaleType = Enum.ScaleType.Crop
+		-- Keep the real location's landmarks visible, including the wider interior/neighborhood views.
+		image.ScaleType = Enum.ScaleType.Fit
 		image.Parent = parent
 		pvpBadge(image, location)
 		return image
@@ -1938,6 +1950,9 @@ local windowBuilders: { [string]: () -> Frame } = {
 }
 require(script.GangNpcWindow).listen() -- the treasure chest capture broken by damage lets the prompt go
 local function open(kind: string)
+	if player:GetAttribute("LoadingBlocked") == true then
+		return
+	end
 	local builder = windowBuilders[kind]
 	if not builder then
 		return
@@ -2110,6 +2125,7 @@ workspace.DescendantAdded:Connect(function(instance)
 	end
 end)
 task.defer(localizeWorld)
+require(script.PromptLocalizer).Start()
 
 -- ---------------------------------------------------------------- profile rendering
 -- the movable HUD (HudLayout): set up with the touch controls below
@@ -2154,12 +2170,26 @@ windowBuilders.settings = function()
 	refreshMenu = refresh
 	return win
 end
+windowBuilders.actions = function()
+	local win, refresh =
+		require(script.ActionsWindow).build(gui, profile, locale, closeWindow, createWindow)
+	refreshMenu = refresh
+	return win
+end
+require(script.TutorialGuide).Start(gui, function()
+	return profile
+end, function(kind)
+	open(kind)
+end, function()
+	return currentWindowKind ~= nil or HudLayout.isEditing()
+end)
 local shownHudLayout = ""
 local function render(p: Types.Profile)
 	local nextLocale = p.locale or Config.defaultLocale
 	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
 	local previousLevel = if profile then profile.level else nil
 	profile = p
+	require(game:GetService("ReplicatedFirst").Loading.LoadingController).Profile(p)
 	if previousLevel and p.level > previousLevel then
 		LevelWindow.celebrate(gui, nextLocale, p.level, previousLevel)
 	end
@@ -2227,7 +2257,10 @@ local function render(p: Types.Profile)
 	refreshWindow(rebuild)
 end
 -- the profile crosses the network Wire-encoded (sparse slot tables survive intact)
-Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any)
+Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any, loaded: boolean?)
+	require(game:GetService("ReplicatedFirst").Loading.LoadingController).SnapshotReady(
+		loaded == true
+	)
 	render(Wire.decode(encoded))
 end)
 -- then only the changes (ProfileService diff): a changed field, or changed entries of a table field;
@@ -3027,6 +3060,7 @@ touchMenuGrid.BackgroundTransparency = 1
 touchMenuGrid.Visible = false
 touchMenuGrid.Parent = touchMenus
 local menuKeys = {
+	"actions",
 	"locations",
 	"jobs",
 	"upgrade",
@@ -3143,6 +3177,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 end)
 for i, kind in ipairs(menuKeys) do
 	local icon = Config.icons.icons["menu_" .. kind]
+		or (if kind == "actions" then Config.icons.icons.rank_1 else nil)
 		or (if kind == "gangs" then Config.icons.icons.top_crown else nil) -- until menu_gangs is uploaded
 		or (if kind == "rubbish" then Config.iconFor("fire_shard") else nil) -- until menu_rubbish is uploaded
 		or (if kind == "daily" then Config.iconFor("ancient_star") else nil) -- until menu_daily is uploaded
@@ -3158,6 +3193,7 @@ for i, kind in ipairs(menuKeys) do
 		elseif kind == "rubbish" then "rubbish_title"
 		elseif kind == "daily" then "daily_short"
 		elseif kind == "pris" then "pris_title"
+		elseif kind == "actions" then "release_actions"
 		else kind
 	local button = touchIconButton(touchMenuGrid, icon, "", 56, T(captionKey))
 	button.Position = UDim2.fromOffset(((i - 1) % 6) * 60, math.floor((i - 1) / 6) * 60)
@@ -3495,6 +3531,7 @@ HudLayout.register("boosters", boosterHud, true, true)
 HudLayout.register("effects", effectsHud, true, true)
 do
 	local sprintButton = require(script.Sprint).start(touchActions)
+	require(script.SpringJump).start()
 	HudLayout.register("sprint", sprintButton, true, false)
 	-- the joystick pushed to its edge sprints by itself, so the «Бег» button is off at the start; «Добавить» in the
 	-- layout editor brings it back [владелец 28.10: «кнопка быстрого бега стоит не там … если джостик потянут сильно,
@@ -3704,7 +3741,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		closeWindow()
 		return
 	end
-	if processed then
+	if processed or player:GetAttribute("LoadingBlocked") == true then
 		return
 	end
 	local k = input.KeyCode
@@ -3767,6 +3804,7 @@ UserInputService.InputChanged:Connect(function(input, processed)
 	if
 		processed
 		or not profile
+		or player:GetAttribute("LoadingBlocked") == true
 		or currentWindowKind
 		or HudLayout.isEditing()
 		or UserInputService:GetFocusedTextBox()
@@ -3900,4 +3938,5 @@ if RunService:IsStudio() then
 	-- on the Player, not in PlayerGui: PlayerGui empties when the character respawns and the hook was lost
 	hook.Parent = player
 end
+require(game:GetService("ReplicatedFirst").Loading.LoadingController).ClientReady()
 print(string.format("[coco-prison] client ready (%s)", locale))

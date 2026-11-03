@@ -48,7 +48,12 @@ end
 
 local function settle(player: Player)
 	local profile = ProfileService.Get(player) :: any
-	if not profile or not ProfileService.IsReal(player) or profile.storageTransfer then
+	if
+		not profile
+		or not ProfileService.IsReal(player)
+		or profile.storageTransfer
+		or profile.bossRewardPending
+	then
 		return
 	end
 	local state = profile.storageDeath
@@ -150,7 +155,14 @@ local function resolve(player: Player)
 	local profile = ProfileService.Get(player) :: any
 	player:SetAttribute(
 		"SharedStorageBusy",
-		profile ~= nil and (profile.storageTransfer ~= nil or profile.storageDeath ~= nil)
+		profile ~= nil
+			and (
+				profile.storageTransfer ~= nil
+				or profile.playerTransfer ~= nil
+				or profile.playerTransferIncoming ~= nil
+				or profile.storageDeath ~= nil
+				or profile.bossRewardPending ~= nil
+			)
 	)
 	if not ok then
 		warn("[DeathService] deferred settlement: " .. tostring(err))
@@ -203,7 +215,11 @@ local function died(player: Player, character: Model)
 			killer = nil
 		end
 	end
-	if (profile :: any).storageTransfer or (profile :: any).storageDeath then
+	if
+		(profile :: any).storageTransfer
+		or (profile :: any).storageDeath
+		or (profile :: any).bossRewardPending
+	then
 		local dropItems = character:IsDescendantOf(workspace)
 			and (not rules.dropInPvpOnly or inPvp(character, profile))
 		local root = character:FindFirstChild("HumanoidRootPart")
@@ -213,14 +229,22 @@ local function died(player: Player, character: Model)
 		ProfileService.Mutate(player, function(p: any)
 			local state = p.storageDeath or { queue = {} }
 			local transferId = p.storageTransfer and p.storageTransfer.id
+			local bossRewardIds = {}
+			for _, award in if p.bossRewardPending then p.bossRewardPending.queue else {} do
+				bossRewardIds[award.id] = true
+			end
 			for _, queued in state.queue do
 				if queued.transferId == transferId then
 					transferId = nil -- only the first death may own this transfer's reserved inventory
+				end
+				for id in queued.bossRewardIds or {} do
+					bossRewardIds[id] = nil
 				end
 			end
 			local entry = {
 				id = HttpService:GenerateGUID(false),
 				transferId = transferId,
+				bossRewardIds = bossRewardIds,
 				dropItems = dropItems,
 				drops = {},
 				position = { position.X, position.Y, position.Z },

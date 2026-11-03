@@ -9,8 +9,7 @@
 --   * /pay ник сумма [клиент pay.*]: from 1 $, not to yourself, the receiver may refuse transfers in the settings
 --     (settings.payOff). Both players must be on this server with real profiles (a transfer to another server or an
 --     offline player is refused: it would need an outside outbox). The check and both Mutates run without a yield
---     in between, so nothing can spend the money twice; then the sender is saved first and the receiver next — a
---     crash between the two saves loses the transfer at worst, it never doubles it.
+--     in between. PlayerTransferService persists a debited outbox before external credit and uses recipient receipts.
 --   * /gift ник [клиент gift.*; сеть TG/25]: the whole stack in the hand, never a block, not a Config.chat.giftForbidden
 --     item; the receiver on the same location within giftRangeBlocks, accepting gifts (settings.giftOff), with room;
 --     on the База банды only to your own gang [клиент gift.error.gang]. The stack moves whole (books, potions, level).
@@ -46,11 +45,30 @@ local Warzone = require(Shared.Warzone)
 local ChatService = require(script.Parent.ChatService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
+local PlayerTransfer = require(script.Parent.PlayerTransferService)
 
 local ChatCommandService = {}
 local cfg = Config.chat
 local started = false
 local lastCommand: { [Player]: number } = {}
+local actionReplies: { [Player]: any } = {}
+local actionStacks: { [Player]: any } = {}
+
+local function reply(player: Player, key: string, ...: any)
+	if actionReplies[player] then
+		actionReplies[player] = { ok = true, key = key, args = { ... } }
+	else
+		ChatService.reply(player, key, ...)
+	end
+end
+
+local function fail(player: Player, key: string, ...: any)
+	if actionReplies[player] then
+		actionReplies[player] = { ok = false, key = key, args = { ... } }
+	else
+		ChatService.fail(player, key, ...)
+	end
+end
 
 local function units(dollars: number): number
 	return math.floor(dollars * Config.moneyScale + 0.5)
@@ -71,6 +89,12 @@ end
 local function findPlayer(query: string): (Player?, string?)
 	local wanted = Strings.lower(query)
 	local starts = {}
+	-- Canonical usernames supplied by the action menu must not match another player's display name.
+	for _, other in ipairs(Players:GetPlayers()) do
+		if Strings.lower(other.Name) == wanted then
+			return other, nil
+		end
+	end
 	for _, other in ipairs(Players:GetPlayers()) do
 		local name, display = Strings.lower(other.Name), Strings.lower(other.DisplayName)
 		if name == wanted or display == wanted then
@@ -93,43 +117,36 @@ local function receiver(player: Player, query: string?, selfKey: string): (Playe
 	end
 	local target, err = findPlayer(query)
 	if not target then
-		ChatService.fail(player, err :: string, query)
+		fail(player, err :: string, query)
 		return nil, nil
 	end
 	if target == player then
-		ChatService.fail(player, selfKey)
+		fail(player, selfKey)
 		return nil, nil
 	end
 	local profile = ProfileService.Get(target)
-	if not profile or not ProfileService.IsReal(target) then
-		ChatService.fail(player, "chat_player_not_found", query)
+	if not profile or not ProfileService.IsReal(target) or not ProfileService.CanExport(target) then
+		fail(player, "chat_player_not_found", query)
 		return nil, nil
 	end
 	return target, profile
-end
-
-local function saveBoth(first: Player, second: Player)
-	task.spawn(function()
-		ProfileService.SaveNow(first)
-		ProfileService.SaveNow(second)
-	end)
 end
 
 -- ── /pay ────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 local function pay(player: Player, args: { string })
 	if not ProfileService.CanExport(player) then
-		ChatService.fail(player, "chat_not_ready")
+		fail(player, "chat_not_ready")
 		return
 	end
 	local profile = ProfileService.Get(player)
 	if not args[1] or not args[2] then
-		ChatService.fail(player, "chat_pay_usage")
+		fail(player, "chat_pay_usage")
 		return
 	end
 	local amount = tonumber((args[2]:gsub(",", ".")))
 	if not amount or amount ~= amount or amount < cfg.payMin or amount > 1e12 then
-		ChatService.fail(player, "chat_pay_min", cfg.payMin)
+		fail(player, "chat_pay_min", cfg.payMin)
 		return
 	end
 	local target, targetProfile = receiver(player, args[1], "chat_pay_self")
@@ -137,47 +154,33 @@ local function pay(player: Player, args: { string })
 		return
 	end
 	if targetProfile.settings and targetProfile.settings.payOff then
-		ChatService.fail(player, "chat_pay_off", target.DisplayName)
+		fail(player, "chat_pay_off", target.DisplayName)
 		return
 	end
 	local sum = units(math.floor(amount * 100 + 1e-6) / 100) -- whole cents
 	if
 		not Numbers.canAfford(profile.coins, sum) or not Numbers.canCredit(targetProfile.coins, sum)
 	then
-		ChatService.fail(player, "chat_pay_no_money", Strings.money(profile.coins))
+		fail(player, "chat_pay_no_money", Strings.money(profile.coins))
 		return
 	end
-	-- no yield from the check to here: the money leaves one profile and enters the other at once
-	ProfileService.Mutate(player, function(p)
-		p.coins -= sum
-	end)
-	ProfileService.Mutate(target, function(p)
-		p.coins += sum
-	end)
-	ChatService.reply(player, "chat_pay_sent", Strings.money(sum), target.DisplayName)
-	ChatService.reply(target, "chat_pay_received", player.DisplayName, Strings.money(sum))
-	Remotes.event("Toast"):FireClient(
-		target,
-		Strings.t(
-			"chat_pay_received",
-			Strings.localeOf(target),
-			player.DisplayName,
-			Strings.money(sum)
-		)
-	)
-	saveBoth(player, target)
+	if PlayerTransfer.Submit(player, target, "pay", sum) then
+		reply(player, "release_transfer_pending")
+	else
+		fail(player, "chat_not_ready")
+	end
 end
 
 -- ── /rubb, /stats ник (этап 8) ──────────────────────────────────────────────────────────────────────────────────
 
 local function rubb(player: Player, args: { string })
 	if not ProfileService.CanExport(player) then
-		ChatService.fail(player, "chat_not_ready")
+		fail(player, "chat_not_ready")
 		return
 	end
 	local profile = ProfileService.Get(player)
 	if not args[1] or not args[2] then
-		ChatService.fail(player, "chat_rubb_usage")
+		fail(player, "chat_rubb_usage")
 		return
 	end
 	local amount = tonumber(args[2])
@@ -189,7 +192,7 @@ local function rubb(player: Player, args: { string })
 		or amount > 1e9
 		or amount ~= math.floor(amount)
 	then
-		ChatService.fail(player, "chat_rubb_min", min)
+		fail(player, "chat_rubb_min", min)
 		return
 	end
 	local target, targetProfile = receiver(player, args[1], "chat_rubb_self")
@@ -197,31 +200,21 @@ local function rubb(player: Player, args: { string })
 		return
 	end
 	if targetProfile.settings and targetProfile.settings.payOff then
-		ChatService.fail(player, "chat_pay_off", target.DisplayName)
+		fail(player, "chat_pay_off", target.DisplayName)
 		return
 	end
 	if
 		not Numbers.canAfford(PrisPlus.rubies(profile), amount)
 		or not Numbers.canCredit(PrisPlus.rubies(targetProfile), amount)
 	then
-		ChatService.fail(player, "chat_rubb_no_rubies", PrisPlus.rubies(profile))
+		fail(player, "chat_rubb_no_rubies", PrisPlus.rubies(profile))
 		return
 	end
-	-- no yield from the check to here: the rubies leave one profile and enter the other at once
-	ProfileService.Mutate(player, function(p)
-		local left = PrisPlus.rubies(p) - amount
-		p.rubies = if left > 0 then left else nil
-	end)
-	ProfileService.Mutate(target, function(p)
-		p.rubies = PrisPlus.rubies(p) + amount
-	end)
-	ChatService.reply(player, "chat_rubb_sent", amount, target.DisplayName)
-	ChatService.reply(target, "chat_rubb_received", player.DisplayName, amount)
-	Remotes.event("Toast"):FireClient(
-		target,
-		Strings.t("chat_rubb_received", Strings.localeOf(target), player.DisplayName, amount)
-	)
-	saveBoth(player, target)
+	if PlayerTransfer.Submit(player, target, "rubies", amount) then
+		reply(player, "release_transfer_pending")
+	else
+		fail(player, "chat_not_ready")
+	end
 end
 
 local function stats(player: Player, args: { string })
@@ -232,7 +225,7 @@ local function stats(player: Player, args: { string })
 	local who = args[1] and Strings.lower(args[1])
 	if not who or who == Strings.lower(player.Name) or who == Strings.lower(player.DisplayName) then
 		local own = profile.stats
-		ChatService.reply(
+		reply(
 			player,
 			"chat_stats",
 			profile.level,
@@ -244,17 +237,17 @@ local function stats(player: Player, args: { string })
 		return
 	end
 	if not PrisPlus.active(profile) then
-		ChatService.fail(player, "chat_stats_other")
+		fail(player, "chat_stats_other")
 		return
 	end
 	local target, err = findPlayer(args[1])
 	local other = target and ProfileService.Get(target)
 	if not target or not other then
-		ChatService.fail(player, err or "chat_player_not_found", args[1])
+		fail(player, err or "chat_player_not_found", args[1])
 		return
 	end
 	local s = other.stats
-	ChatService.reply(
+	reply(
 		player,
 		"chat_stats_of",
 		target.DisplayName,
@@ -294,44 +287,45 @@ local function fits(profile: Types.Profile, stack: Types.ItemStack): boolean
 	return false
 end
 
-local function give(profile: Types.Profile, stack: Types.ItemStack)
-	if InventoryService.isStackable(stack.id) and plain(stack) then
-		InventoryService.add(profile, stack.id, stack.count, stack.level)
-		return
-	end
-	for slot = 1, InventoryService.SLOTS do
-		if not profile.inventory[slot] then
-			profile.inventory[slot] = stack
-			return
-		end
-	end
-end
-
 local function gift(player: Player, args: { string })
 	if not ProfileService.CanExport(player) then
-		ChatService.fail(player, "chat_not_ready")
+		fail(player, "chat_not_ready")
 		return
 	end
 	local profile = ProfileService.Get(player)
 	if not args[1] then
-		ChatService.fail(player, "chat_gift_usage")
+		fail(player, "chat_gift_usage")
 		return
 	end
 	if not profile or not ProfileService.IsReal(player) then
 		return
 	end
-	local slot = profile.selectedSlot
+	local slot = if args[2] then tonumber(args[2]) else profile.selectedSlot
+	if not InventoryService.isSlot(slot) then
+		fail(player, "release_action_changed")
+		return
+	end
 	local stack = profile.inventory[slot]
 	if not stack then
-		ChatService.fail(player, "chat_gift_empty")
+		fail(player, "chat_gift_empty")
+		return
+	end
+	local amount = if args[3] then tonumber(args[3]) else stack.count
+	if not Numbers.integer(amount, 1) or amount > stack.count then
+		fail(player, "release_action_changed")
+		return
+	end
+	local expected = actionStacks[player]
+	if expected and not require(Shared.Persistence).equal(expected, stack) then
+		fail(player, "release_action_changed")
 		return
 	end
 	if Config.block(stack.id) then
-		ChatService.fail(player, "chat_gift_block")
+		fail(player, "chat_gift_block")
 		return
 	end
 	if table.find(cfg.giftForbidden, stack.id) then
-		ChatService.fail(player, "chat_gift_forbidden")
+		fail(player, "chat_gift_forbidden")
 		return
 	end
 	local target, targetProfile = receiver(player, args[1], "chat_gift_self")
@@ -340,60 +334,37 @@ local function gift(player: Player, args: { string })
 	end
 	local name = target.DisplayName
 	if targetProfile.settings and targetProfile.settings.giftOff then
-		ChatService.fail(player, "chat_gift_off", name)
+		fail(player, "chat_gift_off", name)
 		return
 	end
 	if targetProfile.location ~= profile.location then
-		ChatService.fail(player, "chat_gift_location", name)
+		fail(player, "chat_gift_location", name)
 		return
 	end
 	local a, b = rootOf(player), rootOf(target)
 	local range = cfg.giftRangeBlocks * Config.rules.combat.blockStuds
 	if not a or not b or (a.Position - b.Position).Magnitude > range then
-		ChatService.fail(player, "chat_gift_far", name, cfg.giftRangeBlocks)
+		fail(player, "chat_gift_far", name, cfg.giftRangeBlocks)
 		return
 	end
 	if profile.location == "gang_base" then
 		local gang = player:GetAttribute("GangId")
 		if typeof(gang) ~= "string" or target:GetAttribute("GangId") ~= gang then
-			ChatService.fail(player, "chat_gift_gang")
+			fail(player, "chat_gift_gang")
 			return
 		end
 	end
-	if not fits(targetProfile, stack) then
-		ChatService.fail(player, "chat_gift_full", name)
+	local moved = deepCopy(stack) :: Types.ItemStack
+	moved.count = amount
+	if not fits(targetProfile, moved) then
+		fail(player, "chat_gift_full", name)
 		return
 	end
-	-- no yield from the checks to here
-	local moved = deepCopy(stack) :: Types.ItemStack
-	ProfileService.Mutate(player, function(p)
-		p.inventory[slot] = nil
-	end)
-	ProfileService.Mutate(target, function(p)
-		give(p, moved)
-	end)
-	local function itemName(who: Player): string
-		return Strings.itemName(moved.id, moved.level, Strings.localeOf(who))
+	if PlayerTransfer.Submit(player, target, "gift", moved, slot) then
+		reply(player, "release_transfer_pending")
+	else
+		fail(player, "chat_not_ready")
 	end
-	ChatService.reply(player, "chat_gift_sent", itemName(player), moved.count, name)
-	ChatService.reply(
-		target,
-		"chat_gift_received",
-		player.DisplayName,
-		itemName(target),
-		moved.count
-	)
-	Remotes.event("Toast"):FireClient(
-		target,
-		Strings.t(
-			"chat_gift_received",
-			Strings.localeOf(target),
-			player.DisplayName,
-			itemName(target),
-			moved.count
-		)
-	)
-	saveBoth(player, target)
 end
 
 -- ── /thx ────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -438,7 +409,7 @@ local function thx(player: Player, _args: { string })
 		end
 	end
 	if #due == 0 then
-		ChatService.fail(player, "chat_thx_none")
+		fail(player, "chat_thx_none")
 		return
 	end
 	local reward = units(cfg.thxPerLevel * profile.level)
@@ -457,7 +428,7 @@ local function thx(player: Player, _args: { string })
 	end)
 	for _, a in ipairs(due) do
 		local by = a.by :: string
-		ChatService.reply(player, "chat_thx_done", by, Strings.money(reward))
+		reply(player, "chat_thx_done", by, Strings.money(reward))
 		local owner = Players:FindFirstChild(by)
 		if
 			owner
@@ -468,7 +439,7 @@ local function thx(player: Player, _args: { string })
 			ProfileService.Mutate(owner, function(p)
 				p.coins += reward
 			end)
-			ChatService.reply(owner, "chat_thx_received", player.DisplayName, Strings.money(reward))
+			reply(owner, "chat_thx_received", player.DisplayName, Strings.money(reward))
 		end
 	end
 end
@@ -504,7 +475,7 @@ local function rubbish(player: Player, list: any)
 			p.inventory[slot] = nil
 		end
 	end)
-	ChatService.reply(player, "rubbish_done", n)
+	reply(player, "rubbish_done", n)
 end
 
 -- ── the other commands ──────────────────────────────────────────────────────────────────────────────────────────
@@ -521,12 +492,12 @@ local function hide(player: Player, _args: { string })
 		settings.hidePlayers = on
 		p.settings = settings
 	end)
-	ChatService.reply(player, if on then "chat_hide_on" else "chat_hide_off")
+	reply(player, if on then "chat_hide_on" else "chat_hide_off")
 end
 
 local function balance(player: Player, _args: { string })
 	local profile = ProfileService.Get(player) :: Types.Profile
-	ChatService.reply(
+	reply(
 		player,
 		"chat_balance",
 		Strings.money(profile.coins),
@@ -537,7 +508,7 @@ end
 
 local function blocks(player: Player, _args: { string })
 	local profile = ProfileService.Get(player) :: Types.Profile
-	ChatService.reply(player, "chat_blocks", Strings.big(profile.blocksTotal))
+	reply(player, "chat_blocks", Strings.big(profile.blocksTotal))
 end
 
 -- at the prison already: to its spawn spot; elsewhere: the trip to the prison lands on the spawn
@@ -567,7 +538,7 @@ local function gang(player: Player, args: { string })
 		or (sub == "invite" and not args[2])
 		or ((sub == "deposit" or sub == "withdraw") and not (amount and amount > 0))
 	then
-		ChatService.fail(player, "chat_gang_usage")
+		fail(player, "chat_gang_usage")
 		return
 	end
 	Remotes.event("ChatClient")
@@ -583,10 +554,7 @@ local function channel(kind: Chat.Kind?): (Player, { string }) -> ()
 		end
 		local target = ChatService.channelOf(player, kind)
 		if not target then
-			ChatService.fail(
-				player,
-				if kind == "faction" then "chat_no_faction" else "chat_no_gang"
-			)
+			fail(player, if kind == "faction" then "chat_no_faction" else "chat_no_gang")
 			return
 		end
 		Remotes.event("ChatClient"):FireClient(player, "channel", target)
@@ -594,11 +562,11 @@ local function channel(kind: Chat.Kind?): (Player, { string }) -> ()
 end
 
 local function help(player: Player, _args: { string })
-	ChatService.reply(player, "chat_help")
+	reply(player, "chat_help")
 end
 
 local function soon(player: Player, _args: { string })
-	ChatService.reply(player, "chat_soon")
+	reply(player, "chat_soon")
 end
 
 local function window(kind: string): (Player, { string }) -> ()
@@ -674,20 +642,42 @@ local function runArgs(player: Player, id: string, typed: { string }): boolean
 	end
 	if command.cooldown then
 		if os.clock() - (lastCommand[player] or -math.huge) < cfg.commandCooldownSeconds then
-			ChatService.fail(player, "chat_wait")
+			fail(player, "chat_wait")
 			return true
 		end
 		lastCommand[player] = os.clock()
 	end
 	if command.profile and not ProfileService.Get(player) then
-		ChatService.fail(player, "chat_not_ready")
+		fail(player, "chat_not_ready")
 		return true
 	end
 	local ok, err = pcall(command.run, player, args)
 	if not ok then
 		warn("[ChatCommandService] /" .. id .. ": " .. tostring(err))
+		fail(player, "release_action_failed")
 	end
 	return true
+end
+
+-- A no-chat action uses exactly the command's validation/outcome, with a structured sender response.
+function ChatCommandService.ExecuteAction(
+	player: Player,
+	id: string,
+	args: { string },
+	expectedStack: any?
+): any
+	if id ~= "pay" and id ~= "gift" and id ~= "hide" then
+		return { ok = false, key = "release_action_failed" }
+	end
+	if actionReplies[player] then
+		return { ok = false, key = "chat_wait" }
+	end
+	actionReplies[player] = { ok = false, key = "release_action_failed" }
+	actionStacks[player] = expectedStack
+	runArgs(player, id, args)
+	local result = actionReplies[player]
+	actionReplies[player], actionStacks[player] = nil, nil
+	return result
 end
 
 -- the command `id` typed as `text` (the alias first, then the arguments)
@@ -735,6 +725,7 @@ local function createCommands()
 end
 
 function ChatCommandService.Start()
+	PlayerTransfer.Start()
 	if started then
 		return
 	end

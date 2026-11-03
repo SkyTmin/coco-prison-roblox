@@ -1,0 +1,113 @@
+--!strict
+return {
+	tutorial_panel_blocks = { ru = "Блоки", en = "Blocks", es = "Bloques", fr = "Blocs" },
+	tutorial_panel_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
+	tutorial_panel_mine = {
+		ru = "Копайте отмеченные блоки",
+		en = "Mine the marked blocks",
+		es = "Mina los bloques marcados",
+		fr = "Minez les blocs indiqués",
+	},
+	tutorial_panel_sell = {
+		ru = "Добычи хватит! Продайте её скупщику",
+		en = "Enough resources! Sell them to the buyer",
+		es = "¡Ya tienes suficiente! Vende al comprador",
+		fr = "Assez de ressources ! Vendez-les à l'acheteur",
+	},
+	tutorial_panel_after_sale = {
+		ru = "Копайте дальше · после продажи $%s / $%s",
+		en = "Keep mining · after selling $%s / $%s",
+		es = "Sigue minando · al vender $%s / $%s",
+		fr = "Continuez à miner · après vente %s $ / %s $",
+	},
+	tutorial_task_title = {
+		ru = "Задание · %d / 2",
+		en = "Task · %d / 2",
+		es = "Tarea · %d / 2",
+		fr = "Mission · %d / 2",
+	},
+	tutorial_upgrade_goal = {
+		ru = "%s → уровень %d",
+		en = "%s → level %d",
+		es = "%s → nivel %d",
+		fr = "%s → niveau %d",
+	},
+	tutorial_money_progress = {
+		ru = "Деньги: $%s / $%s",
+		en = "Money: $%s / $%s",
+		es = "Dinero: $%s / $%s",
+		fr = "Argent : %s $ / %s $",
+	},
+	tutorial_counter_progress = {
+		ru = "%s: %s / %s",
+		en = "%s: %s / %s",
+		es = "%s: %s / %s",
+		fr = "%s : %s / %s",
+	},
+	tutorial_blocks_progress = {
+		ru = "Блоки: %s / %s",
+		en = "Blocks: %s / %s",
+		es = "Bloques: %s / %s",
+		fr = "Blocs : %s / %s",
+	},
+	tutorial_collect_upgrade = {
+		ru = "Соберите показанные требования. Копайте отмеченные блоки и продавайте добычу.",
+		en = "Meet these requirements. Mine the marked blocks and sell your resources.",
+		es = "Reúne los requisitos indicados. Mina los bloques marcados y vende tus recursos.",
+		fr = "Remplissez ces conditions. Minez les blocs indiqués et vendez vos ressources.",
+	},
+	tutorial_level_goal = {
+		ru = "Новое задание: повысьте уровень до %d",
+		en = "New task: reach level %d",
+		es = "Nueva tarea: alcanza el nivel %d",
+		fr = "Nouvelle mission : atteignez le niveau %d",
+	},
+	tutorial_collect_level = {
+		ru = "Накопайте нужное число блоков и заработайте деньги продажей.",
+		en = "Mine the required blocks and earn money by selling resources.",
+		es = "Mina los bloques necesarios y gana dinero vendiendo recursos.",
+		fr = "Minez le nombre de blocs requis et gagnez de l'argent en vendant vos ressources.",
+	},
+	tutorial_choose_level = {
+		ru = "Выберите «Повышение уровня»",
+		en = "Choose Level up",
+		es = "Elige Subir de nivel",
+		fr = "Choisissez Monter de niveau",
+	},
+	tutorial_buy_level = {
+		ru = "Нажмите кнопку повышения уровня",
+		en = "Press the Level up button",
+		es = "Pulsa el botón Subir de nivel",
+		fr = "Appuyez sur Monter de niveau",
+	},
+	tutorial_sell_blocks = {
+		ru = "Продайте добытые блоки. Следуйте жёлтой линии к скупщику, откройте окно и нажмите «Продать всё».",
+		en = "Sell your mined blocks. Follow the yellow line to the buyer, open the window and press Sell all.",
+		es = "Vende tus bloques. Sigue la línea amarilla hasta el comprador, abre su ventana y pulsa Vender todo.",
+		fr = "Vendez vos blocs. Suivez la ligne jaune jusqu'à l'acheteur, ouvrez sa fenêtre et appuyez sur Tout vendre.",
+	},
+	tutorial_open_menu = {
+		ru = "Откройте меню",
+		en = "Open the menu",
+		es = "Abre el menú",
+		fr = "Ouvrez le menu",
+	},
+	tutorial_choose_upgrade = {
+		ru = "Выберите «Улучшение предмета»",
+		en = "Choose Item upgrade",
+		es = "Elige Mejorar objeto",
+		fr = "Choisissez Améliorer un objet",
+	},
+	tutorial_choose_shovel = {
+		ru = "Выберите свою лопату",
+		en = "Select your shovel",
+		es = "Selecciona tu pala",
+		fr = "Sélectionnez votre pelle",
+	},
+	tutorial_buy_upgrade = {
+		ru = "Нажмите «Улучшить»",
+		en = "Press Upgrade",
+		es = "Pulsa Mejorar",
+		fr = "Appuyez sur Améliorer",
+	},
+}

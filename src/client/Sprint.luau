@@ -121,8 +121,14 @@ function Sprint.start(touchParent: Instance): ImageButton
 		end
 		local now = os.clock()
 		local moving = humanoid.MoveDirection.Magnitude > 0.1
+		local state = humanoid:GetState()
+		local airborne = state == Enum.HumanoidStateType.Jumping
+			or state == Enum.HumanoidStateType.Freefall
+		-- Native jump transitions can briefly report no MoveDirection. Keep the current
+		-- sprint intent in the air; landing still ends a stationary sprint normally.
+		local keepAirborneSprint = airborne and wanted
 		-- stopping ends a sprint [ваниль]; a short stand still is forgiven
-		if moving then
+		if moving or keepAirborneSprint then
 			stillSince = nil
 		elseif not stillSince then
 			stillSince = now
@@ -138,7 +144,7 @@ function Sprint.start(touchParent: Instance): ImageButton
 			edgeSince = nil
 		end
 		local edge = edgeSince ~= nil and now - edgeSince >= EDGE_HOLD
-		send(moving and (keyboard or locked or edge))
+		send((moving or keepAirborneSprint) and (keyboard or locked or edge))
 		local on = character and character:GetAttribute("Sprinting") == true
 		stroke.Transparency = if locked then 0 else 0.4
 		button.BackgroundColor3 = if on

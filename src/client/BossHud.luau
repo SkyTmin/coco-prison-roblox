@@ -17,8 +17,12 @@ local NEAR = 20 -- studs beyond the arena wall where the bar shows already
 
 local function nameOf(state: Instance): string
 	local locale = Strings.localeOf(Players.LocalPlayer)
-	local name = state:GetAttribute(if locale == "ru" then "Name" else "NameEn")
-	return if typeof(name) == "string" then name else state.Name
+	local name = state:GetAttribute("Name")
+	return Strings.bossName(
+		state.Name,
+		if typeof(name) == "string" then name else state.Name,
+		locale
+	)
 end
 
 local function clock(seconds: number): string

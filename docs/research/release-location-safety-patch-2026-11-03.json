@@ -1,0 +1,324 @@
+{
+  "placeId": 92594200898716,
+  "savedAndReopened": true,
+  "geometryOnly": true,
+  "regions": [
+    {
+      "min": "12158, 16344, -256",
+      "repairedEdges": 0,
+      "solids": 11168,
+      "location": "castle",
+      "root": "Workspace.Castle",
+      "max": "12642, 16680, 296",
+      "rescueY": 16332
+    },
+    {
+      "min": "10140, 13352, -234",
+      "repairedEdges": 0,
+      "solids": 12221,
+      "location": "market",
+      "root": "Workspace.Market",
+      "max": "10660, 13580, 302",
+      "rescueY": 13340
+    },
+    {
+      "min": "-26, -2, -22",
+      "repairedEdges": 0,
+      "solids": 100,
+      "location": "gang_base",
+      "root": "ServerStorage.GangHouseTemplate",
+      "max": "26, 18, 22",
+      "rescueY": -14
+    },
+    {
+      "min": "8140, 10448, -288",
+      "repairedEdges": 0,
+      "solids": 12267,
+      "location": "spider_lair",
+      "root": "Workspace.SpiderLair",
+      "max": "8656, 10612, 300",
+      "rescueY": 10436
+    },
+    {
+      "min": "17084, 23868, -270",
+      "repairedEdges": 0,
+      "solids": 3051,
+      "location": "edge_gate",
+      "root": "Workspace.EdgeGate",
+      "max": "17700, 24122, 254",
+      "rescueY": 23856
+    },
+    {
+      "min": "2052, 1448, -948",
+      "repairedEdges": 2,
+      "solids": 9188,
+      "location": "mountain_foot",
+      "root": "Workspace.MountainFoot",
+      "max": "2748, 1872, 286",
+      "rescueY": 1436
+    },
+    {
+      "min": "14235, 19487, 3835",
+      "repairedEdges": 0,
+      "solids": 2429,
+      "location": "warzone",
+      "root": "Workspace.Warzone",
+      "max": "14565, 19547.599609375, 4165",
+      "rescueY": 19475
+    },
+    {
+      "min": "8974.7646484375, 11948, -425.6305236816406",
+      "repairedEdges": 0,
+      "solids": 4735,
+      "location": "snowy_hand",
+      "root": "Workspace.SnowyHand",
+      "max": "9825.08203125, 12043.845703125, 424",
+      "rescueY": 11936
+    },
+    {
+      "min": "11165, 14996, 3765",
+      "repairedEdges": 0,
+      "solids": 1011,
+      "location": "ghetto",
+      "root": "Workspace.Ghetto",
+      "max": "11635, 15049.7998046875, 4235",
+      "rescueY": 14984
+    },
+    {
+      "min": "11304, 14665, 3964",
+      "repairedEdges": 0,
+      "solids": 14,
+      "location": "ghetto",
+      "root": "Workspace.Ghetto.GangMineRooms.GangMineRoom_2",
+      "max": "11376, 14725, 4036",
+      "rescueY": 14653
+    },
+    {
+      "min": "11424, 14665, 3964",
+      "repairedEdges": 0,
+      "solids": 14,
+      "location": "ghetto",
+      "root": "Workspace.Ghetto.GangMineRooms.GangMineRoom_3",
+      "max": "11496, 14725, 4036",
+      "rescueY": 14653
+    },
+    {
+      "min": "11184, 14665, 3964",
+      "repairedEdges": 0,
+      "solids": 14,
+      "location": "ghetto",
+      "root": "Workspace.Ghetto.GangMineRooms.GangMineRoom_1",
+      "max": "11256, 14725, 4036",
+      "rescueY": 14653
+    },
+    {
+      "min": "11544, 14665, 3964",
+      "repairedEdges": 0,
+      "solids": 14,
+      "location": "ghetto",
+      "root": "Workspace.Ghetto.GangMineRooms.GangMineRoom_4",
+      "max": "11616, 14725, 4036",
+      "rescueY": 14653
+    },
+    {
+      "min": "3112, 2948, -288",
+      "repairedEdges": 0,
+      "solids": 9826,
+      "location": "underworld",
+      "root": "Workspace.Underworld",
+      "max": "3688, 3190, 288",
+      "rescueY": 2936
+    },
+    {
+      "min": "21061.349609375, 29808, -304.25",
+      "repairedEdges": 0,
+      "solids": 6928,
+      "location": "eden",
+      "root": "Workspace.Eden",
+      "max": "21646, 30108, 301.04998779296875",
+      "rescueY": 29796
+    },
+    {
+      "min": "23094, 32836, -256",
+      "repairedEdges": 0,
+      "solids": 7611,
+      "location": "gate",
+      "root": "Workspace.Gate",
+      "max": "23706, 33104.5, 216",
+      "rescueY": 32824
+    },
+    {
+      "min": "22084, 31352, -216",
+      "repairedEdges": 0,
+      "solids": 5788,
+      "location": "cherubim",
+      "root": "Workspace.Cherubim",
+      "max": "22716, 31626, 216",
+      "rescueY": 31340
+    },
+    {
+      "min": "20148, 28336, -242",
+      "repairedEdges": 0,
+      "solids": 5592,
+      "location": "purgatory",
+      "root": "Workspace.Purgatory",
+      "max": "20652, 28612, 258",
+      "rescueY": 28324
+    },
+    {
+      "min": "24030, 34320, -264",
+      "repairedEdges": 0,
+      "solids": 9672,
+      "location": "paradise",
+      "root": "Workspace.Paradise",
+      "max": "24770, 34561.62890625, 264",
+      "rescueY": 34308
+    },
+    {
+      "min": "14142, 19352, -258",
+      "repairedEdges": 0,
+      "solids": 7075,
+      "location": "kyoto",
+      "root": "Workspace.Kyoto",
+      "max": "14658, 19629.3984375, 258",
+      "rescueY": 19340
+    },
+    {
+      "min": "6080, 7448, -320",
+      "repairedEdges": 0,
+      "solids": 4297,
+      "location": "sunken_lighthouse",
+      "root": "Workspace.SunkenLighthouse",
+      "max": "6720, 7618.02197265625, 320",
+      "rescueY": 7436
+    },
+    {
+      "min": "19072, 26836, -264",
+      "repairedEdges": 0,
+      "solids": 6150,
+      "location": "church",
+      "root": "Workspace.Church",
+      "max": "19728, 27192, 248",
+      "rescueY": 26824
+    },
+    {
+      "min": "13142, 17836, -426",
+      "repairedEdges": 0,
+      "solids": 5940,
+      "location": "inside_out",
+      "root": "Workspace.InsideOut",
+      "max": "13658, 18139.80078125, 426",
+      "rescueY": 17824
+    },
+    {
+      "min": "11148, 14844, -252",
+      "repairedEdges": 0,
+      "solids": 8397,
+      "location": "leprechaun_valley",
+      "root": "Workspace.LeprechaunValley",
+      "max": "11652, 15076, 252",
+      "rescueY": 14832
+    },
+    {
+      "min": "18088, 25336, -292.25",
+      "repairedEdges": 0,
+      "solids": 5372,
+      "location": "tree",
+      "root": "Workspace.Tree",
+      "max": "18744, 25696, 231.04998779296875",
+      "rescueY": 25324
+    },
+    {
+      "min": "1400, -36, -600",
+      "repairedEdges": 0,
+      "solids": 10119,
+      "location": "basement",
+      "root": "Workspace.Basement",
+      "max": "1600, 76, 20",
+      "rescueY": -48
+    },
+    {
+      "min": "-1610, -28, -560",
+      "repairedEdges": 0,
+      "solids": 12947,
+      "location": "fraction_base",
+      "root": "Workspace.FactionBase",
+      "max": "-490, 100, 560",
+      "rescueY": -40
+    },
+    {
+      "min": "440, -68, -260",
+      "repairedEdges": 0,
+      "solids": 1994,
+      "location": "quarry",
+      "root": "Workspace.Quarry",
+      "max": "960, 52, 260",
+      "rescueY": -80
+    },
+    {
+      "min": "16154, 22352, -246",
+      "repairedEdges": 0,
+      "solids": 5011,
+      "location": "barn",
+      "root": "Workspace.Barn",
+      "max": "16646, 22582, 246",
+      "rescueY": 22340
+    },
+    {
+      "min": "15150, 20852, -250",
+      "repairedEdges": 0,
+      "solids": 5529,
+      "location": "farm",
+      "root": "Workspace.Farm",
+      "max": "15650, 21094, 250",
+      "rescueY": 20840
+    },
+    {
+      "min": "4080, 4448, -320",
+      "repairedEdges": 2,
+      "solids": 5709,
+      "location": "pyramid",
+      "root": "Workspace.Pyramid",
+      "max": "4720, 4686, 320",
+      "rescueY": 4436
+    },
+    {
+      "min": "-202, -52, -204",
+      "repairedEdges": 0,
+      "solids": 3589,
+      "location": "prison",
+      "root": "Workspace.Prison",
+      "max": "202, 44.5, 202",
+      "rescueY": -64
+    },
+    {
+      "min": "7033, 8896, -320",
+      "repairedEdges": 0,
+      "solids": 2592,
+      "location": "end_castle",
+      "root": "Workspace.EndCastle",
+      "max": "7720, 9096.7998046875, 334",
+      "rescueY": 8884
+    },
+    {
+      "min": "5080, 5948, -320",
+      "repairedEdges": 0,
+      "solids": 9038,
+      "location": "royal_garden",
+      "root": "Workspace.RoyalGarden",
+      "max": "5720, 6121.103515625, 320",
+      "rescueY": 5936
+    },
+    {
+      "min": "-80, -1, -370.5",
+      "repairedEdges": 0,
+      "solids": 89,
+      "location": "prison",
+      "root": "Workspace.Showcase",
+      "max": "80, 29.5, -290",
+      "rescueY": -13
+    }
+  ],
+  "status": "PASS",
+  "missing": []
+}

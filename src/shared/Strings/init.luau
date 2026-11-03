@@ -6,7 +6,19 @@ local Config = require(script.Parent.Config)
 type Entry = { [string]: string }
 
 local STRINGS: { [string]: Entry } = {}
-for _, part in ipairs({ script.Part1, script.Part2, script.Part3, script.Part4, script.Part5 }) do
+for _, part in ipairs({
+	script.Part1,
+	script.Part2,
+	script.Part3,
+	script.Part4,
+	script.Part5,
+	script.ReleaseCombat,
+	script.ReleaseWorld,
+	script.ReleaseItems,
+	script.ReleaseUi,
+	script.ReleaseServers,
+	script.ReleaseTutorial,
+}) do
 	for key, entry in pairs(require(part) :: any) do
 		STRINGS[key] = entry
 	end
@@ -57,6 +69,11 @@ function Strings.t(key: string, locale: string?, ...: any): string
 		return string.format(text, ...)
 	end
 	return text
+end
+
+function Strings.bossName(id: string, fallbackName: string, locale: string?): string
+	local key = "boss_name_" .. id
+	return if Strings.has(key, locale) then Strings.t(key, locale) else fallbackName
 end
 
 -- Money for display: three decimals like the original ("0.012"), thousands as "9.91K".
@@ -386,6 +403,11 @@ local LOCATIONS: { [string]: { [string]: string } } = {
 		es = "Lejanía nevada",
 		fr = "Lointain enneigé",
 	},
+	["Снежная длань"] = {
+		en = "Snowy hand",
+		es = "Mano nevada",
+		fr = "Main enneigée",
+	},
 	["Снежная далнь"] = {
 		en = "Snowy reach",
 		es = "Lejanía nevada",
@@ -437,23 +459,71 @@ local function pick(table_: { [string]: { [string]: string } }, ru: string, loca
 	return if row and row[loc] then row[loc] else ru
 end
 
+-- World labels reuse the same names as their menus; additional map text lives in string parts.
+for ru, key in pairs({
+	["Библиотекарь"] = "gang_library_title",
+	["Кузнец"] = "gang_forge_title",
+	["Чёрный рынок"] = "exchange_black",
+	["Торговец"] = "exchange_trader",
+	["Каменщик"] = "job_mason",
+	["Барыга"] = "book_trader",
+	["Арена босса"] = "spot_boss",
+}) do
+	WORLD[ru] = STRINGS[key]
+end
+for key, entry in pairs(STRINGS) do
+	if key:sub(1, 6) == "world_" then
+		WORLD[entry.ru] = entry
+	end
+end
+
+local function worldUpper(text: string): string
+	local out = {}
+	for _, code in utf8.codes(text) do
+		if
+			(code >= 0x0430 and code <= 0x044F)
+			or (code >= 97 and code <= 122)
+			or (code >= 0x00E0 and code <= 0x00F6)
+			or (code >= 0x00F8 and code <= 0x00FE)
+		then
+			code -= 32
+		elseif code == 0x0451 then
+			code = 0x0401
+		elseif code == 0x00FF then
+			code = 0x0178
+		elseif code == 0x0153 then
+			code = 0x0152
+		end
+		table.insert(out, utf8.char(code))
+	end
+	return table.concat(out)
+end
+
 -- Text of a world sign (BillboardGui / SurfaceGui label built in Russian). Keeps upper case.
 function Strings.worldText(ru: string, locale: string?): string
-	local upper = ru == string.upper(ru) and ru ~= string.lower(ru)
-	local key = if upper then nil else ru
-	if not key then
-		for candidate in pairs(WORLD) do
-			if string.upper(candidate) == ru then
-				key = candidate
+	local loc = locale or Config.defaultLocale
+	if loc == "ru" then
+		return ru
+	end
+	local upper = ru == worldUpper(ru) and ru ~= Strings.lower(ru)
+	local row = WORLD[ru] or LOCATIONS[ru]
+	if not row and upper then
+		for _, dictionary in ipairs({ WORLD, LOCATIONS }) do
+			for candidate, entry in pairs(dictionary) do
+				if worldUpper(candidate) == ru then
+					row = entry
+					break
+				end
+			end
+			if row then
 				break
 			end
 		end
 	end
-	if not key then
+	if not row or not row[loc] then
 		return ru
 	end
-	local text = pick(WORLD, key, locale)
-	return if upper then string.upper(text) else text
+	return if upper then worldUpper(row[loc]) else row[loc]
 end
 
 function Strings.blockName(id: string, ruName: string, locale: string?): string
@@ -462,7 +532,12 @@ function Strings.blockName(id: string, ruName: string, locale: string?): string
 		return ruName
 	end
 	local row = BLOCKS[id]
-	return if row and row[loc] then row[loc] else ruName
+	if row and row[loc] then
+		return row[loc]
+	end
+	-- Item-only catalog entries (e.g. a gang mine pass) use the item-name translations.
+	local key = "item_" .. id
+	return if Strings.has(key, loc) then Strings.t(key, loc) else ruName
 end
 
 function Strings.counterName(ru: string, locale: string?): string

@@ -628,11 +628,16 @@ function DonateWindow.build(
 			buy.button.Visible = false
 			orRobux.Visible = false
 			robux.button.Visible = true
-			packageHint.Visible = true
-			robux.label.Text = ROBUX .. " " .. grouped(packPrice)
-			robux.paint(Kit.GOOD, true)
+			local unavailable = pack.productId <= 0 and not RunService:IsStudio()
+			packageHint.Visible = not unavailable
+			robux.label.Text = if unavailable
+				then t("donate_robux_soon")
+				else ROBUX .. " " .. grouped(packPrice)
+			robux.paint(Kit.GOOD, not unavailable)
 			robux.run = function()
-				Remotes.event("DonateTopUp"):FireServer(pack.id)
+				if not unavailable then
+					Remotes.event("DonateTopUp"):FireServer(pack.id)
+				end
 			end
 		elseif item then
 			buy.button.Visible = true

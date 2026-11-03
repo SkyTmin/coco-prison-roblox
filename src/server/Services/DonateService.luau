@@ -37,9 +37,45 @@ local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
 
 local DonateService = {}
-local RECEIPTS_KEPT = 50
 local lastAction: { [Player]: number } = {}
 local boughtHooks: { (Player, string) -> () } = {}
+local productInfo: { [number]: { expires: number, info: any } } = {}
+local productChecking: { [number]: boolean } = {}
+
+-- Never open a Robux prompt for a different quantity/name or price than our catalog.
+-- Refresh both successes and mismatches; a Creator Hub repair takes effect without a restart.
+local function productIssue(id: number, name: string, price: number): string?
+	local cached = productInfo[id]
+	if not cached or cached.expires <= os.clock() then
+		if productChecking[id] then
+			return "donate_product_unavailable"
+		end
+		productChecking[id] = true
+		local ok, info = pcall(function()
+			return MarketplaceService:GetProductInfoAsync(id, Enum.InfoType.Product)
+		end)
+		productChecking[id] = nil
+		cached = {
+			expires = os.clock() + (if ok and typeof(info) == "table" then 60 else 5),
+			info = if ok then info else nil,
+		}
+		productInfo[id] = cached
+	end
+	local info = cached.info
+	if typeof(info) ~= "table" then
+		return "donate_product_unavailable"
+	end
+	local basePrice = if typeof(info.UserBasePriceInRobux) == "number"
+		then info.UserBasePriceInRobux
+		else info.PriceInRobux
+	if info.Name ~= name or basePrice ~= price then
+		return "donate_product_mismatch"
+	end
+	if info.IsForSale == false then
+		return "donate_product_unavailable"
+	end
+	return nil
+end
 
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
@@ -87,7 +123,7 @@ end
 
 -- the goods into the profile (inside a mutation, after `blocked`); where they went: "inventory", "stash" (some or
 -- all did not fit), "boosters" or "auction"
-local function give(p: any, item: Donate.Item, count: number): string
+local function give(p: any, item: Donate.Item, count: number, guaranteed: boolean?): string
 	if item.give then
 		local left = InventoryService.add(p, item.give, count * (item.each or 1))
 		if left > 0 then
@@ -98,7 +134,15 @@ local function give(p: any, item: Donate.Item, count: number): string
 	elseif item.booster then
 		for _ = 1, count do
 			for _, kind in ipairs(item.booster.kinds) do
-				Boosters.store(p, kind, item.booster.scope, Donate.MULT, Donate.MINUTES)
+				Boosters.store(
+					p,
+					kind,
+					item.booster.scope,
+					Donate.MULT,
+					Donate.MINUTES,
+					nil,
+					guaranteed
+				)
 			end
 		end
 	elseif item.prisDays then
@@ -180,6 +224,11 @@ local function onTopUp(player: Player, packId: any)
 		return
 	end
 	if pack.productId > 0 then
+		local issue = productIssue(pack.productId, pack.productName, pack.robux)
+		if issue then
+			toast(player, issue)
+			return
+		end
 		MarketplaceService:PromptProductPurchase(player, pack.productId)
 	elseif RunService:IsStudio() then
 		ProfileService.Mutate(player, function(p)
@@ -208,6 +257,11 @@ local function onBuyRobux(player: Player, id: any)
 		return
 	end
 	if item.productId > 0 then
+		local issue = productIssue(item.productId, item.productName, item.robux)
+		if issue then
+			toast(player, issue)
+			return
+		end
 		MarketplaceService:PromptProductPurchase(player, item.productId)
 	elseif RunService:IsStudio() then
 		local place: string? = nil
@@ -247,25 +301,45 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 	end
 	-- what the receipt gave: the pack's crystals, the item, or (no room for the item) its price in crystals
 	local crystals, place: string? = 0, nil
-	ProfileService.Mutate(player, function(p)
-		if pack then
+	local reward: string? = nil
+	local granted = false
+	local saved = ProfileService.MutateDurable(player, function(p)
+		granted, crystals, place = false, 0, nil
+		-- Save serialization can yield behind another receipt. Check again on each exact
+		-- checkpoint/live profile so simultaneous retries cannot both grant this purchase.
+		if table.find(p.receipts or {}, id) then
+			return
+		end
+		-- Select once on the staged checkpoint. A capacity change during persistence must
+		-- not switch the confirmed grant into a different live reward or silently lose it.
+		if not reward then
+			reward = if pack
+				then "pack"
+				elseif item and itemId and not blocked(p, itemId, item, 1) then "item"
+				else "refund"
+		end
+		if reward == "pack" and pack then
 			crystals = pack.crystals
-		elseif item and itemId and not blocked(p, itemId, item, 1) then
-			place = give(p, item, 1)
+		elseif reward == "item" and item then
+			place = give(p, item, 1, true)
 		elseif item then
 			crystals = item.price
 		end
+		granted = true
 		addCrystals(p, crystals)
 		local receipts = p.receipts or {}
 		table.insert(receipts, id)
-		while #receipts > RECEIPTS_KEPT do
-			table.remove(receipts, 1)
-		end
+		-- A previously NotProcessedYet receipt can be retried after later purchases.
+		-- Forgetting its id would turn that retry into another paid grant.
 		p.receipts = receipts
 	end)
-	if not ProfileService.SaveNow(player) then
-		-- kept in memory with its id: a retry on this server sees the id; a lost server loses both and is retried
+	if not saved then
+		-- No unconfirmed grant is spendable; a landed-but-unacknowledged checkpoint carries
+		-- its receipt id and is safely recognized after rejoin.
 		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if not granted then
+		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end
 	if place and itemId then
 		bought(player, itemId, 1, place)

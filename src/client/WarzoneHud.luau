@@ -44,13 +44,15 @@ function WarzoneHud.Start(gui: ScreenGui)
 		return Strings.t(key, Strings.localeOf(player), ...)
 	end
 
-	local hint = Ui.rich(gui, "", UDim2.fromOffset(420, 26), UDim2.new(0.5, -210, 0, 54), 16)
+	local hint = Ui.rich(gui, "", UDim2.new(0.9, 0, 0, 50), UDim2.new(0.05, 0, 0, 54), 14)
 	hint.Name = "WarzoneHint"
 	hint.TextXAlignment = Enum.TextXAlignment.Center
+	hint.TextWrapped = true
 	hint.TextStrokeTransparency = 0.4
 	hint.Visible = false
 
 	local boards: { [BasePart]: Board } = {}
+	local mineSigns: { [BasePart]: TextLabel } = {}
 	local function attach(part: Instance)
 		local id = part:GetAttribute("Point")
 		if not part:IsA("BasePart") or boards[part] or not Warzone.point(id) then
@@ -58,17 +60,19 @@ function WarzoneHud.Start(gui: ScreenGui)
 		end
 		local gui3d = Instance.new("BillboardGui")
 		gui3d.Name = "WarzoneBoard"
-		gui3d.Size = UDim2.fromOffset(240, 74)
+		gui3d.Size = UDim2.fromOffset(260, 100)
 		gui3d.StudsOffsetWorldSpace = Vector3.new(0, 7, 0)
 		gui3d.MaxDistance = 160
 		gui3d.LightInfluence = 0
 		gui3d.Parent = part
 		local title =
-			label(gui3d, UDim2.new(1, 0, 0, 26), UDim2.new(), Color3.fromRGB(255, 200, 70))
-		local status = label(gui3d, UDim2.new(1, 0, 0, 20), UDim2.fromOffset(0, 28), FREE)
+			label(gui3d, UDim2.new(1, 0, 0, 42), UDim2.new(), Color3.fromRGB(255, 200, 70))
+		title.TextWrapped = true
+		local status = label(gui3d, UDim2.new(1, 0, 0, 36), UDim2.fromOffset(0, 44), FREE)
+		status.TextWrapped = true
 		local back = Instance.new("Frame")
 		back.Size = UDim2.new(0.8, 0, 0, 10)
-		back.Position = UDim2.new(0.1, 0, 0, 54)
+		back.Position = UDim2.new(0.1, 0, 0, 84)
 		back.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
 		back.BorderSizePixel = 0
 		back.Parent = gui3d
@@ -98,13 +102,9 @@ function WarzoneHud.Start(gui: ScreenGui)
 		board.LightInfluence = 0
 		board.Parent = part
 		local text = label(board, UDim2.fromScale(1, 1), UDim2.new(), Color3.fromRGB(245, 205, 85))
-		local function translate()
-			text.Text = "⛏ " .. t("warzone_mine_hint")
-		end
-		translate()
-		local connection = player:GetAttributeChangedSignal("Locale"):Connect(translate)
+		mineSigns[part] = text
 		part.Destroying:Connect(function()
-			connection:Disconnect()
+			mineSigns[part] = nil
 		end)
 	end
 	for _, part in ipairs(CollectionService:GetTagged("WarzoneMineSign")) do
@@ -124,13 +124,27 @@ function WarzoneHud.Start(gui: ScreenGui)
 		local faction = if typeof(mine) == "string" and Config.faction(mine) then mine else nil
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		local nearState: Warzone.State? = nil
+		for part, text in mineSigns do
+			local state = Warzone.state(part:GetAttribute("Point") :: string, now)
+			text.Text = if state.active and not state.owner
+				then "⛏ " .. t("warzone_mine_hint")
+				else t("warzone_inactive")
+			local sign = text.Parent :: BillboardGui
+			sign.Enabled = state.active and not state.owner
+		end
 		for part, board in pairs(boards) do
 			local state = Warzone.state(board.point, now)
 			board.title.Text = t("warzone_point_title", t("warzone_point_" .. board.point))
-			if state.owner then
+				.. "\n"
+				.. t("warzone_direction_" .. board.point)
+			if not state.active then
+				board.status.Text = t("warzone_inactive")
+				board.status.TextColor3 = Ui.colors.muted
+				board.back.Visible = false
+			elseif state.owner then
 				board.status.Text = t("warzone_held_by", t("faction_" .. state.owner))
 					.. "  "
-					.. t("warzone_available_in", clock(state.untilAt - now))
+					.. t("warzone_next_hint", clock(state.untilAt - now))
 				board.status.TextColor3 = Config.factionColor(state.owner)
 				board.back.Visible = false
 			else
@@ -152,7 +166,7 @@ function WarzoneHud.Start(gui: ScreenGui)
 			end
 		end
 		local near = nearState
-		if near and not near.owner and faction then
+		if near and near.active and not near.owner and faction then
 			hint.Visible = true
 			local others = 0
 			for f, score in pairs(near.scores) do
@@ -175,6 +189,9 @@ function WarzoneHud.Start(gui: ScreenGui)
 					)
 					else ""
 			)
+		elseif near and near.active and not near.owner then
+			hint.Visible = true
+			hint.Text = t("warzone_join_hint")
 		else
 			hint.Visible = false
 		end

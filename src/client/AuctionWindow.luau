@@ -52,6 +52,7 @@ local function paint(view: SlotView, stack: ItemStack?)
 	local tile = if stack and not icon then BlockColors.of(stack.id) else nil
 	view.icon.Image, view.icon.Visible = icon or "", icon ~= nil or tile ~= nil
 	view.icon.ImageColor3 = tint
+	require(script.Parent.EnchantmentVisual).slot(view.icon, stack)
 	view.icon.BackgroundColor3 = tile or Color3.new()
 	view.icon.BackgroundTransparency = if tile then 0 else 1
 	view.count.Text = if stack and stack.count > 1 then tostring(stack.count) else ""

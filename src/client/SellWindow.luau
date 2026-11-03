@@ -66,6 +66,7 @@ function SellWindow.build(
 		Ui.colors.buttonGreen
 	)
 	sellAll.TextSize = 18
+	sellAll.Name = "TutorialSell"
 	sellAll.Activated:Connect(function()
 		Remotes.event("Sell"):FireServer()
 		onClose() -- [владелец 21.10] the window closes after selling everything

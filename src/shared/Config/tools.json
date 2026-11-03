@@ -1,5 +1,5 @@
 {
-  "source": "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация",
+  "source": "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация; явные дополнительные ступени — design-decisions.toolUpgradeExtensions [владелец/решение]",
   "vanilla": {
     "attackSpeed": {
       "hand": 4,
@@ -625,6 +625,18 @@
           },
           "enchantAfter": 2,
           "materialAfter": "diamond"
+        },
+        {
+          "from": 15,
+          "to": 16,
+          "cost": 20000,
+          "requirements": {
+            "Крысы": 16700,
+            "Оружейник": 5
+          },
+          "enchantAfter": 3,
+          "materialAfter": "diamond",
+          "source": "[владелец 03.11] добавить алмазный меч Острота III; [решение 03.11] цена $20000, Крысы16700 (последний шаг +2900), ОружейникV. В снимках 19.10 переход15→16 не показан; это расширение нашей игры, не восстановленная цена Cristalix."
         }
       ]
     },

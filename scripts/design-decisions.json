@@ -115,7 +115,8 @@
     "rechargeMinutes": [20, 16, 12, 9, 6],
     "splashLevel": 3,
     "splashRadiusBlocks": 4,
-    "hungerPerSecond": 0.5,
+    "hungerPerSecond": 0.025,
+    "_hungerPerSecond": "[ваниль] Hunger I: 0.005 exhaustion/tick, 20 ticks/s, 4 exhaustion per food point => 0.025 food points/s; minecraft.wiki/w/Hunger_(effect)",
     "strengthDamage": 3
   },
   "blocks": {
@@ -902,6 +903,19 @@
     }
   },
   "pvpFromLevel": 9,
+  "toolUpgradeExtensions": {
+    "sword": [
+      {
+        "from": 15,
+        "to": 16,
+        "cost": 20000,
+        "requirements": { "Крысы": 16700, "Оружейник": 5 },
+        "enchantAfter": 3,
+        "materialAfter": "diamond",
+        "source": "[владелец 03.11] добавить алмазный меч Острота III; [решение 03.11] цена $20000, Крысы16700 (последний шаг +2900), ОружейникV. В снимках 19.10 переход15→16 не показан; это расширение нашей игры, не восстановленная цена Cristalix."
+      }
+    ]
+  },
   "toolShop": {
     "shovel": 0,
     "axe": 4,
@@ -4924,6 +4938,8 @@
       "_source": "[ваниль] еда ест 32 тика = 1,6 с, пока держишь кнопку; при еде скорость × 0,2; есть можно, только если голод не полон, золотое яблоко — всегда [владелец 27.10: «еду надо есть долго как в майне, а не мгновенно»]"
     },
     "foodEffects": {
+      "rotten_flesh": [{"effect": "hunger", "level": 1, "seconds": 30, "chance": 0.8}],
+      "_rotten_flesh": "[ваниль] rotten flesh: 4 hunger, 0.8 saturation, 80% Hunger I for 30s; duration refreshes, not stacks; minecraft.wiki/w/Rotten_flesh",
       "golden_apple": [
         {
           "effect": "regeneration",
@@ -5167,10 +5183,11 @@
         7,
         7,
         8,
-        8
+        8,
+        9
       ]
     },
-    "_sharpness": "[владелец 22.10] острота меча растёт с уровнем без сброса при смене материала (было по меню: I–III и обнуление); урон остроты по формуле Java 0,5×ур+0,5 [ваниль]",
+    "_sharpness": "[владелец 22.10] острота меча растёт с уровнем без сброса при смене материала (было по меню: I–III и обнуление); урон остроты по формуле Java 0,5×ур+0,5 [ваниль]. [владелец/решение 03.11] добавлена ступень16 с отображениемIII, продолжение прежней скрытой силы8→9: полный некритический урон11,5→12; ступени1–15 без изменений.",
     "crit": {
       "multiplier": 1.5,
       "_source": "[ваниль, владелец 22.10] удар в падении (после прыжка, не на земле, не на лестнице и не в воде) — ×1,5"
@@ -5280,6 +5297,44 @@
     "_notTradable": "[решение] мешок денег из кейса (это деньги, а не предмет)"
   },
   "donate": {
+    "legacyPacks": [
+      {
+        "id": "crystals_100_legacy",
+        "crystals": 100,
+        "robux": 99,
+        "productId": 3723068679,
+        "productName": "100 кристаллов"
+      },
+      {
+        "id": "crystals_550_legacy",
+        "crystals": 550,
+        "robux": 499,
+        "productId": 3723068693,
+        "productName": "550 кристаллов"
+      },
+      {
+        "id": "crystals_1200_legacy",
+        "crystals": 1200,
+        "robux": 999,
+        "productId": 3723068701,
+        "productName": "1200 кристаллов"
+      },
+      {
+        "id": "crystals_2600_legacy",
+        "crystals": 2600,
+        "robux": 1999,
+        "productId": 3723068712,
+        "productName": "2600 кристаллов"
+      },
+      {
+        "id": "crystals_7000_legacy",
+        "crystals": 7000,
+        "robux": 4999,
+        "productId": 3723068729,
+        "productName": "7000 кристаллов"
+      }
+    ],
+    "_legacyPacks": "[сеть 03.11 Marketplace read] Honor outstanding old products at their originally advertised quantities. New smaller packs use new product IDs; never reuse old IDs for smaller grants.",
     "_source": "[меню 26.10] wiki/in-game-wiki/DONATE-SHOP-BOOSTERS.md: товары, цены в кристалликах, бустеры +100 % на 30 мин, «Дополнительный слот на Аукционе» до 50; [решение] кристаллики покупаются наборами за Robux (Developer Products; productId = 0, пока владелец не создал товары в Creator Dashboard), курс ≈ 1 R$ за кристаллик, бонус к большим наборам; Скины, Промокод, Подарить — позже; [этап 8] вкладка «PRIS+»: pris_plus (30 дней), auction_no_fee (навсегда), rubies_100 (100 рубинов за 100 кр., только за кристаллы — robux 0 = без прямой покупки за Robux); рубины тратятся первыми при любой покупке в донат-магазине [вики]; [решение 28.10, владелец: «хочу, чтобы игрок мог покупать сами предметы. Даже за 10 роблакс»] каждый товар ещё и напрямую за Robux — 1 шт. за покупку, своя Developer Product (items.<id>.robux = цена в кристаллах, productId, productName); товары создаёт scripts/create-dev-products.mjs; [решение 28.10, владелец: «в заблуждение вводит … одна цена, в итоге другую сумму вводить надо»] окно Roblox «Buy Robux and item» продаёт наименьший пакет Robux, покрывающий цену (80 / 400 / 800 / 1700 / 4500 …), игра его не меняет и баланс не видит — наборы кристаллов стоят ровно как пакеты: 80 R$ → 80, 400 → 440 (+10 %), 800 → 960 (+20 %), 1700 → 2210 (+30 %), 4500 → 6300 (+40 %); id наборов прежние (crystals_100 … — внутренние); [владелец 28.10] инъекция «Без нужд» (needs_injection) — 399 кристаллов / 399 R$, навсегда [решение]; [владелец 28.10: «в донат добавить авто-продажу … цена 549»] предмет autosell: «Использовать» в руке включает автопродажу навсегда (у оригинала — на сезон [вики]); вскопанный блок сразу продаётся по цене скупщика с множителями, у прицела «+0,057 $»; в Настройках вкл./выкл. и показ дохода у прицела; «Перезарядка стойки» 39 [вики]: предмет stand_recharge, «Использовать» сразу заряжает зельеварку, нужен Зельевар, одноразово [вики]; в окне Зельеварки — кнопка «Перезарядить» / «Купить · 39» [решение]",
     "boosterMultiplier": 2,
     "boosterMinutes": 30,
@@ -5288,7 +5343,7 @@
         "id": "crystals_100",
         "crystals": 80,
         "robux": 80,
-        "productId": 3723068679,
+        "productId": 0,
         "icon": "crystal",
         "productName": "80 кристаллов"
       },
@@ -5296,7 +5351,7 @@
         "id": "crystals_550",
         "crystals": 440,
         "robux": 400,
-        "productId": 3723068693,
+        "productId": 0,
         "icon": "crystals_550",
         "bonus": 10,
         "productName": "440 кристаллов"
@@ -5305,7 +5360,7 @@
         "id": "crystals_1200",
         "crystals": 960,
         "robux": 800,
-        "productId": 3723068701,
+        "productId": 0,
         "icon": "crystals_1200",
         "bonus": 20,
         "productName": "960 кристаллов"
@@ -5314,7 +5369,7 @@
         "id": "crystals_2600",
         "crystals": 2210,
         "robux": 1700,
-        "productId": 3723068712,
+        "productId": 0,
         "icon": "crystals_2600",
         "bonus": 30,
         "productName": "2210 кристаллов"
@@ -5323,7 +5378,7 @@
         "id": "crystals_7000",
         "crystals": 6300,
         "robux": 4500,
-        "productId": 3723068729,
+        "productId": 0,
         "icon": "crystals_7000",
         "bonus": 40,
         "productName": "6300 кристаллов"
@@ -5780,7 +5835,7 @@
     "decayEverySeconds": 3,
     "_decay": "[решение] если у маяка 90 с никто не копает, очки всех фракций на нём тают по 1 каждые 3 с",
     "perServer": true,
-    "_perServer": "[решение] точки свои у каждого сервера (Дворы — место на сервере), после перезапуска сервера все свободны"
+    "_perServer": "[владелец 03.11] Exactly one randomly selected available/held point per server; choose on startup and after hold expires."
   },
   "ghetto": {
     "_source": "docs/research/remaining-features-design.md, этап 1в; факты — remaining-features-facts.md §1 «Локации банд». [вики] Торговец обычными ключами и звёздами, Чёрный рынок с 20 ур.; [клиент] «В наличии: %dшт.», «Предмет закончился», «Сундук с сокровищами появился на Гетто», «До захвата», «Игрок %s открыл сундук!»; всё остальное — [решение]",

@@ -6,7 +6,7 @@
 -- player/mob/boss deaths (LastHitBy cleared, stats untouched). Огнестойкость (a potion) protects like Creative.
 -- The void net: parts tagged VoidCatch (attribute LocationId) lie under floating locations (Пустотная крепость:
 -- scripts/build-end-castle.luau); a player who falls into one is put back on that location's arrival point with
--- VOID_DAMAGE [решение] instead of falling for kilometres.
+-- WorldSafetyService instead of falling for kilometres. Scenery escapes no longer cost health.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -14,14 +14,13 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Effects = require(ReplicatedStorage:WaitForChild("Shared").Effects)
 local HurtService = require(script.Parent.HurtService)
-local FallService = require(script.Parent.FallService)
+local WorldSafety = require(script.Parent.WorldSafetyService)
 
 local LAVA_DAMAGE = 4 -- [ваниль] per 0.5 s in lava
 local LAVA_PERIOD = 0.5
 local BURN_DAMAGE = 1 -- [ваниль] fire: 1 per second
 local BURN_SECONDS = 8 -- [решение] vanilla burns 15 s after lava; shorter here, there is no water to jump into
 local FEET = Vector3.new(2, 2.5, 2)
-local VOID_DAMAGE = 4 -- [решение] a fall into the void costs two hearts
 local BODY = Vector3.new(3, 5, 3)
 
 local LavaService = {}
@@ -67,42 +66,6 @@ function LavaService.Start()
 	refreshVoid()
 	CollectionService:GetInstanceAddedSignal("VoidCatch"):Connect(refreshVoid)
 	CollectionService:GetInstanceRemovedSignal("VoidCatch"):Connect(refreshVoid)
-	local rescuing: { [Player]: boolean } = {}
-	local function rescue(player: Player, root: BasePart, humanoid: Humanoid, net: BasePart)
-		if rescuing[player] then
-			return
-		end
-		local locationId = net:GetAttribute("LocationId")
-		local spawn: BasePart? = nil
-		for _, p in ipairs(CollectionService:GetTagged("LocationSpawn")) do
-			if
-				p:IsA("BasePart")
-				and p:GetAttribute("LocationId") == locationId
-				and p:GetAttribute("Spot") == nil
-				and p:GetAttribute("PrivateArrival") ~= true
-			then
-				spawn = p
-				break
-			end
-		end
-		if not spawn then
-			return
-		end
-		rescuing[player] = true
-		task.spawn(function()
-			pcall(function()
-				player:RequestStreamAroundAsync((spawn :: BasePart).Position)
-			end)
-			if root.Parent then
-				root.AssemblyLinearVelocity = Vector3.zero
-				FallService.Reset(player)
-				root.CFrame = (spawn :: BasePart).CFrame + Vector3.new(0, 4, 0)
-				humanoid:SetAttribute("LastHitBy", nil)
-				HurtService.Damage(humanoid, VOID_DAMAGE)
-			end
-			rescuing[player] = nil
-		end)
-	end
 	RunService.Heartbeat:Connect(function()
 		for _, player in ipairs(Players:GetPlayers()) do
 			local character = player.Character
@@ -111,7 +74,7 @@ function LavaService.Start()
 			if root and root:IsA("BasePart") and humanoid and humanoid.Health > 0 then
 				local hits = workspace:GetPartBoundsInBox(root.CFrame, BODY, voidParams)
 				if #hits > 0 and hits[1]:IsA("BasePart") then
-					rescue(player, root, humanoid, hits[1] :: BasePart)
+					WorldSafety.Catch(player, hits[1] :: BasePart)
 				end
 			end
 		end

@@ -75,10 +75,21 @@ function CreativeWindow.build(
 		return Strings.t(key, locale, ...)
 	end
 	local remote = Remotes.event("Creative")
-	local win, content = createWindow(parent, t("creative"), UDim2.fromOffset(660, 460), function()
-		ItemTooltip.hide()
-		onClose()
-	end)
+	local viewport = workspace.CurrentCamera.ViewportSize
+	local win, content = createWindow(
+		parent,
+		t("creative"),
+		UDim2.fromOffset(
+			math.min(780, viewport.X - 24),
+			math.min(680, viewport.Y - game:GetService("GuiService"):GetGuiInset().Y - 24)
+		),
+		function()
+			ItemTooltip.hide()
+			onClose()
+		end
+	)
+	win.Name = "Window_Creative"
+	require(script.Parent.ReleaseLayout).header(win, content)
 	Ui.titleColor(win, Ui.colors.header)
 
 	-- top bar: mode switch and quick actions
@@ -93,6 +104,7 @@ function CreativeWindow.build(
 	toggle.Activated:Connect(function()
 		remote:FireServer("toggle")
 	end)
+	local topButtons = { toggle }
 	local x = 160
 	for _, action in ipairs({
 		{ op = "coins", key = "creative_coins", w = 80 },
@@ -111,7 +123,27 @@ function CreativeWindow.build(
 		b.Activated:Connect(function()
 			remote:FireServer(action.op)
 		end)
+		table.insert(topButtons, b)
 		x += action.w + 6
+	end
+	local resetOverlay: Frame? = nil
+	if player:GetAttribute("CreativeResetAllowed") then
+		local reset = Ui.button(
+			content,
+			t("release_reset"),
+			UDim2.fromOffset(150, 44),
+			UDim2.new(),
+			Ui.colors.close
+		)
+		reset.TextSize = 14
+		reset.Activated:Connect(function()
+			if resetOverlay and resetOverlay.Parent then
+				return
+			end
+			resetOverlay =
+				require(script.Parent.ResetProgressWindow).open(parent, locale, createWindow)
+		end)
+		table.insert(topButtons, reset)
 	end
 
 	-- tabs
@@ -120,10 +152,9 @@ function CreativeWindow.build(
 	tabBar.Position = UDim2.fromOffset(4, 40)
 	tabBar.Size = UDim2.new(1, -8, 0, 30)
 	tabBar.Parent = content
-	local tabLayout = Instance.new("UIListLayout")
-	tabLayout.FillDirection = Enum.FillDirection.Horizontal
+	local tabLayout = Instance.new("UIGridLayout")
 	tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	tabLayout.Padding = UDim.new(0, 4)
+	tabLayout.CellPadding = UDim2.fromOffset(4, 4)
 	tabLayout.Parent = tabBar
 	local hint = Ui.label(
 		content,
@@ -133,17 +164,18 @@ function CreativeWindow.build(
 		11,
 		Ui.colors.muted
 	)
-	hint.TextTruncate = Enum.TextTruncate.AtEnd
+	hint.TextWrapped, hint.TextSize = true, 13
 
 	local pages: { [string]: ScrollingFrame } = {}
 	local tabButtons: { [string]: TextButton } = {}
 	local builders: { [string]: (ScrollingFrame) -> () } = {}
 	local seenLog = #logLines
+	local pageTop = 92
 
 	local function page(): ScrollingFrame
 		local list = Instance.new("ScrollingFrame")
-		list.Position = UDim2.fromOffset(4, 92)
-		list.Size = UDim2.new(1, -8, 1, -96)
+		list.Position = UDim2.fromOffset(4, pageTop)
+		list.Size = UDim2.new(1, -8, 1, -pageTop - 4)
 		list.BackgroundTransparency = 1
 		list.BorderSizePixel = 0
 		list.ScrollBarThickness = 8
@@ -320,50 +352,50 @@ function CreativeWindow.build(
 		for i, id in ipairs(BOOK_ITEMS) do
 			named(extras, id, i)
 		end
-		header(list, t("creative_books_all"), 3)
-		local effects = {}
-		for effect in pairs(Config.books.effects) do
-			if Config.books.catalog[effect] then
-				table.insert(effects, effect)
-			end
+		local function bookName(id: string): string
+			return if Strings.has("book_" .. id, locale) then t("book_" .. id) else id
 		end
-		local names: { [string]: string } = {}
-		for _, effect in ipairs(effects) do
-			local key = "book_" .. effect
-			names[effect] = if Strings.has(key, locale) then t(key) else effect
-		end
-		table.sort(effects, function(a, b)
-			return names[a] < names[b]
-		end)
-		-- one card per book: its name in the rarity colour and a cell per level (I, II, III)
-		local cards = grid(list, Vector2.new(152, 74), 4)
-		for i, effect in ipairs(effects) do
-			local card = Ui.card(cards, UDim2.new(), UDim2.new())
-			card.LayoutOrder = i
-			local rarity = Config.books.catalog[effect].rarity or "common"
-			local title = Ui.label(
-				card,
-				names[effect],
-				UDim2.new(1, -8, 0, 18),
-				UDim2.fromOffset(6, 2),
-				12,
-				ItemInfo.RARITY_COLORS[rarity] or Ui.colors.text
+		for groupIndex, group in
+			ipairs(
+				require(Shared.CreativeBooks).groups(
+					Config.books.catalog,
+					Config.books.effects,
+					bookName
+				)
 			)
-			title.TextTruncate = Enum.TextTruncate.AtEnd
-			for level = 1, #Config.books.effects[effect] do
-				local stack: any = {
-					id = "ancient_book",
-					count = 1,
-					level = level,
-					books = { { id = effect, level = level } },
-					rarity = rarity,
-					applyChance = 100,
-				}
-				local frame = slot(card, 44, stack, { "ancient_book", effect, level }, ROMAN[level])
-				frame.Position = UDim2.fromOffset(6 + (level - 1) * 48, 24)
+		do
+			header(list, Strings.itemName(group.itemId, nil, locale), 3 + groupIndex * 2)
+			local cards = grid(list, Vector2.new(152, 82), 4 + groupIndex * 2)
+			for i, effect in ipairs(group.books) do
+				local card = Ui.card(cards, UDim2.new(), UDim2.new())
+				card.LayoutOrder = i
+				local rarity = Config.books.catalog[effect].rarity or "common"
+				local title = Ui.label(
+					card,
+					bookName(effect),
+					UDim2.new(1, -8, 0, 28),
+					UDim2.fromOffset(4, 2),
+					13,
+					ItemInfo.RARITY_COLORS[rarity] or Ui.colors.text
+				)
+				title.TextWrapped = true
+				for level = 1, #Config.books.effects[effect] do
+					local stack: any = {
+						id = "ancient_book",
+						count = 1,
+						level = level,
+						books = { { id = effect, level = level } },
+						rarity = rarity,
+						applyChance = 100,
+					}
+					local frame =
+						slot(card, 44, stack, { "ancient_book", effect, level }, ROMAN[level])
+					frame.Position = UDim2.fromOffset(6 + (level - 1) * 48, 34)
+				end
 			end
 		end
 	end
+
 	builders.items = function(list)
 		local sections: { { key: string, ids: { string } } } = {
 			{ key = "creative_food", ids = {} },
@@ -488,12 +520,41 @@ function CreativeWindow.build(
 		toggle.BackgroundColor3 = if on then Ui.colors.buttonGreen else Ui.colors.buttonGrey
 	end
 	local watch = player:GetAttributeChangedSignal("Creative"):Connect(refresh)
+	local function arrange()
+		local width = content.AbsoluteSize.X
+		local columns = if width >= 650 then #topButtons else 3
+		for index, button in ipairs(topButtons) do
+			button.Size = UDim2.fromOffset((width - 8 - (columns - 1) * 4) / columns, 44)
+			button.Position = UDim2.fromOffset(
+				4 + ((index - 1) % columns) * ((width - 8 + 4) / columns),
+				4 + math.floor((index - 1) / columns) * 48
+			)
+		end
+		local top = 8 + math.ceil(#topButtons / columns) * 48
+		local tabColumns = if width >= 650 then #TABS else 3
+		tabBar.Position, tabBar.Size =
+			UDim2.fromOffset(4, top), UDim2.new(1, -8, 0, math.ceil(#TABS / tabColumns) * 48)
+		tabLayout.CellSize = UDim2.new(1 / tabColumns, -4, 0, 44)
+		top += math.ceil(#TABS / tabColumns) * 48
+		hint.Position, hint.Size = UDim2.fromOffset(4, top), UDim2.new(1, -8, 0, 32)
+		pageTop = top + 36
+		for _, list in pairs(pages) do
+			list.Position, list.Size =
+				UDim2.fromOffset(4, pageTop), UDim2.new(1, -8, 1, -pageTop - 4)
+		end
+	end
+	local resized = content:GetPropertyChangedSignal("AbsoluteSize"):Connect(arrange)
 	win.Destroying:Connect(function()
 		watch:Disconnect()
 		logWatch:Disconnect()
+		resized:Disconnect()
+		if resetOverlay then
+			resetOverlay:Destroy()
+		end
 		ItemTooltip.hide()
 	end)
 	refresh(nil)
+	arrange()
 	return win, refresh
 end
 

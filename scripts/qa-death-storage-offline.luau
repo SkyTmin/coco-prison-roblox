@@ -182,6 +182,13 @@ local function fixture()
 	end
 	modules.Numbers = load("src/shared/Numbers.luau")
 	modules.Persistence = load("src/shared/Persistence.luau")
+	modules.InventoryService = {
+		add = function(p, id, amount)
+			table.insert(p.inventory, { id = id, count = amount })
+			return 0
+		end,
+	}
+	f.bossPolicy = load("src/server/Services/BossRewardPolicy.luau")
 	f.death = load("src/server/Services/DeathService.luau", function(source)
 		return source:gsub(
 			"return DeathService%s*$",
@@ -353,6 +360,43 @@ check(
 	"ordinary non-pending death retains existing immediate behavior",
 	count(f.emitted, "apple") == 3 and f.other.coins == 20000 and f.live.storageDeath == nil
 )
+f = fixture()
+f.live.storageTransfer = nil
+local award = {
+	id = "boss1",
+	bossId = "basalt",
+	killedAt = 100,
+	untilAt = 1300,
+	coins = 1000,
+	items = { ancient_star = 2 },
+	share = 1,
+}
+f.bossPolicy.Enqueue(f.live, award)
+f:die()
+f:resolve()
+check(
+	"pending boss award defers old inventory and killer export",
+	#f.emitted == 0 and f.other.coins == 0 and f.live.storageDeath.queue[1].bossRewardIds.boss1
+)
+f.live.inventory[3] = { id = "apple", count = 7 }
+f:die()
+check(
+	"only first death owns pending boss award",
+	f.live.storageDeath.queue[2].bossRewardIds.boss1 == nil
+)
+f.bossPolicy.Apply(f.live, award)
+f.bossPolicy.Remove(f.live, award.id)
+f:resolve()
+check(
+	"resolved pending boss loot drops with original death once",
+	count(f.emitted, "ancient_star") == 2 and count(f.emitted, "apple") == 3
+)
+f:resolve()
+check(
+	"second death retains its distinct respawn items",
+	count(f.emitted, "ancient_star") == 2 and count(f.emitted, "apple") == 10
+)
+
 print(
 	string.format(
 		"Death/storage integration PASS: %d actual-source checks; durable/world mocks, no Studio",

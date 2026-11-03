@@ -107,7 +107,8 @@ function HeldItem.MakeVisual(
 	id: string,
 	level: number,
 	spriteScale: number?,
-	variant: string? -- the model to show instead of the item's own (the bow's pull stages)
+	variant: string?, -- the model to show instead of the item's own (the bow's pull stages)
+	enchanted: boolean?
 ): (Instance, BasePart, boolean)
 	local icon = Config.iconFor(id, if level > 0 then level else nil)
 	local block = Config.block(id)
@@ -181,6 +182,12 @@ function HeldItem.MakeVisual(
 		trail.Enabled = false
 		trail.Parent = visual
 	end
+	if
+		enchanted
+		or require(ReplicatedStorage.Shared.ItemEnchantment).active({ id = id, level = level })
+	then
+		require(script.Parent.EnchantmentVisual).held(container, visual)
+	end
 	return container, visual, cube
 end
 
@@ -216,7 +223,13 @@ local function render(rig: Rig)
 		elseif isCube then 1.05 / 1.2
 		else 1.54 / 1.2
 	local spriteSize = (if tool then 1.45 else 1.2) * scale
-	local container, visual, cube = HeldItem.MakeVisual(id, level, scale, variant)
+	local container, visual, cube = HeldItem.MakeVisual(
+		id,
+		level,
+		scale,
+		variant,
+		rig.character:GetAttribute("HeldEnchanted") == true
+	)
 	local motor = Instance.new("Motor6D")
 	motor.Name = "HeldItemGrip"
 	motor.Part0, motor.Part1 = hand, visual
@@ -277,6 +290,12 @@ local function characterAdded(player: Instance, character: Model)
 	table.insert(
 		rig.connections,
 		character:GetAttributeChangedSignal("HeldItem"):Connect(function()
+			render(rig)
+		end)
+	)
+	table.insert(
+		rig.connections,
+		character:GetAttributeChangedSignal("HeldEnchanted"):Connect(function()
 			render(rig)
 		end)
 	)

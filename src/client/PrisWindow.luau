@@ -309,7 +309,7 @@ function PrisWindow.build(
 	end
 
 	local function bossName(card: any): string
-		return if locale == "ru" then card.name else card.nameEn or card.name
+		return Strings.bossName(card.id, card.name, locale)
 	end
 
 	local function fillBosses()

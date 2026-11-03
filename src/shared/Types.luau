@@ -154,6 +154,14 @@ export type Profile = {
 	canteen: number?, -- Столовая: the opening (Daily.canteenPeriod) whose portion was taken
 	location: string,
 	operationIds: { [string]: boolean },
+	tutorial: {
+		version: number,
+		step: number,
+		upgradedAt: number?,
+		dropId: string?,
+		completedAt: number?,
+		legacy: boolean?,
+	}?,
 }
 
 return {}

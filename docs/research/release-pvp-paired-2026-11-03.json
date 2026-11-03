@@ -1,0 +1,915 @@
+{
+  "observed": [
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "standing",
+      "motionPosition": "-9.91460108e-11, 204.149979, 7, 1, 0, -1.94085331e-07, 0, 1, 0, 1.94085331e-07, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "sprint": true,
+      "user": -2,
+      "motionY": 0,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "sprinting",
+      "motionPosition": "-5.84678972e-10, 204.149979, 4.92158365, 1, 0, 2.362186e-15, 0, 1, 0, -2.362186e-15, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "running victim",
+      "motionPosition": "1.45388634e-09, 204.149979, 6.99998188, 1, 0, 2.98752454e-08, 0, 1, 0, -2.98752454e-08, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "motionY": 2.585053299256173,
+      "grounded": false,
+      "y": 205.43829345703125,
+      "name": "falling critical",
+      "motionPosition": "6.28767708e-13, 208.433777, 7, 1, 0, 2.3702724e-18, 0, 1, 0, -2.3702724e-18, 0, 1",
+      "falling": true,
+      "state": "Freefall",
+      "vy": 0
+    },
+    {
+      "y": 207.1350860595703,
+      "name": "falling critical contact",
+      "motionY": -21.365433027576028,
+      "grounded": false,
+      "state": "Freefall",
+      "vy": 15.597540855407715
+    },
+    {
+      "user": -1,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "reverse direction",
+      "motionPosition": "-3.42976869e-10, 204.149979, 1.36536871e-09, 1, 0, 4.63734657e-15, 0, 1, 0, -4.63734657e-15, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseStaging.Spawn",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "rapid repeat",
+      "motionPosition": "-1.37396062e-14, 204.149979, 7, 1, 0, 1.97489247e-18, 0, 1, 0, -1.97489247e-18, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "rapid repeat",
+      "motionPosition": "1.06399603e-13, 204.149979, 7, 1, 0, 1.86160306e-18, 0, 1, 0, -1.86160306e-18, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "rapid repeat",
+      "motionPosition": "1.06399603e-13, 204.149979, 7, 1, 0, 1.86160306e-18, 0, 1, 0, -1.86160306e-18, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "rapid repeat",
+      "motionPosition": "1.06399603e-13, 204.149979, 7, 1, 0, 1.86160306e-18, 0, 1, 0, -1.86160306e-18, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    },
+    {
+      "user": -2,
+      "grounded": true,
+      "y": 204.14990234375,
+      "name": "absorbed hit",
+      "motionPosition": "-2.69694477e-14, 204.149979, 7, 1, 0, 1.79969913e-18, 0, 1, 0, -1.79969913e-18, 0, 1",
+      "falling": false,
+      "state": "Running",
+      "ground": "Workspace.QAReleaseFloor",
+      "vy": 0.00048828125
+    }
+  ],
+  "checks": [
+    {
+      "name": "standing one accepted result",
+      "pass": true
+    },
+    {
+      "name": "standing positive damage",
+      "pass": true
+    },
+    {
+      "name": "standing victim received push",
+      "pass": true
+    },
+    {
+      "name": "standing one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "sprinting one accepted result",
+      "pass": true
+    },
+    {
+      "name": "sprinting positive damage",
+      "pass": true
+    },
+    {
+      "name": "sprinting victim received push",
+      "pass": true
+    },
+    {
+      "name": "sprinting one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "running victim one accepted result",
+      "pass": true
+    },
+    {
+      "name": "running victim positive damage",
+      "pass": true
+    },
+    {
+      "name": "running victim victim received push",
+      "pass": true
+    },
+    {
+      "name": "running victim one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "falling critical one accepted result",
+      "pass": true
+    },
+    {
+      "name": "falling critical positive damage",
+      "pass": true
+    },
+    {
+      "name": "falling critical victim received push",
+      "pass": true
+    },
+    {
+      "name": "falling critical one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "actual falling hit is critical",
+      "pass": true
+    },
+    {
+      "name": "reverse direction one accepted result",
+      "pass": true
+    },
+    {
+      "name": "reverse direction positive damage",
+      "pass": true
+    },
+    {
+      "name": "reverse direction victim received push",
+      "pass": true
+    },
+    {
+      "name": "reverse direction one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "rapid repeat one accepted result",
+      "pass": true
+    },
+    {
+      "name": "rapid repeat positive damage",
+      "pass": true
+    },
+    {
+      "name": "rapid repeat victim received push",
+      "pass": true
+    },
+    {
+      "name": "rapid repeat one coherent victim impact",
+      "pass": true
+    },
+    {
+      "name": "absorbed hit consumes golden health",
+      "pass": true
+    },
+    {
+      "name": "absorbed hit tells attacker it landed",
+      "pass": true
+    }
+  ],
+  "status": "PASS",
+  "cases": [
+    {
+      "victim": {
+        "displacement": 0.5759416222572327,
+        "y": 204.1499786376953,
+        "x": 0.00013819911691825837,
+        "events": [
+          {
+            "at": 11.337588200000027,
+            "kind": "health",
+            "data": 25
+          },
+          {
+            "at": 11.337834100000691,
+            "kind": "impact",
+            "data": {
+              "id": 5,
+              "absorbed": 0,
+              "health": 25,
+              "damage": 4
+            }
+          },
+          {
+            "at": 11.337868900000103,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 11.338048499999786,
+            "kind": "applied",
+            "data": {
+              "health": 25,
+              "id": 5,
+              "vz": -26,
+              "vx": 2.836329393574033e-8,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -0.5757752656936646,
+        "vz": 3.8264708734914166e-8,
+        "health": 25,
+        "vx": 7.665646251098224e-8,
+        "vy": 0.00041619763942435384
+      },
+      "name": "standing",
+      "attacker": {
+        "displacement": 6.375198702279761e-10,
+        "y": 204.1499786376953,
+        "x": -1.9345564039596752e-10,
+        "events": [
+          {
+            "at": 9.834750399999393,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041619932744652033
+            }
+          },
+          {
+            "at": 9.984852600000522,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 9.984856499999296,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 9.984982899999522,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          }
+        ],
+        "z": 7,
+        "vz": -7.371399135536194e-8,
+        "health": 29,
+        "vx": 2.905061435853895e-8,
+        "vy": 0.00041619932744652033
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 4
+    },
+    {
+      "victim": {
+        "displacement": 3.8332314491271973,
+        "y": 204.14927673339844,
+        "x": 0.000016997983038891107,
+        "events": [
+          {
+            "at": 13.403937700000824,
+            "kind": "health",
+            "data": 25
+          },
+          {
+            "at": 13.404119800001354,
+            "kind": "impact",
+            "data": {
+              "id": 8,
+              "absorbed": 0,
+              "health": 25,
+              "damage": 4
+            }
+          },
+          {
+            "at": 13.404142700001103,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 13.40430440000091,
+            "kind": "applied",
+            "data": {
+              "health": 25,
+              "id": 8,
+              "vz": -52,
+              "vx": 2.4422448063887714e-8,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -3.833231210708618,
+        "vz": -2.9102096557617188,
+        "health": 25,
+        "vx": 0.00006981938349781558,
+        "vy": 0.06931132078170776
+      },
+      "name": "sprinting",
+      "attacker": {
+        "displacement": 9.49678897857666,
+        "y": 204.14878845214844,
+        "x": -0.000036658220778917894,
+        "events": [
+          {
+            "at": 11.90059939999992,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041619932744652033
+            }
+          },
+          {
+            "at": 12.052259099998992,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 12.052263600000515,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 12.052398499999981,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          }
+        ],
+        "z": -2.49678897857666,
+        "vz": -8.23095703125,
+        "health": 29,
+        "vx": -0.00004927347617922351,
+        "vy": 0.2969902753829956
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 4
+    },
+    {
+      "victim": {
+        "displacement": 16.930065155029297,
+        "y": 204.1499786376953,
+        "x": 16.91997528076172,
+        "events": [
+          {
+            "at": 15.45421080000051,
+            "kind": "health",
+            "data": 25
+          },
+          {
+            "at": 15.454402900000787,
+            "kind": "impact",
+            "data": {
+              "id": 11,
+              "absorbed": 0,
+              "health": 25,
+              "damage": 4
+            }
+          },
+          {
+            "at": 15.45443080000041,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 15.454589700000724,
+            "kind": "applied",
+            "data": {
+              "health": 25,
+              "id": 11,
+              "vz": -25.73299789428711,
+              "vx": 14.116552352905273,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -0.5844141244888306,
+        "vz": -8.292582975855112e-8,
+        "health": 25,
+        "vx": 20.799999237060547,
+        "vy": 0.00041619763942435384
+      },
+      "name": "running victim",
+      "attacker": {
+        "displacement": 1.0436096431476471e-14,
+        "y": 204.1499786376953,
+        "x": 1.453879683310788e-9,
+        "events": [
+          {
+            "at": 13.951996399999189,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041620322735980153
+            }
+          },
+          {
+            "at": 14.084447499999442,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 14.084451000000627,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 14.084584300000643,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          }
+        ],
+        "z": 6.999981880187988,
+        "vz": 6.087397963483454e-8,
+        "health": 29,
+        "vx": -4.662747184885907e-12,
+        "vy": 0.00041620322735980153
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 4
+    },
+    {
+      "victim": {
+        "displacement": 0.5250703692436218,
+        "y": 204.1499786376953,
+        "x": -7.124578704775786e-12,
+        "events": [
+          {
+            "at": 17.654107600001225,
+            "kind": "health",
+            "data": 23
+          },
+          {
+            "at": 17.654281600000104,
+            "kind": "impact",
+            "data": {
+              "id": 14,
+              "absorbed": 0,
+              "health": 23,
+              "damage": 6
+            }
+          },
+          {
+            "at": 17.65430329999981,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 17.65445069999987,
+            "kind": "applied",
+            "data": {
+              "health": 23,
+              "id": 14,
+              "vz": -26,
+              "vx": 1.0049318710514399e-8,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -0.5250703692436218,
+        "vz": -9.413799517687949e-8,
+        "health": 23,
+        "vx": 2.364699369650225e-8,
+        "vy": 0.00041618934483267367
+      },
+      "name": "falling critical",
+      "attacker": {
+        "displacement": 1.0756330450899937e-13,
+        "y": 204.1499786376953,
+        "x": 9.922427191954436e-14,
+        "events": [
+          {
+            "at": 16.152641599999697,
+            "kind": "intent",
+            "data": {
+              "falling": true,
+              "y": 208.37689208984375,
+              "state": "Freefall",
+              "vy": -4.365945816040039
+            }
+          },
+          {
+            "at": 16.300644299999476,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 16.300648999998884,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 16.30076840000038,
+            "kind": "hit",
+            "data": {
+              "critical": true,
+              "result": "hit",
+              "amount": 6
+            }
+          }
+        ],
+        "z": 7,
+        "vz": -8.462185263624633e-8,
+        "health": 29,
+        "vx": 6.481907025013278e-12,
+        "vy": 0.0004161999677307904
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 6
+    },
+    {
+      "victim": {
+        "displacement": 0.5759415626525879,
+        "y": 204.1499786376953,
+        "x": -1.2752255848513805e-13,
+        "events": [
+          {
+            "at": 18.33417709999958,
+            "kind": "health",
+            "data": 25
+          },
+          {
+            "at": 18.334339900000487,
+            "kind": "impact",
+            "data": {
+              "id": 17,
+              "absorbed": 0,
+              "health": 25,
+              "damage": 4
+            }
+          },
+          {
+            "at": 18.334365000000616,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 18.334494099999574,
+            "kind": "applied",
+            "data": {
+              "health": 25,
+              "id": 17,
+              "vz": 26,
+              "vx": -3.3049591709188864e-12,
+              "vy": 14
+            }
+          }
+        ],
+        "z": 7.575941562652588,
+        "vz": -7.094741505397906e-8,
+        "health": 25,
+        "vx": 5.434583772584434e-12,
+        "vy": 0.00041619763942435384
+      },
+      "name": "reverse direction",
+      "attacker": {
+        "displacement": 2.3018212336189947e-10,
+        "y": 204.1499786376953,
+        "x": 4.737449321723375e-11,
+        "events": [
+          {
+            "at": 19.536694300000818,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041616609087213874
+            }
+          },
+          {
+            "at": 19.68654290000086,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 19.686546799999633,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 19.686693400000877,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          }
+        ],
+        "z": -1.885833711412488e-10,
+        "vz": 6.548566489072982e-8,
+        "health": 29,
+        "vx": -1.6449989814759647e-8,
+        "vy": 0.00041616609087213874
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 4
+    },
+    {
+      "victim": {
+        "displacement": 0.5759416222572327,
+        "y": 204.1499786376953,
+        "x": 5.720242612916593e-10,
+        "events": [
+          {
+            "at": 21.604147800000646,
+            "kind": "health",
+            "data": 25
+          },
+          {
+            "at": 21.60432960000071,
+            "kind": "impact",
+            "data": {
+              "id": 20,
+              "absorbed": 0,
+              "health": 25,
+              "damage": 4
+            }
+          },
+          {
+            "at": 21.604354500001136,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 21.604522200001156,
+            "kind": "applied",
+            "data": {
+              "health": 25,
+              "id": 20,
+              "vz": -26,
+              "vx": -8.238412618766233e-9,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -0.5759416222572327,
+        "vz": 9.143593615590362e-8,
+        "health": 25,
+        "vx": -2.2969075530454575e-8,
+        "vy": 0.00041619763942435384
+      },
+      "name": "rapid repeat",
+      "attacker": {
+        "displacement": 1.0450593569775318e-13,
+        "y": 204.1499786376953,
+        "x": 1.0720608699821971e-13,
+        "events": [
+          {
+            "at": 20.1008724000003,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041616609087213874
+            }
+          },
+          {
+            "at": 20.21794249999948,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041616609087213874
+            }
+          },
+          {
+            "at": 20.251835400000346,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 20.251845599999797,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 20.252001299999392,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          },
+          {
+            "at": 20.31774299999961,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041616609087213874
+            }
+          },
+          {
+            "at": 20.350137899999027,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "cooldown",
+              "amount": 0
+            }
+          },
+          {
+            "at": 20.41734059999908,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041616609087213874
+            }
+          },
+          {
+            "at": 20.550791199999367,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "cooldown",
+              "amount": 0
+            }
+          }
+        ],
+        "z": 7,
+        "vz": 9.439505532782277e-8,
+        "health": 29,
+        "vx": -7.230840926020221e-12,
+        "vy": 0.00041616609087213874
+      },
+      "impacts": 1,
+      "hits": 1,
+      "pushes": 0,
+      "damage": 4
+    },
+    {
+      "victim": {
+        "displacement": 0.5759416222572327,
+        "y": 204.1499786376953,
+        "x": 1.4738232856359446e-10,
+        "events": [
+          {
+            "at": 23.604813199999626,
+            "kind": "impact",
+            "data": {
+              "id": 23,
+              "absorbed": 4,
+              "health": 29,
+              "damage": 4
+            }
+          },
+          {
+            "at": 23.604842000000644,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 23.605028300000413,
+            "kind": "applied",
+            "data": {
+              "health": 29,
+              "id": 23,
+              "vz": -26,
+              "vx": 7.564880277755037e-9,
+              "vy": 14
+            }
+          }
+        ],
+        "z": -0.5759416222572327,
+        "vz": -7.940678159457093e-8,
+        "health": 29,
+        "vx": 1.9947746565662783e-8,
+        "vy": 0.00041619763942435384
+      },
+      "golden": 16,
+      "name": "absorbed hit",
+      "attacker": {
+        "displacement": 9.975623571547437e-14,
+        "y": 204.1499786376953,
+        "x": 8.366564548372563e-14,
+        "events": [
+          {
+            "at": 22.101593800000046,
+            "kind": "intent",
+            "data": {
+              "falling": false,
+              "y": 204.1499786376953,
+              "state": "Running",
+              "vy": 0.00041617840179242194
+            }
+          },
+          {
+            "at": 22.250487400000566,
+            "kind": "sound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 22.25049410000065,
+            "kind": "localHurtSound",
+            "data": "player_hurt"
+          },
+          {
+            "at": 22.250715500000297,
+            "kind": "hit",
+            "data": {
+              "critical": false,
+              "result": "hit",
+              "amount": 4
+            }
+          }
+        ],
+        "z": 7,
+        "vz": 5.479031273125656e-8,
+        "health": 29,
+        "vx": -4.19708798965468e-12,
+        "vy": 0.00041617840179242194
+      }
+    }
+  ],
+  "realProfiles": false
+}

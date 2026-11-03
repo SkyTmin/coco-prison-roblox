@@ -51,6 +51,14 @@
 
 ## Журнал
 
+### 03.11 — Release source integration, tutorial corrections and scoped Studio evidence
+
+Implemented PvP impact/audio/HP/knockback synchronization, per-server bosses and exact-respawn reward locks, six-hour routing/friends policy, Actions with durable transfers, complete personal-item reset, typed-asset loading gate, world boundaries, food/Silk/Spring corrections, localization/donate guards and visible matte enchantment marks. Latest owner steering: compact right-hand tutorial with existing block icons; gather ALL requirements and enough sale value before guiding one sale, then item upgrade and level-up. Cancelled10-block/$5 reward removed. Diamond sword SharpIII added as tier16; absent screenshot price/requirements explicitly recorded as owner-requested design extension, not wiki facts.
+
+[Integration/remaining acceptance](research/release-readiness-2026-11-02.md). Actual Studio evidence: PvP32 PASS including native attack; safety17 PASS for real Prison/Quarry recovery and legal depth; all30 illustrations typed-preload successfully. Latest Items48 completed checks PASS (food, Spring, native repeat upgrade, auction sorts), then Silk fixture aborted before mining; neighboring-cell fixture corrected, rerun pending. Actions28/30 PASS; exact transfer/replay/layout checks pass, native click fixture corrected for58px inset, rerun pending. Tutorial goals37, panel91, sword45, loader98 and independent reset/loading6 checks pass against actual source with isolated engine/store mocks; these do not replace native-phone or full newcomer playthrough acceptance.
+
+Source-only sync preserved the cloud map. User saved and restarted confirmed Katorga;35 boundary regions and repaired legacy walls survived reopening. No publish/global wipe/real paid transaction/real-profile reset. Native window control was stopped with Escape; no further CUA calls. Later normal owner login hit the existing cross-session profile lock after repeated restarts; do not forcibly remove that lock. Restore Creative after a successful subsequent Play. Studio fixtures use scoped negative IDs and restore parked scenery in finally paths.
+
 ### 03.11 — Thirty faithful location illustrations [owner/art]
 
 Generated and uploaded illustrations for all 30 locations, with three parallel art agents after the explicit request to speed up the artwork. Actual in-game screenshots govern camera/layout/landmarks; misleading added objects were removed in revised outputs. Final PNGs, source references, exact prompts and a searchable comparison gallery are in `assets/previews`; `ids.json` and generated `Config/previews.json` now contain all 30 uploaded ids. [Art report](research/release-location-art-2026-11-03.md). No publication. Runtime asset loading/menu review remains part of the ongoing release QA; the larger release code changes are still in progress.

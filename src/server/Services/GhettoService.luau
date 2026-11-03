@@ -27,10 +27,13 @@ local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local Numbers = require(Shared.Numbers)
 local ProfileService = require(script.Parent.ProfileService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
 local ItemDropService = require(script.Parent.ItemDropService)
+local GangService = require(script.Parent.GangService)
+local GangHouseService = require(script.Parent.GangHouseService)
 
 local GhettoService = {}
 local cfg = Ghetto.cfg
@@ -44,7 +47,13 @@ local stockFolder: Folder? = nil
 local nextRestock = 0
 local started = false
 
-type Hold = { startedAt: number, endedAt: number?, connection: RBXScriptConnection }
+type Hold = {
+	startedAt: number,
+	endedAt: number?,
+	character: Model,
+	position: Vector3,
+	connection: RBXScriptConnection,
+}
 type Treasure =
 	{ model: Model, prompt: ProximityPrompt, point: BasePart, holds: { [Player]: Hold } }
 local treasure: Treasure? = nil
@@ -86,6 +95,7 @@ local function nearTag(player: Player, tag: string): boolean
 		if
 			npc:IsA("BasePart")
 			and npc:IsDescendantOf(workspace)
+			and GangHouseService.allowed(npc, player)
 			and (npc.Position - root.Position).Magnitude <= NPC_RANGE
 		then
 			return true
@@ -132,12 +142,10 @@ local function buyTrader(player: Player, id: any, rawCount: any)
 	if not price or not nearTag(player, "GhettoTrader") then
 		return
 	end
-	local count = if typeof(rawCount) == "number"
-			and rawCount == rawCount
-			and rawCount >= 1
-			and rawCount <= 64
-		then math.floor(rawCount)
-		else 1
+	if not Numbers.integer(rawCount, 1) or rawCount > 64 then
+		return
+	end
+	local count = rawCount :: number
 	local itemId = id :: string
 	local result = ""
 	ProfileService.Mutate(player, function(p)
@@ -232,7 +240,7 @@ local function bindPrompt(part: Instance, tag: string)
 	local def = PROMPTS[tag]
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "GhettoPrompt"
-	prompt.ActionText = Strings.t(def.text)
+	require(Shared.PromptText).Set(prompt, "ActionText", def.text)
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
@@ -367,11 +375,19 @@ local function clearTreasure()
 	t.model:Destroy()
 end
 
-local function giveReward(player: Player, at: Vector3)
+local function giveReward(player: Player, at: Vector3): boolean
 	local reward = rollReward()
+	local profile = ProfileService.Get(player)
+	if not profile then
+		return false
+	end
 	local locale = Strings.localeOf(player)
 	local text: string
 	if reward.id == "money" then
+		if not Numbers.canCredit(profile.coins, units(reward.dollars or 0)) then
+			toast(player, "ghetto_reward_wallet_full")
+			return false
+		end
 		ProfileService.Mutate(player, function(p)
 			p.coins += units(reward.dollars or 0)
 			p.stats.ghettoChests = (p.stats.ghettoChests or 0) + 1
@@ -390,10 +406,12 @@ local function giveReward(player: Player, at: Vector3)
 				at,
 				false
 			)
+			toast(player, "ghetto_reward_overflow")
 		end
 		text = Strings.itemName(reward.id, 1, locale) .. (if count > 1 then " ×" .. count else "")
 	end
 	toast(player, "ghetto_chest_drop", text) -- [клиент gang.ghetto.chest.drop]
+	return true
 end
 
 local function capture(player: Player)
@@ -402,8 +420,10 @@ local function capture(player: Player)
 		return
 	end
 	local at = t.point.Position
+	if not giveReward(player, at + Vector3.new(0, 3, 0)) then
+		return
+	end
 	clearTreasure()
-	giveReward(player, at + Vector3.new(0, 3, 0))
 	Sfx.toPlayer(player, "level_up", 0.6)
 	announce("ghetto_chest_opened", player.DisplayName) -- [клиент gang.ghetto.chest.opened]
 end
@@ -413,6 +433,40 @@ local function endHold(t: Treasure, player: Player)
 	if hold then
 		hold.connection:Disconnect()
 		t.holds[player] = nil
+	end
+end
+
+local function treasureAccess(player: Player): boolean
+	local profile = ProfileService.Get(player)
+	return profile ~= nil
+		and profile.location == "ghetto"
+		and GangService.gangOf(profile) ~= nil
+		and GangService.level(profile, "ghetto") >= 1
+end
+
+local function validHold(t: Treasure, player: Player, hold: Hold): boolean
+	local root = rootOf(player)
+	local body = t.model.PrimaryPart
+	return treasure == t
+		and root ~= nil
+		and body ~= nil
+		and player.Character == hold.character
+		and treasureAccess(player)
+		and (root.Position - body.Position).Magnitude <= CHEST_RANGE + 2
+		and (root.Position - hold.position).Magnitude <= 2
+		and (hold.endedAt == nil or os.clock() - hold.endedAt <= 0.75)
+end
+
+local function updateHolds()
+	local t = treasure
+	if not t then
+		return
+	end
+	for player, hold in pairs(t.holds) do
+		if not validHold(t, player, hold) then
+			endHold(t, player)
+			Remotes.event("TreasureReset"):FireClient(player)
+		end
 	end
 end
 
@@ -436,8 +490,8 @@ local function spawnChest(): number?
 	local model, body = buildChest(point)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "TreasurePrompt"
-	prompt.ActionText = Strings.t("ghetto_chest_capture")
-	prompt.ObjectText = Strings.t("ghetto_chest_name")
+	require(Shared.PromptText).Set(prompt, "ActionText", "ghetto_chest_capture")
+	require(Shared.PromptText).Set(prompt, "ObjectText", "ghetto_chest_name")
 	prompt.HoldDuration = cfg.treasure.holdSeconds
 	prompt.KeyboardKeyCode = Enum.KeyCode.LeftShift -- [вики: «зажать Shift у сундука»]
 	prompt.MaxActivationDistance = CHEST_RANGE
@@ -453,13 +507,21 @@ local function spawnChest(): number?
 		endHold(t, player)
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		local profile = ProfileService.Get(player)
-		if not humanoid or not profile or profile.location ~= "ghetto" then
+		local root = rootOf(player)
+		if
+			not humanoid
+			or not character
+			or not root
+			or not treasureAccess(player)
+			or (root.Position - body.Position).Magnitude > CHEST_RANGE + 2
+		then
 			return
 		end
 		local health = humanoid.Health
 		t.holds[player] = {
 			startedAt = os.clock(),
+			character = character,
+			position = root.Position,
 			-- damage breaks the capture [решение]
 			connection = humanoid.HealthChanged:Connect(function(now: number)
 				if now < health - 0.01 and t.holds[player] then
@@ -476,18 +538,16 @@ local function spawnChest(): number?
 		local hold = t.holds[player]
 		if hold and not hold.endedAt then
 			hold.endedAt = os.clock()
-			hold.connection:Disconnect()
+			-- Keep damage cancellation through the short HoldEnded/Triggered ordering handoff.
 		end
 	end)
 	prompt.Triggered:Connect(function(player)
 		local hold = t.holds[player]
-		local root = rootOf(player)
 		if
 			treasure ~= t
 			or not hold
 			or (hold.endedAt or os.clock()) - hold.startedAt < cfg.treasure.holdSeconds - 0.35
-			or not root
-			or (root.Position - body.Position).Magnitude > CHEST_RANGE + 2
+			or not validHold(t, player, hold)
 		then
 			return
 		end
@@ -588,6 +648,14 @@ function GhettoService.Start()
 		local t = treasure
 		if t then
 			endHold(t, player)
+		end
+	end)
+	local holdClock = 0
+	RunService.Heartbeat:Connect(function(dt)
+		holdClock += dt
+		if holdClock >= 0.2 then
+			holdClock = 0
+			updateHolds()
 		end
 	end)
 	nextChestAt = os.clock() + cfg.treasure.firstAfterMinutes * 60

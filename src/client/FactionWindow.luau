@@ -208,7 +208,7 @@ function FactionWindow.build(
 		)
 		local title = Ui.label(
 			chip,
-			t("warzone_point_" .. point.id),
+			t("warzone_point_" .. point.id) .. " · " .. t("warzone_direction_short_" .. point.id),
 			UDim2.new(1, -12, 0, 20),
 			UDim2.fromOffset(6, 4),
 			14,
@@ -237,7 +237,7 @@ function FactionWindow.build(
 			t("warzone_held"),
 			Ui.hex(Ui.colors.header),
 			Warzone.heldBy(mine, now),
-			#Warzone.points,
+			Warzone.MAX_ACTIVE,
 			t("warzone_taken"),
 			Ui.hex(Ui.colors.header),
 			if p then p.stats.warzonePoints or 0 else 0
@@ -246,7 +246,9 @@ function FactionWindow.build(
 			local chip = chips[i]
 			local state = Warzone.state(point.id, now)
 			local owner = state.owner
-			if owner then
+			if not state.active then
+				chip.status.Text = t("warzone_inactive")
+			elseif owner then
 				-- [вики] the hold left «13 мин.» (fraction.gui.point_time)
 				local minutes = math.max(1, math.ceil((state.untilAt - now) / 60))
 				chip.status.Text = string.format(

@@ -353,31 +353,10 @@ end
 -- blocks from mines far above the player stay in the bag [сеть TG/25]; the second result counts them
 -- sells every sellable block: (money, items kept because their block is locked, items sold)
 function InventoryService.sellAll(profile: Profile, multiplier: number): (number, number, number)
-	if
-		not validSlots(profile.inventory)
-		or not Numbers.integer(profile.coins)
-		or not Numbers.finite(multiplier)
-		or multiplier <= 0
-	then
+	if not Numbers.finite(multiplier) or multiplier <= 0 then
 		return 0, 0, 0
 	end
-	local total, locked, count = 0, 0, 0
-	local soldSlots = {}
-	for slot, stack in pairs(profile.inventory) do
-		local block = Config.block(stack.id)
-		if block and block.sellable ~= false and Config.blockLocked(stack.id, profile.level) then
-			locked += stack.count
-		elseif block and block.sellable ~= false then
-			total += math.floor(
-				block.basePrice * Config.moneyScale * multiplier * stack.count + 0.5
-			)
-			count += stack.count
-			table.insert(soldSlots, slot)
-		end
-	end
-	if not Numbers.canCredit(profile.coins, total) then
-		return 0, locked, 0
-	end
+	local total, locked, count, soldSlots = require(Shared.Selling).quote(profile, multiplier)
 	for _, slot in ipairs(soldSlots) do
 		profile.inventory[slot] = nil
 	end

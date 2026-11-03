@@ -24,12 +24,14 @@ export type Item = {
 	icon: string?,
 	robux: number, -- the same item straight for Robux, one per purchase (its own Developer Product)
 	productId: number,
+	productName: string,
 }
 export type Pack = {
 	id: string,
 	crystals: number,
 	robux: number,
 	productId: number,
+	productName: string,
 	icon: string,
 	bonus: number?,
 }
@@ -39,6 +41,8 @@ local cfg = Config.donate
 
 Donate.tabs = cfg.tabs :: { { id: string, items: { string }? } }
 Donate.packs = cfg.packs :: { Pack }
+-- Existing paid receipts keep their original quantities when the visible catalog is versioned.
+Donate.legacyPacks = (cfg.legacyPacks or {}) :: { Pack }
 Donate.MULT = cfg.boosterMultiplier :: number
 Donate.MINUTES = cfg.boosterMinutes :: number
 
@@ -64,6 +68,11 @@ function Donate.byProduct(productId: number): (Pack?, string?)
 		return nil, nil
 	end
 	for _, pack in ipairs(Donate.packs) do
+		if pack.productId == productId then
+			return pack, nil
+		end
+	end
+	for _, pack in ipairs(Donate.legacyPacks) do
 		if pack.productId == productId then
 			return pack, nil
 		end

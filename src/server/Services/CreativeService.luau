@@ -8,6 +8,7 @@ local LogService = game:GetService("LogService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
@@ -21,6 +22,45 @@ local CreativeService = {}
 local rules = Config.rules.creative
 local started = false
 local catalog: { [string]: boolean } = {}
+local resets: { [Player]: { token: string, expires: number } } = {}
+
+local function resetAllowed(player: Player): boolean
+	return table.find(rules.admins, player.UserId) ~= nil
+		or (game.CreatorType == Enum.CreatorType.User and player.UserId == game.CreatorId)
+end
+
+local function resetRequest(player: Player, action: any, token: any): any
+	if not resetAllowed(player) or not ProfileService.IsReal(player) then
+		return { ok = false, key = "release_reset_failed" }
+	end
+	if action == "prepare" then
+		if require(Shared.ProgressReset).blocked(ProfileService.Get(player)) then
+			return { ok = false, key = "release_reset_busy" }
+		end
+		local request = { token = HttpService:GenerateGUID(false), expires = os.clock() + 45 }
+		resets[player] = request
+		return { ok = true, token = request.token }
+	end
+	local request = resets[player]
+	if
+		action ~= "confirm"
+		or not request
+		or token ~= request.token
+		or os.clock() > request.expires
+	then
+		return { ok = false, key = "release_action_expired" }
+	end
+	resets[player] = nil
+	local ok, reason = ProfileService.ResetOwnProgress(player)
+	if ok then
+		task.defer(function()
+			if player.Parent then
+				player:LoadCharacterAsync()
+			end
+		end)
+	end
+	return { ok = ok, key = reason or "release_reset_done" }
+end
 
 local function allowed(player: Player): boolean
 	return RunService:IsStudio()
@@ -164,6 +204,10 @@ function CreativeService.Start()
 		end
 	end
 	Remotes.event("Creative").OnServerEvent:Connect(onRequest)
+	Remotes.func("CreativeReset").OnServerInvoke = resetRequest
+	Players.PlayerRemoving:Connect(function(player)
+		resets[player] = nil
+	end)
 	-- the server's warnings and errors go to the creative window of allowed players: the owner reads
 	-- them on a phone where the chat (and /console) is not available [владелец 21.10]
 	local logRemote = Remotes.event("ServerLog")
@@ -191,6 +235,7 @@ function CreativeService.Start()
 		end
 	end)
 	local function added(player: Player)
+		player:SetAttribute("CreativeResetAllowed", resetAllowed(player))
 		if allowed(player) then
 			player:SetAttribute("CreativeAllowed", true)
 		end

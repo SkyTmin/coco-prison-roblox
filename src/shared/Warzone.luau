@@ -2,7 +2,8 @@
 -- Дворы (warzone) and the four faction points [клиент fraction.warzone.*; вики; docs/research/remaining-features-
 -- design.md этап 2]: Деньги, Блоки, Мобы, Спешка. WarzoneService owns the state and mirrors it into
 -- ReplicatedStorage.Warzone.<point> attributes, so the server and the client read the same thing:
---   Owner = faction id holding it ("" = free), Since / Until = workspace:GetServerTimeNow() of the capture and of the
+--   Active = the one selected beacon for this round; Owner = faction id holding it ("" = free),
+--   Since / Until = workspace:GetServerTimeNow() of the capture and of the
 --   end of the hold, Score_<faction> = capture points of each faction while it is free, Need = points to capture.
 -- While a faction holds a point, every member of it on this server gets +bonus to the multiplier of the point's kind
 -- (Boosters.runningAll lists it as a faction booster with `point` set) or the point's effect (Спешка).
@@ -11,6 +12,7 @@ local Config = require(script.Parent.Config)
 
 export type Point = { id: string, kind: string?, effect: string? }
 export type State = {
+	active: boolean,
 	owner: string?,
 	since: number,
 	untilAt: number,
@@ -28,6 +30,7 @@ Warzone.LOCATION = "warzone"
 Warzone.POINT_TAG = "WarzonePoint" -- the beacon top of a point (attribute Point): the client hangs its board there
 Warzone.BEAM_TAG = "WarzoneBeam" -- the beacon beam (attribute Point): the server paints it in the owner's colour
 Warzone.MINE_PREFIX = "warzone_" -- the pad at a point is the mini-mine warzone_<point>
+Warzone.MAX_ACTIVE = 1 -- [владелец: release] one randomly selected point per server round
 
 local byId: { [string]: Point } = {}
 for _, point in ipairs(Warzone.points) do
@@ -63,6 +66,7 @@ function Warzone.state(pointId: string, now: number?): State
 	local t = now or workspace:GetServerTimeNow()
 	local folder = folderOf(pointId)
 	local state: State = {
+		active = false,
 		owner = nil,
 		since = 0,
 		untilAt = 0,
@@ -72,6 +76,10 @@ function Warzone.state(pointId: string, now: number?): State
 		need = Warzone.cfg.captureScore,
 	}
 	if not folder then
+		return state
+	end
+	state.active = folder:GetAttribute("Active") == true
+	if not state.active then
 		return state
 	end
 	local owner = folder:GetAttribute("Owner")
@@ -91,7 +99,7 @@ function Warzone.state(pointId: string, now: number?): State
 	return state
 end
 
--- how many points a faction holds now (the faction window: «Захваченные точки N/4»)
+-- how many points a faction holds now (at most MAX_ACTIVE)
 function Warzone.heldBy(faction: string?, now: number?): number
 	if not faction then
 		return 0

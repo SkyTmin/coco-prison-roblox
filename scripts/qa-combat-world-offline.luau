@@ -290,6 +290,9 @@ modules.HurtService = {
 		h.Health = math.max(0, h.Health - amount)
 	end,
 	Knockback = function() end,
+	Impulse = function(_, direction, strength, lift)
+		return direction * 26 * (strength or 1) + rbx.Vector3.new(0, lift or 14, 0)
+	end,
 }
 modules.BossDamage = {
 	Limit = function(_, amount)
@@ -488,6 +491,58 @@ p.Character.PrimaryPart.AssemblyLinearVelocity = rbx.Vector3.new(0, 8, 0)
 modules.CombatService._attack(p, rbx.Vector3.new(0, 0, -1), true)
 flushAttack()
 check(near(mh.Health, 86), "Ascending motion must not grant a critical")
+local attackerHumanoid = p.Character:FindFirstChildOfClass("Humanoid")
+attackerHumanoid.GetState = function()
+	return rbx.Enum.HumanoidStateType.Freefall
+end
+for _, case in
+	{
+		{ ground = false, speed = 0, fresh = true, damage = 6 },
+		{ ground = true, speed = 0, fresh = true, damage = 4 },
+		{ ground = false, speed = 21, fresh = true, damage = 6 },
+		{ ground = false, speed = 0, fresh = false, damage = 4 },
+	}
+do
+	clock += 1
+	grounded = case.ground
+	p.Character.PrimaryPart.AssemblyLinearVelocity = rbx.Vector3.new(0, case.speed, 0)
+	if case.fresh then
+		modules.MotionService._report(p, rbx.Vector3.new(0, 8, 0), 0, clock)
+		clock += 0.03
+		modules.MotionService._report(p, rbx.Vector3.new(0, 7, 0), 0, clock)
+	end
+	mh.Health = 100
+	modules.CombatService._attack(p, rbx.Vector3.new(0, 0, -1), true)
+	flushAttack()
+	check(
+		near(mh.Health, 100 - case.damage),
+		"Recent fall evidence survives replicated ascent, but requires physical air and freshness"
+	)
+end
+clock += 1
+modules.MotionService._report(p, rbx.Vector3.new(0, 8, 0), 0, clock - 0.9)
+modules.MotionService._report(p, rbx.Vector3.new(0, 7, 0), 0, clock - 0.87)
+check(
+	modules.MotionService.verticalSpeed(p) == nil,
+	"Late old packets cannot become current fall evidence"
+)
+clock += 1
+modules.MotionService._report(p, rbx.Vector3.new(0, 8, 0), 0, clock)
+clock += 0.03
+modules.MotionService._report(p, rbx.Vector3.new(0, 7, 0), 0, clock)
+local oldCharacter = p.Character
+p.Character = character(p)
+check(modules.MotionService.verticalSpeed(p) == nil, "Respawn cannot reuse previous character fall")
+check(
+	modules.MotionService.rootAt(p) == nil,
+	"Respawn cannot reuse previous character hit position"
+)
+modules.MotionService._report(p, rbx.Vector3.new(0, 3, 0), 0, clock)
+check(
+	modules.MotionService.verticalSpeed(p) == nil,
+	"First new-character report starts fresh history"
+)
+p.Character = oldCharacter
 grounded = true
 for _, ranged in ipairs({ false, true }) do
 	clock += 1
@@ -617,7 +672,8 @@ local Warzone = execute(
 	)
 )
 p.profile.faction = "slavs"
-Warzone._points.haste = { def = { effect = "haste" }, owner = "slavs", untilAt = clock + 1800 }
+Warzone._points.haste =
+	{ active = true, def = { effect = "haste" }, owner = "slavs", untilAt = clock + 1800 }
 Warzone._refresh()
 check(p.Character:GetAttribute("Haste") == 1, "Current faction member gets owned-point Haste")
 local oldCharacter = p.Character

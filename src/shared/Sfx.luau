@@ -102,11 +102,18 @@ local function preload()
 end
 
 -- Server: everyone within HEAR_DISTANCE of `anchor` hears `name` there.
-function Sfx.broadcast(name: string, anchor: BasePart, volume: number?, pitch: number?)
+function Sfx.broadcast(
+	name: string,
+	anchor: BasePart,
+	volume: number?,
+	pitch: number?,
+	exclude: Player?
+)
 	for _, player in ipairs(Players:GetPlayers()) do
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if
-			root
+			player ~= exclude
+			and root
 			and root:IsA("BasePart")
 			and (root.Position - anchor.Position).Magnitude <= HEAR_DISTANCE
 		then

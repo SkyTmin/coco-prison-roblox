@@ -162,7 +162,7 @@ local function act(player: Player, tag: string)
 			profile.stats.ghettoMasonStones = progress
 		end)
 		if rewarded then
-			toast(player, "ghetto_mason_reward")
+			toast(player, "ghetto_mason_received", tostring(cfg.mason.mult), cfg.mason.minutes)
 		elseif full then
 			toast(player, "ghetto_mason_full")
 		else
@@ -192,7 +192,25 @@ local function bind(part: Instance, tag: string)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "GhettoMinePrompt"
-	prompt.ActionText = Strings.t("prompt_" .. tag)
+	require(Shared.PromptText).Set(prompt, "ActionText", "prompt_" .. tag)
+	if tag == "GhettoMason" then
+		require(Shared.PromptText).Set(
+			prompt,
+			"ObjectText",
+			"ghetto_mason_details",
+			cfg.mason.count,
+			tostring(cfg.mason.mult),
+			cfg.mason.minutes
+		)
+	elseif tag == "GhettoMineGate" then
+		require(Shared.PromptText).Set(
+			prompt,
+			"ObjectText",
+			"ghetto_mine_details",
+			cfg.gangMine.minMembers,
+			cfg.gangMine.seconds / 60
+		)
+	end
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
 	prompt.HoldDuration = 0.5

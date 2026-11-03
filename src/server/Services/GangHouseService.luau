@@ -173,6 +173,7 @@ local function ensure(doc: any): House?
 	model.Parent = workspace
 	-- the tags only now: the prompt services bind this copy
 	tagAll(model)
+	require(script.Parent.WorldSafetyService).Register(model, LOCATION)
 	for _, d in ipairs(model:GetDescendants()) do
 		if
 			d:IsA("BasePart")
@@ -262,7 +263,7 @@ local function bindPrompt(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "HousePrompt"
-	prompt.ActionText = Strings.t("gang_house_exit")
+	require(Shared.PromptText).Set(prompt, "ActionText", "gang_house_exit")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = DOOR_RANGE
 	prompt.RequiresLineOfSight = false

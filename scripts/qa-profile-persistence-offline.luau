@@ -20,7 +20,8 @@ local function copy(value)
 	return result
 end
 local baseEnvironment = getfenv()
-local function fixture()
+local function fixture(options)
+	options = options or {}
 	local f = {
 		disk = {},
 		clock = 1000,
@@ -30,6 +31,11 @@ local function fixture()
 		messages = {},
 		tasks = {},
 		warnings = {},
+		actors = {},
+		guid = 0,
+		serverAttributes = {},
+		studio = options.studio == true,
+		testArgs = options.testArgs or "",
 	}
 	local names = setmetatable({}, {
 		__index = function(_, key)
@@ -38,8 +44,19 @@ local function fixture()
 	})
 	local modules = {
 		Types = {},
-		Remotes = {},
-		Wire = {},
+		Remotes = {
+			event = function(name)
+				return {
+					FireClient = function(_, actor, ...)
+						table.insert(
+							f.messages,
+							{ remote = name, actor = actor, args = table.pack(...) }
+						)
+					end,
+				}
+			end,
+		},
+		Wire = { encode = copy },
 		Boosters = { prune = function() end },
 		Config = {
 			rules = {
@@ -64,6 +81,9 @@ local function fixture()
 		self.time += seconds
 	end
 	f.store = {
+		GetAsync = function(_, key)
+			return copy(f.disk[key])
+		end,
 		UpdateAsync = function(_, key, transform)
 			f.calls += 1
 			if f.beforeUpdate then
@@ -82,7 +102,18 @@ local function fixture()
 	}
 	local services = {
 		DataStoreService = {
-			GetDataStore = function()
+			GetDataStore = function(_, name, scope)
+				if scope then
+					local prefix = name .. "@" .. scope .. "/"
+					return {
+						GetAsync = function(_, key)
+							return f.store:GetAsync(prefix .. key)
+						end,
+						UpdateAsync = function(_, key, change)
+							return f.store:UpdateAsync(prefix .. key, change)
+						end,
+					}
+				end
 				return f.store
 			end,
 		},
@@ -91,7 +122,18 @@ local function fixture()
 				table.insert(f.messages, { topic, copy(data) })
 			end,
 		},
-		Players = {},
+		Players = {
+			GetPlayers = function()
+				return f.actors
+			end,
+			GetPlayerByUserId = function(_, id)
+				for _, actor in f.actors do
+					if actor.UserId == id and actor.Parent then
+						return actor
+					end
+				end
+			end,
+		},
 		ReplicatedStorage = {
 			Shared = names,
 			WaitForChild = function()
@@ -100,12 +142,23 @@ local function fixture()
 		},
 		RunService = {
 			IsStudio = function()
-				return false
+				return f.studio
 			end,
 		},
 		HttpService = {
 			GenerateGUID = function()
-				return "test-guid"
+				f.guid += 1
+				return (options.runName or "test-guid") .. "-" .. f.guid
+			end,
+		},
+		StudioTestService = {
+			GetTestArgs = function()
+				return f.testArgs
+			end,
+		},
+		ServerStorage = {
+			SetAttribute = function(_, key, value)
+				f.serverAttributes[key] = value
 			end,
 		},
 	}
@@ -143,6 +196,9 @@ local function fixture()
 					spawn = function(fn, ...)
 						table.insert(f.tasks, { fn = fn, args = table.pack(...) })
 					end,
+					defer = function(fn, ...)
+						table.insert(f.tasks, { fn = fn, args = table.pack(...) })
+					end,
 				},
 				warn = function(...)
 					table.insert(f.warnings, table.pack(...))
@@ -152,7 +208,20 @@ local function fixture()
 		return fn()
 	end
 	modules.Persistence = load("src/shared/Persistence.luau")
+	modules.TestSessionScope = load("src/server/Services/TestSessionScope.luau")
 	modules.Numbers = load("src/shared/Numbers.luau")
+	modules.Selling = load("src/shared/Selling.luau")
+	modules.Tutorial = load("src/shared/Tutorial.luau")
+	modules.ProgressReset = load("src/shared/ProgressReset.luau")
+	modules.Config.donate = { items = { fixturePaidKey = { give = "ancient_key" } } }
+	modules.Strings = {
+		t = function(key)
+			return key
+		end,
+		localeOf = function()
+			return "en"
+		end,
+	}
 	modules.InventoryService = load("src/server/Services/InventoryService.luau")
 	function f:profile(job)
 		local boundary = load("src/server/Services/ProfileService.luau", job, function(source)
@@ -160,7 +229,7 @@ local function fixture()
 				"return ProfileService%s*$",
 				[[
 return {
- service = ProfileService, acquire = acquire, save = save, migrate = migrate,
+ service = ProfileService, acquire = acquire, save = save, migrate = migrate, load = load, flush = flushReplication,
  sessions = sessions, setStore = function(value) store = value end,
 }
 ]]
@@ -185,6 +254,7 @@ return {
 		actor.Kick = function(_, reason)
 			table.insert(actor.kicks, reason)
 		end
+		table.insert(f.actors, actor)
 		return actor
 	end
 	function f:session(boundary, actor, token, seed)
@@ -210,6 +280,28 @@ return {
 		}
 		modules.SharedStorageRecord = {}
 		return load("src/server/Services/StorageTransferService.luau")
+	end
+	function f:playerTransfers(boundary)
+		modules.ProfileService = boundary.service
+		modules.Remotes.event = function()
+			return {
+				FireClient = function(_, actor, message)
+					table.insert(f.messages, { actor.UserId, message })
+				end,
+			}
+		end
+		local boundaryTransfer = load(
+			"src/server/Services/PlayerTransferService.luau",
+			nil,
+			function(source)
+				return source:gsub(
+					"return Transfer%s*$",
+					"return {service=Transfer,setInbox=function(value) inbox=value end}"
+				)
+			end
+		)
+		boundaryTransfer.setInbox(f.store)
+		return boundaryTransfer.service
 	end
 	return f
 end
@@ -472,3 +564,5 @@ print(serde.encode("json", {
 	realProfiles = false,
 	realDataStores = false,
 }, true))
+
+return { fixture = fixture }

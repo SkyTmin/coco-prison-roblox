@@ -18,6 +18,7 @@ local TILE_W, TILE_H, GAP, COLS = 150, 96, 8, 4
 
 -- the tiles in the order of the original menu; `icon` overrides menu_<kind>
 MenuWindow.ENTRIES = {
+	{ kind = "actions", caption = "release_actions", icon = "rank_1" },
 	{ kind = "locations", caption = "locations", key = "M" },
 	{ kind = "level", caption = "level_up", key = "U" },
 	{ kind = "upgrade", caption = "upgrade", key = "J" },

@@ -604,6 +604,20 @@ end
 
 -- ---------------------------------------------------------------- mining
 -- Шёлковое касание: the block drops itself
+-- Self-inflicted food Hunger also works under spawn protection. Re-eating refreshes,
+-- rather than adds, its duration; a stronger/longer existing Hunger remains intact.
+function BookService.GiveHunger(player: Player, level: number, seconds: number)
+	local character = player.Character
+	if not character then
+		return
+	end
+	local active = BookService.active(character, "Hunger")
+	local untilAt = tonumber(character:GetAttribute("HungerUntil")) or 0
+	character:SetAttribute("Hunger", math.max(active, level))
+	character:SetAttribute("HungerUntil", math.max(untilAt, now() + seconds))
+	tracked[character] = true
+end
+
 function BookService.silkTouch(profile: Types.Profile): boolean
 	return Books.level(Books.held(profile), "silk_touch") > 0
 end
@@ -927,7 +941,9 @@ local function springs(player: Player, profile: Types.Profile)
 	end
 	-- [владелец 29.10] full jump height I 1.25 / II 1.5 / III 2 blocks; keep the base step clearance.
 	local base = Config.rules.combat.jumpBlocks or 1.05
-	local height = (math.max(1, Books.worn(profile, "springs")) + base - 1) * BLOCK
+	local springsHeight = Books.worn(profile, "springs")
+	local height = (math.max(1, springsHeight) + base - 1) * BLOCK
+	character:SetAttribute("SpringsJumpHeight", if springsHeight > 0 then height else nil)
 	-- Humanoid's impulse is not a ballistic sqrt(2gh): that overshot the target in Studio.
 	-- Let Roblox use its native height mode so the book controls height directly.
 	humanoid.UseJumpPower = false

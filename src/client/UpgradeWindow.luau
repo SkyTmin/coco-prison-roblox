@@ -55,11 +55,19 @@ function UpgradeWindow.build(
 	local balance = Ui.rich(win, "", UDim2.fromOffset(160, 28), UDim2.new(1, -204, 0, 6), 14)
 	balance.TextXAlignment = Enum.TextXAlignment.Right
 	-- owned items row
-	local itemsRow = Instance.new("Frame")
+	local itemsRow = Instance.new("ScrollingFrame")
+	itemsRow.Name = "UpgradeItems"
+	itemsRow.ScrollingDirection = Enum.ScrollingDirection.X
+	itemsRow.ScrollBarThickness = 3
+	itemsRow.BorderSizePixel = 0
+	itemsRow.CanvasSize = UDim2.new()
 	itemsRow.Size, itemsRow.BackgroundTransparency = UDim2.new(1, 0, 0, 52), 1
 	itemsRow.Parent = content
 	local selectedKey: string? = nil
 	local viewLevel = 1
+	local previousKey: string? = nil
+	local previousItem: string? = nil
+	local previousLevel = 1
 	local itemButtons: { [string]: { frame: Frame, icon: ImageLabel } } = {}
 	-- left card: one big icon, the full name, the level, a rule, the cost on one line, the button
 	local left = Ui.panel(content, UDim2.fromOffset(240, H - 150), UDim2.fromOffset(0, 58))
@@ -88,6 +96,7 @@ function UpgradeWindow.build(
 	costLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local buy =
 		Ui.button(left, t("upgrade_button"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -46))
+	buy.Name = "TutorialUpgrade"
 	-- right: "Улучшения" and "Требования", each a panel of rows: the name on the left, the value on the right
 	local ROW = 28
 	type Row = { name: TextLabel, value: TextLabel, box: Frame, icon: ImageLabel }
@@ -211,6 +220,14 @@ function UpgradeWindow.build(
 		)
 		-- owned items, one button each
 		local owned = entries(p)
+		local chosen = entryFor(selectedKey)
+		if not chosen then
+			local heldKey = if p then "inv:" .. p.selectedSlot else nil
+			chosen = entryFor(heldKey) or owned[1]
+			selectedKey = if chosen then chosen.key else nil
+			viewLevel = if chosen then (chosen.stack.level or 1) else 1
+		end
+		itemsRow.CanvasSize = UDim2.fromOffset(math.max(0, #owned * 52 - 4), 0)
 		local alive: { [string]: boolean } = {}
 		for index, entry in ipairs(owned) do
 			alive[entry.key] = true
@@ -219,6 +236,7 @@ function UpgradeWindow.build(
 				local frame, _, _, icon = Ui.invSlot(itemsRow, 48)
 				local hit = Instance.new("TextButton")
 				hit.Size, hit.BackgroundTransparency, hit.Text = UDim2.fromScale(1, 1), 1, ""
+				hit.Name = "TutorialUpgradeItem"
 				hit.Parent = frame
 				local key = entry.key
 				hit.Activated:Connect(function()
@@ -231,8 +249,16 @@ function UpgradeWindow.build(
 				itemButtons[entry.key] = view
 			end
 			view.frame.Position = UDim2.fromOffset((index - 1) * 52, 0)
+			local hit = view.frame:FindFirstChild("TutorialUpgradeItem")
+			if hit then
+				hit:SetAttribute("TutorialItemId", entry.stack.id)
+				hit:SetAttribute("TutorialItemTarget", entry.key)
+				hit:SetAttribute("TutorialItemLevel", entry.stack.level or 1)
+				hit:SetAttribute("TutorialSelected", entry.key == selectedKey)
+			end
 			view.icon.Image = Config.iconFor(entry.stack.id, entry.stack.level or 1) or ""
 			view.icon.Visible = view.icon.Image ~= ""
+			require(script.Parent.EnchantmentVisual).slot(view.icon, entry.stack)
 			local stroke = view.frame:FindFirstChildOfClass("UIStroke")
 			if stroke then
 				local selected = entry.key == selectedKey
@@ -246,14 +272,6 @@ function UpgradeWindow.build(
 				itemButtons[key] = nil
 			end
 		end
-		local chosen = entryFor(selectedKey)
-		if not chosen then
-			-- default: the tool in hand, else the first owned item
-			local heldKey = if p then "inv:" .. p.selectedSlot else nil
-			chosen = entryFor(heldKey) or owned[1]
-			selectedKey = if chosen then chosen.key else nil
-			viewLevel = if chosen then (chosen.stack.level or 1) else 1
-		end
 		local entry = chosen
 		left.Visible, upsPanel.Visible, reqPanel.Visible = entry ~= nil, entry ~= nil, entry ~= nil
 		pager.Visible, prev.Visible, nextB.Visible = entry ~= nil, entry ~= nil, entry ~= nil
@@ -262,6 +280,10 @@ function UpgradeWindow.build(
 		end
 		local id = entry.stack.id
 		local current = entry.stack.level or 1
+		if selectedKey ~= previousKey or id ~= previousItem or current > previousLevel then
+			viewLevel = current
+		end
+		previousKey, previousItem, previousLevel = selectedKey, id, current
 		local top = maxLevel(id)
 		viewLevel = math.clamp(viewLevel, 1, top)
 		local up = Config.upgrade(id, viewLevel)

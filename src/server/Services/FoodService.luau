@@ -14,6 +14,7 @@ local Remotes = require(Shared.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 local HungerService = require(script.Parent.HungerService)
+local BookService = require(script.Parent.BookService)
 local NeedsService = require(script.Parent.NeedsService)
 
 local survival = Config.rules.survival
@@ -25,6 +26,7 @@ local SECONDS = EAT.seconds :: number
 type Eating = { slot: number, id: string, startedAt: number }
 
 local FoodService = {}
+local random = Random.new()
 local eating: { [Player]: Eating } = {}
 local started = false
 
@@ -94,7 +96,13 @@ local function finish(player: Player, entry: Eating)
 	local effects = survival.foodEffects[entry.id]
 	if typeof(effects) == "table" then
 		for _, effect in ipairs(effects) do
-			NeedsService.GiveEffect(player, effect.effect, effect.level, effect.seconds)
+			if random:NextNumber() < (effect.chance or 1) then
+				if effect.effect == "hunger" then
+					BookService.GiveHunger(player, effect.level, effect.seconds)
+				else
+					NeedsService.GiveEffect(player, effect.effect, effect.level, effect.seconds)
+				end
+			end
 		end
 	end
 	Remotes.event("Ate"):FireClient(player, entry.id)

@@ -11,16 +11,13 @@
 --     gets ×(1 + lastHitBonus); players below minDamageShare or no longer in the location get nothing
 --     [клиент: «кого нет на локации — ничего»];
 --   * state for the HUD bar lives in ReplicatedStorage.Bosses.<id> attributes (works with streaming);
---   * [владелец 22.10: «босс должен жить независимо от игроков»] a server shuts down when its last player
---     leaves, so the boss's life (health, the respawn time, who dealt how much) is kept in MemoryStore
---     (hash map BossState) every few seconds; a new server picks it up: the same wounded boss, or the
---     respawn timer that is already running. One record per boss for the whole game: with several
---     servers the last writer wins (fine while the game runs one server).
+--   * each public server owns its common arena bosses. Cross-server reward eligibility belongs to
+--     the player's durable profile, for exactly this boss's respawn interval from its kill.
 
 local BossPhysics = require(script.Parent.BossPhysics)
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
-local MemoryStoreService = game:GetService("MemoryStoreService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -36,9 +33,10 @@ local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local HurtService = require(script.Parent.HurtService)
 local ProfileService = require(script.Parent.ProfileService)
+local BossRewardPolicy = require(script.Parent.BossRewardPolicy)
+local BossRewardService = require(script.Parent.BossRewardService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local GangService = require(script.Parent.GangService)
-local InventoryService = require(script.Parent.InventoryService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
 local SplinterAbilities = require(script.Parent.SplinterAbilities)
 local BasaltAbilities = require(script.Parent.BasaltAbilities)
@@ -138,7 +136,6 @@ type Boss = {
 	stuckFor: number,
 	nextAbility: number,
 	stunnedUntil: number, -- after ramming a pillar or the wall: open to ×stunDamageMultiplier damage
-	dirty: boolean, -- changed since the last MemoryStore save
 }
 -- what MemoryStore keeps per boss
 type Saved = { hp: number?, respawnAt: number?, damageBy: { [string]: number }? }
@@ -159,7 +156,7 @@ end
 
 local function bossName(boss: Boss, player: Player): string
 	local locale = Strings.localeOf(player)
-	return if locale == "ru" or not boss.card.nameEn then boss.card.name else boss.card.nameEn
+	return Strings.bossName(boss.id, boss.card.name, locale)
 end
 
 local function playersInLocation(boss: Boss): { Player }
@@ -589,18 +586,9 @@ local function publish(boss: Boss)
 	boss.state:SetAttribute("MaxHealth", boss.card.hp)
 	boss.state:SetAttribute("Invulnerable", false) -- [владелец 02.11] no boss blocks
 	boss.state:SetAttribute("Stunned", os.clock() < boss.stunnedUntil)
-	boss.dirty = true
 end
 
--- ---------------------------------------------------------------- the boss outlives its server (MemoryStore)
-local SAVE_EVERY = 3
-local storeOk, store = pcall(function()
-	-- Studio deaths and accelerated QA respawns must not change live-server boss timers.
-	return MemoryStoreService:GetHashMap(
-		if RunService:IsStudio() then "BossState_Studio" else "BossState"
-	)
-end)
-
+-- Local snapshot only: recover a damaged rig without replacing another server's boss.
 local function snapshot(boss: Boss): Saved
 	local humanoid = boss.humanoid
 	local damageBy = {}
@@ -613,35 +601,6 @@ local function snapshot(boss: Boss): Saved
 		respawnAt = if typeof(respawnAt) == "number" then respawnAt else 0,
 		damageBy = damageBy,
 	}
-end
-
-local function save(boss: Boss)
-	boss.dirty = false
-	if not storeOk then
-		return
-	end
-	local data = snapshot(boss)
-	-- kept a little longer than one respawn cycle; a record older than that means nothing
-	local ok, err = pcall(function()
-		store:SetAsync(boss.id, data, boss.card.respawnSeconds + 600)
-	end)
-	if not ok then
-		warn("[BossService] save failed", boss.id, err)
-	end
-end
-
-local function load(id: string): Saved?
-	if not storeOk then
-		return nil
-	end
-	local ok, data = pcall(function()
-		return store:GetAsync(id)
-	end)
-	if not ok then
-		warn("[BossService] load failed", id, data)
-		return nil
-	end
-	return if typeof(data) == "table" then data else nil
 end
 
 -- ---------------------------------------------------------------- casting helpers
@@ -1009,24 +968,7 @@ local spawnBoss: (boss: Boss, saved: Saved?) -> ()
 -- hitter the powder (chance from the card's «1–N %», higher with a bigger damage share [решение]) and the shard of the
 -- late bosses. Items that do not fit go to the storage [B] (p.stash).
 local random = Random.new()
-local function grant(p: any, id: string, count: number)
-	local left = InventoryService.add(p, id, count)
-	if left > 0 then
-		local stash = table.clone(p.stash or {})
-		local merged = false
-		for _, entry in ipairs(stash) do
-			if entry.id == id then
-				entry.count += left
-				merged = true
-			end
-		end
-		if not merged then
-			table.insert(stash, { id = id, count = left })
-		end
-		p.stash = stash
-	end
-end
-local function reward(boss: Boss, lastHit: number?)
+local function reward(boss: Boss, lastHit: number?, killedAt: number)
 	local total = 0
 	for _, dealt in pairs(boss.damageBy) do
 		total += dealt
@@ -1035,6 +977,14 @@ local function reward(boss: Boss, lastHit: number?)
 	local rules = Config.bosses.rewards
 	local present = playersInLocation(boss)
 	local payouts: { [number]: number } = {}
+	local profiles, awards = {}, {}
+	for _, player in present do
+		if ProfileService.IsReal(player) then
+			profiles[player.UserId] = ProfileService.Get(player)
+		end
+	end
+	local shares, rewardLast =
+		BossRewardPolicy.Shares(boss.id, killedAt, boss.damageBy, profiles, lastHit)
 	local ranking = {}
 	for userId, dealt in pairs(boss.damageBy) do
 		table.insert(ranking, { userId = userId, dealt = dealt })
@@ -1057,7 +1007,7 @@ local function reward(boss: Boss, lastHit: number?)
 	end
 	for _, player in ipairs(present) do
 		local dealt = boss.damageBy[player.UserId] or 0
-		local share = if total > 0 then dealt / total else 0
+		local share = shares[player.UserId] or 0
 		toast(player, "boss_killed", bossName(boss, player), table.concat(top, "  "))
 		if share >= rules.minDamageShare then
 			-- [меню] the card says «0–350 $»: a share of the bank, the last hit +20 %, never above the bank
@@ -1074,28 +1024,40 @@ local function reward(boss: Boss, lastHit: number?)
 					bank
 						* share
 						* bankMult
-						* (if lastHit == player.UserId then 1 + rules.lastHitBonus else 1)
+						* (if rewardLast == player.UserId then 1 + rules.lastHitBonus else 1)
 				)
 			)
-			local items = BossLoot.Roll(boss.card, share, lastHit == player.UserId, random)
+			local items = BossLoot.Roll(boss.card, share, rewardLast == player.UserId, random)
 			if items.ancient_star and starMult > 1 then
 				local stars = items.ancient_star * starMult
 				items.ancient_star = math.floor(stars)
 					+ (if random:NextNumber() < stars % 1 then 1 else 0)
 			end
-			ProfileService.Mutate(player, function(p)
-				p.coins += amount
-				payouts[player.UserId] = amount -- report the actual credit, including book / last-hit bonuses
-				p.stats.bosses = (p.stats.bosses or 0) + 1
-				for id, count in pairs(items) do
-					grant(p, id, count)
-				end
-			end)
-			toast(player, "boss_reward", Strings.money(amount), math.floor(share * 100 + 0.5))
-			local locale = Strings.localeOf(player)
-			for id, count in pairs(items) do
-				toast(player, "boss_item", Strings.itemName(id, nil, locale), count)
+			local award = {
+				id = HttpService:GenerateGUID(false),
+				bossId = boss.id,
+				killedAt = killedAt,
+				untilAt = killedAt + boss.card.respawnSeconds,
+				coins = amount,
+				items = items,
+				share = share,
+			}
+			if BossRewardService.Enqueue(player, award) then
+				table.insert(awards, { player = player, award = award })
 			end
+		elseif
+			dealt > 0
+			and profiles[player.UserId]
+			and not BossRewardPolicy.Eligible(profiles[player.UserId], boss.id, killedAt)
+		then
+			toast(
+				player,
+				"boss_reward_locked",
+				math.max(
+					0,
+					math.ceil(BossRewardPolicy.Until(profiles[player.UserId], boss.id) - killedAt)
+				)
+			)
 		elseif dealt > 0 then
 			toast(player, "boss_no_reward", math.floor(rules.minDamageShare * 100))
 		end
@@ -1103,10 +1065,22 @@ local function reward(boss: Boss, lastHit: number?)
 	-- [владелец 29.10] every contributor, not only the podium: damage, share and actual money received.
 	-- Resolve departed players' names outside the death handler; absent / ineligible players received zero.
 	task.spawn(function()
+		local rewarded = {}
+		for _, entry in awards do
+			BossRewardService.Resolve(entry.player)
+			local profile = ProfileService.Get(entry.player) :: any
+			if
+				profile
+				and profile.bossRewardReceipts
+				and profile.bossRewardReceipts[boss.id] == entry.award.id
+			then
+				payouts[entry.player.UserId] = entry.award.coins
+				table.insert(rewarded, entry.player.UserId)
+			end
+		end
+		GangService.progressOnce(rewarded, "bossKill", 1, boss.id)
 		ChatService.announceWith(function(locale)
-			local name = if locale == "ru" or not boss.card.nameEn
-				then boss.card.name
-				else boss.card.nameEn
+			local name = Strings.bossName(boss.id, boss.card.name, locale)
 			return Strings.t("chat_boss_killed", locale, name)
 		end)
 		for i, entry in ipairs(ranking) do
@@ -1140,13 +1114,8 @@ local function died(boss: Boss)
 		return
 	end
 	local lastHit = humanoid:GetAttribute("LastHitBy")
-	reward(boss, if typeof(lastHit) == "number" then lastHit else nil)
-	-- gang quests «Убить босса X ×N»: every gang that hit it counts the kill once
-	local hitters = {}
-	for userId in pairs(boss.damageBy) do
-		table.insert(hitters, userId)
-	end
-	GangService.progressOnce(hitters, "bossKill", 1, boss.id)
+	local killedAt = workspace:GetServerTimeNow()
+	reward(boss, if typeof(lastHit) == "number" then lastHit else nil, killedAt)
 	SplinterAbilities.Clear(boss)
 	BasaltAbilities.Clear(boss)
 	MinotaurAbilities.Clear(boss)
@@ -1177,7 +1146,7 @@ local function died(boss: Boss)
 	end
 	boss.model, boss.humanoid, boss.root = nil, nil, nil
 	table.clear(boss.damageBy)
-	boss.state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + boss.card.respawnSeconds)
+	boss.state:SetAttribute("RespawnAt", killedAt + boss.card.respawnSeconds)
 	publish(boss)
 	local root = model.PrimaryPart
 	if deathDuration and root then
@@ -1817,24 +1786,11 @@ local function register(spawnPart: Instance)
 		stuckFor = 0,
 		nextAbility = 0,
 		stunnedUntil = 0,
-		dirty = false,
 	}
 	bosses[id] = boss
 	state:SetAttribute("RespawnAt", workspace:GetServerTimeNow() + card.fight.firstSpawnSeconds)
 	publish(boss)
-	boss.dirty = false -- nothing to save before the old record is read
-	task.spawn(function()
-		local saved = load(id)
-		local now = workspace:GetServerTimeNow()
-		if saved and typeof(saved.respawnAt) == "number" and saved.respawnAt > now then
-			-- killed on another server: its respawn timer keeps running here
-			state:SetAttribute("RespawnAt", saved.respawnAt)
-			publish(boss)
-			task.delay(saved.respawnAt - now, spawnBoss, boss)
-		else
-			task.delay(card.fight.firstSpawnSeconds, spawnBoss, boss, saved)
-		end
-	end)
+	task.delay(card.fight.firstSpawnSeconds, spawnBoss, boss)
 end
 
 function BossService.Start()
@@ -1842,6 +1798,7 @@ function BossService.Start()
 		return
 	end
 	started = true
+	BossRewardService.Start()
 	for _, part in ipairs(CollectionService:GetTagged("BossSpawn")) do
 		register(part)
 	end
@@ -1855,21 +1812,6 @@ function BossService.Start()
 			for _, boss in pairs(bosses) do
 				think(boss, elapsed)
 			end
-		end
-	end)
-	task.spawn(function()
-		while true do
-			task.wait(SAVE_EVERY)
-			for _, boss in pairs(bosses) do
-				if boss.dirty then
-					task.spawn(save, boss)
-				end
-			end
-		end
-	end)
-	game:BindToClose(function()
-		for _, boss in pairs(bosses) do
-			save(boss)
 		end
 	end)
 	-- Studio-only QA hook: ServerStorage.BossDebug ("spawn" | "kill" | "state", bossId)

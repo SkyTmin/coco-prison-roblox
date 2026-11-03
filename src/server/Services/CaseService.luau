@@ -1016,8 +1016,11 @@ local function bind(part: Instance)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "CasePrompt"
 	-- the chest in the Хранилище building (scripts/build-vault.luau, attribute Vault) is the same ender chest
-	prompt.ActionText =
-		Strings.t(if part:GetAttribute("Vault") then "vault_title" else containerTitle(id))
+	require(Shared.PromptText).Set(
+		prompt,
+		"ActionText",
+		if part:GetAttribute("Vault") then "vault_title" else containerTitle(id)
+	)
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = RANGE
 	prompt.RequiresLineOfSight = false -- usable from any side of the chest model
@@ -1028,8 +1031,8 @@ local function bind(part: Instance)
 	if CASES[id] then
 		local more = Instance.new("ProximityPrompt")
 		more.Name = "CaseInfo"
-		more.ActionText = Strings.t("case_info")
-		more.ObjectText = Strings.t(containerTitle(id))
+		require(Shared.PromptText).Set(more, "ActionText", "case_info")
+		require(Shared.PromptText).Set(more, "ObjectText", containerTitle(id))
 		more.KeyboardKeyCode = Enum.KeyCode.R
 		more.GamepadKeyCode = Enum.KeyCode.ButtonY
 		more.HoldDuration = 0
@@ -1051,7 +1054,9 @@ local function bind(part: Instance)
 			local current = caseId(part)
 			prompt.Enabled = current ~= nil
 			if current then
-				prompt.ActionText = Strings.t(
+				require(Shared.PromptText).Set(
+					prompt,
+					"ActionText",
 					if part:GetAttribute("Vault") then "vault_title" else containerTitle(current)
 				)
 			end
@@ -1059,7 +1064,7 @@ local function bind(part: Instance)
 				info.Enabled = current ~= nil and CASES[current] ~= nil
 				if current and CASES[current] then
 					info:SetAttribute("CaseId", current)
-					info.ObjectText = Strings.t(containerTitle(current))
+					require(Shared.PromptText).Set(info, "ObjectText", containerTitle(current))
 				end
 			end
 		end),

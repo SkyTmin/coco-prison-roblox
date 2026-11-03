@@ -1294,7 +1294,7 @@ do
 	local edgeFolder = Instance.new("Folder")
 	edgeFolder.Name = "Edge"
 	edgeFolder.Parent = root
-	for _, w in ipairs({ { 0, 284, 568, 4 }, { 0, -300, 568, 4 }, { 284, -150142, 4, 584 }, { -284, -150142, 4, 584 } }) do
+	for _, w in ipairs({ { 0, 284, 568, 4 }, { 0, -300, 568, 4 }, { 284, -8, 4, 584 }, { -284, -8, 4, 584 } }) do
 		local p = Instance.new("Part")
 		p.Name = "EdgeWall"
 		p.Anchored = true

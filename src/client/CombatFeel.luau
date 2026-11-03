@@ -490,6 +490,10 @@ function CombatFeel.Start(gui: ScreenGui, kindProvider: () -> string, locale: ()
 					lastHitSound = os.clock()
 					Sfx.play("block", nil, 0.5, 1.1)
 				end
+			elseif status == "dodged" or status == "protected" then
+				popText(Strings.t("combat_" .. status, loc), Color3.fromRGB(180, 200, 230), false)
+			elseif status == "cooldown" and target and Players:GetPlayerFromCharacter(target) then
+				popText(Strings.t("combat_recovery", loc), Color3.fromRGB(170, 170, 170), false)
 			elseif status == "ally" then
 				popText(Strings.t("faction_same", loc), Color3.fromRGB(170, 170, 170), false)
 			elseif status == "nopvp" then

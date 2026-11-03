@@ -31,6 +31,7 @@ local TELEPORT = 20 -- studs between reports: the history before it is dropped
 
 type Snap = { t: number, cf: CFrame }
 local history: { [Player]: { Snap } } = {}
+local historyCharacter: { [Player]: Model } = {}
 local lastAt: { [Player]: number } = {} -- os.clock of the last accepted report
 local counts: { [Player]: number } = {} -- accepted reports, for the far players' share
 local budgets: { [Player]: { tokens: number, at: number } } = {}
@@ -76,6 +77,10 @@ local function onMotion(player: Player, position: any, yaw: any, stamp: any)
 	end
 	local serverNow = workspace:GetServerTimeNow()
 	stamp = math.clamp(stamp, serverNow - 1, serverNow) -- the sender's clock cannot be ahead of ours
+	if historyCharacter[player] ~= character then
+		history[player] = nil
+		historyCharacter[player] = character
+	end
 	local list = history[player]
 	if not list then
 		list = {}
@@ -114,10 +119,19 @@ end
 -- Derive falling from validated position reports; replicated AssemblyLinearVelocity can lag a short jump.
 function MotionService.verticalSpeed(player: Player): number?
 	local list = history[player]
-	if not list or #list < 2 or os.clock() - (lastAt[player] or -math.huge) > FRESH then
+	if
+		historyCharacter[player] ~= player.Character
+		or not list
+		or #list < 2
+		or os.clock() - (lastAt[player] or -math.huge) > FRESH
+	then
 		return nil
 	end
 	local newest = list[#list]
+	-- A late packet does not become current fall evidence just because it arrived now.
+	if workspace:GetServerTimeNow() - newest.t > 0.15 then
+		return nil
+	end
 	for i = #list - 1, 1, -1 do
 		local elapsed = newest.t - list[i].t
 		if elapsed >= 0.025 then
@@ -132,7 +146,12 @@ end
 
 function MotionService.rootAt(player: Player, at: number?): CFrame?
 	local list = history[player]
-	if not list or #list == 0 or os.clock() - (lastAt[player] or -math.huge) > FRESH then
+	if
+		historyCharacter[player] ~= player.Character
+		or not list
+		or #list == 0
+		or os.clock() - (lastAt[player] or -math.huge) > FRESH
+	then
 		return nil
 	end
 	local newest = list[#list]
@@ -182,6 +201,7 @@ function MotionService.Start()
 	relay = Remotes.unreliable("MotionFx")
 	Players.PlayerRemoving:Connect(function(player)
 		history[player], lastAt[player], counts[player] = nil, nil, nil
+		historyCharacter[player] = nil
 		budgets[player] = nil
 	end)
 end

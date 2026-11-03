@@ -397,7 +397,7 @@ local function bindPrompt(part: Instance)
 	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "LocationPrompt"
-	prompt.ActionText = Strings.t("teleporter_prompt")
+	require(Shared.PromptText).Set(prompt, "ActionText", "teleporter_prompt")
 	prompt.HoldDuration = 0
 	prompt.MaxActivationDistance = 8
 	prompt.Parent = part
@@ -433,6 +433,14 @@ function LocationService.Request(
 	onArrive: (() -> boolean)?
 )
 	teleport(player, locationId, nil, arrival, onArrive)
+end
+
+-- A server recovery must not leave a previously started travel channel able to move the player later.
+function LocationService.CancelForRecovery(player: Player)
+	if pending[player] then
+		clearChannel(player)
+		Remotes.event("TeleportChannel"):FireClient(player, nil)
+	end
 end
 
 function LocationService.Start()

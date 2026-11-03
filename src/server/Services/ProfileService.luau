@@ -33,6 +33,8 @@ type Session = {
 	saving: boolean,
 	token: string,
 	fresh: boolean?,
+	resetting: boolean?,
+	resetCharacter: Model?, -- old body must never repopulate the cleared saved position
 }
 
 local STORE_NAME = "PlayerProfiles_v3"
@@ -48,6 +50,19 @@ local sessions: { [Player]: Session } = {}
 local onLoaded: ((Player) -> ())? = nil -- set in Start: puts the character back at the logout spot
 local loadedHooks: { (Player) -> () } = {} -- ProfileService.OnLoaded: settle pending boosters / auction steps
 local store: DataStore? = nil
+local testStore: DataStore? = nil
+local function storeFor(player: Player): DataStore?
+	if player.UserId < 0 and RunService:IsStudio() then
+		local scope = require(script.Parent.TestSessionScope).Get()
+		if scope then
+			if not testStore then
+				testStore = DataStoreService:GetDataStore(STORE_NAME .. "_QA", scope)
+			end
+			return testStore
+		end
+	end
+	return store
+end
 -- The whole profile goes to the client at most every REPLICATE_SECONDS: one dug block mutates it
 -- 2–3 times (inventory, hunger, achievements), and sending each copy at 20 blocks a second flooded
 -- the connection — dig confirmations then came seconds late and the client put the blocks back.
@@ -85,6 +100,7 @@ function ProfileService.defaultProfile(): Profile
 		trainer = { strength = 0, agility = 0, needs = 0 },
 		location = "prison",
 		operationIds = {},
+		tutorial = require(Shared.Tutorial).new(),
 	}
 end
 
@@ -136,6 +152,9 @@ local function migrate(data: any): Profile
 			then data.caseContents.ancientCase
 			else nil
 		profile.caseContents = { ancientCase = decodeInventory(ancient) }
+		if data.tutorial == nil then
+			(profile :: any).tutorial = { version = 1, step = 4, legacy = true }
+		end
 	end
 	-- older schemas are discarded on purpose during development (no live players yet)
 	profile.schemaVersion = SCHEMA_VERSION
@@ -354,7 +373,7 @@ local function acquire(player: Player, token: string): (boolean, any)
 		local lockedBy: string? = nil
 		local data: any = nil
 		local ok, err = pcall(function()
-			(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+			(storeFor(player) :: DataStore):UpdateAsync(keyFor(player), function(old: any)
 				local lock = if typeof(old) == "table" then old._lock else nil
 				if
 					typeof(lock) == "table"
@@ -396,8 +415,11 @@ local function acquire(player: Player, token: string): (boolean, any)
 	end
 end
 
-local function load(player: Player)
-	local token = HttpService:GenerateGUID(false)
+local function load(player: Player, retryToken: string?)
+	player:SetAttribute("ProfileState", "loading")
+	-- A failed acquire may have applied its lock before the response was lost. Retry the
+	-- exact acquisition token, never contest our own fresh lock with a different token.
+	local token = retryToken or HttpService:GenerateGUID(false)
 	local ok, result = false, nil
 	if store then
 		ok, result = acquire(player, token)
@@ -433,7 +455,7 @@ local function load(player: Player)
 		-- left while the lock was being taken: give it back at once
 		if ok and store then
 			pcall(function()
-				(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+				(storeFor(player) :: DataStore):UpdateAsync(keyFor(player), function(old: any)
 					if
 						typeof(old) == "table"
 						and typeof(old._lock) == "table"
@@ -449,6 +471,7 @@ local function load(player: Player)
 		return
 	end
 	sessions[player] = session
+	player:SetAttribute("ProfileState", if session.loadFailed then "error" else "ready")
 	ProfileService.Replicate(player)
 	if onLoaded then
 		onLoaded(player)
@@ -498,7 +521,7 @@ local function save(player: Player, session: Session, release: boolean?, transfo
 	end
 	local stolen = false
 	local ok, err = pcall(function()
-		(store :: DataStore):UpdateAsync(keyFor(player), function(old: any)
+		(storeFor(player) :: DataStore):UpdateAsync(keyFor(player), function(old: any)
 			local lock = if typeof(old) == "table" then old._lock else nil
 			if not Persistence.owns(lock, JOB_ID, session.token) then
 				stolen = true
@@ -578,6 +601,37 @@ function ProfileService.MutateDurable(player: Player, transform: (any) -> ()): b
 	return true
 end
 
+-- Called only after CreativeService validates an own-player, single-use confirmation.
+-- Unknown/idempotency fields and paid entitlements survive; session acquisition stays unchanged.
+function ProfileService.ResetOwnProgress(player: Player): (boolean, string?)
+	local session = sessions[player]
+	local Reset = require(Shared.ProgressReset)
+	if not session or session.loadFailed or session.resetting or not store then
+		return false, "release_reset_failed"
+	end
+	if Reset.blocked(session.profile) then
+		return false, "release_reset_busy"
+	end
+	session.resetting = true
+	local ok, saved = pcall(ProfileService.MutateDurable, player, function(p: any)
+		Reset.apply(p, ProfileService.defaultProfile())
+	end)
+	if ok and saved then
+		session.resetCharacter = player.Character
+	end
+	session.resetting = nil
+	if not ok or not saved then
+		-- The write might have applied. Never leave the old inventory spendable after an uncertain reset.
+		session.loadFailed = true
+		local strings = require(Shared.Strings)
+		player:Kick(strings.t("release_reset_reload", strings.localeOf(player)))
+		return false, "release_reset_failed"
+	end
+	session.fresh = false -- reset never replays referral/new-account rewards
+	ProfileService.Replicate(player)
+	return true, nil
+end
+
 -- Runs fn(player) after each successful profile load (pending booster / auction steps are settled there).
 function ProfileService.OnLoaded(fn: (Player) -> ())
 	table.insert(loadedHooks, fn)
@@ -591,7 +645,7 @@ end
 -- false when the profile failed to load (a default one that is never saved): keep it out of the global tops
 function ProfileService.IsReal(player: Player): boolean
 	local session = sessions[player]
-	return session ~= nil and not session.loadFailed
+	return session ~= nil and not session.loadFailed and not session.resetting
 end
 
 -- An unfinished shared transfer cannot be exported into another durable account or world item.
@@ -599,8 +653,12 @@ function ProfileService.CanExport(player: Player): boolean
 	local session = sessions[player]
 	return session ~= nil
 		and not session.loadFailed
+		and not session.resetting
 		and (session.profile :: any).storageTransfer == nil
 		and (session.profile :: any).storageDeath == nil
+		and (session.profile :: any).bossRewardPending == nil
+		and (session.profile :: any).playerTransfer == nil
+		and (session.profile :: any).playerTransferIncoming == nil
 end
 
 -- true when this session started a brand-new profile (no record existed): the invite reward is for new players only
@@ -611,7 +669,7 @@ end
 
 function ProfileService.Mutate(player: Player, mutator: (Profile) -> ())
 	local session = sessions[player]
-	if not session then
+	if not session or session.resetting then
 		return
 	end
 	mutator(session.profile)
@@ -630,6 +688,7 @@ function ProfileService.Replicate(player: Player)
 				character:SetAttribute("AttackResetAt", workspace:GetServerTimeNow())
 			end
 			character:SetAttribute("HeldItem", held)
+			character:SetAttribute("HeldEnchanted", require(Shared.ItemEnchantment).active(stack))
 			local armor: { string } = {}
 			for _, id in ipairs({ "helmet", "chestplate", "leggings", "boots" }) do
 				local piece = session.profile.armor[id]
@@ -726,7 +785,8 @@ local function flushReplication()
 			local sent = sentCopies[player]
 			if not sent then
 				sentCopies[player] = deepCopy(session.profile)
-				Remotes.event("ProfileUpdated"):FireClient(player, Wire.encode(session.profile))
+				Remotes.event("ProfileUpdated")
+					:FireClient(player, Wire.encode(session.profile), not session.loadFailed)
 			else
 				local ops = diff(sent, session.profile :: any)
 				if #ops > 0 then
@@ -963,6 +1023,7 @@ function ProfileService.Start()
 	-- [владелец 21.10] rejoining puts you where you left: the position is stored every few seconds
 	-- and on leave, and applied to the first character of the next session (not after a death).
 	local restored: { [Player]: boolean } = {}
+	local restoring: { [Player]: Model } = {}
 	local function rememberPosition(player: Player)
 		-- nothing is written until the character has been put back at the saved spot: otherwise a slow
 		-- DataStore load let this overwrite the logout spot with the spawn position (bug 21.10)
@@ -973,7 +1034,15 @@ function ProfileService.Start()
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if session and root and root:IsA("BasePart") and humanoid and humanoid.Health > 0 then
+		if
+			session
+			and not session.resetting
+			and session.resetCharacter ~= character
+			and root
+			and root:IsA("BasePart")
+			and humanoid
+			and humanoid.Health > 0
+		then
 			local p = root.Position
 			if p.Y > -200 then
 				session.profile.lastPosition = {
@@ -989,13 +1058,37 @@ function ProfileService.Start()
 	local function restorePosition(player: Player, character: Model)
 		-- runs on spawn and again when the profile finishes loading (however long that takes)
 		local session = sessions[player]
-		if restored[player] or not session then
+		if not session or session.loadFailed or restoring[player] == character then
 			return
 		end
-		restored[player] = true
+		restoring[player] = character
+		local function arrived()
+			local root = character:FindFirstChild("HumanoidRootPart")
+			if
+				player.Character == character
+				and root
+				and root:IsA("BasePart")
+				and session.resetCharacter ~= character
+			then
+				session.resetCharacter = nil
+				restored[player] = true
+				character:SetAttribute("ArrivalPosition", root.Position)
+				character:SetAttribute("SpawnReady", true)
+			end
+			if restoring[player] == character then
+				restoring[player] = nil
+			end
+		end
+		if restored[player] then
+			character:WaitForChild("HumanoidRootPart", 10)
+			arrived()
+			return
+		end
 		local profile = session.profile
 		local pos = profile.lastPosition
 		if typeof(pos) ~= "table" or #pos ~= 3 then
+			character:WaitForChild("HumanoidRootPart", 10)
+			arrived()
 			return
 		end
 		-- [сеть R1] the spot is kept for 20 min after leaving, then the join starts at the spawn (no profile.lastSeen =
@@ -1011,6 +1104,8 @@ function ProfileService.Start()
 			profile.location = "prison"
 			session.dirty = true
 			ProfileService.Replicate(player)
+			character:WaitForChild("HumanoidRootPart", 10)
+			arrived()
 			return
 		end
 		local root = character:WaitForChild("HumanoidRootPart", 10)
@@ -1021,6 +1116,10 @@ function ProfileService.Start()
 		if root and root:IsA("BasePart") and player.Character == character then
 			require(script.Parent.FallService).Reset(player)
 			character:PivotTo(CFrame.new(pos[1], pos[2] + 1, pos[3]))
+			arrived()
+		end
+		if restoring[player] == character then
+			restoring[player] = nil
 		end
 	end
 	onLoaded = function(player: Player)
@@ -1028,6 +1127,35 @@ function ProfileService.Start()
 			task.spawn(restorePosition, player, player.Character)
 		end
 	end
+	local bootstrapAt: { [Player]: number } = {}
+	local retrying: { [Player]: boolean } = {}
+	Remotes.event("ClientBootstrap").OnServerEvent:Connect(function(player: Player, retry: any)
+		local now = os.clock()
+		if now - (bootstrapAt[player] or -math.huge) < 2 or retrying[player] then
+			return
+		end
+		bootstrapAt[player] = now
+		local session = sessions[player]
+		if retry == true and session and session.loadFailed then
+			retrying[player] = true
+			restored[player] = nil
+			load(player, session.token)
+			retrying[player] = nil
+		end
+		-- Initial replication can precede the HUD listener. Explicit resync is read-only.
+		if player.Character and player.Character:GetAttribute("SpawnReady") ~= true then
+			task.spawn(restorePosition, player, player.Character)
+		elseif player.Character and not restoring[player] and ProfileService.IsReal(player) then
+			-- Mine/world safety may legitimately move a ready character before its client
+			-- observed the restored pose. Refresh proof from this server's current root.
+			local root = player.Character:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				player.Character:SetAttribute("ArrivalPosition", root.Position)
+			end
+		end
+		sentCopies[player] = nil
+		ProfileService.Replicate(player)
+	end)
 	local function added(player: Player)
 		player.CharacterAdded:Connect(function(character)
 			ProfileService.Replicate(player)
@@ -1051,11 +1179,13 @@ function ProfileService.Start()
 		added(player)
 	end
 	Players.PlayerRemoving:Connect(function(player)
+		bootstrapAt[player], retrying[player] = nil, nil
 		replicateDue[player] = nil
 		replicatedAt[player] = nil
 		sentCopies[player] = nil
 		rememberPosition(player)
 		restored[player] = nil
+		restoring[player] = nil
 		local session = sessions[player]
 		if session then
 			sessions[player] = nil

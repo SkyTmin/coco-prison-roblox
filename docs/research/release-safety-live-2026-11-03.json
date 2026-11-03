@@ -1,0 +1,282 @@
+{
+  "cleanup": {
+    "restored": true
+  },
+  "checks": [
+    {
+      "observed": {
+        "loadingBlocked": false,
+        "runtimeReady": true,
+        "phase": "ready",
+        "physicalInput": false,
+        "session": "48f8903e-3989-4603-88cf-bcd81d1c32dc",
+        "elapsed": 2.981030399998417
+      },
+      "name": "negative isolated profile and real client loading completed",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Prison.LocationSafety.West",
+        "canQuery": false,
+        "hit": "Workspace.Prison.LocationSafety.West"
+      },
+      "name": "prison exterior collision query West",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Prison.LocationSafety.East",
+        "canQuery": false,
+        "hit": "Workspace.Prison.LocationSafety.East"
+      },
+      "name": "prison exterior collision query East",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Prison.LocationSafety.North",
+        "canQuery": false,
+        "hit": "Workspace.Prison.LocationSafety.North"
+      },
+      "name": "prison exterior collision query North",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Prison.LocationSafety.South",
+        "canQuery": false,
+        "hit": "Workspace.Prison.LocationSafety.South"
+      },
+      "name": "prison exterior collision query South",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          0,
+          4.762079238891602,
+          -40
+        ],
+        "target": [
+          0,
+          1,
+          -40
+        ],
+        "location": "prison"
+      },
+      "name": "prison fast below-floor escape returns to exact same-map spawn",
+      "pass": true
+    },
+    {
+      "observed": {
+        "before": 20,
+        "after": 20,
+        "minimum": 20
+      },
+      "name": "prison fallback preserves health without ForceField",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          61.599998474121094,
+          -44,
+          -119
+        ],
+        "ladder": "Workspace.Prison.Ladder",
+        "anchor": "Workspace.Prison.MineAnchor_prison",
+        "anchoredObservation": true,
+        "target": [
+          61.599998474121094,
+          -44,
+          -119
+        ]
+      },
+      "name": "prison legal deep mine ladder remains in place",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          61.599998474121094,
+          -24,
+          -119
+        ],
+        "ladder": "Workspace.Prison.Ladder",
+        "anchor": "Workspace.Prison.MineAnchor_prison",
+        "anchoredObservation": true,
+        "target": [
+          61.599998474121094,
+          -24,
+          -119
+        ]
+      },
+      "name": "prison legal mid ladder remains in place",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Quarry.LocationSafety.West",
+        "canQuery": false,
+        "hit": "Workspace.Quarry.LocationSafety.West"
+      },
+      "name": "quarry exterior collision query West",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Quarry.LocationSafety.East",
+        "canQuery": false,
+        "hit": "Workspace.Quarry.LocationSafety.East"
+      },
+      "name": "quarry exterior collision query East",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Quarry.LocationSafety.North",
+        "canQuery": false,
+        "hit": "Workspace.Quarry.LocationSafety.North"
+      },
+      "name": "quarry exterior collision query North",
+      "pass": true
+    },
+    {
+      "observed": {
+        "wall": "Workspace.Quarry.LocationSafety.South",
+        "canQuery": false,
+        "hit": "Workspace.Quarry.LocationSafety.South"
+      },
+      "name": "quarry exterior collision query South",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          700,
+          4.160991191864014,
+          124
+        ],
+        "target": [
+          700,
+          0.5,
+          124
+        ],
+        "location": "quarry"
+      },
+      "name": "quarry fast below-floor escape returns to exact same-map spawn",
+      "pass": true
+    },
+    {
+      "observed": {
+        "before": 20,
+        "after": 20,
+        "minimum": 20
+      },
+      "name": "quarry fallback preserves health without ForceField",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          622.4000244140625,
+          -60,
+          -19
+        ],
+        "ladder": "Workspace.Quarry.Ladder",
+        "anchor": "Workspace.Quarry.MineAnchor_quarry",
+        "anchoredObservation": true,
+        "target": [
+          622.4000244140625,
+          -60,
+          -19
+        ]
+      },
+      "name": "quarry legal deep mine ladder remains in place",
+      "pass": true
+    },
+    {
+      "observed": {
+        "at": [
+          622.4000244140625,
+          -32,
+          -19
+        ],
+        "ladder": "Workspace.Quarry.Ladder",
+        "anchor": "Workspace.Quarry.MineAnchor_quarry",
+        "anchoredObservation": true,
+        "target": [
+          622.4000244140625,
+          -32,
+          -19
+        ]
+      },
+      "name": "quarry legal mid ladder remains in place",
+      "pass": true
+    }
+  ],
+  "phase": "quarry",
+  "realProfiles": false,
+  "regions": [
+    {
+      "min": [
+        -202,
+        -52,
+        -204
+      ],
+      "floor": -64,
+      "fallVelocity": -180,
+      "id": "prison",
+      "fallStart": [
+        0,
+        -72,
+        -40
+      ],
+      "max": [
+        202,
+        44.5,
+        202
+      ],
+      "spawn": "Workspace.Prison.LocationSpawn_spawn"
+    },
+    {
+      "min": [
+        440,
+        -68,
+        -260
+      ],
+      "floor": -80,
+      "fallVelocity": -180,
+      "id": "quarry",
+      "fallStart": [
+        700,
+        -88,
+        124
+      ],
+      "max": [
+        960,
+        52,
+        260
+      ],
+      "spawn": "Workspace.Quarry.LocationSpawn_quarry_spawn"
+    }
+  ],
+  "elapsed": 15.457999200003542,
+  "client": {
+    "loadingBlocked": false,
+    "runtimeReady": true,
+    "phase": "ready",
+    "physicalInput": false,
+    "session": "48f8903e-3989-4603-88cf-bcd81d1c32dc",
+    "elapsed": 2.981030399998417
+  },
+  "status": "PASS",
+  "deadlineSeconds": 120,
+  "physicalInput": false,
+  "limitations": [
+    "Collision queries verify real collidable exterior walls, not native walking contact.",
+    "Fast fall is an unanchored server-owned fault-injection pose; no private recovery function is called.",
+    "Legal mine/ladder poses are anchored observations; native climbing and all other locations remain separate acceptance."
+  ]
+}
