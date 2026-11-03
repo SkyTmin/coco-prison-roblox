@@ -1,0 +1,279 @@
+{
+  "lights": 15,
+  "failed": 0,
+  "neon": 0,
+  "checks": [
+    {
+      "pass": true,
+      "name": "accepted open-air design"
+    },
+    {
+      "pass": true,
+      "name": "bounded scenery and light budget",
+      "detail": {
+        "lights": 15,
+        "parts": 4538
+      }
+    },
+    {
+      "pass": true,
+      "name": "matte geometry without particle clouds"
+    },
+    {
+      "pass": true,
+      "name": "original 40x16x40 mine, relocated with map"
+    },
+    {
+      "pass": true,
+      "name": "one shared guardian with original radius"
+    },
+    {
+      "pass": true,
+      "name": "one buyer at arrival"
+    },
+    {
+      "pass": true,
+      "name": "solid arrival spawn"
+    },
+    {
+      "pass": true,
+      "name": "solid arrival mine"
+    },
+    {
+      "pass": true,
+      "name": "solid arrival boss"
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 0,148",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 0,124",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 0,100",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 0,76",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 32,142",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 56,142",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation -116,76",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation -148,76",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation -180,80",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 112,80",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 160,72",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 208,56",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 220,52",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 112,-80",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation -112,-80",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "clear circulation 0,-116",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "no props inside excavation",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "entire combat floor clear",
+      "detail": ""
+    },
+    {
+      "pass": true,
+      "name": "solid arena floor"
+    },
+    {
+      "pass": true,
+      "name": "continuous floor around all mine edges",
+      "detail": {
+        "holes": [],
+        "samples": 1750
+      }
+    },
+    {
+      "pass": true,
+      "name": "open sky 0,-20"
+    },
+    {
+      "pass": true,
+      "name": "open sky 0,148"
+    },
+    {
+      "pass": true,
+      "name": "open sky -112,0"
+    },
+    {
+      "pass": true,
+      "name": "open sky 112,0"
+    },
+    {
+      "pass": true,
+      "name": "open sky 220,-32"
+    },
+    {
+      "pass": true,
+      "name": "open sky 0,-176"
+    },
+    {
+      "pass": true,
+      "name": "open sky -44,-176"
+    },
+    {
+      "pass": true,
+      "name": "open sky 40,-208"
+    },
+    {
+      "pass": true,
+      "name": "loading deck stairs",
+      "detail": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16
+      ]
+    },
+    {
+      "pass": true,
+      "name": "north terrace stair 1",
+      "detail": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        8,
+        8,
+        8,
+        8
+      ]
+    },
+    {
+      "pass": true,
+      "name": "north terrace stair 2",
+      "detail": [
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        20
+      ]
+    },
+    {
+      "pass": true,
+      "name": "north terrace stair 3",
+      "detail": [
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        32
+      ]
+    },
+    {
+      "pass": true,
+      "name": "arena stairs",
+      "detail": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12
+      ]
+    },
+    {
+      "pass": true,
+      "name": "four broad ladder shafts"
+    },
+    {
+      "pass": true,
+      "name": "full winding-wheel landmark"
+    },
+    {
+      "pass": true,
+      "name": "old cave roof completely removed"
+    },
+    {
+      "pass": true,
+      "name": "contour guards prevent stepping off irregular edges"
+    },
+    {
+      "pass": true,
+      "name": "original backup inert"
+    },
+    {
+      "pass": true,
+      "name": "loading supports clear of raised terrain",
+      "detail": []
+    }
+  ],
+  "passed": 48,
+  "physicalWalkthrough": false,
+  "particles": 0,
+  "parts": 4538
+}

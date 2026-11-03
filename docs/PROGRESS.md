@@ -3,6 +3,8 @@
 Читать первым. Последняя запись сверху. В конце сессии добавить запись: что сделано, что открыто, следующий шаг.
 
 
+- **03.11.2026 — Каменоломня по принятому открытому концепту.** Простор вокруг исходной шахты 40×40×16, северные террасы, западный подъёмник/склад/погрузка, восточная арена, небо и невидимый периметр. Исправлено пересечение камня с опорами под площадкой (мерцание со скриншота). Native geometry QA 48/48, 1 750 проб пола, screenshot указанного места; Play новой карты работает. Не приняты: полный физический/мобильный обход и бой после переноса. См. docs/research/quarry-open-air-2026-11-03.md. Публикации не было.
+
 - **03.11.2026 — RMB consumables.** Fixed paper/soap/sleeping-bag and other usable hand items: RMB/L2 now follows the same catalog routing as F/touch; books still open their window, food/bow keep held input. Loader/menu/HUD-edit blocks remain. Actual input closure + actual server consumer with isolated inventory: 50 PASS (`scripts/qa-consumable-input-offline.luau`); no real items spent/granted. Synced client source to confirmed Katorga Studio and restarted Play; physical mouse/touch QA remains separate. Selene src 0/0, StyLua src and Rojo build PASS. Quarry art rebuild continues separately.
 
 ## Текущее состояние (20 октября 2026)

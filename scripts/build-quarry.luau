@@ -1,27 +1,26 @@
 --!nocheck
--- Builds the Каменоломня (quarry) location, level 3 [вики LOCATIONS-MENU]. The pit mine (40×16×40, stone /
--- coal / iron, locations.json) and the whole location are IN ONE CAVE [владелец 22.10]: rock walls with ore
--- veins, a closed roof with stalactites, torches and hanging lanterns, scaffolding, a rail line with
--- minecarts, ore piles; the arrival area with the block buyer south of the pit and the boss arena
--- (Базальтовый страж) in the east part of the cave. No way out: players come and go by teleport.
--- A separate zone at X = 700 so StreamingEnabled loads it only for players who are there.
--- Run in Studio (Edit) via scripts/studio-loader.luau after build-textures. Idempotent: replaces
--- Workspace.Quarry. Spots (LocationSpawn, LocationId "quarry"): spawn, mine, boss.
-
+-- Каменоломня, level 3 [wiki]. Owner-approved OPEN-AIR concept 03.11.2026:
+-- assets/concepts/quarry/accepted-open-air-2026-11-03.png. Exact original mine 40x16x40.
+-- Wide mining court, western winding-wheel depot, northern terraced working faces,
+-- eastern shared Basalt Guardian arena, buyer at arrival. New footprint/heights [decision].
+-- Build in Studio Edit after build-textures. Atomic replacement, inert original backup.
+-- Geometry at X=700 is lifted to its own open-sky altitude at the end; teleport tags follow it.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
+local Shared = game:GetService("ReplicatedStorage").Shared
 local textures = require(game:GetService("ReplicatedStorage").Shared.Config.textures)
+assert(not game:GetService("RunService"):IsRunning(), "Stop Play before rebuilding Quarry")
 local old = workspace:FindFirstChild("Quarry")
-if old then
-	old:Destroy()
-end
+local originalBuyer = old and old:FindFirstChild("QuarryBuyer", true)
+local buyer = originalBuyer and originalBuyer:Clone()
+assert(not workspace:FindFirstChild("QuarryRebuild"), "Inspect unfinished QuarryRebuild first")
 local root = Instance.new("Folder")
-root.Name = "Quarry"
+root.Name = "QuarryRebuild"
+root:SetAttribute("DesignVersion", "2026-11-03-open-air-accepted")
 root.Parent = workspace
 
 local QX, QZ = 700, 0 -- zone centre
 local B = 4 -- block size
-local rng = Random.new(20261022) -- fixed seed: the same quarry every rebuild
 local STONE = Color3.fromRGB(110, 110, 114)
 local DARK = Color3.fromRGB(60, 60, 66)
 local WOOD = Color3.fromRGB(120, 85, 50)
@@ -68,23 +67,13 @@ local function sign(target, text, offset, color)
 	label.Text = text
 	label.Parent = gui
 end
-local function lamp(x, z, height)
-	height = height or 10
-	textured(part("LampPost", Vector3.new(1, height, 1), at(x, height / 2, z), WOOD), "px_oak_log")
-	part("LampArm", Vector3.new(1, 1, 3), at(x, height - 0.5, z - 1), WOOD, Enum.Material.Wood)
-	local bulb = part("Lantern", Vector3.new(1.6, 1.6, 1.6), at(x, height - 1.8, z - 2), LAMP, Enum.Material.Neon)
-	bulb.CanCollide = false
-	local light = Instance.new("PointLight")
-	light.Range = 26
-	light.Brightness = 1.4
-	light.Color = LAMP
-	light.Parent = bulb
-end
 local function spot(id, x, z, faceX, faceZ)
-	local p = part("LocationSpawn_quarry_" .. id, Vector3.new(4, 1, 4), CFrame.lookAt(
-		Vector3.new(QX + x, 0.5, QZ + z),
-		Vector3.new(QX + faceX, 0.5, QZ + faceZ)
-	), STONE)
+	local p = part(
+		"LocationSpawn_quarry_" .. id,
+		Vector3.new(4, 1, 4),
+		CFrame.lookAt(Vector3.new(QX + x, 0.5, QZ + z), Vector3.new(QX + faceX, 0.5, QZ + faceZ)),
+		STONE
+	)
 	textured(p, "px_cobblestone")
 	p.Transparency = 0
 	p.CanCollide = true
@@ -96,743 +85,988 @@ local function spot(id, x, z, faceX, faceZ)
 	return p
 end
 
--- ---------------------------------------------------------------- the pit (mine 40 × 16 × 40)
-local MX, MZ = 0, -20 -- pit centre
-local SX, SY, SZ = 40, 16, 40
-local w, h, d = SX * B, SY * B, SZ * B
-local hole = { x0 = MX - w / 2 - 2 * B, x1 = MX + w / 2 + 2 * B, z0 = MZ - d / 2 - 2 * B, z1 = MZ + d / 2 + 2 * B }
+local ok, result = xpcall(function()
+	-- ---------------------------------------------------------------- the pit (mine 40 × 16 × 40)
+	local MX, MZ = 0, -20 -- pit centre
+	local SX, SY, SZ = 40, 16, 40
+	local w, h, d = SX * B, SY * B, SZ * B
+	local hole = {
+		x0 = MX - w / 2 - 2 * B,
+		x1 = MX + w / 2 + 2 * B,
+		z0 = MZ - d / 2 - 2 * B,
+		z1 = MZ + d / 2 + 2 * B,
+	}
 
--- ground: four grass slabs around the pit hole, 4 studs thick, top at y = 0
-local HALF = 260
-local function slab(name, x0, x1, z0, z1)
-	if x1 - x0 < 0.5 or z1 - z0 < 0.5 then
-		return
+	-- ground: four grass slabs around the pit hole, 4 studs thick, top at y = 0
+	local HALF = 156
+	local function slab(name, x0, x1, z0, z1)
+		if x1 - x0 < 0.5 or z1 - z0 < 0.5 then
+			return
+		end
+		local p = part(
+			name,
+			Vector3.new(x1 - x0, 4, z1 - z0),
+			at((x0 + x1) / 2, -2, (z0 + z1) / 2),
+			LEAVES
+		)
+		textured(p, "px_stone")
 	end
-	local p = part(name, Vector3.new(x1 - x0, 4, z1 - z0), at((x0 + x1) / 2, -2, (z0 + z1) / 2), LEAVES)
-	textured(p, "px_grass_top")
-end
-slab("Ground", -HALF, HALF, -HALF, hole.z0)
-slab("Ground", -HALF, HALF, hole.z1, HALF)
-slab("Ground", -HALF, hole.x0, hole.z0, hole.z1)
-slab("Ground", hole.x1, HALF, hole.z0, hole.z1)
+	slab("Ground", -HALF, HALF, -HALF, hole.z0)
+	slab("Ground", -HALF, HALF, hole.z1, HALF)
+	slab("Ground", -HALF, hole.x0, hole.z0, hole.z1)
+	slab("Ground", hole.x1, HALF, hole.z0, hole.z1)
 
--- [владелец 22.10: «границы шахты из камня, а копаем камень — границы не видно»] the pit walls, floor and
--- rim are dark like Minecraft's bedrock (cobblestone texture tinted almost black), so the edge of the
--- mine never looks like one more block to dig
-local BEDROCK = Color3.fromRGB(62, 58, 66)
-local function bedrock(p)
-	textured(p, "px_cobblestone")
-	p.Color = BEDROCK
-	return p
-end
-bedrock(part("PitFloor", Vector3.new(w + 4 * B, B, d + 4 * B), at(MX, -h - B / 2, MZ), DARK))
-for _, wall in ipairs({
-	{ "PitWallN", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ - d / 2 - B) },
-	{ "PitWallS", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ + d / 2 + B) },
-	{ "PitWallW", Vector3.new(2 * B, h, d), at(MX - w / 2 - B, -h / 2, MZ) },
-	{ "PitWallE", Vector3.new(2 * B, h, d), at(MX + w / 2 + B, -h / 2, MZ) },
-}) do
-	bedrock(part(wall[1], wall[2], wall[3], STONE))
-end
--- cobblestone rim around the opening; a gate in the south rail towards the plaza
-local rimY = 0.5
-for _, r in ipairs({
-	{ Vector3.new(w + 4 * B, 1, 2 * B), at(MX, rimY - 0.5, MZ - d / 2 - B) },
-	{ Vector3.new(w + 4 * B, 1, 2 * B), at(MX, rimY - 0.5, MZ + d / 2 + B) },
-	{ Vector3.new(2 * B, 1, d), at(MX - w / 2 - B, rimY - 0.5, MZ) },
-	{ Vector3.new(2 * B, 1, d), at(MX + w / 2 + B, rimY - 0.5, MZ) },
-}) do
-	bedrock(part("PitRim", r[1], r[2], STONE))
-end
-local function rail(size, cf)
-	textured(part("PitRail", size, cf, WOOD), "px_planks")
-end
-local railLen = (w + 4 * B) / 2 - 8
-for _, half in ipairs({ -1, 1 }) do
-	rail(Vector3.new(railLen, 3, 0.6), at(MX + half * (8 + railLen / 2), 1.5, MZ + d / 2 + 2 * B))
-end
-rail(Vector3.new(w + 4 * B, 3, 0.6), at(MX, 1.5, MZ - d / 2 - 2 * B))
-rail(Vector3.new(0.6, 3, d + 4 * B), at(MX - w / 2 - 2 * B, 1.5, MZ))
-rail(Vector3.new(0.6, 3, d + 4 * B), at(MX + w / 2 + 2 * B, 1.5, MZ))
-
-local anchor = part("MineAnchor_quarry", Vector3.new(w, 0.2, d), at(MX, -0.1, MZ), DARK)
-anchor:SetAttribute("LocationId", "quarry")
-anchor:SetAttribute("MineId", "quarry")
-anchor:SetAttribute("Size", Vector3.new(SX, SY, SZ))
-anchor.CanQuery = false
-anchor.CanTouch = false
-CollectionService:AddTag(anchor, "MineAnchor")
-sign(anchor, "Каменоломня", 12)
-
--- four ladders like the prison mines (eight invisible 2×2 trusses + a textured plate each)
-local LADDER_W = 4 * B
-local ladderTexture = textures and textures.textures and textures.textures.ladder
-for _, side in ipairs({
-	{ MX, MZ - d / 2, Vector3.new(0, 0, 1) },
-	{ MX, MZ + d / 2, Vector3.new(0, 0, -1) },
-	{ MX - w / 2, MZ, Vector3.new(1, 0, 0) },
-	{ MX + w / 2, MZ, Vector3.new(-1, 0, 0) },
-}) do
-	local inward = side[3]
-	local along = Vector3.new(math.abs(inward.Z), 0, math.abs(inward.X))
-	local base = Vector3.new(QX + side[1], -h / 2, QZ + side[2])
-	for k = 0, LADDER_W / 2 - 1 do
-		local truss = Instance.new("TrussPart")
-		truss.Name = "Ladder"
-		truss.Size = Vector3.new(2, h, 2)
-		truss.CFrame = CFrame.new(base - inward * 0.6 + along * (-LADDER_W / 2 + 1 + k * 2))
-		truss.Anchored = true
-		truss.Transparency = 1
-		truss.Parent = root
+	-- [владелец 22.10: «границы шахты из камня, а копаем камень — границы не видно»] the pit walls, floor and
+	-- rim are dark like Minecraft's bedrock (cobblestone texture tinted almost black), so the edge of the
+	-- mine never looks like one more block to dig
+	local BEDROCK = Color3.fromRGB(62, 58, 66)
+	local function bedrock(p)
+		textured(p, "px_cobblestone")
+		p.Color = BEDROCK
+		return p
 	end
-	local plate = Instance.new("Part")
-	plate.Name = "LadderFace"
-	plate.Size = Vector3.new(LADDER_W * along.X + 0.2 * math.abs(inward.X), h, LADDER_W * along.Z + 0.2 * math.abs(inward.Z))
-	plate.CFrame = CFrame.new(base + inward * 0.15)
-	plate.Anchored = true
-	plate.CanCollide = false
-	plate.CanQuery = false
-	plate.Transparency = 1
-	plate.Parent = root
-	if ladderTexture then
-		local tex = Instance.new("Texture")
-		tex.Texture = ladderTexture
-		tex.Face = if inward.Z > 0
-			then Enum.NormalId.Back
-			elseif inward.Z < 0 then Enum.NormalId.Front
-			elseif inward.X > 0 then Enum.NormalId.Right
-			else Enum.NormalId.Left
-		tex.StudsPerTileU, tex.StudsPerTileV = B, B
-		tex.Parent = plate
+	bedrock(part("PitFloor", Vector3.new(w + 4 * B, B, d + 4 * B), at(MX, -h - B / 2, MZ), DARK))
+	for _, wall in ipairs({
+		{ "PitWallN", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ - d / 2 - B) },
+		{ "PitWallS", Vector3.new(w + 4 * B, h, 2 * B), at(MX, -h / 2, MZ + d / 2 + B) },
+		{ "PitWallW", Vector3.new(2 * B, h, d), at(MX - w / 2 - B, -h / 2, MZ) },
+		{ "PitWallE", Vector3.new(2 * B, h, d), at(MX + w / 2 + B, -h / 2, MZ) },
+	}) do
+		bedrock(part(wall[1], wall[2], wall[3], STONE))
 	end
-end
+	-- cobblestone rim around the opening; a gate in the south rail towards the plaza
+	local rimY = 1
+	for _, r in ipairs({
+		{ Vector3.new(w + 4 * B, 1, 2 * B), at(MX, rimY - 0.5, MZ - d / 2 - B) },
+		{ Vector3.new(w + 4 * B, 1, 2 * B), at(MX, rimY - 0.5, MZ + d / 2 + B) },
+		{ Vector3.new(2 * B, 1, d), at(MX - w / 2 - B, rimY - 0.5, MZ) },
+		{ Vector3.new(2 * B, 1, d), at(MX + w / 2 + B, rimY - 0.5, MZ) },
+	}) do
+		bedrock(part("PitRim", r[1], r[2], STONE))
+	end
+	local function rail(size, cf)
+		textured(part("PitRail", size, cf, WOOD), "px_planks")
+	end
+	local railLen = (w + 4 * B) / 2 - 8
+	for _, half in ipairs({ -1, 1 }) do
+		rail(
+			Vector3.new(railLen, 3, 0.6),
+			at(MX + half * (8 + railLen / 2), 1.5, MZ + d / 2 + 2 * B)
+		)
+	end
+	rail(Vector3.new(w + 4 * B, 3, 0.6), at(MX, 1.5, MZ - d / 2 - 2 * B))
+	rail(Vector3.new(0.6, 3, d + 4 * B), at(MX - w / 2 - 2 * B, 1.5, MZ))
+	rail(Vector3.new(0.6, 3, d + 4 * B), at(MX + w / 2 + 2 * B, 1.5, MZ))
 
+	local anchor = part("MineAnchor_quarry", Vector3.new(w, 0.2, d), at(MX, -0.1, MZ), DARK)
+	anchor:SetAttribute("LocationId", "quarry")
+	anchor:SetAttribute("MineId", "quarry")
+	anchor:SetAttribute("Size", Vector3.new(SX, SY, SZ))
+	anchor.Transparency = 1
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.CanTouch = false
+	CollectionService:AddTag(anchor, "MineAnchor")
 
--- ---------------------------------------------------------------- the cave around the pit [владелец 22.10]
--- The mine sits in a cave: thick rock walls, a closed stone roof with stalactites, torches on the walls,
--- lanterns hanging on chains; one entrance in the south wall towards the plaza. Outside the cave is a
--- rocky hill (stepped stone blocks with grass on top).
-local CX0, CX1 = MX - w / 2 - 2 * B - 24, 214 -- cave interior, x (east part = boss arena)
-local CZ0, CZ1 = MZ - d / 2 - 2 * B - 24, 152 -- cave interior, z (south part = arrival area)
-local cave = Instance.new("Folder")
-cave.Name = "Cave"
-cave.Parent = root
--- [владелец 22.10: «в шахте плохое освещение, камня почти не видно»] the closed roof shuts out the sky,
--- so inside only Lighting.Ambient lights the blocks. The client (IndoorLighting) brightens the ambient
--- light and lifts the exposure while the player is inside this volume.
--- (a Persistent model: with streaming the client always has it, however far its centre is)
-local indoorModel = Instance.new("Model")
-indoorModel.Name = "IndoorLighting"
-indoorModel.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
-indoorModel.Parent = cave
-local indoor = part("IndoorVolume", Vector3.new(CX1 - CX0, 200, CZ1 - CZ0), at((CX0 + CX1) / 2, 0, (CZ0 + CZ1) / 2), STONE, nil, indoorModel)
-indoor.Transparency = 1
-indoor.CanCollide = false
-indoor.CanQuery = false
-indoor.CanTouch = false
-indoor:SetAttribute("Ambient", Color3.fromRGB(150, 145, 138))
-indoor:SetAttribute("Exposure", 0.2) -- 0.35 washed the stone out
-CollectionService:AddTag(indoor, "IndoorLighting")
--- cave floor: cut stone around the pit hole (just above the grass so it wins the z-fight)
-local function floor(x0, x1, z0, z1)
-	if x1 - x0 > 0.5 and z1 - z0 > 0.5 then
-		textured(part("CaveFloor", Vector3.new(x1 - x0, 0.4, z1 - z0), at((x0 + x1) / 2, 0.2, (z0 + z1) / 2), STONE, nil, cave), "px_stone")
+	-- four ladders like the prison mines (eight invisible 2×2 trusses + a textured plate each)
+	local LADDER_W = 4 * B
+	local ladderTexture = textures and textures.textures and textures.textures.ladder
+	for _, side in ipairs({
+		{ MX, MZ - d / 2, Vector3.new(0, 0, 1) },
+		{ MX, MZ + d / 2, Vector3.new(0, 0, -1) },
+		{ MX - w / 2, MZ, Vector3.new(1, 0, 0) },
+		{ MX + w / 2, MZ, Vector3.new(-1, 0, 0) },
+	}) do
+		local inward = side[3]
+		local along = Vector3.new(math.abs(inward.Z), 0, math.abs(inward.X))
+		local base = Vector3.new(QX + side[1], -h / 2, QZ + side[2])
+		for k = 0, LADDER_W / 2 - 1 do
+			local truss = Instance.new("TrussPart")
+			truss.Name = "Ladder"
+			truss.Size = Vector3.new(2, h, 2)
+			truss.CFrame = CFrame.new(base - inward * 0.6 + along * (-LADDER_W / 2 + 1 + k * 2))
+			truss.Anchored = true
+			truss.Transparency = 1
+			truss.Parent = root
+		end
+		local plate = Instance.new("Part")
+		plate.Name = "LadderFace"
+		plate.Size = Vector3.new(
+			LADDER_W * along.X + 0.2 * math.abs(inward.X),
+			h,
+			LADDER_W * along.Z + 0.2 * math.abs(inward.Z)
+		)
+		plate.CFrame = CFrame.new(base + inward * 0.15)
+		plate.Anchored = true
+		plate.CanCollide = false
+		plate.CanQuery = false
+		plate.Transparency = 1
+		plate.Parent = root
+		if ladderTexture then
+			local tex = Instance.new("Texture")
+			tex.Texture = ladderTexture
+			tex.Face = if inward.Z > 0
+				then Enum.NormalId.Back
+				elseif inward.Z < 0 then Enum.NormalId.Front
+				elseif inward.X > 0 then Enum.NormalId.Right
+				else Enum.NormalId.Left
+			tex.StudsPerTileU, tex.StudsPerTileV = B, B
+			tex.Parent = plate
+		end
 	end
-end
-floor(CX0, CX1, CZ0, hole.z0)
-floor(CX0, CX1, hole.z1, CZ1)
-floor(CX0, hole.x0, hole.z0, hole.z1)
-floor(hole.x1, CX1, hole.z0, hole.z1)
--- the vault: a stepped stone DOME over the whole cave [владелец 22.10: «крыша как сфера, а не коробка»].
--- Ceiling height follows an ellipsoid (48 studs in the middle, falling to the walls; 64 felt empty); every 8 × 8 column
--- is one block reaching up to its neighbours' height, so the steps never leave a gap to the sky. Columns
--- where the vault would be lower than 12 studs (the corners, the edge) are solid rock down to the floor.
-local DCX, DCZ = (CX0 + CX1) / 2, (CZ0 + CZ1) / 2
-local DRX, DRZ = (CX1 - CX0) / 2 * 1.25, (CZ1 - CZ0) / 2 * 1.25
-local DOME_H = 48
-local function ceilingAt(x, z)
-	local k = 1 - ((x - DCX) / DRX) ^ 2 - ((z - DCZ) / DRZ) ^ 2
-	return math.floor(DOME_H * math.sqrt(math.max(0, k)) / 4) * 4
-end
-local CELL = 8
-local cols = {}
-local gx0, gx1 = math.floor((CX0 - CELL) / CELL), math.ceil((CX1 + CELL) / CELL)
-local gz0, gz1 = math.floor((CZ0 - CELL) / CELL), math.ceil((CZ1 + CELL) / CELL)
-local function colAt(ix, iz)
-	local row = cols[ix]
-	return row and row[iz]
-end
-for ix = gx0, gx1 do
-	cols[ix] = {}
-	for iz = gz0, gz1 do
-		local x, z = ix * CELL + CELL / 2, iz * CELL + CELL / 2
-		local inside = x > CX0 and x < CX1 and z > CZ0 and z < CZ1
-		local y = if inside then ceilingAt(x, z) else 0
-		cols[ix][iz] = { x = x, z = z, y = y, open = inside and y >= 12 }
+
+	-- Accepted owner concept 03.11: assets/concepts/quarry/accepted-open-air-2026-11-03.png.
+	-- Spacious OPEN-AIR quarry. Existing excavation stays exactly 40x16x40 blocks.
+	local terrain, props, arena =
+		Instance.new("Folder"), Instance.new("Folder"), Instance.new("Folder")
+	terrain.Name, props.Name, arena.Name = "Terraces", "Props", "BossArena"
+	terrain.Parent, props.Parent, arena.Parent = root, root, root
+	local ROCK = Color3.fromRGB(228, 226, 219)
+	local TIMBER = Color3.fromRGB(241, 225, 196)
+	local BASALT = Color3.fromRGB(184, 190, 197)
+	local MOSS = Color3.fromRGB(119, 148, 87)
+	local count = 0
+	local function block(name, x, y, z, w, h, d, variant, tint, parent, collide)
+		local p = part(name, Vector3.new(w, h, d), at(x, y, z), tint or STONE, nil, parent or props)
+		if variant then
+			textured(p, variant)
+		end
+		p.Color = tint or ROCK
+		p.CanTouch, p.CanCollide = false, collide ~= false
+		if collide == false then
+			p.CanQuery = false
+		end
+		count += 1
+		if count % 100 == 0 then
+			task.wait()
+		end
+		return p
 	end
-end
-local function vaultCell(x, z, y0, y1)
-	local roll = rng:NextNumber()
-	local variant = if roll < 0.78 then "px_stone" elseif roll < 0.9 then "px_cobblestone" elseif roll < 0.96 then "px_coal_ore" else "px_iron_ore"
-	textured(part("CaveVault", Vector3.new(CELL, y1 - y0, CELL), at(x, (y0 + y1) / 2, z), STONE, nil, cave), variant)
-end
-for ix = gx0, gx1 do
-	for iz = gz0, gz1 do
-		local c = cols[ix][iz]
-		local top = if c.open then c.y else 0
-		local nearOpen = c.open
-		for _, o in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
-			local n = colAt(ix + o[1], iz + o[2])
-			if n and n.open then
-				top = math.max(top, n.y)
-				nearOpen = true
+	local function beam(name, a, b, width, variant, color)
+		local p = block(name, 0, 0, 0, width, width, (b - a).Magnitude, variant, color)
+		p.CFrame = CFrame.lookAt((a + b) / 2 + Vector3.new(QX, 0, QZ), b + Vector3.new(QX, 0, QZ))
+		return p
+	end
+	local function lantern(x, y, z, lit)
+		block("LampCap", x, y + 1.6, z, 3, 0.6, 3, nil, IRON)
+		block("LampBase", x, y - 1.6, z, 3, 0.6, 3, nil, IRON)
+		local bulb = block("LampGlass", x, y, z, 2, 2.6, 2, nil, LAMP, props, false)
+		for _, dx in { -1.2, 1.2 } do
+			for _, dz in { -1.2, 1.2 } do
+				block("LampFrame", x + dx, y, z + dz, 0.3, 3, 0.3, nil, IRON, props, false)
 			end
 		end
-		if nearOpen then -- columns deep inside the rock are never seen: skip them
-			vaultCell(c.x, c.z, if c.open then c.y else 0, top + CELL)
+		if lit then
+			local light = Instance.new("PointLight")
+			light.Range, light.Brightness, light.Color, light.Shadows = 46, 0.65, LAMP, false
+			light.Parent = bulb
 		end
 	end
-end
--- stalactites hang from the vault (no collision, they only look heavy)
-for _ = 1, 140 do
-	local x = math.floor(rng:NextNumber(CX0 + 8, CX1 - 8) / 4) * 4 + 2
-	local z = math.floor(rng:NextNumber(CZ0 + 8, CZ1 - 8) / 4) * 4 + 2
-	local roof = ceilingAt(x, z)
-	if roof >= 24 then
-		local len = rng:NextInteger(1, 4) * 4
-		local s = part("Stalactite", Vector3.new(4, len, 4), at(x, roof - len / 2, z), STONE, nil, cave)
-		textured(s, if rng:NextNumber() < 0.8 then "px_stone" else "px_cobblestone")
-		s.CanCollide = false
-		if len >= 8 then
-			local tip = part("StalactiteTip", Vector3.new(2, 4, 2), s.CFrame * CFrame.new(0, -len / 2 - 2, 0), STONE, nil, cave)
-			textured(tip, "px_stone")
-			tip.CanCollide = false
+	local function crate(x, y, z, scale)
+		local s = scale or 8
+		block("Crate", x, y + s / 2, z, s, s, s, "px_planks", TIMBER)
+		for _, dx in { -s / 2 - 0.15, s / 2 + 0.15 } do
+			block("CrateBand", x + dx, y + s / 2, z, 0.6, s + 0.2, s + 0.2, "px_oak_log", TIMBER)
+		end
+		for _, dy in { 1, s - 1 } do
+			block("CrateRail", x, y + dy, z, s - 0.4, 1.2, s + 0.3, "px_oak_log", TIMBER)
 		end
 	end
-end
--- torches on the inside walls and lanterns on chains under the roof
-local function torch(x, y, z)
-	local stick = part("Torch", Vector3.new(0.6, 2, 0.6), at(x, y, z), WOOD, Enum.Material.Wood, cave)
-	stick.CanCollide = false
-	local flame = part("TorchFlame", Vector3.new(0.8, 0.8, 0.8), at(x, y + 1.3, z), Color3.fromRGB(255, 170, 60), Enum.Material.Neon, cave)
-	flame.CanCollide = false
-	local light = Instance.new("PointLight")
-	light.Range = 30
-	light.Brightness = 1.6
-	light.Color = Color3.fromRGB(255, 170, 90)
-	light.Parent = flame
-end
-local function wallTorch(x, z)
-	if ceilingAt(x, z) >= 16 then -- skip spots inside the solid corners
-		torch(x, 10, z)
+	local function barrel(x, y, z)
+		block("Barrel", x, y + 4, z, 6, 8, 6, "px_planks", TIMBER)
+		for _, dy in { 1.5, 6.5 } do
+			block("BarrelHoop", x, y + dy, z, 6.3, 1, 6.3, nil, IRON)
+		end
+		block("BarrelLid", x, y + 8.1, z, 5.5, 0.2, 5.5, "px_oak_log", TIMBER)
 	end
-end
-for t = 0, 1, 1 / 12 do
-	wallTorch(CX0 + 1, CZ0 + (CZ1 - CZ0) * t)
-	wallTorch(CX1 - 1, CZ0 + (CZ1 - CZ0) * t)
-	wallTorch(CX0 + (CX1 - CX0) * t, CZ0 + 1)
-	wallTorch(CX0 + (CX1 - CX0) * t, CZ1 - 1)
-end
-local function lantern(x, z, drop)
-	local roof = ceilingAt(x, z)
-	drop = math.max(drop, roof - 30) -- long chains under the high middle of the dome
-	local chain = part("Chain", Vector3.new(0.3, drop, 0.3), at(x, roof - drop / 2, z), IRON, Enum.Material.Metal, cave)
-	chain.CanCollide = false
-	local box = part("HangingLantern", Vector3.new(2, 2.4, 2), at(x, roof - drop - 1.2, z), LAMP, Enum.Material.Neon, cave)
-	box.CanCollide = false
-	local light = Instance.new("PointLight")
-	light.Range = 34
-	light.Brightness = 1.3
-	light.Color = LAMP
-	light.Shadows = true -- otherwise the light shows through the roof from outside
-	light.Parent = box
-end
-for _, xz in ipairs({
-	{ -60, -100 },
-	{ 60, -100 },
-	{ -60, 60 },
-	{ 60, 60 },
-	{ -100, -20 },
-	{ 0, -20 },
-	{ -40, 116 },
-	{ 40, 116 },
-	{ 120, 116 },
-	{ 190, 116 },
-	{ 156, -90 },
-	{ 200, -20 },
-	-- over the four quarters of the pit, so its bottom is lit too
-	{ -40, -60 },
-	{ 40, -60 },
-	{ -40, 20 },
-	{ 40, 20 },
-}) do
-	lantern(MX + xz[1], xz[2], if xz[1] == 0 and xz[2] == -20 then 10 else 6)
-end
--- a misty, dim cave: a few dust particles in the air over the pit
-local dust = part("CaveDust", Vector3.new(w, 1, d), at(MX, 30, MZ), STONE, nil, cave)
-dust.Transparency = 1
-dust.CanCollide = false
-dust.CanQuery = false
-local emitter = Instance.new("ParticleEmitter")
-emitter.Rate = 6
-emitter.Lifetime = NumberRange.new(8, 12)
-emitter.Speed = NumberRange.new(0.3, 0.8)
-emitter.SpreadAngle = Vector2.new(180, 180)
-emitter.Size = NumberSequence.new(0.25)
-emitter.Transparency = NumberSequence.new(0.6)
-emitter.Color = ColorSequence.new(Color3.fromRGB(200, 190, 170))
-emitter.LightEmission = 0.2
-emitter.Parent = dust
 
--- ---------------------------------------------------------------- arrival plaza and the buyer
-local PZ = 116 -- arrival area centre, south of the pit, inside the cave
-textured(part("Plaza", Vector3.new(56, 1, 48), at(0, 0.5, PZ), STONE), "px_cobblestone")
-for ix = -3, 3 do
-	for iz = -2, 2 do
-		if (ix + iz) % 2 == 0 then
-			textured(part("PlazaTile", Vector3.new(8, 0.2, 8), at(ix * 8, 1.05, PZ + iz * 8), STONE), "px_stone")
+	local function fence(x0, z0, x1, z1, y, low)
+		local a, b = Vector3.new(x0, y, z0), Vector3.new(x1, y, z1)
+		local n = math.max(1, math.ceil((b - a).Magnitude / 12))
+		for i = 0, n do
+			local v = a:Lerp(b, i / n)
+			block(
+				"FencePost",
+				v.X,
+				y + (if low then 1.5 else 2.5),
+				v.Z,
+				1.5,
+				(if low then 3 else 5),
+				1.5,
+				"px_oak_log",
+				TIMBER
+			)
+		end
+		for _, h in (if low then { 0.8, 2.3 } else { 1.5, 3.5 }) do
+			beam("FenceRail", a + Vector3.yAxis * h, b + Vector3.yAxis * h, 1, "px_oak_log", TIMBER)
 		end
 	end
-end
-textured(part("RoadPit", Vector3.new(16, 0.4, PZ - 24 - hole.z1), at(MX, 0.5, (PZ - 24 + hole.z1) / 2), STONE), "px_gravel")
-spot("spawn", 0, PZ + 8, 0, MZ)
-for _, xz in ipairs({ { -26, PZ - 22 }, { 26, PZ - 22 }, { -26, PZ + 22 }, { 26, PZ + 22 } }) do
-	lamp(xz[1], xz[2])
-end
-
--- block buyer (SellPoint on the rig's root, like scripts/build-npcs.luau)
-local npcs = Instance.new("Folder")
-npcs.Name = "Npcs"
-npcs.Parent = root
-local function npc(name, tag, cf, label, labelColor, skin, shirt, pants)
-	local desc = Instance.new("HumanoidDescription")
-	desc.HeadColor, desc.LeftArmColor, desc.RightArmColor = skin, skin, skin
-	desc.TorsoColor, desc.LeftLegColor, desc.RightLegColor = shirt, pants, pants
-	local model = Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R15)
-	model.Name = name
-	local animate = model:FindFirstChild("Animate")
-	if animate then
-		animate:Destroy()
+	local function footprint(x, z)
+		local n = math.noise(x / 48, z / 48, 9) * 0.035
+		return (x / 240) ^ 2 + ((z + 16) / 248) ^ 2 < 1 + n
+			or ((x - 216) / 96) ^ 2 + ((z + 24) / 116) ^ 2 < 1 + n
+			or (x / 176) ^ 2 + ((z - 136) / 88) ^ 2 < 1 + n
 	end
-	local humanoid = model:FindFirstChildOfClass("Humanoid")
-	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-	humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-	for _, p in ipairs(model:GetDescendants()) do
-		if p:IsA("BasePart") then
-			p.Anchored = true
+	local function groundY(x, z)
+		local h = 0
+		-- Broad usable terrace shelves; curved risers follow the quarry face.
+		local north = z + math.floor(math.sin(x / 44) * 2) * 4
+		if north < -128 then
+			h = 8
+		end
+		if north < -160 then
+			h = 20
+		end
+		if north < -192 then
+			h = 32
+		end
+		if north < -224 then
+			h = 44
+		end
+		if x < -208 and (x < -224 or z < -108 or z > 44) then
+			h = math.max(h, 8)
+		end
+		if x > 280 then
+			h = math.max(h, 16)
+		end
+		-- Switchback stair routes are carved into the heightfield, no buried/blocked treads.
+		if math.abs(x) < 12 and z >= -148 and z <= -116 then
+			h = math.clamp(math.floor((-z - 116) / 4) * 2, 0, 8)
+		elseif x >= -56 and x <= 12 and z >= -148 and z <= -132 then
+			h = 8
+		elseif x >= -56 and x <= -32 and z >= -184 and z < -148 then
+			h = 8 + math.clamp(math.floor((-z - 148) / 4) * 2, 0, 12)
+		elseif x >= -56 and x <= 52 and z >= -184 and z <= -172 then
+			h = 20
+		elseif x >= 28 and x <= 52 and z >= -216 and z < -184 then
+			h = 20 + math.clamp(math.floor((-z - 184) / 4) * 2, 0, 12)
+		end
+		return h
+	end
+	for _, p in root:GetChildren() do
+		if p.Name == "Ground" or p.Name == "PitRail" then
+			p:Destroy()
 		end
 	end
-	model.Parent = npcs
-	model:PivotTo(cf)
-	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
-	local hrp = model:FindFirstChild("HumanoidRootPart")
-	CollectionService:AddTag(hrp, tag)
-	sign(hrp, label, 4.5, labelColor)
-	local head = model:FindFirstChild("Head")
-	local helmet = part("Helmet", Vector3.new(1.35, 0.8, 1.35), head.CFrame * CFrame.new(0, 0.5, 0), Color3.fromRGB(230, 200, 60), Enum.Material.Metal, model)
-	helmet.Shape = Enum.PartType.Ball
-	helmet.CanCollide = false
-	return model
-end
-npc(
-	"QuarryBuyer",
-	"SellPoint",
-	CFrame.lookAt(Vector3.new(QX + 22, 4, QZ + PZ - 6), Vector3.new(QX, 4, QZ + PZ - 6)),
-	"Скупщик блоков",
-	Color3.fromRGB(255, 55, 55),
-	Color3.fromRGB(198, 140, 100),
-	Color3.fromRGB(70, 70, 80),
-	Color3.fromRGB(50, 45, 40)
-)
-textured(part("Stall", Vector3.new(4, 3, 10), at(19, 1.5, PZ - 6), WOOD), "px_planks")
-for _, z in ipairs({ -10, -2 }) do
-	textured(part("StallPost", Vector3.new(1, 9, 1), at(17, 4.5, PZ + z), WOOD), "px_oak_log")
-	textured(part("StallPost", Vector3.new(1, 9, 1), at(25, 4.5, PZ + z), WOOD), "px_oak_log")
-end
-part("Awning", Vector3.new(10, 0.6, 12), at(21, 9.3, PZ - 6), Color3.fromRGB(170, 60, 50), Enum.Material.Fabric)
-
--- ---------------------------------------------------------------- inside the cave: scaffolding, rails, piles
-local props = Instance.new("Folder")
-props.Name = "Props"
-props.Parent = root
-local function log(size, cf)
-	return textured(part("Log", size, cf, WOOD, nil, props), "px_oak_log")
-end
-local function planks(size, cf)
-	return textured(part("Planks", size, cf, WOOD, nil, props), "px_planks")
-end
--- (the scaffolding towers in the pit corners are gone [владелец 22.10]: they stood inside the mine blocks)
--- wooden roof props (mine supports) along the cave walls
-for t = 0.1, 0.9, 0.2 do
-	for _, side in ipairs({ { CX0 + 3, nil }, { CX1 - 3, nil } }) do
-		local z = CZ0 + (CZ1 - CZ0) * t
-		local roof = math.min(ceilingAt(side[1], z), 30)
-		log(Vector3.new(2, roof, 2), at(side[1], roof / 2, z))
-		log(Vector3.new(2, 2, 10), at(side[1], roof - 1, z))
+	-- Solid columns, merged by equal height/material. No thin cave skin or missing corner cells.
+	local cells = {}
+	local function cellKey(x, z)
+		return x .. ":" .. z
 	end
-end
--- rail line inside the cave along the south wall, with minecarts
-local railZ = hole.z1 + 14
-for i = 0, 17 do
-	planks(Vector3.new(1, 0.4, 6), at(-100 + i * 4, 0.6, railZ))
-end
-for _, dz in ipairs({ -2.2, 2.2 }) do
-	part("Rail", Vector3.new(72, 0.4, 0.4), at(-66, 1, railZ + dz), IRON, Enum.Material.Metal, props)
-end
-for i, fill in ipairs({ "px_coal_ore", "px_stone", "px_iron_ore" }) do
-	local x = -92 + i * 14
-	part("Cart", Vector3.new(6, 3, 5), at(x, 2.4, railZ), IRON, Enum.Material.DiamondPlate, props)
-	textured(part("CartLoad", Vector3.new(5, 1, 4), at(x, 4.2, railZ), STONE, nil, props), fill)
-	for _, o in ipairs({ { -2, -2.4 }, { 2, -2.4 }, { -2, 2.4 }, { 2, 2.4 } }) do
-		local wheel = part("Wheel", Vector3.new(1.4, 1.4, 0.6), at(x + o[1], 1.3, railZ + o[2]), DARK, Enum.Material.Metal, props)
-		wheel.Shape = Enum.PartType.Cylinder
-		wheel.CFrame = at(x + o[1], 1.3, railZ + o[2]) * CFrame.Angles(0, math.pi / 2, 0)
+	for z = -280, 232, 4 do
+		for x = -252, 324, 4 do
+			if footprint(x + 2, z + 2) and not (x >= -88 and x < 88 and z >= -108 and z < 68) then
+				local h = groundY(x + 2, z + 2)
+				local style = if h > 0
+					then 1
+					elseif math.noise(x / 36, z / 36, 3) > 0.08 then 2
+					else 3
+				cells[cellKey(x, z)] = { h = h, style = style }
+			end
+		end
 	end
-end
--- ore and stone piles in the cave corners (stacked blocks, like Minecraft)
-local function pile(cx, cz, variant, size)
-	for layer = 0, size - 1 do
-		for ix = -size + layer + 1, size - layer - 1 do
-			for iz = -size + layer + 1, size - layer - 1 do
-				if rng:NextNumber() < 0.8 then
-					textured(part("Pile", Vector3.new(B, B, B), at(cx + ix * B, 0.4 + B / 2 + layer * B, cz + iz * B), STONE, nil, props), variant)
+	for z = -280, 232, 4 do
+		for x = -252, 324, 4 do
+			local c = cells[cellKey(x, z)]
+			if not c then
+				continue
+			end
+			local function same(xx, zz)
+				local v = cells[cellKey(xx, zz)]
+				return v and v.h == c.h and v.style == c.style
+			end
+			local nx = 1
+			while same(x + nx * 4, z) do
+				nx += 1
+			end
+			local nz = 1
+			while true do
+				local full = true
+				for i = 0, nx - 1 do
+					if not same(x + i * 4, z + nz * 4) then
+						full = false
+						break
+					end
+				end
+				if not full then
+					break
+				end
+				nz += 1
+			end
+			for i = 0, nx - 1 do
+				for j = 0, nz - 1 do
+					cells[cellKey(x + i * 4, z + j * 4)] = nil
 				end
 			end
+			block(
+				"TerraceGround",
+				x + nx * 2,
+				(c.h - 12) / 2,
+				z + nz * 2,
+				nx * 4,
+				c.h + 12,
+				nz * 4,
+				if c.style == 1
+					then "px_stone"
+					elseif c.style == 2 then "px_gravel"
+					else "px_cobblestone",
+				ROCK,
+				terrain
+			)
 		end
 	end
-end
-pile(CX1 - 14, CZ1 - 14, "px_stone", 3)
-pile(CX0 + 12, CZ0 + 12, "px_coal_ore", 2)
-pile(CX1 - 12, CZ0 + 12, "px_cobblestone", 2)
-pile(CX0 + 12, CZ1 - 22, "px_iron_ore", 2)
--- ---------------------------------------------------------------- cave decor [владелец 22.10: «больше дизайна»]
-local decor = Instance.new("Folder")
-decor.Name = "Decor"
-decor.Parent = root
--- glowing crystal clusters along the walls (cyan and violet, soft light)
-local function crystal(x, z)
-	local hue = if rng:NextNumber() < 0.6 then Color3.fromRGB(90, 220, 255) else Color3.fromRGB(190, 110, 255)
-	for k = 1, rng:NextInteger(3, 5) do
-		local height = rng:NextNumber(2, 5)
-		local c = part("Crystal", Vector3.new(0.9, height, 0.9), CFrame.new(QX + x + rng:NextNumber(-1.5, 1.5), height / 2 + 0.2, QZ + z + rng:NextNumber(-1.5, 1.5)) * CFrame.Angles(rng:NextNumber(-0.5, 0.5), rng:NextNumber(0, 6.28), rng:NextNumber(-0.5, 0.5)), hue, Enum.Material.Neon, decor)
-		c.CanCollide = false
-		if k == 1 then
-			local light = Instance.new("PointLight")
-			light.Range = 14
-			light.Brightness = 0.9
-			light.Color = hue
-			light.Parent = c
-		end
-	end
-end
--- mushrooms by the walls (Minecraft brown and red)
-local function mushroom(x, z)
-	local red = rng:NextNumber() < 0.5
-	part("MushroomStem", Vector3.new(0.6, 1.2, 0.6), at(x, 1, z), Color3.fromRGB(230, 220, 200), nil, decor).CanCollide = false
-	part("MushroomCap", Vector3.new(1.8, 0.6, 1.8), at(x, 1.9, z), if red then Color3.fromRGB(200, 40, 40) else Color3.fromRGB(150, 110, 75), nil, decor).CanCollide = false
-end
-local placed = 0
-for _ = 1, 400 do
-	if placed >= 60 then
-		break
-	end
-	local x = rng:NextNumber(CX0 + 6, CX1 - 6)
-	local z = rng:NextNumber(CZ0 + 6, CZ1 - 6)
-	local open = ceilingAt(x, z) >= 12
-	local nearWall = ceilingAt(x, z) < 30 -- the low ring of the dome, by the walls
-	local clear = not (x > hole.x0 - 4 and x < hole.x1 + 4 and z > hole.z0 - 4 and z < hole.z1 + 4) -- not at the pit
-		and not (x > -30 and x < 30 and z > PZ - 26) -- not on the arrival area
-		and (x - 156) ^ 2 + (z - MZ) ^ 2 > 46 ^ 2 -- not in the arena
-	if open and nearWall and clear then
-		if placed % 3 == 0 then
-			crystal(x, z)
-		else
-			mushroom(x, z)
-		end
-		placed += 1
-	end
-end
--- mine supports around the pit: two posts and a beam every 32 studs, just outside the rim rail
-for _, side in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
-	for k = -2, 2 do
-		local along = k * 32
-		local x = if side[1] ~= 0 then MX + side[1] * (w / 2 + 2 * B + 5) else MX + along
-		local z = if side[2] ~= 0 then MZ + side[2] * (d / 2 + 2 * B + 5) else MZ + along
-		local gate = side[2] == 1 and math.abs(along) < 10 -- keep the way from the arrival area open
-		if not gate then
-			local dx, dz = math.abs(side[2]) * 3, math.abs(side[1]) * 3
-			log(Vector3.new(1.4, 12, 1.4), at(x - dx, 6, z - dz))
-			log(Vector3.new(1.4, 12, 1.4), at(x + dx, 6, z + dz))
-			log(Vector3.new(1.4 + dx * 2, 1.4, 1.4 + dz * 2), at(x, 12.4, z))
-		end
-	end
-end
--- a still underground pool in the south-west, with a cobblestone rim and a lily pad
-local POOL_X, POOL_Z, POOL_W, POOL_D = -80, 128, 28, 20
-for _, r in ipairs({
-	{ Vector3.new(POOL_W + 4, 2, 2), at(POOL_X, 1, POOL_Z - POOL_D / 2 - 1) },
-	{ Vector3.new(POOL_W + 4, 2, 2), at(POOL_X, 1, POOL_Z + POOL_D / 2 + 1) },
-	{ Vector3.new(2, 2, POOL_D), at(POOL_X - POOL_W / 2 - 1, 1, POOL_Z) },
-	{ Vector3.new(2, 2, POOL_D), at(POOL_X + POOL_W / 2 + 1, 1, POOL_Z) },
-}) do
-	textured(part("PoolRim", r[1], r[2], STONE, nil, decor), "px_cobblestone")
-end
-workspace.Terrain:FillBlock(at(POOL_X, 1.1, POOL_Z), Vector3.new(POOL_W + 8, 4, POOL_D + 8), Enum.Material.Air) -- re-runs
-workspace.Terrain:FillBlock(at(POOL_X, 1.1, POOL_Z), Vector3.new(POOL_W, 1.4, POOL_D), Enum.Material.Water)
-part("LilyPad", Vector3.new(2.4, 0.1, 2.4), at(POOL_X + 6, 1.85, POOL_Z - 3), Color3.fromRGB(60, 140, 50), nil, decor).CanCollide = false
-crystal(POOL_X - POOL_W / 2 - 4, POOL_Z + POOL_D / 2 + 3)
--- barrels and crates by the buyer's stall
-local function barrel(x, z)
-	local b = part("Barrel", Vector3.new(3, 2.6, 2.6), at(x, 1.7, z) * CFrame.Angles(0, 0, math.pi / 2), WOOD, Enum.Material.Wood, decor)
-	b.Shape = Enum.PartType.Cylinder
-	part("BarrelHoop", Vector3.new(0.3, 2.7, 2.7), at(x, 2.4, z) * CFrame.Angles(0, 0, math.pi / 2), IRON, Enum.Material.Metal, decor).Shape = Enum.PartType.Cylinder
-end
-for _, xz in ipairs({ { 30, PZ - 16 }, { 33, PZ - 12 }, { 30, PZ + 2 } }) do
-	barrel(xz[1], xz[2])
-end
-for _, c in ipairs({ { 33, PZ + 6, 0 }, { 33, PZ + 9.5, 0 }, { 33, PZ + 7.5, 3.5 } }) do
-	textured(part("Crate", Vector3.new(3.5, 3.5, 3.5), at(c[1], 1 + 1.75 + c[3], c[2]), WOOD, nil, decor), "px_planks")
-end
--- a signpost at the arrival area pointing to the mine and the arena
-local post = textured(part("SignPost", Vector3.new(1, 7, 1), at(-12, 4, PZ - 18), WOOD, nil, decor), "px_oak_log")
-local board = textured(part("SignBoard", Vector3.new(6, 2.4, 0.4), at(-12, 6.6, PZ - 18), WOOD, nil, decor), "px_planks")
-local gui = Instance.new("SurfaceGui")
-gui.Face = Enum.NormalId.Back
-gui.CanvasSize = Vector2.new(240, 96)
-gui.Parent = board
-local text = Instance.new("TextLabel")
-text.Size = UDim2.fromScale(1, 1)
-text.BackgroundTransparency = 1
-text.TextScaled = true
-text.Font = Enum.Font.Code
-text.TextColor3 = Color3.fromRGB(60, 40, 20)
-text.Text = "↑ Шахта   → Арена"
-text.Parent = gui
-_ = post
 
--- ---------------------------------------------------------------- boss arena (east part of the cave)
--- A round floor of cut stone, a ring of cobblestone pillars with fire bowls, a low wall with the gate
--- facing the road (south). BossService spawns the boss on the BossSpawn part (attribute BossId).
-local arena = Instance.new("Folder")
-arena.Name = "BossArena"
-arena.Parent = root
-local AX, AZ, AR = 156, MZ, 40
-local SEGMENTS = 24
-local function isGate(a)
-	return math.sin(a) > 0.93 -- the +Z side, towards the road
-end
--- [владелец 22.10: «что с текстурами под боссом»] the floor was 24 overlapping wedge tiles in two
--- textures at the same height, which flickered (z-fighting) where they overlapped. Now two discs that
--- never share a surface: a cobblestone ring (top 1.0) and a raised stone circle inside it (top 1.3).
-local function disc(name, radius, top, material)
-	local p = part(name, Vector3.new(1, 2 * radius, 2 * radius), at(AX, top - 0.5, AZ) * CFrame.Angles(0, 0, math.pi / 2), STONE, nil, arena)
-	p.Shape = Enum.PartType.Cylinder
-	textured(p, material)
-	return p
-end
-local INNER = AR - 6
-disc("ArenaFloor", AR, 1, "px_cobblestone")
-disc("ArenaFloorInner", INNER, 1.3, "px_stone")
-part("ArenaCentre", Vector3.new(16, 1.2, 16), at(AX, 0.9, AZ), Color3.fromRGB(52, 52, 58), Enum.Material.Basalt, arena)
--- lava cracks running out from the centre (on the inner circle, decoration only)
-for i = 0, 7 do
-	local a = i / 8 * math.pi * 2 + rng:NextNumber(-0.2, 0.2)
-	local len = rng:NextNumber(12, INNER - 10)
-	local crack = part("LavaCrack", Vector3.new(0.8, 0.12, len), CFrame.new(QX + AX, 1.36, QZ + AZ) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -(8 + len / 2)), Color3.fromRGB(255, 100, 25), Enum.Material.Neon, arena)
-	crack.CanCollide = false
-	crack.CanQuery = false
-end
-local glow = part("ArenaGlow", Vector3.new(1, 1, 1), at(AX, 3, AZ), Color3.new(), nil, arena)
-glow.Transparency = 1
-glow.CanCollide = false
-glow.CanQuery = false
-local arenaLight = Instance.new("PointLight")
-arenaLight.Range = 46
-arenaLight.Brightness = 1.2
-arenaLight.Color = Color3.fromRGB(255, 120, 50)
-arenaLight.Parent = glow
-for i = 0, 9 do
-	local a = (i + 0.5) / 10 * math.pi * 2
-	local x, z = AX + math.cos(a) * (AR + 2), AZ + math.sin(a) * (AR + 2)
-	if not isGate(a) then
-		-- basalt columns for the Базальтовый страж: dark, faceted, with a glowing lava seam
-		local basalt = Color3.fromRGB(52, 52, 58)
-		part("Pillar", Vector3.new(5, 18, 5), at(x, 9, z) * CFrame.Angles(0, a, 0), basalt, Enum.Material.Basalt, arena)
-		part("PillarFacet", Vector3.new(5, 15, 5), at(x, 7.5, z) * CFrame.Angles(0, a + math.pi / 4, 0), basalt, Enum.Material.Basalt, arena)
-		local seam = part("LavaSeam", Vector3.new(0.4, 12, 5.2), at(x, 7, z) * CFrame.Angles(0, a, 0), Color3.fromRGB(255, 110, 30), Enum.Material.Neon, arena)
-		seam.CanCollide = false
-		part("PillarCap", Vector3.new(6.5, 1.5, 6.5), at(x, 18.75, z), basalt, Enum.Material.Basalt, arena)
-		local fire = part("FireBowl", Vector3.new(2.5, 1.5, 2.5), at(x, 20.2, z), Color3.fromRGB(255, 120, 40), Enum.Material.Neon, arena)
-		fire.CanCollide = false
-		local flames = Instance.new("Fire")
-		flames.Size = 4
-		flames.Heat = 6
-		flames.Parent = fire
-		local light = Instance.new("PointLight")
-		light.Range = 22
-		light.Color = Color3.fromRGB(255, 150, 70)
-		light.Parent = fire
-	end
-end
-for i = 0, SEGMENTS - 1 do
-	local a = (i + 0.5) / SEGMENTS * math.pi * 2
-	if not isGate(a) then
-		local seg = part("ArenaWall", Vector3.new(2 * (AR + 2) * math.tan(math.pi / SEGMENTS) + 0.5, 3, 2), CFrame.new(QX + AX, 1.5, QZ + AZ) * CFrame.Angles(0, -a + math.pi / 2, 0) * CFrame.new(0, 0, -(AR + 2)), STONE, nil, arena)
-		textured(seg, "px_stone")
-	end
-end
-local bossSpawn = part("BossSpawn", Vector3.new(4, 1, 4), at(AX, 1.3, AZ), STONE, nil, arena) -- the arena centre: BossService measures the arena from here
-bossSpawn.Transparency = 1
-bossSpawn.CanCollide = false
-bossSpawn.CanQuery = false
-bossSpawn:SetAttribute("BossId", "basalt_guardian")
-bossSpawn:SetAttribute("ArenaRadius", AR)
-CollectionService:AddTag(bossSpawn, "BossSpawn")
--- the road: plaza → east → north to the arena gate
-local GATE_Z = AZ + AR + 2
-textured(part("RoadEast", Vector3.new(AX - 28 + 5, 0.4, 10), at((28 + AX + 5) / 2, 0.2, PZ), STONE), "px_gravel")
-textured(part("RoadNorth", Vector3.new(10, 0.4, PZ - GATE_Z + 5), at(AX, 0.2, (PZ + GATE_Z) / 2), STONE), "px_gravel")
-lamp(AX + 8, GATE_Z + 30)
-local arenaSign = part("ArenaSign", Vector3.new(1, 1, 1), at(AX, 8, GATE_Z + 6), STONE, nil, arena)
-arenaSign.Transparency = 1
-arenaSign.CanCollide = false
-sign(arenaSign, "Арена босса", 0, Color3.fromRGB(255, 80, 60))
-
--- ---------------------------------------------------------------- rock formations [владелец 22.10: «много пустого пространства»]
--- The cave floor around the pit, the arrival area and the arena was a bare flat field under a high vault.
--- Natural rock now fills every free spot: stalagmites, boulder heaps, a few columns up to the vault, crystal
--- clusters; a miners' camp in the empty south-east. Paths, the pit rim, the arena and the props stay clear.
-local formations = Instance.new("Folder")
-formations.Name = "Formations"
-formations.Parent = root
-local function stoneVariant()
-	local roll = rng:NextNumber()
-	return if roll < 0.6 then "px_stone" elseif roll < 0.82 then "px_cobblestone" elseif roll < 0.9 then "px_gravel" elseif roll < 0.96 then "px_coal_ore" else "px_iron_ore"
-end
-local function rock(size, x, y, z)
-	return textured(part("Rock", size, at(x, y, z), STONE, nil, formations), stoneVariant())
-end
-local CAMP_X, CAMP_Z = 124, 70
-local function reserved(x, z)
-	return (x > hole.x0 - 10 and x < hole.x1 + 10 and z > hole.z0 - 10 and z < hole.z1 + 10) -- the pit and its supports
-		or (x > -34 and x < 34 and z > PZ - 30) -- arrival area and spawn
-		or (x > -12 and x < 12 and z > hole.z1 and z < PZ) -- road to the pit
-		or (x > 12 and x < 40 and z > PZ - 22 and z < PZ + 14) -- the buyer, barrels and crates
-		or (x > POOL_X - POOL_W / 2 - 6 and x < POOL_X + POOL_W / 2 + 6 and z > POOL_Z - POOL_D / 2 - 6 and z < POOL_Z + POOL_D / 2 + 6)
-		or (x > -106 and x < -24 and z > railZ - 6 and z < railZ + 6) -- the rail line
-		or (z > PZ - 9 and z < PZ + 9 and x > 24 and x < AX + 9) -- road east
-		or (x > AX - 9 and x < AX + 9 and z > GATE_Z - 2 and z < PZ) -- road to the arena gate
-		or (x - AX) ^ 2 + (z - AZ) ^ 2 < (AR + 10) ^ 2 -- the arena
-		or (x - CAMP_X) ^ 2 + (z - CAMP_Z) ^ 2 < 16 ^ 2 -- the miners' camp
-		or (x - (CX1 - 14)) ^ 2 + (z - (CZ1 - 14)) ^ 2 < 14 ^ 2 -- the ore piles
-		or (x - (CX0 + 12)) ^ 2 + (z - (CZ0 + 12)) ^ 2 < 12 ^ 2
-		or (x - (CX1 - 12)) ^ 2 + (z - (CZ0 + 12)) ^ 2 < 12 ^ 2
-		or (x - (CX0 + 12)) ^ 2 + (z - (CZ1 - 22)) ^ 2 < 12 ^ 2
-		or x < CX0 + 8 or x > CX1 - 8 or z < CZ0 + 8 or z > CZ1 - 8 -- torches and props along the walls
-end
-local FLOOR_Y = 0.4
-local function stalagmite(x, z, roof)
-	local y = FLOOR_Y
-	if rng:NextNumber() < 0.6 then
-		rock(Vector3.new(8, 4, 8), x, y + 2, z)
-		y += 4
-	end
-	local blocks = math.min(rng:NextInteger(1, 3), math.floor((roof - y - 8) / 4))
-	for _ = 1, blocks do
-		rock(Vector3.new(4, 4, 4), x, y + 2, z)
-		y += 4
-	end
-	rock(Vector3.new(2, 3, 2), x, y + 1.5, z)
-end
-local function boulders(x, z)
-	local spots = { { 0, 0 }, { 4, 0 }, { -4, 0 }, { 0, 4 }, { 0, -4 }, { 4, 4 }, { -4, -4 }, { 4, -4 } }
-	local used = {}
-	for k = 1, rng:NextInteger(3, 6) do
-		local o = spots[k]
-		rock(Vector3.new(4, 4, 4), x + o[1], FLOOR_Y + 2, z + o[2])
-		table.insert(used, o)
-	end
-	for _ = 1, rng:NextInteger(0, 2) do
-		local o = used[rng:NextInteger(1, #used)]
-		rock(Vector3.new(4, 4, 4), x + o[1], FLOOR_Y + 6, z + o[2])
-	end
-end
-local function column(x, z, roof)
-	-- a pillar of rock holding up the vault, flared at the floor and at the top
-	rock(Vector3.new(8, roof + 4, 8), x, (roof + 4) / 2, z)
-	rock(Vector3.new(12, 4, 12), x, FLOOR_Y + 2, z)
-	rock(Vector3.new(12, 4, 12), x, roof - 2, z)
-	rock(Vector3.new(4, 4, 4), x + 6, FLOOR_Y + 2, z + 2)
-end
-local STEP = 14
-for gx = CX0 + 8, CX1 - 8, STEP do
-	for gz = CZ0 + 8, CZ1 - 8, STEP do
-		local x = math.floor((gx + rng:NextNumber(-4, 4)) / 4) * 4 + 2
-		local z = math.floor((gz + rng:NextNumber(-4, 4)) / 4) * 4 + 2
-		local roof = ceilingAt(x, z)
-		-- every corner of the formation footprint must be free (a 12-stud square)
-		local free = roof >= 20
-		for _, o in ipairs({ { -6, -6 }, { 6, -6 }, { -6, 6 }, { 6, 6 }, { 0, 0 } }) do
-			if reserved(x + o[1], z + o[2]) then
-				free = false
+	-- Readable rock faces, ore seams and moss ledges, each on the actual terrace riser.
+	-- A shallow facing sits outside the solid core: no coplanar flickering and no holes behind it.
+	for z = -252, -120, 4 do
+		for x = -224, 260, 4 do
+			if not footprint(x + 2, z + 2) or not footprint(x + 2, z + 6) then
+				continue
 			end
-		end
-		if free and rng:NextNumber() < 0.6 then
-			local roll = rng:NextNumber()
-			if roll < 0.42 then
-				stalagmite(x, z, roof)
-			elseif roll < 0.78 then
-				boulders(x, z)
-			elseif roll < 0.9 then
-				crystal(x, z)
-				boulders(x + 6, z + 2)
-			else
-				column(x, z, roof)
+			local hi, lo = groundY(x + 2, z + 2), groundY(x + 2, z + 6)
+			if hi - lo < 4 then
+				continue
+			end
+			local h = math.floor(x / 4 + z / 4) % 13
+			local material = if h == 0 or h == 1
+				then "px_coal_ore"
+				elseif h == 4 or h == 5 then "px_iron_ore"
+				elseif h == 8 then "px_mossy_cobblestone"
+				else "px_cobblestone"
+			block(
+				"TerraceRiserFace",
+				x + 2,
+				(hi + lo) / 2,
+				z + 4.15,
+				4,
+				hi - lo,
+				0.3,
+				material,
+				ROCK,
+				terrain,
+				false
+			)
+			if h == 2 or h == 9 then
+				block(
+					"RoughRockRib",
+					x + 2,
+					(hi + lo) / 2,
+					z + 5,
+					4,
+					hi - lo,
+					2,
+					"px_stone",
+					ROCK,
+					terrain,
+					false
+				)
 			end
 		end
 	end
-end
--- the miners' camp: a tent, a campfire with log benches, a tool rack and a chest of ore
-local camp = Instance.new("Folder")
-camp.Name = "MinersCamp"
-camp.Parent = root
-local CANVAS = Color3.fromRGB(196, 176, 130)
-for _, side in ipairs({ -1, 1 }) do
-	local slope = part("TentCanvas", Vector3.new(0.4, 8.5, 12), at(CAMP_X - 8 + side * 2.9, 3.4, CAMP_Z - 4) * CFrame.Angles(0, 0, side * math.rad(42)), CANVAS, Enum.Material.Fabric, camp)
-	slope.CanCollide = true
-end
-textured(part("TentPole", Vector3.new(0.6, 6.6, 0.6), at(CAMP_X - 8, 3.7, CAMP_Z - 10.2), WOOD, nil, camp), "px_oak_log")
-textured(part("TentPole", Vector3.new(0.6, 6.6, 0.6), at(CAMP_X - 8, 3.7, CAMP_Z + 2.2), WOOD, nil, camp), "px_oak_log")
-part("Bedroll", Vector3.new(3, 0.4, 7), at(CAMP_X - 8, 0.6, CAMP_Z - 4), Color3.fromRGB(150, 50, 45), Enum.Material.Fabric, camp)
-local fireBase = textured(part("Campfire", Vector3.new(3, 0.8, 3), at(CAMP_X + 4, 0.8, CAMP_Z + 2), WOOD, nil, camp), "px_oak_log")
-local embers = part("Embers", Vector3.new(2, 0.3, 2), at(CAMP_X + 4, 1.35, CAMP_Z + 2), Color3.fromRGB(255, 120, 40), Enum.Material.Neon, camp)
-embers.CanCollide = false
-local flames = Instance.new("Fire")
-flames.Size = 3
-flames.Heat = 5
-flames.Parent = embers
-local campLight = Instance.new("PointLight")
-campLight.Range = 24
-campLight.Brightness = 1.5
-campLight.Color = Color3.fromRGB(255, 160, 80)
-campLight.Parent = embers
-_ = fireBase
-for _, o in ipairs({ { 0, 6, 0 }, { 6, 0, math.pi / 2 }, { 0, -4.5, 0 } }) do
-	local bench = part("Bench", Vector3.new(5, 1.4, 1.4), at(CAMP_X + 4 + o[1], 1.1, CAMP_Z + 2 + o[2]) * CFrame.Angles(0, o[3], 0), WOOD, nil, camp)
-	textured(bench, "px_oak_log")
-end
-textured(part("OreChest", Vector3.new(3, 2.4, 2), at(CAMP_X - 2, 1.6, CAMP_Z - 10), WOOD, nil, camp), "px_planks")
-textured(part("OreChestLoad", Vector3.new(2.6, 0.6, 1.6), at(CAMP_X - 2, 3.1, CAMP_Z - 10), STONE, nil, camp), "px_coal_ore")
-textured(part("ToolRack", Vector3.new(5, 0.6, 0.6), at(CAMP_X + 8, 4, CAMP_Z - 9), WOOD, nil, camp), "px_planks")
-for k = -1, 1 do
-	part("RackPick", Vector3.new(0.3, 3.5, 0.3), at(CAMP_X + 8 + k * 1.5, 2.4, CAMP_Z - 8.8), Color3.fromRGB(110, 75, 40), Enum.Material.Wood, camp)
-	part("RackPickHead", Vector3.new(2, 0.4, 0.4), at(CAMP_X + 8 + k * 1.5, 4.3, CAMP_Z - 8.6), IRON, Enum.Material.Metal, camp)
-end
-
-local count = 0
-for _, x in ipairs(root:GetDescendants()) do
-	if x:IsA("BasePart") then
-		count += 1
+	-- Moss/grass borders and shrubs belong to the periphery and upper benches, keeping
+	-- stairs and every principal working court clear. Full blocks/slabs, no particle grass.
+	for z = -252, 212, 4 do
+		for x = -236, 308, 4 do
+			if not footprint(x + 2, z + 2) then
+				continue
+			end
+			local border = not footprint(x + 14, z + 2)
+				or not footprint(x - 10, z + 2)
+				or not footprint(x + 2, z + 14)
+				or not footprint(x + 2, z - 10)
+			local upper = z < -132 and math.noise(x / 20, z / 20, 12) > 0.12
+			local stair = (x > -64 and x < 60 and z < -112 and z > -220)
+			if not (border or upper) or stair then
+				continue
+			end
+			local y = groundY(x + 2, z + 2)
+			block(
+				"GrassLedge",
+				x + 2,
+				y + 0.12,
+				z + 2,
+				4,
+				0.24,
+				4,
+				"px_grass_top",
+				Color3.fromRGB(230, 235, 219),
+				terrain,
+				false
+			)
+			if (math.floor(x / 4) * 7 + math.floor(z / 4) * 13) % 43 == 0 then
+				block(
+					"QuarryShrub",
+					x + 2,
+					y + 2,
+					z + 2,
+					4,
+					4,
+					4,
+					"px_dark_oak_leaves",
+					Color3.fromRGB(174, 204, 143),
+					terrain,
+					false
+				)
+				block(
+					"QuarryShrub",
+					x + 5,
+					y + 1.5,
+					z + 2,
+					2,
+					3,
+					4,
+					"px_dark_oak_leaves",
+					Color3.fromRGB(182, 214, 151),
+					terrain,
+					false
+				)
+			end
+		end
 	end
+	-- Perimeter follows the actual footprint. The invisible collision wall is behind the
+	-- visible low retaining wall/fence; it cannot cover the mine or any interior route.
+	local edgeModel = Instance.new("Model")
+	edgeModel.Name, edgeModel.ModelStreamingMode, edgeModel.Parent =
+		"ContourSafety", Enum.ModelStreamingMode.Persistent, root
+	for z = -280, 232, 8 do
+		for x = -252, 324, 8 do
+			if not footprint(x + 4, z + 4) then
+				continue
+			end
+			for _, v in { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } } do
+				if footprint(x + 4 + v[1] * 8, z + 4 + v[2] * 8) then
+					continue
+				end
+				local xx, zz = x + 4 + v[1] * 4, z + 4 + v[2] * 4
+				local y = groundY(x + 4, z + 4)
+				local w, d = if v[1] == 0 then 8 else 2, if v[2] == 0 then 8 else 2
+				local guard = block("ContourWall", xx, 56, zz, w, 136, d, nil, STONE, edgeModel)
+				guard.Transparency, guard.CanQuery, guard.CastShadow = 1, false, false
+				block("OuterRetaining", xx, y + 1, zz, w, 2, d, "px_stone_bricks", BASALT, terrain)
+				block(
+					"OuterFence",
+					xx,
+					y + 3.5,
+					zz,
+					if v[1] == 0 then 8 else 1,
+					1,
+					if v[2] == 0 then 8 else 1,
+					"px_oak_log",
+					TIMBER
+				)
+				block("OuterPost", xx, y + 3, zz, 1.5, 4, 1.5, "px_oak_log", TIMBER)
+			end
+		end
+	end
+	-- Vegetation and exposed stone stay on shelves and yard edges, never on the digging grid.
+	for _, p in
+		{
+			{ -220, 44 },
+			{ -208, 112 },
+			{ -156, 168 },
+			{ -80, 188 },
+			{ 72, 184 },
+			{ 152, 144 },
+			{ 288, 28 },
+			{ 280, -88 },
+			{ -164, -188 },
+			{ -88, -224 },
+			{ 12, -236 },
+			{ 96, -204 },
+			{ 176, -156 },
+		}
+	do
+		local x, z = p[1], p[2]
+		local y = groundY(x, z)
+		for i = 0, 4 do
+			local dx, dz = (i % 3) * 4, math.floor(i / 3) * 4
+			block(
+				"MossyRubble",
+				x + dx,
+				y + 2 + (i % 2) * 2,
+				z + dz,
+				4,
+				4 + (i % 2) * 4,
+				4,
+				"px_cobblestone",
+				if i % 2 == 0 then MOSS else ROCK,
+				terrain
+			)
+		end
+	end
+	-- Ore faces and rough ribs establish the working quarry character of the north terraces.
+	for _, q in
+		{
+			{ -140, -164, 8 },
+			{ -100, -196, 20 },
+			{ -12, -228, 32 },
+			{ 84, -200, 20 },
+			{ 144, -164, 8 },
+		}
+	do
+		local x, z, y = q[1], q[2], q[3]
+		for i = -3, 3 do
+			block(
+				"QuarryOreFace",
+				x + i * 4,
+				y + 6 + (i % 2) * 4,
+				z,
+				4,
+				4,
+				4,
+				if i % 3 == 0 then "px_coal_ore" else "px_iron_ore",
+				ROCK,
+				terrain
+			)
+		end
+	end
+	-- The mine retains the dark unbreakable walls and exact ladder shafts of the original.
+	for _, z in { -108, 68 } do
+		for _, x in { -48, 48 } do
+			block("PitCurb", x, 1, z, 72, 2, 4, "px_stone_bricks", BASALT)
+			fence(x - 36, z, x + 36, z, 2, true)
+		end
+	end
+	for _, x in { -88, 88 } do
+		for _, z in { -68, 28 } do
+			block("PitCurb", x, 1, z, 4, 2, 72, "px_stone_bricks", BASALT)
+			fence(x, z - 36, x, z + 36, 2, true)
+		end
+	end
+	for _, p in { { -88, 68 }, { 88, 68 }, { -88, -108 }, { 88, -108 } } do
+		block("RimLanternFoot", p[1], 2, p[2], 5, 4, 5, "px_stone_bricks", BASALT)
+		lantern(p[1], 6, p[2], false)
+	end
+	spot("spawn", 0, 148, 0, -20)
+	spot("mine", 0, 76, 0, -20)
+	for _, x in { -18, 18 } do
+		block("ArrivalBorder", x, 1, 152, 3, 2, 56, "px_stone_bricks", BASALT)
+		block("ArrivalPost", x, 4, 176, 5, 6, 5, "px_stone_bricks", BASALT)
+		lantern(x, 9, 176, false)
+	end
+	-- Buyer: stepped-gable shop from the accepted sheet, near the arrival on the right.
+	local SX, SZ = 56, 124
+	block("BuyerCounter", SX, 2, SZ + 8, 20, 4, 4, "px_planks", TIMBER)
+	block("CounterTrim", SX, 4.25, SZ + 8, 22.4, 0.5, 5, "px_oak_log", TIMBER)
+	for _, x in { SX - 10, SX + 10 } do
+		for _, z in { SZ - 8, SZ + 8 } do
+			block("StallPost", x, 6, z, 2, 12, 2, "px_oak_log", TIMBER)
+		end
+	end
+	block("StallBack", SX, 4, SZ - 8, 18, 8, 2, "px_planks", TIMBER)
+	for tier = 0, 3 do
+		for _, side in { -1, 1 } do
+			block(
+				"StallRoofStep",
+				SX + side * (12 - tier * 3),
+				12 + tier * 1.5,
+				SZ,
+				3,
+				1.5,
+				24,
+				"px_planks",
+				TIMBER
+			)
+		end
+	end
+	block("StallRidge", SX, 18, SZ, 3, 1.5, 24, "px_oak_log", TIMBER)
+	block("CounterSample", SX - 6, 6.5, SZ + 8, 4, 4, 4, "px_coal_ore", ROCK)
+	block("CounterSample", SX + 6, 5.5, SZ + 8, 4, 2, 4, "px_iron_ore", ROCK)
+	lantern(SX + 7, 10, SZ + 7, true)
+	barrel(SX + 16, 0, SZ + 4)
+	crate(SX + 16, 0, SZ - 8, 8)
+	if not buyer then
+		local d = Instance.new("HumanoidDescription")
+		d.HeadColor, d.LeftArmColor, d.RightArmColor =
+			Color3.fromRGB(198, 140, 100),
+			Color3.fromRGB(198, 140, 100),
+			Color3.fromRGB(198, 140, 100)
+		d.TorsoColor, d.LeftLegColor, d.RightLegColor = Color3.fromRGB(65, 78, 85), IRON, IRON
+		buyer = Players:CreateHumanoidModelFromDescription(d, Enum.HumanoidRigType.R15)
+		d:Destroy()
+	end
+	local npcs = Instance.new("Folder")
+	npcs.Name, npcs.Parent = "Npcs", root
+	buyer.Name, buyer.Parent = "QuarryBuyer", npcs
+	buyer:PivotTo(CFrame.lookAt(Vector3.new(QX + SX, 4, SZ + 2), Vector3.new(QX + SX, 4, SZ + 20)))
+	for _, v in buyer:GetDescendants() do
+		if v:IsA("BasePart") then
+			v.Anchored = true
+		end
+		if v:IsA("LuaSourceContainer") or v:IsA("BillboardGui") then
+			v:Destroy()
+		end
+	end
+	local hrp = assert(buyer:FindFirstChild("HumanoidRootPart"))
+	CollectionService:AddTag(hrp, "SellPoint")
+	sign(hrp, "Скупщик блоков", 4.5, Color3.fromRGB(255, 80, 65))
+	local hum = buyer:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	end
+	buyer.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+
+	-- WEST: masonry loading deck, working rail siding and warehouse behind the winding tower.
+	local WX = -180
+	block("LoadingDeck", WX, 14, -32, 80, 4, 144, "px_stone_bricks", BASALT)
+	for z = -96, 32, 32 do
+		for _, x in { WX - 32, WX + 32 } do
+			block("LoadingFoot", x, 2, z, 8, 4, 8, "px_stone_bricks", BASALT)
+			block("LoadingPillar", x, 9, z, 6, 10, 6, "px_stone_bricks", BASALT)
+		end
+	end
+	for i = 1, 8 do
+		block("LoadingStair", WX, i, 74 - i * 4, 24, i * 2, 4, "px_stone_bricks", BASALT)
+	end
+	for _, x in { WX - 13, WX + 13 } do
+		beam(
+			"LoadingHandrail",
+			Vector3.new(x, 6, 70),
+			Vector3.new(x, 20, 42),
+			1.5,
+			"px_oak_log",
+			TIMBER
+		)
+	end
+	fence(WX - 40, -104, WX + 40, -104, 16)
+	fence(WX + 40, -104, WX + 40, 40, 16)
+	fence(WX - 40, -104, WX - 40, 40, 16)
+	-- Warehouse open at the front; full block columns and stepped pitched roof.
+	for _, x in { WX - 28, WX + 28 } do
+		for _, z in { -100, -56 } do
+			block("WarehousePost", x, 28, z, 4, 24, 4, "px_oak_log", TIMBER)
+			block("WarehouseFoot", x, 18, z, 6, 4, 6, "px_stone_bricks", BASALT)
+		end
+	end
+	block("WarehouseBack", WX, 26, -100, 56, 20, 2, "px_planks", TIMBER)
+	for _, x in { WX - 28, WX + 28 } do
+		block("WarehouseSide", x, 22, -78, 2, 12, 44, "px_planks", TIMBER)
+	end
+	block("WarehouseHeader", WX, 38, -56, 52, 4, 4, "px_oak_log", TIMBER)
+	for i = 0, 6 do
+		for _, side in { -1, 1 } do
+			block(
+				"WarehouseRoof",
+				WX,
+				39 + i * 2,
+				-78 + side * (26 - i * 4),
+				64,
+				2,
+				4,
+				"px_planks",
+				TIMBER
+			)
+		end
+	end
+	crate(WX - 18, 16, -86, 8)
+	crate(WX - 8, 16, -86, 8)
+	crate(WX - 18, 24, -86, 6)
+	barrel(WX + 18, 16, -86)
+	lantern(WX + 24, 33, -58, true)
+	-- Large stepped wooden wheel and an intelligible load-bearing hoist structure.
+	for _, x in { WX - 20, WX + 20 } do
+		block("HoistFoot", x, 18, -12, 10, 4, 10, "px_stone_bricks", BASALT)
+		block("HoistTower", x, 46, -12, 4, 52, 6, "px_oak_log", TIMBER)
+	end
+	block("HoistCrown", WX, 74, -12, 52, 4, 8, "px_oak_log", TIMBER)
+	block("HoistCrossbar", WX, 40, -12, 36, 4, 8, "px_oak_log", TIMBER)
+	beam(
+		"HoistBrace",
+		Vector3.new(WX - 20, 22, -12),
+		Vector3.new(WX + 20, 62, -12),
+		3,
+		"px_oak_log",
+		TIMBER
+	)
+	for dx = -24, 24, 4 do
+		for dy = -24, 24, 4 do
+			local r = math.sqrt(dx * dx + dy * dy)
+			if r >= 19 and r <= 24 then
+				block("WheelRim", WX + dx, 52 + dy, -6, 4, 4, 4, "px_planks", TIMBER)
+			end
+		end
+	end
+	block("WheelHub", WX, 52, -6, 8, 8, 8, "px_oak_log", TIMBER)
+	block("WheelSpoke", WX, 52, -6, 40, 3, 3, "px_oak_log", TIMBER)
+	block("WheelSpoke", WX, 52, -6, 3, 40, 3, "px_oak_log", TIMBER)
+	for _, side in { -1, 1 } do
+		beam(
+			"WheelSpoke",
+			Vector3.new(WX - 14, 52 + side * 14, -6),
+			Vector3.new(WX + 14, 52 - side * 14, -6),
+			3,
+			"px_oak_log",
+			TIMBER
+		)
+	end
+	block("HoistAxle", WX, 52, -12, 5, 5, 24, nil, IRON)
+	block("HoistBoom", WX + 24, 62, -12, 56, 4, 7, "px_oak_log", TIMBER)
+	beam(
+		"HoistBoomBrace",
+		Vector3.new(WX, 42, -12),
+		Vector3.new(WX + 44, 60, -12),
+		3,
+		"px_oak_log",
+		TIMBER
+	)
+	block("HoistChain", WX + 44, 43, -12, 0.6, 34, 0.6, nil, IRON, props, false)
+	crate(WX + 44, 21, -12, 8)
+	lantern(WX - 24, 62, -8, false)
+	for x = WX - 28, WX + 28, 8 do
+		block("RailSleeper", x, 16.3, 22, 2, 0.6, 12, "px_oak_log", TIMBER)
+	end
+	for _, z in { 19, 25 } do
+		block("Rail", WX, 17, z, 64, 0.5, 0.5, nil, IRON)
+	end
+	for _, x in { WX - 16, WX + 4 } do
+		block("CartFloor", x, 19, 22, 11, 1, 7, nil, IRON)
+		for _, z in { 18, 26 } do
+			block("CartSide", x, 21, z, 11, 4, 1, nil, Color3.fromRGB(147, 151, 154))
+			for _, dx in { -4, 4 } do
+				block("CartWheel", x + dx, 18, z, 2, 2, 1.5, nil, IRON)
+			end
+		end
+		for _, dx in { -6, 6 } do
+			block("CartEnd", x + dx, 21, 22 + 0, 1, 4, 8, nil, Color3.fromRGB(147, 151, 154))
+		end
+		block("CartOre", x, 21, 22, 10, 2, 6, "px_coal_ore", ROCK)
+	end
+	-- Three sorting bays with different ore piles, lumber and a tool rack at the yard edge.
+	for i = 0, 2 do
+		local x, z = WX - 20 + i * 20, 116
+		block("SortingBase", x, 1, z, 20, 2, 24, "px_stone_bricks", BASALT)
+		block("SortingBack", x, 5, z + 10, 20, 6, 4, "px_stone_bricks", BASALT)
+		block("SortingDivider", x - 9, 5, z - 2, 2, 6, 20, "px_stone_bricks", BASALT)
+		for j = 0, 3 do
+			block(
+				"SortingLoad",
+				x - 4 + j % 2 * 4,
+				4 + math.floor(j / 2) * 2,
+				z - 4 + math.floor(j / 2) * 4,
+				4,
+				4,
+				4,
+				({ "px_coal_ore", "px_iron_ore", "px_stone" })[i + 1],
+				ROCK
+			)
+		end
+	end
+	for row = 0, 1 do
+		for i = 0, 2 - row do
+			block(
+				"TimberStack",
+				-92 + i * 4 + row * 2,
+				2 + row * 4,
+				152,
+				4,
+				4,
+				20,
+				"px_oak_log",
+				TIMBER
+			)
+		end
+	end
+	for _, x in { -122, -102 } do
+		block("ToolRackPost", x, 6, 104, 2, 12, 2, "px_oak_log", TIMBER)
+	end
+	block("ToolRackBeam", -112, 13, 104, 24, 2, 2, "px_oak_log", TIMBER)
+	for i = 0, 2 do
+		block("ToolHandle", -118 + i * 6, 7, 104, 1, 7, 1, "px_oak_log", TIMBER)
+		block("ToolHead", -118 + i * 6, 9, 104, 5, 1.5, 2, nil, IRON)
+	end
+	crate(-116, 0, 148, 8)
+	crate(-126, 0, 148, 8)
+	crate(-126, 8, 148, 6)
+
+	-- NORTH: two work shelters on distinct terraces, a connected upper gallery, stairs in terrain.
+	local function shelter(x, z, y)
+		for _, dx in { -20, 20 } do
+			block("ShelterPost", x + dx, y + 7, z + 6, 4, 14, 4, "px_oak_log", TIMBER)
+			block("ShelterBase", x + dx, y + 1, z + 6, 6, 2, 6, "px_stone_bricks", BASALT)
+		end
+		block("ShelterRoof", x, y + 15, z, 48, 2, 24, "px_planks", TIMBER)
+		block("ShelterBeam", x, y + 13, z + 8, 48, 2, 4, "px_oak_log", TIMBER)
+		crate(x - 12, y, z, 8)
+		barrel(x + 12, y, z)
+		lantern(x, y + 10, z + 8, true)
+	end
+	shelter(-112, -180, 20)
+	shelter(92, -212, 32)
+	for _, q in { { -112, -140, 8, 88 }, { 92, -172, 20, 96 } } do
+		local x, z, y, w = q[1], q[2], q[3], q[4]
+		block("TerraceGallery", x, y + 1, z, w, 2, 12, "px_planks", TIMBER)
+		fence(x - w / 2, z + 6, x + w / 2, z + 6, y + 2)
+		for dx = -w / 2, w / 2, 16 do
+			block("GalleryBrace", x + dx, y - 2, z, 4, 8, 4, "px_oak_log", TIMBER)
+		end
+	end
+	for _, p in { { -64, -152, 8 }, { 64, -184, 20 }, { -76, -216, 32 } } do
+		block("TerraceLampFoot", p[1], p[3] + 2, p[2], 4, 4, 4, "px_stone_bricks", BASALT)
+		lantern(p[1], p[3] + 6, p[2], false)
+	end
+
+	-- Stone cutting benches and stored quarry blocks sit beside the terrace work shelters.
+	for _, v in { { -120, -172, 20 }, { 100, -204, 32 } } do
+		local x, z, y = v[1], v[2], v[3]
+		block("CuttingBench", x, y + 3, z + 14, 16, 2, 6, "px_planks", TIMBER)
+		for _, dx in { -6, 6 } do
+			block("BenchLeg", x + dx, y + 1, z + 14, 2, 2, 4, "px_oak_log", TIMBER)
+		end
+		block("CuttingStone", x, y + 5, z + 14, 8, 2, 4, "px_smooth_stone", ROCK)
+		for i = 0, 2 do
+			block(
+				"StoredQuarryStone",
+				x + 28 + i % 2 * 4,
+				y + 2 + math.floor(i / 2) * 4,
+				z + 12,
+				4,
+				4,
+				4,
+				"px_stone",
+				ROCK
+			)
+		end
+	end
+	-- EAST: open-sky basalt sanctuary with a free combat circle and arch behind the arena.
+	local AX, AZ = 220, -32
+	block("ArenaPlinth", AX, 6, AZ, 104, 12, 104, "px_stone_bricks", BASALT, arena)
+	block(
+		"ArenaInlay",
+		AX,
+		12.15,
+		AZ,
+		80,
+		0.3,
+		80,
+		"px_stone_bricks",
+		Color3.fromRGB(208, 211, 216),
+		arena
+	)
+	for _, d in { -32, 32 } do
+		block("ArenaFloorMark", AX + d, 12.33, AZ, 2, 0.06, 64, "px_stone", ROCK, arena, false)
+		block("ArenaFloorMark", AX, 12.33, AZ + d, 64, 0.06, 2, "px_stone", ROCK, arena, false)
+	end
+	for i = 1, 6 do
+		block("ArenaStair", AX, i, 46 - i * 4, 64, i * 2, 4, "px_stone_bricks", BASALT, arena)
+	end
+	for _, dx in { -46, 46 } do
+		for _, dz in { -46, 46 } do
+			local x, z = AX + dx, AZ + dz
+			block("SentryFoot", x, 13, z, 12, 2, 12, "px_stone_bricks", BASALT, arena)
+			block("SentryBase", x, 16, z, 10, 4, 10, "px_stone_bricks", BASALT, arena)
+			block("SentryBody", x, 26, z, 8, 16, 8, "px_stone_bricks", BASALT, arena)
+			block("SentryBrow", x, 36, z, 12, 4, 12, "px_stone_bricks", BASALT, arena)
+			block("SentryCrown", x, 40, z, 8, 4, 8, "px_stone_bricks", BASALT, arena)
+			block("SentryFace", x, 29, z + 4.1, 6, 6, 0.3, "px_stone", ROCK, arena, false)
+			for _, ex in { -1.5, 1.5 } do
+				block("SentryEye", x + ex, 30, z + 4.3, 1.2, 1, 0.3, nil, IRON, arena, false)
+			end
+			block("SentryMouth", x, 27.8, z + 4.3, 3, 1, 0.3, nil, IRON, arena, false)
+			block("SentryRecess", x, 21, z + 4.1, 3, 6, 0.3, nil, IRON, arena, false)
+			lantern(x, 21, z + 6, dz > 0)
+		end
+	end
+	block("ArchLanding", AX, 6, AZ - 58, 72, 12, 12, "px_stone_bricks", BASALT, arena)
+	for tier = 0, 5 do
+		local inset = if tier < 3 then 0 else (tier - 2) * 6
+		for _, side in { -1, 1 } do
+			block(
+				"SanctuaryArch",
+				AX + side * (28 - inset),
+				16 + tier * 8,
+				AZ - 56,
+				8,
+				8,
+				8,
+				"px_stone_bricks",
+				BASALT,
+				arena
+			)
+		end
+	end
+	block("SanctuaryKeystone", AX, 60, AZ - 56, 24, 8, 8, "px_stone_bricks", BASALT, arena)
+	local bossSpawn = block("BossSpawn", AX, 12.3, AZ, 4, 0.2, 4, nil, STONE, arena, false)
+	bossSpawn.Transparency = 1
+	bossSpawn:SetAttribute("BossId", "basalt_guardian")
+	bossSpawn:SetAttribute("ArenaRadius", 40)
+	CollectionService:AddTag(bossSpawn, "BossSpawn")
+	spot("boss", AX, 52, AX, AZ)
+	-- Deliberate trim clearances: avoid equal visible planes where different textures meet.
+	-- Never alter the mining grid, terrain collision or ladder widths.
+	for _, v in arena:GetDescendants() do
+		if v:IsA("BasePart") and v.Name == "ArenaFloorMark" and v.Size.X > v.Size.Z then
+			v.Size = Vector3.new(62, v.Size.Y, v.Size.Z)
+		end
+	end
+	for _, v in terrain:GetDescendants() do
+		if not v:IsA("BasePart") then
+			continue
+		end
+		if v.Name == "GrassLedge" then
+			v.Size = Vector3.new(v.Size.X - 0.12, v.Size.Y, v.Size.Z - 0.12)
+		elseif v.Name == "TerraceRiserFace" then
+			v.Size = Vector3.new(v.Size.X - 0.12, math.max(0.1, v.Size.Y - 0.08), v.Size.Z)
+		elseif v.Name == "QuarryShrub" then
+			v.Size -= Vector3.new(0.24, 0.08, 0.24)
+		end
+	end
+	-- Local daylight preset is for consistent gameplay, not a cave. Deep mine fill remains.
+	local lighting = Instance.new("Model")
+	lighting.Name, lighting.ModelStreamingMode, lighting.Parent =
+		"QuarryDaylight", Enum.ModelStreamingMode.Persistent, root
+	local volume = block("DaylightVolume", 40, 36, -20, 608, 240, 544, nil, STONE, lighting, false)
+	volume.Transparency = 1
+	volume:SetAttribute("Ambient", Color3.fromRGB(140, 140, 146))
+	volume:SetAttribute("Exposure", -0.1)
+	volume:SetAttribute("Haze", 0.035)
+	volume:SetAttribute("ClockTime", 13.5)
+	volume:SetAttribute("Brightness", 1.5)
+	CollectionService:AddTag(volume, "IndoorLighting")
+	require(Shared.MineLighting).Apply(anchor, { 40, 16, 40 })
+	-- Separate altitude prevents the newly open quarry from overlooking the prison/basement.
+	local BY = 37500 -- [decision] unused altitude above the existing 34500 highest location.
+	root:SetAttribute("WorldBaseY", BY)
+	for _, v in root:GetDescendants() do
+		if v:IsA("BasePart") then
+			v.CFrame += Vector3.new(0, BY, 0)
+		end
+	end
+	require(Shared.LocationBounds).Apply(root, "quarry")
+	assert(count < 6000, "Open quarry scenery budget exceeded")
+	-- Preserve an inert snapshot: stripping every tag prevents backup NPCs/anchors joining live registries.
+	local backupName = "QuarryBeforeRedesign_20261103"
+	if old and not game.ServerStorage:FindFirstChild(backupName) then
+		local backup = old:Clone()
+		backup.Name = backupName
+		for _, v in backup:GetDescendants() do
+			local tags = CollectionService:GetTags(v)
+			if #tags > 0 then
+				v:SetAttribute("BackupTags", table.concat(tags, "|"))
+			end
+			for _, tag in tags do
+				CollectionService:RemoveTag(v, tag)
+			end
+			if v:IsA("BaseScript") then
+				v.Enabled = false
+			end
+		end
+		backup.Parent = game.ServerStorage
+	end
+	-- Clear only the old quarry's tiny Terrain pool, now replaced by dry mining infrastructure.
+	workspace.Terrain:FillBlock(at(-80, 1.1, 128), Vector3.new(36, 4, 28), Enum.Material.Air)
+	if old then
+		old:Destroy()
+	end
+	root.Name = "Quarry"
+	return "[build-quarry] accepted open-air quarry, extra parts="
+		.. count
+		.. ", original mining volume/economy/boss retained"
+end, debug.traceback)
+if not ok then
+	root:Destroy()
+	if buyer and not buyer.Parent then
+		buyer:Destroy()
+	end
+	error(result)
 end
-return "[build-quarry] done, parts: " .. count
+return result
