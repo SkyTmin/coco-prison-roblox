@@ -45,7 +45,7 @@ end
 
 -- ---------------------------------------------------------------- the rig
 -- A new body standing on y = 0 (its HumanoidRootPart included); centres in px are in Body.parts / Body.root.
-function BlockBody.build(name: string): Model
+function BlockBody.build(name: string, stablePlayerCollision: boolean?): Model
 	local model = Instance.new("Model")
 	model.Name = name
 	local humanoid = Instance.new("Humanoid")
@@ -77,6 +77,13 @@ function BlockBody.build(name: string): Model
 		part.Material = Enum.Material.SmoothPlastic
 		part.TopSurface, part.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
 		part.CanCollide = COLLIDE[partName] == true
+		if stablePlayerCollision then
+			-- The Humanoid may restore torso.CanCollide during simulation, so CollisionGroups
+			-- also puts this visual rig in a non-colliding group. Waist/Neck swings must not
+			-- change the player's physical envelope and shove its camera away from walls.
+			part.CanCollide = false
+			part:SetAttribute("BlockBodyVisual", true)
+		end
 		part:SetAttribute("Role", data.base)
 		part.Parent = model
 		parts[partName] = part
@@ -89,6 +96,17 @@ function BlockBody.build(name: string): Model
 		motor.C0 = CFrame.new((pivot - centres[from]) * PX)
 		motor.C1 = CFrame.new((pivot - centres[to]) * PX)
 		motor.Parent = parts[to]
+	end
+	if stablePlayerCollision then
+		local head = parts.Head
+		local collider = Instance.new("Part")
+		collider.Name = "HeadCollision"
+		collider.Size, collider.CFrame = head.Size, head.CFrame
+		collider.Transparency, collider.Massless, collider.CastShadow = 1, true, false
+		collider.CanTouch = false
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0, weld.Part1, weld.Parent = root, collider, collider
+		collider.Parent = model
 	end
 	model:SetAttribute("BlockBody", true)
 	return model

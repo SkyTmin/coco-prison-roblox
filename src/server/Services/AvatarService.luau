@@ -16,6 +16,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local BlockBody = require(script.Parent.BlockBody)
+local CollisionGroups = require(script.Parent.CollisionGroups)
 local Body = BlockBody.Body
 
 local AvatarService = {}
@@ -145,7 +146,9 @@ function AvatarService.Start()
 		old:Destroy()
 	end
 	StarterPlayer.LoadCharacterAppearance = false
-	BlockBody.build("StarterCharacter").Parent = StarterPlayer
+	local template = BlockBody.build("StarterCharacter", true)
+	CollisionGroups.player(template)
+	template.Parent = StarterPlayer
 	local function added(player: Player)
 		player.CharacterAdded:Connect(function(character)
 			quietSpawn(character)

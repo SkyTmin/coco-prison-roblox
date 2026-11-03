@@ -1,0 +1,197 @@
+{
+  "running": false,
+  "kind": "temporary client rigs; not live camera acceptance",
+  "results": [
+    {
+      "altitude": 48.54999923706055,
+      "valid": true,
+      "mode": "animated",
+      "phases": {
+        "walk_into_wall": {
+          "reverseSteps": 3,
+          "frames": 180,
+          "zRange": 5.421745300292969,
+          "yRange": 0.054721832275390625,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.6388425230979919,
+          "stepMax": 0.26666259765625
+        },
+        "walk_and_mine": {
+          "reverseSteps": 29,
+          "frames": 240,
+          "zRange": 0.9608840942382812,
+          "yRange": 0.075439453125,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 1.5222004652023315,
+          "stepMax": 0.5483330488204956
+        },
+        "stationary_idle": {
+          "reverseSteps": 0,
+          "frames": 181,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.00010398122685728595,
+          "stepMax": 0
+        },
+        "stationary_mine": {
+          "reverseSteps": 4,
+          "frames": 180,
+          "zRange": 0.935455322265625,
+          "yRange": 0.0413360595703125,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.954414427280426,
+          "stepMax": 0.5386214852333069
+        },
+        "settle": {
+          "reverseSteps": 0,
+          "frames": 120,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0,
+          "stepMax": 0
+        }
+      },
+      "rootInitial": "-17.5004825592041, 51.70000076293945, 90.91236877441406",
+      "colliders": [
+        "HumanoidRootPart",
+        "LowerTorso",
+        "Head",
+        "UpperTorso"
+      ]
+    },
+    {
+      "altitude": 48.54999923706055,
+      "valid": true,
+      "mode": "rigid_head",
+      "phases": {
+        "walk_into_wall": {
+          "reverseSteps": 3,
+          "frames": 180,
+          "zRange": 5.421745300292969,
+          "yRange": 0.054721832275390625,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.6388425230979919,
+          "stepMax": 0.26666259765625
+        },
+        "walk_and_mine": {
+          "reverseSteps": 0,
+          "frames": 240,
+          "zRange": 0.02370452880859375,
+          "yRange": 0.0018157958984375,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.00050097715575248,
+          "stepMax": 0.0001146949507528916
+        },
+        "stationary_idle": {
+          "reverseSteps": 0,
+          "frames": 181,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.00020810755086131394,
+          "stepMax": 0
+        },
+        "stationary_mine": {
+          "reverseSteps": 4,
+          "frames": 180,
+          "zRange": 0.1055145263671875,
+          "yRange": 0.037883758544921875,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.9584661722183228,
+          "stepMax": 0.031022341921925545
+        },
+        "settle": {
+          "reverseSteps": 0,
+          "frames": 120,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0,
+          "stepMax": 0
+        }
+      },
+      "rootInitial": "-1.5004829168319702, 51.70000076293945, 90.91236877441406",
+      "colliders": [
+        "HumanoidRootPart",
+        "LowerTorso",
+        "UpperTorso",
+        "HeadCollision"
+      ]
+    },
+    {
+      "altitude": 48.54999923706055,
+      "valid": true,
+      "mode": "root_only",
+      "phases": {
+        "walk_into_wall": {
+          "reverseSteps": 1,
+          "frames": 180,
+          "zRange": 5.521049499511719,
+          "yRange": 0.00005340576171875,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.002678964287042618,
+          "stepMax": 0.26666259765625
+        },
+        "walk_and_mine": {
+          "reverseSteps": 0,
+          "frames": 240,
+          "zRange": 0.01692962646484375,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.000038382499042199925,
+          "stepMax": 0.0000762939453125
+        },
+        "stationary_idle": {
+          "reverseSteps": 0,
+          "frames": 181,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.00010396977450000122,
+          "stepMax": 0
+        },
+        "stationary_mine": {
+          "reverseSteps": 0,
+          "frames": 180,
+          "zRange": 0.0005340576171875,
+          "yRange": 0.000118255615234375,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0.0032811081036925316,
+          "stepMax": 0.0002500027767382562
+        },
+        "settle": {
+          "reverseSteps": 0,
+          "frames": 120,
+          "zRange": 0,
+          "yRange": 0,
+          "stateChanges": 0,
+          "state": "Running",
+          "vyMax": 0,
+          "stepMax": 0
+        }
+      },
+      "rootInitial": "14.499517440795898, 51.70000076293945, 90.91236877441406",
+      "colliders": [
+        "HumanoidRootPart",
+        "LowerTorso",
+        "UpperTorso"
+      ]
+    }
+  ]
+}

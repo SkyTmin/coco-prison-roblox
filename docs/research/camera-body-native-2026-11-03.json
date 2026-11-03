@@ -1,0 +1,179 @@
+{
+  "checks": [
+    {
+      "pass": true,
+      "name": "wall: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "wall: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "walk reached solid wall",
+      "detail": 7.400794982910156
+    },
+    {
+      "pass": true,
+      "name": "mining against wall has no large frame impulses",
+      "detail": {
+        "moving": 0.00016184389824047685,
+        "stationary": 0.0154114980250597
+      }
+    },
+    {
+      "pass": true,
+      "name": "ceiling: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "ceiling: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "ceiling: head stays below solid low ceiling",
+      "detail": 5.600001513957977
+    },
+    {
+      "pass": true,
+      "name": "ladder: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "ladder: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "native Truss climb reached",
+      "detail": 18.000511169433594
+    },
+    {
+      "pass": true,
+      "name": "free_jump: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "free_jump: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "jump actually moved root after settling",
+      "detail": {
+        "rise": 7.266326904296875,
+        "baseline": 76.2999038696289,
+        "jumping": true
+      }
+    },
+    {
+      "pass": true,
+      "name": "legacy_ceiling: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "legacy_ceiling: head stays below solid low ceiling",
+      "detail": 5.6000091433525085
+    },
+    {
+      "pass": true,
+      "name": "low ceiling jump restriction matches original body",
+      "detail": {
+        "legacy": 0,
+        "current": 0
+      }
+    }
+  ],
+  "status": "PASS",
+  "rows": [
+    {
+      "maxHeadTop": 78.74991148710251,
+      "stateJumping": false,
+      "jumpHeight": 7.199999809265137,
+      "minZ": -82.19303131103516,
+      "settledY": 76.25930786132812,
+      "stationaryMineStepMax": 0.0154114980250597,
+      "frames": 835,
+      "initialZ": -74.792236328125,
+      "maxY": 76.29991149902344,
+      "movingMineStepMax": 0.00016184389824047685,
+      "jumpPower": 50,
+      "useJumpPower": true,
+      "initialY": 76.2999038696289,
+      "kind": "wall",
+      "stateClimbing": false,
+      "jumpMaxY": 76.29991149902344
+    },
+    {
+      "maxHeadTop": 78.74990385770798,
+      "stateJumping": true,
+      "jumpHeight": 7.199999809265137,
+      "minZ": -74.792236328125,
+      "settledY": 76.2999038696289,
+      "stationaryMineStepMax": 0.1021881103515625,
+      "frames": 835,
+      "initialZ": -74.792236328125,
+      "maxY": 76.2999038696289,
+      "movingMineStepMax": 0.08856201171875,
+      "jumpPower": 50,
+      "useJumpPower": true,
+      "initialY": 76.2999038696289,
+      "kind": "ceiling",
+      "stateClimbing": false,
+      "jumpMaxY": 76.2999038696289
+    },
+    {
+      "maxHeadTop": 96.75041502714157,
+      "stateJumping": false,
+      "jumpHeight": 7.199999809265137,
+      "minZ": -191.03018188476562,
+      "settledY": 82.43218994140625,
+      "stationaryMineStepMax": 0.399993896484375,
+      "frames": 835,
+      "initialZ": -74.792236328125,
+      "maxY": 94.3004150390625,
+      "movingMineStepMax": 3.2524847984313965,
+      "jumpPower": 50,
+      "useJumpPower": true,
+      "initialY": 76.2999038696289,
+      "kind": "ladder",
+      "stateClimbing": true,
+      "jumpMaxY": 94.3004150390625
+    },
+    {
+      "maxHeadTop": 86.01623076200485,
+      "stateJumping": true,
+      "jumpHeight": 7.199999809265137,
+      "minZ": -74.792236328125,
+      "settledY": 76.2999038696289,
+      "stationaryMineStepMax": 1.019012451171875,
+      "frames": 835,
+      "initialZ": -74.792236328125,
+      "maxY": 83.56623077392578,
+      "movingMineStepMax": 0.9566192626953125,
+      "jumpPower": 50,
+      "useJumpPower": true,
+      "initialY": 76.2999038696289,
+      "kind": "free_jump",
+      "stateClimbing": false,
+      "jumpMaxY": 83.56623077392578
+    },
+    {
+      "maxHeadTop": 78.74991148710251,
+      "stateJumping": true,
+      "jumpHeight": 7.199999809265137,
+      "minZ": -74.792236328125,
+      "settledY": 76.2999038696289,
+      "stationaryMineStepMax": 0.1021881103515625,
+      "frames": 835,
+      "initialZ": -74.792236328125,
+      "maxY": 76.2999038696289,
+      "movingMineStepMax": 0.08856201171875,
+      "jumpPower": 50,
+      "useJumpPower": true,
+      "initialY": 76.2999038696289,
+      "kind": "legacy_ceiling",
+      "stateClimbing": false,
+      "jumpMaxY": 76.2999038696289
+    }
+  ],
+  "limitation": "server disposable rigs; live first-person camera and mobile not accepted by this fixture"
+}
