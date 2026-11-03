@@ -1,0 +1,50 @@
+{
+  "placeVersion": 430,
+  "recovery": {
+    "restored": false,
+    "note": "Presence check only. Review geometry and source versions before resuming QA; never publish here.",
+    "restoreDetail": "No live restore callback completed; do not save",
+    "status": "RECOVERY_REQUIRED",
+    "rebuildingAttempted": false,
+    "missing": {
+      "1": "InsideOut",
+      "2": "Barn",
+      "3": "Quarry",
+      "4": "EdgeGate",
+      "5": "Tree",
+      "6": "Church",
+      "7": "Purgatory",
+      "8": "Eden",
+      "9": "Cherubim",
+      "10": "Gate",
+      "11": "Basement",
+      "12": "Warzone",
+      "13": "Ghetto",
+      "14": "Showcase",
+      "15": "FactionBase",
+      "16": "Paradise",
+      "17": "SunkenLighthouse",
+      "18": "RoyalGarden",
+      "19": "Pyramid",
+      "20": "Underworld",
+      "21": "MountainFoot",
+      "22": "EndCastle",
+      "23": "SnowyHand",
+      "24": "SpiderLair",
+      "25": "Market",
+      "26": "LeprechaunValley",
+      "27": "Castle",
+      "28": "Farm",
+      "29": "Kyoto"
+    },
+    "activeLease": true
+  },
+  "checkedAtUtc": "2026-11-03T16:09:30Z",
+  "workspaceRoots": {
+    "1": "Camera",
+    "2": "Prison",
+    "3": "QAReleaseStaging",
+    "4": "Terrain"
+  },
+  "placeId": 92594200898716
+}

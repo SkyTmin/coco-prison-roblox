@@ -1,35 +1,58 @@
 --!nocheck
--- Edit-only coordinator. Install make-release-pvp-qa output first. Never save while leased.
+-- Edit-only full-map coordinator. Install make-release-pvp-qa output first.
+-- Never detaches scenery, creates a map lease, or changes Archivable to reduce memory.
 assert(game.RunService:IsStudio() and not game.RunService:IsRunning(), "Edit only")
 assert(game.PlaceId == 92594200898716, "Use the confirmed Katorga place")
-assert(
-	not game.ServerStorage:FindFirstChild("QAReleaseMapLease"),
-	"Restore an earlier map lease first"
-)
 local report = game.ServerStorage:FindFirstChild("QAReleasePvpResult")
 	or Instance.new("StringValue")
-assert(report.Value ~= "running", "Pvp test is already running")
+assert(
+	report.Value ~= "running",
+	"Previous pvp run is still running or was interrupted; inspect it first"
+)
 report.Name, report.Value, report.Parent = "QAReleasePvpResult", "running", game.ServerStorage
 task.spawn(function()
+	local preflight, before
 	local ok, result = xpcall(function()
-		local source =
-			game.HttpService:GetAsync("http://127.0.0.1:8766/scripts/qa-release-scene-session.luau")
-		local makeLease = assert(loadstring(source))
-		makeLease({ Prison = true })
+		local source = game.HttpService:GetAsync(
+			"http://127.0.0.1:8766/scripts/qa-release-full-map-preflight.luau"
+		)
+		preflight = assert(loadstring(source))
+		before = preflight()
 		return game:GetService("StudioTestService"):ExecuteMultiplayerTestAsync(2, "release-pvp-v1")
 	end, debug.traceback)
-	local lease = game.ServerStorage:FindFirstChild("QAReleaseMapLease")
-	local restored, restoreError = true, nil
-	if lease then
-		restored, restoreError = pcall(function()
-			lease:Invoke("restore")
-		end)
+	local checked, after = false, nil
+	if before then
+		checked, after = pcall(preflight)
+	end
+	local mapIntact = checked and before.sceneryInstances == after.sceneryInstances
+	if mapIntact then
+		for index, root in before.roots do
+			local current = after.roots[index]
+			if
+				not current
+				or current.name ~= root.name
+				or current.class ~= root.class
+				or current.descendants ~= root.descendants
+			then
+				mapIntact = false
+				break
+			end
+		end
 	end
 	report.Value = game.HttpService:JSONEncode({
 		ok = ok,
 		result = result,
-		mapRestored = restored,
-		restoreError = if restored then nil else tostring(restoreError),
+		mode = "FULL_MAP",
+		sceneryMoved = false,
+		memoryReduction = false,
+		mapIntact = mapIntact,
+		before = before,
+		after = if checked then after else nil,
+		mapCheckError = if not checked
+			then tostring(after or "Preflight did not complete")
+			elseif not mapIntact then "Map root structure changed during the test"
+			else nil,
 	})
 end)
-return "Pvp two-player test started; read ServerStorage.QAReleasePvpResult. Do not save until mapRestored."
+return "Pvp 2-client FULL_MAP test started; read ServerStorage.QAReleasePvpResult. "
+	.. "Scenery stays in Workspace; full-map memory usage is not reduced."

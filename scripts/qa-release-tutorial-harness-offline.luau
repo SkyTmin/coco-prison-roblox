@@ -12,7 +12,16 @@ local function check(name, pass)
 end
 check("server script compiles", loadstring(server) ~= nil)
 check("client script compiles", loadstring(client) ~= nil)
-for _, path in { "scripts/run-release-tutorial-qa.luau", "scripts/qa-release-resume-map.luau" } do
+for _, path in
+	{
+		"scripts/run-release-tutorial-qa.luau",
+		"scripts/run-release-pvp-qa.luau",
+		"scripts/run-release-actions-qa.luau",
+		"scripts/qa-release-scene-session.luau",
+		"scripts/qa-release-full-map-preflight.luau",
+		"scripts/qa-release-resume-map.luau",
+	}
+do
 	check(path .. " compiles", loadstring(fs.readFile(path), "@" .. path) ~= nil)
 end
 for _, source in { server, client } do
