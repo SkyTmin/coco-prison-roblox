@@ -1,0 +1,689 @@
+{
+  "proximity": {
+    "gift": {
+      "refused": true,
+      "text": "Подойдите ближе к получателю. Передавать можно только игроку рядом."
+    },
+    "rubb": {
+      "refused": true,
+      "text": "Подойдите ближе к получателю. Передавать можно только игроку рядом."
+    },
+    "pay": {
+      "refused": true,
+      "text": "Подойдите ближе к получателю. Передавать можно только игроку рядом."
+    },
+    "farDistance": 32.015663146972656
+  },
+  "checks": [
+    {
+      "name": "nearby recipient appears in Actions",
+      "pass": true
+    },
+    {
+      "name": "nearby quote before movement accepted",
+      "pass": true
+    },
+    {
+      "name": "walking away removes recipient without reopening Actions",
+      "pass": true
+    },
+    {
+      "name": "walk away after quote refuses confirmation",
+      "pass": true
+    },
+    {
+      "name": "pay far quote refused",
+      "pass": true
+    },
+    {
+      "name": "gift far quote refused",
+      "pass": true
+    },
+    {
+      "name": "pay chat route refuses distant player",
+      "pass": true
+    },
+    {
+      "name": "rubb chat route refuses distant player",
+      "pass": true
+    },
+    {
+      "name": "gift chat route refuses distant player",
+      "pass": true
+    },
+    {
+      "name": "all far requests preserve money rubies inventory and journals",
+      "pass": true
+    },
+    {
+      "name": "returning nearby restores recipient without reopening Actions",
+      "pass": true
+    },
+    {
+      "name": "money review is read-only",
+      "pass": true
+    },
+    {
+      "name": "normal remote money confirmation",
+      "pass": true
+    },
+    {
+      "name": "coins conserved",
+      "pass": true
+    },
+    {
+      "name": "money token replay refused",
+      "pass": true
+    },
+    {
+      "name": "partial stack count conserved",
+      "pass": true
+    },
+    {
+      "name": "partial metadata stack preserved exactly",
+      "pass": true
+    },
+    {
+      "name": "gift token replay refused",
+      "pass": true
+    },
+    {
+      "name": "changed reviewed stack cannot be retargeted",
+      "pass": true
+    },
+    {
+      "name": "recipient payment preference enforced",
+      "pass": true
+    },
+    {
+      "name": "hide works through normal nonchat action",
+      "pass": true
+    },
+    {
+      "name": "simulated nonowner cannot prepare progress reset",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 390",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 390",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 390",
+      "pass": true
+    },
+    {
+      "name": "native layout fits 844",
+      "pass": true
+    },
+    {
+      "name": "44px target Close at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_pay at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionMode_gift at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionHide at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionInvite at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionRecipient_-1 at 844",
+      "pass": true
+    },
+    {
+      "name": "44px target ActionReview at 844",
+      "pass": true
+    },
+    {
+      "name": "native mouse review and confirmation activate",
+      "pass": true
+    },
+    {
+      "name": "native UI confirmation transfers once",
+      "pass": true
+    },
+    {
+      "name": "first-login guide renders from server profile",
+      "pass": true
+    }
+  ],
+  "money": {
+    "replay": {
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "reply": {
+        "ok": false,
+        "key": "release_action_expired",
+        "args": []
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      }
+    },
+    "ui": {
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "actualUnits": {
+        "debited": 30000,
+        "credited": 30000
+      },
+      "after": {
+        "recipient": 155000,
+        "sender": 45000
+      },
+      "requestedAmount": 3,
+      "expectedUnits": 30000,
+      "result": "Ожидаем сохранения передачи. Не повторяйте её до подтверждения результата."
+    },
+    "remote": {
+      "before": {
+        "recipient": 100000,
+        "sender": 100000
+      },
+      "actualUnits": {
+        "debited": 25000,
+        "credited": 25000
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "requestedAmount": 2.5,
+      "expectedUnits": 25000,
+      "reply": {
+        "ok": true,
+        "key": "release_transfer_pending",
+        "args": []
+      },
+      "quote": {
+        "recipient": -1,
+        "ok": true,
+        "token": "a3d4c997-9c19-44ce-820d-3b4a84bffc4b",
+        "amount": 2.5,
+        "display": "Player1",
+        "kind": "pay",
+        "expires": 61.44511240000065,
+        "name": "Player1"
+      }
+    },
+    "preference": {
+      "quote": {
+        "recipient": -1,
+        "ok": true,
+        "token": "3591e8b6-c7c7-4e6b-8382-bd116c95465f",
+        "amount": 1,
+        "display": "Player1",
+        "kind": "pay",
+        "expires": 94.17865950000123,
+        "name": "Player1"
+      },
+      "reply": {
+        "ok": false,
+        "key": "chat_pay_off",
+        "args": [
+          "Player1"
+        ]
+      },
+      "after": {
+        "recipient": 125000,
+        "sender": 75000
+      },
+      "before": {
+        "recipient": 125000,
+        "sender": 75000
+      }
+    }
+  },
+  "nativeTouchTested": false,
+  "guide": {
+    "visible": true,
+    "marker": false
+  },
+  "ui": {
+    "ok": true,
+    "clicks": [
+      {
+        "insetY": 58,
+        "hits": [
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ScrollingFrame.ActionRecipient_-1",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ScrollingFrame",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ],
+        "visibleRect": {
+          "top": 268,
+          "right": 676,
+          "left": 142,
+          "bottom": 312
+        },
+        "inputEvents": [
+          {
+            "y": 290,
+            "x": 409,
+            "event": "target.InputBegan",
+            "processed": false
+          },
+          {
+            "y": 290,
+            "x": 409,
+            "event": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 290,
+            "x": 409,
+            "event": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "originalDestroyed": true,
+        "successor": {
+          "recipientSelected": true,
+          "buttonReplaced": true
+        },
+        "y": 290,
+        "clips": [
+          {
+            "y": 268,
+            "x": 142,
+            "name": "ScrollingFrame",
+            "w": 540,
+            "h": 116
+          },
+          {
+            "y": 216,
+            "x": 142,
+            "name": "ActionForm",
+            "w": 542,
+            "h": 251
+          }
+        ],
+        "x": 409,
+        "name": "ActionRecipient_-1",
+        "activatedObserved": true,
+        "inputX": 409,
+        "insetX": 0,
+        "result": {
+          "ok": false,
+          "text": ""
+        },
+        "inputY": 348
+      },
+      {
+        "insetY": 58,
+        "hits": [
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ActionReview",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Hotbar.Frame.TextButton",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Hotbar.Frame",
+            "active": false
+          }
+        ],
+        "visibleRect": {
+          "top": 423,
+          "right": 682,
+          "left": 142,
+          "bottom": 467
+        },
+        "inputEvents": [
+          {
+            "y": 445,
+            "x": 412,
+            "event": "target.InputBegan",
+            "processed": false
+          },
+          {
+            "y": 445,
+            "x": 412,
+            "event": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 445,
+            "x": 412,
+            "event": "target.InputEnded",
+            "processed": false
+          },
+          {
+            "y": 445,
+            "x": 412,
+            "event": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "originalDestroyed": true,
+        "successor": {
+          "confirmationVisible": true
+        },
+        "y": 445,
+        "clips": [
+          {
+            "y": 216,
+            "x": 142,
+            "name": "ActionForm",
+            "w": 542,
+            "h": 251
+          }
+        ],
+        "x": 412,
+        "name": "ActionReview",
+        "activatedObserved": true,
+        "inputX": 412,
+        "insetX": 0,
+        "result": {
+          "ok": false,
+          "text": ""
+        },
+        "inputY": 503
+      },
+      {
+        "insetY": 58,
+        "hits": [
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm.ActionConfirm",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content.ActionForm",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions.Content",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.Window_Actions",
+            "active": true
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.CombatFeedback",
+            "active": false
+          },
+          {
+            "path": "Players.Player2.PlayerGui.PrisonHud.AutoSellFx",
+            "active": false
+          }
+        ],
+        "visibleRect": {
+          "top": 324,
+          "right": 682,
+          "left": 142,
+          "bottom": 368
+        },
+        "inputEvents": [
+          {
+            "y": 346,
+            "x": 412,
+            "event": "target.InputBegan",
+            "processed": false
+          },
+          {
+            "y": 346,
+            "x": 412,
+            "event": "UIS.InputBegan",
+            "processed": true
+          },
+          {
+            "y": 346,
+            "x": 412,
+            "event": "target.InputEnded",
+            "processed": false
+          },
+          {
+            "y": 346,
+            "x": 412,
+            "event": "UIS.InputEnded",
+            "processed": true
+          }
+        ],
+        "originalDestroyed": true,
+        "successor": {
+          "result": {
+            "ok": true,
+            "text": "Ожидаем сохранения передачи. Не повторяйте её до подтверждения результата."
+          },
+          "confirmationGone": true
+        },
+        "y": 346,
+        "clips": [
+          {
+            "y": 216,
+            "x": 142,
+            "name": "ActionForm",
+            "w": 548,
+            "h": 251
+          }
+        ],
+        "x": 412,
+        "name": "ActionConfirm",
+        "activatedObserved": true,
+        "inputX": 412,
+        "insetX": 0,
+        "result": {
+          "ok": true,
+          "text": "Ожидаем сохранения передачи. Не повторяйте её до подтверждения результата."
+        },
+        "inputY": 404
+      }
+    ],
+    "touchTested": false,
+    "text": "Ожидаем сохранения передачи. Не повторяйте её до подтверждения результата.",
+    "nativeKeyboardTested": false
+  },
+  "realAccountsTouched": false,
+  "moneyScale": 10000,
+  "status": "PASS",
+  "ownerResetExecuted": false,
+  "layouts": [
+    {
+      "h": 680,
+      "viewport": {
+        "y": 844,
+        "x": 390
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 174
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 340
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 346
+        }
+      ],
+      "w": 366,
+      "formHeight": 468
+    },
+    {
+      "h": 308,
+      "viewport": {
+        "y": 390,
+        "x": 844
+      },
+      "rows": [
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "Close",
+          "textSize": false,
+          "w": 44
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_pay",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionMode_gift",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionHide",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionInvite",
+          "textSize": 14,
+          "w": 271
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionRecipient_-1",
+          "textSize": 14,
+          "w": 534
+        },
+        {
+          "scaled": false,
+          "h": 44,
+          "name": "ActionReview",
+          "textSize": 14,
+          "w": 540
+        }
+      ],
+      "w": 560,
+      "formHeight": 96
+    }
+  ],
+  "testScope": "Run_c67691ea-8be9-4134-a05a-ead61b876466",
+  "mapRestored": true
+}

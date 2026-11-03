@@ -1,5 +1,29 @@
 --!strict
 return {
+	release_transfer_nearby = {
+		ru = "Подойдите ближе к получателю. Передавать можно только игроку рядом.",
+		en = "Move closer to the recipient. Transfers are only available to nearby players.",
+		es = "Acércate al destinatario. Solo puedes transferir a jugadores cercanos.",
+		fr = "Rapprochez-vous du destinataire. Les transferts sont réservés aux joueurs proches.",
+	},
+	release_transfer_alive = {
+		ru = "Для передачи оба игрока должны быть живы. Дождитесь возрождения.",
+		en = "Both players must be alive to transfer. Wait for respawn.",
+		es = "Ambos jugadores deben estar vivos para transferir. Espera a que reaparezcan.",
+		fr = "Les deux joueurs doivent être en vie. Attendez la réapparition.",
+	},
+	release_action_nearby = {
+		ru = "Игроки рядом · не дальше %d блоков",
+		en = "Nearby players · within %d blocks",
+		es = "Jugadores cercanos · hasta %d bloques",
+		fr = "Joueurs proches · à %d blocs maximum",
+	},
+	release_action_no_nearby = {
+		ru = "Рядом никого нет. Подойдите к игроку — он появится здесь.",
+		en = "No players nearby. Move closer to a player to see them here.",
+		es = "No hay nadie cerca. Acércate a un jugador para verlo aquí.",
+		fr = "Personne à proximité. Approchez-vous d’un joueur pour le voir ici.",
+	},
 	release_transfer_pending = {
 		ru = "Ожидаем сохранения передачи. Не повторяйте её до подтверждения результата.",
 		en = "Waiting for the transfer to save. Do not repeat it before the result is confirmed.",

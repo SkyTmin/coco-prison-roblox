@@ -7,6 +7,7 @@ local Config = require(Shared.Config)
 local Numbers = require(Shared.Numbers)
 local Persistence = require(Shared.Persistence)
 local Remotes = require(Shared.Remotes)
+local TransferAccess = require(Shared.TransferAccess)
 local Commands = require(script.Parent.ChatCommandService)
 local Profile = require(script.Parent.ProfileService)
 local ActionsService = {}
@@ -43,6 +44,10 @@ function ActionsService.Request(player: Player, action: any, payload: any): any
 		if not target or target == player then
 			return failure("release_action_recipient")
 		end
+		local nearby, reason = TransferAccess.Check(player, target)
+		if not nearby then
+			return failure(reason :: string)
+		end
 		local args = if quote.kind == "pay"
 			then { target.Name, tostring(quote.amount) }
 			else { target.Name, tostring(quote.slot), tostring(quote.count) }
@@ -63,6 +68,10 @@ function ActionsService.Request(player: Player, action: any, payload: any): any
 	local target = Players:GetPlayerByUserId(payload.recipient)
 	if not target or target == player then
 		return failure("release_action_recipient")
+	end
+	local nearby, reason = TransferAccess.Check(player, target)
+	if not nearby then
+		return failure(reason :: string)
 	end
 	local quote: any = {
 		kind = payload.kind,

@@ -7,7 +7,7 @@
 -- the channel switch go back to the client as ChatClient(action, …), so the usual remotes (Teleport, GangAction,
 -- GangHome — their services check everything) and the input bar (TargetTextChannel) do the rest.
 --   * /pay ник сумма [клиент pay.*]: from 1 $, not to yourself, the receiver may refuse transfers in the settings
---     (settings.payOff). Both players must be on this server with real profiles (a transfer to another server or an
+--     (settings.payOff). Both players must be alive, nearby and on this server with real profiles (a transfer to another server or an
 --     offline player is refused: it would need an outside outbox). The check and both Mutates run without a yield
 --     in between. PlayerTransferService persists a debited outbox before external credit and uses recipient receipts.
 --   * /gift ник [клиент gift.*; сеть TG/25]: the whole stack in the hand, never a block, not a Config.chat.giftForbidden
@@ -46,6 +46,7 @@ local ChatService = require(script.Parent.ChatService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
 local PlayerTransfer = require(script.Parent.PlayerTransferService)
+local TransferAccess = require(Shared.TransferAccess)
 
 local ChatCommandService = {}
 local cfg = Config.chat
@@ -124,6 +125,11 @@ local function receiver(player: Player, query: string?, selfKey: string): (Playe
 		fail(player, selfKey)
 		return nil, nil
 	end
+	local nearby, reason = TransferAccess.Check(player, target)
+	if not nearby then
+		fail(player, reason :: string)
+		return nil, nil
+	end
 	local profile = ProfileService.Get(target)
 	if not profile or not ProfileService.IsReal(target) or not ProfileService.CanExport(target) then
 		fail(player, "chat_player_not_found", query)
@@ -164,10 +170,11 @@ local function pay(player: Player, args: { string })
 		fail(player, "chat_pay_no_money", Strings.money(profile.coins))
 		return
 	end
-	if PlayerTransfer.Submit(player, target, "pay", sum) then
+	local accepted, reason = PlayerTransfer.Submit(player, target, "pay", sum)
+	if accepted then
 		reply(player, "release_transfer_pending")
 	else
-		fail(player, "chat_not_ready")
+		fail(player, reason or "chat_not_ready")
 	end
 end
 
@@ -210,10 +217,11 @@ local function rubb(player: Player, args: { string })
 		fail(player, "chat_rubb_no_rubies", PrisPlus.rubies(profile))
 		return
 	end
-	if PlayerTransfer.Submit(player, target, "rubies", amount) then
+	local accepted, reason = PlayerTransfer.Submit(player, target, "rubies", amount)
+	if accepted then
 		reply(player, "release_transfer_pending")
 	else
-		fail(player, "chat_not_ready")
+		fail(player, reason or "chat_not_ready")
 	end
 end
 
@@ -260,12 +268,6 @@ local function stats(player: Player, args: { string })
 end
 
 -- ── /gift ───────────────────────────────────────────────────────────────────────────────────────────────────────
-
-local function rootOf(player: Player): BasePart?
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	return if root and root:IsA("BasePart") then root else nil
-end
 
 local function plain(stack: Types.ItemStack): boolean
 	return stack.books == nil
@@ -341,12 +343,6 @@ local function gift(player: Player, args: { string })
 		fail(player, "chat_gift_location", name)
 		return
 	end
-	local a, b = rootOf(player), rootOf(target)
-	local range = cfg.giftRangeBlocks * Config.rules.combat.blockStuds
-	if not a or not b or (a.Position - b.Position).Magnitude > range then
-		fail(player, "chat_gift_far", name, cfg.giftRangeBlocks)
-		return
-	end
 	if profile.location == "gang_base" then
 		local gang = player:GetAttribute("GangId")
 		if typeof(gang) ~= "string" or target:GetAttribute("GangId") ~= gang then
@@ -360,10 +356,11 @@ local function gift(player: Player, args: { string })
 		fail(player, "chat_gift_full", name)
 		return
 	end
-	if PlayerTransfer.Submit(player, target, "gift", moved, slot) then
+	local accepted, reason = PlayerTransfer.Submit(player, target, "gift", moved, slot)
+	if accepted then
 		reply(player, "release_transfer_pending")
 	else
-		fail(player, "chat_not_ready")
+		fail(player, reason or "chat_not_ready")
 	end
 end
 

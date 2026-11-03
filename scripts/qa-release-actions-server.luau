@@ -145,6 +145,63 @@ local ok, err = xpcall(function()
 		)
 	end
 	local beforeA, beforeB = P.Get(a).coins, P.Get(b).coins
+	local itemBefore = Persistence.copy(P.Get(a).inventory)
+	local rubiesBefore = { P.Get(a).rubies or 0, P.Get(b).rubies or 0 }
+	report.proximity = {}
+	local nearRoster = rpc:InvokeClient(a, "roster", b.UserId, true)
+	check("nearby recipient appears in Actions", nearRoster.matched and nearRoster.present)
+	local oldQuote = review("pay", 1)
+	check("nearby quote before movement accepted", oldQuote.ok)
+	rpc:InvokeClient(b, "pose", a.Character:GetPivot() * CFrame.new(32, 0, 0))
+	task.wait(0.5)
+	local distance = (a.Character.HumanoidRootPart.Position - b.Character.HumanoidRootPart.Position).Magnitude
+	report.proximity.farDistance = distance
+	assert(
+		distance > Config.chat.giftRangeBlocks * Config.rules.combat.blockStuds,
+		"Far fixture is not outside range"
+	)
+	local farRoster = rpc:InvokeClient(a, "roster", b.UserId, false)
+	check(
+		"walking away removes recipient without reopening Actions",
+		farRoster.matched and not farRoster.present
+	)
+	local refused = request(a, "confirm", oldQuote.token)
+	check(
+		"walk away after quote refuses confirmation",
+		not refused.ok and refused.key == "release_transfer_nearby"
+	)
+	for _, kind in { "pay", "gift" } do
+		local farQuote = review(kind, 1, 1)
+		check(
+			kind .. " far quote refused",
+			not farQuote.ok and farQuote.key == "release_transfer_nearby"
+		)
+	end
+	for _, command in { "pay", "rubb", "gift" } do
+		task.wait(Config.chat.commandCooldownSeconds + 0.25)
+		local args = if command == "gift" then { b.Name, "1", "1" } else { b.Name, "1" }
+		local commandResult = rpc:InvokeClient(a, "command", command, args)
+		report.proximity[command] = commandResult
+		check(command .. " chat route refuses distant player", commandResult.refused)
+	end
+	check(
+		"all far requests preserve money rubies inventory and journals",
+		P.Get(a).coins == beforeA
+			and P.Get(b).coins == beforeB
+			and (P.Get(a).rubies or 0) == rubiesBefore[1]
+			and (P.Get(b).rubies or 0) == rubiesBefore[2]
+			and Persistence.equal(P.Get(a).inventory, itemBefore)
+			and not P.Get(a).playerTransfer
+			and not P.Get(b).playerTransferIncoming
+	)
+	rpc:InvokeClient(b, "pose", a.Character:GetPivot() * CFrame.new(4, 0, 0))
+	task.wait(0.5)
+	local returnedRoster = rpc:InvokeClient(a, "roster", b.UserId, true)
+	check(
+		"returning nearby restores recipient without reopening Actions",
+		returnedRoster.matched and returnedRoster.present
+	)
+	rpc:InvokeClient(a, "close")
 	local payAmount = 2.5
 	local payUnits = math.floor(payAmount * Config.moneyScale + 0.5)
 	local q = review("pay", payAmount)

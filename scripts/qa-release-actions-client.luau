@@ -267,6 +267,39 @@ end
 rpc.OnClientInvoke = function(op, a, b)
 	if op == "action" then
 		return action:InvokeServer(a, b)
+	elseif op == "command" then
+		local Strings = require(game.ReplicatedStorage.Shared.Strings)
+		local expected = Strings.t("release_transfer_nearby", player:GetAttribute("Locale") or "ru")
+		local answer
+		local listener = remotes
+			:WaitForChild("ChatSystem").OnClientEvent
+			:Connect(function(text, kind)
+				if text == expected and kind == "error" then
+					answer = { refused = true, text = text }
+				end
+			end)
+		remotes:WaitForChild("ChatCommand"):FireServer(a, b)
+		untilTrue(function()
+			return answer
+		end, 5)
+		listener:Disconnect()
+		return answer or { refused = false }
+	elseif op == "roster" then
+		if not find("Window_Actions") then
+			debugApi:Invoke("open", "actions")
+		end
+		local observed = untilTrue(function()
+			local win = find("Window_Actions")
+			if not win then
+				return nil
+			end
+			local present = win:FindFirstChild("ActionRecipient_" .. tostring(a), true) ~= nil
+			return if present == b then { present = present, matched = true } else nil
+		end, 5)
+		return observed or { matched = false }
+	elseif op == "close" then
+		debugApi:Invoke("close")
+		return true
 	elseif op == "pose" then
 		player.Character:PivotTo(a)
 		return true

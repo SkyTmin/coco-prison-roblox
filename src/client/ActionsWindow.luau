@@ -1,10 +1,12 @@
 --!strict
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
+local RunService = game:GetService("RunService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local TransferAccess = require(Shared.TransferAccess)
 local Ui = require(script.Parent.Ui)
 local ActionsWindow = {}
 
@@ -34,6 +36,7 @@ function ActionsWindow.build(
 	local quote: any = nil
 	local waiting, alive = false, true
 	local rebuild: () -> ()
+	local refreshRecipients: (boolean?) -> () = function() end
 	local tabs = {}
 	for index, mode in ipairs({ "pay", "gift" }) do
 		local button = Ui.button(
@@ -190,7 +193,7 @@ function ActionsWindow.build(
 			end, Ui.colors.buttonGreen).Name =
 				"ActionClaim"
 		end
-		label(t("release_action_recipient"), 32, 1)
+		label(t("release_action_nearby", Config.chat.giftRangeBlocks), 44, 1)
 		local people = Instance.new("ScrollingFrame")
 		people.BackgroundTransparency, people.BorderSizePixel, people.ScrollBarThickness = 1, 0, 5
 		people.Size, people.LayoutOrder = UDim2.new(1, -8, 0, 116), 2
@@ -198,26 +201,68 @@ function ActionsWindow.build(
 			UDim2.new(), Enum.AutomaticSize.Y, scroll
 		local list = Instance.new("UIListLayout")
 		list.Padding, list.Parent = UDim.new(0, 4), people
-		for _, other in ipairs(Players:GetPlayers()) do
-			if other == Players.LocalPlayer then
-				continue
+		local previousRoster = ""
+		refreshRecipients = function(force: boolean?)
+			if not people.Parent then
+				return
 			end
-			local pick = Ui.button(
-				people,
-				other.DisplayName .. " (@" .. other.Name .. ")",
-				UDim2.new(1, -6, 0, 44),
-				UDim2.new(),
-				if recipient == other.UserId then Ui.colors.buttonBlue else Ui.colors.buttonGrey
-			)
-			pick.TextSize, pick.TextScaled = 14, false
-			pick.Name = "ActionRecipient_" .. other.UserId
-			pick.Activated:Connect(function()
-				if not waiting then
-					recipient = other.UserId
-					rebuild()
+			local nearby = {}
+			for _, other in ipairs(Players:GetPlayers()) do
+				if TransferAccess.Check(Players.LocalPlayer, other) then
+					table.insert(nearby, other)
 				end
+			end
+			table.sort(nearby, function(a, b)
+				return a.Name < b.Name
 			end)
+			local ids = {}
+			local selectedHere = false
+			for _, other in ipairs(nearby) do
+				table.insert(ids, tostring(other.UserId))
+				selectedHere = selectedHere or recipient == other.UserId
+			end
+			if not selectedHere then
+				recipient = nil
+			end
+			local signature = table.concat(ids, ",")
+			if not force and signature == previousRoster then
+				return
+			end
+			previousRoster = signature
+			for _, child in ipairs(people:GetChildren()) do
+				if child:IsA("GuiObject") then
+					child:Destroy()
+				end
+			end
+			if #nearby == 0 then
+				local empty = Ui.label(
+					people,
+					t("release_action_no_nearby"),
+					UDim2.new(1, -6, 0, 68),
+					UDim2.new(),
+					14
+				)
+				empty.TextWrapped = true
+			end
+			for _, other in ipairs(nearby) do
+				local pick = Ui.button(
+					people,
+					other.DisplayName .. " (@" .. other.Name .. ")",
+					UDim2.new(1, -6, 0, 44),
+					UDim2.new(),
+					if recipient == other.UserId then Ui.colors.buttonBlue else Ui.colors.buttonGrey
+				)
+				pick.TextSize, pick.TextScaled = 14, false
+				pick.Name = "ActionRecipient_" .. other.UserId
+				pick.Activated:Connect(function()
+					if not waiting then
+						recipient = other.UserId
+						rebuild()
+					end
+				end)
+			end
 		end
+		refreshRecipients(true)
 		if kind == "gift" then
 			label(t("release_action_item"), 28, 3)
 			local items = Instance.new("Frame")
@@ -314,10 +359,22 @@ function ActionsWindow.build(
 			end
 		end)
 	end)
+	-- Refresh only the nearby list, preserving the amount, keyboard focus and form scroll.
+	local refreshElapsed = 0
+	local movement = RunService.Heartbeat:Connect(function(dt)
+		refreshElapsed += dt
+		if refreshElapsed >= 0.35 then
+			refreshElapsed = 0
+			if alive and not quote and not waiting then
+				refreshRecipients()
+			end
+		end
+	end)
 	win.Destroying:Connect(function()
 		alive = false
 		join:Disconnect()
 		leave:Disconnect()
+		movement:Disconnect()
 	end)
 	rebuild()
 	return win,

@@ -1,6 +1,7 @@
 --!nocheck
 -- Actual PlayerTransferService + actual ProfileService durable writes. All keys/stores/players are isolated fakes.
 local fs, serde = require("@lune/fs"), require("@lune/serde")
+local rb = require("@lune/roblox")
 local factory = require("./qa-profile-persistence-offline").fixture
 local checks = {}
 local function check(name, value)
@@ -47,7 +48,10 @@ local function fixture(kind)
 		},
 	}
 	sb.profile.inventory = {}
-	assert(boundary.service.SaveNow(a) and boundary.service.SaveNow(b))
+	assert(
+		boundary.service.SaveNow(a) and boundary.service.SaveNow(b),
+		"Fixture initial saves failed"
+	)
 	local service = f:playerTransfers(boundary)
 	local function submit()
 		local value = if kind == "gift" then copy(sa.profile.inventory[2]) else 250
@@ -586,6 +590,65 @@ do
 		ordinary.serverAttributes.TestSessionScope == nil and ordinary.disk["User_-303"] ~= nil
 	)
 end
+
+-- The same actual transport gate protects money, rubies and item gifts, not just the Actions UI.
+for _, kind in { "pay", "rubies", "gift" } do
+	for _, distance in { 4, 15.999, 16, 16.001, 32 } do
+		local near = fixture(kind)
+		near.b.Character.root.Position = rb.Vector3.new(distance, 0, 0)
+		local beforeA, beforeB = copy(near.sa.profile), copy(near.sb.profile)
+		local writes = near.f.writes
+		local accepted, reason = near.submit()
+		check(kind .. " range decision at " .. distance, accepted == (distance <= 16))
+		if distance > 16 then
+			check(
+				kind .. " too far leaves no debit/journal/write at " .. distance,
+				reason == "release_transfer_nearby"
+					and near.sa.profile.coins == beforeA.coins
+					and near.sa.profile.rubies == beforeA.rubies
+					and near.sa.profile.inventory[2].count == beforeA.inventory[2].count
+					and near.sb.profile.coins == beforeB.coins
+					and not near.sa.profile.playerTransfer
+					and near.f.writes == writes
+			)
+		end
+	end
+end
+for _, state in { "sender_dead", "recipient_dead", "sender_left", "recipient_left", "missing_body" } do
+	local near = fixture("pay")
+	if state == "sender_dead" then
+		near.a.Character.humanoid.Health = 0
+	end
+	if state == "recipient_dead" then
+		near.b.Character.humanoid.Health = 0
+	end
+	if state == "sender_left" then
+		near.a.Parent = nil
+	end
+	if state == "recipient_left" then
+		near.b.Parent = nil
+	end
+	if state == "missing_body" then
+		near.b.Character = nil
+	end
+	check(
+		state .. " refuses new transfer without debit",
+		not near.submit() and near.sa.profile.coins == 10000 and not near.sa.profile.playerTransfer
+	)
+end
+local accepted = fixture("pay")
+assert(accepted.submit())
+accepted.b.Character.root.Position = rb.Vector3.new(32, 0, 0)
+accepted.b.Character.humanoid.Health = 0
+accepted.b.Parent = nil
+-- Distance/life are eligibility at acceptance. Once debited, leaving must not strand the journal.
+accepted.service.Resolve(accepted.a)
+check(
+	"accepted outbox posts after recipient walks away/dies/leaves",
+	accepted.f.disk["Inbox_-202"] ~= nil
+)
+accepted.b.Parent = true
+completed(accepted, "accepted nearby transfer recovers after departure")
 
 print(serde.encode("json", {
 	passed = #checks,

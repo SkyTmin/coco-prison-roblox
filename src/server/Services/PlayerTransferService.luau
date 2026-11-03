@@ -10,6 +10,7 @@ local Persistence = require(Shared.Persistence)
 local Numbers = require(Shared.Numbers)
 local Strings = require(Shared.Strings)
 local Remotes = require(Shared.Remotes)
+local TransferAccess = require(Shared.TransferAccess)
 local Inventory = require(script.Parent.InventoryService)
 local Profile = require(script.Parent.ProfileService)
 local Transfer = {}
@@ -309,7 +310,11 @@ function Transfer.Submit(
 	kind: string,
 	value: any,
 	slot: number?
-): boolean
+): (boolean, string?)
+	local nearby, reason = TransferAccess.Check(player, target)
+	if not nearby then
+		return false, reason
+	end
 	if player == target or not Profile.CanExport(player) or not Profile.CanExport(target) then
 		return false
 	end
@@ -346,6 +351,12 @@ function Transfer.Submit(
 	else
 		return false
 	end
+	-- All validation above is synchronous. This is the final gate immediately before
+	-- reserving the debit/outbox; later save/recovery must finish even if either player leaves.
+	nearby, reason = TransferAccess.Check(player, target)
+	if not nearby then
+		return false, reason
+	end
 	Profile.Mutate(player, function(profile: any)
 		if kind == "pay" then
 			profile.coins -= value
@@ -362,7 +373,7 @@ function Transfer.Submit(
 	end)
 	busy(player)
 	task.defer(Transfer.Resolve, player)
-	return true
+	return true, nil
 end
 
 function Transfer.Start()
