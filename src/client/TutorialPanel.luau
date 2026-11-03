@@ -24,7 +24,9 @@ function Panel.obstacles(gui: ScreenGui, panel: Frame, playerGui: PlayerGui): { 
 			end
 			ancestor = ancestor.Parent
 		end
-		local p, size = object.AbsolutePosition, object.AbsoluteSize
+		-- AbsolutePosition includes the ScreenGui origin (often -58 for IgnoreGuiInset).
+		-- Panel.Position is relative to this GUI; native touch controls need the same conversion.
+		local p, size = object.AbsolutePosition - gui.AbsolutePosition, object.AbsoluteSize
 		if size.X > 1 and size.Y > 1 then
 			table.insert(result, { x = p.X, y = p.Y, width = size.X, height = size.Y })
 		end
@@ -56,19 +58,19 @@ function Panel.obstacles(gui: ScreenGui, panel: Frame, playerGui: PlayerGui): { 
 	return result
 end
 
--- Prefer the right edge, then the nearest clear column. A short viewport scrolls the
+-- Prefer the left edge, then the nearest clear column. A short viewport scrolls the
 -- card's contents instead of shrinking text or covering a player-moved control.
 function Panel.place(view: Vector2, inset: number, height: number, obstacles: { Rect }): Rect
 	local width = math.min(250, view.X - 24)
 	local top, bottom, gap = inset + 8, view.Y - 8, 8
-	local columns = { view.X - width - 10 }
+	local columns = { 10 }
 	for _, obstacle in obstacles do
-		table.insert(columns, obstacle.x - width - gap)
+		table.insert(columns, obstacle.x + obstacle.width + gap)
 	end
 	local best: Rect? = nil
 	local bestScore = math.huge
 	for _, x in columns do
-		if x < math.max(8, view.X / 2 - width) or x + width > view.X - 8 then
+		if x < 8 or x > view.X / 2 or x + width > view.X - 8 then
 			continue
 		end
 		local spans = {}
@@ -88,7 +90,7 @@ function Panel.place(view: Vector2, inset: number, height: number, obstacles: { 
 		for _, span in spans do
 			local available = math.min(height, span[1] - y, bottom - y)
 			if available >= math.min(90, height) then
-				local score = (height - available) * 100 + (view.X - width - 10 - x) * 2 + y - top
+				local score = (height - available) * 100 + math.abs(x - 10) * 2 + y - top
 				if score < bestScore then
 					bestScore, best = score, { x = x, y = y, width = width, height = available }
 				end
@@ -96,7 +98,7 @@ function Panel.place(view: Vector2, inset: number, height: number, obstacles: { 
 			y = math.max(y, span[2])
 		end
 	end
-	return best or { x = view.X - width - 10, y = top, width = width, height = 0 }
+	return best or { x = 10, y = top, width = width, height = 0 }
 end
 
 function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
@@ -212,6 +214,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 			entry.name.Size = UDim2.new(1, -118, 1, 0)
 			entry.value.Size = UDim2.fromOffset(86, rowHeight)
 			entry.value.Position = UDim2.new(1, -92, 0, 0)
+			entry.value.TextColor3 = if complete then Ui.colors.money else Ui.colors.text
 			entry.value.Text = Strings.big(requirement.have)
 				.. " / "
 				.. Strings.big(requirement.needed)
@@ -221,6 +224,9 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 			y += rowHeight + gap
 		end
 		count.Text = string.format("%d / %d", met, #requirements)
+		count.TextColor3 = if #requirements > 0 and met == #requirements
+			then Ui.colors.money
+			else Ui.colors.text
 		local money = row(#requirements + 1)
 		money.frame.Name, money.frame.Visible = "MoneyRequirement", goal ~= nil
 		money.frame.Position, money.frame.Size =
@@ -231,6 +237,9 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 		money.value.Size = UDim2.fromOffset(136, rowHeight)
 		money.value.Position = UDim2.new(1, -142, 0, 0)
 		money.name.Size = UDim2.new(1, -168, 1, 0)
+		money.value.TextColor3 = if goal and goal.coins >= goal.cost
+			then Ui.colors.money
+			else Ui.colors.text
 		money.value.Text = if goal
 			then "$" .. Strings.money(goal.coins) .. " / $" .. Strings.money(goal.cost) .. (if goal.coins
 					>= goal.cost

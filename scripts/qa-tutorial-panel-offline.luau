@@ -5,6 +5,7 @@ local prefix = fs.readFile("scripts/qa-release-upgrade-offline.luau")
 prefix = prefix:sub(1, assert(prefix:find("local fn = assert(loadstring", 1, true)) - 1)
 local boundary = assert(loadstring(prefix .. "\nreturn {node=node, Ui=Ui, modules=f.modules}"))()
 local M, Ui = boundary.modules, boundary.Ui
+Ui.colors.text, Ui.colors.money = rb.Color3.fromRGB(225, 225, 225), rb.Color3.fromRGB(90, 220, 90)
 local function node(kind)
 	local n = boundary.node(kind)
 	n.Enabled, n.AbsolutePosition, n.AbsoluteSize = true, rb.Vector2.zero, rb.Vector2.new(10, 10)
@@ -145,8 +146,16 @@ for _, locale in { "ru", "en", "es", "fr" } do
 		find("RequirementsTitle").Text == M.Strings.t("requirements", locale)
 	)
 	check(locale .. " exact three rows", find("RequirementsCount").Text == "0 / 3")
+	check(
+		locale .. " incomplete summary is neutral",
+		find("RequirementsCount").TextColor3 == Ui.colors.text
+	)
 	for index = 1, 3 do
 		local row = find("Requirement_" .. index)
+		check(
+			locale .. " incomplete material is neutral " .. index,
+			row:FindFirstChild("Progress").TextColor3 == Ui.colors.text
+		)
 		check(
 			locale .. " genuine icon " .. index,
 			expected[row:FindFirstChild("Icon").Image] == true
@@ -172,6 +181,10 @@ for _, locale in { "ru", "en", "es", "fr" } do
 			== "$" .. M.Strings.money(0) .. " / $" .. M.Strings.money(30000)
 	)
 	check(
+		locale .. " missing cash is neutral even with sellable blocks",
+		find("MoneyRequirement"):FindFirstChild("Progress").TextColor3 == Ui.colors.text
+	)
+	check(
 		locale .. " projected sale labeled separately",
 		find("TaskHint").Text
 			== M.Strings.t(
@@ -188,7 +201,12 @@ end
 goal.saleReady, goal.estimatedSale = true, 30000
 card.Update(3, "en", goal, "tutorial_sell_blocks", rb.Vector2.new(1280, 720), 58, {})
 check("completed materials header", find("RequirementsCount").Text == "3 / 3")
+check("completed summary becomes green", find("RequirementsCount").TextColor3 == Ui.colors.money)
 for index = 1, 3 do
+	check(
+		"complete material becomes green " .. index,
+		find("Requirement_" .. index):FindFirstChild("Progress").TextColor3 == Ui.colors.money
+	)
 	check(
 		"complete marker " .. index,
 		find("Requirement_" .. index):FindFirstChild("Progress").Text:find("✓", 1, true) ~= nil
@@ -243,8 +261,8 @@ do
 	local p, s = card.frame.Position, card.frame.Size
 	local rect = { x = p.X.Offset, y = p.Y.Offset, width = s.X.Offset, height = s.Y.Offset }
 	check(
-		tostring(sample.view) .. " usable right-side panel",
-		rect.height >= 90 and rect.x + rect.width > sample.view.X / 2 and rect.width == 250
+		tostring(sample.view) .. " usable left-side panel",
+		rect.height >= 90 and rect.x < sample.view.X / 2 and rect.width == 250
 	)
 	check(
 		tostring(sample.view) .. " fits safe screen",
@@ -258,6 +276,14 @@ do
 		card.shortcut.Size.Y.Offset == 44
 	)
 end
+check(
+	"actual sufficient cash becomes green",
+	find("MoneyRequirement"):FindFirstChild("Progress").TextColor3 == Ui.colors.money
+)
+check(
+	"empty desktop keeps panel at left edge",
+	Panel.place(rb.Vector2.new(1280, 720), 58, 240, {}).x == 10
+)
 card.shortcut.Activated:Fire()
 check("shortcut still opens ordinary menu", opened == "menu")
 local levelGoal = {
@@ -273,6 +299,14 @@ card.Update(4, "fr", levelGoal, "tutorial_collect_level", rb.Vector2.new(390, 84
 check(
 	"level task reuses actual block count",
 	find("Requirement_1"):FindFirstChild("Progress").Text == "9 / 10"
+)
+check(
+	"reused level row resets to neutral",
+	find("Requirement_1"):FindFirstChild("Progress").TextColor3 == Ui.colors.text
+)
+check(
+	"reused money row resets to neutral",
+	find("MoneyRequirement"):FindFirstChild("Progress").TextColor3 == Ui.colors.text
 )
 check("old third material hidden after phase transition", not find("Requirement_3").Visible)
 card.Update(3, "en", goal, "tutorial_open_menu", rb.Vector2.new(390, 844), 58, {})
@@ -293,6 +327,21 @@ stats.Name = "Scoreboard"
 stats.Parent = gui
 local obstacles = Panel.obstacles(gui, card.frame, playerGui)
 check("only visible controls and scoreboard block placement", #obstacles == 2)
+gui.AbsolutePosition = rb.Vector2.new(0, -58)
+blocker.AbsolutePosition, blocker.AbsoluteSize = rb.Vector2.new(8, 6), rb.Vector2.new(190, 44)
+local insetObstacles = Panel.obstacles(gui, card.frame, playerGui)
+local menuRect
+for _, rect in insetObstacles do
+	if rect.x == 8 then
+		menuRect = rect
+	end
+end
+check("actual ScreenGui negative origin normalizes menu obstacle", menuRect and menuRect.y == 64)
+local insetPlacement = Panel.place(rb.Vector2.new(1280, 720), 58, 240, { menuRect })
+check(
+	"left card stays below real menu with 58px inset",
+	insetPlacement.x == 10 and insetPlacement.y >= 116
+)
 local noSpace =
 	Panel.place(rb.Vector2.new(390, 844), 58, 240, { { x = 0, y = 0, width = 390, height = 844 } })
 check("fully obstructed HUD never covered by fallback", noSpace.height == 0)

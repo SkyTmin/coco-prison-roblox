@@ -114,13 +114,28 @@ function Guide.Start(
 	local cachedTarget: BasePart? = nil
 	local cachedMode: string? = nil
 	local cachedCounter: string? = nil
+	local searchedPosition = Vector3.zero
+	local searchedLook = Vector3.zero
 	local searchedAt = -math.huge
-	local function chooseTarget(mode: string?, counter: string?): BasePart?
+	local function chooseTarget(mode: string?, counters: { [string]: boolean }?): BasePart?
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if not root or not root:IsA("BasePart") or not mode then
 			cachedTarget = nil
 			return nil
+		end
+		local keys = {}
+		for key in counters or {} do
+			table.insert(keys, key)
+		end
+		table.sort(keys)
+		local counterKey = table.concat(keys, "|")
+		local camera = workspace.CurrentCamera
+		local look = if camera then camera.CFrame.LookVector else root.CFrame.LookVector
+		local eye = if camera then camera.CFrame.Position else root.Position
+		local function facing(part: BasePart): number
+			local delta = part.Position + Vector3.new(0, part.Size.Y / 2, 0) - eye
+			return if delta.Magnitude < 0.01 then 1 else delta.Unit:Dot(look)
 		end
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
@@ -132,24 +147,41 @@ function Guide.Start(
 			if mode == "sell" then
 				return true
 			end
+			if facing(part) < 0.65 then
+				return false
+			end
 			local surface = part.Position + Vector3.new(0, part.Size.Y / 2, 0)
 			local hit =
 				workspace:Raycast(surface + Vector3.new(0, 5, 0), Vector3.new(0, -5.1, 0), params)
-			return hit ~= nil and hit.Instance == part
+			if not hit or hit.Instance ~= part then
+				return false
+			end
+			-- Do not point through a wall or an intervening column of mine blocks.
+			local sight = workspace:Raycast(eye, part.Position - eye, params)
+			return sight ~= nil and sight.Instance == part
 		end
+		local sameGoal = cachedMode == mode and cachedCounter == counterKey
+		local valid = sameGoal and cachedTarget and exposed(cachedTarget)
+		local elapsed = os.clock() - searchedAt
 		if
-			cachedMode == mode
-			and cachedCounter == counter
-			and cachedTarget
-			and exposed(cachedTarget)
+			valid
+			and (
+				elapsed < 0.5
+				or (
+					elapsed < 2
+					and (root.Position - searchedPosition).Magnitude < 2
+					and look:Dot(searchedLook) > 0.99
+				)
+			)
 		then
 			return cachedTarget
 		end
 		cachedTarget = nil
-		if cachedMode == mode and cachedCounter == counter and os.clock() - searchedAt < 0.5 then
+		if sameGoal and elapsed < 0.5 then
 			return nil
 		end
-		cachedMode, cachedCounter, searchedAt = mode, counter, os.clock()
+		cachedMode, cachedCounter, searchedAt = mode, counterKey, os.clock()
+		searchedPosition, searchedLook = root.Position, look
 		local mine = workspace:FindFirstChild("Mine_prison")
 		local candidates = if mode == "mine" and mine
 			then mine:GetChildren()
@@ -184,18 +216,24 @@ function Guide.Start(
 					or block.tool ~= "shovel"
 					or candidate:GetAttribute("MineId") ~= "prison"
 					or candidate.LocalTransparencyModifier >= 1
+					or facing(candidate) < 0.65
 				then
 					continue
 				end
-				distance += math.max(0, root.Position.Y - candidate.Position.Y) * 3
-				if counter and block.upgradeCounter ~= counter then
+				-- Nearby upper surfaces are easier to reach than the bottom of a dug shaft.
+				distance += math.max(
+					0,
+					root.Position.Y - candidate.Position.Y - candidate.Size.Y / 2
+				) * 3
+				distance += (1 - facing(candidate)) * 8
+				if #keys > 0 and not (counters and counters[block.upgradeCounter]) then
 					keep(fallback, candidate, distance)
 					continue
 				end
 			end
 			keep(nearest, candidate, distance)
 		end
-		-- At most 64 rays on a retarget; one ray while a target stays valid.
+		-- At most 64 candidates / 128 rays on a retarget; two rays for the cached target.
 		for _, list in { nearest, fallback } do
 			for _, entry in list do
 				if exposed(entry.part) then
@@ -309,7 +347,7 @@ function Guide.Start(
 			local phase = "tutorial_open_menu"
 			local nextControl: GuiObject? = nil
 			local worldMode: string? = nil
-			local wantedCounter: string? = nil
+			local wantedCounters: { [string]: boolean } = {}
 			local displayGoal: any = nil
 			local readyForMenu = false
 			if step == 3 then
@@ -317,8 +355,8 @@ function Guide.Start(
 				displayGoal = goal
 				if goal then
 					for _, requirement in goal.requirements do
-						if not wantedCounter and requirement.have < requirement.needed then
-							wantedCounter = requirement.counter
+						if requirement.have < requirement.needed then
+							wantedCounters[requirement.counter] = true
 						end
 					end
 					readyForMenu = goal.ready
@@ -382,7 +420,7 @@ function Guide.Start(
 					and step < 5
 					and profile
 					and profile.location == "prison"
-				then chooseTarget(worldMode, wantedCounter)
+				then chooseTarget(worldMode, wantedCounters)
 				else nil
 			marker.Adornee, marker.Enabled = target, target ~= nil
 			highlight.Adornee, highlight.Enabled =

@@ -199,9 +199,26 @@ p.counters["Гравий"] = 20
 p.coins = 0
 goal = M.Tutorial.upgradeGoal(p)
 check(
-	"all resources with insufficient bag value keeps mining",
-	goal.resourcesReady and not goal.saleReady and not goal.ready
+	"complete shovel resources guide sale even when bag cannot cover the full price",
+	goal.resourcesReady and goal.saleReady and not goal.ready
 )
+check("empty sale cannot acknowledge first guided sale", not M.Tutorial.soldForUpgrade(p, 0))
+local firstSale = economy.InventoryService.sellAll(p, economy.Selling.multiplier(p))
+p.coins += firstSale
+check(
+	"real first sale records checkpoint without advancing upgrade",
+	M.Tutorial.soldForUpgrade(p, firstSale) and M.Tutorial.step(p) == 3
+)
+local restored = boundary.migrate(p)
+check("sale checkpoint survives profile reload", restored.tutorial.upgradeSold == true)
+p.inventory[2] = { id = "sand", count = 1 }
+check(
+	"after first sale one more block cannot send player back again",
+	not M.Tutorial.upgradeGoal(p).saleReady
+)
+check("sale acknowledgement is idempotent", not M.Tutorial.soldForUpgrade(p, firstSale))
+p.inventory[2] = nil
+check("empty bag never sends player to pointless sale", not M.Tutorial.upgradeGoal(p).saleReady)
 p.coins = 49000
 p.inventory[2] = { id = "sand", count = 9 }
 goal = M.Tutorial.upgradeGoal(p)
@@ -255,6 +272,53 @@ p.inventory[2] = { id = "sand", count = 0 / 0 }
 check(
 	"invalid inventory cannot create a fictitious sale-ready estimate",
 	economy.Selling.quote(p) == 0
+)
+-- Run the production NPC sale callback: coins, loot removal and tutorial checkpoint
+-- must be observed in the same mutation, without requiring the old dropId field.
+local saleProfile = boundary.service.defaultProfile()
+saleProfile.counters = { ["Гравий"] = 20, ["Песок"] = 15, ["Земля"] = 15 }
+saleProfile.inventory[2] = { id = "sand", count = 15 }
+local saleSource = fs.readFile("src/server/Services/EconomyService.luau")
+local saleStart = assert(saleSource:find("local function sell(player:", 1, true))
+local saleEnd = assert(saleSource:find("local BULK", saleStart, true))
+local saleFactory = assert(loadstring(saleSource:sub(saleStart, saleEnd - 1) .. "\nreturn sell"))
+local committed, writes = false, 0
+setfenv(
+	saleFactory,
+	setmetatable({
+		ProfileService = {
+			Get = function()
+				return saleProfile
+			end,
+			Mutate = function(_, fn)
+				writes += 1
+				fn(saleProfile)
+				committed = saleProfile.coins > 0
+					and saleProfile.inventory[2] == nil
+					and saleProfile.tutorial.upgradeSold == true
+			end,
+		},
+		InventoryService = economy.InventoryService,
+		ProfessionService = { moneyMultiplier = economy.Selling.multiplier },
+		Tutorial = M.Tutorial,
+		TutorialService = {
+			OnSold = function()
+				error("obsolete dropId hook")
+			end,
+		},
+		GangService = { progress = function() end },
+		Strings = { money = tostring },
+		Sfx = { toPlayer = function() end },
+		nearNpc = function()
+			return true
+		end,
+		toast = function() end,
+	}, { __index = getfenv() })
+)
+saleFactory()(actor)
+check(
+	"real seller callback atomically records cash loot and first-sale checkpoint",
+	committed and writes == 1
 )
 print(serde.encode("json", {
 	status = "PASS",

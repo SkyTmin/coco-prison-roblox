@@ -51,6 +51,12 @@
 
 ## Журнал
 
+### 03.11 — Left tutorial card, truthful colors and look-directed mining
+
+Latest owner steering implemented: task card on LEFT; incomplete resource/coin counts are neutral, only completed requirements turn green. Targeting considers all unfinished materials in the camera direction, real top exposure and line of sight, favors nearby upper blocks, and refreshes on movement/turning/removal. After completing shovel block requirements, arrows offer the first sale even before the bag covers the entire price. The actual NPC sale atomically records `upgradeSold`; any remaining money is then gathered in one batch to avoid one trip per block.
+
+Checks: panel121, guide22, goals44 (including actual server sale closure), onboarding295 + profile39, economy49 and sword45 passed; full Selene/StyLua and Rojo passed. Studio source sync confirmed5 modules, then final1-module panel inset correction. Live owner session showed the left card and neutral253/470 + $3.025/$5 values, an actual mine target with camera dot0.9965, and revealed a58px ScreenGui-origin mismatch that overlapped Menu; normalization fixed it and native placement became(10,116), below the button ending at108. Following ordinary PlayerRemoving/save and restart, owner profile loaded, Creative restored, and existing completed tutorial(step5, level2) stayed hidden. No reset or item/money grants, map preserved, no publication. Full fresh onboarding and physical touch/camera-turn acceptance remain separate from these scoped checks.
+
 ### 03.11 — Release source integration, tutorial corrections and scoped Studio evidence
 
 Implemented PvP impact/audio/HP/knockback synchronization, per-server bosses and exact-respawn reward locks, six-hour routing/friends policy, Actions with durable transfers, complete personal-item reset, typed-asset loading gate, world boundaries, food/Silk/Spring corrections, localization/donate guards and visible matte enchantment marks. Latest owner steering: compact right-hand tutorial with existing block icons; gather ALL requirements and enough sale value before guiding one sale, then item upgrade and level-up. Cancelled10-block/$5 reward removed. Diamond sword SharpIII added as tier16; absent screenshot price/requirements explicitly recorded as owner-requested design extension, not wiki facts.

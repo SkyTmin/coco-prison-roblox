@@ -158,6 +158,7 @@ export type Profile = {
 		version: number,
 		step: number,
 		upgradedAt: number?,
+		upgradeSold: boolean?,
 		dropId: string?,
 		completedAt: number?,
 		legacy: boolean?,

@@ -15,7 +15,10 @@ local function closure(first, last, returns, env)
 	return fn()
 end
 local now, scans, rays = 1, 0, 0
-local parts, byPosition = {}, {}
+local parts, byPosition, byCenter = {}, {}, {}
+local function positionKey(v)
+	return string.format("%.3f,%.3f,%.3f", v.X + 0, v.Y + 0, v.Z + 0)
+end
 local root = {
 	Position = rb.Vector3.new(0, 8, 0),
 	IsA = function()
@@ -27,7 +30,11 @@ local character = {
 		return root
 	end,
 }
-local world = {}
+local world = {
+	CurrentCamera = {
+		CFrame = rb.CFrame.lookAt(rb.Vector3.new(0, 8, -12), rb.Vector3.new(0, 0, 8)),
+	},
+}
 for i = 1, 12000 do
 	local part = {
 		Name = if i % 2 == 0 then "gravel" else "sand",
@@ -52,6 +59,7 @@ for i = 1, 12000 do
 	}
 	table.insert(parts, part)
 	byPosition[tostring(part.Position + rb.Vector3.new(0, 7, 0))] = part
+	byCenter[positionKey(part.Position)] = part
 end
 parts[1].exposed, parts[3].exposed = true, true
 function world:FindFirstChild()
@@ -62,13 +70,17 @@ function world:FindFirstChild()
 		end,
 	}
 end
-function world:Raycast(at)
+function world:Raycast(at, direction)
 	rays += 1
+	if at == self.CurrentCamera.CFrame.Position then
+		local part = byCenter[positionKey(at + direction)]
+		return if part and part.exposed and part.visible ~= false then { Instance = part } else nil
+	end
 	local part = byPosition[tostring(at)]
 	return if part and part.exposed then { Instance = part } else nil
 end
-local selectTarget =
-	closure("local cachedTarget:", "local function chooseControl", "chooseTarget", {
+local function newSelector()
+	return closure("local cachedTarget:", "local function chooseControl", "chooseTarget", {
 		player = { Character = character },
 		workspace = world,
 		Vector3 = rb.Vector3,
@@ -94,38 +106,103 @@ local selectTarget =
 			end,
 		},
 	})
-local picked = selectTarget("mine", "sand")
+end
+local selectTarget = newSelector()
+local picked = selectTarget("mine", { sand = true })
 check("actual nearest existing exposed target selected", picked == parts[1])
 local previousScans, previousRays = scans, rays
 for _ = 1, 100 do
-	selectTarget("mine", "sand")
+	selectTarget("mine", { sand = true })
 end
 check("cached target avoids 100 full 12000-cell scans", scans == previousScans)
-check("cached target uses one bounded exposure ray per tick", rays - previousRays == 100)
+check("cached target uses two bounded visibility rays per tick", rays - previousRays == 200)
 parts[1].Parent = nil
 now += 0.6
 check(
 	"another player's removed target retargets existing cell",
-	selectTarget("mine", "sand") == parts[3]
+	selectTarget("mine", { sand = true }) == parts[3]
 )
 parts[3].LocalTransparencyModifier = 1
 now += 0.6
-check("fast-hidden target is never retained", selectTarget("mine", "sand") == nil)
+check("fast-hidden target is never retained", selectTarget("mine", { sand = true }) == nil)
 parts[1].Parent, parts[1].exposed = world, true
 previousRays = rays
 now += 0.6
 check(
 	"missing exposed requested material falls back to real clearance block",
-	selectTarget("mine", "gravel") == parts[1]
+	selectTarget("mine", { gravel = true }) == parts[1]
 )
-check("retarget ray count capped despite 12000 candidates", rays - previousRays <= 64)
+check("retarget ray count capped despite 12000 candidates", rays - previousRays <= 130)
 parts[1].exposed = false
 previousScans = scans
 check(
 	"invalid target clears immediately and rescan is throttled",
-	selectTarget("mine", "gravel") == nil and scans == previousScans
+	selectTarget("mine", { gravel = true }) == nil and scans == previousScans
 )
 check("no task mode clears target", selectTarget(nil, nil) == nil)
+
+local template = parts[1]
+local function cell(name, x, y, z)
+	local part = table.clone(template)
+	part.Name, part.Position, part.exposed, part.Parent = name, rb.Vector3.new(x, y, z), true, world
+	return part
+end
+local function scene(cells, eye, towards)
+	parts, byPosition, byCenter = cells, {}, {}
+	for _, part in parts do
+		byPosition[tostring(part.Position + rb.Vector3.new(0, 7, 0))] = part
+		byCenter[positionKey(part.Position)] = part
+	end
+	world.CurrentCamera.CFrame = rb.CFrame.lookAt(eye, towards)
+	now += 3
+	return newSelector()
+end
+local far = cell("sand", 0, 0, 24)
+local near = cell("gravel", 0, 0, 8)
+local behind = cell("sand", 0, 0, -8)
+selectTarget = scene({ far, near, behind }, root.Position, rb.Vector3.new(0, 0, 16))
+check(
+	"nearest of ALL unfinished materials ahead wins",
+	selectTarget("mine", { sand = true, gravel = true }) == near
+)
+check("completed material no longer selected", selectTarget("mine", { sand = true }) == far)
+world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, behind.Position)
+now += 0.6
+check(
+	"camera turn replaces intact old target with block in view",
+	selectTarget("mine", { sand = true }) == behind
+)
+local low = cell("sand", 0, -4, 8)
+local high = cell("sand", 0, 0, 12)
+selectTarget = scene({ low, high }, root.Position, rb.Vector3.new(0, 0, 16))
+check(
+	"nearby upper layer preferred over bottom of hole",
+	selectTarget("mine", { sand = true }) == high
+)
+high.visible = false
+now += 0.6
+check("block occluded from player cannot be targeted", selectTarget("mine", { sand = true }) == low)
+low.exposed = false
+now += 0.6
+check(
+	"buried or occluded blocks never produce false marker",
+	selectTarget("mine", { sand = true }) == nil
+)
+local left = cell("sand", -8, 0, 12)
+local right = cell("sand", 8, 0, 12)
+root.Position = rb.Vector3.new(-8, 8, 0)
+selectTarget = scene({ left, right }, root.Position, left.Position)
+check(
+	"initial nearby block follows player's position",
+	selectTarget("mine", { sand = true }) == left
+)
+root.Position = rb.Vector3.new(8, 8, 0)
+world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, right.Position)
+now += 0.6
+check(
+	"walking retargets even though old block still exists",
+	selectTarget("mine", { sand = true }) == right
+)
 
 local env = {
 	itemConfirmed = false,
@@ -142,7 +219,11 @@ env.object = function(name)
 end
 local selector = {
 	Name = "TextButton",
-	attributes = { TutorialItemId = "shovel", TutorialItemTarget = "inv:7", TutorialSelected = true },
+	attributes = {
+		TutorialItemId = "shovel",
+		TutorialItemTarget = "inv:7",
+		TutorialSelected = true,
+	},
 }
 function selector:IsA(kind)
 	return kind == "GuiObject" or kind == "GuiButton"
@@ -192,16 +273,11 @@ check(
 	"closed menu points at actual menu button",
 	selected == objects.MenuButton and phase == "tutorial_open_menu"
 )
-print(
-	serde.encode(
-		"json",
-		{
-			status = "PASS",
-			count = #checks,
-			checks = checks,
-			actualSourceClosures = true,
-			realProfiles = false,
-			realGeometry = false,
-		}
-	)
-)
+print(serde.encode("json", {
+	status = "PASS",
+	count = #checks,
+	checks = checks,
+	actualSourceClosures = true,
+	realProfiles = false,
+	realGeometry = false,
+}))

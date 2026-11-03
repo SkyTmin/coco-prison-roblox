@@ -63,8 +63,25 @@ function Tutorial.upgradeGoal(profile: any): any
 	goal.saleReady = goal.resourcesReady
 		and profile.coins < cost
 		and goal.estimatedSale > 0
-		and profile.coins + goal.estimatedSale >= cost
+		and (
+			not (profile.tutorial and profile.tutorial.upgradeSold)
+			or profile.coins + goal.estimatedSale >= cost
+		)
 	return goal
+end
+
+-- Called inside the same server mutation as the real sale. After the first guided
+-- sale, a remaining money deficit is gathered in one batch, not one trip per block.
+function Tutorial.soldForUpgrade(profile: any, amount: number): boolean
+	if Tutorial.step(profile) ~= 3 or amount <= 0 or profile.tutorial.upgradeSold then
+		return false
+	end
+	local goal = Tutorial.upgradeGoal(profile)
+	if not goal or not goal.resourcesReady then
+		return false
+	end
+	profile.tutorial.upgradeSold = true
+	return true
 end
 
 function Tutorial.levelGoal(profile: any): any
