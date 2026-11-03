@@ -10,6 +10,8 @@ export type Settings = {
 	muted: boolean?,
 	hideToasts: boolean?,
 	hideBoosters: boolean?,
+	hideRequirements: boolean?,
+	trackedUpgrade: string?, -- "level" or equipment id:minimum tier; empty = tutorial only
 	autosellOff: boolean?, -- the bought auto-sell switched off [владелец 28.10]
 	autosellTextOff: boolean?, -- no «+0,057 $» at the crosshair
 	-- the chat (этап 3): «[Совет]» lines off [клиент settings.elements.advice_toggle], /pay and /gift refused to
@@ -159,6 +161,7 @@ export type Profile = {
 		step: number,
 		upgradedAt: number?,
 		upgradeSold: boolean?,
+		ordinaryCaseOpened: boolean?,
 		dropId: string?,
 		completedAt: number?,
 		legacy: boolean?,

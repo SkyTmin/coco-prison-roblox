@@ -28,7 +28,7 @@ type Rank = Ranks.Rank
 
 local LevelWindow = {}
 
-local W, H = 720, 476
+local W, H = 720, 520
 local GOOD, BAD = Kit.GOOD, Kit.BAD
 local CARD, EDGE, TRACK = Kit.CARD, Kit.EDGE, Kit.TRACK
 local SLIDE = Kit.SLIDE
@@ -363,6 +363,22 @@ function LevelWindow.build(
 	local button, buttonLabel, buttonBack =
 		Kit.actionButton(content, UDim2.new(1, -192, 0, 48), UDim2.new(0, 4, 1, -52), 20)
 	button.Name = "LevelUp"
+	local pin = Ui.button(
+		content,
+		T("tracker_pin"),
+		UDim2.new(1, -8, 0, 38),
+		UDim2.new(0, 4, 1, -96),
+		Ui.colors.buttonGrey
+	)
+	pin.Name, pin.TextSize = "PinLevelRequirements", 14
+	pin.Activated:Connect(function()
+		local p = getProfile()
+		if p and Config.levelRule(p.level + 1) then
+			Remotes.event("SetSetting"):FireServer("trackedUpgrade", "level")
+			Remotes.event("SetSetting"):FireServer("hideRequirements", false)
+			pin.Text = T("tracker_pinned")
+		end
+	end)
 	Kit.fit(buttonLabel) -- narrower since the invite button sits next to it
 	local buttonGradient = gradient(buttonBack, Color3.new(), Color3.new(), 90)
 	local glow = stroke(button, Color3.new(1, 1, 1), 0)

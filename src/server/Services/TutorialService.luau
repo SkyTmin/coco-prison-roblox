@@ -28,12 +28,20 @@ function TutorialService.OnDug(
 end
 function TutorialService.OnSold(_player: Player, _items: { [string]: number }) end
 
-function TutorialService.OnUpgraded(player: Player, _itemId: string, before: number, after: number)
-	if Tutorial.step(Profile.Get(player)) ~= 3 then
+function TutorialService.OnUpgraded(player: Player, itemId: string, before: number, after: number)
+	local profile = Profile.Get(player)
+	local tracked = profile
+		and profile.settings
+		and profile.settings.trackedUpgrade == itemId .. ":" .. before
+	if not tracked and (itemId ~= "shovel" or Tutorial.step(profile) ~= 3) then
 		return
 	end
 	apply(player, function(p)
-		return Tutorial.upgraded(p, before, after, os.time())
+		local changed = Tutorial.advanceTrackedUpgrade(p, itemId, before, after)
+		if itemId == "shovel" then
+			changed = Tutorial.upgraded(p, before, after, os.time()) or changed
+		end
+		return changed
 	end)
 end
 
@@ -42,7 +50,7 @@ function TutorialService.Start()
 end
 
 function TutorialService.OnLevelUp(player: Player, before: number, after: number)
-	if Tutorial.step(Profile.Get(player)) ~= 4 then
+	if after < 2 then
 		return
 	end
 	apply(player, function(p)

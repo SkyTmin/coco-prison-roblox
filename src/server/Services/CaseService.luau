@@ -631,6 +631,11 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		InventoryService.remove(p, key, 1)
 		p.caseContents[session.id] = contents
 		p.coins += money
+		if session.id == "ordinaryCase" and p.tutorial then
+			local state = table.clone(p.tutorial)
+			state.ordinaryCaseOpened = true
+			p.tutorial = state
+		end
 		if
 			session.id == "ordinaryCase"
 			and random:NextNumber() < Config.artifacts.fromCaseChance.ordinaryCase

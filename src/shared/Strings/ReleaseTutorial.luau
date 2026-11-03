@@ -1,5 +1,73 @@
 --!strict
 return {
+	tracker_pin = {
+		ru = "Добавить подсказку на экран",
+		en = "Pin requirements to screen",
+		es = "Fijar requisitos en pantalla",
+		fr = "Afficher les objectifs à l'écran",
+	},
+	tracker_pinned = {
+		ru = "Подсказка добавлена",
+		en = "Requirements pinned",
+		es = "Requisitos fijados",
+		fr = "Objectifs affichés",
+	},
+	settings_requirements = {
+		ru = "Плашка заданий и улучшений",
+		en = "Tasks and upgrade requirements",
+		es = "Tareas y requisitos de mejora",
+		fr = "Missions et objectifs d'amélioration",
+	},
+	tracker_move = {
+		ru = "Переместить плашку на экране",
+		en = "Move the requirements card",
+		es = "Mover el panel de requisitos",
+		fr = "Déplacer le panneau d'objectifs",
+	},
+	tracker_level_goal = {
+		ru = "Повысить уровень до %d",
+		en = "Reach level %d",
+		es = "Alcanza el nivel %d",
+		fr = "Atteindre le niveau %d",
+	},
+	tracker_ready = {
+		ru = "Всё готово — откройте меню",
+		en = "Ready — open the menu",
+		es = "Todo listo: abre el menú",
+		fr = "Tout est prêt : ouvrez le menu",
+	},
+	tracker_collect = {
+		ru = "Соберите требования для улучшения",
+		en = "Meet the upgrade requirements",
+		es = "Reúne los requisitos de mejora",
+		fr = "Remplissez les objectifs d'amélioration",
+	},
+	tutorial_marker_mine = { ru = "Копать", en = "Mine", es = "Minar", fr = "Miner" },
+	tutorial_marker_sell = { ru = "Продать", en = "Sell", es = "Vender", fr = "Vendre" },
+	tutorial_marker_case = {
+		ru = "Открыть кейс",
+		en = "Open case",
+		es = "Abrir caja",
+		fr = "Ouvrir la caisse",
+	},
+	tutorial_earn_upgrade = {
+		ru = "Копайте ещё: денег на улучшение пока не хватает",
+		en = "Keep mining: earn more money for the upgrade",
+		es = "Sigue minando: falta dinero para la mejora",
+		fr = "Continuez à miner : il manque de l'argent",
+	},
+	tutorial_panel_level_mine = {
+		ru = "Копайте блоки в шахте на спавне",
+		en = "Mine blocks in the spawn mine",
+		es = "Mina bloques en la mina inicial",
+		fr = "Minez des blocs dans la mine de départ",
+	},
+	tutorial_first_case = {
+		ru = "Ключ в руке! Следуйте стрелкам к обычному кейсу.",
+		en = "Key equipped! Follow the arrows to the ordinary case.",
+		es = "¡Llave equipada! Sigue las flechas hasta la caja normal.",
+		fr = "Clé en main ! Suivez les flèches jusqu'à la caisse ordinaire.",
+	},
 	tutorial_panel_blocks = { ru = "Блоки", en = "Blocks", es = "Bloques", fr = "Blocs" },
 	tutorial_panel_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
 	tutorial_panel_mine = {

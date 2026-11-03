@@ -60,8 +60,14 @@ end
 
 -- Prefer the left edge, then the nearest clear column. A short viewport scrolls the
 -- card's contents instead of shrinking text or covering a player-moved control.
-function Panel.place(view: Vector2, inset: number, height: number, obstacles: { Rect }): Rect
-	local width = math.min(250, view.X - 24)
+function Panel.place(
+	view: Vector2,
+	inset: number,
+	height: number,
+	obstacles: { Rect },
+	requestedWidth: number?
+): Rect
+	local width = math.min(requestedWidth or 250, view.X - 24)
 	local top, bottom, gap = inset + 8, view.Y - 8, 8
 	local columns = { 10 }
 	for _, obstacle in obstacles do
@@ -101,7 +107,31 @@ function Panel.place(view: Vector2, inset: number, height: number, obstacles: { 
 	return best or { x = 10, y = top, width = width, height = 0 }
 end
 
-function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
+-- A saved layout from a larger phone must never cover the current touch controls.
+-- Keep the player's position whenever it fits; otherwise use the same safe placement.
+function Panel.relocate(view: Vector2, inset: number, wanted: Rect, obstacles: { Rect }): Rect
+	local width = math.min(wanted.width, view.X - 24)
+	local height = math.min(wanted.height, view.Y - inset - 16)
+	local rect = {
+		x = math.clamp(wanted.x, 8, math.max(8, view.X - width - 8)),
+		y = math.clamp(wanted.y, inset + 8, math.max(inset + 8, view.Y - height - 8)),
+		width = width,
+		height = height,
+	}
+	for _, obstacle in obstacles do
+		if
+			rect.x < obstacle.x + obstacle.width
+			and rect.x + rect.width > obstacle.x
+			and rect.y < obstacle.y + obstacle.height
+			and rect.y + rect.height > obstacle.y
+		then
+			return Panel.place(view, inset, height, obstacles, width)
+		end
+	end
+	return rect
+end
+
+function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?)
 	local panel = Ui.card(gui, UDim2.fromOffset(250, 220), UDim2.new())
 	panel.Name, panel.ZIndex = "FirstSteps", 6
 	local scroll = Instance.new("ScrollingFrame")
@@ -110,8 +140,21 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 		UDim2.fromScale(1, 1), 3, Enum.ScrollingDirection.Y
 	scroll.Parent = panel
 	local title =
-		Ui.label(scroll, "", UDim2.new(1, -16, 0, 28), UDim2.fromOffset(8, 6), 14, Ui.colors.header)
+		Ui.label(scroll, "", UDim2.new(1, -45, 0, 28), UDim2.fromOffset(8, 6), 14, Ui.colors.header)
 	title.Name, title.TextWrapped = "TaskGoal", true
+	local close = Ui.button(
+		panel,
+		"×",
+		UDim2.fromOffset(28, 28),
+		UDim2.new(1, -30, 0, 2),
+		Ui.colors.buttonGrey
+	)
+	close.Name, close.TextSize, close.ZIndex = "HideRequirements", 20, 10
+	close.Activated:Connect(function()
+		if onHide then
+			onHide()
+		end
+	end)
 	local header =
 		Ui.label(scroll, "", UDim2.new(1, -76, 0, 18), UDim2.fromOffset(8, 36), 13, Ui.colors.muted)
 	header.Name = "RequirementsTitle"
@@ -157,7 +200,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 	shortcut.Activated:Connect(function()
 		openMenu("menu")
 	end)
-	local api = { frame = panel, shortcut = shortcut }
+	local api = { frame = panel, shortcut = shortcut, manual = false, preservePosition = false }
 	function api.Update(
 		step: number,
 		locale: string,
@@ -192,7 +235,11 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 				Strings.itemFullName(goal.itemId, goal.level, locale),
 				goal.to
 			)
-			else Strings.t("tutorial_level_goal", locale, goal.level)
+			else Strings.t(
+				if api.manual then "tracker_level_goal" else "tutorial_level_goal",
+				locale,
+				goal.level
+			)
 		header.Text = Strings.t("requirements", locale)
 		local met, y = 0, 56
 		for index, requirement in requirements do
@@ -251,11 +298,12 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 		end
 		y += rowHeight + 8
 		local shortPhase = if phase == "tutorial_collect_upgrade"
-				or phase == "tutorial_collect_level"
 			then "tutorial_panel_mine"
+			elseif phase == "tutorial_collect_level" then "tutorial_panel_level_mine"
 			elseif phase == "tutorial_sell_blocks" then "tutorial_panel_sell"
 			else phase
 		hint.Text = if goal
+				and (phase == "tutorial_collect_upgrade" or phase == "tutorial_collect_level" or phase == "tutorial_earn_upgrade")
 				and goal.coins < goal.cost
 				and (goal.estimatedSale or 0) > 0
 				and not goal.saleReady
@@ -266,6 +314,12 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 				Strings.money(goal.cost)
 			)
 			else Strings.t(shortPhase, locale)
+		if api.manual then
+			hint.Text = Strings.t(
+				if goal and goal.ready then "tracker_ready" else "tracker_collect",
+				locale
+			)
+		end
 		hint.Position = UDim2.fromOffset(8, y)
 		y += 28
 		shortcut.Visible, shortcut.Text =
@@ -275,8 +329,13 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> ())
 			y += 48
 		end
 		local rect = Panel.place(view, inset, y + 6, obstacles)
-		panel.Position, panel.Size =
-			UDim2.fromOffset(rect.x, rect.y), UDim2.fromOffset(rect.width, rect.height)
+		if not api.preservePosition then
+			panel.Position = UDim2.fromOffset(rect.x, rect.y)
+		end
+		panel.Size = UDim2.fromOffset(
+			rect.width,
+			if api.preservePosition then math.min(y + 6, view.Y - inset - 16) else rect.height
+		)
 		scroll.CanvasSize = UDim2.fromOffset(0, y + 6)
 		panel:SetAttribute("LayoutFits", rect.height > 0)
 	end

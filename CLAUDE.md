@@ -41,6 +41,8 @@ Do not read `wiki/` wholesale (≈ 60 MB, 500 files). Grep, then read the matchi
 
 ## Studio loop without the Rojo plugin (agent sessions)
 
+**Latest owner steering (03.11 morning): Studio access ended until evening. Continue code only; do not launch Studio, operate its UI, or send PC notifications.** Connection disappeared during the fresh tutorial STS test; completion and map-lease restoration were not confirmed. When the owner renews Studio access, run `scripts/qa-release-resume-map.luau` in Edit before Play or saving. It restores a live lease if possible and reports missing scenery; do not save/rebuild a partial map blindly. The tutorial flow is still unaccepted. Latest completed paired checks: Actions 41/41, post-collision PvP 32/32.
+
 **Owner-confirmed active QA place (01.11): «Каторга», PlaceId `92594200898716`, universe `10772144679`.** Studio still displays the old internal title `Место игрока coco_shamill: 10202026_1`; the owner explicitly confirmed it. Reuse this open cloud place for current QA and sync only repository scripts. A Rojo source-only build is a validation artifact, not a replacement for its map. Do not switch to a local build merely because the cloud title differs from «Каторга».
 
 **Owner authorization (02.11): always restart Play when needed for fixes/QA, even while the owner is playing; do not ask again. Restore the owner's enabled Creative mode after each restart through its normal client remote.**

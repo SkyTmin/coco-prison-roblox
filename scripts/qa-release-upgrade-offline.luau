@@ -188,6 +188,16 @@ for _, child in item.children do
 	end
 end
 select.Activated:Fire()
+local preferences = {}
+f.modules.Remotes.event("SetSetting").FireServer = function(_, key, value)
+	preferences[key] = value
+end
+local pin = find(window, "PinUpgradeRequirements")
+pin.Activated:Fire()
+check(
+	"pin stores selected equipment tier and enables card",
+	preferences.trackedUpgrade == "pickaxe:1" and preferences.hideRequirements == false
+)
 local event = f.modules.Remotes.event("UpgradeItem")
 local target
 event.FireServer = function(_, v)
@@ -197,6 +207,11 @@ buy.Activated:Fire()
 check("selected scrolled item is submitted", target == 12)
 p.inventory[12].level = 2
 refresh(p)
+pin.Activated:Fire()
+check(
+	"pin follows next real upgrade after successful purchase",
+	preferences.trackedUpgrade == "pickaxe:2"
+)
 check(
 	"upgrade result immediately shows next upgrade",
 	buy.Text == "upgrade_button" and buy.Interactable

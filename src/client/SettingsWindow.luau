@@ -30,6 +30,8 @@ function SettingsWindow.of(profile: Types.Profile?): Types.Settings
 		muted = s.muted == true,
 		hideToasts = s.hideToasts == true,
 		hideBoosters = s.hideBoosters == true,
+		hideRequirements = s.hideRequirements == true,
+		trackedUpgrade = s.trackedUpgrade,
 		autosellOff = s.autosellOff == true,
 		autosellTextOff = s.autosellTextOff == true,
 		tipsOff = s.tipsOff == true,
@@ -248,6 +250,23 @@ function SettingsWindow.build(
 			y += 52
 		elseif selectedTab == "display" then
 			number("brightness", "settings_brightness", "settings_brightness_hint")
+			toggle(
+				"settings_requirements",
+				"hideRequirements",
+				not settings.hideRequirements,
+				"settings_shown",
+				"settings_hidden"
+			)
+			local move = Ui.button(
+				scroll,
+				T("tracker_move"),
+				UDim2.new(1, -9, 0, 44),
+				UDim2.fromOffset(0, y),
+				Ui.colors.buttonBlue
+			)
+			move.Name = "MoveRequirements"
+			move.Activated:Connect(openLayout)
+			y += 52
 			toggle(
 				"settings_toasts",
 				"hideToasts",

@@ -72,6 +72,11 @@ function ProgressReset.apply(profile: any, defaults: any)
 	for _, key in ipairs(CLEARED) do
 		profile[key] = Persistence.copy(defaults[key])
 	end
+	if typeof(profile.settings) == "table" then
+		local settings = table.clone(profile.settings)
+		settings.trackedUpgrade, settings.hideRequirements = nil, nil
+		profile.settings = settings
+	end
 	if typeof(profile.auction) == "table" then
 		profile.auction.returns = {}
 	end

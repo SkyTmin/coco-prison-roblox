@@ -10,15 +10,21 @@ local player = game.Players.LocalPlayer
 assert(player.UserId < 0, "Refuse real account")
 local Run, startedAt = game.RunService, os.clock()
 local folder, ready, rpc, session, acked
+local currentRpcId
 local function progress(phase, detail)
 	player:SetAttribute("QAReleaseTutorialPhase", phase)
-	local info =
-		{ session = session, phase = phase, error = detail, elapsed = os.clock() - startedAt }
+	local info = {
+		session = session,
+		phase = phase,
+		rpcId = currentRpcId,
+		error = detail,
+		elapsed = os.clock() - startedAt,
+	}
 	if ready then
 		ready:FireServer(info)
 	end
 	if detail then
-		warn("[QAReleaseTutorial startup] " .. game.HttpService:JSONEncode(info))
+		warn("[QAReleaseTutorial] " .. game.HttpService:JSONEncode(info))
 	end
 end
 local function need(parent, name)
@@ -92,23 +98,38 @@ local function find(name)
 	return player.PlayerGui:FindFirstChild(name, true)
 end
 local function inspect(args)
-	if args.close or args.marker == "mine" or args.marker == "sell" then
+	if args.close or args.marker == "mine" or args.marker == "sell" or args.marker == "case" then
+		progress("inspect_close_window")
 		debugHook:Invoke("close")
 	end
 	if args.menu then
+		progress("inspect_open_menu")
 		debugHook:Invoke("open", "menu")
 	end
+	progress("inspect_wait_guide")
 	local settled = waitFor(function()
 		local marker, panel = find("TutorialWorldMarker"), find("FirstSteps")
 		if not marker or not panel then
 			return false
 		end
 		local target = marker.Adornee
+		if args.phase and marker.Parent:GetAttribute("TutorialPhase") ~= args.phase then
+			return false
+		end
+		if args.control == "menu" then
+			local name = marker.Parent:GetAttribute("TutorialTargetControl")
+			return name == "MenuButton" or name == "Touch_menu" or name == "TutorialUpgradeShortcut"
+		end
 		if args.marker == "mine" then
 			return marker.Enabled and target and target:GetAttribute("MineId") == "prison"
 		end
 		if args.marker == "sell" then
 			return marker.Enabled and target and game.CollectionService:HasTag(target, "SellPoint")
+		end
+		if args.marker == "case" then
+			return marker.Enabled
+				and target
+				and game.CollectionService:HasTag(target, "OrdinaryCase")
 		end
 		if args.menu then
 			local tile = find(if args.level then "Tile_level" else "Tile_upgrade")
@@ -116,12 +137,25 @@ local function inspect(args)
 		end
 		return args.marker ~= "none" or not marker.Enabled
 	end, 6)
+	if not settled then
+		local marker = find("TutorialWorldMarker")
+		local detail = string.format(
+			"expected=%s; phase=%s; target=%s",
+			tostring(args.phase or args.control or args.marker or "any"),
+			tostring(marker and marker.Parent:GetAttribute("TutorialPhase")),
+			tostring(marker and marker.Adornee)
+		)
+		progress("inspect_guide_timeout", detail)
+		error("inspect_guide_timeout: " .. detail)
+	end
+	progress("inspect_guide_ready")
 	task.wait(0.6) -- the real guide observes profile/window state every 0.5 s
 	local marker, panel, highlight =
 		find("TutorialWorldMarker"), find("FirstSteps"), find("TutorialBlock")
 	local target = marker and marker.Adornee
 	local camera = workspace.CurrentCamera
 	if args.frame and target and camera then
+		progress("inspect_frame_target")
 		if not savedCamera then
 			savedCamera = { type = camera.CameraType, cf = camera.CFrame, focus = camera.Focus }
 		end
@@ -133,9 +167,12 @@ local function inspect(args)
 		camera.Focus = CFrame.new(target.Position)
 	end
 	local framesBefore = frames
-	waitFor(function()
+	progress("inspect_wait_render")
+	local rendered = waitFor(function()
 		return frames - framesBefore >= 2
 	end, 3)
+	assert(rendered, "inspect_render_timeout: fewer than 2 rendered frames")
+	progress("inspect_collect_ui")
 	local onScreen, projected = false, nil
 	if target and camera then
 		local point, inside =
@@ -162,9 +199,31 @@ local function inspect(args)
 			end
 		end
 	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local beam = root and root:FindFirstChild("TutorialPath")
+	local pathArrows = workspace:FindFirstChild("TutorialDirectionArrows")
+	local mineFacing
+	if root and camera then
+		for _, anchor in game.CollectionService:GetTagged("MineAnchor") do
+			if anchor:GetAttribute("MineId") == "prison" then
+				local delta = (anchor.Position - root.Position) * Vector3.new(1, 0, 1)
+				if delta.Magnitude > 0.1 then
+					mineFacing = camera.CFrame.LookVector:Dot(delta.Unit)
+				end
+			end
+		end
+	end
+	local uiArrow = find("TutorialUiArrow")
+	local caption = marker and marker:FindFirstChildWhichIsA("TextLabel", true)
 	return {
 		step = marker and marker.Parent:GetAttribute("TutorialStep"),
 		phase = marker and marker.Parent:GetAttribute("TutorialPhase"),
+		targetControl = marker and marker.Parent:GetAttribute("TutorialTargetControl"),
+		uiArrowVisible = uiArrow ~= nil and visible(uiArrow),
+		mineFacing = mineFacing,
+		beamTexture = beam and beam.Texture,
+		groundArrows = pathArrows and pathArrows:GetAttribute("VisibleArrows") or 0,
+		groundArrowParts = pathArrows and #pathArrows:GetChildren() or 0,
 		requirementsReady = marker and marker.Parent:GetAttribute("TutorialRequirementsReady"),
 		pathConnected = player.Character ~= nil and player.Character:FindFirstChild(
 			"HumanoidRootPart"
@@ -181,6 +240,7 @@ local function inspect(args)
 		menuUpgradeHighlighted = menuHighlighted,
 		menuLevelHighlighted = levelHighlighted,
 		marker = {
+			caption = caption and caption.Text,
 			enabled = marker ~= nil and marker.Enabled and visible(marker),
 			path = target and target:GetFullName(),
 			inWorkspace = target ~= nil and target:IsDescendantOf(workspace),
@@ -189,6 +249,7 @@ local function inspect(args)
 			name = target and target.Name,
 			position = target and vector(target.Position),
 			sellPoint = target ~= nil and game.CollectionService:HasTag(target, "SellPoint"),
+			ordinaryCase = target ~= nil and game.CollectionService:HasTag(target, "OrdinaryCase"),
 			onScreen = onScreen,
 			projected = projected,
 		},
@@ -220,9 +281,12 @@ local function buttonState(name)
 		size = { x = size.X, y = size.Y },
 	}
 end
-rpc.OnClientInvoke = function(op, args)
+local function handleRpc(op, args)
 	if op == "inspect" then
 		return inspect(args or {})
+	elseif op == "select" then
+		R.event("SelectSlot"):FireServer(args.slot)
+		return { remote = "SelectSlot", slot = args.slot, nativeClickClaimed = false }
 	elseif op == "pose" then
 		local c = player.Character
 		c.Humanoid:Move(Vector3.zero)
@@ -388,6 +452,22 @@ rpc.OnClientInvoke = function(op, args)
 		renderConnection:Disconnect()
 		return true
 	end
+	error("unsupported_rpc: " .. tostring(op))
+end
+rpc.OnClientInvoke = function(op, args, id)
+	currentRpcId = id
+	progress("rpc_" .. op)
+	local ok, result = xpcall(function()
+		return handleRpc(op, args)
+	end, debug.traceback)
+	progress(
+		if ok then "rpc_done_" .. op else "rpc_failed_" .. op,
+		if ok then nil else tostring(result)
+	)
+	if not ok then
+		error(result, 0)
+	end
+	return result
 end
 task.spawn(function()
 	progress("waiting_LoadingBlocked")

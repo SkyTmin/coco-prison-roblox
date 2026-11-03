@@ -103,7 +103,7 @@ for _, card in C.achievementsCfg.statCards do
 	)
 end
 M.TutorialService.OnLevelUp(actor, 1, 2)
-check("level cannot skip first upgrade", M.Tutorial.step(session.profile) == 3)
+check("unconfirmed level cannot skip first upgrade", M.Tutorial.step(session.profile) == 3)
 M.TutorialService.OnUpgraded(actor, "shovel", 1, 1)
 check("no change upgrade cannot advance", M.Tutorial.step(session.profile) == 3)
 M.TutorialService.OnUpgraded(actor, "shovel", 1, 2)
@@ -116,6 +116,7 @@ check(
 session.profile = boundary.migrate(f.disk["User_-700"])
 M.TutorialService.OnLevelUp(actor, 1, 1)
 check("unchanged level cannot complete tutorial", M.Tutorial.step(session.profile) == 4)
+session.profile.level = 2
 M.TutorialService.OnLevelUp(actor, 1, 2)
 check(
 	"actual level completes and persists tutorial",

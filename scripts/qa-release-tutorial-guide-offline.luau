@@ -204,6 +204,118 @@ check(
 	selectTarget("mine", { sand = true }) == right
 )
 
+-- Regression: nearer buried/occluded cells must not permanently exclude the 33rd
+-- valid requested material. Execute the unchanged production selector across ticks.
+local crowded = {}
+for i = 0, 31 do
+	local candidate = cell("sand", -16 + (i % 8) * 4, 0, 40 + math.floor(i / 8) * 4)
+	candidate.exposed, candidate.visible = i % 2 == 0, false
+	table.insert(crowded, candidate)
+end
+local visible33 = cell("sand", 0, 0, 140)
+table.insert(crowded, visible33)
+root.Position = rb.Vector3.new(0, 8, 0)
+selectTarget = scene(crowded, root.Position, rb.Vector3.new(0, 8, 140))
+previousRays = rays
+check("first blocked page has no fabricated target", selectTarget("mine", { sand = true }) == nil)
+check("blocked first page retains ray budget", rays - previousRays <= 130)
+previousScans = scans
+now += 0.2
+check(
+	"blocked page continuation obeys half-second throttle",
+	selectTarget("mine", { sand = true }) == nil and scans == previousScans
+)
+now += 0.4
+previousRays = rays
+check(
+	"33rd visible requested block is found on bounded continuation",
+	selectTarget("mine", { sand = true }) == visible33
+)
+check("continuation retains ray budget", rays - previousRays <= 130)
+now += 2.1
+check(
+	"valid farther wanted target stays visible during another blocked page",
+	selectTarget("mine", { sand = true }) == visible33
+)
+crowded[1].exposed, crowded[1].visible = true, true
+now += 2.1
+check(
+	"fresh nearby probes rediscover a block another player exposed",
+	selectTarget("mine", { sand = true }) == crowded[1]
+)
+
+local deeper = {}
+for i = 0, 95 do
+	local candidate = cell("sand", -16 + (i % 8) * 4, 0, 40 + math.floor(i / 8) * 4)
+	candidate.visible = false
+	table.insert(deeper, candidate)
+end
+local visible97, clearance = cell("sand", 0, 0, 160), cell("gravel", 0, 0, 12)
+table.insert(deeper, visible97)
+table.insert(deeper, clearance)
+selectTarget = scene(deeper, root.Position, rb.Vector3.new(0, 8, 160))
+check(
+	"clearance fallback is available while wanted search continues",
+	selectTarget("mine", { sand = true }) == clearance
+)
+local foundWanted = false
+for page = 1, 4 do
+	now += 0.6
+	previousRays = rays
+	local target = selectTarget("mine", { sand = true })
+	check("paged wanted search under fallback stays bounded " .. page, rays - previousRays <= 130)
+	if target == visible97 then
+		foundWanted = true
+		break
+	end
+end
+check("cached visible fallback cannot starve the 97th wanted block", foundWanted)
+
+for _, candidate in deeper do
+	candidate.exposed, candidate.visible = false, false
+end
+selectTarget = scene(deeper, root.Position, rb.Vector3.new(0, 8, 160))
+for _ = 1, 5 do
+	selectTarget("mine", { sand = true })
+	now += 0.6
+end
+deeper[40].exposed, deeper[40].visible = true, true
+local rediscovered = false
+for page = 1, 5 do
+	previousRays = rays
+	local target = selectTarget("mine", { sand = true })
+	check(
+		"exhausted scan retries without exceeding ray budget " .. page,
+		rays - previousRays <= 130
+	)
+	if target == deeper[40] then
+		rediscovered = true
+		break
+	end
+	now += 0.6
+end
+check("completed failed scan retries blocks exposed later", rediscovered)
+local fallbackOnly = {}
+for i = 0, 31 do
+	local candidate = cell("gravel", -16 + (i % 8) * 4, 0, 40 + math.floor(i / 8) * 4)
+	candidate.visible = false
+	table.insert(fallbackOnly, candidate)
+end
+local fallback33 = cell("gravel", 0, 0, 140)
+table.insert(fallbackOnly, fallback33)
+selectTarget = scene(fallbackOnly, root.Position, rb.Vector3.new(0, 8, 140))
+check(
+	"occluded fallback page does not fabricate clearance",
+	selectTarget("mine", { sand = true }) == nil
+)
+now += 0.6
+previousRays = rays
+check(
+	"fallback search also reaches its33rd visible block",
+	selectTarget("mine", { sand = true }) == fallback33
+)
+check("fallback continuation remains bounded", rays - previousRays <= 130)
+
 local env = {
 	itemConfirmed = false,
 	seenButtons = {},

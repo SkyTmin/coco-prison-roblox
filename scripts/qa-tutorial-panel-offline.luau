@@ -109,9 +109,11 @@ local function check(name, pass)
 end
 local playerGui, gui = node("PlayerGui"), node("ScreenGui")
 gui.Parent = playerGui
-local opened
+local opened, closeRequested
 local card = Panel.new(gui, function(kind)
 	opened = kind
+end, function()
+	closeRequested = true
 end)
 local function find(name)
 	for _, n in card.frame:GetDescendants() do
@@ -345,8 +347,58 @@ check(
 local noSpace =
 	Panel.place(rb.Vector2.new(390, 844), 58, 240, { { x = 0, y = 0, width = 390, height = 844 } })
 check("fully obstructed HUD never covered by fallback", noSpace.height == 0)
+find("HideRequirements").Activated:Fire()
+check("small close button invokes persisted hide path", closeRequested == true)
+card.manual = true
+card.Update(4, "fr", levelGoal, "tutorial_collect_level", rb.Vector2.new(390, 844), 58, {})
+check(
+	"manual level card loses onboarding-only title",
+	find("TaskGoal").Text == M.Strings.t("tracker_level_goal", "fr", 2)
+)
+card.manual = false
+goal.coins, goal.estimatedSale, goal.saleReady = 0, 100, false
+card.Update(3, "ru", goal, "tutorial_first_case", rb.Vector2.new(390, 844), 58, {})
+check(
+	"case instruction is not replaced by projected cash hint",
+	find("TaskHint").Text == M.Strings.t("tutorial_first_case", "ru")
+)
+for _, view in
+	{
+		rb.Vector2.new(320, 568),
+		rb.Vector2.new(568, 320),
+		rb.Vector2.new(360, 640),
+		rb.Vector2.new(640, 360),
+		rb.Vector2.new(390, 844),
+		rb.Vector2.new(844, 390),
+		rb.Vector2.new(768, 1024),
+		rb.Vector2.new(1024, 768),
+	}
+do
+	local controls = {
+		{ x = 8, y = 64, width = 70, height = 44 },
+		{ x = 0, y = view.Y - 150, width = 145, height = 150 },
+		{ x = view.X - 95, y = view.Y - 130, width = 85, height = 80 },
+		{ x = view.X / 2 - 100, y = view.Y - 50, width = 200, height = 45 },
+	}
+	local safe =
+		Panel.relocate(view, 58, { x = 0, y = view.Y - 145, width = 250, height = 235 }, controls)
+	check(
+		tostring(view) .. " moved card falls back to visible safe space",
+		safe.height >= 90
+			and safe.x >= 8
+			and safe.y >= 66
+			and safe.x + safe.width <= view.X - 8
+			and safe.y + safe.height <= view.Y - 8
+	)
+	for i, control in controls do
+		check(tostring(view) .. " moved card clears control " .. i, not overlap(safe, control))
+	end
+end
+local custom = { x = 300, y = 150, width = 250, height = 190 }
+local placed = Panel.relocate(rb.Vector2.new(1280, 720), 58, custom, {})
+check("valid custom card position stays unchanged", placed.x == 300 and placed.y == 150)
 local source = fs.readFile("src/client/TutorialGuide.luau")
-local _, uses = source:gsub('worldMode = if goal.saleReady then "sell" else "mine"', "")
+local _, uses = source:gsub('worldMode = if goal%.saleReady%s+then "sell"', "")
 check(
 	"both guide stages gate seller on shared sale readiness",
 	uses == 2 and not source:find("canSell", 1, true)

@@ -1,0 +1,96 @@
+{
+  "checks": [
+    {
+      "pass": true,
+      "name": "wall: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "wall: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "walk reached solid wall",
+      "detail": 7.400840759277344
+    },
+    {
+      "pass": true,
+      "name": "mining against wall has no large frame impulses",
+      "detail": {
+        "moving": 0.00016853882698342204,
+        "stationary": 0.015411530621349812
+      }
+    },
+    {
+      "pass": true,
+      "name": "ceiling: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "ceiling: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": false,
+      "name": "jump actually moved root",
+      "detail": 0
+    },
+    {
+      "pass": true,
+      "name": "rigid head keeps low ceiling solid",
+      "detail": 5.600001513957977
+    },
+    {
+      "pass": true,
+      "name": "ladder: sampled and server simulated"
+    },
+    {
+      "pass": true,
+      "name": "ladder: visual torso filtered despite Humanoid CanCollide"
+    },
+    {
+      "pass": true,
+      "name": "native Truss climb reached",
+      "detail": 17.998550415039062
+    }
+  ],
+  "status": "FAIL",
+  "rows": [
+    {
+      "movingMineStepMax": 0.00016853882698342204,
+      "minZ": -81.64962005615234,
+      "frames": 836,
+      "initialZ": -74.248779296875,
+      "maxY": 76.29991149902344,
+      "stationaryMineStepMax": 0.015411530621349812,
+      "initialY": 76.2999038696289,
+      "kind": "wall",
+      "stateClimbing": false,
+      "maxHeadTop": 78.74991148710251
+    },
+    {
+      "movingMineStepMax": 0.09293365478515625,
+      "minZ": -74.248779296875,
+      "frames": 836,
+      "initialZ": -74.248779296875,
+      "maxY": 76.2999038696289,
+      "stationaryMineStepMax": 0.1021881103515625,
+      "initialY": 76.2999038696289,
+      "kind": "ceiling",
+      "stateClimbing": false,
+      "maxHeadTop": 78.74990385770798
+    },
+    {
+      "movingMineStepMax": 3.8791162967681885,
+      "minZ": -191.02845764160156,
+      "frames": 836,
+      "initialZ": -74.248779296875,
+      "maxY": 94.29845428466797,
+      "stationaryMineStepMax": 0.399993896484375,
+      "initialY": 76.2999038696289,
+      "kind": "ladder",
+      "stateClimbing": true,
+      "maxHeadTop": 96.74845427274704
+    }
+  ],
+  "limitation": "server disposable rigs; live first-person camera and mobile not accepted by this fixture"
+}

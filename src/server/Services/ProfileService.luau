@@ -851,6 +851,7 @@ function ProfileService.Start()
 	-- per mode ("mobile" / "desktop") element id → {x, y}, the anchor point as a fraction of the screen; nil
 	-- for a mode resets it. Only known ids and positions on the screen are kept; one save a second.
 	local HUD_IDS = {
+		requirements = true,
 		attack = true,
 		eat = true,
 		menu = true,
@@ -913,6 +914,12 @@ function ProfileService.Start()
 		end)
 	-- the settings window: one value at a time, checked by its key
 	local SETTINGS: { [string]: (any) -> boolean } = {
+		hideRequirements = function(v)
+			return typeof(v) == "boolean"
+		end,
+		trackedUpgrade = function(v)
+			return require(Shared.Tutorial).validTrackingTarget(v)
+		end,
 		volume = function(v)
 			return typeof(v) == "number" and v == v and v >= 0 and v <= 1
 		end,

@@ -1,0 +1,1617 @@
+{
+  "menuShortcutClicked": false,
+  "assets": {
+    "rbxassetid://120467403268934": "Success",
+    "rbxassetid://5886559421": "Failure",
+    "rbxassetid://77890280599391": "Success",
+    "rbxassetid://87188573562363": "Success"
+  },
+  "remoteCalls": 0,
+  "checks": [
+    {
+      "pass": true,
+      "name": "ru 1 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 title fits",
+      "detail": "Деревянная лопата → уровень 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 resource text fits 1",
+      "detail": "Гравий"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 resource text fits 2",
+      "detail": "Земля"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 resource text fits 3",
+      "detail": "Песок"
+    },
+    {
+      "pass": true,
+      "name": "ru 1 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 title fits",
+      "detail": "Деревянная лопата → уровень 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 resource text fits 1",
+      "detail": "Гравий"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 resource text fits 2",
+      "detail": "Земля"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 resource text fits 3",
+      "detail": "Песок"
+    },
+    {
+      "pass": true,
+      "name": "ru 2 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 title fits",
+      "detail": "Деревянная лопата → уровень 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 resource text fits 1",
+      "detail": "Гравий"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 resource text fits 2",
+      "detail": "Земля"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 resource text fits 3",
+      "detail": "Песок"
+    },
+    {
+      "pass": true,
+      "name": "ru 3 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 title fits",
+      "detail": "Деревянная лопата → уровень 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 resource text fits 1",
+      "detail": "Гравий"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 resource text fits 2",
+      "detail": "Земля"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 resource text fits 3",
+      "detail": "Песок"
+    },
+    {
+      "pass": true,
+      "name": "ru 4 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 title fits",
+      "detail": "Деревянная лопата → уровень 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 resource text fits 1",
+      "detail": "Гравий"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 resource text fits 2",
+      "detail": "Земля"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 resource text fits 3",
+      "detail": "Песок"
+    },
+    {
+      "pass": true,
+      "name": "ru 5 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "en 1 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "en 1 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "en 1 title fits",
+      "detail": "Wooden shovel → level 2"
+    },
+    {
+      "pass": true,
+      "name": "en 1 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "en 1 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "en 1 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "en 1 resource text fits 1",
+      "detail": "Gravel"
+    },
+    {
+      "pass": true,
+      "name": "en 1 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "en 1 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "en 1 resource text fits 2",
+      "detail": "Dirt"
+    },
+    {
+      "pass": true,
+      "name": "en 1 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "en 1 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "en 1 resource text fits 3",
+      "detail": "Sand"
+    },
+    {
+      "pass": true,
+      "name": "en 1 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "en 2 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "en 2 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "en 2 title fits",
+      "detail": "Wooden shovel → level 2"
+    },
+    {
+      "pass": true,
+      "name": "en 2 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "en 2 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "en 2 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "en 2 resource text fits 1",
+      "detail": "Gravel"
+    },
+    {
+      "pass": true,
+      "name": "en 2 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "en 2 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "en 2 resource text fits 2",
+      "detail": "Dirt"
+    },
+    {
+      "pass": true,
+      "name": "en 2 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "en 2 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "en 2 resource text fits 3",
+      "detail": "Sand"
+    },
+    {
+      "pass": true,
+      "name": "en 2 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "en 3 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "en 3 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "en 3 title fits",
+      "detail": "Wooden shovel → level 2"
+    },
+    {
+      "pass": true,
+      "name": "en 3 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "en 3 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "en 3 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "en 3 resource text fits 1",
+      "detail": "Gravel"
+    },
+    {
+      "pass": true,
+      "name": "en 3 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "en 3 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "en 3 resource text fits 2",
+      "detail": "Dirt"
+    },
+    {
+      "pass": true,
+      "name": "en 3 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "en 3 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "en 3 resource text fits 3",
+      "detail": "Sand"
+    },
+    {
+      "pass": true,
+      "name": "en 3 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "en 4 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "en 4 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "en 4 title fits",
+      "detail": "Wooden shovel → level 2"
+    },
+    {
+      "pass": true,
+      "name": "en 4 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "en 4 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "en 4 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "en 4 resource text fits 1",
+      "detail": "Gravel"
+    },
+    {
+      "pass": true,
+      "name": "en 4 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "en 4 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "en 4 resource text fits 2",
+      "detail": "Dirt"
+    },
+    {
+      "pass": true,
+      "name": "en 4 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "en 4 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "en 4 resource text fits 3",
+      "detail": "Sand"
+    },
+    {
+      "pass": true,
+      "name": "en 4 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "en 5 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "en 5 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "en 5 title fits",
+      "detail": "Wooden shovel → level 2"
+    },
+    {
+      "pass": true,
+      "name": "en 5 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "en 5 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "en 5 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "en 5 resource text fits 1",
+      "detail": "Gravel"
+    },
+    {
+      "pass": true,
+      "name": "en 5 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "en 5 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "en 5 resource text fits 2",
+      "detail": "Dirt"
+    },
+    {
+      "pass": true,
+      "name": "en 5 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "en 5 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "en 5 resource text fits 3",
+      "detail": "Sand"
+    },
+    {
+      "pass": true,
+      "name": "en 5 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "es 1 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "es 1 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "es 1 title fits",
+      "detail": "Pala de madera → nivel 2"
+    },
+    {
+      "pass": true,
+      "name": "es 1 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "es 1 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "es 1 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "es 1 resource text fits 1",
+      "detail": "Grava"
+    },
+    {
+      "pass": true,
+      "name": "es 1 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "es 1 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "es 1 resource text fits 2",
+      "detail": "Tierra"
+    },
+    {
+      "pass": true,
+      "name": "es 1 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "es 1 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "es 1 resource text fits 3",
+      "detail": "Arena"
+    },
+    {
+      "pass": true,
+      "name": "es 1 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "es 2 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "es 2 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "es 2 title fits",
+      "detail": "Pala de madera → nivel 2"
+    },
+    {
+      "pass": true,
+      "name": "es 2 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "es 2 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "es 2 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "es 2 resource text fits 1",
+      "detail": "Grava"
+    },
+    {
+      "pass": true,
+      "name": "es 2 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "es 2 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "es 2 resource text fits 2",
+      "detail": "Tierra"
+    },
+    {
+      "pass": true,
+      "name": "es 2 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "es 2 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "es 2 resource text fits 3",
+      "detail": "Arena"
+    },
+    {
+      "pass": true,
+      "name": "es 2 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "es 3 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "es 3 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "es 3 title fits",
+      "detail": "Pala de madera → nivel 2"
+    },
+    {
+      "pass": true,
+      "name": "es 3 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "es 3 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "es 3 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "es 3 resource text fits 1",
+      "detail": "Grava"
+    },
+    {
+      "pass": true,
+      "name": "es 3 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "es 3 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "es 3 resource text fits 2",
+      "detail": "Tierra"
+    },
+    {
+      "pass": true,
+      "name": "es 3 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "es 3 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "es 3 resource text fits 3",
+      "detail": "Arena"
+    },
+    {
+      "pass": true,
+      "name": "es 3 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "es 4 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "es 4 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "es 4 title fits",
+      "detail": "Pala de madera → nivel 2"
+    },
+    {
+      "pass": true,
+      "name": "es 4 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "es 4 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "es 4 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "es 4 resource text fits 1",
+      "detail": "Grava"
+    },
+    {
+      "pass": true,
+      "name": "es 4 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "es 4 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "es 4 resource text fits 2",
+      "detail": "Tierra"
+    },
+    {
+      "pass": true,
+      "name": "es 4 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "es 4 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "es 4 resource text fits 3",
+      "detail": "Arena"
+    },
+    {
+      "pass": true,
+      "name": "es 4 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "es 5 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "es 5 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "es 5 title fits",
+      "detail": "Pala de madera → nivel 2"
+    },
+    {
+      "pass": true,
+      "name": "es 5 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "es 5 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "es 5 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "es 5 resource text fits 1",
+      "detail": "Grava"
+    },
+    {
+      "pass": true,
+      "name": "es 5 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "es 5 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "es 5 resource text fits 2",
+      "detail": "Tierra"
+    },
+    {
+      "pass": true,
+      "name": "es 5 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "es 5 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "es 5 resource text fits 3",
+      "detail": "Arena"
+    },
+    {
+      "pass": true,
+      "name": "es 5 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 title fits",
+      "detail": "Pelle en bois → niveau 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 resource text fits 1",
+      "detail": "Gravier"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 resource text fits 2",
+      "detail": "Terre"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 resource text fits 3",
+      "detail": "Sable"
+    },
+    {
+      "pass": true,
+      "name": "fr 1 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 title fits",
+      "detail": "Pelle en bois → niveau 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 resource text fits 1",
+      "detail": "Gravier"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 resource text fits 2",
+      "detail": "Terre"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 resource text fits 3",
+      "detail": "Sable"
+    },
+    {
+      "pass": true,
+      "name": "fr 2 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 title fits",
+      "detail": "Pelle en bois → niveau 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 resource text fits 1",
+      "detail": "Gravier"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 resource text fits 2",
+      "detail": "Terre"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 resource text fits 3",
+      "detail": "Sable"
+    },
+    {
+      "pass": true,
+      "name": "fr 3 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 title fits",
+      "detail": "Pelle en bois → niveau 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 resource text fits 1",
+      "detail": "Gravier"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 resource text fits 2",
+      "detail": "Terre"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 resource text fits 3",
+      "detail": "Sable"
+    },
+    {
+      "pass": true,
+      "name": "fr 4 X is inside card"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 native frame has usable height"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 card fits fixture viewport"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 title fits",
+      "detail": "Pelle en bois → niveau 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 count stays incomplete"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 actual block icon 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 neutral missing requirement 1"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 resource text fits 1",
+      "detail": "Gravier"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 actual block icon 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 neutral missing requirement 2"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 resource text fits 2",
+      "detail": "Terre"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 actual block icon 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 neutral missing requirement 3"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 resource text fits 3",
+      "detail": "Sable"
+    },
+    {
+      "pass": true,
+      "name": "fr 5 X is inside card"
+    },
+    {
+      "pass": false,
+      "name": "official tutorial arrow asset loaded",
+      "detail": "Failure"
+    },
+    {
+      "pass": true,
+      "name": "native manual level title translated"
+    }
+  ],
+  "layouts": [
+    {
+      "locale": "ru",
+      "actualViewport": true,
+      "title": "Деревянная лопата → уровень 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 633,
+        "x": 1809
+      },
+      "scrollHeight": 211,
+      "hint": "Копайте отмеченные блоки",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "ru",
+      "actualViewport": false,
+      "title": "Деревянная лопата → уровень 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 568,
+        "x": 320
+      },
+      "scrollHeight": 211,
+      "hint": "Копайте отмеченные блоки",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "ru",
+      "actualViewport": false,
+      "title": "Деревянная лопата → уровень 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 320,
+        "x": 568
+      },
+      "scrollHeight": 200,
+      "hint": "Копайте отмеченные блоки",
+      "size": {
+        "y": 196,
+        "x": 250
+      }
+    },
+    {
+      "locale": "ru",
+      "actualViewport": false,
+      "title": "Деревянная лопата → уровень 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 844,
+        "x": 390
+      },
+      "scrollHeight": 211,
+      "hint": "Копайте отмеченные блоки",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "ru",
+      "actualViewport": false,
+      "title": "Деревянная лопата → уровень 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 390,
+        "x": 844
+      },
+      "scrollHeight": 200,
+      "hint": "Копайте отмеченные блоки",
+      "size": {
+        "y": 200,
+        "x": 250
+      }
+    },
+    {
+      "locale": "en",
+      "actualViewport": true,
+      "title": "Wooden shovel → level 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 633,
+        "x": 1809
+      },
+      "scrollHeight": 211,
+      "hint": "Mine the marked blocks",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "en",
+      "actualViewport": false,
+      "title": "Wooden shovel → level 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 568,
+        "x": 320
+      },
+      "scrollHeight": 211,
+      "hint": "Mine the marked blocks",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "en",
+      "actualViewport": false,
+      "title": "Wooden shovel → level 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 320,
+        "x": 568
+      },
+      "scrollHeight": 200,
+      "hint": "Mine the marked blocks",
+      "size": {
+        "y": 196,
+        "x": 250
+      }
+    },
+    {
+      "locale": "en",
+      "actualViewport": false,
+      "title": "Wooden shovel → level 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 844,
+        "x": 390
+      },
+      "scrollHeight": 211,
+      "hint": "Mine the marked blocks",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "en",
+      "actualViewport": false,
+      "title": "Wooden shovel → level 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 390,
+        "x": 844
+      },
+      "scrollHeight": 200,
+      "hint": "Mine the marked blocks",
+      "size": {
+        "y": 200,
+        "x": 250
+      }
+    },
+    {
+      "locale": "es",
+      "actualViewport": true,
+      "title": "Pala de madera → nivel 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 633,
+        "x": 1809
+      },
+      "scrollHeight": 211,
+      "hint": "Mina los bloques marcados",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "es",
+      "actualViewport": false,
+      "title": "Pala de madera → nivel 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 568,
+        "x": 320
+      },
+      "scrollHeight": 211,
+      "hint": "Mina los bloques marcados",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "es",
+      "actualViewport": false,
+      "title": "Pala de madera → nivel 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 320,
+        "x": 568
+      },
+      "scrollHeight": 200,
+      "hint": "Mina los bloques marcados",
+      "size": {
+        "y": 196,
+        "x": 250
+      }
+    },
+    {
+      "locale": "es",
+      "actualViewport": false,
+      "title": "Pala de madera → nivel 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 844,
+        "x": 390
+      },
+      "scrollHeight": 211,
+      "hint": "Mina los bloques marcados",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "es",
+      "actualViewport": false,
+      "title": "Pala de madera → nivel 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 390,
+        "x": 844
+      },
+      "scrollHeight": 200,
+      "hint": "Mina los bloques marcados",
+      "size": {
+        "y": 200,
+        "x": 250
+      }
+    },
+    {
+      "locale": "fr",
+      "actualViewport": true,
+      "title": "Pelle en bois → niveau 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 633,
+        "x": 1809
+      },
+      "scrollHeight": 211,
+      "hint": "Minez les blocs indiqués",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "fr",
+      "actualViewport": false,
+      "title": "Pelle en bois → niveau 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 568,
+        "x": 320
+      },
+      "scrollHeight": 211,
+      "hint": "Minez les blocs indiqués",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "fr",
+      "actualViewport": false,
+      "title": "Pelle en bois → niveau 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 320,
+        "x": 568
+      },
+      "scrollHeight": 200,
+      "hint": "Minez les blocs indiqués",
+      "size": {
+        "y": 196,
+        "x": 250
+      }
+    },
+    {
+      "locale": "fr",
+      "actualViewport": false,
+      "title": "Pelle en bois → niveau 2",
+      "position": {
+        "y": 116,
+        "x": 10
+      },
+      "fixture": {
+        "y": 844,
+        "x": 390
+      },
+      "scrollHeight": 211,
+      "hint": "Minez les blocs indiqués",
+      "size": {
+        "y": 211,
+        "x": 250
+      }
+    },
+    {
+      "locale": "fr",
+      "actualViewport": false,
+      "title": "Pelle en bois → niveau 2",
+      "position": {
+        "y": 66,
+        "x": 153
+      },
+      "fixture": {
+        "y": 390,
+        "x": 844
+      },
+      "scrollHeight": 200,
+      "hint": "Minez les blocs indiqués",
+      "size": {
+        "y": 200,
+        "x": 250
+      }
+    }
+  ],
+  "simulatedInput": false,
+  "actualViewport": {
+    "y": 633,
+    "x": 1809,
+    "inset": 58
+  },
+  "closeClicked": false,
+  "physicalPhoneTest": false,
+  "assetPreloadComplete": true,
+  "realProfileAccess": false,
+  "status": "FAIL",
+  "previewSeconds": 0,
+  "failed": 1,
+  "guiRemoved": true
+}

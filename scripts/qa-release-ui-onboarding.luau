@@ -41,7 +41,7 @@ check(
 		and not Tutorial.sold(p, { sand = 200 })
 		and Tutorial.step(p) == 3
 )
-check("level cannot skip upgrade task", not Tutorial.leveled(p, 1, 2, 100))
+check("unconfirmed level cannot skip upgrade task", not Tutorial.leveled(p, 1, 2, 100))
 check("failed/no-change upgrade cannot advance tutorial", not Tutorial.upgraded(p, 1, 1, 100))
 check(
 	"actual upgrade starts persisted level task",
@@ -50,6 +50,7 @@ check(
 		and p.tutorial.completedAt == nil
 )
 check("failed/no-change level cannot complete tutorial", not Tutorial.leveled(p, 1, 1, 101))
+p.level = 2
 check(
 	"actual level completes persisted guide",
 	Tutorial.leveled(p, 1, 2, 102)
@@ -123,6 +124,9 @@ local function actor(id, name, display, x)
 		a.attrs[key] = value
 	end
 	a.Character = {
+		FindFirstChildOfClass = function(_, class)
+			return if class == "Humanoid" then { Health = a.health or 20 } else nil
+		end,
 		FindFirstChild = function()
 			return {
 				IsA = function()
@@ -156,7 +160,7 @@ local config = {
 	chat = {
 		payMin = 1,
 		giftForbidden = { "blocked" },
-		giftRangeBlocks = 5,
+		giftRangeBlocks = 4,
 		commandCooldownSeconds = 0,
 	},
 	rules = { combat = { blockStuds = 4 } },
@@ -285,6 +289,7 @@ local env = {
 	warn = function() end,
 }
 modules.InventoryService = load("src/server/Services/InventoryService.luau", env)
+modules.TransferAccess = load("src/shared/TransferAccess.luau", env)
 local mail = {}
 modules.PlayerTransferService = load(
 	"src/server/Services/PlayerTransferService.luau",
@@ -441,6 +446,61 @@ check(
 )
 recipient.UserId = 22
 
+for _, kind in { "pay", "gift" } do
+	resetProfiles()
+	recipient.Character = actor(22, "Bob", "Bob", 32).Character
+	check(
+		kind .. " far quote rejected before review",
+		quote(kind, 1).key == "release_transfer_nearby"
+	)
+	recipient.Character = actor(22, "Bob", "Bob", 4).Character
+	q = quote(kind, 1)
+	check(kind .. " nearby quote accepted", q.ok)
+	recipient.Character = actor(22, "Bob", "Bob", 32).Character
+	result = Actions.Request(sender, "confirm", q.token)
+	check(
+		kind .. " walking away after review refuses confirm",
+		not result.ok and result.key == "release_transfer_nearby"
+	)
+	check(
+		kind .. " walking away preserves balances and item",
+		profiles[sender].coins == 10000
+			and profiles[recipient].coins == 0
+			and profiles[sender].inventory[4].count == 5
+	)
+	local command = modules.ChatCommandService.ExecuteAction(
+		sender,
+		kind,
+		if kind == "pay" then { recipient.Name, "1" } else { recipient.Name, "4", "1" }
+	)
+	check(
+		kind .. " command cannot bypass distance",
+		not command.ok and command.key == "release_transfer_nearby"
+	)
+	recipient.Character = actor(22, "Bob", "Bob", 4).Character
+	q = quote(kind, 1)
+	recipient.health = 0
+	-- This character closure must read the same actor's current health.
+	local livingBody = recipient.Character
+	recipient.Character = {
+		FindFirstChildOfClass = function()
+			return { Health = 0 }
+		end,
+		FindFirstChild = livingBody.FindFirstChild,
+	}
+	result = Actions.Request(sender, "confirm", q.token)
+	check(
+		kind .. " death after review refuses without debit",
+		not result.ok
+			and result.key == "release_transfer_alive"
+			and profiles[sender].coins == 10000
+			and profiles[sender].inventory[4].count == 5
+	)
+	recipient.health = nil
+	recipient.Character = actor(22, "Bob", "Bob", 4).Character
+end
+resetProfiles()
+
 -- Actual ProfileService reset at its real durable/session boundary, on negative simulated actors only.
 local factory = require("./qa-profile-persistence-offline").fixture
 local f = factory()
@@ -589,6 +649,9 @@ check(
 	"upgrade checkpoints level task",
 	f.writes == stageSaves + 1 and Tutorial.step(f.disk["User_-777"]) == 4
 )
+boundary.service.Mutate(owner, function(profile)
+	profile.level = 2
+end)
 serverTutorial.OnLevelUp(owner, 1, 2)
 check(
 	"real tutorial service checkpoints completion",

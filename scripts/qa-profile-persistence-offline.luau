@@ -4,6 +4,7 @@
 -- Real Persistence/Numbers/Inventory/StorageTransfer code; isolated DataStore, clock and players.
 local fs = require("@lune/fs")
 local serde = require("@lune/serde")
+local rb = require("@lune/roblox")
 local checks = {}
 local function check(name, value)
 	assert(value, name)
@@ -59,7 +60,9 @@ local function fixture(options)
 		Wire = { encode = copy },
 		Boosters = { prune = function() end },
 		Config = {
+			chat = { giftRangeBlocks = 4 },
 			rules = {
+				combat = { blockStuds = 4 },
 				survival = { hunger = { max = 20 } },
 				ui = { locales = { "ru", "en", "es", "fr" }, defaultLocale = "ru" },
 			},
@@ -73,6 +76,11 @@ local function fixture(options)
 			MAX = 3,
 			unlocked = function(p)
 				return p.vaultSections or 1
+			end,
+		},
+		ItemEnchantment = {
+			active = function()
+				return false
 			end,
 		},
 	}
@@ -171,6 +179,11 @@ local function fixture(options)
 		setfenv(
 			fn,
 			setmetatable({
+				workspace = {
+					GetServerTimeNow = function()
+						return f.clock
+					end,
+				},
 				game = {
 					JobId = job or "A",
 					GetService = function(_, name)
@@ -210,6 +223,7 @@ local function fixture(options)
 	modules.Persistence = load("src/shared/Persistence.luau")
 	modules.TestSessionScope = load("src/server/Services/TestSessionScope.luau")
 	modules.Numbers = load("src/shared/Numbers.luau")
+	modules.TransferAccess = load("src/shared/TransferAccess.luau")
 	modules.Selling = load("src/shared/Selling.luau")
 	modules.Tutorial = load("src/shared/Tutorial.luau")
 	modules.ProgressReset = load("src/shared/ProgressReset.luau")
@@ -282,6 +296,34 @@ return {
 		return load("src/server/Services/StorageTransferService.luau")
 	end
 	function f:playerTransfers(boundary)
+		for _, actor in self.actors do
+			if not actor.Character then
+				local attributes = {}
+				local root = {
+					Position = rb.Vector3.zero,
+					IsA = function()
+						return true
+					end,
+				}
+				local humanoid = { Health = 20 }
+				actor.Character = {
+					root = root,
+					humanoid = humanoid,
+					FindFirstChild = function(_, name)
+						return if name == "HumanoidRootPart" then root else nil
+					end,
+					FindFirstChildOfClass = function(_, name)
+						return if name == "Humanoid" then humanoid else nil
+					end,
+					GetAttribute = function(_, key)
+						return attributes[key]
+					end,
+					SetAttribute = function(_, key, value)
+						attributes[key] = value
+					end,
+				}
+			end
+		end
 		modules.ProfileService = boundary.service
 		modules.Remotes.event = function()
 			return {

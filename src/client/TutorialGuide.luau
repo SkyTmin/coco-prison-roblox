@@ -8,10 +8,30 @@ local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Tutorial = require(Shared.Tutorial)
 local Strings = require(Shared.Strings)
 local Config = require(Shared.Config)
+local Remotes = require(Shared.Remotes)
 local Ui = require(script.Parent.Ui)
 local TutorialPanel = require(script.Parent.TutorialPanel)
+local TutorialPath = require(script.Parent.TutorialPath)
+local HudLayout = require(script.Parent.HudLayout)
 local Guide = {}
 local started = false
+
+-- A shaft and two wings remain recognizable without relying on a font's triangle glyph.
+local function pointer(parent: Instance): Frame
+	local holder = Instance.new("Frame")
+	holder.BackgroundTransparency, holder.Size, holder.Parent = 1, UDim2.fromOffset(42, 42), parent
+	for _, shape in { { 21, 17, 6, 34, 0 }, { 14, 29, 20, 6, 45 }, { 28, 29, 20, 6, -45 } } do
+		local part = Instance.new("Frame")
+		part.AnchorPoint, part.Position =
+			Vector2.new(0.5, 0.5), UDim2.fromOffset(shape[1], shape[2])
+		part.Size, part.Rotation = UDim2.fromOffset(shape[3], shape[4]), shape[5]
+		part.BorderSizePixel, part.BackgroundColor3, part.ZIndex, part.Parent =
+			0, Ui.colors.yellow, 31, holder
+		local edge = Instance.new("UIStroke")
+		edge.Color, edge.Thickness, edge.Parent = Color3.fromRGB(20, 20, 20), 1, part
+	end
+	return holder
+end
 
 function Guide.Start(
 	gui: ScreenGui,
@@ -30,15 +50,19 @@ function Guide.Start(
 	local itemConfirmed = false
 	local seenButtons: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any
 	local marks: { [GuiObject]: UIStroke } = {}
-	local taskPanel = TutorialPanel.new(gui, openMenu)
+	local hideRequestedAt = -math.huge
+	local taskPanel = TutorialPanel.new(gui, openMenu, function()
+		hideRequestedAt = os.clock()
+		Remotes.event("SetSetting"):FireServer("hideRequirements", true)
+	end)
 	local panel, shortcut = taskPanel.frame, taskPanel.shortcut
+	HudLayout.register("requirements", panel, true, true)
 	local marker = Instance.new("BillboardGui")
 	marker.Name, marker.AlwaysOnTop = "TutorialWorldMarker", true
 	marker.Size, marker.StudsOffsetWorldSpace, marker.Parent =
 		UDim2.fromOffset(160, 82), Vector3.new(0, 5, 0), gui
-	local arrow = Ui.label(marker, "▼", UDim2.new(1, 0, 0, 48), UDim2.new(), 42, Ui.colors.yellow)
-	arrow.Font, arrow.TextXAlignment, arrow.TextStrokeTransparency =
-		Enum.Font.GothamBold, Enum.TextXAlignment.Center, 0.25
+	local arrow = pointer(marker)
+	arrow.Position = UDim2.fromOffset(59, 0)
 	local caption =
 		Ui.label(marker, "", UDim2.new(1, 0, 0, 28), UDim2.fromOffset(0, 48), 16, Ui.colors.yellow)
 	caption.TextXAlignment, caption.TextStrokeTransparency = Enum.TextXAlignment.Center, 0.25
@@ -46,15 +70,18 @@ function Guide.Start(
 	highlight.Name, highlight.FillColor, highlight.OutlineColor =
 		"TutorialBlock", Ui.colors.yellow, Ui.colors.yellow
 	highlight.FillTransparency, highlight.Parent = 0.7, gui
-	local uiArrow =
-		Ui.label(gui, "▼", UDim2.fromOffset(42, 42), UDim2.new(), 32, Ui.colors.yellow)
+	local uiArrow = pointer(gui)
 	uiArrow.Name, uiArrow.AnchorPoint, uiArrow.ZIndex = "TutorialUiArrow", Vector2.new(0.5, 1), 30
-	uiArrow.TextXAlignment, uiArrow.TextStrokeTransparency, uiArrow.Visible =
-		Enum.TextXAlignment.Center, 0.25, false
+	uiArrow.Visible = false
 	local line: Beam? = nil
 	local startAttachment: Attachment? = nil
 	local endAttachment: Attachment? = nil
+	local groundPath: any = nil
 	local function clearLine()
+		if groundPath then
+			groundPath.Destroy()
+			groundPath = nil
+		end
 		if line then
 			line:Destroy()
 			line = nil
@@ -91,8 +118,11 @@ function Guide.Start(
 		beam.Name, beam.Attachment0, beam.Attachment1 = "TutorialPath", a, b
 		beam.FaceCamera, beam.Color, beam.Transparency =
 			true, ColorSequence.new(Ui.colors.yellow), NumberSequence.new(0.15)
-		beam.Width0, beam.Width1, beam.Segments, beam.Parent = 0.14, 0.09, 1, root
+		-- The thin stock beam connects the endpoints; full local ground arrows carry direction.
+		-- No external texture asset can make the guide disappear.
+		beam.Width0, beam.Width1, beam.Segments, beam.Parent = 0.07, 0.07, 1, root
 		startAttachment, endAttachment, line = a, b, beam
+		groundPath = TutorialPath.new(Ui.colors.yellow)
 	end
 	local function visible(object: Instance?): boolean
 		local current = object
@@ -117,11 +147,16 @@ function Guide.Start(
 	local searchedPosition = Vector3.zero
 	local searchedLook = Vector3.zero
 	local searchedAt = -math.huge
+	local cachedFallback = false
+	local rejectedWanted: { [BasePart]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+	local rejectedFallback: { [BasePart]: boolean } = setmetatable({}, { __mode = "k" }) :: any
 	local function chooseTarget(mode: string?, counters: { [string]: boolean }?): BasePart?
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if not root or not root:IsA("BasePart") or not mode then
-			cachedTarget = nil
+			cachedTarget, cachedMode, cachedFallback = nil, nil, false
+			table.clear(rejectedWanted)
+			table.clear(rejectedFallback)
 			return nil
 		end
 		local keys = {}
@@ -144,7 +179,7 @@ function Guide.Start(
 			if not part:IsDescendantOf(workspace) or part.LocalTransparencyModifier >= 1 then
 				return false
 			end
-			if mode == "sell" then
+			if mode ~= "mine" then
 				return true
 			end
 			if facing(part) < 0.65 then
@@ -161,7 +196,13 @@ function Guide.Start(
 			return sight ~= nil and sight.Instance == part
 		end
 		local sameGoal = cachedMode == mode and cachedCounter == counterKey
+		if not sameGoal then
+			table.clear(rejectedWanted)
+			table.clear(rejectedFallback)
+		end
 		local valid = sameGoal and cachedTarget and exposed(cachedTarget)
+		local retained = if valid then cachedTarget else nil
+		local retainedFallback = cachedFallback
 		local elapsed = os.clock() - searchedAt
 		if
 			valid
@@ -169,6 +210,7 @@ function Guide.Start(
 				elapsed < 0.5
 				or (
 					elapsed < 2
+					and not cachedFallback
 					and (root.Position - searchedPosition).Magnitude < 2
 					and look:Dot(searchedLook) > 0.99
 				)
@@ -186,10 +228,14 @@ function Guide.Start(
 		local candidates = if mode == "mine" and mine
 			then mine:GetChildren()
 			elseif mode == "sell" then CollectionService:GetTagged("SellPoint")
+			elseif mode == "case" then CollectionService:GetTagged("OrdinaryCase")
+			elseif mode == "mine_area" then CollectionService:GetTagged("MineAnchor")
 			else {}
-		local nearest, fallback = {}, {}
-		local function keep(list: any, part: BasePart, distance: number)
-			if #list == 32 and distance >= list[32].distance then
+		-- Fresh nearby probes respond promptly when another player exposes a block;
+		-- paged candidates ensure buried nearer blocks cannot starve every farther one.
+		local fresh, nearest, fallbackFresh, fallback = {}, {}, {}, {}
+		local function keep(list: any, part: BasePart, distance: number, limit: number)
+			if #list == limit and distance >= list[limit].distance then
 				return
 			end
 			local at = #list + 1
@@ -200,7 +246,7 @@ function Guide.Start(
 				end
 			end
 			table.insert(list, at, { part = part, distance = distance })
-			if #list > 32 then
+			if #list > limit then
 				table.remove(list)
 			end
 		end
@@ -209,6 +255,9 @@ function Guide.Start(
 				continue
 			end
 			local distance = (candidate.Position - root.Position).Magnitude
+			if mode == "mine_area" and candidate:GetAttribute("MineId") ~= "prison" then
+				continue
+			end
 			if mode == "mine" then
 				local block = Config.block(candidate.Name)
 				if
@@ -227,20 +276,55 @@ function Guide.Start(
 				) * 3
 				distance += (1 - facing(candidate)) * 8
 				if #keys > 0 and not (counters and counters[block.upgradeCounter]) then
-					keep(fallback, candidate, distance)
+					keep(fallbackFresh, candidate, distance, 4)
+					if not rejectedFallback[candidate] then
+						keep(fallback, candidate, distance, 20)
+					end
 					continue
 				end
 			end
-			keep(nearest, candidate, distance)
+			keep(fresh, candidate, distance, 8)
+			if not rejectedWanted[candidate] then
+				keep(nearest, candidate, distance, 32)
+			end
 		end
-		-- At most 64 candidates / 128 rays on a retarget; two rays for the cached target.
-		for _, list in { nearest, fallback } do
+		-- A completed pass may revisit previously occluded cells on the next attempt.
+		if #nearest == 0 then
+			table.clear(rejectedWanted)
+		end
+		if #fallback == 0 then
+			table.clear(rejectedFallback)
+		end
+		local checked: { [BasePart]: boolean } = {}
+		-- At most 8+32+4+20 candidates / 128 rays; up to two extra rays validate the cache.
+		for group, list in { fresh, nearest, fallbackFresh, fallback } do
+			if group == 3 and retained and not retainedFallback then
+				cachedTarget, cachedFallback = retained, false
+				return cachedTarget
+			end
 			for _, entry in list do
+				if checked[entry.part] then
+					continue
+				end
+				checked[entry.part] = true
 				if exposed(entry.part) then
-					cachedTarget = entry.part
+					cachedTarget, cachedFallback = entry.part, group >= 3
+					if not cachedFallback then
+						table.clear(rejectedWanted)
+						table.clear(rejectedFallback)
+					end
 					return cachedTarget
 				end
+				if group < 3 then
+					rejectedWanted[entry.part] = true
+				else
+					rejectedFallback[entry.part] = true
+				end
 			end
+		end
+		cachedTarget, cachedFallback = retained, retainedFallback
+		if retained then
+			return retained
 		end
 		return nil
 	end
@@ -313,19 +397,37 @@ function Guide.Start(
 		local pulse = (math.sin(os.clock() * 5) + 1) / 2
 		marker.StudsOffsetWorldSpace = Vector3.new(0, 5 + pulse * 0.6, 0)
 		if line then
-			line.Width0, line.Width1 = 0.1 + pulse * 0.08, 0.07 + pulse * 0.04
+			line.Width0, line.Width1 = 0.06 + pulse * 0.02, 0.06 + pulse * 0.02
+		end
+		if
+			groundPath
+			and startAttachment
+			and endAttachment
+			and startAttachment.Parent
+			and endAttachment.Parent
+		then
+			groundPath.Update(
+				startAttachment.WorldPosition,
+				endAttachment.WorldPosition,
+				player.Character
+			)
+		elseif groundPath then
+			-- A dug/streamed-out block destroys its attachment before the next 0.25 s retarget.
+			clearLine()
 		end
 		for _, stroke in marks do
 			stroke.Thickness = 2 + pulse * 2
 		end
 		uiArrow.Visible = control ~= nil and visible(control) and step < 5
 		if control and uiArrow.Visible then
-			local pos, size = control.AbsolutePosition, control.AbsoluteSize
+			local pos, size = control.AbsolutePosition - gui.AbsolutePosition, control.AbsoluteSize
 			local camera = workspace.CurrentCamera
 			local view = if camera then camera.ViewportSize else Vector2.new(800, 600)
+			local below = pos.Y < GuiService:GetGuiInset().Y + 52
+			uiArrow.Rotation = if below then 180 else 0
 			uiArrow.Position = UDim2.fromOffset(
 				math.clamp(pos.X + size.X / 2, 24, view.X - 24),
-				math.max(GuiService:GetGuiInset().Y + 42, pos.Y - 4 - pulse * 8)
+				if below then pos.Y + size.Y + 48 + pulse * 6 else pos.Y - 4 - pulse * 6
 			)
 		end
 	end)
@@ -335,6 +437,40 @@ function Guide.Start(
 		animation:Disconnect()
 		clearLine()
 	end)
+	local initialFacing = false
+	local function faceMine(profile: any)
+		if initialFacing or not profile then
+			return
+		end
+		if step ~= 3 or profile.blocksTotal > 0 or profile.location ~= "prison" then
+			initialFacing = true
+			return
+		end
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		local camera = workspace.CurrentCamera
+		if not root or not root:IsA("BasePart") or not camera then
+			return
+		end
+		for _, anchor in CollectionService:GetTagged("MineAnchor") do
+			if anchor:IsA("BasePart") and anchor:GetAttribute("MineId") == "prison" then
+				local delta = (anchor.Position - root.Position) * Vector3.new(1, 0, 1)
+				if delta.Magnitude < 0.1 then
+					return
+				end
+				local direction = delta.Unit
+				root.CFrame = CFrame.lookAt(root.Position, root.Position + direction)
+				local focus = root.Position + Vector3.new(0, 1.5, 0)
+				local distance = (camera.CFrame.Position - camera.Focus.Position).Magnitude
+				local eye = if distance < 1
+					then focus
+					else focus - direction * math.min(distance, 12) + Vector3.new(0, 3, 0)
+				camera.CFrame, camera.Focus =
+					CFrame.lookAt(eye, focus + direction * 12), CFrame.new(focus)
+				initialFacing = true
+				return
+			end
+		end
+	end
 	task.spawn(function()
 		while alive do
 			local profile = getProfile()
@@ -343,6 +479,9 @@ function Guide.Start(
 				Tutorial.step(profile), profile and profile.locale or Config.defaultLocale
 			if step ~= previous then
 				itemConfirmed = false
+				if previous >= 5 and step == 3 then
+					initialFacing = false
+				end
 			end
 			local phase = "tutorial_open_menu"
 			local nextControl: GuiObject? = nil
@@ -364,7 +503,13 @@ function Guide.Start(
 						nextControl, phase = chooseControl(goal)
 					else
 						phase = "tutorial_collect_upgrade"
-						worldMode = if goal.saleReady then "sell" else "mine"
+						worldMode = if goal.saleReady
+							then "sell"
+							elseif profile.tutorial.upgradeSold then nil
+							else "mine"
+						if profile.tutorial.upgradeSold and not goal.saleReady then
+							phase = "tutorial_earn_upgrade"
+						end
 					end
 				end
 			elseif step == 4 then
@@ -385,7 +530,7 @@ function Guide.Start(
 						end
 					else
 						phase = "tutorial_collect_level"
-						worldMode = if goal.saleReady then "sell" else "mine"
+						worldMode = if goal.saleReady then "sell" else "mine_area"
 					end
 				end
 			end
@@ -393,15 +538,31 @@ function Guide.Start(
 				phase = "tutorial_sell_blocks"
 				nextControl = object("TutorialSell")
 			end
+			if Tutorial.shouldGuideCase(profile) then
+				worldMode, phase, nextControl = "case", "tutorial_first_case", nil
+			end
 			local ready = player:GetAttribute("LoadingBlocked") == false
+			if ready then
+				faceMine(profile)
+			end
 			mark(if ready and step < 5 then nextControl else nil)
 			gui:SetAttribute("TutorialStep", step)
 			gui:SetAttribute("TutorialPhase", phase)
 			gui:SetAttribute("TutorialRequirementsReady", readyForMenu)
 			local camera = workspace.CurrentCamera
+			local tracked, trackedStep = Tutorial.trackedGoal(profile)
+			taskPanel.manual = tracked ~= nil
+			if tracked or step >= 5 then
+				displayGoal = tracked
+			end
+			local editing = HudLayout.isEditing()
+			if editing and not displayGoal then
+				displayGoal, trackedStep = Tutorial.levelGoal(profile), 4
+			end
+			taskPanel.preservePosition = editing or HudLayout.moved("requirements")
 			if camera then
 				taskPanel.Update(
-					step,
+					if tracked or step >= 5 then trackedStep else step,
 					locale,
 					displayGoal,
 					phase,
@@ -409,12 +570,45 @@ function Guide.Start(
 					GuiService:GetGuiInset().Y,
 					TutorialPanel.obstacles(gui, panel, player.PlayerGui)
 				)
+				if not taskPanel.preservePosition then
+					HudLayout.setDefault(panel)
+				end
 			end
-			panel.Visible = ready
-				and step < 5
-				and not menuOpen()
-				and panel:GetAttribute("LayoutFits") == true
-			caption.Text = Strings.t("release_tutorial_marker", locale)
+			local hidden = profile and profile.settings and profile.settings.hideRequirements
+			panel.Visible = editing
+				or (
+					ready
+					and (step < 5 or tracked ~= nil)
+					and not hidden
+					and os.clock() - hideRequestedAt >= 1
+					and not menuOpen()
+					and (taskPanel.preservePosition or panel:GetAttribute("LayoutFits") == true)
+				)
+			if taskPanel.preservePosition and not editing and camera then
+				local scale = panel:FindFirstChildOfClass("UIScale")
+				local factor = if scale then scale.Scale else 1
+				local view = camera.ViewportSize
+				local origin = panel.AbsolutePosition - gui.AbsolutePosition
+				local rect = TutorialPanel.relocate(view, GuiService:GetGuiInset().Y, {
+					x = origin.X,
+					y = origin.Y,
+					width = panel.Size.X.Offset * factor,
+					height = panel.Size.Y.Offset * factor,
+				}, TutorialPanel.obstacles(gui, panel, player.PlayerGui))
+				panel.Position, panel.Size =
+					UDim2.fromOffset(rect.x, rect.y),
+					UDim2.fromOffset(rect.width / factor, rect.height / factor)
+				if rect.height <= 0 then
+					panel.Visible = false
+				end
+			end
+			caption.Text = Strings.t(
+				if worldMode == "mine" or worldMode == "mine_area"
+					then "tutorial_marker_mine"
+					elseif worldMode == "case" then "tutorial_marker_case"
+					else "tutorial_marker_sell",
+				locale
+			)
 			-- Re-evaluate every tick, including when another player digs our target or streaming removes it.
 			target = if ready
 					and step < 5

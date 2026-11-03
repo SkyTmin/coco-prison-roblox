@@ -18,7 +18,7 @@ local Ui = require(script.Parent.Ui)
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local UpgradeWindow = {}
 
-local W, H = 700, 480
+local W, H = 700, 524
 local ARMOR = { helmet = true, chestplate = true, leggings = true, boots = true }
 
 local function maxLevel(itemId: string): number
@@ -86,17 +86,25 @@ function UpgradeWindow.build(
 		Ui.label(left, "", UDim2.new(1, -16, 0, 20), UDim2.fromOffset(8, 180), 13, Ui.colors.text)
 	itemLevel.TextXAlignment = Enum.TextXAlignment.Center
 	local rule = Instance.new("Frame")
-	rule.Position, rule.Size = UDim2.new(0, 10, 1, -94), UDim2.new(1, -20, 0, 1)
+	rule.Position, rule.Size = UDim2.new(0, 10, 1, -138), UDim2.new(1, -20, 0, 1)
 	rule.BackgroundColor3, rule.BorderSizePixel = Ui.colors.border, 0
 	rule.Parent = left
 	local costKey =
-		Ui.label(left, t("cost"), UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -82), 14)
+		Ui.label(left, t("cost"), UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -126), 14)
 	costKey.TextXAlignment = Enum.TextXAlignment.Left
-	local costLabel = Ui.rich(left, "", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -82), 14)
+	local costLabel = Ui.rich(left, "", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 1, -126), 14)
 	costLabel.TextXAlignment = Enum.TextXAlignment.Right
 	local buy =
 		Ui.button(left, t("upgrade_button"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -46))
 	buy.Name = "TutorialUpgrade"
+	local pin = Ui.button(
+		left,
+		t("tracker_pin"),
+		UDim2.new(1, -16, 0, 38),
+		UDim2.new(0, 8, 1, -90),
+		Ui.colors.buttonGrey
+	)
+	pin.Name, pin.TextSize, pin.TextWrapped = "PinUpgradeRequirements", 13, true
 	-- right: "Улучшения" and "Требования", each a panel of rows: the name on the left, the value on the right
 	local ROW = 28
 	type Row = { name: TextLabel, value: TextLabel, box: Frame, icon: ImageLabel }
@@ -280,6 +288,15 @@ function UpgradeWindow.build(
 		end
 		local id = entry.stack.id
 		local current = entry.stack.level or 1
+		pin.Visible = Config.upgrade(id, current) ~= nil
+		pin.Text = t(
+			if p
+					and p.settings
+					and p.settings.trackedUpgrade == id .. ":" .. current
+					and not p.settings.hideRequirements
+				then "tracker_pinned"
+				else "tracker_pin"
+		)
 		if selectedKey ~= previousKey or id ~= previousItem or current > previousLevel then
 			viewLevel = current
 		end
@@ -413,6 +430,15 @@ function UpgradeWindow.build(
 		local entry = entryFor(selectedKey)
 		if buy.Interactable and entry then
 			Remotes.event("UpgradeItem"):FireServer(entry.target)
+		end
+	end)
+	pin.Activated:Connect(function()
+		local entry = entryFor(selectedKey)
+		if entry and Config.upgrade(entry.stack.id, entry.stack.level or 1) then
+			Remotes.event("SetSetting")
+				:FireServer("trackedUpgrade", entry.stack.id .. ":" .. (entry.stack.level or 1))
+			Remotes.event("SetSetting"):FireServer("hideRequirements", false)
+			pin.Text = t("tracker_pinned")
 		end
 	end)
 	refresh(profile)
