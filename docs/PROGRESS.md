@@ -2,6 +2,9 @@
 
 Читать первым. Последняя запись сверху. В конце сессии добавить запись: что сделано, что открыто, следующий шаг.
 
+
+- **03.11.2026 — RMB consumables.** Fixed paper/soap/sleeping-bag and other usable hand items: RMB/L2 now follows the same catalog routing as F/touch; books still open their window, food/bow keep held input. Loader/menu/HUD-edit blocks remain. Actual input closure + actual server consumer with isolated inventory: 50 PASS (`scripts/qa-consumable-input-offline.luau`); no real items spent/granted. Synced client source to confirmed Katorga Studio and restarted Play; physical mouse/touch QA remains separate. Selene src 0/0, StyLua src and Rojo build PASS. Quarry art rebuild continues separately.
+
 ## Текущее состояние (20 октября 2026)
 
 **Этап:** 1 — Тюрьма (спавн-локация целиком), начат 20.10.2026 в ветке `stage-1`. Этап A принят владельцем 20.10.2026. План v1.0 в `docs/PLAN.md`.

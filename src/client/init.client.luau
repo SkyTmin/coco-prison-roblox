@@ -2806,8 +2806,46 @@ ContextActionService:BindAction(
 	Enum.KeyCode.ButtonR2
 )
 
+-- soap / toilet paper / sleeping bag in hand (they restore a need when used) [вики]
+local function isNeedConsumable(): boolean
+	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
+	if not stack then
+		return false
+	end
+	for _, need in ipairs({ "hygiene", "sleep", "toilet" }) do
+		if Config.needs[need].consumable == stack.id then
+			return true
+		end
+	end
+	-- the injection «Без нужд» too [владелец 28.10]
+	-- and the donate items used from the hand: auto-sell, a booster item, the auction slot
+	-- (required here: the top level of this script is at the 200-locals limit)
+	local Donate = require(Shared.Donate)
+	local Boosters = require(Shared.Boosters)
+	if
+		require(Shared.Books).isUsable(stack.id) -- an ancient book, powder, a dispeller: the book window
+		or stack.id == Config.needs.injection.item
+		or stack.id == Donate.AUTOSELL
+		or stack.id == Donate.AUCTION_SLOT
+		or stack.id == "oblivion_scroll" -- resets the skill tree (SkillService)
+		or require(Shared.Potions).isUsable(stack.id) -- drink / throw / charge the stand (PotionService)
+		or Boosters.fromItem(stack.id) ~= nil
+	then
+		return true
+	end
+	-- a location pass is used the same way (the server opens the location for good) [владелец 22.10]
+	local passFor = stack.id:match("^(.+)_pass$")
+	local location = passFor and Config.location(passFor)
+	return location ~= nil and location.requiresPass == true
+end
+
 local function useConsumable()
-	if profile and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil) then
+	if
+		profile
+		and isNeedConsumable()
+		and not HudLayout.isEditing()
+		and not require(script.WindowInput).GameplayBlocked(currentWindowKind ~= nil)
+	then
 		local stack = profile.inventory[profile.selectedSlot]
 		if stack and require(Shared.Books).isUsable(stack.id) then
 			require(script.BookWindow).sourceSlot = profile.selectedSlot
@@ -2848,11 +2886,8 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 			BowController.Begin()
 		elseif Eating.InHand() then
 			Eating.Hold("mouse", true)
-		elseif profile then
-			local stack = profile.inventory[profile.selectedSlot]
-			if stack and require(Shared.Books).isUsable(stack.id) then
-				useConsumable()
-			end
+		elseif isNeedConsumable() then
+			useConsumable()
 		end
 	end
 end)
@@ -2894,38 +2929,6 @@ local function isFood(): boolean
 	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
 	local food = Config.rules.survival and Config.rules.survival.food
 	return stack ~= nil and food ~= nil and typeof(food[stack.id]) == "number"
-end
--- soap / toilet paper / sleeping bag in hand (they restore a need when used) [вики]
-local function isNeedConsumable(): boolean
-	local stack = if profile then profile.inventory[profile.selectedSlot] else nil
-	if not stack then
-		return false
-	end
-	for _, need in ipairs({ "hygiene", "sleep", "toilet" }) do
-		if Config.needs[need].consumable == stack.id then
-			return true
-		end
-	end
-	-- the injection «Без нужд» too [владелец 28.10]
-	-- and the donate items used from the hand: auto-sell, a booster item, the auction slot
-	-- (required here: the top level of this script is at the 200-locals limit)
-	local Donate = require(Shared.Donate)
-	local Boosters = require(Shared.Boosters)
-	if
-		require(Shared.Books).isUsable(stack.id) -- an ancient book, powder, a dispeller: the book window
-		or stack.id == Config.needs.injection.item
-		or stack.id == Donate.AUTOSELL
-		or stack.id == Donate.AUCTION_SLOT
-		or stack.id == "oblivion_scroll" -- resets the skill tree (SkillService)
-		or require(Shared.Potions).isUsable(stack.id) -- drink / throw / charge the stand (PotionService)
-		or Boosters.fromItem(stack.id) ~= nil
-	then
-		return true
-	end
-	-- a location pass is used the same way (the server opens the location for good) [владелец 22.10]
-	local passFor = stack.id:match("^(.+)_pass$")
-	local location = passFor and Config.location(passFor)
-	return location ~= nil and location.requiresPass == true
 end
 local function cancelDigInput()
 	attackHeld = false
