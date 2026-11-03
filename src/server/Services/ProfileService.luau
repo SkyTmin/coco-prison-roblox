@@ -35,6 +35,7 @@ type Session = {
 	fresh: boolean?,
 	resetting: boolean?,
 	resetCharacter: Model?, -- old body must never repopulate the cleared saved position
+	closing: boolean?, -- one final release, shared by PlayerRemoving and BindToClose
 }
 
 local STORE_NAME = "PlayerProfiles_v3"
@@ -47,6 +48,7 @@ local JOB_ID = if game.JobId == "" then "studio" else game.JobId
 
 local ProfileService = {}
 local sessions: { [Player]: Session } = {}
+local closingSessions: { [Session]: Player } = {} -- detached sessions still own an in-flight final write
 local onLoaded: ((Player) -> ())? = nil -- set in Start: puts the character back at the logout spot
 local loadedHooks: { (Player) -> () } = {} -- ProfileService.OnLoaded: settle pending boosters / auction steps
 local store: DataStore? = nil
@@ -553,6 +555,30 @@ local function save(player: Player, session: Session, release: boolean?, transfo
 	return true
 end
 
+-- Register before detaching or yielding: shutdown must also await players already leaving.
+local function beginRelease(player: Player, session: Session)
+	if session.closing then
+		return
+	end
+	session.closing = true
+	closingSessions[session] = player
+	if sessions[player] == session then
+		sessions[player] = nil
+	end
+	task.spawn(function()
+		local ok, err = pcall(function()
+			while session.saving do
+				task.wait(0.1)
+			end
+			save(player, session, true)
+		end)
+		closingSessions[session] = nil
+		if not ok then
+			warn("[ProfileService] final save failed for " .. player.Name .. ": " .. tostring(err))
+		end
+	end)
+end
+
 -- Writes the profile now and waits for it (an autosave in flight first). Steps that touch shared stores (the auction,
 -- global boosters) call it after recording their pending step in the profile and before the outside write, so a
 -- crash can never leave the outside effect without the profile change. false = not saved: abort the step.
@@ -592,11 +618,16 @@ function ProfileService.MutateDurable(player: Player, transform: (any) -> ()): b
 	if not Persistence.finiteTree(staged) or not Numbers.integer(staged.coins) then
 		return false
 	end
-	if not save(player, session, false, staged) or sessions[player] ~= session then
+	if not save(player, session, false, staged) then
 		return false
 	end
+	-- A leave may detach this session while UpdateAsync yields. Its final release must preserve
+	-- this acknowledged checkpoint even though the departed caller may no longer export rewards.
 	transform(session.profile)
 	session.dirty = true
+	if sessions[player] ~= session then
+		return false
+	end
 	ProfileService.Replicate(player)
 	return true
 end
@@ -898,8 +929,8 @@ function ProfileService.Start()
 							then pos[4]
 							else 1
 						(clean :: any)[id] = {
-							math.floor(pos[1] * 10000) / 10000,
-							math.floor(pos[2] * 10000) / 10000,
+							math.floor(pos[1] * 10000 + 0.5) / 10000,
+							math.floor(pos[2] * 10000 + 0.5) / 10000,
 							if pos[3] == 0 then 0 else 1,
 							math.floor(math.clamp(size, 0.5, 2) * 100 + 0.5) / 100,
 						}
@@ -1195,11 +1226,7 @@ function ProfileService.Start()
 		restoring[player] = nil
 		local session = sessions[player]
 		if session then
-			sessions[player] = nil
-			while session.saving do
-				task.wait(0.1) -- let an autosave in flight finish, then write the final state
-			end
-			save(player, session, true)
+			beginRelease(player, session)
 		end
 	end)
 	-- another server waits for a profile this server holds: the player joined there (a double login or a hop
@@ -1224,20 +1251,12 @@ function ProfileService.Start()
 		if RunService:IsStudio() and not store then
 			return
 		end
-		-- every profile in parallel (BindToClose gives 30 s), each after its autosave in flight
-		local left = 0
+		-- Start active profiles in parallel; include final writes already detached by PlayerRemoving.
 		for player, session in pairs(sessions) do
 			rememberPosition(player) -- shutdown may skip PlayerRemoving: keep the exact logout spot
-			left += 1
-			task.spawn(function()
-				while session.saving do
-					task.wait(0.1)
-				end
-				save(player, session, true)
-				left -= 1
-			end)
+			beginRelease(player, session)
 		end
-		while left > 0 do
+		while next(closingSessions) ~= nil do
 			task.wait(0.1)
 		end
 	end)

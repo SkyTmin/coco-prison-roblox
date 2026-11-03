@@ -281,10 +281,15 @@ function TopBoards.Start(locale: () -> string)
 	end
 	CollectionService:GetInstanceAddedSignal("TopBoard"):Connect(attach)
 	CollectionService:GetInstanceRemovedSignal("TopBoard"):Connect(detach)
-	task.spawn(function()
-		local folder = ReplicatedStorage:WaitForChild("Tops")
-		for _, v in ipairs(folder:GetChildren()) do
-			if v:IsA("StringValue") then
+	local watched: { [Instance]: boolean } = {}
+	local function watchFolder(folder: Instance)
+		if folder.Name ~= "Tops" or not folder:IsA("Folder") or watched[folder] then
+			return
+		end
+		watched[folder] = true
+		local function watchValue(v: Instance)
+			if v:IsA("StringValue") and not watched[v] then
+				watched[v] = true
 				v.Changed:Connect(function()
 					for part, gui in pairs(guis) do
 						if part:GetAttribute("Board") == v.Name then
@@ -292,10 +297,22 @@ function TopBoards.Start(locale: () -> string)
 						end
 					end
 				end)
+				TopBoards.Refresh()
 			end
 		end
+		folder.ChildAdded:Connect(watchValue)
+		for _, v in ipairs(folder:GetChildren()) do
+			watchValue(v)
+		end
 		TopBoards.Refresh()
-	end)
+	end
+	-- LeaderboardService starts late; boards keep their existing empty-state render until data arrives.
+	-- Subscribe before scanning so a late folder or later StringValue cannot miss its update listener.
+	ReplicatedStorage.ChildAdded:Connect(watchFolder)
+	local folder = ReplicatedStorage:FindFirstChild("Tops")
+	if folder then
+		watchFolder(folder)
+	end
 end
 
 return TopBoards

@@ -11,6 +11,8 @@ for _, name in ipairs({
 	"Sfx",
 	"DigStart",
 	"DigFinish",
+	"DigAccepted",
+	"DigRejected",
 	"Sell",
 	"BuyItem",
 	"UpgradeItem",
@@ -44,6 +46,8 @@ for _, name in ipairs({
 	"Swing",
 	"FactionChoose",
 	"HitConfirm",
+	"HurtImpact",
+	"Knockback",
 	"FactionLeave",
 	"FactionChestOpened",
 	"FactionChestMove",
@@ -78,6 +82,8 @@ for _, name in ipairs({
 	"ChatCommand",
 	"Rubbish",
 	"DailyClaim",
+	"AuctionAnnounced",
+	"AuctionListed",
 }) do
 	Remotes.event(name)
 end
