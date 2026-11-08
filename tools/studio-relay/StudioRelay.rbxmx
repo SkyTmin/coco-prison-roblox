@@ -10,8 +10,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.8"
-local BUILD = 9 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.9"
+local BUILD = 10 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "https://coco-studio-relay.coco-relay-2a55b6.workers.dev"
 
 local HttpService = game:GetService("HttpService")
@@ -1708,28 +1708,56 @@ return render
 
 end)()
 local fontsCache = nil
+local function compileFont(text)
+	local okLs, fn = pcall(function()
+		return loadstring(text)
+	end)
+	local ok, f
+	if okLs and fn then
+		ok, f = pcall(fn)
+	else
+		local tmp = Instance.new("ModuleScript")
+		tmp.Source = text
+		ok, f = pcall(require, tmp)
+		tmp:Destroy()
+	end
+	return if ok and type(f) == "table" then f else nil
+end
+-- font source text: the Font module next to the installed file, else the relay (edit/server only)
+local fontTextCache = nil
+local function fontText()
+	if fontTextCache then
+		return fontTextCache
+	end
+	local m = script:FindFirstChild("Font")
+	if m then
+		local ok, src = pcall(function()
+			return m.Source
+		end)
+		if ok and type(src) == "string" and #src > 0 then
+			fontTextCache = src
+			return src
+		end
+	end
+	if role ~= "client" then
+		local okReq, res = request("GET", "/plugin/asset?name=font")
+		if okReq and res.StatusCode == 200 then
+			fontTextCache = res.Body
+		end
+	end
+	return fontTextCache
+end
 local function fonts()
 	if fontsCache == nil then
-		local m = script:FindFirstChild("Font")
-		local ok, f = pcall(require, m)
-		if not ok or type(f) ~= "table" then
-			-- installed file predates the font: fetch it from the relay (same source as Font.luau)
-			local okReq, res = request("GET", "/plugin/asset?name=font")
-			if okReq and res.StatusCode == 200 then
-				local okLs, fn = pcall(function()
-					return loadstring(res.Body)
-				end)
-				if okLs and fn then
-					ok, f = pcall(fn)
-				else
-					local tmp = Instance.new("ModuleScript")
-					tmp.Source = res.Body
-					ok, f = pcall(require, tmp)
-					tmp:Destroy()
-				end
-			end
+		local text = fontText()
+		local f = text and compileFont(text)
+		if f then
+			fontsCache = f
+		elseif role ~= "client" then
+			fontsCache = {}
+		else
+			return {} -- a test client gets the font from the server-side plugin (bridge op "fontload")
 		end
-		fontsCache = if ok and type(f) == "table" then f else {}
 	end
 	return fontsCache
 end
@@ -1817,11 +1845,22 @@ local function findPlayer(target)
 	return nil
 end
 
+local fontSent = setmetatable({}, { __mode = "k" })
 local function forwardToClient(target, kind, timeout, payload)
 	local remote = ReplicatedStorage:FindFirstChild(BRIDGE)
 	local player = findPlayer(target)
 	if not remote or not player then
 		return false, { error = "no client for " .. target }
+	end
+	if kind == "render" and not fontSent[player] then
+		local text = fontText()
+		if text then
+			for _, part in split(text) do
+				invokeWithTimeout(remote, player, 20, "put", "__font", part)
+			end
+			local okF, accepted = invokeWithTimeout(remote, player, 30, "fontload")
+			fontSent[player] = okF and accepted == true
+		end
 	end
 	local token = HttpService:GenerateGUID(false)
 	for _, part in split(payload or "") do
@@ -1989,6 +2028,13 @@ elseif role == "client" then
 			elseif op == "free" then
 				outbox[token] = nil
 				return true
+			elseif op == "fontload" then
+				local f = compileFont(table.concat(inbox["__font"] or {}))
+				inbox["__font"] = nil
+				if f then
+					fontsCache = f
+				end
+				return f ~= nil
 			elseif op == "logs" then
 				local batch = pendingLogs
 				pendingLogs = {}

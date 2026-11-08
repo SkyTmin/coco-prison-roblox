@@ -206,7 +206,7 @@ async function main() {
 			writePng(out, data.w, data.h, Buffer.from(data.b64, "base64"));
 			const extra = data.rays ? ` rays ${data.rays}, gui ${data.guiObjects}, ${data.seconds}s (world ${data.worldSeconds}s)${data.minimized ? ", MINIMIZED" : ""}` : "";
 			console.log(`saved ${out} ${data.w}x${data.h} (source ${data.srcW}x${data.srcH})${extra}`);
-			if (data.images && data.images.fail) console.log(`images: ${data.images.ok} ok, ${data.images.fail} failed: ${data.images.failed.join(" | ")}`);
+			if (data.images) console.log(`images: ${data.images.ok} ok, ${data.images.fail} failed: ${data.images.failed.join(" | ")}`);
 			break;
 		}
 		case "logs": {
