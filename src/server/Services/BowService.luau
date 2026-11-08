@@ -33,6 +33,7 @@ local BookService = require(script.Parent.BookService)
 local CombatService = require(script.Parent.CombatService)
 local MotionService = require(script.Parent.MotionService)
 local HurtService = require(script.Parent.HurtService)
+local CommercePolicy = require(script.Parent.CommercePolicyService)
 
 local BowService = {}
 local started = false
@@ -59,7 +60,14 @@ type Flying = {
 	ticks: number,
 	lag: number, -- s the shooter sees players behind the server clock: players are tested that far back
 }
-type Stuck = { part: BasePart, on: BasePart, at: number, pickup: boolean }
+type Stuck = {
+	part: BasePart,
+	on: BasePart,
+	at: number,
+	pickup: boolean,
+	owner: number,
+	tradeAuthorized: boolean,
+}
 
 local drawing: { [Player]: number } = {} -- os.clock() of the draw start
 local flying: { Flying } = {}
@@ -303,10 +311,14 @@ local function stick(arrow: Flying, at: Vector3, on: BasePart)
 	part:SetAttribute("Flame", arrow.flame or nil)
 	CollectionService:AddTag(part, "StuckArrow")
 	part.Parent = folder
-	table.insert(
-		stuck,
-		{ part = part, on = on, at = os.clock(), pickup = not arrow.creative and not arrow.saved }
-	)
+	table.insert(stuck, {
+		part = part,
+		on = on,
+		at = os.clock(),
+		pickup = not arrow.creative and not arrow.saved,
+		owner = arrow.shooter.UserId,
+		tradeAuthorized = CommercePolicy.CanTrade(arrow.shooter),
+	})
 	if #stuck > MAX_STUCK then
 		table.remove(stuck, 1).part:Destroy()
 	end
@@ -428,11 +440,22 @@ local function pickUp()
 		local taker: Player? = nil
 		if not gone and entry.pickup and now - entry.at > 0.5 then
 			for _, player in ipairs(Players:GetPlayers()) do
+				local owner = entry.owner and Players:GetPlayerByUserId(entry.owner)
+				-- Reclaiming your own shot is not a trade. Other-player pickup needs
+				-- known origin permission and the receiver's current permission, as item drops do.
+				local allowed = entry.owner == player.UserId
+					or (
+						entry.owner ~= nil
+						and entry.tradeAuthorized
+						and CommercePolicy.CanTrade(player)
+						and (owner == nil or CommercePolicy.CanTrade(owner))
+					)
 				local root = player.Character
 					and player.Character:FindFirstChild("HumanoidRootPart")
 				local profile = ProfileService.Get(player)
 				if
-					root
+					allowed
+					and root
 					and root:IsA("BasePart")
 					and profile
 					and (root.Position - entry.part.Position).Magnitude <= radius

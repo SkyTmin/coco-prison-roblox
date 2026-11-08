@@ -10,6 +10,7 @@ local Profile = require(script.Parent.ProfileService)
 local Inventory = require(script.Parent.InventoryService)
 local Storage = require(script.Parent.SharedStorageService)
 local Record = require(script.Parent.SharedStorageRecord)
+local Policy = require(script.Parent.CommercePolicyService)
 local Transfers = {}
 local busy: { [Player]: boolean } = {}
 local started = false
@@ -143,6 +144,10 @@ function Transfers.Begin(
 	afterPage: any,
 	coins: number
 ): boolean
+	-- This journal is used only by multiuser gang/faction pages, never the personal vault.
+	if not Policy.RequireTrade(player) then
+		return false
+	end
 	if Transfers.Pending(player) or not Profile.CanExport(player) or not Numbers.integer(coins) then
 		return false
 	end

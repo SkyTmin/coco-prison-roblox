@@ -30,11 +30,14 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
 local Donate = require(Shared.Donate)
+local CommercePolicy = require(Shared.CommercePolicy)
 local Remotes = require(Shared.Remotes)
 local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
+local LegacyReceiptGuard = require(script.Parent.LegacyReceiptGuard)
+local Policy = require(script.Parent.CommercePolicyService)
 
 local DonateService = {}
 local lastAction: { [Player]: number } = {}
@@ -188,6 +191,9 @@ local function onBuy(player: Player, id: any, rawCount: any)
 	if not item or typeof(rawCount) ~= "number" or rawCount ~= rawCount or throttled(player) then
 		return
 	end
+	if CommercePolicy.RequiresRandomPurchase(id) and not Policy.RequireRandom(player) then
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return
@@ -247,6 +253,9 @@ local function onBuyRobux(player: Player, id: any)
 	if not item or throttled(player) then
 		return
 	end
+	if CommercePolicy.RequiresRandomPurchase(id) and not Policy.RequireRandom(player) then
+		return
+	end
 	local profile = ProfileService.Get(player)
 	if not profile then
 		return
@@ -260,6 +269,10 @@ local function onBuyRobux(player: Player, id: any)
 		local issue = productIssue(item.productId, item.productName, item.robux)
 		if issue then
 			toast(player, issue)
+			return
+		end
+		-- Marketplace metadata yields; the player may have left while it was loading.
+		if CommercePolicy.RequiresRandomPurchase(id) and not Policy.RequireRandom(player) then
 			return
 		end
 		MarketplaceService:PromptProductPurchase(player, item.productId)
@@ -298,6 +311,16 @@ local function processReceipt(info: any): Enum.ProductPurchaseDecision
 		return if ProfileService.SaveNow(player)
 			then Enum.ProductPurchaseDecision.PurchaseGranted
 			else Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	local legacyGranted = LegacyReceiptGuard.WasGranted(player.UserId, id)
+	if legacyGranted == true then
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	elseif legacyGranted == nil then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	-- The legacy read yields. A removed/replaced session must not receive this grant.
+	if ProfileService.Get(player) ~= profile or not ProfileService.IsReal(player) then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	-- what the receipt gave: the pack's crystals, the item, or (no room for the item) its price in crystals
 	local crystals, place: string? = 0, nil

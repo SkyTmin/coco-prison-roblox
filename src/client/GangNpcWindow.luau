@@ -18,6 +18,7 @@ local Types = require(Shared.Types)
 local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
 local Kit = require(script.Parent.WindowKit)
+local CommerceUi = require(script.Parent.CommerceUi)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local GangNpcWindow = {}
@@ -154,7 +155,7 @@ function GangNpcWindow.build(
 	)
 	hint.TextWrapped = true
 	-- the top block: the library bar or the two forge slots
-	local TOP = if isForge then 150 else 104
+	local TOP = if isForge then 232 else 104
 	local top = Ui.card(content, UDim2.new(1, -8, 0, TOP - 58), UDim2.fromOffset(4, 52))
 	local list = Instance.new("ScrollingFrame")
 	list.Size = UDim2.new(1, -8, 1, -(TOP + 4))
@@ -332,7 +333,8 @@ function GangNpcWindow.build(
 			chance, price = forgeOffer(ea, la)
 		end
 		local stars = starCount(p)
-		local ok = chance ~= nil and price ~= nil and stars >= price
+		local policy = CommerceUi.reason("random")
+		local ok = chance ~= nil and price ~= nil and stars >= price and policy == nil
 		local text = if not a
 				or not b
 				or not chance
@@ -344,13 +346,35 @@ function GangNpcWindow.build(
 		local go = Ui.button(
 			top,
 			text,
-			UDim2.new(1, -20, 0, 18),
+			UDim2.new(1, -20, 0, 44),
 			UDim2.fromOffset(10, 70),
 			if ok then Ui.colors.buttonGreen else Ui.colors.buttonGrey
 		)
 		go.Name = "Forge"
 		go.TextSize = 13
+		go.Active, go.TextWrapped = ok, true
+		local outcome = Ui.label(
+			top,
+			if policy
+				then T(policy)
+				elseif chance then T(
+					"commerce_success_failure",
+					tostring(chance * 100),
+					tostring((1 - chance) * 100)
+				) .. "\n" .. T("commerce_forge_keep", tostring(math.max(a and a.applyChance or 0, b and b.applyChance or 0)))
+				else "",
+			UDim2.new(1, -20, 0, 54),
+			UDim2.fromOffset(10, 116),
+			13,
+			Ui.colors.yellow
+		)
+		outcome.TextWrapped = true
 		go.Activated:Connect(function()
+			local reason = CommerceUi.reason("random")
+			if reason then
+				outcome.Text = T(reason)
+				return
+			end
 			if ok then
 				Remotes.event("GangNpc"):FireServer("forge", pair[1], pair[2])
 				pair = {}
@@ -360,6 +384,10 @@ function GangNpcWindow.build(
 
 	refresh = function(p: Types.Profile?)
 		profile = p
+		if not isForge then
+			local policy = CommerceUi.reason("trade")
+			hint.Text = T(policy or "gang_library_text")
+		end
 		clear(list)
 		if not p then
 			return
@@ -404,7 +432,12 @@ function GangNpcWindow.build(
 					) .. T("gang_library_points", libraryPoints(stack)),
 					ItemInfo.RARITY_COLORS[rarity]
 				)
-				actionButton(card, T("gang_library_give"), true, function()
+				local policy = CommerceUi.reason("trade")
+				actionButton(card, T("gang_library_give"), policy == nil, function()
+					if CommerceUi.reason("trade") then
+						refresh(profile)
+						return
+					end
 					Remotes.event("GangNpc"):FireServer("library", slot)
 				end)
 			else
@@ -441,6 +474,9 @@ function GangNpcWindow.build(
 		Remotes.event("GangAction"):FireServer("state")
 	end
 	refresh(profile)
+	CommerceUi.watch(win, function()
+		refresh(profile)
+	end)
 	return win, refresh
 end
 

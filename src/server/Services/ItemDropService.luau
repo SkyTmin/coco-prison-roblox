@@ -25,6 +25,7 @@ local Types = require(Shared.Types)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
 local CollisionGroups = require(script.Parent.CollisionGroups)
+local Policy = require(script.Parent.CommercePolicyService)
 
 local ItemDropService = {}
 local rules = Config.rules.survival.drops
@@ -36,7 +37,14 @@ local REACH_UP = rules.pickupReachBlocks.vertical * BLOCK
 local MERGE = rules.mergeBlocks * BLOCK
 local STACK = 64
 local FX_RANGE = 64
-type Drop = { part: BasePart, stack: Types.ItemStack, pickupAt: number, gang: string? }
+type Drop = {
+	part: BasePart,
+	stack: Types.ItemStack,
+	pickupAt: number,
+	gang: string?,
+	owner: number?,
+	tradeAuthorized: boolean,
+}
 local random = Random.new()
 local order: { BasePart } = {} -- oldest first, for the server-wide cap
 local drops: { [BasePart]: Drop } = {}
@@ -135,6 +143,8 @@ function ItemDropService.Spawn(
 		stack = table.clone(stack),
 		pickupAt = os.clock() + pickupDelay,
 		gang = gang,
+		owner = if from then from.UserId else nil,
+		tradeAuthorized = from ~= nil and Policy.CanTrade(from),
 	}
 	table.insert(order, drop)
 	while #order > rules.maxOnServer do
@@ -201,8 +211,20 @@ local function pickUp()
 		local top = feet + heightOf(character)
 		for part, drop in pairs(drops) do
 			local at = part.Position
+			-- Mob loot and reclaiming your own death/drop remain ordinary gameplay.
+			-- Other-player loot needs the originating permission plus the receiver's,
+			-- including a current check when the originating player is still online.
+			local owner = drop.owner and Players:GetPlayerByUserId(drop.owner)
+			local exchanging = drop.owner ~= nil and drop.owner ~= player.UserId
+			local tradeBlocked = exchanging
+				and (
+					not drop.tradeAuthorized
+					or not Policy.CanTrade(player)
+					or (owner ~= nil and not Policy.CanTrade(owner))
+				)
 			if
 				now < drop.pickupAt
+				or tradeBlocked
 				or (drop.gang ~= nil and player:GetAttribute("GangId") ~= drop.gang)
 				or Config.blockLocked(drop.stack.id, level) -- [сеть TG/25] blocks of mines far above the player
 				or math.abs(at.X - root.Position.X) > REACH_SIDE
@@ -265,6 +287,8 @@ local function merge()
 							and drops[other.part]
 							and other.stack.id == drop.stack.id
 							and other.gang == drop.gang
+							and other.owner == drop.owner
+							and other.tradeAuthorized == drop.tradeAuthorized
 							and (other.stack.level or 0) == (drop.stack.level or 0)
 							and drop.stack.count + other.stack.count <= STACK
 							and (other.part.Position - part.Position).Magnitude <= MERGE
@@ -282,6 +306,9 @@ local function merge()
 end
 
 local function onDropItem(player: Player, slot: any, count: any)
+	if not Policy.RequireTrade(player) then
+		return
+	end
 	if
 		not ProfileService.CanExport(player)
 		or not InventoryService.isSlot(slot)

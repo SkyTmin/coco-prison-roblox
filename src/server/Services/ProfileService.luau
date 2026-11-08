@@ -23,6 +23,7 @@ local Config = require(Shared.Config)
 local Vault = require(Shared.Vault)
 local Persistence = require(Shared.Persistence)
 local Numbers = require(Shared.Numbers)
+local StorageNames = require(Shared.StorageNames)
 
 type Profile = Types.Profile
 -- fresh: nothing was stored for this player before this load (a brand-new profile — ReferralService)
@@ -38,12 +39,12 @@ type Session = {
 	closing: boolean?, -- one final release, shared by PlayerRemoving and BindToClose
 }
 
-local STORE_NAME = "PlayerProfiles_v3"
+local STORE_NAME = StorageNames.progress("PlayerProfiles_v3")
 local SCHEMA_VERSION = 3
 local AUTOSAVE_SECONDS = 120
 local LOCK_STALE_SECONDS = 300 -- > 2 autosaves: a lock this old belongs to a dead server
 local LOCK_WAIT_SECONDS = 20 -- how long a join waits for another server to let go
-local RELEASE_TOPIC = "ProfileRelease"
+local RELEASE_TOPIC = StorageNames.progress("ProfileRelease")
 local JOB_ID = if game.JobId == "" then "studio" else game.JobId
 
 local ProfileService = {}
@@ -58,7 +59,10 @@ local function storeFor(player: Player): DataStore?
 		local scope = require(script.Parent.TestSessionScope).Get()
 		if scope then
 			if not testStore then
-				testStore = DataStoreService:GetDataStore(STORE_NAME .. "_QA", scope)
+				testStore = DataStoreService:GetDataStore(
+					StorageNames.progress("PlayerProfiles_v3_QA"),
+					scope
+				)
 			end
 			return testStore
 		end
@@ -431,6 +435,9 @@ local function load(player: Player, retryToken: string?)
 			)
 			return
 		end
+	elseif RunService:IsStudio() and game.GameId == 0 then
+		-- An unpublished local copy can be played with a fresh, in-memory profile.
+		ok = true
 	end
 	if ok and not Persistence.finiteTree(result) then
 		ok, result = false, "non-finite saved profile; refusing replacement"
@@ -729,7 +736,11 @@ function ProfileService.Replicate(player: Player)
 			end
 			character:SetAttribute("Armor", table.concat(armor, ","))
 		end
-		player:SetAttribute("Locale", session.profile.locale or Config.rules.ui.defaultLocale)
+		player:SetAttribute("LocaleManual", session.profile.locale ~= nil)
+		player:SetAttribute(
+			"Locale",
+			session.profile.locale or player:GetAttribute("AutoLocale") or "en"
+		)
 		replicateDue[player] = true
 	end
 end
@@ -1032,6 +1043,18 @@ function ProfileService.Start()
 			settings[key] = value
 			p.settings = settings
 		end)
+	end)
+	-- Device/account locale is session-only; it must never become a stored manual choice.
+	Remotes.event("SetAutoLocale").OnServerEvent:Connect(function(player: Player, locale: any)
+		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then
+			return
+		end
+		player:SetAttribute("AutoLocale", locale)
+		local profile = ProfileService.Get(player)
+		if not profile or not profile.locale then
+			player:SetAttribute("LocaleManual", false)
+			player:SetAttribute("Locale", locale)
+		end
 	end)
 	Remotes.event("SetLocale").OnServerEvent:Connect(function(player: Player, locale: any)
 		if typeof(locale) ~= "string" or not table.find(Config.rules.ui.locales, locale) then

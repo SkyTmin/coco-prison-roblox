@@ -10,6 +10,21 @@ local function check(name, ok)
 	table.insert(checks, name)
 end
 local modules, hooks, events = {}, {}, {}
+-- Commerce is allowed in unrelated economy fixtures; dedicated policy tests cover denial.
+modules.CommercePolicyService = {
+	CanRandom = function()
+		return true
+	end,
+	CanTrade = function()
+		return true
+	end,
+	RequireRandom = function()
+		return true
+	end,
+	RequireTrade = function()
+		return true
+	end,
+}
 local names = setmetatable({}, {
 	__index = function(_, k)
 		return k
@@ -42,6 +57,7 @@ local services = {
 	Players = players,
 	RunService = { Heartbeat = signal() },
 	ReplicatedStorage = {
+		Shared = names,
 		WaitForChild = function()
 			return names
 		end,
@@ -236,6 +252,7 @@ for _, name in
 		"MiningDrops",
 		"MiningStats",
 		"Books",
+		"AncientRoll",
 		"Skills",
 		"Achievements",
 	}
@@ -382,6 +399,12 @@ check(
 -- Command validation ends at the durable transport boundary. Actual delivery/crash/retry
 -- semantics are exercised by qa-player-transfer-offline.luau, never simulated by saveBoth.
 local transfers = {}
+-- Proximity is covered by qa-player-transfer-offline; this fixture isolates amount validation.
+modules.TransferAccess = {
+	Check = function()
+		return true
+	end,
+}
 modules.PlayerTransferService = {
 	Submit = function(sender, target, kind, amount)
 		table.insert(transfers, { sender = sender, target = target, kind = kind, amount = amount })

@@ -25,6 +25,7 @@ local Types = require(Shared.Types)
 local ItemTooltip = require(script.Parent.ItemTooltip)
 local Ui = require(script.Parent.Ui)
 local Layout = require(script.Parent.AuctionLayout)
+local CommerceUi = require(script.Parent.CommerceUi)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 type ItemStack = Types.ItemStack
@@ -535,6 +536,11 @@ function AuctionWindow.build(
 				)
 			)
 		buyButton.Visible = not mine
+		local reason = CommerceUi.reason("trade")
+		buyButton.Active, buyButton.AutoButtonColor = reason == nil, reason == nil
+		if reason and not mine then
+			askText.Text = T(reason)
+		end
 		ask.Visible = true
 		-- a touch has no hover: the tooltip next to the question
 		if UserInputService.TouchEnabled and not UserInputService.MouseEnabled then
@@ -542,6 +548,12 @@ function AuctionWindow.build(
 		end
 	end
 	buyButton.Activated:Connect(function()
+		local reason = CommerceUi.reason("trade")
+		if reason then
+			askText.Text = T(reason)
+			buyButton.Active = false
+			return
+		end
 		local lot = selected
 		ask.Visible = false
 		ItemTooltip.hide()
@@ -1029,7 +1041,12 @@ function AuctionWindow.build(
 				)
 			)
 		end
-		local ready = stack ~= nil and dollars ~= nil
+		local policy = CommerceUi.reason("trade")
+		if policy then
+			net.Text = T(policy)
+		end
+		local ready = stack ~= nil and dollars ~= nil and policy == nil
+		listButton.Active = ready
 		listButton.AutoButtonColor = ready
 		listButton.BackgroundColor3 = if ready then Ui.colors.buttonGreen else Ui.colors.buttonGrey
 	end
@@ -1047,6 +1064,11 @@ function AuctionWindow.build(
 		drawSell()
 	end)
 	listButton.Activated:Connect(function()
+		local reason = CommerceUi.reason("trade")
+		if reason then
+			net.Text = T(reason)
+			return
+		end
 		local stack, amount, dollars = readSell()
 		if stack and amount and dollars and chosen then
 			Remotes.event("AuctionSell"):FireServer(chosen, amount, dollars, currency)
@@ -1266,6 +1288,12 @@ function AuctionWindow.build(
 	arrange()
 	drawMoney()
 	show("auction")
+	CommerceUi.watch(win, function()
+		drawSell()
+		if ask.Visible and selected then
+			confirm(selected)
+		end
+	end)
 	return win,
 		function(p: Types.Profile?)
 			current = p

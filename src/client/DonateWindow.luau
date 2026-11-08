@@ -28,6 +28,9 @@ local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Ui = require(script.Parent.Ui)
 local Kit = require(script.Parent.WindowKit)
+local CommerceUi = require(script.Parent.CommerceUi)
+local CasePreviewWindow = require(script.Parent.CasePreviewWindow)
+local CasePreview = require(Shared.CasePreview)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local DonateWindow = {}
@@ -267,6 +270,29 @@ function DonateWindow.build(
 	grid.ScrollingDirection = Enum.ScrollingDirection.Y
 	grid.CanvasSize = UDim2.new()
 	grid.Parent = content
+	local details = Ui.button(
+		content,
+		t("commerce_details"),
+		UDim2.fromOffset(GRID_W, 44),
+		UDim2.new(0, 4, 1, -50),
+		Ui.colors.buttonBlue
+	)
+	details.Name, details.TextSize, details.TextWrapped = "DonateDetails", 14, true
+	details.Activated:Connect(function()
+		if selected then
+			CasePreviewWindow.purchase(win, parent, locale, createWindow, selected, function()
+				return current
+			end)
+		end
+	end)
+	local function fitDetails()
+		local scale = math.max(0.25, if win.AbsoluteSize.X > 0 then win.AbsoluteSize.X / W else 1)
+		local h = math.ceil(44 / scale)
+		details.Size, details.Position, details.TextSize =
+			UDim2.fromOffset(GRID_W, h), UDim2.new(0, 4, 1, -h - 6), math.ceil(14 / scale)
+		grid.Size = UDim2.new(0, GRID_W, 1, -(if details.Visible then 128 + h else 122))
+	end
+	win:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitDetails)
 
 	-- ------------------------------------------------------------------ the purchase panel
 	local panel = Kit.frame(
@@ -612,6 +638,9 @@ function DonateWindow.build(
 		local pack = if tab == "crystals" then Donate.pack(selected) else nil
 		local item = if tab ~= "crystals" then Donate.item(selected) else nil
 		local id = selected or ""
+		details.Visible = CasePreview.purchase(id) ~= nil
+		fitDetails()
+		buy.button.Active, robux.button.Active = true, true
 		amountCaption.Visible = item ~= nil
 		stepper.Visible = item ~= nil
 		totalCaption.Visible = true
@@ -708,6 +737,37 @@ function DonateWindow.build(
 				end
 			end
 		end
+		local policy = CommerceUi.reason("purchase", id)
+		if policy then
+			description.Text, description.TextColor3 = t(policy), Ui.colors.yellow
+			buy.button.Active, robux.button.Active = false, false
+			buy.paint(nil, false)
+			robux.paint(nil, false)
+			buy.run, robux.run =
+				function()
+					description.Text = t(policy)
+				end, function()
+					description.Text = t(policy)
+				end
+		else
+			description.TextColor3 = Ui.colors.muted
+			local originalBuy, originalRobux = buy.run, robux.run
+			local function guarded(run: () -> ())
+				local reason = CommerceUi.reason("purchase", id)
+				if reason then
+					description.Text = t(reason)
+					refreshAll()
+				else
+					run()
+				end
+			end
+			buy.run = function()
+				guarded(originalBuy)
+			end
+			robux.run = function()
+				guarded(originalRobux)
+			end
+		end
 	end
 
 	selectTab = function(id: string)
@@ -754,6 +814,7 @@ function DonateWindow.build(
 		current = p
 		refreshAll()
 	end
+	CommerceUi.watch(win, refreshAll)
 	-- no crystals yet: open on the packs; the PRIS+ window asks for its tab
 	local wanted = DonateWindow.startTab
 	DonateWindow.startTab = nil

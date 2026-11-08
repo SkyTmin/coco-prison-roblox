@@ -7,6 +7,7 @@
 local Config = require(script.Parent.Config)
 local Nicknames = require(script.Parent.Nicknames)
 local Types = require(script.Parent.Types)
+local RewardOdds = require(script.Parent.RewardOdds)
 
 export type Entry = {
 	stack: Types.ItemStack,
@@ -15,6 +16,24 @@ export type Entry = {
 }
 
 local CasePreview = {}
+
+function CasePreview.plan(caseId: string, profile: any?, keyId: string?): any
+	return RewardOdds.case(caseId, profile, keyId)
+end
+
+function CasePreview.purchase(id: string): (string?, string?)
+	local cases = {
+		ordinary_key = "ordinaryCase",
+		ancient_key = "ancientCase",
+		improved_ancient_key = "ancientCase",
+		nickname_key = "nicknameCase",
+		artifact_key = "artifactCase",
+		ancient_powder = "powder",
+		ancient_star = "forge",
+		ancient_star_set = "forge",
+	}
+	return cases[id], id
+end
 
 local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RARITY_ORDER = { common = 1, rare = 2, legendary = 3 }

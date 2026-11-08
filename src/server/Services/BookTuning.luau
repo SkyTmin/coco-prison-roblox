@@ -1,21 +1,11 @@
 --!strict
 local BookTuning = {}
-local adjusted: { [string]: boolean } = { plastolom = true, vampirism = true, enlightened = true }
+local AncientRoll = require(game:GetService("ReplicatedStorage").Shared.AncientRoll)
 local layerReadyAt: { [Player]: number } = {}
 local LAYER_COOLDOWN = 90 -- [владелец 01.11] shared by every tool and tier, after a successful layer
 
 function BookTuning.roll(effect: string, level: number, choices: { string }, random: Random): string
-	if level ~= 3 or not adjusted[effect] or random:NextNumber() < 0.5 then
-		return effect
-	end
-	local alternatives = {}
-	for _, id in ipairs(choices) do
-		if not adjusted[id] then
-			table.insert(alternatives, id)
-		end
-	end
-	assert(#alternatives > 0, "Book pool has no alternative reward")
-	return alternatives[random:NextInteger(1, #alternatives)]
+	return AncientRoll.adjust(effect, level, choices, random)
 end
 
 function BookTuning.proc(effect: string, level: number, chance: number): number

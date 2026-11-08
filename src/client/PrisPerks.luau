@@ -84,7 +84,7 @@ function PrisPerks.appleSkin(meter: Frame, p: Types.Profile?, health: number, ma
 		if typeof(saturation) == "number" then saturation else 0,
 		maxHealth - health
 	)
-	local locale = profile.locale or Config.defaultLocale
+	local locale = profile.locale or Strings.localeOf(player)
 	local l = label :: TextLabel
 	l.Text = Strings.t(
 		"appleskin_line",

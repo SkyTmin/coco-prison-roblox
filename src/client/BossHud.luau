@@ -35,9 +35,10 @@ end
 
 function BossHud.Start(gui: ScreenGui)
 	local player = Players.LocalPlayer
+	player:SetAttribute("HudBossActive", false)
 	local bar = Instance.new("Frame")
 	bar.Name = "BossBar"
-	bar.AnchorPoint = Vector2.new(0.5, 0)
+	bar.AnchorPoint = Vector2.zero
 	bar.Size = UDim2.fromOffset(340, 46)
 	bar.BackgroundColor3 = Ui.colors.panel
 	bar.BackgroundTransparency = 0.25
@@ -45,6 +46,12 @@ function BossHud.Start(gui: ScreenGui)
 	bar.Visible = false
 	bar.ZIndex = 5
 	bar.Parent = gui
+	player:GetAttributeChangedSignal("HudGameplayOpen"):Connect(function()
+		if player:GetAttribute("HudGameplayOpen") == false then
+			bar.Visible = false
+			player:SetAttribute("HudBossActive", false)
+		end
+	end)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = bar
@@ -60,6 +67,9 @@ function BossHud.Start(gui: ScreenGui)
 	title.Font = Enum.Font.GothamBold
 	title.TextStrokeTransparency = 0.4
 	title.ZIndex = 6
+	title.TextScaled = true
+	local titleSize = Instance.new("UITextSizeConstraint")
+	titleSize.MinTextSize, titleSize.MaxTextSize, titleSize.Parent = 10, 16, title
 	local back = Instance.new("Frame")
 	back.Size = UDim2.new(1, -16, 0, 16)
 	back.Position = UDim2.fromOffset(8, 24)
@@ -129,10 +139,19 @@ function BossHud.Start(gui: ScreenGui)
 				shown = state
 			end
 		end
-		bar.Visible = shown ~= nil
-		-- [владелец 22.10: «бар босса выше, к краю верха экрана»] at the very top, between the Roblox
-		-- buttons in the corners (the centre of the top bar is free)
-		bar.Position = UDim2.new(0.5, 0, 0, 4)
+		bar.Visible = shown ~= nil and player:GetAttribute("HudGameplayOpen") ~= false
+		player:SetAttribute("HudBossActive", bar.Visible and gui.Enabled)
+		-- Keep the shared horizontal lane and notice priority, but pin the boss to the
+		-- safe area's local top (Y=0), independently of notification Y [owner 03.11].
+		local width = tonumber(player:GetAttribute("HudNotificationWidth"))
+		local x = tonumber(player:GetAttribute("HudNotificationX"))
+		local height = tonumber(player:GetAttribute("HudNotificationHeight")) or 52
+		width = math.clamp(width or 340, 1, math.max(1, gui.AbsoluteSize.X - 20))
+		bar.Position = UDim2.fromOffset(
+			if x then x - gui.AbsolutePosition.X else (gui.AbsoluteSize.X - width) / 2,
+			0
+		)
+		bar.Size = UDim2.fromOffset(width, math.max(46, height))
 		if shown then
 			local hp = tonumber(shown:GetAttribute("Health")) or 0
 			local max = math.max(1, tonumber(shown:GetAttribute("MaxHealth")) or 1)

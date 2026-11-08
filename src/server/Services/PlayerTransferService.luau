@@ -11,8 +11,10 @@ local Numbers = require(Shared.Numbers)
 local Strings = require(Shared.Strings)
 local Remotes = require(Shared.Remotes)
 local TransferAccess = require(Shared.TransferAccess)
+local StorageNames = require(Shared.StorageNames)
 local Inventory = require(script.Parent.InventoryService)
 local Profile = require(script.Parent.ProfileService)
+local Policy = require(script.Parent.CommercePolicyService)
 local Transfer = {}
 local inbox: any = nil
 local testInbox: any = nil
@@ -25,7 +27,8 @@ local function inboxFor(userId: number): any
 	local scope = scopeFor(userId)
 	if scope then
 		if not testInbox then
-			testInbox = DataStoreService:GetDataStore("PlayerTransfers_QA_v1", scope)
+			testInbox =
+				DataStoreService:GetDataStore(StorageNames.progress("PlayerTransfers_QA_v1"), scope)
 		end
 		return testInbox
 	end
@@ -311,6 +314,12 @@ function Transfer.Submit(
 	value: any,
 	slot: number?
 ): (boolean, string?)
+	if not Policy.RequireTrade(player) then
+		return false
+	end
+	if not Policy.CanTrade(target) then
+		return false, "policy_trade_unavailable"
+	end
 	local nearby, reason = TransferAccess.Check(player, target)
 	if not nearby then
 		return false, reason
@@ -381,7 +390,11 @@ function Transfer.Start()
 		return
 	end
 	started = true
-	inbox = DataStoreService:GetDataStore("PlayerTransfers_v1")
+	-- Local map copies have no universe or mailbox. Keep the rest of Studio bootable.
+	if RunService:IsStudio() and game.GameId == 0 then
+		return
+	end
+	inbox = DataStoreService:GetDataStore(StorageNames.progress("PlayerTransfers_v1"))
 	Profile.OnLoaded(function(player)
 		busy(player)
 		task.defer(Transfer.Resolve, player)

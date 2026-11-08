@@ -12,6 +12,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local CaseRoll = require(Shared.CaseRoll)
 local Donate = require(Shared.Donate)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
@@ -22,6 +23,8 @@ local Ui = require(script.Parent.Ui)
 local DragDrop = require(script.Parent.DragDrop)
 local SlotView = require(script.Parent.SlotView)
 local StorageTransferUi = require(script.Parent.StorageTransferUi)
+local CasePreviewWindow = require(script.Parent.CasePreviewWindow)
+local CommerceUi = require(script.Parent.CommerceUi)
 
 type Address = DragDrop.Address
 type SlotView = { address: Address, name: TextLabel, count: TextLabel, icon: ImageLabel }
@@ -268,17 +271,37 @@ function ChestWindow.build(
 		return b
 	end
 	local third = math.floor((gridWidth - 2 * 8) / 3)
-	local open = button(t("case_open"), PAD, third, Ui.colors.buttonGreen)
+	local caseWidth = if #accepted > 1 then math.floor((gridWidth - 3 * 8) / 4) else third
+	local open = button(t("case_open"), PAD, caseWidth, Ui.colors.buttonGreen)
+	open.Name = "CaseOpenReward"
 	open.Visible = not isStorage
 	local take = button(
 		t("case_take_all"),
-		if isStorage then PAD else PAD + third + 8,
-		third,
+		if isStorage then PAD else PAD + caseWidth + 8,
+		if isStorage then third else caseWidth,
 		Ui.colors.buttonBlue
 	)
+	if not isStorage then
+		local details =
+			button(t("case_info"), PAD + 2 * (caseWidth + 8), caseWidth, Ui.colors.buttonGrey)
+		details.Name = "CaseRewardDetails"
+		details.Activated:Connect(function()
+			if selectedKey and win.Visible then
+				CasePreviewWindow.purchase(
+					win,
+					parent,
+					locale,
+					createWindow,
+					selectedKey,
+					getProfile
+				)
+			end
+		end)
+	end
 	local keyButton: TextButton? = nil
 	if #accepted > 1 then
-		keyButton = button("", PAD + 2 * (third + 8), third, Ui.colors.buttonGrey)
+		keyButton = button("", PAD + 3 * (caseWidth + 8), caseWidth, Ui.colors.buttonGrey)
+		keyButton.TextSize = 13
 	end
 	local hint =
 		Ui.label(content, "", UDim2.fromOffset(gridWidth, 18), UDim2.fromOffset(PAD, rowY + 40), 13)
@@ -394,7 +417,7 @@ function ChestWindow.build(
 				tostring(open.Active)
 			)
 		)
-		if open.Active then
+		if open.Active and not CommerceUi.reason("random") then
 			Remotes.event("CaseOpen"):FireServer(id, selectedKey)
 		end
 	end)
@@ -524,9 +547,15 @@ function ChestWindow.build(
 		if keyButton then
 			keyButton.Text = Strings.itemName(selectedKey, nil, locale)
 		end
-		setActive(open, available and have > 0)
-		hint.Text = if not available
-			then t("case_locked")
+		local policy = CommerceUi.reason("random")
+		local profile = getProfile()
+		local hasRoom = id ~= "ordinaryCase"
+			or CaseRoll.ordinaryHasRoom(profile and profile.caseContents[id])
+		setActive(open, available and have > 0 and policy == nil and hasRoom)
+		hint.Text = if policy
+			then t(policy)
+			elseif not available then t("case_locked")
+			elseif not hasRoom then t("case_space_rolls", CaseRoll.ORDINARY_MAX_DRAWS)
 			elseif have == 0 then t(
 				"case_need_key",
 				Strings.itemName(selectedKey or "ordinary_key", nil, locale)
@@ -556,6 +585,9 @@ function ChestWindow.build(
 		busyChanged:Disconnect()
 		removing:Disconnect()
 	end)
+	if not isStorage then
+		CommerceUi.watch(win, refresh)
+	end
 	refresh()
 	return win, refresh
 end

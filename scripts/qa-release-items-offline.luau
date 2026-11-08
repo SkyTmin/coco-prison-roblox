@@ -88,7 +88,12 @@ local function load(path, transform, extra)
 	setfenv(fn, setmetatable(environment, { __index = getfenv() }))
 	return fn()
 end
-for _, name in { "Effects", "Potions", "PrisPlus", "Donate", "Auction" } do
+f.services.RunService.IsStudio = function()
+	return false
+end
+for _, name in
+	{ "StorageNames", "Effects", "Potions", "PrisPlus", "Donate", "Auction", "CommercePolicy" }
+do
 	M[name] = load("src/shared/" .. name .. ".luau")
 end
 f.services.StarterPlayer = {}
@@ -573,6 +578,12 @@ M.ProfileService.MutateDurable = function(_, transform)
 	transform(f.profiles[actor])
 	return true
 end
+-- Legacy-store failure/replay behavior has its own actual-source receipt boundary fixture.
+M.LegacyReceiptGuard = {
+	WasGranted = function()
+		return false
+	end,
+}
 local donate = load("src/server/Services/DonateService.luau", function(s)
 	return s:gsub(
 		"return DonateService%s*$",
@@ -672,6 +683,34 @@ check(
 		and M.Donate.byProduct(3723068679).crystals == 100
 )
 local ordinary = C.donate.items.ordinary_key
+do
+	local originalRandom = M.CommercePolicyService.RequireRandom
+	M.CommercePolicyService.RequireRandom = function() return false end
+	for id, item in C.donate.items do
+		p=f.fresh();p.crystals=100000;p.rubies=10000
+		f.setClock(f.getClock()+1)
+		donate.buy(actor,id,1)
+		if M.CommercePolicy.RequiresRandomPurchase(id) then
+			check("restricted crystal/ruby purchase has no debit or grant "..id,
+				p.crystals==100000 and p.rubies==10000 and next(p.inventory)==nil)
+			f.setClock(f.getClock()+1)
+			donate.robux(actor,id)
+			check("restricted direct Robux product never prompts "..id,#prompts==0)
+		else
+			check("deterministic purchase remains available "..id,
+				if item.rubies then p.rubies==10000+item.rubies else outcome(p,item))
+		end
+	end
+	p=f.fresh()
+	local paid={ProductId=ordinary.productId,PlayerId=actor.UserId,PurchaseId="restricted-already-paid"}
+	local result=donate.receipt(paid)
+	donate.receipt(paid)
+	check("restricted already-paid receipt grants and persists exactly once",
+		result==rb.Enum.ProductPurchaseDecision.PurchaseGranted
+		and M.InventoryService.count(p,"ordinary_key")==1
+		and M.InventoryService.count(disk,"ordinary_key")==1)
+	M.CommercePolicyService.RequireRandom = originalRandom
+end
 p = f.fresh()
 f.setClock(f.getClock() + 1)
 metadata[ordinary.productId] = { Name = ordinary.productName, PriceInRobux = ordinary.robux + 1 }

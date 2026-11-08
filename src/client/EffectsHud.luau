@@ -30,6 +30,17 @@ type Box = { frame: Frame, icon: ImageLabel, level: TextLabel, timer: TextLabel 
 
 local EffectsHud = {}
 
+local function hudEffects(character: Model?): { any }
+	local active = Effects.active(character)
+	-- Owner 03.11: the permanent injection has no HUD icon or overflow entry; its mechanics remain active.
+	for index = #active, 1, -1 do
+		if active[index].effect.id == "needs_free" then
+			table.remove(active, index)
+		end
+	end
+	return active
+end
+
 local function timeText(endsAt: number?): string
 	if not endsAt then
 		return "**:**" -- vanilla Java shows endless effects like this
@@ -51,7 +62,41 @@ function EffectsHud.start(
 	frame.BackgroundTransparency = 1
 	frame.AnchorPoint = Vector2.new(1, 0)
 	frame.Size = UDim2.fromOffset(6 * (BOX + GAP), 2 * ROW)
+	frame.Visible = false
 	frame.Parent = gui
+	local function describe(entry: any): string
+		return t("effect_" .. entry.effect.id)
+			.. " "
+			.. (ROMAN[entry.level] or tostring(entry.level))
+			.. " — "
+			.. (
+				if entry.endsAt
+					then timeText(entry.endsAt)
+					else t(
+						if entry.effect.harmful then "effect_until_restored" else "effect_forever"
+					)
+			)
+	end
+	local overflow =
+		Ui.button(frame, "", UDim2.fromOffset(44, 44), UDim2.fromOffset(88, 0), Ui.colors.panel)
+	overflow.Name, overflow.Visible = "EffectOverflow", false
+	local remaining: { any } = {}
+	local remainingKey, overflowIndex = "", 0
+	overflow.Activated:Connect(function()
+		if #remaining == 0 then
+			return
+		end
+		overflowIndex = overflowIndex % #remaining + 1
+		-- One readable page per tap: the existing 52px toast cannot hold a dozen effect lines.
+		showToast(
+			string.format(
+				"%d/%d · %s",
+				overflowIndex,
+				#remaining,
+				describe(remaining[overflowIndex])
+			)
+		)
+	end)
 
 	local boxes: { [string]: Box } = {}
 	local function boxFor(effect: Effects.Effect): Box
@@ -98,22 +143,14 @@ function EffectsHud.start(
 		timer.TextXAlignment = Enum.TextXAlignment.Center
 		timer.TextStrokeTransparency = 0.3
 		local hit = Instance.new("TextButton")
+		hit.Name = "EffectDetails"
 		hit.Size, hit.BackgroundTransparency, hit.Text = UDim2.fromScale(1, 1), 1, ""
 		hit.Parent = panel
 		local box: Box = { frame = panel, icon = icon, level = level, timer = timer }
 		hit.Activated:Connect(function()
-			for _, entry in ipairs(Effects.active(player.Character)) do
+			for _, entry in ipairs(hudEffects(player.Character)) do
 				if entry.effect.id == effect.id then
-					local name = t("effect_" .. effect.id)
-						.. " "
-						.. (ROMAN[entry.level] or tostring(entry.level))
-					showToast(
-						if entry.endsAt
-							then name .. " — " .. timeText(entry.endsAt)
-							else name .. " — " .. t(
-								if effect.harmful then "effect_until_restored" else "effect_forever"
-							)
-					)
+					showToast(describe(entry))
 				end
 			end
 		end)
@@ -122,7 +159,7 @@ function EffectsHud.start(
 	end
 
 	local function render()
-		local active = Effects.active(player.Character)
+		local active = hudEffects(player.Character)
 		-- the layout editor [владелец 28.10: «возможность передвигать иконки с эффектами»]: two sample icons to grab
 		if #active == 0 and HudLayout.isEditing() then
 			for _, id in ipairs({ "speed", "regeneration" }) do
@@ -133,25 +170,80 @@ function EffectsHud.start(
 			end
 		end
 		local shown: { [string]: boolean } = {}
-		local anyBeneficial = false
+		local compact = frame:GetAttribute("Compact") == true
+		local beneficialCount, harmfulCount = 0, 0
 		for _, entry in ipairs(active) do
-			anyBeneficial = anyBeneficial or not entry.effect.harmful
+			if entry.effect.harmful then
+				harmfulCount += 1
+			else
+				beneficialCount += 1
+			end
 		end
+		if compact then
+			local ordered = {}
+			for _, harmful in { true, false } do
+				for _, entry in active do
+					if entry.effect.harmful == harmful then
+						table.insert(ordered, entry)
+					end
+				end
+			end
+			active = ordered
+		end
+		frame.Visible = #active > 0
+		frame.Size = UDim2.fromOffset(
+			if compact then 132 else 6 * (BOX + GAP),
+			if compact
+				then 44
+				else (math.ceil(beneficialCount / 6) + math.ceil(harmfulCount / 6)) * ROW
+		)
+		table.clear(remaining)
+		local ids = {}
+		if compact then
+			for i = 3, #active do
+				table.insert(remaining, active[i])
+				table.insert(ids, active[i].effect.id)
+			end
+		end
+		local key = table.concat(ids, ",")
+		if key ~= remainingKey then
+			remainingKey, overflowIndex = key, 0
+		end
+		overflow.Visible, overflow.Text = #remaining > 0, "+" .. tostring(#remaining)
 		-- right-aligned rows: the first effect of each row is the rightmost one
 		local beneficial, harmful = 0, 0
 		local width = frame.Size.X.Offset
-		for _, entry in ipairs(active) do
+		for activeIndex, entry in ipairs(active) do
+			if compact and activeIndex > 2 then
+				continue
+			end
 			local box = boxFor(entry.effect)
 			shown[entry.effect.id] = true
 			local index, row
 			if entry.effect.harmful then
 				harmful += 1
-				index, row = harmful, if anyBeneficial then 1 else 0
+				index, row =
+					(harmful - 1) % 6 + 1,
+					math.ceil(beneficialCount / 6) + math.floor((harmful - 1) / 6)
 			else
 				beneficial += 1
-				index, row = beneficial, 0
+				index, row = (beneficial - 1) % 6 + 1, math.floor((beneficial - 1) / 6)
 			end
-			box.frame.Position = UDim2.fromOffset(width - index * (BOX + GAP), row * ROW)
+			box.frame.Size =
+				UDim2.fromOffset(if compact then 44 else BOX, if compact then 44 else BOX)
+			box.frame.Position = if compact
+				then UDim2.fromOffset((activeIndex - 1) * 44, 0)
+				else UDim2.fromOffset(width - index * (BOX + GAP), row * ROW)
+			box.icon.Size = UDim2.fromOffset(if compact then 22 else 28, if compact then 22 else 28)
+			box.icon.Position = if compact
+				then UDim2.new(0.5, 0, 0, 13)
+				else UDim2.fromScale(0.5, 0.5)
+			box.level.Size = UDim2.new(1, -4, 0, 14)
+			box.level.Position = UDim2.fromOffset(2, if compact then 17 else BOX - 15)
+			box.timer.Size = if compact then UDim2.new(1, 0, 0, 12) else UDim2.new(1, GAP, 0, 14)
+			box.timer.Position = if compact
+				then UDim2.fromOffset(0, 31)
+				else UDim2.new(0, -GAP / 2, 1, 2)
 			box.frame.Visible = true
 			box.level.Text = if entry.level > 1
 				then (ROMAN[entry.level] or tostring(entry.level))
@@ -170,6 +262,7 @@ function EffectsHud.start(
 			end
 		end
 	end
+	frame:GetAttributeChangedSignal("Compact"):Connect(render)
 	task.spawn(function()
 		while frame.Parent do
 			render()

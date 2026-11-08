@@ -537,14 +537,18 @@ local transport = isolated:playerTransfers(ib)
 check("STS source can submit a scoped transfer", transport.Submit(qa, qb, "pay", 250))
 local scopedPacket = copy(iqa.profile.playerTransfer)
 transport.Resolve(qa)
-local mailboxKey = "PlayerTransfers_QA_v1@" .. scope .. "/Inbox_-202"
+local mailboxKey = isolated.storageNames.progress("PlayerTransfers_QA_v1")
+	.. "@"
+	.. scope
+	.. "/Inbox_-202"
 check(
 	"STS mailbox and packet use shared scope",
 	isolated.disk[mailboxKey][scopedPacket.id].packet.testScope == scope
 )
 check(
 	"STS source save uses scoped profile store",
-	isolated.disk["PlayerProfiles_v3_QA@" .. scope .. "/User_-101"].coins == 750
+	isolated.disk[isolated.storageNames.progress("PlayerProfiles_v3_QA") .. "@" .. scope .. "/User_-101"].coins
+			== 750
 		and isolated.disk["User_-101"].coins == 77777
 )
 check("STS never creates unscoped mailbox key", isolated.disk["Inbox_-202"] == nil)
@@ -571,7 +575,7 @@ check(
 	"next STS run starts a fresh isolated profile",
 	otherScope ~= scope and osession.profile.coins == 0
 )
-otherRun.disk["PlayerTransfers_QA_v1@" .. otherScope .. "/Inbox_-202"] =
+otherRun.disk[otherRun.storageNames.progress("PlayerTransfers_QA_v1") .. "@" .. otherScope .. "/Inbox_-202"] =
 	{ [scopedPacket.id] = { packet = scopedPacket } }
 otherRun:playerTransfers(ob).Resolve(otherActor)
 check(
@@ -649,6 +653,42 @@ check(
 )
 accepted.b.Parent = true
 completed(accepted, "accepted nearby transfer recovers after departure")
+
+for _, kind in { "pay", "rubies", "gift" } do
+	for _, side in { "sender", "recipient" } do
+		local denied = fixture(kind)
+		local restricted = if side == "sender" then denied.a else denied.b
+		restricted.policyTrade = false
+		local before = copy(denied.sa.profile)
+		check(
+			"policy denies " .. kind .. " " .. side,
+			not denied.submit()
+				and denied.sa.profile.playerTransfer == nil
+				and serde.encode("json", before) == serde.encode("json", denied.sa.profile)
+		)
+	end
+	local durable = fixture(kind)
+	assert(durable.submit())
+	durable.a.policyTrade, durable.b.policyTrade = false, false
+	if kind == "pay" then
+		completed(durable, "accepted pay settles after policy changes")
+	else
+		for _ = 1, 4 do
+			durable:pump()
+		end
+		check(
+			"accepted " .. kind .. " settles after policy changes",
+			not durable.sa.profile.playerTransfer
+				and not durable.sb.profile.playerTransferIncoming
+				and (
+					if kind == "rubies"
+						then durable.sa.profile.rubies == 65 and durable.sb.profile.rubies == 35
+						else durable.sa.profile.inventory[2].count == 2
+							and durable.sb.profile.inventory[1].count == 1
+				)
+		)
+	end
+end
 
 print(serde.encode("json", {
 	passed = #checks,

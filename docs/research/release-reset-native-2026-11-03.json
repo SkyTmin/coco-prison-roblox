@@ -1,0 +1,535 @@
+{
+  "date": "2026-11-03",
+  "placeId": 92594200898716,
+  "gameId": 10772144679,
+  "epoch": "release1_20261103",
+  "published": false,
+  "desktopInputUsed": false,
+  "oldNamespaceDeleted": false,
+  "sourceSyncScripts": 13,
+  "beforeStudio": {
+    "checkedEnvironment": "live",
+    "livePersistentNamespacesEmpty": true,
+    "stores": {
+      "1": {
+        "name": "K_L_release1_20261103_PlayerProfiles_v3",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "2": {
+        "name": "K_L_release1_20261103_PlayerTransfers_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "3": {
+        "name": "K_L_release1_20261103_AuctionLots_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "4": {
+        "name": "K_L_release1_20261103_Gangs_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "5": {
+        "name": "K_L_release1_20261103_GangTags_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "6": {
+        "name": "K_L_release1_20261103_GangChest_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "7": {
+        "name": "K_L_release1_20261103_FactionStorage_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "8": {
+        "name": "K_L_release1_20261103_Referrals_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "9": {
+        "name": "K_L_release1_20261103_TopNames_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "10": {
+        "name": "K_L_release1_20261103_Top_ratsClean_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "11": {
+        "name": "K_L_release1_20261103_Top_money_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "12": {
+        "name": "K_L_release1_20261103_Top_level_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "13": {
+        "name": "K_L_release1_20261103_Top_blocksClean_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "14": {
+        "name": "K_L_release1_20261103_Top_deaths_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      }
+    },
+    "epoch": "release1_20261103",
+    "legacyRecordsTouched": false,
+    "ownerProfileReadOk": true,
+    "memoryStoreContentsEnumerated": false,
+    "ownerProfileEmpty": true,
+    "status": "LIVE_PERSISTENT_NAMESPACES_EMPTY",
+    "activeEnvironment": "Studio; source may still be pre-cutover",
+    "dataStoreWrites": 0,
+    "livePrefix": "K_L_release1_20261103_"
+  },
+  "freshEntry": {
+    "checks": {
+      "1": {
+        "name": "studio namespace",
+        "passed": true
+      },
+      "2": {
+        "name": "profile ready",
+        "passed": true
+      },
+      "3": {
+        "name": "level1 money0 blocks0",
+        "passed": true
+      },
+      "4": {
+        "name": "only starter shovel",
+        "passed": true
+      },
+      "5": {
+        "name": "counters empty",
+        "passed": true
+      },
+      "6": {
+        "name": "enderChest empty",
+        "passed": true
+      },
+      "7": {
+        "name": "caseContents empty",
+        "passed": true
+      },
+      "8": {
+        "name": "armor empty",
+        "passed": true
+      },
+      "9": {
+        "name": "keys empty",
+        "passed": true
+      },
+      "10": {
+        "name": "passes empty",
+        "passed": true
+      },
+      "11": {
+        "name": "achievements empty",
+        "passed": true
+      },
+      "12": {
+        "name": "skills empty",
+        "passed": true
+      },
+      "13": {
+        "name": "nicknames empty",
+        "passed": true
+      },
+      "14": {
+        "name": "boosters empty",
+        "passed": true
+      },
+      "15": {
+        "name": "stash empty",
+        "passed": true
+      },
+      "16": {
+        "name": "no old gameplay stats (current session playSeconds allowed)",
+        "passed": true
+      },
+      "17": {
+        "name": "no gang/faction",
+        "passed": true
+      },
+      "18": {
+        "name": "no artifacts/fragments",
+        "passed": true
+      },
+      "19": {
+        "name": "no purchased currency",
+        "passed": true
+      },
+      "20": {
+        "name": "no rubies",
+        "passed": true
+      },
+      "21": {
+        "name": "tutorial fresh",
+        "passed": true
+      },
+      "22": {
+        "name": "top rats empty",
+        "passed": true
+      },
+      "23": {
+        "name": "top money empty",
+        "passed": true
+      },
+      "24": {
+        "name": "top level empty",
+        "passed": true
+      },
+      "25": {
+        "name": "top blocks empty",
+        "passed": true
+      },
+      "26": {
+        "name": "top deaths empty",
+        "passed": true
+      },
+      "27": {
+        "name": "all5 tops",
+        "passed": true
+      },
+      "28": {
+        "name": "creative available",
+        "passed": true
+      }
+    },
+    "epoch": "release1_20261103",
+    "checkCount": 28,
+    "summary": {
+      "tops": {
+        "deaths": [],
+        "money": [],
+        "level": [],
+        "blocks": [],
+        "rats": []
+      },
+      "stats": {
+        "playSeconds": 180
+      },
+      "tutorial": {
+        "version": 2,
+        "step": 3
+      },
+      "coins": 0,
+      "locale": "en",
+      "blocks": 0,
+      "level": 1,
+      "localeManual": false,
+      "inventory": {
+        "1": {
+          "id": "shovel",
+          "level": 1,
+          "count": 1,
+          "books": []
+        }
+      }
+    },
+    "prefix": "K_S_release1_20261103_",
+    "environment": "studio",
+    "gameId": 10772144679,
+    "failures": 0,
+    "stage": "fresh-Studio-entry",
+    "placeId": 92594200898716
+  },
+  "freshClient": {
+    "locale": "en",
+    "loadingScreenRemaining": false,
+    "rows": {
+      "1": {
+        "visible": true,
+        "complete": false,
+        "name": "Requirement_1",
+        "counter": "Гравий"
+      },
+      "2": {
+        "visible": true,
+        "complete": false,
+        "name": "Requirement_2",
+        "counter": "Земля"
+      },
+      "3": {
+        "visible": true,
+        "complete": false,
+        "name": "Requirement_3",
+        "counter": "Песок"
+      }
+    },
+    "creativeAvailable": true,
+    "requirementsTitle": "Requirements"
+  },
+  "afterStudio": {
+    "checkedEnvironment": "live",
+    "livePersistentNamespacesEmpty": true,
+    "stores": {
+      "1": {
+        "name": "K_L_release1_20261103_PlayerProfiles_v3",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "2": {
+        "name": "K_L_release1_20261103_PlayerTransfers_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "3": {
+        "name": "K_L_release1_20261103_AuctionLots_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "4": {
+        "name": "K_L_release1_20261103_Gangs_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "5": {
+        "name": "K_L_release1_20261103_GangTags_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "6": {
+        "name": "K_L_release1_20261103_GangChest_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "7": {
+        "name": "K_L_release1_20261103_FactionStorage_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "8": {
+        "name": "K_L_release1_20261103_Referrals_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "9": {
+        "name": "K_L_release1_20261103_TopNames_v1",
+        "kind": "dataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "10": {
+        "name": "K_L_release1_20261103_Top_ratsClean_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "11": {
+        "name": "K_L_release1_20261103_Top_money_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "12": {
+        "name": "K_L_release1_20261103_Top_level_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "13": {
+        "name": "K_L_release1_20261103_Top_blocksClean_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      },
+      "14": {
+        "name": "K_L_release1_20261103_Top_deaths_v1",
+        "kind": "orderedDataStores",
+        "empty": true,
+        "evidence": {
+          "finished": true,
+          "countOnFirstPage": 0
+        },
+        "readOk": true
+      }
+    },
+    "epoch": "release1_20261103",
+    "legacyRecordsTouched": false,
+    "ownerProfileReadOk": true,
+    "memoryStoreContentsEnumerated": false,
+    "ownerProfileEmpty": true,
+    "status": "LIVE_PERSISTENT_NAMESPACES_EMPTY",
+    "activeEnvironment": "Studio; source may still be pre-cutover",
+    "dataStoreWrites": 0,
+    "livePrefix": "K_L_release1_20261103_"
+  },
+  "rejoin": {
+    "inventory": {
+      "1": {
+        "id": "shovel",
+        "level": 1,
+        "books": [],
+        "count": 1
+      }
+    },
+    "tutorial": {
+      "version": 2,
+      "step": 3
+    },
+    "vaultEmpty": true,
+    "caseItemCount": 0,
+    "passed": true,
+    "coins": 0,
+    "creativeAvailable": true,
+    "blocks": 0,
+    "stage": "normal-stop-and-rejoin",
+    "topCounts": {
+      "deaths": 0,
+      "money": 0,
+      "level": 0,
+      "blocks": 0,
+      "rats": 0
+    },
+    "profileReady": "ready",
+    "level": 1,
+    "namespace": "K_S_release1_20261103_",
+    "playSeconds": 300
+  },
+  "testAssertionCorrections": [
+    "Fresh stats begins accruing playSeconds during the current session; allow current-session play time while checking gameplay stats.",
+    "After deserialize, caseContents normalizes to ancientCase={} even if empty. Count contained items instead of requiring a completely absent container. No production code change was needed for either observation."
+  ]
+}

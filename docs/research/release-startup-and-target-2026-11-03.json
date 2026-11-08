@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-03",
+  "placeId": 92594200898716,
+  "startup": {
+    "manual": true,
+    "touch": true,
+    "auto": "en",
+    "keyboard": true,
+    "phase": "ready",
+    "screen": "750, 381",
+    "profile": "ready",
+    "playerLocale": "en-us",
+    "observation": "{\"bounded\":true,\"finished\":true,\"segments\":12,\"size\":[28,28],\"seen\":true,\"samples\":21,\"rotating\":true,\"labels\":{\"KATORGA\":true,\"КАТОРГА\":true}}",
+    "loading": false,
+    "platformLocale": "en-us",
+    "locale": "ru"
+  },
+  "final": {
+    "render": "{\"cardReturns\":true,\"layer\":true,\"hiddenWhileMenu\":true,\"gridVisible\":true}",
+    "auto": "en",
+    "qaObserver": false,
+    "creative": true,
+    "locale": "ru",
+    "manual": true,
+    "loading": false
+  },
+  "sourceTests": {
+    "locale": 43,
+    "loader": 98,
+    "profile": 39,
+    "loaderPeerScenarios": 6,
+    "stickyTarget": 48
+  },
+  "limits": [
+    "Menu layering was verified using native GUI state; VirtualInput click attempts did not activate the menu and are not counted as a passed input test.",
+    "Sticky target cases executed actual production selection code against isolated geometry fixtures; owner's progress was not reset.",
+    "Existing external asset203785492 type mismatch remains outside these changes."
+  ],
+  "cleanPlay": true,
+  "published": false
+}

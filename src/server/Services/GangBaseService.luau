@@ -128,6 +128,9 @@ function GangBaseService.forgeOffer(effect: string, level: number): (number?, nu
 end
 
 local function library(player: Player, slot: any)
+	if not require(script.Parent.CommercePolicyService).RequireTrade(player) then
+		return
+	end
 	if
 		not ProfileService.CanExport(player)
 		or not InventoryService.isSlot(slot)
@@ -186,6 +189,9 @@ local function library(player: Player, slot: any)
 end
 
 local function forge(player: Player, slotA: any, slotB: any)
+	if not require(script.Parent.CommercePolicyService).RequireRandom(player) then
+		return
+	end
 	if
 		not InventoryService.isSlot(slotA)
 		or not InventoryService.isSlot(slotB)

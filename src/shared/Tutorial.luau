@@ -184,8 +184,25 @@ function Tutorial.levelGoal(profile: any): any
 		saleReady = resourcesReady
 			and profile.coins < cost
 			and estimatedSale > 0
-			and profile.coins + estimatedSale >= cost,
+			and (
+				profile.coins + estimatedSale >= cost
+				or (Tutorial.step(profile) == 4 and not profile.tutorial.levelSold)
+			),
 	}
+end
+
+-- After the first guided level sale, wait for a batch that covers the remaining cost.
+function Tutorial.soldForLevel(profile: any, amount: number): boolean
+	if Tutorial.step(profile) ~= 4 or amount <= 0 or profile.tutorial.levelSold then
+		return false
+	end
+	local goal = Tutorial.levelGoal(profile)
+	if not goal or not goal.resourcesReady then
+		return false
+	end
+	profile.tutorial = table.clone(profile.tutorial)
+	profile.tutorial.levelSold = true
+	return true
 end
 
 -- Ordinary mining/selling mutate the real counters and coins; the guide reads them directly.

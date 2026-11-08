@@ -14,6 +14,7 @@ assert(
 	"Unexpected QA backup"
 )
 local Scope = require(game.ServerScriptService.Server.Services.TestSessionScope)
+local Names = require(game.ReplicatedStorage.Shared.StorageNames)
 local expectedScope = assert(Scope.Get(), "No isolated test scope")
 assert(typeof(expectedScope) == "string" and expectedScope:match("^Run_"), "Invalid test scope")
 local stores, writes, reads, rejected = {}, 0, 0, 0
@@ -45,9 +46,9 @@ local function copy(value, seen)
 	return result
 end
 local function keyAllowed(name, scope, key)
-	local prefix = if name == "PlayerProfiles_v3_QA"
+	local prefix = if name == Names.progress("PlayerProfiles_v3_QA")
 		then "User_"
-		elseif name == "PlayerTransfers_QA_v1" then "Inbox_"
+		elseif name == Names.progress("PlayerTransfers_QA_v1") then "Inbox_"
 		else nil
 	local valid = scope == expectedScope
 		and prefix
@@ -63,10 +64,10 @@ end
 local Adapter = {}
 function Adapter:GetDataStore(name, scope)
 	assert(
-		name == "PlayerProfiles_v3"
-			or name == "PlayerProfiles_v3_QA"
-			or name == "PlayerTransfers_v1"
-			or name == "PlayerTransfers_QA_v1",
+		name == Names.progress("PlayerProfiles_v3")
+			or name == Names.progress("PlayerProfiles_v3_QA")
+			or name == Names.progress("PlayerTransfers_v1")
+			or name == Names.progress("PlayerTransfers_QA_v1"),
 		"Unexpected QA store"
 	)
 	local id = name .. ":" .. tostring(scope)

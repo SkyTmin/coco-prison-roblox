@@ -5,6 +5,7 @@
 -- screen: «Вскопайте блоки возле маяка» with your faction's capture points. Reads ReplicatedStorage.Warzone
 -- (Shared/Warzone), so it works whatever part of the location is streamed in.
 local CollectionService = game:GetService("CollectionService")
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -40,6 +41,7 @@ end
 
 function WarzoneHud.Start(gui: ScreenGui)
 	local player = Players.LocalPlayer
+	player:SetAttribute("HudWarzoneActive", false)
 	local function t(key: string, ...: any): string
 		return Strings.t(key, Strings.localeOf(player), ...)
 	end
@@ -50,6 +52,21 @@ function WarzoneHud.Start(gui: ScreenGui)
 	hint.TextWrapped = true
 	hint.TextStrokeTransparency = 0.4
 	hint.Visible = false
+	hint.TextScaled = true
+	local hintSize = Instance.new("UITextSizeConstraint")
+	hintSize.MinTextSize, hintSize.MaxTextSize, hintSize.Parent = 11, 14, hint
+	player:GetAttributeChangedSignal("HudBossActive"):Connect(function()
+		if player:GetAttribute("HudBossActive") == true then
+			hint.Visible = false
+			player:SetAttribute("HudWarzoneActive", false)
+		end
+	end)
+	player:GetAttributeChangedSignal("HudGameplayOpen"):Connect(function()
+		if player:GetAttribute("HudGameplayOpen") == false then
+			hint.Visible = false
+			player:SetAttribute("HudWarzoneActive", false)
+		end
+	end)
 
 	local boards: { [BasePart]: Board } = {}
 	local mineSigns: { [BasePart]: TextLabel } = {}
@@ -195,6 +212,23 @@ function WarzoneHud.Start(gui: ScreenGui)
 		else
 			hint.Visible = false
 		end
+		-- One persistent gameplay notice owns the lane. Boss combat information wins;
+		-- an eligible capture hint resumes on the next refresh after the boss leaves.
+		hint.Visible = hint.Visible
+			and player:GetAttribute("HudBossActive") ~= true
+			and player:GetAttribute("HudGameplayOpen") ~= false
+		player:SetAttribute("HudWarzoneActive", hint.Visible and gui.Enabled)
+		local width = tonumber(player:GetAttribute("HudNotificationWidth"))
+		local x = tonumber(player:GetAttribute("HudNotificationX"))
+		local y = tonumber(player:GetAttribute("HudNotificationY"))
+		local height = tonumber(player:GetAttribute("HudNotificationHeight")) or 52
+		width = math.clamp(width or 340, 1, math.max(1, gui.AbsoluteSize.X - 20))
+		local inset = GuiService:GetGuiInset()
+		hint.Position = UDim2.fromOffset(
+			if x then x - gui.AbsolutePosition.X else (gui.AbsoluteSize.X - width) / 2,
+			if y then y - gui.AbsolutePosition.Y else inset.Y + 8
+		)
+		hint.Size = UDim2.fromOffset(width, math.max(46, height))
 	end)
 end
 

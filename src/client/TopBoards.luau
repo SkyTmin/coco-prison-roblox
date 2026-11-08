@@ -38,7 +38,7 @@ local BOARDS = {
 }
 
 local localeOf: () -> string = function()
-	return Config.defaultLocale
+	return Strings.localeOf(Players.LocalPlayer)
 end
 local guis: { [BasePart]: SurfaceGui } = {}
 

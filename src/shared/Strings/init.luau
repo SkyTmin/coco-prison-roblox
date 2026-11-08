@@ -18,6 +18,7 @@ for _, part in ipairs({
 	script.ReleaseUi,
 	script.ReleaseServers,
 	script.ReleaseTutorial,
+	script.Commerce,
 }) do
 	for key, entry in pairs(require(part) :: any) do
 		STRINGS[key] = entry
@@ -50,7 +51,7 @@ function Strings.localeOf(player: Player?): string
 			return locale
 		end
 	end
-	return Config.defaultLocale
+	return "en"
 end
 
 -- True when the key exists in that locale (tooltips skip lines that are not translated yet).

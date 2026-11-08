@@ -1,0 +1,159 @@
+{
+  "placeId": 92594200898716,
+  "date": "2026-11-03",
+  "desktop": {
+    "physicalTouchTested": false,
+    "checks": [
+      {
+        "name": "tracked level card compact by default",
+        "pass": true
+      },
+      {
+        "name": "redundant heading hidden",
+        "pass": true
+      },
+      {
+        "name": "redundant footer hidden",
+        "pass": true
+      },
+      {
+        "name": "direct editor has one handle",
+        "pass": true
+      },
+      {
+        "name": "size controls already visible",
+        "pass": true
+      },
+      {
+        "name": "minus reduces to 80 percent",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "before": "10, 58",
+          "after": "120, 102"
+        },
+        "name": "native header drag moves card",
+        "pass": true
+      },
+      {
+        "name": "profile resend preserves edit position",
+        "pass": true
+      },
+      {
+        "name": "profile resend preserves edit size",
+        "pass": true
+      },
+      {
+        "evidence": 0,
+        "name": "locked card remains stationary through tutorial ticks",
+        "pass": true
+      },
+      {
+        "name": "saved position survives profile resend",
+        "pass": true
+      },
+      {
+        "name": "saved scale survives profile resend",
+        "pass": true
+      }
+    ],
+    "scale": 0.800000011920929,
+    "finalPosition": [
+      120,
+      102
+    ],
+    "status": "PASS",
+    "osInputUsed": false,
+    "initialSize": [
+      220,
+      100
+    ],
+    "viewport": [
+      1168,
+      338
+    ],
+    "finalSize": [
+      176,
+      80
+    ],
+    "touchEmulator": false
+  },
+  "iphoneAttempt": {
+    "osInputUsed": false,
+    "status": "FAIL",
+    "physicalTouchTested": false,
+    "checks": [
+      {
+        "name": "tracked level card compact by default",
+        "pass": true
+      },
+      {
+        "name": "redundant heading hidden",
+        "pass": true
+      },
+      {
+        "name": "redundant footer hidden",
+        "pass": true
+      }
+    ],
+    "viewport": [
+      750,
+      381
+    ],
+    "initialSize": [
+      220,
+      100
+    ],
+    "error": "VirtualInput::SendMouseButton: duplicate button state.\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:36 function click\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:57\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:42\n",
+    "touchEmulator": true
+  },
+  "galaxyAttempt": {
+    "osInputUsed": false,
+    "status": "FAIL",
+    "physicalTouchTested": false,
+    "checks": [
+      {
+        "name": "tracked level card compact by default",
+        "pass": true
+      },
+      {
+        "name": "redundant heading hidden",
+        "pass": true
+      },
+      {
+        "name": "redundant footer hidden",
+        "pass": true
+      }
+    ],
+    "viewport": [
+      705,
+      338
+    ],
+    "initialSize": [
+      220,
+      100
+    ],
+    "error": "Players.coco_shamill.PlayerGui.QARequirementsLive:24: UI wait timed out\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:24 function waitFor\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:63\nPlayers.coco_shamill.PlayerGui.QARequirementsLive:47\n",
+    "touchEmulator": true
+  },
+  "nativeRejoin": {
+    "profileReady": true,
+    "sameLevel": true,
+    "sameCoins": true,
+    "mobileLayoutPreserved": true,
+    "mobileRequirements": {
+      "1": 0.0113,
+      "2": 0.3136,
+      "3": 1,
+      "4": 0.7
+    },
+    "trackedGoal": "shovel:2",
+    "shutdownGuardUsed": false
+  },
+  "limits": [
+    "Mobile viewport/rendering checked; mobile automated mouse sequence did not complete. Human input also changed the tracked goal during the phone phase, so do not attribute those layout edits to the harness.",
+    "Physical finger input not tested.",
+    "Real owner's preferences retained; no progress reset, item grants or purchases."
+  ]
+}

@@ -346,6 +346,12 @@ warzone._tick()
 check("new round revokes previous Haste source", player.haste == nil and activeCount() == 1)
 
 modules.Ghetto = load("src/shared/Ghetto.luau")
+modules.CommercePolicy = load("src/shared/CommercePolicy.luau")
+modules.CommercePolicyService = {
+	RequireRandom = function()
+		return true
+	end,
+}
 local ghetto = load(
 	"src/server/Services/GhettoService.luau",
 	expose(

@@ -64,7 +64,7 @@ export type Professions = {
 
 export type Profile = {
 	schemaVersion: number,
-	locale: string?, -- nil uses Config.rules.ui.defaultLocale; schema stays v3
+	locale: string?, -- explicit manual choice; nil uses the session/account language, never persisted automatically
 	level: number,
 	coins: number, -- integer, in 1/moneyScale
 	blocksTotal: number, -- cumulative blocks with multipliers (never spent)
@@ -161,6 +161,7 @@ export type Profile = {
 		step: number,
 		upgradedAt: number?,
 		upgradeSold: boolean?,
+		levelSold: boolean?,
 		ordinaryCaseOpened: boolean?,
 		dropId: string?,
 		completedAt: number?,

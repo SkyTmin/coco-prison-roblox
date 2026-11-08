@@ -46,6 +46,14 @@ local function fixture(seedInventory, seedPages)
 		end,
 	})
 	local modules = {
+		CommercePolicyService = {
+			CanTrade = function()
+				return f.policyTrade ~= false
+			end,
+			RequireTrade = function()
+				return f.policyTrade ~= false
+			end,
+		},
 		Config = {
 			tools = { pickaxe = true, sword = true },
 			moneyScale = 10000,
@@ -66,6 +74,11 @@ local function fixture(seedInventory, seedPages)
 		},
 	}
 	local services = {
+		RunService = {
+			IsStudio = function()
+				return false
+			end,
+		},
 		Players = {
 			GetPlayers = function()
 				return { f.actor }
@@ -86,6 +99,8 @@ local function fixture(seedInventory, seedPages)
 		},
 		DataStoreService = {
 			GetDataStore = function(_, name)
+				assert(name:sub(1, #modules.StorageNames.Prefix) == modules.StorageNames.Prefix)
+				name = name:sub(#modules.StorageNames.Prefix + 1)
 				return {
 					GetAsync = function(_, key)
 						if f.readFail then
@@ -159,6 +174,7 @@ local function fixture(seedInventory, seedPages)
 	end
 	modules.Types = {}
 	modules.Persistence = load("src/shared/Persistence.luau")
+	modules.StorageNames = load("src/shared/StorageNames.luau")
 	modules.Numbers = load("src/shared/Numbers.luau")
 	modules.InventoryService = load("src/server/Services/InventoryService.luau")
 	modules.ProfileService = {
@@ -265,6 +281,39 @@ local function fixture(seedInventory, seedPages)
 end
 local X =
 	{ id = "ancient_book", count = 1, books = { { id = "hammer", level = 3 } }, applyChance = 73 }
+do
+	local denied = fixture({ [1] = X })
+	denied.policyTrade = false
+	check(
+		"restricted shared deposit leaves inventory and journal unchanged",
+		not denied:begin({ [1] = X }, {}, { [1] = X })
+			and denied.live.inventory[1].id == X.id
+			and denied.live.storageTransfer == nil
+			and denied.calls == 0
+	)
+	denied.drop(denied.actor, 1, 1)
+	check(
+		"restricted manual drop cannot remove or publish inventory",
+		denied.live.inventory[1].id == X.id and not denied.escaped
+	)
+	local withdrawal = fixture({}, { { [1] = X } })
+	withdrawal.policyTrade = false
+	check(
+		"restricted shared withdrawal leaves page untouched",
+		not withdrawal:begin({}, { [1] = X }, {})
+			and next(withdrawal.live.inventory) == nil
+			and withdrawal.calls == 0
+	)
+	local accepted = fixture({ [1] = X })
+	assert(accepted:begin({ [1] = X }, {}, { [1] = X }))
+	accepted.policyTrade = false
+	accepted:resolve()
+	check(
+		"accepted shared journal recovers after policy changes",
+		accepted.live.storageTransfer == nil
+			and accepted.stores.GangChest_v1.guild.pages["1"]["1"].id == X.id
+	)
+end
 local function amount(slots, id)
 	local n = 0
 	for _, stack in slots or {} do
@@ -585,6 +634,11 @@ local function profileFixture(fault, lock)
 									return names
 								end,
 							}
+							elseif name == "RunService" then {
+								IsStudio = function()
+									return false
+								end,
+							}
 							else {}
 					end,
 				},
@@ -604,6 +658,7 @@ local function profileFixture(fault, lock)
 	end
 	modules.Persistence = load("src/shared/Persistence.luau")
 	modules.Numbers = load("src/shared/Numbers.luau")
+	modules.StorageNames = load("src/shared/StorageNames.luau")
 	local profile = load("src/server/Services/ProfileService.luau", function(source)
 		return source:gsub(
 			"return ProfileService%s*$",

@@ -418,6 +418,8 @@ local function affinityFixture()
 	q.teleport = teleport
 	local ms = {
 		GetHashMap = function(_, name)
+			assert(name:sub(1, #q.namespacePrefix) == q.namespacePrefix)
+			name = name:sub(#q.namespacePrefix + 1)
 			q.maps[name] = q.maps[name] or {}
 			local map = q.maps[name]
 			return {
@@ -507,6 +509,8 @@ local function affinityFixture()
 			q.close = fn
 		end,
 	}
+	mods.StorageNames = load("src/shared/StorageNames.luau", { game = q.game })
+	q.namespacePrefix = mods.StorageNames.Prefix
 	q.service = load("src/server/Services/ServerAffinityService.luau", {
 		game = q.game,
 		script = { Parent = names },

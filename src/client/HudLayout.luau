@@ -12,6 +12,7 @@
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 
 local HudLayout = {}
 
@@ -25,6 +26,7 @@ type Entry = {
 	default: UDim2, -- its place at registration: back there when the layout is reset
 	optional: boolean,
 	shownByDefault: boolean,
+	defaultSize: number,
 	base: number, -- the layout's own scale for the element (setBaseScale), before the player's size
 }
 
@@ -32,6 +34,7 @@ local MIN_SCALE, MAX_SCALE, SCALE_STEP = 0.5, 2, 0.1
 
 local entries: { Entry } = {}
 local editing = false
+local editingId: string? = nil
 local moved: { [string]: boolean } = {} -- elements the applied layout puts at the player's own place
 
 -- grip: the part the player grabs (the menu button of the whole touch menu); the object moves
@@ -52,6 +55,7 @@ function HudLayout.register(
 		optional = false,
 		shownByDefault = true,
 		base = 1,
+		defaultSize = 1,
 	})
 end
 
@@ -82,6 +86,14 @@ function HudLayout.setDefault(object: GuiObject)
 	end
 end
 
+-- Default user size is separate from base scale, so saved0.6 is never multiplied twice.
+function HudLayout.setDefaultSize(id: string, size: number)
+	for _, e in entries do
+		if e.id == id then
+			e.defaultSize = math.clamp(size, MIN_SCALE, MAX_SCALE)
+		end
+	end
+end
 -- the element's own scale under the default layout (its UIScale gets base × the player's size)
 function HudLayout.setBaseScale(object: GuiObject, base: number)
 	for _, e in ipairs(entries) do
@@ -108,7 +120,16 @@ end
 
 -- the player's size for an element under this layout (1 when unchanged)
 function HudLayout.sizeOf(id: string, layout: Layout?): number
-	return sizeIn(layout and layout[id])
+	local pos = layout and layout[id]
+	if pos then
+		return sizeIn(pos)
+	end
+	for _, e in entries do
+		if e.id == id then
+			return e.defaultSize
+		end
+	end
+	return 1
 end
 
 local function inMode(e: Entry, mode: string): boolean
@@ -123,6 +144,9 @@ end
 -- the saved positions over the default layout (call after the defaults are set)
 function HudLayout.apply(mode: string, layout: Layout?)
 	for _, e in ipairs(entries) do
+		if editing and (not editingId or editingId == e.id) then
+			continue
+		end
 		local pos = layout and layout[e.id]
 		moved[e.id] = inMode(e, mode) and pos ~= nil
 		if inMode(e, mode) and pos then
@@ -130,7 +154,7 @@ function HudLayout.apply(mode: string, layout: Layout?)
 		else
 			e.object.Position = e.default
 		end
-		local size = if inMode(e, mode) then sizeIn(pos) else 1
+		local size = if inMode(e, mode) then (if pos then sizeIn(pos) else e.defaultSize) else 1
 		if size ~= 1 or e.base ~= 1 or e.object:FindFirstChildOfClass("UIScale") then
 			uiScale(e.object).Scale = e.base * size
 		end
@@ -161,7 +185,7 @@ function HudLayout.keepClear(id: string, obstacle: GuiObject)
 				and a.Y + size.Y > b.Y
 			then
 				entry.object.Position = entry.default
-				uiScale(entry.object).Scale = entry.base
+				uiScale(entry.object).Scale = entry.base * entry.defaultSize
 			end
 			return
 		end
@@ -207,17 +231,20 @@ function HudLayout.edit(
 	mode: string,
 	layout: Layout?,
 	texts: Texts,
-	onDone: (Layout?) -> ()
+	onDone: (Layout?) -> (),
+	onlyId: string?
 )
 	if editing then
 		return
 	end
 	editing = true
+	editingId = onlyId
 	local overlay = Instance.new("Frame")
 	overlay.Name = "HudLayoutEditor"
 	overlay.Size = UDim2.fromScale(1, 1)
 	overlay.BackgroundColor3 = Color3.new(0, 0, 0)
 	overlay.BackgroundTransparency = 0.75
+	overlay.Active = true
 	overlay.ZIndex = 50
 	overlay.Parent = gui
 	-- the bar at the top: what to do, Готово, Сбросить
@@ -263,6 +290,12 @@ function HudLayout.edit(
 	end
 	local doneButton = button(texts.done, Color3.fromRGB(40, 160, 70), -8)
 	local resetButton = button(texts.reset, Color3.fromRGB(70, 70, 78), -102)
+	doneButton.Name, resetButton.Name = "LockLayout", "ResetLayout"
+	if onlyId then
+		bar.Position = UDim2.new(0.5, 0, 0, GuiService:GetGuiInset().Y + 8)
+		bar.Size, fit.Scale = UDim2.fromOffset(math.min(460, viewport.X - 16), 56), 1
+		doneButton.Size, resetButton.Size = UDim2.fromOffset(88, 44), UDim2.fromOffset(88, 44)
+	end
 	-- a handle over every movable element of this mode
 	local handles: { [Frame]: Entry } = {}
 	-- optional elements: shown while editing, the toggle says whether they stay
@@ -294,6 +327,13 @@ function HudLayout.edit(
 	percent.TextColor3 = Color3.new(1, 1, 1)
 	percent.ZIndex = 55
 	percent.Parent = sizer
+	if onlyId then
+		-- The direct card editor keeps its touch controls readable even at 50% card scale.
+		sizer.Size = UDim2.fromOffset(184, 48)
+		minus.Size, plus.Size = UDim2.fromOffset(44, 44), UDim2.fromOffset(44, 44)
+		plus.Position = UDim2.new(1, -46, 0, 2)
+		percent.Size, percent.Position = UDim2.new(1, -96, 1, 0), UDim2.fromOffset(48, 0)
+	end
 	local function showPercent(e: Entry)
 		percent.Text = string.format("%d%%", math.floor((sizes[e] or 1) * 100 + 0.5))
 	end
@@ -335,7 +375,7 @@ function HudLayout.edit(
 		end
 	end
 	for _, e in ipairs(entries) do
-		if inMode(e, mode) and parentOf(e.object) then
+		if inMode(e, mode) and parentOf(e.object) and (not onlyId or e.id == onlyId) then
 			local h = Instance.new("Frame")
 			h.Name = "Handle_" .. e.id
 			h.BackgroundColor3 = Color3.fromRGB(255, 220, 80)
@@ -348,7 +388,7 @@ function HudLayout.edit(
 			stroke.Thickness = 2
 			stroke.Parent = h
 			handles[h] = e
-			sizes[e] = sizeIn(layout and layout[e.id])
+			sizes[e] = HudLayout.sizeOf(e.id, layout)
 			if e.optional then
 				shown[e] = shownIn(e, layout)
 				e.object.Visible = true
@@ -369,6 +409,9 @@ function HudLayout.edit(
 				end)
 			end
 			paint(h, e)
+			if onlyId then
+				choose(e)
+			end
 		end
 	end
 	local function sync()
@@ -376,14 +419,19 @@ function HudLayout.edit(
 		local pick = selected
 		if pick then -- under the element, or above it when it sits at the bottom
 			local g = pick.grip
-			local below = g.AbsolutePosition.Y + g.AbsoluteSize.Y - origin.Y + 40
+			local below = g.AbsolutePosition.Y
+					+ g.AbsoluteSize.Y
+					- origin.Y
+					+ sizer.Size.Y.Offset
+					+ 8
 				< overlay.AbsoluteSize.Y
+			local halfSizer = sizer.Size.X.Offset / 2
 			sizer.AnchorPoint = Vector2.new(0.5, if below then 0 else 1)
 			sizer.Position = UDim2.fromOffset(
 				math.clamp(
 					g.AbsolutePosition.X - origin.X + g.AbsoluteSize.X / 2,
-					64,
-					math.max(64, overlay.AbsoluteSize.X - 64)
+					halfSizer,
+					math.max(halfSizer, overlay.AbsoluteSize.X - halfSizer)
 				),
 				if below
 					then g.AbsolutePosition.Y - origin.Y + g.AbsoluteSize.Y + 4
@@ -394,8 +442,10 @@ function HudLayout.edit(
 			local g = e.grip
 			h.Position =
 				UDim2.fromOffset(g.AbsolutePosition.X - origin.X, g.AbsolutePosition.Y - origin.Y)
-			h.Size =
-				UDim2.fromOffset(math.max(24, g.AbsoluteSize.X), math.max(24, g.AbsoluteSize.Y))
+			h.Size = UDim2.fromOffset(
+				math.max(24, g.AbsoluteSize.X),
+				math.max(if onlyId then 44 else 24, g.AbsoluteSize.Y)
+			)
 			local t = toggles[h]
 			if t then -- above the element, or below it when it sits at the top
 				local above = g.AbsolutePosition.Y - origin.Y > 36
@@ -497,10 +547,12 @@ function HudLayout.edit(
 		end
 		overlay:Destroy()
 		editing = false
+		editingId = nil
 		onDone(result)
 	end
 	doneButton.Activated:Connect(function()
-		local result: Layout = {}
+		-- A direct card edit must not erase the player's other HUD positions.
+		local result: Layout = if onlyId then table.clone(layout or {}) else {}
 		for _, e in pairs(handles) do
 			local x, y = fractionOf(e.object)
 			-- {x, y, shown (1 for elements that cannot be removed), size}
@@ -514,7 +566,13 @@ function HudLayout.edit(
 		close(result)
 	end)
 	resetButton.Activated:Connect(function()
-		close(nil)
+		if onlyId then
+			local result = table.clone(layout or {})
+			result[onlyId] = nil
+			close(result)
+		else
+			close(nil)
+		end
 	end)
 	sync()
 end

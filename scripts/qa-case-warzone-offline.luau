@@ -20,10 +20,12 @@ local function execute(path, bindings, transform)
 	return fn()
 end
 local Random = {}
+local draws = 0
 function Random.new(seed)
 	local state = seed or 1729
 	return {
 		NextNumber = function(_, a, b)
+			draws += 1
 			state = (state * 16807) % 2147483647
 			return (a or 0) + (state / 2147483647) * ((b or 1) - (a or 0))
 		end,
@@ -33,14 +35,29 @@ function Random.new(seed)
 	}
 end
 local Config = {}
-for _, name in ipairs({ "keys", "books", "tools" }) do
+for _, name in ipairs({ "keys", "books", "tools", "artifacts", "rules" }) do
 	Config[name] = serde.decode("json", fs.readFile("src/shared/Config/" .. name .. ".json"))
 end
+Config.tools = Config.tools.tools
+Config.moneyScale = Config.rules.money.scale
 local modules = { Config = Config, Types = {} }
-local shared = { Config = "Config", Types = "Types" }
+local shared = setmetatable({}, {
+	__index = function(_, name)
+		return name
+	end,
+})
+for _, name in { "Numbers", "Persistence", "AncientRoll", "CaseRoll" } do
+	modules[name] = execute("src/shared/" .. name .. ".luau", {
+		script = { Parent = shared },
+		require = function(id)
+			return assert(modules[id], id)
+		end,
+	})
+end
 local gameMock = {
 	GetService = function()
 		return {
+			Shared = shared,
 			WaitForChild = function()
 				return shared
 			end,
@@ -161,6 +178,7 @@ local collection = {
 }
 -- Exercise the actual server session flow as well as the delivery helper.
 local currentProfile, messages, serverClock = nil, {}, 100
+local randomAllowed = true
 local remotes = {
 	event = function(name)
 		return {
@@ -181,7 +199,20 @@ local mockModules = setmetatable({
 	},
 	Remotes = remotes,
 	Sfx = { broadcast = function() end },
-	ArtifactService = { Notify = function() end },
+	ArtifactService = {
+		Notify = function() end,
+		GrantFragment = function()
+			return {}
+		end,
+	},
+	CommercePolicyService = {
+		CanRandom = function()
+			return randomAllowed
+		end,
+		RequireRandom = function()
+			return randomAllowed
+		end,
+	},
 	Strings = {
 		localeOf = function()
 			return "en"
@@ -192,6 +223,7 @@ local mockModules = setmetatable({
 		itemName = function(id)
 			return id
 		end,
+		money = tostring,
 	},
 	Vault = {
 		slot = function(_, index)
@@ -282,6 +314,20 @@ local function eventCount(name)
 	return count
 end
 fresh(2)
+randomAllowed = false
+local beforeDraws = draws
+flow.open(player, part)
+flow.roll(player, "ancientCase", "improved_ancient_key")
+check(eventCount("CaseOpened") == 1, "Restricted user cannot inspect the case")
+check(
+	currentProfile.inventory[1].count == 2
+		and draws == beforeDraws
+		and eventCount("AncientRoll") == 0,
+	"Restricted prompt or direct remote spent a key or rolled"
+)
+flow.close(player)
+randomAllowed = true
+fresh(2)
 flow.open(player, part)
 check(
 	eventCount("AncientRoll") == 1 and eventCount("CaseOpened") == 0,
@@ -325,6 +371,30 @@ check(
 check(
 	modules.InventoryService.count(currentProfile, "ancient_book") == 1,
 	"Replayed claim duplicated the book"
+)
+flow.close(player)
+part:RemoveTag("AncientCase")
+part:AddTag("OrdinaryCase")
+fresh(2)
+currentProfile.inventory[1] = { id = "ordinary_key", count = 2 }
+local contents = {}
+for slot = 1, 24 do
+	contents[slot] = { id = "apple", count = 1 }
+end
+currentProfile.caseContents.ordinaryCase = contents
+beforeDraws = draws
+flow.open(player, part)
+check(
+	currentProfile.inventory[1].count == 2 and draws == beforeDraws,
+	"Ordinary case with three free slots must refuse before RNG or debit"
+)
+check(messages[#messages - 1].args[1] == "case_space_rolls", "Capacity failure has no reason")
+contents[24] = nil
+serverClock += 1
+flow.roll(player, "ordinaryCase", "ordinary_key")
+check(
+	currentProfile.inventory[1].count == 1 and draws > beforeDraws,
+	"Four free slots allow one ordinary opening"
 )
 flow.close(player)
 part:Destroy()

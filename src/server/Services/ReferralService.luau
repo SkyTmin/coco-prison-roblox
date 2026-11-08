@@ -33,14 +33,15 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local StorageNames = require(Shared.StorageNames)
 local ProfileService = require(script.Parent.ProfileService)
 local InventoryService = require(script.Parent.InventoryService)
 
 local ReferralService = {}
 
 local cfg = Config.referrals
-local STORE_NAME = "Referrals_v1"
-local TOPIC = "Referrals_v1"
+local STORE_NAME = StorageNames.progress("Referrals_v1")
+local TOPIC = StorageNames.progress("Referrals_v1")
 local PLAY_TICK = 60 -- seconds between play-time ticks (and retries of a friend's credit)
 
 local store: DataStore? = nil

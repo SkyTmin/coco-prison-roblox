@@ -23,12 +23,14 @@ local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Ghetto = require(Shared.Ghetto)
+local CommercePolicy = require(Shared.CommercePolicy)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
 local Numbers = require(Shared.Numbers)
 local ProfileService = require(script.Parent.ProfileService)
+local Policy = require(script.Parent.CommercePolicyService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
 local ItemDropService = require(script.Parent.ItemDropService)
@@ -138,6 +140,9 @@ local function restock()
 end
 
 local function buyTrader(player: Player, id: any, rawCount: any)
+	if CommercePolicy.IsRandomInput(id) and not Policy.RequireRandom(player) then
+		return
+	end
 	local price = Ghetto.traderPrice(id)
 	if not price or not nearTag(player, "GhettoTrader") then
 		return
@@ -175,6 +180,9 @@ local function buyTrader(player: Player, id: any, rawCount: any)
 end
 
 local function buyBlack(player: Player, id: any)
+	if CommercePolicy.IsRandomInput(id) and not Policy.RequireRandom(player) then
+		return
+	end
 	local item = Ghetto.blackItem(id)
 	local profile = ProfileService.Get(player)
 	if not item or not profile or not nearTag(player, "BlackMarket") then

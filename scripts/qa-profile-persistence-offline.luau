@@ -44,6 +44,14 @@ local function fixture(options)
 		end,
 	})
 	local modules = {
+		CommercePolicyService = {
+			CanTrade = function(actor)
+				return actor.policyTrade ~= false
+			end,
+			RequireTrade = function(actor)
+				return actor.policyTrade ~= false
+			end,
+		},
 		Types = {},
 		Remotes = {
 			event = function(name)
@@ -221,6 +229,8 @@ local function fixture(options)
 		return fn()
 	end
 	modules.Persistence = load("src/shared/Persistence.luau")
+	modules.StorageNames = load("src/shared/StorageNames.luau")
+	f.storageNames = modules.StorageNames
 	modules.TestSessionScope = load("src/server/Services/TestSessionScope.luau")
 	modules.Numbers = load("src/shared/Numbers.luau")
 	modules.TransferAccess = load("src/shared/TransferAccess.luau")
@@ -244,6 +254,7 @@ local function fixture(options)
 				[[
 return {
  service = ProfileService, acquire = acquire, save = save, migrate = migrate, load = load, flush = flushReplication,
+ storeName = STORE_NAME, releaseTopic = RELEASE_TOPIC,
  sessions = sessions, setStore = function(value) store = value end,
 }
 ]]
@@ -262,6 +273,9 @@ return {
 			attributes = {},
 			kicks = {},
 		}
+		actor.GetAttribute = function(_, key)
+			return actor.attributes[key]
+		end
 		actor.SetAttribute = function(_, key, value)
 			actor.attributes[key] = value
 		end

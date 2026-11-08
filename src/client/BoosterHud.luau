@@ -38,6 +38,7 @@ function BoosterHud.start(
 	frame.BackgroundTransparency = 1
 	frame.Size = UDim2.fromOffset(ROW_W, 0)
 	frame.AutomaticSize = Enum.AutomaticSize.Y
+	frame.Visible = false
 	frame.Parent = gui
 	local layout = Instance.new("UIListLayout")
 	layout.Padding = UDim.new(0, 2)
@@ -94,21 +95,46 @@ function BoosterHud.start(
 		rows[i] = { button = button, icon = icon, text = text, time = time, fill = fill }
 	end
 
-	local nextAt = 0
-	RunService.Heartbeat:Connect(function()
-		local clock = os.clock()
-		if clock < nextAt then
-			return
-		end
-		nextAt = clock + 0.2
+	local summary = Ui.button(frame, "", UDim2.fromOffset(100, 44), UDim2.new(), Ui.colors.panel)
+	summary.Name, summary.LayoutOrder, summary.Visible = "BoosterSummary", 0, false
+	summary.ClipsDescendants = true
+	summary.Activated:Connect(onClick)
+	local summaryIcon = Instance.new("ImageLabel")
+	summaryIcon.Name, summaryIcon.BackgroundTransparency = "Icon", 1
+	summaryIcon.Size, summaryIcon.Position = UDim2.fromOffset(24, 24), UDim2.fromOffset(3, 4)
+	summaryIcon.ScaleType, summaryIcon.Parent = Enum.ScaleType.Fit, summary
+	local multiplier = Ui.label(
+		summary,
+		"",
+		UDim2.fromOffset(40, 18),
+		UDim2.fromOffset(30, 3),
+		13,
+		Ui.colors.green
+	)
+	multiplier.Name, multiplier.TextTruncate = "Multiplier", Enum.TextTruncate.AtEnd
+	local count = Ui.label(summary, "", UDim2.fromOffset(26, 18), UDim2.fromOffset(72, 3), 12)
+	count.Name, count.TextXAlignment = "ActiveCount", Enum.TextXAlignment.Right
+	local timer = Ui.label(summary, "", UDim2.fromOffset(66, 16), UDim2.fromOffset(30, 25), 12)
+	timer.Name, timer.TextXAlignment = "Time", Enum.TextXAlignment.Right
+	local function render()
 		local p = getProfile()
-		-- the player may hide the bar in the settings [владелец 27.10]
-		frame.Visible = not (p and p.settings and p.settings.hideBoosters == true)
 		local now = Boosters.now()
 		local running = if p then Boosters.runningAll(p, now) else {}
+		local compact = frame:GetAttribute("Compact") == true
+		frame.AutomaticSize = if compact then Enum.AutomaticSize.None else Enum.AutomaticSize.Y
+		frame.Size = UDim2.fromOffset(if compact then 100 else ROW_W, if compact then 44 else 0)
+		frame.Visible = #running > 0 and not (p and p.settings and p.settings.hideBoosters == true)
+		summary.Visible = compact and #running > 0
+		if compact and running[1] then
+			local first = running[1]
+			local left = math.max(0, math.floor(first.endsAt - now))
+			summaryIcon.Image = Boosters.icon(first.kind, Boosters.scopeOf(first))
+			multiplier.Text, count.Text = "×" .. tostring(first.mult), tostring(#running)
+			timer.Text = string.format("%d:%02d", left // 60, left % 60)
+		end
 		for i, row in ipairs(rows) do
 			local a = running[i]
-			row.button.Visible = a ~= nil
+			row.button.Visible = not compact and a ~= nil
 			if a and p then
 				local scope = Boosters.scopeOf(a)
 				local color = Boosters.SCOPE_COLORS[scope]
@@ -160,7 +186,17 @@ function BoosterHud.start(
 				)
 			end
 		end
+	end
+	frame:GetAttributeChangedSignal("Compact"):Connect(render)
+	local nextAt = 0
+	RunService.Heartbeat:Connect(function()
+		local clock = os.clock()
+		if clock >= nextAt then
+			nextAt = clock + 0.2
+			render()
+		end
 	end)
+	render()
 	return frame
 end
 

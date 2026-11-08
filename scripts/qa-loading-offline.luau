@@ -17,6 +17,13 @@ local function source(path, env, instrument)
 end
 local State = source("src/first/LoadingState.luau")
 local Strings = source("src/first/LoadingStrings.luau")
+local Locale = source("src/first/Locale.luau", {
+	game = {
+		GetService = function()
+			return { RobloxLocaleId = "en-us" }
+		end,
+	},
+})
 local serverSource = fs.readFile("src/server/Services/ProfileService.luau")
 local bootstrapStart = assert(serverSource:find("-- Initial replication can precede", 1, true))
 local bootstrapEnd = assert(serverSource:find("sentCopies[player] = nil", bootstrapStart, true))
@@ -147,12 +154,18 @@ local function fixture()
 			end,
 		},
 		script = {
-			Parent = { LoadingState = "State", LoadingStrings = "Strings", HudLayout = "HudLayout" },
+			Parent = {
+				LoadingState = "State",
+				LoadingStrings = "Strings",
+				Locale = "Locale",
+				HudLayout = "HudLayout",
+			},
 		},
 		require = function(name)
 			return if name == "State"
 				then State
 				elseif name == "Strings" then Strings
+				elseif name == "Locale" then Locale
 				elseif name == "Config" then f.config
 				else {
 					isEditing = function()
