@@ -247,10 +247,10 @@ end
 ---------------------------------------------------------------- scene state (per render)
 local scene = {}
 local K_DEFAULT = {
-	sun = 1, -- direct light multiplier
-	amb = 1, -- Ambient + OutdoorAmbient multiplier
+	sun = 0.45, -- direct light multiplier (calibrated on Prison spawn, 08.11)
+	amb = 0.8, -- Ambient + OutdoorAmbient multiplier
 	env = 0.25, -- EnvironmentDiffuseScale sky light
-	fog = 0.0035, -- Atmosphere density -> extinction per stud
+	fog = 0.002, -- Atmosphere density -> extinction per stud
 	exposure = 1, -- final multiplier before tone mapping
 	sat = 1, -- extra saturation after colour correction
 	skyHaze = 0.35,

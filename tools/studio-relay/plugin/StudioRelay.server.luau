@@ -6,8 +6,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.7"
-local BUILD = 8 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.8"
+local BUILD = 9 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
@@ -777,6 +777,10 @@ local function checkUpdate()
 	local build = tonumber(getHeader(res, "x-build")) or 0
 	if build > BUILD and ui.updateLabel then
 		ui.pending = { build = build, source = res.Body }
+		if getSetting("RelayAutoUpdate") == true then
+			applyUpdate() -- the owner switched auto-update on in this widget
+			return
+		end
 		ui.updateLabel.Text = "Доступно обновление: сборка "
 			.. build
 			.. " (сейчас "
@@ -876,7 +880,20 @@ local function buildUi()
 		end
 	)
 	btn(5, "Отключить и забыть", Color3.fromRGB(170, 40, 40), disconnect)
-	local ver = label(6, 16, 11, false)
+	local autoBtn
+	local function autoText()
+		return if getSetting("RelayAutoUpdate") == true
+			then "Автообновление: ВКЛ (нажми, чтобы выключить)"
+			else "Автообновление: выкл"
+	end
+	autoBtn = btn(6, autoText(), Color3.fromRGB(70, 70, 110), function()
+		setSetting("RelayAutoUpdate", not (getSetting("RelayAutoUpdate") == true))
+		autoBtn.Text = autoText()
+		if getSetting("RelayAutoUpdate") == true then
+			ui.checkNow = true
+		end
+	end)
+	local ver = label(7, 16, 11, false)
 	ver.TextColor3 = Color3.fromRGB(150, 150, 150)
 	ver.Text = "v" .. VERSION .. " · сборка " .. BUILD .. " · " .. relayUrl():gsub("^https://", "")
 	ui.updateLabel = label(-2, 32, 13, true)
