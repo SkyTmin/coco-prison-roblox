@@ -6,8 +6,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.5"
-local BUILD = 6 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.6"
+local BUILD = 7 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
@@ -88,6 +88,9 @@ local function setStatus(text)
 	ui.statusText = text
 	if ui.status then
 		ui.status.Text = text
+	end
+	if ui.connectBtn then
+		ui.connectBtn.Visible = getSetting("RelayToken") == nil
 	end
 end
 
@@ -809,9 +812,13 @@ local function buildUi()
 		widget.Enabled = not widget.Enabled
 	end)
 
-	local frame = Instance.new("Frame")
+	local frame = Instance.new("ScrollingFrame")
 	frame.Size = UDim2.fromScale(1, 1)
 	frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	frame.BorderSizePixel = 0
+	frame.ScrollBarThickness = 6
+	frame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	frame.CanvasSize = UDim2.new()
 	frame.Parent = widget
 	local pad = Instance.new("UIPadding")
 	pad.PaddingTop, pad.PaddingBottom, pad.PaddingLeft, pad.PaddingRight =
@@ -853,9 +860,10 @@ local function buildUi()
 	ui.status = label(1, 40, 14, false)
 	ui.code = label(2, 40, 32, true)
 	ui.code.TextXAlignment = Enum.TextXAlignment.Center
-	btn(3, "Подключить", Color3.fromRGB(0, 120, 215), function()
+	ui.connectBtn = btn(3, "Подключить", Color3.fromRGB(0, 120, 215), function()
 		task.spawn(startPairing)
 	end)
+	ui.connectBtn.Visible = not getSetting("RelayToken")
 	local pauseBtn
 	pauseBtn = btn(
 		4,
@@ -871,10 +879,10 @@ local function buildUi()
 	local ver = label(6, 16, 11, false)
 	ver.TextColor3 = Color3.fromRGB(150, 150, 150)
 	ver.Text = "v" .. VERSION .. " · сборка " .. BUILD .. " · " .. relayUrl():gsub("^https://", "")
-	ui.updateLabel = label(7, 32, 13, true)
+	ui.updateLabel = label(-2, 32, 13, true)
 	ui.updateLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
 	ui.updateLabel.Visible = false
-	ui.updateButton = btn(8, "Обновить", Color3.fromRGB(30, 140, 60), applyUpdate)
+	ui.updateButton = btn(-1, "Обновить", Color3.fromRGB(30, 140, 60), applyUpdate)
 	ui.updateButton.Visible = false
 	if IS_CHILD then
 		btn(9, "Откатить обновление", Color3.fromRGB(90, 90, 90), rollback)

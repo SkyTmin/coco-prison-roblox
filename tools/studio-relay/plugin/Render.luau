@@ -45,6 +45,7 @@ end
 
 ---------------------------------------------------------------- images (owner's assets)
 local imageCache = {}
+local imageStats = { ok = 0, fail = 0, failed = {} }
 -- property read that tolerates properties missing in older Studio builds
 local function prop(obj, name)
 	local ok, v = pcall(function()
@@ -80,8 +81,13 @@ local function loadImage(id)
 	end)
 	if not ok or not img then
 		imageCache[id] = false
+		imageStats.fail += 1
+		if #imageStats.failed < 8 then
+			table.insert(imageStats.failed, id .. " " .. string.sub(tostring(img), 1, 80))
+		end
 		return nil
 	end
+	imageStats.ok += 1
 	local size = img.Size
 	local okR, buf = pcall(function()
 		return img:ReadPixelsBuffer(Vector2.zero, size)
@@ -322,6 +328,13 @@ local function collectScene(cam)
 			col = { srgbToLin(col.R), srgbToLin(col.G), srgbToLin(col.B) },
 			shadows = c.l.Shadows,
 			part = c.l.Parent,
+			params = (function()
+				local p = RaycastParams.new()
+				p.FilterType = Enum.RaycastFilterType.Exclude
+				p.IgnoreWater = true
+				p.FilterDescendantsInstances = { c.l.Parent }
+				return p
+			end)(),
 		})
 	end
 end
@@ -432,10 +445,11 @@ local function partAlpha(inst)
 	return 1 - t
 end
 
-local function occluded(from, dir, dist)
+local function occluded(from, dir, dist, rp)
 	local origin = from
+	rp = rp or shadowParams
 	for _ = 1, 4 do
-		local hit = workspace:Raycast(origin, dir * dist, shadowParams)
+		local hit = workspace:Raycast(origin, dir * dist, rp)
 		if not hit then
 			return false
 		end
@@ -555,12 +569,8 @@ local function shade(hit, dir, r, g, b, neon)
 			if nd > 0 then
 				local att = (1 - dist / l.range)
 				att = att * att * l.bright * nd
-				if att > 0.01 and l.shadows then
-					shadowParams.FilterDescendantsInstances = { l.part }
-					if occluded(pos + n * 0.05, ld, dist - 0.2) then
-						att = 0
-					end
-					shadowParams.FilterDescendantsInstances = scene.shadowFilter
+				if att > 0.01 and l.shadows and occluded(pos + n * 0.05, ld, dist - 0.2, l.params) then
+					att = 0
 				end
 				lr += l.col[1] * att
 				lg += l.col[2] * att
@@ -574,8 +584,8 @@ end
 local function applyFog(r, g, b, dist, dir)
 	local f
 	if scene.atm then
-		f = 1 - math.exp(-dist * scene.density * 0.012)
-		f = clamp01(f * (1 + scene.haze * 0.15))
+		f = 1 - math.exp(-dist * scene.density * 0.0035)
+		f = clamp01(f * (0.7 + scene.haze * 0.25))
 	else
 		if scene.fogEnd >= 100000 then
 			return r, g, b
@@ -1331,6 +1341,7 @@ local function render(opts, deps)
 			worldSeconds = math.floor(tWorld * 100) / 100,
 			minimized = minimized,
 			lights = #scene.lights,
+			images = imageStats,
 		}
 end
 
