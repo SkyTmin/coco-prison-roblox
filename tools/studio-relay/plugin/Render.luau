@@ -254,8 +254,8 @@ local K_DEFAULT = {
 	exposure = 1, -- final multiplier before tone mapping
 	sat = 1, -- extra saturation after colour correction
 	skyHaze = 0.35,
-	variantTint = 0, -- how much Part.Color tints a MaterialVariant colour map (0 = not at all)
-	matDark = 1, -- strength of the built-in material darkening below
+	variantTint = 1, -- how much Part.Color tints a MaterialVariant colour map (calibrated: fully)
+	matDark = 0.8, -- strength of the built-in material darkening below
 }
 -- built-in Roblox materials draw their own texture over Part.Color; average brightness of that texture
 local MATERIAL_TONE = {
@@ -450,7 +450,7 @@ local function skyColor(dir)
 	end
 	if day then
 		local k = clamp01(scene.sun.Y * 3)
-		zen = { 0.10 * k + 0.01, 0.30 * k + 0.02, 0.85 * k + 0.05 }
+		zen = { 0.08 * k + 0.01, 0.40 * k + 0.02, 0.72 * k + 0.05 }
 		hor = hor or { 0.55 * k + 0.05, 0.70 * k + 0.05, 0.95 * k + 0.08 }
 	else
 		zen = { 0.004, 0.006, 0.02 }

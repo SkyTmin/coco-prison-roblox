@@ -10,8 +10,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "2.0"
-local BUILD = 11 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "2.1"
+local BUILD = 12 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "https://coco-studio-relay.coco-relay-2a55b6.workers.dev"
 
 local HttpService = game:GetService("HttpService")
@@ -589,8 +589,8 @@ local K_DEFAULT = {
 	exposure = 1, -- final multiplier before tone mapping
 	sat = 1, -- extra saturation after colour correction
 	skyHaze = 0.35,
-	variantTint = 0, -- how much Part.Color tints a MaterialVariant colour map (0 = not at all)
-	matDark = 1, -- strength of the built-in material darkening below
+	variantTint = 1, -- how much Part.Color tints a MaterialVariant colour map (calibrated: fully)
+	matDark = 0.8, -- strength of the built-in material darkening below
 }
 -- built-in Roblox materials draw their own texture over Part.Color; average brightness of that texture
 local MATERIAL_TONE = {
@@ -785,7 +785,7 @@ local function skyColor(dir)
 	end
 	if day then
 		local k = clamp01(scene.sun.Y * 3)
-		zen = { 0.10 * k + 0.01, 0.30 * k + 0.02, 0.85 * k + 0.05 }
+		zen = { 0.08 * k + 0.01, 0.40 * k + 0.02, 0.72 * k + 0.05 }
 		hor = hor or { 0.55 * k + 0.05, 0.70 * k + 0.05, 0.95 * k + 0.08 }
 	else
 		zen = { 0.004, 0.006, 0.02 }
