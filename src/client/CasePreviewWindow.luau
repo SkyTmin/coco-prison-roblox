@@ -61,12 +61,14 @@ function CasePreviewWindow.listen(open: () -> ())
 			local board = Instance.new("BillboardGui")
 			board.Name = "CaseInfoButton"
 			board.AlwaysOnTop = true
-			board.Size = UDim2.fromOffset(118, 24)
-			board.StudsOffset = Vector3.new(0, -1.4, 0)
+			-- a tall empty canvas centred on the chest, the button at its bottom: a fixed number of screen pixels
+			-- under the engine «Открыть» prompt (UIOffset −36 px, ≈ 72 px tall) at any distance
+			board.Size = UDim2.fromOffset(118, 124)
 			board.Adornee = prompt.Parent :: any
 			board.ResetOnSpawn = false
 			local button = Instance.new("TextButton")
-			button.Size = UDim2.fromScale(1, 1)
+			button.Size = UDim2.new(1, 0, 0, 24)
+			button.Position = UDim2.new(0, 0, 1, -24)
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
 			button.BackgroundTransparency = 0.25
 			button.TextColor3 = Color3.fromRGB(215, 215, 220)
