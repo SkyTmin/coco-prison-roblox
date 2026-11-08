@@ -61,6 +61,7 @@ function CasePreviewWindow.listen(open: () -> ())
 			local board = Instance.new("BillboardGui")
 			board.Name = "CaseInfoButton"
 			board.AlwaysOnTop = true
+			board.Active = true -- buttons inside a BillboardGui get mouse / touch input only when it is Active
 			-- a tall empty canvas centred on the chest, the button at its bottom: a fixed number of screen pixels
 			-- under the engine «Открыть» prompt (≈ 72 px tall around the chest) at any distance: 74–98 px below its centre
 			board.Size = UDim2.fromOffset(118, 196)
