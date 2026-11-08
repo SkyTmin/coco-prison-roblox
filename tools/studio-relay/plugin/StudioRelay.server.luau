@@ -6,8 +6,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.3"
-local BUILD = 4 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.4"
+local BUILD = 5 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
@@ -740,6 +740,7 @@ local function applyUpdate()
 	end
 	setSetting("ApprovedBuild", pending.build)
 	setSetting("ApprovedSource", pending.source)
+	setSetting("RelayJustUpdated", true)
 	alive = false
 	pcall(function()
 		ui.widget:Destroy()
@@ -792,7 +793,13 @@ local function buildUi()
 	end
 	ui.toolbar = toolbar
 	local button =
-		toolbar:CreateButton("Studio Relay", "Связь с облачным агентом", "rbxassetid://4458901886")
+		-- the button id must differ per build: an update starts while the old button still exists
+		toolbar:CreateButton(
+			"StudioRelay" .. BUILD,
+			"Связь с облачным агентом",
+			"rbxassetid://4458901886",
+			"Studio Relay"
+		)
 	button.ClickableWhenViewportHidden = true
 	local info = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 320, 220, 280, 200)
 	local widget = plugin:CreateDockWidgetPluginGui("StudioRelayWidget" .. BUILD, info)
@@ -873,13 +880,20 @@ local function buildUi()
 		btn(9, "Откатить обновление", Color3.fromRGB(90, 90, 90), rollback)
 	end
 	setStatus(ui.statusText or "")
-	if not getSetting("RelayToken") then
+	if not getSetting("RelayToken") or getSetting("RelayJustUpdated") then
+		setSetting("RelayJustUpdated", nil)
 		widget.Enabled = true
 	end
 end
 
+if role ~= "client" then
+	task.spawn(pollLoop) -- before the UI: a UI error must never cut the agent off
+end
 if role == "edit" then
-	buildUi()
+	local okUi, errUi = pcall(buildUi)
+	if not okUi then
+		warn("[StudioRelay] UI failed: " .. tostring(errUi))
+	end
 	task.spawn(function()
 		while alive do
 			checkUpdate()
@@ -892,7 +906,4 @@ if role == "edit" then
 			ui.checkNow = nil
 		end
 	end)
-end
-if role ~= "client" then
-	task.spawn(pollLoop)
 end
