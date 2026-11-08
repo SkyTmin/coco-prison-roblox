@@ -212,6 +212,14 @@ for (const [id, extensions] of Object.entries(decisions.toolUpgradeExtensions ??
 		tool.upgrades.push(structuredClone(extension));
 	}
 }
+// [владелец 08.11] single upgrade steps made easier (decisions.upgradeOverrides.<tool>.<fromLevel>)
+for (const [toolId, steps] of Object.entries(decisions.upgradeOverrides || {})) {
+	if (toolId === "_why" || !tools[toolId]) continue;
+	for (const [from, change] of Object.entries(steps)) {
+		const up = tools[toolId].upgrades.find((u) => u.from === Number(from));
+		if (up) Object.assign(up, change);
+	}
+}
 write("tools.json", {
 	source: "wiki/client-audit/content-analysis/*-recovery.json [меню]; материал по уровню — интерпретация; явные дополнительные ступени — design-decisions.toolUpgradeExtensions [владелец/решение]",
 	vanilla: {

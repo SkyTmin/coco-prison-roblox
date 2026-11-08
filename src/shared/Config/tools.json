@@ -301,11 +301,11 @@
         {
           "from": 1,
           "to": 2,
-          "cost": 5,
+          "cost": 1,
           "requirements": {
-            "Гравий": 20,
-            "Песок": 15,
-            "Земля": 15
+            "Гравий": 8,
+            "Песок": 6,
+            "Земля": 6
           },
           "enchantAfter": 1,
           "materialAfter": "wood"
