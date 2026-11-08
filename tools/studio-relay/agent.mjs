@@ -9,6 +9,7 @@
 //   node tools/studio-relay/agent.mjs run <edit|server|client> <file.luau | -e "code"> [--timeout 60]
 //   node tools/studio-relay/agent.mjs shot <edit|client> <out.png> [--max 1024]
 //   node tools/studio-relay/agent.mjs render <edit|client|server> <out.png> [--max 640] [--noaa] [--nogui]
+//        [--cam x,y,z,lookX,lookY,lookZ] [--fov 70] [--size 1280x720]   (render from any point)
 //   node tools/studio-relay/agent.mjs logs [target] [--since N] [--tail 50]
 //   node tools/studio-relay/agent.mjs play | runmode | stop
 //   node tools/studio-relay/agent.mjs sync [only1,only2,...]   (scripts/make-studio-sync.mjs -> edit)
@@ -190,6 +191,9 @@ async function main() {
 			const opts = { max: Number(arg("--max", cmd === "render" ? 640 : 1024)) };
 			if (process.argv.includes("--noaa")) opts.aa = false;
 			if (process.argv.includes("--nogui")) opts.gui = false;
+			if (arg("--cam")) opts.cam = arg("--cam").split(",").map(Number);
+			if (arg("--fov")) opts.fov = Number(arg("--fov"));
+			if (arg("--size")) [opts.vw, opts.vh] = arg("--size").split("x").map(Number);
 			const r = await send(target, cmd === "render" ? "render" : "screenshot", JSON.stringify(opts), Number(arg("--timeout", 120)));
 			const data = JSON.parse(r.body);
 			if (!r.ok) {

@@ -327,7 +327,58 @@ local function collectScene(cam)
 end
 
 ---------------------------------------------------------------- sky
+-- skybox faces: forward F, right R, up U as seen from inside the cube (orientation tuned by comparison)
+local SKY_FACES = {
+	{ "SkyboxFt", Vector3.new(0, 0, -1), Vector3.new(1, 0, 0), Vector3.new(0, 1, 0) },
+	{ "SkyboxBk", Vector3.new(0, 0, 1), Vector3.new(-1, 0, 0), Vector3.new(0, 1, 0) },
+	{ "SkyboxRt", Vector3.new(1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 1, 0) },
+	{ "SkyboxLf", Vector3.new(-1, 0, 0), Vector3.new(0, 0, -1), Vector3.new(0, 1, 0) },
+	{ "SkyboxUp", Vector3.new(0, 1, 0), Vector3.new(0, 0, 1), Vector3.new(-1, 0, 0) },
+	{ "SkyboxDn", Vector3.new(0, -1, 0), Vector3.new(0, 0, 1), Vector3.new(1, 0, 0) },
+}
+local function loadSkybox()
+	local sky = Lighting:FindFirstChildOfClass("Sky")
+	scene.skybox = nil
+	if not sky then
+		return
+	end
+	local faces = {}
+	for i, f in SKY_FACES do
+		local img = loadImage(prop(sky, f[1]))
+		if not img then
+			return
+		end
+		faces[i] = img
+	end
+	scene.skybox = faces
+end
+local function skyboxColor(dir)
+	local best, bi = -2, 1
+	for i, f in SKY_FACES do
+		local d = dir.X * f[2].X + dir.Y * f[2].Y + dir.Z * f[2].Z
+		if d > best then
+			best, bi = d, i
+		end
+	end
+	local f = SKY_FACES[bi]
+	local u = 0.5 + 0.5 * (dir.X * f[3].X + dir.Y * f[3].Y + dir.Z * f[3].Z) / best
+	local v = 0.5 - 0.5 * (dir.X * f[4].X + dir.Y * f[4].Y + dir.Z * f[4].Z) / best
+	local img = scene.skybox[bi]
+	local r, g, b = sampleBilinearPx(img, u * img.w, v * img.h)
+	return srgbToLin(r), srgbToLin(g), srgbToLin(b)
+end
+
 local function skyColor(dir)
+	if scene.skybox then
+		local r, g, b = skyboxColor(dir)
+		if scene.atm then
+			-- atmosphere haze over the skybox near the horizon
+			local h = (1 - math.abs(dir.Y)) ^ 6 * clamp01(scene.haze * 0.35 + scene.density)
+			local c = scene.fogColor
+			r, g, b = r * (1 - h) + c[1] * h, g * (1 - h) + c[2] * h, b * (1 - h) + c[3] * h
+		end
+		return r, g, b
+	end
 	local y = dir.Y
 	local day = scene.sun.Y > -0.05
 	local zen, hor
@@ -543,13 +594,26 @@ local function applyFog(r, g, b, dist, dir)
 end
 
 -- returns linear r,g,b and the id of the first opaque instance (for edge detection)
-local MAXD = 3000
+local MAXD = 40000
+local SEG = 10000
+local function castLong(origin, dir, maxLen)
+	local done = 0
+	while done < maxLen do
+		local len = math.min(SEG, maxLen - done)
+		local hit = workspace:Raycast(origin + dir * done, dir * len, params)
+		if hit then
+			return hit
+		end
+		done += len
+	end
+	return nil
+end
 local function trace(origin, dir)
 	local accR, accG, accB, remain = 0, 0, 0, 1
 	local firstInst = nil
 	local travelled = 0
-	for _ = 1, 10 do
-		local hit = workspace:Raycast(origin, dir * (MAXD - travelled), params)
+	for _ = 1, 12 do
+		local hit = castLong(origin, dir, MAXD - travelled)
 		if not hit then
 			local r, g, b = skyColor(dir)
 			return accR + r * remain, accG + g * remain, accB + b * remain, firstInst or "sky"
@@ -640,8 +704,16 @@ end
 local function renderWorld(canvas, cam, opts)
 	local W, H = canvas.w, canvas.h
 	local cf = cam.CFrame
+	local fov = cam.FieldOfView
+	if type(opts.cam) == "table" and #opts.cam >= 6 then
+		local c = opts.cam
+		cf = CFrame.lookAt(Vector3.new(c[1], c[2], c[3]), Vector3.new(c[4], c[5], c[6]))
+	end
+	if tonumber(opts.fov) then
+		fov = tonumber(opts.fov)
+	end
 	local origin = cf.Position
-	local tanHalf = math.tan(math.rad(cam.FieldOfView) / 2)
+	local tanHalf = math.tan(math.rad(fov) / 2)
 	local aspect = W / H
 	local right, up, look = cf.RightVector, cf.UpVector, cf.LookVector
 	local function rayDir(px, py)
@@ -1229,6 +1301,9 @@ local function render(opts, deps)
 	local minimized = vp.X < 200 or vp.Y < 120
 	local maxSide = math.clamp(tonumber(opts.max) or 640, 64, 1280)
 	local vw, vh = vp.X, vp.Y
+	if tonumber(opts.vw) and tonumber(opts.vh) and opts.cam then
+		vw, vh = tonumber(opts.vw), tonumber(opts.vh)
+	end
 	if minimized then
 		vw, vh = tonumber(opts.vw) or 1280, tonumber(opts.vh) or 720
 	end
@@ -1236,10 +1311,11 @@ local function render(opts, deps)
 	local W, H = math.max(16, math.floor(vw * s)), math.max(16, math.floor(vh * s))
 	local canvas = newCanvas(W, H)
 	collectScene(cam)
+	loadSkybox()
 	local stats = { gui = 0 }
 	local rays = renderWorld(canvas, cam, opts)
 	local tWorld = os.clock() - t0
-	if opts.gui ~= false and not minimized then
+	if opts.gui ~= false and not minimized and not opts.cam then
 		renderGui(canvas, s, stats)
 	end
 	return true,
