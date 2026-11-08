@@ -29,6 +29,7 @@ local InventoryService = require(script.Parent.InventoryService)
 local MineService = require(script.Parent.MineService)
 local NeedsService = require(script.Parent.NeedsService)
 local ProfileService = require(script.Parent.ProfileService)
+local CommercePolicy = require(script.Parent.CommercePolicyService)
 local GangService = require(script.Parent.GangService)
 local AchievementService = require(script.Parent.AchievementService)
 local ProfessionService = require(script.Parent.ProfessionService)
@@ -721,7 +722,7 @@ function BookService.onDug(
 		end
 		extra = breakCells(mine, cells, toolId, toolLevel)
 	end
-	local copy = roll(Books.value(tool, "trader"))
+	local copy = CommercePolicy.CanRandom(player) and roll(Books.value(tool, "trader"))
 	local sold, soldItems = 0, 0
 	local dugCounts: { [string]: number } = {}
 	if copy or #extra > 0 or #layer > 0 then
@@ -814,6 +815,12 @@ local function onUse(player: Player, sourceSlot: any, where: any, key: any)
 		if source.id == Books.BOOK then
 			local book = (source.books :: { { id: string, level: number } })[1]
 			local chance = source.applyChance or 100
+			if (chance < 100 or book.id == "trader") and not CommercePolicy.CanRandom(player) then
+				result = if player:GetAttribute("PolicyState") == "ready"
+					then "policy_random_unavailable"
+					else "policy_loading"
+				return
+			end
 			take(p, sourceSlot)
 			if random:NextInteger(1, 100) <= chance then
 				local books = table.clone(target.books or {})

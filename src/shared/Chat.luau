@@ -8,7 +8,7 @@ Chat.FOLDER = "CocoChat" -- TextChatService.CocoChat holds the faction and gang 
 Chat.COMMANDS = "CocoCommands" -- TextChatService.CocoCommands holds our TextChatCommands (ChatCommandService)
 Chat.GENERAL = "RBXGeneral" -- Общий: Roblox's default channel, everyone on this server («Here» tab)
 Chat.SYSTEM = "RBXSystem" -- system lines (shown in the General tab)
-Chat.TOPIC = "Chat_v1" -- MessagingService: announcements for every server
+Chat.TOPIC = require(script.Parent.StorageNames).progress("Chat_v1") -- MessagingService within this release
 
 export type Kind = "faction" | "gang"
 -- a channel's tab shows its Name: the server names them in English (the fallback), the client renames its copy into

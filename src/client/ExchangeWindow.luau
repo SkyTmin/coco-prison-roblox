@@ -14,6 +14,9 @@ local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
 local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
+local CommerceUi = require(script.Parent.CommerceUi)
+local CasePreviewWindow = require(script.Parent.CasePreviewWindow)
+local CasePreview = require(Shared.CasePreview)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local ExchangeWindow = {}
@@ -164,6 +167,10 @@ function ExchangeWindow.build(
 			UDim2.new(1, -24, 0, 38),
 			UDim2.new(0, 12, 1, -50)
 		)
+		if CasePreview.purchase(id) then
+			button.Text, button.TextSize, button.TextWrapped =
+				Strings.t("commerce_details", locale), 13, true
+		end
 		local function update(p: Types.Profile?)
 			local have = if forMoney
 				then (if p then p.coins / Config.moneyScale else 0)
@@ -182,7 +189,15 @@ function ExchangeWindow.build(
 				then Strings.money(math.floor(need * Config.moneyScale + 0.5))
 				else tostring(need)
 			costValue.TextColor3 = if have >= need then Ui.colors.text else Ui.colors.red
-			local ok = p ~= nil and have >= need and (not isBlack or Ghetto.stock(id) > 0)
+			local policy = CommerceUi.reason("item", id)
+			local ok = p ~= nil
+				and have >= need
+				and (not isBlack or Ghetto.stock(id) > 0)
+				and policy == nil
+			if policy then
+				qty.Text, qty.TextWrapped, qty.Size =
+					Strings.t(policy, locale), true, UDim2.new(1, -16, 0, 26)
+			end
 			button.BackgroundColor3 = if ok then Ui.colors.buttonBlue else Ui.colors.buttonGrey
 			button.Interactable = ok
 		end
@@ -195,12 +210,46 @@ function ExchangeWindow.build(
 			update(profile)
 		end)
 		button.Activated:Connect(function()
-			if forMoney then
-				Remotes.event("GhettoBuy")
-					:FireServer(if isBlack then "black" else "trader", id, quantity)
-			else
-				Remotes.event("Exchange"):FireServer(kind, id, quantity)
+			if CommerceUi.reason("item", id) then
+				update(profile)
+				return
 			end
+			local count = quantity
+			local function purchase()
+				if CommerceUi.reason("item", id) then
+					update(profile)
+					return
+				end
+				if forMoney then
+					Remotes.event("GhettoBuy")
+						:FireServer(if isBlack then "black" else "trader", id, count)
+				else
+					Remotes.event("Exchange"):FireServer(kind, id, count)
+				end
+			end
+			if CasePreview.purchase(id) then
+				CasePreviewWindow.purchase(
+					win,
+					parent,
+					locale,
+					createWindow,
+					id,
+					function()
+						return profile
+					end,
+					purchase,
+					Strings.t(if forMoney then "buy" else "exchange", locale)
+						.. " · "
+						.. Strings.itemName(id, nil, locale)
+						.. " ×"
+						.. count
+				)
+			else
+				purchase()
+			end
+		end)
+		CommerceUi.watch(win, function()
+			update(profile)
 		end)
 		table.insert(updates, update)
 	end

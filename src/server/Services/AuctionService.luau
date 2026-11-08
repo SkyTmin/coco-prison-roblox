@@ -28,6 +28,7 @@ local HttpService = game:GetService("HttpService")
 local MemoryStoreService = game:GetService("MemoryStoreService")
 local MessagingService = game:GetService("MessagingService")
 local Players = game:GetService("Players")
+local Policy = require(script.Parent.CommercePolicyService)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
@@ -40,6 +41,7 @@ local Remotes = require(Shared.Remotes)
 local PrisPlus = require(Shared.PrisPlus)
 local Strings = require(Shared.Strings)
 local Types = require(Shared.Types)
+local StorageNames = require(Shared.StorageNames)
 local DonateService = require(script.Parent.DonateService)
 local InventoryService = require(script.Parent.InventoryService)
 local ProfileService = require(script.Parent.ProfileService)
@@ -54,6 +56,8 @@ type Lot = {
 	fee: number?, -- the seller's commission rate at listing
 	seller: number,
 	sellerName: string,
+	paidTradeAuthorized: boolean?,
+	paidTradeAuthorizedAt: number?,
 	createdAt: number,
 	expiresAt: number,
 	status: string, -- active / sold / cancelled / expired / void
@@ -70,9 +74,9 @@ type Data = {
 	returns: { ItemStack },
 }
 
-local LOTS_STORE = "AuctionLots_v1"
-local INDEX_MAP = "AuctionIndex_v1"
-local SOLD_TOPIC = "AuctionSold"
+local LOTS_STORE = StorageNames.progress("AuctionLots_v1")
+local INDEX_MAP = StorageNames.progress("AuctionIndex_v1")
+local SOLD_TOPIC = StorageNames.progress("AuctionSold")
 local MAX_INDEX_PAGES = 50 -- 200 lots a page
 local QUERY_COOLDOWN = 0.3
 local OPEN_SETTLE_COOLDOWN = 10
@@ -262,6 +266,8 @@ local function summaryOf(lot: Lot | Summary): Summary
 		fee = if typeof(lot.fee) == "number" then lot.fee else nil,
 		seller = lot.seller,
 		sellerName = lot.sellerName,
+		paidTradeAuthorized = lot.paidTradeAuthorized,
+		paidTradeAuthorizedAt = lot.paidTradeAuthorizedAt,
 		createdAt = lot.createdAt,
 		expiresAt = lot.expiresAt,
 	}
@@ -636,6 +642,9 @@ local function canAct(player: Player): boolean
 end
 
 local function sell(player: Player, slot: number, amount: number, value: number, currency: any)
+	if not Policy.RequireTrade(player) then
+		return
+	end
 	if not ProfileService.CanExport(player) then
 		toast(player, "auction_try_later")
 		return
@@ -686,6 +695,8 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 			fee = fee,
 			seller = player.UserId,
 			sellerName = player.Name,
+			paidTradeAuthorized = true,
+			paidTradeAuthorizedAt = now,
 			createdAt = now,
 			expiresAt = now + cfg.lotDays * 86400,
 		}
@@ -750,7 +761,27 @@ local function sell(player: Player, slot: number, amount: number, value: number,
 	changed(player)
 end
 
+-- Offline listings retain the verified seller's consent for their finite lifetime.
+-- PolicyService only accepts Player instances; it cannot query an offline user id.
+-- Missing legacy authorization is never silently upgraded to permission.
+local function sellerAuthorized(lot: any): boolean
+	if
+		lot.paidTradeAuthorized ~= true
+		or typeof(lot.paidTradeAuthorizedAt) ~= "number"
+		or lot.paidTradeAuthorizedAt ~= lot.paidTradeAuthorizedAt
+		or lot.paidTradeAuthorizedAt <= 0
+		or lot.paidTradeAuthorizedAt > os.time()
+	then
+		return false
+	end
+	local seller = Players:GetPlayerByUserId(lot.seller)
+	return seller == nil or Policy.CanTrade(seller)
+end
+
 local function buy(player: Player, id: string, price: number)
+	if not Policy.RequireTrade(player) then
+		return
+	end
 	if not ProfileService.CanExport(player) then
 		toast(player, "auction_try_later")
 		return
@@ -767,6 +798,10 @@ local function buy(player: Player, id: string, price: number)
 	end
 	if s.seller == player.UserId then
 		toast(player, "auction_own_lot")
+		return
+	end
+	if not sellerAuthorized(s) then
+		toast(player, "policy_trade_unavailable")
 		return
 	end
 	if data(profile).pendingBuys[id] then
@@ -823,6 +858,8 @@ local function buy(player: Player, id: string, price: number)
 		end
 		if
 			old.status ~= "active"
+			or not Policy.CanTrade(player)
+			or not sellerAuthorized(old)
 			or old.expiresAt <= os.time()
 			or old.price ~= price
 			or old.cur ~= cur
@@ -927,8 +964,8 @@ end
 -- server (banner + a system chat line for each player who did not hide auction ads), gone → the credit comes back.
 -- Its outcome is noted under "done_<lot>" so a player who left (or whose server shut down) is settled on the next
 -- join: aired = spent, anything else = the credit back.
-local ANNOUNCE_MAP = "AuctionAnnounce_v1"
-local ANNOUNCE_TOPIC = "AuctionAnnounce"
+local ANNOUNCE_MAP = StorageNames.progress("AuctionAnnounce_v1")
+local ANNOUNCE_TOPIC = StorageNames.progress("AuctionAnnounce")
 local TAIL_CACHE_SECONDS = 5
 local announceMap: MemoryStoreHashMap? = nil
 local memoryAnnounce: { [string]: any } = {} -- Studio without MemoryStore: the same keys on this server

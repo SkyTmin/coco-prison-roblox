@@ -40,6 +40,7 @@ for _, name in ipairs({
 	"Teleport",
 	"TeleportChannel",
 	"SetLocale",
+	"SetAutoLocale",
 	"Creative",
 	"DropItem",
 	"ServerLog",
@@ -105,6 +106,7 @@ end
 Remotes.unreliable(require(ReplicatedStorage.Shared.MineNet).REMOTE)
 
 local AvatarService = require(script.Services.AvatarService)
+local CommercePolicyService = require(script.Services.CommercePolicyService)
 local NpcBodyService = require(script.Services.NpcBodyService)
 local SignService = require(script.Services.SignService)
 local ProfileService = require(script.Services.ProfileService)
@@ -141,6 +143,7 @@ local CollisionGroups = require(script.Services.CollisionGroups)
 local LeaderboardService = require(script.Services.LeaderboardService)
 
 AvatarService.Start() -- first: the StarterCharacter must exist before anyone spawns
+CommercePolicyService.Start() -- account restrictions resolve asynchronously; gated actions fail closed meanwhile
 local MatteWindows = require(ReplicatedStorage.Shared.MatteWindows)
 MatteWindows.Apply(workspace:FindFirstChild("Ghetto"))
 MatteWindows.Apply(game:GetService("ServerStorage"):FindFirstChild("GangHouseTemplate"))

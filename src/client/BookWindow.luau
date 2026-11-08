@@ -19,6 +19,7 @@ local Types = require(Shared.Types)
 local ItemTooltip = require(script.Parent.ItemTooltip)
 local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
+local CommerceUi = require(script.Parent.CommerceUi)
 
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 type Candidate = { stack: Types.ItemStack, where: string, key: number | string, refusal: string? }
@@ -30,7 +31,7 @@ local MAX_ROWS = 4
 local GRID_W = COLS * SLOT + (COLS - 1) * GAP
 local INNER_W = GRID_W + 2 * PAD
 local SOURCE_H = 78
-local FOOT_H = 54
+local FOOT_H = 80
 local TITLES = {
 	[Books.BOOK] = "book_window_book",
 	[Books.POWDER] = "book_window_powder",
@@ -159,6 +160,7 @@ function BookWindow.build(
 		13,
 		Ui.colors.yellow
 	)
+	chanceLabel.Name = "BookOutcome"
 
 	local pickCaption = Ui.label(
 		content,
@@ -177,15 +179,17 @@ function BookWindow.build(
 	-- the outcome line and the button
 	local foot = Ui.card(content, UDim2.fromOffset(GRID_W, FOOT_H), UDim2.fromOffset(PAD, footTop))
 	local info = Ui.label(foot, "", UDim2.new(1, -170, 1, -8), UDim2.fromOffset(12, 4), 13)
+	info.Name = "BookPreview"
 	info.TextWrapped = true
 	local button = Ui.button(
 		foot,
 		t(ACTIONS[sourceId] or "book_action_apply"),
-		UDim2.fromOffset(140, 36),
-		UDim2.new(1, -150, 0, 9),
+		UDim2.fromOffset(140, 44),
+		UDim2.new(1, -150, 0, 18),
 		ACTION_COLORS[sourceId]
 	)
 	button.Font = Enum.Font.SourceSansBold
+	button.Name = "BookApply"
 	button.TextSize = 17
 	local function setButton(active: boolean)
 		button.Active = active
@@ -220,7 +224,9 @@ function BookWindow.build(
 			nameLabel.Text = ItemInfo.bookName(book.id, book.level, locale)
 			nameLabel.TextColor3 = ItemInfo.RARITY_COLORS[rarity] or Ui.colors.text
 			descLabel.Text = ItemInfo.bookDescription(book.id, book.level, locale) or ""
-			chanceLabel.Text = t("tip_apply_chance", held.applyChance or 100)
+			local chance = held.applyChance or 100
+			chanceLabel.Text =
+				t("commerce_success_failure", tostring(chance), tostring(100 - chance))
 		else
 			nameLabel.Text = Strings.itemFullName(held.id, held.level, locale)
 				.. (if held.count > 1 then "  ×" .. held.count else "")
@@ -255,7 +261,14 @@ function BookWindow.build(
 			info.TextColor3 = Ui.colors.red
 		elseif sourceId == Books.POWDER then
 			local chance = pick.stack.applyChance or 100
-			info.Text = t("book_chance_now", chance, math.min(100, chance + Books.POWDER_STEP))
+			local after = math.min(100, chance + Books.POWDER_STEP)
+			info.Text = t(
+				"commerce_powder_result",
+				tostring(chance),
+				tostring(after),
+				tostring(100 - chance),
+				tostring(100 - after)
+			)
 			info.TextColor3 = Ui.colors.green
 		elseif confirm then
 			info.Text = t("book_dispel_confirm")
@@ -263,10 +276,28 @@ function BookWindow.build(
 		else
 			info.Text = Strings.itemFullName(pick.stack.id, pick.stack.level, locale)
 				.. "\n"
-				.. t("book_slots_line", #(pick.stack.books or {}), Books.limit(pick.stack.id))
+				.. (
+					if sourceId == Books.BOOK
+						then t("commerce_book_risk")
+						else t(
+							"book_slots_line",
+							#(pick.stack.books or {}),
+							Books.limit(pick.stack.id)
+						)
+				)
 			info.TextColor3 = Ui.colors.text
 		end
-		setButton(pick ~= nil and pick.refusal == nil)
+		local held = current.inventory[sourceSlot]
+		local enchant = held and held.books and held.books[1]
+		local policy = if held
+				and held.id == Books.BOOK
+				and ((held.applyChance or 100) < 100 or (enchant and enchant.id == "trader"))
+			then CommerceUi.reason("random")
+			else nil
+		if policy then
+			info.Text, info.TextColor3 = t(policy), Ui.colors.yellow
+		end
+		setButton(pick ~= nil and pick.refusal == nil and policy == nil)
 	end
 
 	local function rebuild()
@@ -350,6 +381,7 @@ function BookWindow.build(
 	end
 
 	button.Activated:Connect(function()
+		updateInfo() -- re-check current attributes immediately before spending
 		local pick = selected
 		if not pick or pick.refusal or not button.Active then
 			return
@@ -386,6 +418,7 @@ function BookWindow.build(
 		tip:Disconnect()
 		ItemTooltip.hide()
 	end)
+	CommerceUi.watch(win, updateInfo)
 
 	rebuild()
 	local function refresh(newProfile: Types.Profile)

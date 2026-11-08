@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GuiService = game:GetService("GuiService")
 local State = require(script.Parent.LoadingState)
 local Text = require(script.Parent.LoadingStrings)
+local Locale = require(script.Parent.Locale)
 local player = Players.LocalPlayer
 local Controller = {}
 local state = State.new(os.clock())
@@ -16,13 +17,14 @@ local started, complete, worker = false, false, false
 local profile: any = nil
 local snapshotReady = false
 local clientReady = false
-local locale = "ru"
+local locale = Locale.resolve(nil, player)
 local generationCharacter: Model? = nil
 local gui: ScreenGui? = nil
 local retryButton: TextButton? = nil
 local caption: TextLabel? = nil
 local heading: TextLabel? = nil
 local hint: TextLabel? = nil
+local spinner: Frame? = nil
 local rows: { [string]: TextLabel } = {}
 local lastRequest = -math.huge
 local pendingBootstrap: boolean? = nil
@@ -89,7 +91,24 @@ local function makeUi()
 		return item
 	end
 	heading = label("Title", 10, 32, 28)
+	heading.Size = UDim2.new(1, -88, 0, 32)
 	heading.TextColor3 = Color3.fromRGB(255, 170, 40)
+	local ring = Instance.new("Frame")
+	ring.Name, ring.BackgroundTransparency = "LoadingSpinner", 1
+	ring.AnchorPoint, ring.Position, ring.Size =
+		Vector2.new(1, 0), UDim2.new(1, -20, 0, 12), UDim2.fromOffset(28, 28)
+	ring.Parent = panel
+	for index = 0, 11 do
+		local angle = math.rad(index * 30 - 90)
+		local segment = Instance.new("Frame")
+		segment.Name, segment.AnchorPoint = "Segment" .. index, Vector2.new(0.5, 0.5)
+		segment.Position = UDim2.fromOffset(14 + math.cos(angle) * 10, 14 + math.sin(angle) * 10)
+		segment.Size, segment.Rotation = UDim2.fromOffset(3, 6), index * 30
+		segment.BackgroundColor3 = Color3.fromRGB(255, 170, 40)
+		segment.BackgroundTransparency, segment.BorderSizePixel = 0.1 + index * 0.065, 0
+		segment.Parent = ring
+	end
+	spinner = ring
 	caption = label("Status", 44, 44, 14)
 	for index, phase in State.order do
 		rows[phase] = label(phase, 90 + (index - 1) * 22, 22, 14)
@@ -112,7 +131,7 @@ end
 
 function Controller.Profile(nextProfile: any)
 	profile = nextProfile
-	locale = nextProfile.locale or "ru"
+	locale = Locale.resolve(nextProfile.locale, player)
 end
 function Controller.SnapshotReady(value: boolean)
 	snapshotReady = value
@@ -377,9 +396,15 @@ function Controller.Start()
 	Actions:BindActionAtPriority("ArrivalLoading", function()
 		return Enum.ContextActionResult.Sink
 	end, false, 10000, table.unpack(Enum.PlayerActions:GetEnumItems()))
-	RunService:BindToRenderStep("ArrivalLoading", Enum.RenderPriority.Last.Value, function()
+	RunService:BindToRenderStep("ArrivalLoading", Enum.RenderPriority.Last.Value, function(dt)
 		if complete then
 			return
+		end
+		if spinner then
+			spinner.Visible = state.failure == nil
+			if spinner.Visible then
+				spinner.Rotation = (spinner.Rotation + dt * 300) % 360
+			end
 		end
 		Input.MouseBehavior, Input.MouseIconEnabled = Enum.MouseBehavior.Default, true
 		player:Move(Vector3.zero)

@@ -344,7 +344,7 @@ end
 function BlockBreak.Start()
 	local sg = Instance.new("SoundGroup")
 	sg.Name = "Blocks"
-	sg.Volume = 1
+	sg.Volume = 0.3
 	sg.Parent = SoundService
 	group = sg
 	local sounds = soundConfig()

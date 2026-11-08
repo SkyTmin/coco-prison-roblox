@@ -35,10 +35,10 @@ local ProfileService = require(script.Parent.ProfileService)
 type Gang = Gangs.Gang
 type Profile = Types.Profile
 
-local GANG_STORE = "Gangs_v1"
-local TAG_STORE = "GangTags_v1"
-local INVITE_MAP = "GangInvites_v1"
-local TOPIC = "Gangs_v1" -- one topic for all gangs (payload id) [решение: лимит подписок на сервер]
+local GANG_STORE = require(Shared.StorageNames).progress("Gangs_v1")
+local TAG_STORE = require(Shared.StorageNames).progress("GangTags_v1")
+local INVITE_MAP = require(Shared.StorageNames).progress("GangInvites_v1")
+local TOPIC = require(Shared.StorageNames).progress("Gangs_v1") -- one topic for all gangs
 local POLL_SECONDS = 60 -- [решение] a gang with members online is re-read at least this often
 local OP_KEEP_SECONDS = 14 * 86400 -- an op id is remembered two weeks (settling a crashed step)
 local OPS_MAX = 300
@@ -1371,6 +1371,9 @@ local function landed(id: string, op: string): boolean?
 end
 
 local function deposit(player: Player, raw: any)
+	if not require(script.Parent.CommercePolicyService).RequireTrade(player) then
+		return
+	end
 	local p, id, doc = cachedGang(player)
 	if not p or not id or not doc then
 		toast(player, "gang_err_no_gang")
@@ -1438,6 +1441,9 @@ local function deposit(player: Player, raw: any)
 end
 
 local function withdraw(player: Player, raw: any)
+	if not require(script.Parent.CommercePolicyService).RequireTrade(player) then
+		return
+	end
 	local p, id, doc = cachedGang(player)
 	if not p or not id or not doc then
 		toast(player, "gang_err_no_gang")

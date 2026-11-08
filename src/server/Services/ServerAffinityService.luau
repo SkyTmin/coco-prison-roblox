@@ -10,6 +10,7 @@ local Shared = game:GetService("ReplicatedStorage").Shared
 local Profile = require(script.Parent.ProfileService)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local StorageNames = require(Shared.StorageNames)
 local Service = {}
 local WINDOW = 6 * 60 * 60
 local PRESENCE_TTL = 60
@@ -171,9 +172,9 @@ function Service.Start()
 		return
 	end
 	local ok = pcall(function()
-		assignments = MemoryStoreService:GetHashMap("ServerAffinity_v1")
-		presence = MemoryStoreService:GetHashMap("ServerPresence_v1")
-		invites = MemoryStoreService:GetHashMap("ServerInvites_v1")
+		assignments = MemoryStoreService:GetHashMap(StorageNames.progress("ServerAffinity_v1"))
+		presence = MemoryStoreService:GetHashMap(StorageNames.progress("ServerPresence_v1"))
+		invites = MemoryStoreService:GetHashMap(StorageNames.progress("ServerInvites_v1"))
 	end)
 	if not ok then
 		return

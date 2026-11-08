@@ -15,6 +15,8 @@ export type Summary = {
 	fee: number?, -- the seller's commission rate when he listed it; nil = cfg.commission
 	seller: number,
 	sellerName: string,
+	paidTradeAuthorized: boolean?,
+	paidTradeAuthorizedAt: number?,
 	createdAt: number, -- os.time()
 	expiresAt: number,
 }

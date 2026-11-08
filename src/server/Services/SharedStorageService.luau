@@ -3,6 +3,7 @@
 -- Existing keys/formats are migrated in place on the first committed operation.
 local DataStoreService = game:GetService("DataStoreService")
 local Persistence = require(game:GetService("ReplicatedStorage").Shared.Persistence)
+local StorageNames = require(game:GetService("ReplicatedStorage").Shared.StorageNames)
 local Record = require(script.Parent.SharedStorageRecord)
 local Storage = {}
 local stores: { [string]: DataStore } = {}
@@ -13,7 +14,7 @@ local function storeFor(kind: string): DataStore
 	assert(kind == "gang" or kind == "faction", "Unknown shared storage")
 	if not stores[kind] then
 		stores[kind] = DataStoreService:GetDataStore(
-			if kind == "gang" then "GangChest_v1" else "FactionStorage_v1"
+			StorageNames.progress(if kind == "gang" then "GangChest_v1" else "FactionStorage_v1")
 		)
 	end
 	return stores[kind]

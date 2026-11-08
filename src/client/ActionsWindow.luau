@@ -8,6 +8,7 @@ local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
 local TransferAccess = require(Shared.TransferAccess)
 local Ui = require(script.Parent.Ui)
+local CommerceUi = require(script.Parent.CommerceUi)
 local ActionsWindow = {}
 
 function ActionsWindow.build(
@@ -112,6 +113,13 @@ function ActionsWindow.build(
 			else t("release_action_failed")
 	end
 	local function request(action: string, payload: any, done: (any) -> ())
+		if action == "quote" or action == "confirm" then
+			local reason = CommerceUi.reason("trade")
+			if reason then
+				result({ ok = false, key = reason })
+				return
+			end
+		end
 		if waiting then
 			return
 		end
@@ -178,6 +186,11 @@ function ActionsWindow.build(
 				end)
 			end, Ui.colors.buttonGreen)
 			confirm.Name = "ActionConfirm"
+			local reason = CommerceUi.reason("trade")
+			confirm.Active = reason == nil
+			if reason then
+				status.Text = t(reason)
+			end
 			button(t("release_action_cancel"), 3, function()
 				quote = nil
 				rebuild()
@@ -341,6 +354,11 @@ function ActionsWindow.build(
 			end)
 		end, Ui.colors.buttonBlue)
 		review.Name = "ActionReview"
+		local reason = CommerceUi.reason("trade")
+		review.Active, review.AutoButtonColor = reason == nil, reason == nil
+		if reason then
+			status.Text, status.TextColor3 = t(reason), Ui.colors.yellow
+		end
 	end
 	local join = Players.PlayerAdded:Connect(function()
 		task.defer(function()
@@ -377,6 +395,13 @@ function ActionsWindow.build(
 		movement:Disconnect()
 	end)
 	rebuild()
+	CommerceUi.watch(win, function()
+		if not waiting then
+			quote = nil
+			status.Text = ""
+			rebuild()
+		end
+	end)
 	return win,
 		function(nextProfile: any)
 			local hadGifts = profile

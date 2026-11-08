@@ -9,7 +9,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextService = game:GetService("TextService")
-local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Auction = require(Shared.Auction)
 local Config = require(Shared.Config)
@@ -24,6 +23,34 @@ local BANNER_SECONDS = 8
 local BANNER_W, BANNER_H = 400, 52 -- [владелец 29.10] keep the play area clear on small phones
 local TOP_GAP, EDGE_GAP, CLOSE_SIZE = 4, 8, 44
 local OFFER_W, OFFER_H = 420, 210
+local player = Players.LocalPlayer
+
+-- Shared HUD contract uses raw GuiObject.AbsolutePosition pixels, not VirtualInput coordinates.
+-- This gameplay GUI shares PrisonHud's device-safe bounds; never add GetGuiInset again.
+local function notificationRect(gui: ScreenGui): (number, number, number, boolean)
+	local origin, size = gui.AbsolutePosition, gui.AbsoluteSize
+	local left, top = origin.X, origin.Y
+	local right, bottom = origin.X + size.X, origin.Y + size.Y
+	local x, y, w, h =
+		player:GetAttribute("HudNotificationX"),
+		player:GetAttribute("HudNotificationY"),
+		player:GetAttribute("HudNotificationWidth"),
+		player:GetAttribute("HudNotificationHeight")
+	local function finite(value: any): boolean
+		return typeof(value) == "number" and value == value and math.abs(value) < math.huge
+	end
+	if finite(x) and finite(y) and finite(w) and finite(h) then
+		left, right = math.max(left, x), math.min(right, x + w)
+		top, bottom = math.max(top, y), math.min(bottom, y + h)
+	else
+		left, right, top = left + EDGE_GAP, right - EDGE_GAP, top + TOP_GAP
+	end
+	local width = math.max(0, math.min(BANNER_W, right - left))
+	return left + math.max(0, (right - left - width) / 2) - origin.X,
+		top - origin.Y,
+		width,
+		width >= 170 and bottom - top >= BANNER_H
+end
 
 type Announce = {
 	lot: string,
@@ -51,9 +78,18 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 	gui.Name = "AuctionBanner"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 60
-	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
+	gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	-- Keep the purchase window's original bounds while announcements can use the
+	-- owner's notice lane at the very top of the gameplay HUD.
+	local offerGui = Instance.new("ScreenGui")
+	offerGui.Name = "AuctionOffer"
+	offerGui.ResetOnSpawn = false
+	offerGui.DisplayOrder = gui.DisplayOrder
+	offerGui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
+	offerGui.ZIndexBehavior = gui.ZIndexBehavior
+	offerGui.Parent = gui.Parent
 
 	local function width(wanted: number): number
 		local camera = workspace.CurrentCamera
@@ -66,15 +102,12 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 	local showing = false
 
 	local function show(m: Announce)
-		-- ScreenGui already excludes the Roblox bar and device cutouts. Do not add GetGuiInset again.
-		-- Relative width follows the *safe* area immediately, including rotation while the banner is visible.
-		local hidden = UDim2.new(0.5, 0, 0, -BANNER_H - EDGE_GAP)
-		local card = Ui.card(gui, UDim2.new(1, -EDGE_GAP * 2, 0, BANNER_H), hidden)
+		local lane = Instance.new("Frame")
+		lane.Name = "NotificationLane"
+		lane.BackgroundTransparency, lane.ClipsDescendants, lane.Visible = 1, true, false
+		lane.Parent = gui
+		local card = Ui.card(lane, UDim2.fromScale(1, 1), UDim2.new())
 		card.Name = "Announce"
-		card.AnchorPoint = Vector2.new(0.5, 0)
-		local limit = Instance.new("UISizeConstraint")
-		limit.MaxSize = Vector2.new(BANNER_W, BANNER_H)
-		limit.Parent = card
 		local icon = Instance.new("ImageLabel")
 		icon.Size = UDim2.fromOffset(32, 32)
 		icon.Position = UDim2.fromOffset(EDGE_GAP, 10)
@@ -149,17 +182,33 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 			Vector2.new(1000, 100)
 		).X
 		local function layout()
-			local contentWidth = math.max(0, card.AbsoluteSize.X - 96)
-			local pw = math.min(contentWidth, priceWidth + 4)
+			local compact = card.AbsoluteSize.X < 300
+			local textX = if compact then 40 else 48
+			local contentWidth = math.max(0, card.AbsoluteSize.X - textX - 48)
+			local pw = math.min(
+				contentWidth,
+				priceWidth + 4,
+				if compact and #books > 0 then math.max(54, contentWidth * 0.65) else math.huge
+			)
 			local hw = math.min(contentWidth, 64)
-			seller.Size = UDim2.fromOffset(math.max(0, contentWidth - pw - 6), 16)
-			price.Size = UDim2.fromOffset(pw, 16)
-			price.Position = UDim2.new(1, -48 - pw, 0, 3)
-			enchants.Size = UDim2.fromOffset(math.max(0, contentWidth - hw - 6), 15)
+			icon.Size = UDim2.fromOffset(if compact then 28 else 32, if compact then 28 else 32)
+			icon.Position = UDim2.fromOffset(EDGE_GAP, if compact then 12 else 10)
+			seller.Position, line.Position, enchants.Position =
+				UDim2.fromOffset(textX, 2), UDim2.fromOffset(textX, 16), UDim2.fromOffset(textX, 34)
+			line.Size = UDim2.fromOffset(contentWidth, 18)
+			seller.Size = UDim2.fromOffset(
+				if compact then contentWidth else math.max(0, contentWidth - pw - 6),
+				14
+			)
+			price.Size = UDim2.fromOffset(pw, 14)
+			price.Position = UDim2.new(1, -48 - pw, 0, if compact then 34 else 2)
+			enchants.Size =
+				UDim2.fromOffset(math.max(0, contentWidth - (if compact then pw else hw) - 6), 15)
+			hint.Visible = not compact
 			hint.Size = UDim2.fromOffset(hw, 15)
 			hint.Position = UDim2.new(1, -48 - hw, 0, 34)
 		end
-		card:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+		local connections = { card:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout) }
 		layout()
 
 		-- The whole card opens the auction; the close target remains 44 px even on narrow phones.
@@ -187,32 +236,86 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 		cross.ScaleType = Enum.ScaleType.Fit
 		cross.ResampleMode = Enum.ResamplerMode.Pixelated
 		cross.Parent = close
-		local dismissed = Instance.new("BindableEvent")
 		local closed = false
+		local remaining, visibleSince = BANNER_SECONDS, nil :: number?
+		local fits = false
+		local function visibility()
+			local visible = not closed
+				and fits
+				and player:GetAttribute("HudToastActive") ~= true
+				and player:GetAttribute("HudBossActive") ~= true
+				and player:GetAttribute("HudWarzoneActive") ~= true
+				and player:GetAttribute("LoadingBlocked") ~= true
+				and player:GetAttribute("HudGameplayOpen") ~= false
+			if visibleSince and not visible then
+				remaining -= os.clock() - visibleSince
+				visibleSince = nil
+			elseif visible and not visibleSince then
+				visibleSince = os.clock()
+			end
+			if remaining <= 0 then
+				closed, visible = true, false
+			end
+			lane.Visible = visible
+			player:SetAttribute("HudAuctionActive", visible)
+		end
+		local function place()
+			local x, y, w, allowed = notificationRect(gui)
+			lane.Position, lane.Size = UDim2.fromOffset(x, y), UDim2.fromOffset(w, BANNER_H)
+			fits = allowed
+			visibility()
+		end
 		local function dismiss()
 			if not closed then
 				closed = true
-				dismissed:Fire()
+				visibility()
 			end
 		end
 		close.Activated:Connect(dismiss)
 		open.Activated:Connect(function()
-			if closed then
+			if closed or not lane.Visible then
 				return
 			end
 			dismiss()
 			openAuction(name)
 		end)
-		TweenService:Create(card, TweenInfo.new(0.2), { Position = UDim2.new(0.5, 0, 0, TOP_GAP) })
-			:Play()
-		task.delay(BANNER_SECONDS, dismiss)
-		dismissed.Event:Wait()
+		for _, name in
+			{
+				"HudToastActive",
+				"HudBossActive",
+				"HudWarzoneActive",
+				"LoadingBlocked",
+				"HudGameplayOpen",
+			}
+		do
+			table.insert(connections, player:GetAttributeChangedSignal(name):Connect(visibility))
+		end
+		for _, name in
+			{
+				"HudNotificationX",
+				"HudNotificationY",
+				"HudNotificationWidth",
+				"HudNotificationHeight",
+			}
+		do
+			table.insert(connections, player:GetAttributeChangedSignal(name):Connect(place))
+		end
+		for _, name in { "AbsolutePosition", "AbsoluteSize" } do
+			table.insert(connections, gui:GetPropertyChangedSignal(name):Connect(place))
+		end
+		place()
+		while not closed do
+			if visibleSince and os.clock() - visibleSince >= remaining then
+				dismiss()
+			else
+				task.wait(0.1)
+			end
+		end
 		open.Active, close.Active = false, false
-		local out = TweenService:Create(card, TweenInfo.new(0.2), { Position = hidden })
-		out:Play()
-		out.Completed:Wait()
-		dismissed:Destroy()
-		card:Destroy()
+		for _, connection in connections do
+			connection:Disconnect()
+		end
+		lane:Destroy()
 	end
 
 	local function pump()
@@ -253,8 +356,11 @@ function AuctionBanner.start(locale: () -> string, openAuction: (search: string?
 		end
 		closeOffer()
 		local w = width(OFFER_W)
-		local card =
-			Ui.card(gui, UDim2.fromOffset(w, OFFER_H), UDim2.new(0.5, -w / 2, 0.5, -OFFER_H / 2))
+		local card = Ui.card(
+			offerGui,
+			UDim2.fromOffset(w, OFFER_H),
+			UDim2.new(0.5, -w / 2, 0.5, -OFFER_H / 2)
+		)
 		card.Name = "AnnounceOffer"
 		card.Active = true
 		offer = card

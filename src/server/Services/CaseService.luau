@@ -14,14 +14,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Boosters = require(Shared.Boosters)
 local Config = require(Shared.Config)
+local CaseRoll = require(Shared.CaseRoll)
 local Donate = require(Shared.Donate)
 local Nicknames = require(Shared.Nicknames)
 local Remotes = require(Shared.Remotes)
 local Sfx = require(Shared.Sfx)
 local Strings = require(Shared.Strings)
 local ProfileService = require(script.Parent.ProfileService)
+local CommercePolicy = require(script.Parent.CommercePolicyService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 local InventoryService = require(script.Parent.InventoryService)
 local AncientCase = require(script.Parent.AncientCase)
@@ -78,7 +79,6 @@ local TAGS = {
 	"FactionChest",
 	"GangChest",
 }
-local ARMOR = { "helmet", "chestplate", "leggings", "boots" }
 local RANGE = 12
 local random = Random.new()
 local bindings: { [Instance]: Binding } = {}
@@ -246,21 +246,6 @@ local function rewardsFor(id: string): { Reward }?
 	return if typeof(rewards) == "table" and #rewards > 0 then rewards else nil
 end
 
-local function roll(rewards: { Reward }): Reward
-	local total = 0
-	for _, reward in ipairs(rewards) do
-		total += reward.weight
-	end
-	local value = random:NextNumber() * total
-	for _, reward in ipairs(rewards) do
-		value -= reward.weight
-		if value < 0 then
-			return reward
-		end
-	end
-	return rewards[#rewards]
-end
-
 local function toast(player: Player, key: string, ...: any)
 	Remotes.event("Toast"):FireClient(player, Strings.t(key, Strings.localeOf(player), ...))
 end
@@ -299,6 +284,9 @@ local function openChest(player: Player, part: BasePart)
 	local heldKey: string? = nil
 	local shared: { [number]: Types.ItemStack }? = nil
 	local gang: string? = nil
+	if (id == "factionChest" or id == "gangChest") and not CommercePolicy.RequireTrade(player) then
+		return
+	end
 	if (id == "factionChest" or id == "gangChest") and not ProfileService.IsReal(player) then
 		toast(player, "gang_chest_unavailable")
 		return
@@ -409,13 +397,14 @@ local function openChest(player: Player, part: BasePart)
 			p.caseContents[id] = p.caseContents[id] or {}
 		end
 	end)
-	if id ~= "ancientCase" or not heldKey then
+	local canRoll = heldKey ~= nil and CommercePolicy.CanRandom(player)
+	if id ~= "ancientCase" or not canRoll then
 		Remotes.event("CaseOpened"):FireClient(player, id)
 	end
 	if part and part:IsA("BasePart") then
 		Sfx.broadcast(if id == "enderChest" then "ender_open" else "chest_open", part, 0.6)
 	end
-	if heldKey then
+	if canRoll then
 		openCase(player, id, heldKey) -- spend the key in hand and roll right away
 	end
 end
@@ -449,6 +438,11 @@ openCase = function(player: Player, id: any, requestedKey: any)
 				"[кейс] нажато слишком быстро после прошлого открытия — пропущено"
 			)
 		end
+		return
+	end
+	-- Keys from gameplay and paid keys share stacks; restrict this generator as a whole.
+	-- Existing rewards may still be withdrawn without rolling or spending another key.
+	if not CommercePolicy.RequireRandom(player) then
 		return
 	end
 	session.rolledAt = os.clock()
@@ -532,6 +526,15 @@ openCase = function(player: Player, id: any, requestedKey: any)
 			failure = "case_no_key"
 			return
 		end
+		-- Decide capacity BEFORE RNG. Otherwise a nearly full chest can accept only
+		-- money rolls while rejecting item rolls for free, changing the paid odds.
+		if
+			session.id == "ordinaryCase"
+			and not CaseRoll.ordinaryHasRoom(p.caseContents[session.id])
+		then
+			failure = "case_space_rolls"
+			return
+		end
 		-- Stage rewards using the inventory's stack limits, then place them in free chest slots.
 		-- No existing chest stack or key is changed until the entire roll fits.
 		local staged = table.clone(p)
@@ -546,68 +549,25 @@ openCase = function(player: Player, id: any, requestedKey: any)
 			rolledBook, bookDestination = book, destination
 			return
 		end
-		local rolls = if session.id == "ordinaryCase" then random:NextInteger(2, 4) else 1
+		local rolls = CaseRoll.drawCount(session.id, random)
 		for _ = 1, rolls do
-			local reward = roll(rewards :: { Reward })
-			local item, count, level = reward.id, 1, nil :: number?
-			if item == "money" then
-				local amount = random:NextInteger(
-					math.floor((reward.min :: number) * Config.moneyScale + 0.5),
-					math.floor((reward.max :: number) * Config.moneyScale + 0.5)
-				)
-				if session.id == "artifactCase" then
-					-- Artifact rewards, including money, remain in the persistent grid until claimed.
-					staged.inventory[1] = { id = "money_bag", count = 1, coins = amount }
-				else
-					money += amount
-				end
-			elseif item == "ancient_book" then
-				-- the artifact case's book: an ordinary-key roll of the Ancient case [меню: «порошок/книга»]
-				staged.inventory[1] = AncientCase.roll(false, random)
-			else
-				if reward.count then
-					count = random:NextInteger(reward.count[1], reward.count[2])
-				end
-				if item == "food" then
-					local items = reward.items :: { string }
-					local counts = reward.count :: { number }
-					item = items[random:NextInteger(1, #items)]
-					count = random:NextInteger(counts[1], counts[2])
-				elseif item == "leather_armor_piece" then
-					item, level = ARMOR[random:NextInteger(1, #ARMOR)], 1
-				elseif item == "wooden_sword_or_bow" then
-					item, level = if random:NextInteger(1, 2) == 1 then "sword" else "bow", 1
-				elseif item == "rare_wooden_pickaxe_silk_touch" then
-					item, level = "pickaxe", 1
-				elseif item == "booster" then
-					-- «ящик (набор)» of the artifact case: a local ×2 booster of a random kind, the storage's item
-					item = Boosters.itemId(
-						Boosters.kinds[random:NextInteger(1, #Boosters.kinds)],
-						"local"
-					)
-				end
-				if reward.id == "rare_wooden_pickaxe_silk_touch" then
-					local free: number? = nil
-					for index = 1, 27 do
-						if not staged.inventory[index] then
-							free = index
-							break
-						end
-					end
-					if free then
-						staged.inventory[free] = {
-							id = item,
-							count = 1,
-							level = level,
-							books = { { id = "silk_touch", level = 1 } },
-						}
-					else
-						failure = "case_full"
-					end
-				elseif InventoryService.add(staged, item, count, level) > 0 then
+			local reward = CaseRoll.select(rewards :: { Reward }, random)
+			local stack, coins = CaseRoll.resolve(session.id, reward, random)
+			money += coins
+			if stack then
+				-- Keep exact metadata (book chance, money bag, Silk Touch) and normal stack limits.
+				local incoming = { stack }
+				local count = stack.count
+				if
+					InventoryService.transfer(
+						incoming,
+						1,
+						staged.inventory,
+						1,
+						InventoryService.SLOTS
+					) ~= count
+				then
 					failure = "case_full"
-				end
-				if failure then
 					return
 				end
 			end
@@ -655,7 +615,9 @@ openCase = function(player: Player, id: any, requestedKey: any)
 		toast(player, "case_error")
 		return
 	end
-	if failure then
+	if failure == "case_space_rolls" then
+		toast(player, failure, CaseRoll.ORDINARY_MAX_DRAWS)
+	elseif failure then
 		toast(player, failure)
 	elseif money > 0 then
 		toast(player, "case_money", Strings.money(money))
@@ -768,6 +730,9 @@ local function move(
 	local key = session.gang or session.faction
 	local page = session.index
 	if isShared then
+		if not CommercePolicy.RequireTrade(player) then
+			return
+		end
 		if not ProfileService.IsReal(player) or Transfers.Pending(player) or not key then
 			return
 		end

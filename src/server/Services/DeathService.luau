@@ -4,6 +4,7 @@
 local CollectionService = game:GetService("CollectionService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local Policy = require(script.Parent.CommercePolicyService)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -215,6 +216,9 @@ local function died(player: Player, character: Model)
 			killer = nil
 		end
 	end
+	-- Intentional PvP must not bypass the same account-wide money exchange rules.
+	-- Capture eligibility before a new debit; an already durable death still settles.
+	local canTransferMoney = killer ~= nil and Policy.CanTrade(player) and Policy.CanTrade(killer)
 	if
 		(profile :: any).storageTransfer
 		or (profile :: any).storageDeath
@@ -248,7 +252,9 @@ local function died(player: Player, character: Model)
 				dropItems = dropItems,
 				drops = {},
 				position = { position.X, position.Y, position.Z },
-				loss = if killer then math.min(p.coins, p.level * Config.moneyScale) else 0,
+				loss = if canTransferMoney
+					then math.min(p.coins, p.level * Config.moneyScale)
+					else 0,
 				killerUserId = killer and killer.UserId,
 				victimName = player.DisplayName,
 			}
@@ -272,7 +278,7 @@ local function died(player: Player, character: Model)
 		end)
 		return
 	end
-	if killer then
+	if killer and canTransferMoney then
 		-- [владелец 22.10] the killer gets as many dollars as the victim's level, taken from the victim
 		-- (no more than the victim has)
 		local loss = math.min(profile.coins, profile.level * Config.moneyScale)

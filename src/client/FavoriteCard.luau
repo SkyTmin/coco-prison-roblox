@@ -7,7 +7,9 @@
 -- any kind: rewarding a like or a favourite is against the Roblox rules. Ignoring it hides it after HIDE_SECONDS (back
 -- next session). The emoji 👍 is left out of the text on purpose [решение]: the UI fonts may not draw it.
 local AvatarEditorService = game:GetService("AvatarEditorService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
@@ -17,6 +19,7 @@ local Ui = require(script.Parent.Ui)
 local Kit = require(script.Parent.WindowKit)
 
 local FavoriteCard = {}
+local player = Players.LocalPlayer
 
 local W, H = 360, 128
 local CHECK_SECONDS = 20
@@ -89,6 +92,24 @@ local function show(parent: Instance, locale: string, onDone: (string?) -> ())
 	end
 
 	local finished = false
+	local prompting = false
+	local remaining = HIDE_SECONDS
+	local connections: { RBXScriptConnection } = {}
+	local function visibility()
+		card.Visible = not finished
+			and not prompting
+			and player:GetAttribute("HudMenuOpen") == true
+			and player:GetAttribute("LoadingBlocked") ~= true
+			and player:GetAttribute("HudToastActive") ~= true
+	end
+	for _, attribute in { "HudMenuOpen", "LoadingBlocked", "HudToastActive" } do
+		table.insert(connections, player:GetAttributeChangedSignal(attribute):Connect(visibility))
+	end
+	card.Destroying:Once(function()
+		for _, connection in connections do
+			connection:Disconnect()
+		end
+	end)
 	local function close(choice: string?)
 		if finished then
 			return
@@ -106,9 +127,10 @@ local function show(parent: Instance, locale: string, onDone: (string?) -> ())
 		tween:Play()
 	end
 	add.Activated:Connect(function()
-		if finished then
+		if finished or not card.Visible then
 			return
 		end
+		prompting = true
 		card.Visible = false
 		-- Roblox's own prompt; its answer decides: added → never again, cancelled → later
 		local connection: RBXScriptConnection? = nil
@@ -129,18 +151,27 @@ local function show(parent: Instance, locale: string, onDone: (string?) -> ())
 		end
 	end)
 	later.Activated:Connect(function()
-		close("later")
+		if card.Visible then
+			close("later")
+		end
 	end)
 	TweenService:Create(
 		card,
 		TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
 		{ Position = UDim2.new(0.5, 0, 0, 64) }
 	):Play()
-	task.delay(HIDE_SECONDS, function()
-		if card.Visible then
-			close(nil) -- ignored: no answer stored, back next session
-		end
-	end)
+	visibility()
+	table.insert(
+		connections,
+		RunService.Heartbeat:Connect(function(dt)
+			if not finished and card.Visible then
+				remaining -= dt
+				if remaining <= 0 then
+					close(nil) -- ignored: no answer stored, back next session
+				end
+			end
+		end)
+	)
 end
 
 -- Starts the check loop. getProfile / getLocale read the client's current copies.
@@ -148,7 +179,13 @@ function FavoriteCard.start(parent: Instance, getProfile: () -> any, getLocale: 
 	task.spawn(function()
 		while true do
 			task.wait(CHECK_SECONDS)
-			if due(getProfile()) then
+			-- An automatic promotion must not cover gameplay or the loading/editor surfaces.
+			-- The same session's card pauses when a full menu closes and resumes on reopening.
+			if
+				due(getProfile())
+				and player:GetAttribute("HudMenuOpen") == true
+				and player:GetAttribute("LoadingBlocked") ~= true
+			then
 				show(parent, getLocale(), function(choice: string?)
 					if choice then
 						Remotes.event("Favorite"):FireServer(choice)

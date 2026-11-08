@@ -16,6 +16,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local ProfileService = require(script.Parent.ProfileService)
 local Types = require(ReplicatedStorage:WaitForChild("Shared").Types)
+local StorageNames = require(ReplicatedStorage:WaitForChild("Shared").StorageNames)
 
 local LeaderboardService = {}
 local started = false
@@ -93,9 +94,12 @@ local function metaOf(player: Player, p: Types.Profile): Meta
 	}
 end
 
--- creative testers and failed loads stay out of the global tops (the boards still show them live)
+-- Test sessions and creative players stay out of BOTH persisted and visible leaderboards.
 local function counts(player: Player): boolean
-	return ProfileService.IsReal(player) and player:GetAttribute("Creative") ~= true
+	return not RunService:IsStudio()
+		and player.UserId > 0
+		and ProfileService.IsReal(player)
+		and player:GetAttribute("Creative") ~= true
 end
 
 local function writePlayer(player: Player)
@@ -142,7 +146,7 @@ local function readBoards()
 				local rows: { Row } = {}
 				for _, entry in ipairs((page :: DataStorePages):GetCurrentPage()) do
 					local id = tonumber(entry.key)
-					if id then
+					if id and id > 0 then
 						table.insert(rows, { id = id, v = entry.value })
 					end
 				end
@@ -182,7 +186,7 @@ local function publish()
 	local live: { [number]: Types.Profile } = {}
 	for _, player in ipairs(Players:GetPlayers()) do
 		local p = ProfileService.Get(player)
-		if p then
+		if p and counts(player) then
 			live[player.UserId] = p
 			names[player.UserId], namesAt[player.UserId] = metaOf(player, p), os.clock()
 		end
@@ -190,7 +194,10 @@ local function publish()
 	for _, board in ipairs(BOARDS) do
 		local byId: { [number]: number } = {}
 		for _, row in ipairs(stored[board.id] or {}) do
-			byId[row.id] = row.v
+			local online = Players:GetPlayerByUserId(row.id)
+			if row.id > 0 and (not online or counts(online)) and not RunService:IsStudio() then
+				byId[row.id] = row.v
+			end
 		end
 		for id, p in pairs(live) do
 			byId[id] = math.floor(board.value(p))
@@ -231,7 +238,7 @@ function LeaderboardService.Start()
 		v.Value = "[]"
 		v.Parent = folder
 		local ok, store = pcall(function()
-			return DataStoreService:GetOrderedDataStore(board.store)
+			return DataStoreService:GetOrderedDataStore(StorageNames.progress(board.store))
 		end)
 		if ok then
 			stores[board.id] = store
@@ -252,7 +259,7 @@ function LeaderboardService.Start()
 		hook.Parent = ServerStorage
 	end
 	local ok, store = pcall(function()
-		return DataStoreService:GetDataStore("TopNames_v1")
+		return DataStoreService:GetDataStore(StorageNames.progress("TopNames_v1"))
 	end)
 	if ok then
 		namesStore = store

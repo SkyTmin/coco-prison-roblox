@@ -234,6 +234,7 @@ end
 local function rebuild(mine: Mine)
 	mine.rebuilding = true
 	mine.generation += 1
+	mine.folder:SetAttribute("ReadyGeneration", 0)
 	-- fresh seed every reset so the layout is reshuffled [владелец]
 	local rng = Random.new(os.time() + mine.generation * 7919 + math.floor(os.clock() * 1000))
 	local total = mine.size[1] * mine.size[2] * mine.size[3]
@@ -278,6 +279,7 @@ local function rebuild(mine: Mine)
 	mine.dug = 0
 	mine.resetAt = os.clock() + mine.resetSeconds
 	mine.rebuilding = false
+	mine.folder:SetAttribute("ReadyGeneration", mine.generation)
 	Remotes.event("MineReset"):FireAllClients(mine.id, mine.generation)
 end
 
@@ -442,6 +444,7 @@ local function register(anchor: Instance)
 	local mineId = (anchor:GetAttribute("MineId") :: string?) or location.id
 	local folder = Instance.new("Folder")
 	folder.Name = "Mine_" .. mineId
+	folder:SetAttribute("ReadyGeneration", 0)
 	folder.Parent = workspace
 	local sizeOverride = anchor:GetAttribute("Size")
 	local size = if typeof(sizeOverride) == "Vector3"
