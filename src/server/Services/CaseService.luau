@@ -1004,6 +1004,9 @@ local function bind(part: Instance)
 		require(Shared.PromptText).Set(more, "ActionText", "case_info")
 		require(Shared.PromptText).Set(more, "ObjectText", containerTitle(id))
 		more.KeyboardKeyCode = Enum.KeyCode.R
+		-- [владелец 08.11: «кнопку Подробнее сделай меньше, а то игроки случайно на него нажимают»] drawn by the client
+		-- as a small grey button under «Открыть» (CasePreviewWindow.listen)
+		more.Style = Enum.ProximityPromptStyle.Custom
 		more.GamepadKeyCode = Enum.KeyCode.ButtonY
 		more.HoldDuration = 0
 		more.MaxActivationDistance = RANGE

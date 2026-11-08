@@ -1,5 +1,8 @@
 --!strict
 -- Complete pre-spend disclosure. Probabilities are joint per draw; bonuses per opening.
+-- [владелец 08.11: «раньше были значки предметов, а теперь текст… убери их в отдельную кнопку i»] the window opens
+-- on the item icons (read-only slots with a rarity strip, hover / tap for the tooltip; the nickname case: its names);
+-- the round «i» left of the close cross switches to the full odds list below and back.
 local GuiService = game:GetService("GuiService")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local RunService = game:GetService("RunService")
@@ -9,7 +12,11 @@ local CasePreview = require(Shared.CasePreview)
 local Config = require(Shared.Config)
 local ItemInfo = require(Shared.ItemInfo)
 local Strings = require(Shared.Strings)
+local Nicknames = require(Shared.Nicknames)
+local UserInputService = game:GetService("UserInputService")
 local CommerceUi = require(script.Parent.CommerceUi)
+local ItemTooltip = require(script.Parent.ItemTooltip)
+local SlotView = require(script.Parent.SlotView)
 local Ui = require(script.Parent.Ui)
 type CreateWindow = (Instance, string, UDim2, () -> ()) -> (Frame, Frame)
 local CasePreviewWindow = {}
@@ -38,6 +45,65 @@ function CasePreviewWindow.listen(open: () -> ())
 			open()
 		end
 	end)
+	-- the custom-styled «Подробнее»: a small grey button under «Открыть» (smaller than the engine prompt, so it is
+	-- not hit by accident); the key R still works through the engine
+	local shown: { [ProximityPrompt]: BillboardGui } = {}
+	local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	ProximityPromptService.PromptShown:Connect(
+		function(prompt: ProximityPrompt, inputType: Enum.ProximityPromptInputType)
+			if
+				prompt.Name ~= "CaseInfo"
+				or prompt.Style ~= Enum.ProximityPromptStyle.Custom
+				or shown[prompt]
+			then
+				return
+			end
+			local board = Instance.new("BillboardGui")
+			board.Name = "CaseInfoButton"
+			board.AlwaysOnTop = true
+			board.Size = UDim2.fromOffset(118, 24)
+			board.StudsOffset = Vector3.new(0, -1.4, 0)
+			board.Adornee = prompt.Parent :: any
+			board.ResetOnSpawn = false
+			local button = Instance.new("TextButton")
+			button.Size = UDim2.fromScale(1, 1)
+			button.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+			button.BackgroundTransparency = 0.25
+			button.TextColor3 = Color3.fromRGB(215, 215, 220)
+			button.Font = Enum.Font.GothamMedium
+			button.TextSize = 12
+			button.AutoButtonColor = true
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 6)
+			corner.Parent = button
+			button.Parent = board
+			local function refresh()
+				local key = if inputType == Enum.ProximityPromptInputType.Keyboard
+					then " [R]"
+					else ""
+				button.Text = "ⓘ " .. prompt.ActionText .. key
+			end
+			task.defer(refresh) -- after PromptLocalizer has set the text
+			local changed = prompt:GetPropertyChangedSignal("ActionText"):Connect(refresh)
+			button.Activated:Connect(function()
+				prompt:InputHoldBegin()
+				task.wait()
+				prompt:InputHoldEnd()
+			end)
+			board.Destroying:Connect(function()
+				changed:Disconnect()
+			end)
+			board.Parent = playerGui
+			shown[prompt] = board
+		end
+	)
+	ProximityPromptService.PromptHidden:Connect(function(prompt: ProximityPrompt)
+		local board = shown[prompt]
+		if board then
+			shown[prompt] = nil
+			board:Destroy()
+		end
+	end)
 end
 
 function CasePreviewWindow.build(
@@ -47,7 +113,8 @@ function CasePreviewWindow.build(
 	createWindow: CreateWindow,
 	requestedId: string?,
 	getProfile: (() -> any)?,
-	requestedKey: string?
+	requestedKey: string?,
+	oddsOnly: boolean? -- the pre-purchase disclosure keeps the odds list in front
 ): Frame
 	local function t(key: string, ...: any): string
 		return Strings.t(key, locale, ...)
@@ -331,7 +398,178 @@ function CasePreviewWindow.build(
 	end)
 	CommerceUi.watch(win, render)
 	render()
+	if not oddsOnly then
+		CasePreviewWindow.itemsView(win, content, scroll, id, locale)
+	end
 	return win
+end
+
+-- the icon grid over the odds list, and the «i» button that switches between them
+local SLOT, GAP = 44, 4
+local RARITY_ORDER = { "common", "rare", "legendary" }
+function CasePreviewWindow.itemsView(
+	win: Frame,
+	content: Frame,
+	odds: ScrollingFrame,
+	id: string,
+	locale: string
+)
+	local entries, nicknames = CasePreview.of(id)
+	if #entries == 0 and not nicknames then
+		return -- powder / forge: only the odds text
+	end
+	local function t(key: string, ...: any): string
+		return Strings.t(key, locale, ...)
+	end
+	local view = Instance.new("ScrollingFrame")
+	view.Name = "ItemsView"
+	view.BackgroundTransparency, view.BorderSizePixel, view.ScrollBarThickness = 1, 0, 6
+	view.Size, view.Position = UDim2.new(1, -8, 1, -8), UDim2.fromOffset(4, 4)
+	view.CanvasSize = UDim2.new()
+	view.Parent = content
+	odds.Visible = false
+	local width = content.AbsoluteSize.X > 0 and content.AbsoluteSize.X - 20 or 560
+	local y = 0
+	local refusal = CommerceUi.reason("random")
+	if refusal then
+		local warn = Ui.label(
+			view,
+			t(refusal),
+			UDim2.new(1, -16, 0, 40),
+			UDim2.fromOffset(4, 0),
+			13,
+			Ui.colors.yellow
+		)
+		warn.TextWrapped = true
+		y += 46
+	end
+	local hint =
+		Ui.label(view, t("case_preview_hint"), UDim2.new(1, -16, 0, 18), UDim2.fromOffset(4, y), 12)
+	hint.TextColor3 = Ui.colors.muted
+	y += 24
+	local frames: { [GuiObject]: any } = {}
+	local hover: GuiObject? = nil
+	local focus: GuiObject? = nil
+	if nicknames then
+		local cols = math.max(2, math.floor((width + GAP) / (130 + GAP)))
+		local cardW = (width - (cols - 1) * GAP) / cols
+		for i, name in ipairs(nicknames) do
+			local column, row = (i - 1) % cols, (i - 1) // cols
+			local plate = Ui.card(
+				view,
+				UDim2.fromOffset(cardW, 26),
+				UDim2.fromOffset(4 + column * (cardW + GAP), y + row * 30)
+			)
+			local label = Ui.label(plate, name, UDim2.new(1, -12, 1, 0), UDim2.fromOffset(6, 0), 14)
+			label.Font = Enum.Font.SourceSansBold
+			label.TextXAlignment = Enum.TextXAlignment.Center
+			label.TextTruncate = Enum.TextTruncate.AtEnd
+			label.TextColor3 = Nicknames.color(name)
+			SlotView.rarityBar(plate, Nicknames.color(name))
+		end
+		y += math.ceil(#nicknames / cols) * 30
+	else
+		local cols = math.max(4, math.floor((width + GAP) / (SLOT + GAP)))
+		for i, entry in ipairs(entries) do
+			local column, row = (i - 1) % cols, (i - 1) // cols
+			local frame, name, count, image = Ui.invSlot(view, SLOT)
+			frame.Position = UDim2.fromOffset(4 + column * (SLOT + GAP), y + row * (SLOT + GAP))
+			SlotView.render(name, count, image, entry.stack)
+			count.Text = if entry.money then "$" else count.Text
+			SlotView.rarityBar(frame, ItemInfo.RARITY_COLORS[entry.rarity] or Ui.colors.muted)
+			frames[frame] = entry
+			frame.MouseEnter:Connect(function()
+				hover = frame
+			end)
+			frame.MouseLeave:Connect(function()
+				if hover == frame then
+					hover = nil
+				end
+			end)
+			frame.InputBegan:Connect(function(input: InputObject)
+				if input.UserInputType == Enum.UserInputType.Touch then
+					focus = if focus == frame then nil else frame
+				end
+			end)
+		end
+		y += math.ceil(#entries / cols) * (SLOT + GAP) + 6
+		-- which strip colour is which rarity
+		local x = 8
+		for _, rarity in ipairs(RARITY_ORDER) do
+			local swatch = Instance.new("Frame")
+			swatch.Size, swatch.Position = UDim2.fromOffset(14, 4), UDim2.fromOffset(x, y + 9)
+			swatch.BackgroundColor3 = ItemInfo.RARITY_COLORS[rarity] or Ui.colors.muted
+			swatch.BorderSizePixel = 0
+			swatch.Parent = view
+			local label = Ui.label(
+				view,
+				t("rarity_" .. rarity),
+				UDim2.fromOffset(110, 22),
+				UDim2.fromOffset(x + 20, y),
+				13
+			)
+			label.TextColor3 = ItemInfo.RARITY_COLORS[rarity] or Ui.colors.text
+			x += 20 + math.max(70, label.TextBounds.X) + 18
+		end
+		y += 28
+	end
+	view.CanvasSize = UDim2.fromOffset(0, y)
+
+	-- the round «i» left of the close cross: icons ⇄ odds
+	local info = Instance.new("TextButton")
+	info.Name = "OddsInfo"
+	info.Size = UDim2.fromOffset(26, 26)
+	info.Position = UDim2.new(1, -66, 0, 7)
+	info.BackgroundColor3 = Ui.colors.buttonBlue
+	info.TextColor3 = Color3.new(1, 1, 1)
+	info.Font = Enum.Font.GothamBold
+	info.TextSize = 16
+	info.Text = "i"
+	info.AutoButtonColor = true
+	info.Parent = win
+	local round = Instance.new("UICorner")
+	round.CornerRadius = UDim.new(1, 0)
+	round.Parent = info
+	info.Activated:Connect(function()
+		local showOdds = not odds.Visible
+		odds.Visible, view.Visible = showOdds, not showOdds
+		info.Text = if showOdds then "←" else "i"
+		ItemTooltip.hide()
+	end)
+
+	local tip = RunService.RenderStepped:Connect(function()
+		local at: GuiObject? = if view.Visible then (focus or hover) else nil
+		local entry = if at then frames[at] else nil
+		if not entry or not at then
+			ItemTooltip.hide()
+			return
+		end
+		local extra: { ItemInfo.Line } = {}
+		if entry.stack.id ~= "ancient_book" then
+			table.insert(extra, {
+				text = t("rarity_" .. entry.rarity),
+				color = ItemInfo.RARITY_COLORS[entry.rarity] or Color3.new(1, 1, 1),
+			})
+		end
+		if entry.money then
+			table.insert(extra, {
+				text = t(
+					"case_preview_money",
+					Strings.money(math.floor(entry.money[1] * Config.moneyScale + 0.5)),
+					Strings.money(math.floor(entry.money[2] * Config.moneyScale + 0.5))
+				),
+				color = Ui.colors.green,
+			})
+		end
+		local anchor: Vector2 | GuiObject = if focus
+			then at
+			else UserInputService:GetMouseLocation()
+		ItemTooltip.show(entry.stack, anchor, extra)
+	end)
+	win.Destroying:Connect(function()
+		tip:Disconnect()
+		ItemTooltip.hide()
+	end)
 end
 
 function CasePreviewWindow.purchase(
@@ -359,7 +597,8 @@ function CasePreviewWindow.purchase(
 			owner.Visible = true
 		end
 	end
-	details = CasePreviewWindow.build(parent, locale, close, createWindow, caseId, getProfile, key)
+	details =
+		CasePreviewWindow.build(parent, locale, close, createWindow, caseId, getProfile, key, true)
 	if confirmPurchase then
 		local scroll = details:FindFirstChild("RewardOdds", true) :: ScrollingFrame
 		scroll.Size = UDim2.new(1, -8, 1, -60)
