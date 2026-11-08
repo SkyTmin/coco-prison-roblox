@@ -15,7 +15,7 @@ local function closure(first, last, returns, env)
 	return fn()
 end
 local now, scans, rays = 1, 0, 0
-local parts, byPosition, byCenter = {}, {}, {}
+local parts, byPosition, byTop = {}, {}, {}
 local function positionKey(v)
 	return string.format("%.3f,%.3f,%.3f", v.X + 0, v.Y + 0, v.Z + 0)
 end
@@ -59,21 +59,26 @@ for i = 1, 12000 do
 	}
 	table.insert(parts, part)
 	byPosition[tostring(part.Position + rb.Vector3.new(0, 7, 0))] = part
-	byCenter[positionKey(part.Position)] = part
+	byTop[positionKey(part.Position + rb.Vector3.new(0, 1.95, 0))] = part
 end
 parts[1].exposed, parts[3].exposed = true, true
+local readyGeneration = 1
+local mine = {
+	GetChildren = function()
+		scans += 1
+		return parts
+	end,
+	GetAttribute = function(_, name)
+		return if name == "ReadyGeneration" then readyGeneration else nil
+	end,
+}
 function world:FindFirstChild()
-	return {
-		GetChildren = function()
-			scans += 1
-			return parts
-		end,
-	}
+	return mine
 end
 function world:Raycast(at, direction)
 	rays += 1
 	if at == self.CurrentCamera.CFrame.Position then
-		local part = byCenter[positionKey(at + direction)]
+		local part = byTop[positionKey(at + direction)]
 		return if part and part.exposed and part.visible ~= false then { Instance = part } else nil
 	end
 	local part = byPosition[tostring(at)]
@@ -115,7 +120,7 @@ for _ = 1, 100 do
 	selectTarget("mine", { sand = true })
 end
 check("cached target avoids 100 full 12000-cell scans", scans == previousScans)
-check("cached target uses two bounded visibility rays per tick", rays - previousRays == 200)
+check("valid held target needs no camera rays", rays == previousRays)
 parts[1].Parent = nil
 now += 0.6
 check(
@@ -133,7 +138,7 @@ check(
 	selectTarget("mine", { gravel = true }) == parts[1]
 )
 check("retarget ray count capped despite 12000 candidates", rays - previousRays <= 130)
-parts[1].exposed = false
+parts[1].Parent = nil
 previousScans = scans
 check(
 	"invalid target clears immediately and rescan is throttled",
@@ -148,10 +153,10 @@ local function cell(name, x, y, z)
 	return part
 end
 local function scene(cells, eye, towards)
-	parts, byPosition, byCenter = cells, {}, {}
+	parts, byPosition, byTop = cells, {}, {}
 	for _, part in parts do
 		byPosition[tostring(part.Position + rb.Vector3.new(0, 7, 0))] = part
-		byCenter[positionKey(part.Position)] = part
+		byTop[positionKey(part.Position + rb.Vector3.new(0, 1.95, 0))] = part
 	end
 	world.CurrentCamera.CFrame = rb.CFrame.lookAt(eye, towards)
 	now += 3
@@ -160,18 +165,51 @@ end
 local far = cell("sand", 0, 0, 24)
 local near = cell("gravel", 0, 0, 8)
 local behind = cell("sand", 0, 0, -8)
+local duringBuild = scene({ far }, root.Position, far.Position)
+readyGeneration = 0
+previousScans = scans
+check(
+	"partial startup mine never locks its only block",
+	duringBuild("mine", { sand = true }) == nil and scans == previousScans
+)
+table.insert(parts, near)
+byPosition[tostring(near.Position + rb.Vector3.new(0, 7, 0))] = near
+byTop[positionKey(near.Position + rb.Vector3.new(0, 1.95, 0))] = near
+readyGeneration = 1
+check(
+	"first complete generation selects the nearer available block",
+	duringBuild("mine", { sand = true, gravel = true }) == near
+)
+readyGeneration = 0
+check(
+	"reset clears an intact cached target",
+	duringBuild("mine", { sand = true, gravel = true }) == nil
+)
+readyGeneration = 2
+near.CanQuery = false
+check(
+	"after reset the selector skips a nonqueryable cell",
+	duringBuild("mine", { sand = true, gravel = true }) == far
+)
+near.CanQuery = nil
+readyGeneration = 3
+check(
+	"new generation invalidates the cache even if the busy interval was missed",
+	duringBuild("mine", { sand = true, gravel = true }) == near
+)
 selectTarget = scene({ far, near, behind }, root.Position, rb.Vector3.new(0, 0, 16))
 check(
 	"nearest of ALL unfinished materials ahead wins",
 	selectTarget("mine", { sand = true, gravel = true }) == near
 )
+check(
+	"another completed requirement does not release still-needed block",
+	selectTarget("mine", { gravel = true }) == near
+)
 check("completed material no longer selected", selectTarget("mine", { sand = true }) == far)
 world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, behind.Position)
 now += 0.6
-check(
-	"camera turn replaces intact old target with block in view",
-	selectTarget("mine", { sand = true }) == behind
-)
+check("camera turn retains intact old target", selectTarget("mine", { sand = true }) == far)
 local low = cell("sand", 0, -4, 8)
 local high = cell("sand", 0, 0, 12)
 selectTarget = scene({ low, high }, root.Position, rb.Vector3.new(0, 0, 16))
@@ -181,11 +219,23 @@ check(
 )
 high.visible = false
 now += 0.6
-check("block occluded from player cannot be targeted", selectTarget("mine", { sand = true }) == low)
-low.exposed = false
+check(
+	"walking behind occluder retains selected surface",
+	selectTarget("mine", { sand = true }) == high
+)
+high.exposed = false
 now += 0.6
 check(
-	"buried or occluded blocks never produce false marker",
+	"temporary occlusion does not release chosen block",
+	selectTarget("mine", { sand = true }) == high
+)
+high.Parent = nil
+now += 0.6
+check("deleted occluded target reacquires", selectTarget("mine", { sand = true }) == low)
+low.Parent = nil
+now += 0.6
+check(
+	"removed held blocks never produce false marker",
 	selectTarget("mine", { sand = true }) == nil
 )
 local left = cell("sand", -8, 0, 12)
@@ -199,9 +249,37 @@ check(
 root.Position = rb.Vector3.new(8, 8, 0)
 world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, right.Position)
 now += 0.6
+check("walking retains existing chosen block", selectTarget("mine", { sand = true }) == left)
+
+-- A held needed target survives unrelated requirement completion and arbitrarily many camera ticks.
+previousScans = scans
+local stable = true
+for i = 1, 20 do
+	now += 0.25
+	root.Position = rb.Vector3.new(i * 3, 8, 0)
+	world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, rb.Vector3.new(0, 8, -100))
+	stable = stable and selectTarget("mine", { sand = true }) == left
+end
 check(
-	"walking retargets even though old block still exists",
-	selectTarget("mine", { sand = true }) == right
+	"twenty moving/turning ticks retain one block without rescanning",
+	stable and scans == previousScans
+)
+root.Position = rb.Vector3.new(0, 8, 0)
+world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, right.Position)
+check(
+	"step scope change invalidates retained block",
+	selectTarget("mine", { sand = true }, "new-step") == right
+)
+check("leaving location clears cache", selectTarget(nil, nil, "outside") == nil)
+world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, left.Position)
+now += 0.6
+check("returning location chooses afresh", selectTarget("mine", { sand = true }, "prison") == left)
+left.Parent = nil
+now += 0.6
+world.CurrentCamera.CFrame = rb.CFrame.lookAt(root.Position, right.Position)
+check(
+	"streamed-out held block reacquires",
+	selectTarget("mine", { sand = true }, "prison") == right
 )
 
 -- Regression: nearer buried/occluded cells must not permanently exclude the 33rd
@@ -240,8 +318,8 @@ check(
 crowded[1].exposed, crowded[1].visible = true, true
 now += 2.1
 check(
-	"fresh nearby probes rediscover a block another player exposed",
-	selectTarget("mine", { sand = true }) == crowded[1]
+	"newly exposed nearer block does not steal chosen target",
+	selectTarget("mine", { sand = true }) == visible33
 )
 
 local deeper = {}
@@ -258,6 +336,12 @@ check(
 	"clearance fallback is available while wanted search continues",
 	selectTarget("mine", { sand = true }) == clearance
 )
+now += 2.1
+check(
+	"clearance target also remains fixed until mined",
+	selectTarget("mine", { sand = true }) == clearance
+)
+clearance.Parent = nil
 local foundWanted = false
 for page = 1, 4 do
 	now += 0.6
@@ -269,7 +353,7 @@ for page = 1, 4 do
 		break
 	end
 end
-check("cached visible fallback cannot starve the 97th wanted block", foundWanted)
+check("after clearance is mined paged search reaches the97th wanted block", foundWanted)
 
 for _, candidate in deeper do
 	candidate.exposed, candidate.visible = false, false

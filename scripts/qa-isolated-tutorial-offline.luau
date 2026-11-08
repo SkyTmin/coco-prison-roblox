@@ -106,6 +106,11 @@ local function fixture(options)
 		},
 		print = function() end,
 		require = function(key)
+			if key.Name == "StorageNames" then
+				local fn = assert(loadstring(fs.readFile("src/shared/StorageNames.luau")))
+				setfenv(fn, setmetatable({ game = game }, { __index = getfenv() }))
+				return fn()
+			end
 			assert(key.Name == "TestSessionScope", "Unexpected adapter dependency")
 			return {
 				Get = function()
@@ -249,7 +254,8 @@ do
 end
 local adapterOk, adapter = run(adapterSource, f)
 check("adapter loads only inside marked local tutorial fixture", adapterOk)
-local store = adapter:GetDataStore("PlayerProfiles_v3_QA", "Run_fixture")
+local storageNames = assert(f.env.loadstring(fs.readFile("src/shared/StorageNames.luau")))()
+local store = adapter:GetDataStore(storageNames.progress("PlayerProfiles_v3_QA"), "Run_fixture")
 check("fresh negative actor has no stored progress", store:GetAsync("User_-1") == nil)
 store:UpdateAsync("User_-1", function(old)
 	assert(old == nil)
@@ -284,12 +290,14 @@ for _, key in { "User_1", "User_0", "User_-0", "User_-", "User_-1_extra", "Inbox
 	end))
 end
 check("adapter refuses a different session scope", not pcall(function()
-	adapter:GetDataStore("PlayerProfiles_v3_QA", "Run_other"):GetAsync("User_-1")
+	adapter
+		:GetDataStore(storageNames.progress("PlayerProfiles_v3_QA"), "Run_other")
+		:GetAsync("User_-1")
 end))
 check("production handle cannot read/write a profile", not pcall(function()
-	adapter:GetDataStore("PlayerProfiles_v3"):GetAsync("User_-1")
+	adapter:GetDataStore(storageNames.progress("PlayerProfiles_v3")):GetAsync("User_-1")
 end))
-local mailbox = adapter:GetDataStore("PlayerTransfers_QA_v1", "Run_fixture")
+local mailbox = adapter:GetDataStore(storageNames.progress("PlayerTransfers_QA_v1"), "Run_fixture")
 mailbox:UpdateAsync("Inbox_-1", function()
 	return { packets = {} }
 end)

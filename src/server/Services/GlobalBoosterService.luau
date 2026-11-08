@@ -15,12 +15,13 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Boosters = require(Shared.Boosters)
 local Remotes = require(Shared.Remotes)
 local Strings = require(Shared.Strings)
+local StorageNames = require(Shared.StorageNames)
 local ProfileService = require(script.Parent.ProfileService)
 local ChatService = require(script.Parent.ChatService) -- announcements in the chat (этап 3)
 
-local MAP_NAME = "SharedBoosters_v1"
+local MAP_NAME = StorageNames.progress("SharedBoosters_v1")
 local KEY = "shared"
-local TOPIC = "SharedBoosters"
+local TOPIC = StorageNames.progress("SharedBoosters")
 local POLL_SECONDS = 15
 local EXPIRE_SECONDS = 7 * 24 * 3600 -- the key lives a week past the last write
 local OP_KEEP_SECONDS = 24 * 3600 -- an activation id is remembered a day past its end (settling pending steps)

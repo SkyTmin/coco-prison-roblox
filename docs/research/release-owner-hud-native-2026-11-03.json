@@ -1,0 +1,784 @@
+{
+  "date": "2026-11-03",
+  "ownerVisualApproval": "ВСЕ ОТЛИЧНО",
+  "profileLayoutPreserved": true,
+  "iPhone17": {
+    "locale": "ru",
+    "checks": {
+      "1": {
+        "name": "Scoreboard within safe area",
+        "pass": true
+      },
+      "2": {
+        "name": "Hotbar within safe area",
+        "pass": true
+      },
+      "3": {
+        "name": "HudView within safe area",
+        "pass": true
+      },
+      "4": {
+        "name": "TouchInventory within safe area",
+        "pass": true
+      },
+      "5": {
+        "name": "FirstSteps within safe area",
+        "pass": true
+      },
+      "6": {
+        "name": "Touch_menu within safe area",
+        "pass": true
+      },
+      "7": {
+        "name": "scoreboard label sb_title",
+        "pass": true
+      },
+      "8": {
+        "name": "scoreboard label level",
+        "pass": true
+      },
+      "9": {
+        "name": "scoreboard label coins",
+        "pass": true
+      },
+      "10": {
+        "name": "scoreboard label blocks",
+        "pass": true
+      },
+      "11": {
+        "name": "scoreboard label sb_faction",
+        "pass": true
+      },
+      "12": {
+        "name": "scoreboard label sb_rats",
+        "pass": true
+      },
+      "13": {
+        "name": "scoreboard label sb_kd",
+        "pass": true
+      },
+      "14": {
+        "name": "Hotbar at safe bottom",
+        "pass": true
+      },
+      "15": {
+        "name": "HudView at safe bottom",
+        "pass": true
+      },
+      "16": {
+        "name": "TouchInventory at safe bottom",
+        "pass": true
+      },
+      "17": {
+        "name": "injection icon removed",
+        "pass": true
+      }
+    },
+    "viewport": {
+      "1": 750,
+      "2": 381
+    },
+    "profileMutated": false,
+    "panels": {
+      "HudView": {
+        "visible": true,
+        "x": 145.97500610351562,
+        "height": 44,
+        "y": 337,
+        "width": 44
+      },
+      "TouchInventory": {
+        "visible": true,
+        "x": 556.0499877929688,
+        "height": 44,
+        "y": 337,
+        "width": 44
+      },
+      "FirstSteps": {
+        "visible": true,
+        "x": 24,
+        "height": 75.60000610351562,
+        "y": 117,
+        "width": 126.00000762939453
+      },
+      "Effects": {
+        "visible": false,
+        "x": 588.5999755859375,
+        "height": 30.799999237060547,
+        "y": 122,
+        "width": 92.4000015258789
+      },
+      "Boosters": {
+        "visible": false,
+        "x": 75.52499389648438,
+        "height": 44,
+        "y": 69.87540435791016,
+        "width": 100
+      },
+      "Touch_menu": {
+        "visible": true,
+        "x": 24.449996948242188,
+        "height": 44,
+        "y": 69.87540435791016,
+        "width": 44
+      },
+      "Hotbar": {
+        "visible": true,
+        "x": 199,
+        "height": 48,
+        "y": 333,
+        "width": 352
+      },
+      "Scoreboard": {
+        "visible": true,
+        "x": 560,
+        "height": 116,
+        "y": 0,
+        "width": 190
+      },
+      "BossBar": {
+        "visible": false,
+        "x": 307,
+        "height": 52,
+        "y": 0,
+        "width": 246
+      }
+    },
+    "texts": {
+      "1": {
+        "y": 3,
+        "textHeight": 12,
+        "x": 6,
+        "height": 17,
+        "text": "PRISON CLASSIC",
+        "textWidth": 84,
+        "width": 178
+      },
+      "2": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Уровень",
+        "textWidth": 35,
+        "width": 68
+      },
+      "3": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffff55\">4</font>",
+        "textWidth": 6,
+        "width": 92
+      },
+      "4": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Баланс",
+        "textWidth": 30,
+        "width": 68
+      },
+      "5": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">1,523</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "6": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Блоки",
+        "textWidth": 26,
+        "width": 68
+      },
+      "7": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">3.33K</font> <font color=\"#aaaaaa\">(3.33K)</font>",
+        "textWidth": 78,
+        "width": 92
+      },
+      "8": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Фракция",
+        "textWidth": 37,
+        "width": 68
+      },
+      "9": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#aaaaaa\">Отсутствует</font>",
+        "textWidth": 48,
+        "width": 92
+      },
+      "10": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Крыс",
+        "textWidth": 21,
+        "width": 68
+      },
+      "11": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">0</font> <font color=\"#aaaaaa\">(0)</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "12": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "У / С",
+        "textWidth": 28,
+        "width": 68
+      },
+      "13": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">0</font><font color=\"#e1e1e1\"> / </font><font color=\"#ff5555\">2</font>",
+        "textWidth": 30,
+        "width": 92
+      }
+    }
+  },
+  "a06PreForced": {
+    "locale": "ru",
+    "checks": {
+      "1": {
+        "name": "Scoreboard within safe area",
+        "pass": true
+      },
+      "2": {
+        "name": "Hotbar within safe area",
+        "pass": true
+      },
+      "3": {
+        "name": "HudView within safe area",
+        "pass": true
+      },
+      "4": {
+        "name": "FirstSteps within safe area",
+        "pass": true
+      },
+      "5": {
+        "name": "scoreboard label sb_title",
+        "pass": true
+      },
+      "6": {
+        "name": "scoreboard label level",
+        "pass": true
+      },
+      "7": {
+        "name": "scoreboard label coins",
+        "pass": true
+      },
+      "8": {
+        "name": "scoreboard label blocks",
+        "pass": true
+      },
+      "9": {
+        "name": "scoreboard label sb_faction",
+        "pass": true
+      },
+      "10": {
+        "name": "scoreboard label sb_rats",
+        "pass": true
+      },
+      "11": {
+        "name": "scoreboard label sb_kd",
+        "pass": true
+      },
+      "12": {
+        "name": "Hotbar at safe bottom",
+        "pass": true
+      },
+      "13": {
+        "name": "HudView at safe bottom",
+        "pass": true
+      },
+      "14": {
+        "name": "injection icon removed",
+        "pass": true
+      }
+    },
+    "viewport": {
+      "1": 705,
+      "2": 338
+    },
+    "profileMutated": false,
+    "panels": {
+      "HudView": {
+        "visible": true,
+        "x": 126,
+        "height": 44,
+        "y": 294,
+        "width": 44
+      },
+      "TouchInventory": {
+        "visible": false,
+        "x": 534,
+        "height": 44,
+        "y": 294,
+        "width": 44
+      },
+      "FirstSteps": {
+        "visible": true,
+        "x": 23,
+        "height": 75.60000610351562,
+        "y": 103,
+        "width": 126.00000762939453
+      },
+      "Effects": {
+        "visible": false,
+        "x": 547.5999755859375,
+        "height": 30.799999237060547,
+        "y": 121.99999237060547,
+        "width": 92.4000015258789
+      },
+      "Boosters": {
+        "visible": false,
+        "x": 70.99349975585938,
+        "height": 44,
+        "y": 61.98919677734375,
+        "width": 100
+      },
+      "Touch_menu": {
+        "visible": false,
+        "x": 22.983001708984375,
+        "height": 44,
+        "y": 61.98919677734375,
+        "width": 44
+      },
+      "Hotbar": {
+        "visible": true,
+        "x": 176,
+        "height": 48,
+        "y": 290,
+        "width": 352
+      },
+      "Scoreboard": {
+        "visible": true,
+        "x": 515,
+        "height": 116,
+        "y": 0,
+        "width": 190
+      },
+      "BossBar": {
+        "visible": false,
+        "x": 288,
+        "height": 52,
+        "y": 0,
+        "width": 220
+      }
+    },
+    "texts": {
+      "1": {
+        "y": 3,
+        "textHeight": 12,
+        "x": 6,
+        "height": 17,
+        "text": "PRISON CLASSIC",
+        "textWidth": 84,
+        "width": 178
+      },
+      "2": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Уровень",
+        "textWidth": 35,
+        "width": 68
+      },
+      "3": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffff55\">4</font>",
+        "textWidth": 6,
+        "width": 92
+      },
+      "4": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Баланс",
+        "textWidth": 30,
+        "width": 68
+      },
+      "5": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">1,523</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "6": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Блоки",
+        "textWidth": 26,
+        "width": 68
+      },
+      "7": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">3.36K</font> <font color=\"#aaaaaa\">(3.36K)</font>",
+        "textWidth": 78,
+        "width": 92
+      },
+      "8": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Фракция",
+        "textWidth": 37,
+        "width": 68
+      },
+      "9": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#aaaaaa\">Отсутствует</font>",
+        "textWidth": 48,
+        "width": 92
+      },
+      "10": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Крыс",
+        "textWidth": 21,
+        "width": 68
+      },
+      "11": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">0</font> <font color=\"#aaaaaa\">(0)</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "12": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "У / С",
+        "textWidth": 28,
+        "width": 68
+      },
+      "13": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">0</font><font color=\"#e1e1e1\"> / </font><font color=\"#ff5555\">2</font>",
+        "textWidth": 30,
+        "width": 92
+      }
+    }
+  },
+  "bossGeometry": {
+    "locale": "ru",
+    "checks": {
+      "1": {
+        "name": "Scoreboard within safe area",
+        "pass": true
+      },
+      "2": {
+        "name": "Hotbar within safe area",
+        "pass": true
+      },
+      "3": {
+        "name": "HudView within safe area",
+        "pass": true
+      },
+      "4": {
+        "name": "TouchInventory within safe area",
+        "pass": true
+      },
+      "5": {
+        "name": "FirstSteps within safe area",
+        "pass": true
+      },
+      "6": {
+        "name": "Touch_menu within safe area",
+        "pass": true
+      },
+      "7": {
+        "name": "scoreboard label sb_title",
+        "pass": true
+      },
+      "8": {
+        "name": "scoreboard label level",
+        "pass": true
+      },
+      "9": {
+        "name": "scoreboard label coins",
+        "pass": true
+      },
+      "10": {
+        "name": "scoreboard label blocks",
+        "pass": true
+      },
+      "11": {
+        "name": "scoreboard label sb_faction",
+        "pass": true
+      },
+      "12": {
+        "name": "scoreboard label sb_rats",
+        "pass": true
+      },
+      "13": {
+        "name": "scoreboard label sb_kd",
+        "pass": true
+      },
+      "14": {
+        "name": "Hotbar at safe bottom",
+        "pass": true
+      },
+      "15": {
+        "name": "HudView at safe bottom",
+        "pass": true
+      },
+      "16": {
+        "name": "TouchInventory at safe bottom",
+        "pass": true
+      },
+      "17": {
+        "name": "injection icon removed",
+        "pass": true
+      }
+    },
+    "viewport": {
+      "1": 750,
+      "2": 381
+    },
+    "profileMutated": false,
+    "panels": {
+      "HudView": {
+        "visible": true,
+        "x": 145.97500610351562,
+        "height": 44,
+        "y": 337,
+        "width": 44
+      },
+      "TouchInventory": {
+        "visible": true,
+        "x": 556.0499877929688,
+        "height": 44,
+        "y": 337,
+        "width": 44
+      },
+      "FirstSteps": {
+        "visible": true,
+        "x": 24,
+        "height": 75.60000610351562,
+        "y": 117,
+        "width": 126.00000762939453
+      },
+      "Effects": {
+        "visible": false,
+        "x": 588.5999755859375,
+        "height": 30.799999237060547,
+        "y": 122,
+        "width": 92.4000015258789
+      },
+      "Boosters": {
+        "visible": false,
+        "x": 75.52499389648438,
+        "height": 44,
+        "y": 69.87540435791016,
+        "width": 100
+      },
+      "Touch_menu": {
+        "visible": true,
+        "x": 24.449996948242188,
+        "height": 44,
+        "y": 69.87540435791016,
+        "width": 44
+      },
+      "Hotbar": {
+        "visible": true,
+        "x": 199,
+        "height": 48,
+        "y": 333,
+        "width": 352
+      },
+      "Scoreboard": {
+        "visible": true,
+        "x": 560,
+        "height": 116,
+        "y": 0,
+        "width": 190
+      },
+      "BossBar": {
+        "visible": false,
+        "x": 307,
+        "height": 52,
+        "y": 0,
+        "width": 246
+      }
+    },
+    "texts": {
+      "1": {
+        "y": 3,
+        "textHeight": 12,
+        "x": 6,
+        "height": 17,
+        "text": "PRISON CLASSIC",
+        "textWidth": 84,
+        "width": 178
+      },
+      "2": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Уровень",
+        "textWidth": 35,
+        "width": 68
+      },
+      "3": {
+        "y": 21,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffff55\">4</font>",
+        "textWidth": 6,
+        "width": 92
+      },
+      "4": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Баланс",
+        "textWidth": 30,
+        "width": 68
+      },
+      "5": {
+        "y": 36,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">1,524</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "6": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Блоки",
+        "textWidth": 26,
+        "width": 68
+      },
+      "7": {
+        "y": 51,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">3.36K</font> <font color=\"#aaaaaa\">(3.36K)</font>",
+        "textWidth": 78,
+        "width": 92
+      },
+      "8": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Фракция",
+        "textWidth": 37,
+        "width": 68
+      },
+      "9": {
+        "y": 66,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#aaaaaa\">Отсутствует</font>",
+        "textWidth": 48,
+        "width": 92
+      },
+      "10": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "Крыс",
+        "textWidth": 21,
+        "width": 68
+      },
+      "11": {
+        "y": 81,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#ffaa00\">0</font> <font color=\"#aaaaaa\">(0)</font>",
+        "textWidth": 30,
+        "width": 92
+      },
+      "12": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 21,
+        "height": 15,
+        "text": "У / С",
+        "textWidth": 28,
+        "width": 68
+      },
+      "13": {
+        "y": 96,
+        "textHeight": 11,
+        "x": 92,
+        "height": 15,
+        "text": "<font color=\"#55ff55\">0</font><font color=\"#e1e1e1\"> / </font><font color=\"#ff5555\">2</font>",
+        "textWidth": 30,
+        "width": 92
+      }
+    }
+  },
+  "notes": [
+    "A06 device switch changed input flags: its pre-force result is not accepted as full mobile input test.",
+    "Boss geometry y=0 was measured while hidden; 35 isolated actual-source boss/warzone checks passed.",
+    "No OS input or publication."
+  ]
+}

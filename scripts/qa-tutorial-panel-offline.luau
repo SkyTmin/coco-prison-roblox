@@ -6,8 +6,12 @@ prefix = prefix:sub(1, assert(prefix:find("local fn = assert(loadstring", 1, tru
 local boundary = assert(loadstring(prefix .. "\nreturn {node=node, Ui=Ui, modules=f.modules}"))()
 local M, Ui = boundary.modules, boundary.Ui
 Ui.colors.text, Ui.colors.money = rb.Color3.fromRGB(225, 225, 225), rb.Color3.fromRGB(90, 220, 90)
+Ui.colors.yellow = rb.Color3.fromRGB(255, 220, 90)
 local function node(kind)
 	local n = boundary.node(kind)
+	for _, event in { "MouseEnter", "MouseLeave", "SelectionGained", "SelectionLost" } do
+		n[event] = boundary.node("TextButton").Activated
+	end
 	n.Enabled, n.AbsolutePosition, n.AbsoluteSize = true, rb.Vector2.zero, rb.Vector2.new(10, 10)
 	function n:GetAttribute(key)
 		return self.attributes and self.attributes[key]
@@ -98,7 +102,10 @@ setfenv(
 		end,
 		Instance = { new = node },
 		Enum = rb.Enum,
+		Color3 = rb.Color3,
+		UDim = rb.UDim,
 		UDim2 = rb.UDim2,
+		Vector2 = rb.Vector2,
 	}, { __index = getfenv() })
 )
 local Panel = fn()
@@ -264,7 +271,9 @@ do
 	local rect = { x = p.X.Offset, y = p.Y.Offset, width = s.X.Offset, height = s.Y.Offset }
 	check(
 		tostring(sample.view) .. " usable left-side panel",
-		rect.height >= 90 and rect.x < sample.view.X / 2 and rect.width == 250
+		rect.height >= 90
+			and rect.x < sample.view.X / 2
+			and rect.width == (if sample.view.X < 900 then 220 else 250)
 	)
 	check(
 		tostring(sample.view) .. " fits safe screen",
@@ -316,6 +325,18 @@ check(
 	"reset reuses rows without old money sizing",
 	find("Requirement_2"):FindFirstChild("Progress").Size.X.Offset == 86
 )
+check(
+	"level money row becomes a visible tool requirement name",
+	find("Requirement_2"):FindFirstChild("ResourceName").Visible
+)
+card.Update(5, "en", nil, "tutorial_open_menu", rb.Vector2.new(390, 844), 58, {})
+card.Update(3, "en", goal, "tutorial_collect_upgrade", rb.Vector2.new(390, 844), 58, {})
+for index = 1, 3 do
+	check(
+		"no-goal money row reuse restores material name " .. index,
+		find("Requirement_" .. index):FindFirstChild("ResourceName").Visible
+	)
+end
 local blocker = node("TextButton")
 blocker.Name = "Touch_attack"
 blocker.Parent = gui
@@ -374,34 +395,141 @@ for _, view in
 		rb.Vector2.new(1024, 768),
 	}
 do
-	local controls = {
-		{ x = 8, y = 64, width = 70, height = 44 },
-		{ x = 0, y = view.Y - 150, width = 145, height = 150 },
-		{ x = view.X - 95, y = view.Y - 130, width = 85, height = 80 },
-		{ x = view.X / 2 - 100, y = view.Y - 50, width = 200, height = 45 },
-	}
-	local safe =
-		Panel.relocate(view, 58, { x = 0, y = view.Y - 145, width = 250, height = 235 }, controls)
+	local safe = Panel.relocate(view, 58, { x = 0, y = view.Y - 145, width = 250, height = 235 })
 	check(
-		tostring(view) .. " moved card falls back to visible safe space",
+		tostring(view) .. " pinned card clamps only to screen bounds",
 		safe.height >= 90
 			and safe.x >= 8
 			and safe.y >= 66
 			and safe.x + safe.width <= view.X - 8
 			and safe.y + safe.height <= view.Y - 8
 	)
-	for i, control in controls do
-		check(tostring(view) .. " moved card clears control " .. i, not overlap(safe, control))
-	end
+	check(tostring(view) .. " pinned horizontal position never auto-relocates", safe.x == 8)
 end
 local custom = { x = 300, y = 150, width = 250, height = 190 }
-local placed = Panel.relocate(rb.Vector2.new(1280, 720), 58, custom, {})
+local placed = Panel.relocate(rb.Vector2.new(1280, 720), 58, custom)
 check("valid custom card position stays unchanged", placed.x == 300 and placed.y == 150)
 local source = fs.readFile("src/client/TutorialGuide.luau")
 local _, uses = source:gsub('worldMode = if goal%.saleReady%s+then "sell"', "")
 check(
 	"both guide stages gate seller on shared sale readiness",
 	uses == 2 and not source:find("canSell", 1, true)
+)
+
+-- The new stable phone lane must ignore invisible thumbstick capture and keep all contents scrollable.
+local native = node("ScreenGui")
+function native:FindFirstChild(name, recursive)
+	for _, candidate in (if recursive then self:GetDescendants() else self:GetChildren()) do
+		if candidate.Name == name then
+			return candidate
+		end
+	end
+	return nil
+end
+native.Name = "TouchGui"
+native.Parent = playerGui
+local capture = node("Frame")
+capture.Name = "DynamicThumbstickFrame"
+capture.Parent = native
+capture.AbsolutePosition = rb.Vector2.new(-100, 93)
+capture.AbsoluteSize = rb.Vector2.new(382, 287)
+local ring = node("ImageLabel")
+ring.Name = "ThumbstickStart"
+ring.Parent = capture
+ring.AbsolutePosition = rb.Vector2.new(29, 187)
+ring.AbsoluteSize = rb.Vector2.new(74, 74)
+local actual = Panel.obstacles(gui, card.frame, playerGui)
+local ringFound = false
+for _, r in actual do
+	check("invisible capture never blocks left half", r.width ~= 382)
+	if r.x == 29 and r.width == 74 then
+		ringFound = r.y == 245
+	end
+end
+check("actual joystick ring keeps one inset conversion", ringFound)
+card.dense, card.manual, card.defaultRect =
+	true, true, { x = 10, y = 66, width = 210, height = 123 }
+for _, locale in { "ru", "en", "es", "fr" } do
+	card.Update(3, locale, goal, "tutorial_collect_upgrade", rb.Vector2.new(705, 338), 58, actual)
+	check(
+		locale .. " default requirements always left",
+		card.frame.Position == rb.UDim2.fromOffset(10, 66)
+	)
+	check(
+		locale .. " default requirements bounded",
+		card.frame.Size.X.Offset == 210 and card.frame.Size.Y.Offset <= 123
+	)
+	for i = 1, 3 do
+		check(
+			locale .. " dense row icon stays readable" .. i,
+			find("Requirement_" .. i):FindFirstChild("Icon").Size.X.Offset == 18
+		)
+		check(
+			locale .. " dense row name still visible" .. i,
+			find("Requirement_" .. i):FindFirstChild("ResourceName").Visible
+		)
+	end
+end
+card.manual = false
+goal.ready = true
+card.Update(3, "en", goal, "tutorial_open_menu", rb.Vector2.new(705, 338), 58, actual)
+check(
+	"tutorial action remains accessible through scroll",
+	card.shortcut.Visible and find("TaskContents").CanvasSize.Y.Offset > card.frame.Size.Y.Offset
+)
+check("tutorial shortcut retains touch target", card.shortcut.Size.Y.Offset == 44)
+goal.ready = false
+local digHint = Panel.newDigHint(gui)
+local caption = digHint.frame:FindFirstChild("HoldCaption")
+for _, view in
+	{
+		rb.Vector2.new(568, 320),
+		rb.Vector2.new(640, 360),
+		rb.Vector2.new(750, 381),
+		rb.Vector2.new(896, 414),
+	}
+do
+	local rightHud = {
+		{ x = view.X - 152, y = 60, width = 140, height = 100 },
+		{ x = view.X - 74, y = view.Y - 89, width = 56, height = 58 },
+		{ x = view.X / 2 - 125, y = view.Y - 70, width = 250, height = 70 },
+	}
+	local rect = assert(Panel.digHintPosition(view, 66, view.X / 2, rightHud))
+	check(
+		"finger stays fully on the dig side",
+		rect.x > view.X / 2 and rect.x + rect.width < view.X
+	)
+	for _, hud in rightHud do
+		check(
+			"finger stays clear of HUD",
+			rect.x + rect.width <= hud.x
+				or rect.x >= hud.x + hud.width
+				or rect.y + rect.height <= hud.y
+				or rect.y >= hud.y + hud.height
+		)
+	end
+	for _, locale in { "ru", "en", "es", "fr" } do
+		card.Update(3, locale, goal, "tutorial_collect_upgrade", view, 58, actual)
+		digHint.Show(rect, locale)
+		check(
+			locale .. " hold instruction is separate, passive, and localized",
+			digHint.frame.Visible
+				and not digHint.frame.Active
+				and digHint.frame.Parent == gui
+				and digHint.frame:FindFirstChild("HoldFinger") ~= nil
+				and caption.Text == M.Strings.t("tutorial_first_dig_hold", locale)
+				and caption.Text ~= "tutorial_first_dig_hold"
+				and find("MoneyRequirement").Visible
+		)
+	end
+end
+digHint.Show(nil, "ru")
+check("hold instruction can be hidden", not digHint.frame.Visible)
+check(
+	"no overlay if the right side is fully occupied",
+	Panel.digHintPosition(rb.Vector2.new(568, 320), 66, 284, {
+		{ x = 284, y = 0, width = 284, height = 320 },
+	}) == nil
 )
 print(serde.encode("json", {
 	passed = #checks,

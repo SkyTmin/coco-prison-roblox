@@ -1,5 +1,23 @@
 --!strict
 return {
+	tracker_layout = {
+		ru = "Положение и размер",
+		en = "Position and size",
+		es = "Posición y tamaño",
+		fr = "Position et taille",
+	},
+	tracker_edit_hint = {
+		ru = "Тяните заголовок · размер − / +",
+		en = "Drag the header · size − / +",
+		es = "Arrastra el título · tamaño − / +",
+		fr = "Glissez le titre · taille − / +",
+	},
+	tracker_lock = {
+		ru = "Закрепить",
+		en = "Lock",
+		es = "Fijar",
+		fr = "Fixer",
+	},
 	tracker_pin = {
 		ru = "Добавить подсказку на экран",
 		en = "Pin requirements to screen",
@@ -43,6 +61,12 @@ return {
 		fr = "Remplissez les objectifs d'amélioration",
 	},
 	tutorial_marker_mine = { ru = "Копать", en = "Mine", es = "Minar", fr = "Miner" },
+	tutorial_first_dig_hold = {
+		ru = "Удерживайте, чтобы скопать блок",
+		en = "Press and hold to mine the block",
+		es = "Mantén pulsado para picar el bloque",
+		fr = "Maintenez le doigt pour miner le bloc",
+	},
 	tutorial_marker_sell = { ru = "Продать", en = "Sell", es = "Vender", fr = "Vendre" },
 	tutorial_marker_case = {
 		ru = "Открыть кейс",

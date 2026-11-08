@@ -1,0 +1,570 @@
+{
+  "date": "2026-11-03",
+  "placeId": 92594200898716,
+  "visualAccepted": false,
+  "ownerSteering": "Owner rejected default design and is manually arranging HUD. No further Studio changes until he reports ready. Capture his real saved layout before adapting defaults.",
+  "devices": {
+    "iphone7": {
+      "viewport": {
+        "1": 666,
+        "2": 374
+      },
+      "coreInset": {
+        "1": 0,
+        "2": 58
+      },
+      "forcedMobileForStudio": true,
+      "objects": [
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Scoreboard",
+          "name": "Scoreboard",
+          "height": 92,
+          "y": 66,
+          "x": 446,
+          "width": 160
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar",
+          "name": "Hotbar",
+          "height": 46,
+          "y": 320,
+          "x": 166,
+          "width": 334
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar.SurvivalHud",
+          "name": "SurvivalHud",
+          "height": 24,
+          "y": 282,
+          "x": 172,
+          "width": 322
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.FirstSteps",
+          "name": "FirstSteps",
+          "height": 126,
+          "y": 66,
+          "x": 10,
+          "width": 210
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects",
+          "name": "Effects",
+          "height": 44,
+          "y": 162,
+          "x": 446,
+          "width": 132
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects.Effect_needs_free",
+          "name": "Effect_needs_free",
+          "height": 40,
+          "y": 162,
+          "x": 534,
+          "width": 40
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Boosters",
+          "name": "Boosters",
+          "height": 44,
+          "y": 198,
+          "x": 10,
+          "width": 100
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchMenus.Touch_menu",
+          "name": "Touch_menu",
+          "height": 44,
+          "y": 66,
+          "x": 612,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.HudView",
+          "name": "HudView",
+          "height": 44,
+          "y": 322,
+          "x": 116,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchActions.TouchInventory",
+          "name": "TouchInventory",
+          "height": 44,
+          "y": 322,
+          "x": 506,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.JumpButton",
+          "name": "JumpButton",
+          "height": 70,
+          "y": 284,
+          "x": 586,
+          "width": 70
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickStart",
+          "name": "ThumbstickStart",
+          "height": 74,
+          "y": 281.0000305175781,
+          "x": 29,
+          "width": 74
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickEnd",
+          "name": "ThumbstickEnd",
+          "height": 36,
+          "y": 300.0000305175781,
+          "x": 48,
+          "width": 36
+        }
+      ]
+    },
+    "galaxyA06": {
+      "viewport": {
+        "1": 705,
+        "2": 338
+      },
+      "coreInset": {
+        "1": 0,
+        "2": 58
+      },
+      "forcedMobileForStudio": true,
+      "objects": [
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Scoreboard",
+          "name": "Scoreboard",
+          "height": 92,
+          "y": 66,
+          "x": 485,
+          "width": 160
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar",
+          "name": "Hotbar",
+          "height": 48,
+          "y": 282,
+          "x": 176,
+          "width": 352
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar.SurvivalHud",
+          "name": "SurvivalHud",
+          "height": 24,
+          "y": 244,
+          "x": 182,
+          "width": 340
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.FirstSteps",
+          "name": "FirstSteps",
+          "height": 123,
+          "y": 66,
+          "x": 10,
+          "width": 210
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects",
+          "name": "Effects",
+          "height": 44,
+          "y": 162,
+          "x": 485,
+          "width": 132
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects.Effect_needs_free",
+          "name": "Effect_needs_free",
+          "height": 40,
+          "y": 162,
+          "x": 573,
+          "width": 40
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Boosters",
+          "name": "Boosters",
+          "height": 44,
+          "y": 195,
+          "x": 10,
+          "width": 100
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchMenus.Touch_menu",
+          "name": "Touch_menu",
+          "height": 44,
+          "y": 66,
+          "x": 651,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.HudView",
+          "name": "HudView",
+          "height": 44,
+          "y": 286,
+          "x": 126,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchActions.TouchInventory",
+          "name": "TouchInventory",
+          "height": 44,
+          "y": 286,
+          "x": 534,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.JumpButton",
+          "name": "JumpButton",
+          "height": 70,
+          "y": 248,
+          "x": 625,
+          "width": 70
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickStart",
+          "name": "ThumbstickStart",
+          "height": 74,
+          "y": 245.00003051757812,
+          "x": 29,
+          "width": 74
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickEnd",
+          "name": "ThumbstickEnd",
+          "height": 36,
+          "y": 264.0000305175781,
+          "x": 48,
+          "width": 36
+        }
+      ]
+    },
+    "iphone17pro": {
+      "viewport": {
+        "1": 750,
+        "2": 381
+      },
+      "coreInset": {
+        "1": 0,
+        "2": 58
+      },
+      "forcedMobileForStudio": true,
+      "objects": [
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Scoreboard",
+          "name": "Scoreboard",
+          "height": 92,
+          "y": 66,
+          "x": 530,
+          "width": 160
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar",
+          "name": "Hotbar",
+          "height": 48,
+          "y": 325,
+          "x": 199,
+          "width": 352
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar.SurvivalHud",
+          "name": "SurvivalHud",
+          "height": 24,
+          "y": 287,
+          "x": 205,
+          "width": 340
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.FirstSteps",
+          "name": "FirstSteps",
+          "height": 126,
+          "y": 66,
+          "x": 10,
+          "width": 210
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects",
+          "name": "Effects",
+          "height": 44,
+          "y": 162,
+          "x": 530,
+          "width": 132
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects.Effect_needs_free",
+          "name": "Effect_needs_free",
+          "height": 40,
+          "y": 162,
+          "x": 618,
+          "width": 40
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Boosters",
+          "name": "Boosters",
+          "height": 44,
+          "y": 198,
+          "x": 10,
+          "width": 100
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchMenus.Touch_menu",
+          "name": "Touch_menu",
+          "height": 44,
+          "y": 66,
+          "x": 696,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.HudView",
+          "name": "HudView",
+          "height": 44,
+          "y": 329,
+          "x": 149,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchActions.TouchInventory",
+          "name": "TouchInventory",
+          "height": 44,
+          "y": 329,
+          "x": 557,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.JumpButton",
+          "name": "JumpButton",
+          "height": 70,
+          "y": 291,
+          "x": 670,
+          "width": 70
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickStart",
+          "name": "ThumbstickStart",
+          "height": 74,
+          "y": 288,
+          "x": 29,
+          "width": 74
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickEnd",
+          "name": "ThumbstickEnd",
+          "height": 36,
+          "y": 307,
+          "x": 48,
+          "width": 36
+        }
+      ]
+    },
+    "ipadA16": {
+      "viewport": {
+        "1": 1179,
+        "2": 819
+      },
+      "coreInset": {
+        "1": 0,
+        "2": 58
+      },
+      "forcedMobileForStudio": true,
+      "objects": [
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Scoreboard",
+          "name": "Scoreboard",
+          "height": 92,
+          "y": 66,
+          "x": 959,
+          "width": 160
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar",
+          "name": "Hotbar",
+          "height": 48,
+          "y": 763,
+          "x": 413,
+          "width": 352
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Hotbar.SurvivalHud",
+          "name": "SurvivalHud",
+          "height": 24,
+          "y": 725,
+          "x": 419,
+          "width": 340
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.FirstSteps",
+          "name": "FirstSteps",
+          "height": 126,
+          "y": 66,
+          "x": 10,
+          "width": 210
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects",
+          "name": "Effects",
+          "height": 44,
+          "y": 162,
+          "x": 959,
+          "width": 132
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Effects.Effect_needs_free",
+          "name": "Effect_needs_free",
+          "height": 40,
+          "y": 162,
+          "x": 1047,
+          "width": 40
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.Boosters",
+          "name": "Boosters",
+          "height": 44,
+          "y": 198,
+          "x": 10,
+          "width": 100
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchMenus.Touch_menu",
+          "name": "Touch_menu",
+          "height": 44,
+          "y": 66,
+          "x": 1125,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.HudView",
+          "name": "HudView",
+          "height": 44,
+          "y": 767,
+          "x": 363,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.PrisonHud.TouchActions.TouchInventory",
+          "name": "TouchInventory",
+          "height": 44,
+          "y": 767,
+          "x": 771,
+          "width": 44
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.JumpButton",
+          "name": "JumpButton",
+          "height": 70,
+          "y": 729,
+          "x": 1099,
+          "width": 70
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickStart",
+          "name": "ThumbstickStart",
+          "height": 148,
+          "y": 633.0000610351562,
+          "x": 58,
+          "width": 148
+        },
+        {
+          "visible": true,
+          "path": "Players.coco_shamill.PlayerGui.TouchGui.TouchControlFrame.DynamicThumbstickFrame.ThumbstickEnd",
+          "name": "ThumbstickEnd",
+          "height": 72,
+          "y": 671.0000610351562,
+          "x": 96,
+          "width": 72
+        }
+      ]
+    }
+  },
+  "stressRender": {
+    "toast": true,
+    "QABoosters": {
+      "shown": true,
+      "pos": "10, 137",
+      "children": 8,
+      "size": "100, 44"
+    },
+    "FirstSteps": {
+      "shown": true,
+      "pos": "10, 8",
+      "children": 7,
+      "size": "210, 123"
+    },
+    "QAEffects": {
+      "shown": true,
+      "pos": "485, 104",
+      "children": 21,
+      "size": "132, 44"
+    },
+    "Scoreboard": {
+      "shown": true,
+      "pos": "485, 8",
+      "children": 23,
+      "size": "160, 92"
+    },
+    "fixture": true
+  },
+  "bossBar": {
+    "visible": true,
+    "boss": true,
+    "root": "909.8092041015625, 37515.44140625, -11.297720909118652",
+    "gameplay": true,
+    "pos": "228, 8",
+    "size": "251, 52"
+  },
+  "limits": [
+    "Only emulator/native geometry, not physical touch.",
+    "Stress boosters/effects used fake UI-only profile/character, no real grants.",
+    "Menu/phone input checks overlapped owner editing and cannot be accepted.",
+    "The old default layout has been explicitly rejected; passing geometry is not visual acceptance."
+  ]
+}

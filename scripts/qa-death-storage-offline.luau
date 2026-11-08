@@ -57,6 +57,11 @@ local function fixture()
 		end,
 	})
 	local modules = {
+		CommercePolicyService = {
+			CanTrade = function(actor)
+				return actor.policyTrade ~= false
+			end,
+		},
 		Types = {},
 		Config = {
 			moneyScale = 10000,
@@ -395,6 +400,55 @@ f:resolve()
 check(
 	"second death retains its distinct respawn items",
 	count(f.emitted, "ancient_star") == 2 and count(f.emitted, "apple") == 10
+)
+
+for _, pending in { false, true } do
+	for _, side in { "victim", "killer" } do
+		local denied = fixture()
+		local restricted = if side == "victim" then denied.player else denied.killer
+		restricted.policyTrade = false
+		if not pending then
+			denied.live.storageTransfer = nil
+		end
+		denied:die()
+		check(
+			"policy blocks new PvP money " .. side .. " pending=" .. tostring(pending),
+			denied.live.coins == 50000
+				and denied.other.coins == 0
+				and (not pending or denied.live.storageDeath.queue[1].loss == 0)
+		)
+		check(
+			"policy does not disable kill/death statistics "
+				.. side
+				.. " pending="
+				.. tostring(pending),
+			denied.live.stats.deaths == 1 and denied.other.stats.kills == 1
+		)
+		if pending then
+			denied:ready()
+			denied:resolve()
+		end
+		check(
+			"restricted PvP death keeps ordinary loot behavior "
+				.. side
+				.. " pending="
+				.. tostring(pending),
+			count(denied.emitted, "apple") == 3 and denied.other.coins == 0
+		)
+	end
+end
+local accepted = fixture()
+accepted:die()
+accepted.player.policyTrade = false
+accepted.killer.policyTrade = false
+accepted:ready()
+accepted:resolve()
+accepted:resolve()
+check(
+	"already-debited death settlement survives later policy change once",
+	accepted.live.coins == 30000
+		and accepted.other.coins == 20000
+		and accepted.live.storageDeath == nil
 )
 
 print(

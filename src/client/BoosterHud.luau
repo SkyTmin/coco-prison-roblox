@@ -7,6 +7,8 @@
 -- green gang, the Дворы point) with its own multiplier, the time left of the source that ends first and a thin bar
 -- that drains with it. The nickname of whoever started a shared booster stays in its pill. Nothing is truncated: the
 -- pills wrap onto a second line and the card grows. A click opens the storage. Refreshed five times a second.
+-- Attribute Compact (phones / short screens, set by init.client): only the strongest kind's card, 108 px wide,
+-- without the pills — the icon, the total and the time; the whole frame hides while nothing runs.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -17,6 +19,7 @@ local Ui = require(script.Parent.Ui)
 local BoosterHud = {}
 
 local CARD_W = 220
+local COMPACT_W = 108
 local ICON = 34
 local PILL_H = 16
 local POINT_COLOR = Color3.fromRGB(255, 214, 90)
@@ -209,15 +212,38 @@ function BoosterHud.start(
 		frame.Visible = not (p and p.settings and p.settings.hideBoosters == true)
 		local now = Boosters.now()
 		local running = if p then Boosters.runningAll(p, now) else {}
+		local compact = frame:GetAttribute("Compact") == true
+		frame.Visible = frame.Visible and #running > 0
+		frame.Size = UDim2.fromOffset(if compact then COMPACT_W else CARD_W, 0)
+		-- compact: only the kind with the largest total
+		local strongest, strongestMult = nil, 0
+		if compact and p then
+			for _, kind in ipairs(Boosters.kinds) do
+				local m = Boosters.multiplier(p, kind, now)
+				if m > strongestMult then
+					strongest, strongestMult = kind, m
+				end
+			end
+		end
 		for _, kind in ipairs(Boosters.kinds) do
 			local card = cards[kind]
+			card.button.Size = UDim2.fromOffset(if compact then COMPACT_W else CARD_W, 0)
+			card.pills.Visible = not compact
+			card.title.Visible = not compact
+			-- compact: the time goes under the total instead of the right edge
+			card.time.Position = if compact
+				then UDim2.fromOffset(ICON + 6, 18)
+				else UDim2.new(1, -56, 0, 0)
+			card.time.TextXAlignment = if compact
+				then Enum.TextXAlignment.Left
+				else Enum.TextXAlignment.Right
 			local list = {}
 			for _, a in ipairs(running) do
 				if a.kind == kind then
 					table.insert(list, a)
 				end
 			end
-			card.button.Visible = #list > 0
+			card.button.Visible = #list > 0 and (not compact or kind == strongest)
 			if #list > 0 and p then
 				-- the source that ends first drives the timer and the bar
 				table.sort(list, function(a, b)
@@ -227,7 +253,10 @@ function BoosterHud.start(
 				card.icon.Image = Boosters.icon(kind, Boosters.scopeOf(first))
 				card.title.Text = t("booster_kind_" .. kind)
 				card.mult.Text = fmtMult(Boosters.multiplier(p, kind, now))
-				card.mult.Position = UDim2.fromOffset(ICON + 6 + card.title.TextBounds.X + 6, -1)
+				card.mult.Position = UDim2.fromOffset(
+					ICON + 6 + (if compact then 0 else card.title.TextBounds.X + 6),
+					if compact then 0 else -1
+				)
 				card.time.Text = fmtTime(first.endsAt - now)
 				card.fill.BackgroundColor3 = if first.point
 					then POINT_COLOR

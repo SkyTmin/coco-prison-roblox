@@ -135,6 +135,7 @@ local function sell(player: Player)
 		total, locked, count = InventoryService.sellAll(p, ProfessionService.moneyMultiplier(p))
 		p.coins += total
 		Tutorial.soldForUpgrade(p, total)
+		Tutorial.soldForLevel(p, total)
 	end)
 	if locked > 0 then
 		toast(player, "block_locked_sell", locked)

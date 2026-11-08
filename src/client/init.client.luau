@@ -54,7 +54,9 @@ require(script.MineReplication).Start() -- confirmed block removals, including o
 require(script.Audio).Start() -- the master volume (SettingsWindow)
 
 local player = Players.LocalPlayer
-local locale = Config.defaultLocale
+local locale = require(game:GetService("ReplicatedFirst").Loading.Locale).resolve(nil, player)
+Remotes.event("SetAutoLocale")
+	:FireServer(require(game:GetService("ReplicatedFirst").Loading.Locale).detect(player))
 local camera = workspace.CurrentCamera
 local function isMobile(): boolean
 	-- QA (Studio only): the device emulator sometimes reports a keyboard; workspace attribute
@@ -149,6 +151,7 @@ do
 		image.BackgroundTransparency = 1
 		image.Image = (Config.icons.icons :: any)[icon] or ""
 		image.ResampleMode = Enum.ResamplerMode.Pixelated
+		image.Name = "StatIcon_" .. index
 		image.Parent = stats
 		local label = Ui.label(
 			stats,
@@ -160,6 +163,29 @@ do
 		)
 		local value = Ui.rich(stats, "", UDim2.new(1, -36, 0, SB_ROW), UDim2.fromOffset(28, y), 14)
 		value.TextXAlignment = Enum.TextXAlignment.Right
+		local detail = Ui.rich(stats, "", UDim2.fromOffset(240, 44), UDim2.new(), 12)
+		detail.Name, detail.Visible, detail.TextWrapped = "StatDetail_" .. index, false, true
+		detail.BackgroundColor3, detail.BackgroundTransparency, detail.ZIndex =
+			Ui.colors.panel, 0.05, 20
+		local function showDetail()
+			detail.Text = value.Text
+			detail.Position =
+				UDim2.new(1, -240, 0, value.Position.Y.Offset + value.Size.Y.Offset + 2)
+			detail.Visible = true
+		end
+		value.Active = true
+		value.MouseEnter:Connect(showDetail)
+		value.MouseLeave:Connect(function()
+			detail.Visible = false
+		end)
+		value.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch then
+				showDetail()
+				task.delay(3, function()
+					detail.Visible = false
+				end)
+			end
+		end)
 		return label, value
 	end
 	statText.statLevelLabel, statText.statLevel = sbRow(1, "hud_level")
@@ -170,6 +196,7 @@ do
 	divider.Position = UDim2.fromOffset(8, 28 + SB_ROW * 3 + 3)
 	divider.BackgroundColor3 = Ui.colors.border
 	divider.BorderSizePixel = 0
+	divider.Name = "Divider"
 	divider.Parent = stats
 	statText.statFactionLabel, statText.statFaction = sbRow(4, "hud_faction")
 	statText.statRatsLabel, statText.statRats = sbRow(5, "hud_rat")
@@ -292,20 +319,11 @@ local toast = Ui.panel(gui, UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12)
 local toastText =
 	Ui.label(toast, "", UDim2.new(1, -12, 1, 0), UDim2.fromOffset(6, 0), 14, Ui.colors.header)
 toastText.TextWrapped = true
+toast.ZIndex = 30 -- menu results must remain above full windows (ZIndex10)
 toast.Visible = false
-local toastToken = 0
-local function showToast(text: string)
-	toastToken += 1
-	local token = toastToken
-	toastText.Text = text
-	-- the player may have turned the notifications off (SettingsWindow) [владелец 27.10]
-	toast.Visible = not SettingsWindow.of(profile).hideToasts
-	task.delay(3, function()
-		if toastToken == token then
-			toast.Visible = false
-		end
-	end)
-end
+local showToast = require(script.HudNotices).start(player, toast, toastText, function()
+	return SettingsWindow.of(profile).hideToasts == true
+end, HudLayout.isEditing)
 
 -- ---------------------------------------------------------------- hotbar
 local SLOT = 44
@@ -708,11 +726,30 @@ end
 local INV_SLOT = 44
 local INV_GAP = 4
 local function buildInventory(): Frame
+	local inventoryCamera = workspace.CurrentCamera
+	local viewport = if inventoryCamera then inventoryCamera.ViewportSize else Vector2.new(900, 600)
+	local compact = viewport.X >= 600 and viewport.Y - GuiService:GetGuiInset().Y <= 450
+	local narrow = viewport.X < 480
+	local INV_SLOT = if narrow
+		then math.clamp(math.floor((viewport.X - 60) / 9), 28, 44)
+		else INV_SLOT
+	local INV_GAP = if narrow then 2 else INV_GAP
 	local gridWidth = 9 * INV_SLOT + 8 * INV_GAP
-	local pad = 16
-	local innerWidth = gridWidth + 2 * pad
-	local win, content =
-		createWindow(gui, T("inventory"), UDim2.fromOffset(innerWidth + 12, 512), closeWindow)
+	local pad = if narrow then 6 elseif compact then 12 else 16
+	local gridX = if compact then pad + 176 + 12 else pad
+	local innerWidth = gridX + gridWidth + pad
+	local topHeight = if compact then 190 else math.max(200, 4 * INV_SLOT + 3 * 8 + 2 * 10)
+	local bagY = if compact then 4 else 4 + topHeight + 14
+	local barY = bagY + 18 + 3 * (INV_SLOT + INV_GAP) + 10
+	local bodyHeight = math.max(barY + 18 + INV_SLOT, if compact then topHeight + 8 + 56 else 0)
+	local win, content = createWindow(
+		gui,
+		T("inventory"),
+		UDim2.fromOffset(innerWidth + 12, bodyHeight + 54),
+		closeWindow
+	)
+	win:SetAttribute("InventoryCompact", compact)
+	win:SetAttribute("InventorySlotSize", INV_SLOT)
 	win.BackgroundTransparency = 0 -- the HUD under it never shows through the slots
 	local views: { { index: number, name: TextLabel, count: TextLabel, image: ImageLabel } } = {}
 	local armorViews: { { part: string, name: TextLabel, count: TextLabel, image: ImageLabel } } =
@@ -768,6 +805,7 @@ local function buildInventory(): Frame
 	end)
 	local function slotAt(index: number, x: number, y: number): Frame
 		local f, name, count, image = Ui.invSlot(content, INV_SLOT)
+		f.Name = "InventorySlot_" .. index
 		f.Position = UDim2.fromOffset(x, y)
 		renderSlot(name, count, image, if profile then profile.inventory[index] else nil)
 		table.insert(views, { index = index, name = name, count = count, image = image })
@@ -779,22 +817,29 @@ local function buildInventory(): Frame
 		l.TextColor3 = Ui.colors.muted
 	end
 
-	-- top: equipment | character | stats, as tall as the four armour slots
-	local topHeight = 4 * INV_SLOT + 3 * 8 + 2 * 10
+	-- Short landscape: equipment/avatar/stats form a sidebar beside the full-size bag.
+	-- Tall screens keep the existing equipment | character | stats composition above it.
+	local equipmentWidth = if compact then 52 else INV_SLOT + 20
 	local equipment =
-		Ui.card(content, UDim2.fromOffset(INV_SLOT + 20, topHeight), UDim2.fromOffset(pad, 4))
+		Ui.card(content, UDim2.fromOffset(equipmentWidth, topHeight), UDim2.fromOffset(pad, 4))
+	equipment.Name = "InventoryEquipment"
 	for i, part in ipairs(ARMOR_PARTS) do
 		local f, name, count, image = Ui.invSlot(equipment, INV_SLOT)
-		f.Position = UDim2.fromOffset(10, 10 + (i - 1) * (INV_SLOT + 8))
+		f.Name = "InventoryArmor_" .. part
+		f.Position = UDim2.fromOffset(
+			if compact then 4 else 10,
+			(if compact then 4 else 10) + (i - 1) * (INV_SLOT + (if compact then 2 else 8))
+		)
 		renderArmor(part, name, count, image)
 		table.insert(armorViews, { part = part, name = name, count = count, image = image })
 		drag.Bind(f, { container = "armor", index = i })
 	end
-	local statsWidth = 150
-	local previewX = pad + INV_SLOT + 20 + 8
-	local previewWidth = innerWidth - pad - statsWidth - 8 - previewX
+	local statsWidth = if compact then 176 else 150
+	local previewX = pad + equipmentWidth + 8
+	local previewWidth = if compact then 116 else innerWidth - pad - statsWidth - 8 - previewX
 	local stage =
 		Ui.card(content, UDim2.fromOffset(previewWidth, topHeight), UDim2.fromOffset(previewX, 4))
+	stage.Name = "InventoryAvatar"
 	stage.ClipsDescendants = true
 	stage.BackgroundColor3 = Color3.fromRGB(44, 52, 74)
 	local backdrop = Instance.new("UIGradient") -- a soft spotlight from above
@@ -880,42 +925,58 @@ local function buildInventory(): Frame
 
 	local stats = Ui.card(
 		content,
-		UDim2.fromOffset(statsWidth, topHeight),
-		UDim2.fromOffset(innerWidth - pad - statsWidth, 4)
+		UDim2.fromOffset(statsWidth, if compact then 56 else topHeight),
+		UDim2.fromOffset(
+			if compact then pad else innerWidth - pad - statsWidth,
+			if compact then topHeight + 8 else 4
+		)
 	)
+	stats.Name = "InventoryStats"
 	local nameLabel =
 		Ui.label(stats, player.DisplayName, UDim2.new(1, -20, 0, 20), UDim2.fromOffset(10, 8), 15)
 	nameLabel.Font = Enum.Font.SourceSansBold
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-	local function statLine(y: number, color: Color3): (TextLabel, TextLabel)
+	nameLabel.Visible = not compact
+	local function statLine(index: number, y: number, color: Color3): (TextLabel, TextLabel)
+		local x = if compact then 8 + (index % 2) * (statsWidth / 2) else 10
+		local lineY = if compact then 2 + math.floor(index / 2) * 26 else y
+		local width = if compact then statsWidth / 2 - 12 else statsWidth - 20
 		local key = Ui.label(
 			stats,
 			"",
-			UDim2.new(1, -20, 0, 14),
-			UDim2.fromOffset(10, y),
+			UDim2.fromOffset(width, if compact then 12 else 14),
+			UDim2.fromOffset(x, lineY),
 			12,
 			Ui.colors.muted
 		)
-		local value =
-			Ui.label(stats, "", UDim2.new(1, -20, 0, 18), UDim2.fromOffset(10, y + 14), 15, color)
+		key.TextTruncate = Enum.TextTruncate.AtEnd
+		local value = Ui.label(
+			stats,
+			"",
+			UDim2.fromOffset(width, if compact then 14 else 18),
+			UDim2.fromOffset(x, lineY + (if compact then 12 else 14)),
+			if compact then 14 else 15,
+			color
+		)
 		value.Font = Enum.Font.SourceSansBold
 		return key, value
 	end
-	local levelKey, levelValue = statLine(36, Color3.fromRGB(128, 255, 32))
+	local levelKey, levelValue = statLine(0, 36, Color3.fromRGB(128, 255, 32))
 	local levelBar = Instance.new("Frame")
 	levelBar.Position = UDim2.fromOffset(10, 70)
 	levelBar.Size = UDim2.new(1, -20, 0, 5)
 	levelBar.BackgroundColor3 = Color3.fromRGB(46, 58, 30)
 	levelBar.BorderSizePixel = 0
 	levelBar.Parent = stats
+	levelBar.Visible = not compact
 	local levelFill = Instance.new("Frame")
 	levelFill.BackgroundColor3 = Color3.fromRGB(128, 255, 32)
 	levelFill.BorderSizePixel = 0
 	levelFill.Size = UDim2.fromScale(0, 1)
 	levelFill.Parent = levelBar
-	local healthKey, healthValue = statLine(84, Color3.fromRGB(255, 95, 95))
-	local armorKey, armorValue = statLine(122, Color3.fromRGB(205, 215, 235))
-	local protectKey, protectValue = statLine(160, Color3.fromRGB(120, 200, 255))
+	local healthKey, healthValue = statLine(1, 84, Color3.fromRGB(255, 95, 95))
+	local armorKey, armorValue = statLine(2, 122, Color3.fromRGB(205, 215, 235))
+	local protectKey, protectValue = statLine(3, 160, Color3.fromRGB(120, 200, 255))
 	local function renderStats()
 		levelKey.Text = T("level")
 		healthKey.Text = T("inv_health")
@@ -938,21 +999,19 @@ local function buildInventory(): Frame
 	renderStats()
 
 	-- the bag and the hotbar
-	local bagY = 4 + topHeight + 14
-	caption(T("inv_backpack"), pad, bagY)
+	caption(T("inv_backpack"), gridX, bagY)
 	for r = 0, 2 do
 		for col = 0, 8 do
 			slotAt(
 				10 + r * 9 + col,
-				pad + col * (INV_SLOT + INV_GAP),
+				gridX + col * (INV_SLOT + INV_GAP),
 				bagY + 18 + r * (INV_SLOT + INV_GAP)
 			)
 		end
 	end
-	local barY = bagY + 18 + 3 * (INV_SLOT + INV_GAP) + 10
-	caption(T("inv_hotbar"), pad, barY)
+	caption(T("inv_hotbar"), gridX, barY)
 	for col = 0, 8 do
-		local f = slotAt(col + 1, pad + col * (INV_SLOT + INV_GAP), barY + 18)
+		local f = slotAt(col + 1, gridX + col * (INV_SLOT + INV_GAP), barY + 18)
 		local key =
 			Ui.label(f, tostring(col + 1), UDim2.fromOffset(12, 12), UDim2.fromOffset(4, 2), 10)
 		key.TextColor3 = Ui.colors.muted
@@ -973,6 +1032,31 @@ local function buildInventory(): Frame
 		renderPreview()
 		renderStats()
 	end
+	local resizeQueued = false
+	local function rebuildForViewport()
+		if resizeQueued then
+			return
+		end
+		resizeQueued = true
+		task.defer(function()
+			resizeQueued = false
+			if win.Parent and openWindow == win and currentWindowKind == "inventory" then
+				win:Destroy() -- also cancels held drag and disconnects the preview animation
+				openWindow = buildInventory()
+			end
+		end)
+	end
+	local viewportChanged = if inventoryCamera
+		then inventoryCamera:GetPropertyChangedSignal("ViewportSize"):Connect(rebuildForViewport)
+		else nil
+	local cameraChanged =
+		workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(rebuildForViewport)
+	win.Destroying:Once(function()
+		if viewportChanged then
+			viewportChanged:Disconnect()
+		end
+		cameraChanged:Disconnect()
+	end)
 	return win
 end
 
@@ -2005,7 +2089,7 @@ require(script.PromptLocalizer).Start()
 -- ---------------------------------------------------------------- profile rendering
 -- the movable HUD (HudLayout): set up with the touch controls below
 local relayoutHud: () -> () = function() end
-local openHudEditor: () -> () = function() end
+local openHudEditor: (string?) -> () = function() end
 -- «Меню» [X]: a tile for every window (MenuWindow)
 windowBuilders.menu = function()
 	return MenuWindow.build(gui, locale, closeWindow, createWindow, function(kind: string)
@@ -2051,16 +2135,10 @@ windowBuilders.actions = function()
 	refreshMenu = refresh
 	return win
 end
-require(script.TutorialGuide).Start(gui, function()
-	return profile
-end, function(kind)
-	open(kind)
-end, function()
-	return currentWindowKind ~= nil or HudLayout.isEditing()
-end)
 local shownHudLayout = ""
 local function render(p: Types.Profile)
-	local nextLocale = p.locale or Config.defaultLocale
+	local nextLocale =
+		require(game:GetService("ReplicatedFirst").Loading.Locale).resolve(p.locale, player)
 	local rebuild = locale ~= nextLocale or (profile ~= nil and profile.location ~= p.location)
 	local previousLevel = if profile then profile.level else nil
 	profile = p
@@ -2069,6 +2147,8 @@ local function render(p: Types.Profile)
 		LevelWindow.celebrate(gui, nextLocale, p.level, previousLevel)
 	end
 	locale = nextLocale
+	player:SetAttribute("LocaleManual", p.locale ~= nil)
+	player:SetAttribute("Locale", nextLocale)
 	if rebuild then
 		localizeWorld()
 		TopBoards.Refresh()
@@ -2132,12 +2212,24 @@ local function render(p: Types.Profile)
 	refreshWindow(rebuild)
 end
 -- the profile crosses the network Wire-encoded (sparse slot tables survive intact)
-Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any, loaded: boolean?)
-	require(game:GetService("ReplicatedFirst").Loading.LoadingController).SnapshotReady(
-		loaded == true
-	)
-	render(Wire.decode(encoded))
-end)
+do
+	-- Early prewarmed remotes can exist before their server listener. One loaded snapshot is the acknowledgement boundary.
+	local resentAutoLocale = false
+	Remotes.event("ProfileUpdated").OnClientEvent:Connect(function(encoded: any, loaded: boolean?)
+		if loaded == true and not resentAutoLocale then
+			resentAutoLocale = true
+			if player:GetAttribute("AutoLocale") == nil then
+				Remotes.event("SetAutoLocale"):FireServer(
+					require(game:GetService("ReplicatedFirst").Loading.Locale).detect(player)
+				)
+			end
+		end
+		require(game:GetService("ReplicatedFirst").Loading.LoadingController).SnapshotReady(
+			loaded == true
+		)
+		render(Wire.decode(encoded))
+	end)
+end
 -- then only the changes (ProfileService diff): a changed field, or changed entries of a table field;
 -- changed tables are copied so the previous profile stays as it was
 Remotes.event("ProfilePatch").OnClientEvent:Connect(function(ops: any)
@@ -2926,6 +3018,7 @@ touchMenus.Name = "TouchMenus"
 touchMenus.Position = UDim2.fromOffset(8, 64)
 touchMenus.Size = UDim2.fromOffset(6 * 60, 2 * 60)
 touchMenus.BackgroundTransparency = 1
+touchMenus.ZIndex = 12 -- expanded menu is above the tutorial / pinned requirements (6)
 touchMenus.Parent = gui
 -- [владелец 21.10] the menu buttons were hit by accident while playing: one "Menu" button stays on
 -- screen and unfolds the grid to its right (2 rows × 6, clear of the joystick); choosing an item or
@@ -3038,6 +3131,13 @@ do
 end
 local function setTouchMenuOpen(open: boolean)
 	touchMenuGrid.Visible = open
+	player:SetAttribute("HudTouchMenuOpen", open)
+	if open then
+		local requirements = gui:FindFirstChild("FirstSteps")
+		if requirements and requirements:IsA("GuiObject") then
+			requirements.Visible = false
+		end
+	end
 	menuToggle.BackgroundColor3 = if open then Ui.colors.buttonBlue else Ui.colors.buttonGrey
 end
 menuToggle.Activated:Connect(function()
@@ -3307,7 +3407,7 @@ do
 	jumpLook.BackgroundTransparency = 1
 	jumpLook.Visible = false
 	jumpLook.Parent = jumpProxy
-	local jumpMoved, jumpHidden = false, false
+	local jumpHidden = false
 	local function robloxJumpButton(): GuiObject?
 		local touchGui = player.PlayerGui:FindFirstChild("TouchGui")
 		local frame = touchGui and touchGui:FindFirstChild("TouchControlFrame")
@@ -3322,8 +3422,7 @@ do
 		end
 		-- Roblox's size (TouchJump: 70 on small screens, else 120) × the player's size; the stand-in keeps
 		-- Roblox's size and its own UIScale (HudLayout) makes it match
-		local small = math.min(frame.AbsoluteSize.X, frame.AbsoluteSize.Y) <= 500
-		local base = if small then 70 else 120
+		local base = jumpProxy:GetAttribute("DefaultSize") or 70
 		local userScale = jumpProxy:FindFirstChildOfClass("UIScale")
 		local scaled = base * (if userScale then userScale.Scale else 1)
 		button.Size = UDim2.fromOffset(scaled, scaled)
@@ -3339,21 +3438,8 @@ do
 			button.Visible, jumpHidden = true, false
 		end
 		jumpLook.Visible = editing
-		if HudLayout.moved("jump") or editing then
-			local at = jumpProxy.AbsolutePosition - frame.AbsolutePosition
-			button.Position = UDim2.fromOffset(at.X, at.Y)
-			jumpMoved = true
-			return
-		end
-		if jumpMoved then -- back to Roblox's own place (TouchJump's formula)
-			local size = base
-			button.Position = if small
-				then UDim2.new(1, -(size * 1.5 - 10), 1, -size - 20)
-				else UDim2.new(1, -(size * 1.5 - 10), 1, -size * 1.75)
-			jumpMoved = false
-		end
-		local at = button.AbsolutePosition - touchActions.AbsolutePosition
-		jumpProxy.Position = UDim2.fromOffset(at.X, at.Y)
+		local at = jumpProxy.AbsolutePosition - frame.AbsolutePosition
+		button.Position = UDim2.fromOffset(at.X, at.Y)
 	end)
 end
 -- Throw the held item like Minecraft: Q one item, Ctrl+Q the whole stack; on a phone hold a hotbar
@@ -3391,7 +3477,8 @@ eatButton.Activated:Connect(function()
 		useConsumable()
 	end
 end)
-local inventoryButton = touchIconButton(touchActions, nil, "•••", 40)
+local inventoryButton =
+	touchIconButton(touchActions, Config.icons.icons.menu_inventory, "•••", 44)
 inventoryButton.Name = "TouchInventory"
 inventoryButton.TextSize = 20
 inventoryButton.Activated:Connect(function()
@@ -3439,66 +3526,176 @@ local function updateLayout()
 	hints.Visible, languageButton.Visible = not mobile, not mobile
 	artifactButton.Visible = not mobile
 	menuButton.Visible = not mobile
-	HudLayout.setBaseScale(stats, if mobile then 0.65 else 1) -- × the player's size (HudLayout.apply)
-	stats.Position = if mobile then UDim2.new(1, -148, 0, 64) else UDim2.new(1, -224, 0.4, 0)
-	-- effect icons sit left of the stats panel, top-aligned with it
-	effectsHud.Position = if mobile then UDim2.new(1, -152, 0, 64) else UDim2.new(1, -230, 0.4, 0)
-	HudLayout.setBaseScale(effectsHud, if mobile then 0.75 else 1)
-	boosterHud.Position = if mobile then UDim2.fromOffset(72, 64) else UDim2.fromOffset(8, 116)
-	local size = if mobile and viewport.X <= 700 then 40 else SLOT
-	local width = 9 * (size + 4) + 8
-	hotbar.Size = UDim2.fromOffset(width, size + 12)
-	hotbar.AnchorPoint = Vector2.new(0.5, 1)
-	-- Reserve «Вид» on the left and the mobile inventory opener on the right.
-	local viewSize, viewGap, edge = 44, 6, 10
-	local leftSpace, rightSpace = viewSize + viewGap, if mobile then 40 + viewGap else 0
-	hotbarScale.Scale =
-		math.min(1, math.max(1, viewport.X - 2 * edge - leftSpace - rightSpace) / width)
-	local barWidth = width * hotbarScale.Scale
-	local barHeight = (size + 12) * hotbarScale.Scale
-	local barCenter = math.clamp(
-		viewport.X / 2,
-		edge + leftSpace + barWidth / 2,
-		math.max(edge + leftSpace + barWidth / 2, viewport.X - edge - rightSpace - barWidth / 2)
-	)
-	local barRight = barCenter + barWidth / 2
-	hotbar.Position = UDim2.new(0, barCenter, 1, -8)
-	survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
-	viewButton.Position = UDim2.new(
-		0,
-		barCenter - barWidth / 2 - viewGap,
-		1,
-		-8 - math.max(0, (barHeight - viewSize) / 2)
-	)
-	-- The inventory opener stays to the right, separated from the view control.
-	inventoryButton.Position = UDim2.new(
-		0,
-		barRight + viewGap,
-		1,
-		-8 - math.max(barHeight, 40) + math.max(0, (barHeight - 40) / 2)
-	)
-	inventoryButton.AnchorPoint = Vector2.new(0, 0)
-	local hintsLeft = barRight + 12
-	local hintsWidth = math.max(0, viewport.X - hintsLeft - 84)
-	hints.Visible = not mobile and hintsWidth >= 100
-	hints.Position = UDim2.new(0, hintsLeft, 1, -10)
-	hints.Size = UDim2.fromOffset(hintsWidth, 0)
-	for i, slot in ipairs(hotbarSlots) do
-		slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
-		slotScales[i].Scale = size / SLOT
+
+	local defaults = require(script.HudDefaults)
+	local inset = GuiService:GetGuiInset().Y
+	local phone = if mobile then defaults.phone(viewport.X, viewport.Y, inset) else nil
+	local lane = if phone
+		then phone.notification
+		else {
+			x = 340,
+			y = inset + 8,
+			width = math.max(100, math.min(400, viewport.X - 570)),
+			height = 52,
+		}
+	player:SetAttribute("HudCompact", mobile)
+	for name, value in
+		{
+			X = lane.x + gui.AbsolutePosition.X,
+			Y = lane.y + gui.AbsolutePosition.Y,
+			Width = lane.width,
+			Height = lane.height,
+		}
+	do
+		player:SetAttribute("HudNotification" .. name, value)
 	end
-	if mobile then
-		toast.Size = UDim2.fromOffset(math.min(520, viewport.X - 20), 66)
-		toast.Position = UDim2.new(0.5, -toast.Size.X.Offset / 2, 0, 12)
-		teleportCountdown.Size = UDim2.new(1, -120, 0, 28)
-		teleportCountdown.Position = UDim2.new(0, 60, 1, -224)
+	for _, suffix in { "X", "Y", "Width", "Height" } do
+		local key = string.lower(suffix)
+		player:SetAttribute(
+			"HudRequirements" .. suffix,
+			if phone
+				then phone.requirements[key]
+				else ({
+					x = 10,
+					y = inset + 58,
+					width = 220,
+					height = math.max(90, math.min(230, viewport.Y - 340)),
+				})[key]
+		)
+	end
+	boosterHud:SetAttribute("Compact", mobile or viewport.Y < 650)
+	effectsHud:SetAttribute("Compact", mobile or viewport.Y < 650)
+	defaults.stats(stats, statText, if phone then phone.stats else nil)
+	if phone then
+		for object, area in
+			{
+				[stats] = phone.stats,
+				[hotbar] = phone.hotbar,
+				[viewButton] = phone.view,
+				[inventoryButton] = phone.inventory,
+				[toast] = phone.notification,
+				[boosterHud] = phone.boosters,
+				[effectsHud] = phone.effects,
+				[touchMenus] = phone.menu,
+				[eatButton] = phone.eat,
+			}
+		do
+			defaults.place(object, area)
+			HudLayout.setBaseScale(object, 1)
+		end
+		effectsHud.AnchorPoint = Vector2.new(1, 0)
+		effectsHud.Position = UDim2.fromOffset(
+			phone.effects.x + phone.effects.width * phone.effectsScale,
+			phone.effects.y
+		)
+		-- View's saved anchor remains the lower-right corner for existing custom layouts.
+		viewButton.AnchorPoint = Vector2.new(1, 1)
+		viewButton.Position = UDim2.fromOffset(phone.view.x + 44, phone.view.y + 44)
+		hotbarScale.Scale, survivalScale.Scale = 1, 1
+		menuToggle.Size = UDim2.fromOffset(44, 44)
+		touchMenuGrid.Position = UDim2.fromOffset(-touchMenuGrid.Size.X.Offset - 6, 0)
+		for _, child in menuToggle:GetChildren() do
+			if child:IsA("Frame") then
+				child.Visible = true
+			end
+		end
+		menuToggle.Text = ""
+		local caption = menuToggle:FindFirstChild("Caption")
+		if caption and caption:IsA("GuiObject") then
+			caption.Visible = false
+		end
+		for name, area in
+			{ Touch_jump = phone.jump, Touch_attack = phone.attack, Touch_sprint = phone.sprint }
+		do
+			local object = touchActions:FindFirstChild(name)
+			if object and object:IsA("GuiObject") then
+				-- Retain anchor semantics used by previously saved custom positions.
+				local anchor = object.AnchorPoint
+				defaults.place(object, area)
+				object.AnchorPoint = anchor
+				object.Position = UDim2.fromOffset(
+					area.x + area.width * anchor.X,
+					area.y + area.height * anchor.Y
+				)
+				object:SetAttribute("DefaultSize", area.width)
+				HudLayout.setDefault(object)
+			end
+		end
+		for i, slot in ipairs(hotbarSlots) do
+			slot.Position = UDim2.fromOffset(6 + (i - 1) * (phone.slot + phone.gap), 6)
+			slotScales[i].Scale = phone.slot / SLOT
+		end
+		toastText.TextSize = 12
+		teleportCountdown.Size = UDim2.fromOffset(lane.width, 28)
+		teleportCountdown.Position = UDim2.fromOffset(lane.x, lane.y + 54)
 		teleportCountdown.TextScaled = true
 	else
-		toast.Size, toast.Position = UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12)
-		teleportCountdown.Size, teleportCountdown.Position =
-			UDim2.fromOffset(520, 28), UDim2.new(0.5, -260, 1, -180)
-		teleportCountdown.TextScaled = false
+		effectsHud.AnchorPoint = Vector2.new(1, 0)
+		HudLayout.setBaseScale(stats, if mobile then 0.65 else 1) -- × the player's size (HudLayout.apply)
+		stats.Position = if mobile
+			then UDim2.new(1, -148, 0, 64)
+			else UDim2.new(1, -224, 0, inset + 8)
+		-- effect icons sit left of the stats panel, top-aligned with it
+		effectsHud.Position = if mobile
+			then UDim2.new(1, -152, 0, 64)
+			else UDim2.new(1, -10, 0, inset + 174)
+		HudLayout.setBaseScale(effectsHud, if mobile then 0.75 else 1)
+		boosterHud.Position = if mobile
+			then UDim2.fromOffset(72, 64)
+			else UDim2.fromOffset(
+				10,
+				inset + 64 + math.max(90, math.min(230, viewport.Y - 340))
+			)
+		local size = if mobile and viewport.X <= 700 then 40 else SLOT
+		local width = 9 * (size + 4) + 8
+		hotbar.Size = UDim2.fromOffset(width, size + 12)
+		hotbar.AnchorPoint = Vector2.new(0.5, 1)
+		-- Reserve «Вид» on the left and the mobile inventory opener on the right.
+		local viewSize, viewGap, edge = 44, 6, 10
+		local leftSpace, rightSpace = viewSize + viewGap, if mobile then 40 + viewGap else 0
+		hotbarScale.Scale =
+			math.min(1, math.max(1, viewport.X - 2 * edge - leftSpace - rightSpace) / width)
+		local barWidth = width * hotbarScale.Scale
+		local barCenter = math.clamp(
+			viewport.X / 2,
+			edge + leftSpace + barWidth / 2,
+			math.max(edge + leftSpace + barWidth / 2, viewport.X - edge - rightSpace - barWidth / 2)
+		)
+		local barRight = barCenter + barWidth / 2
+		hotbar.Position = UDim2.new(0, barCenter, 1, 0)
+		survivalScale.Scale = 1 -- the meters span the hotbar and share its scale
+		viewButton.Position = UDim2.new(0, barCenter - barWidth / 2 - viewGap, 1, 0)
+		-- The inventory opener stays to the right, separated from the view control.
+		inventoryButton.Position = UDim2.new(0, barRight + viewGap, 1, -44)
+		inventoryButton.AnchorPoint = Vector2.new(0, 0)
+		local hintsLeft = barRight + 12
+		local hintsWidth = math.max(0, viewport.X - hintsLeft - 84)
+		hints.Visible = not mobile and hintsWidth >= 100
+		hints.Position = UDim2.new(0, hintsLeft, 1, -10)
+		hints.Size = UDim2.fromOffset(hintsWidth, 0)
+		for i, slot in ipairs(hotbarSlots) do
+			slot.Position = UDim2.fromOffset(6 + (i - 1) * (size + 4), 6)
+			slotScales[i].Scale = size / SLOT
+		end
+		if mobile then
+			toast.Size = UDim2.fromOffset(math.min(520, viewport.X - 20), 66)
+			toast.Position = UDim2.new(0.5, -toast.Size.X.Offset / 2, 0, 12)
+			teleportCountdown.Size = UDim2.new(1, -120, 0, 28)
+			teleportCountdown.Position = UDim2.new(0, 60, 1, -224)
+			teleportCountdown.TextScaled = true
+		else
+			toast.Size, toast.Position = UDim2.fromOffset(520, 66), UDim2.new(1, -530, 0, 12)
+			teleportCountdown.Size, teleportCountdown.Position =
+				UDim2.fromOffset(520, 28), UDim2.new(0.5, -260, 1, -180)
+			teleportCountdown.TextScaled = false
+		end
+		toast.Size, toast.Position =
+			UDim2.fromOffset(lane.width, lane.height), UDim2.fromOffset(lane.x, lane.y)
+		toastText.TextSize = 14
 	end
+	HudLayout.setDefault(touchMenus)
+	HudLayout.setDefault(eatButton)
+
 	for win, layout in pairs(windowLayouts) do
 		fitWindow(win, layout)
 	end
@@ -3515,6 +3712,8 @@ local function updateLayout()
 	HudLayout.setDefault(toast)
 	HudLayout.setDefault(boosterHud)
 	HudLayout.setDefault(effectsHud)
+	HudLayout.setDefaultSize("requirements", if phone then phone.requirementsScale else 1)
+	HudLayout.setDefaultSize("effects", if phone then phone.effectsScale else 1)
 	HudLayout.apply(mode, layout)
 	viewShown = viewButton.Visible
 	-- the status effect icons stay just left of the stats panel wherever it goes, unless moved themselves
@@ -3526,11 +3725,18 @@ local function updateLayout()
 			stats.Position.Y.Offset
 		)
 	end
+	if phone and not HudLayout.isEditing() then
+		defaults.dockNearBottom(viewButton, viewport)
+		defaults.dockNearBottom(inventoryButton, viewport)
+		defaults.clamp(stats, viewport)
+		defaults.clearStats(effectsHud, stats, viewport)
+	end
+	defaults.menuGrid(touchMenus, touchMenuGrid, viewport)
 end
 relayoutHud = function()
 	updateLayout()
 end
-openHudEditor = function()
+openHudEditor = function(onlyId: string?)
 	if HudLayout.isEditing() then
 		return
 	end
@@ -3538,15 +3744,14 @@ openHudEditor = function()
 	cancelDigInput()
 	touchBow, touchAim = false, nil
 	BowController.Cancel()
-	toastToken += 1 -- a sample in the notification panel while it is placed (no pending hide)
 	toastText.Text = T("layout_toasts")
 	toast.Visible = true
 	local mode = if isMobile() then "mobile" else "desktop"
 	local edited = hudOverride[mode]
 	local saved = if profile and profile.hudLayout then profile.hudLayout[mode] else nil
 	HudLayout.edit(gui, mode, if edited ~= nil then (if edited then edited else nil) else saved, {
-		title = T("layout_title"),
-		done = T("layout_done"),
+		title = T(if onlyId == "requirements" then "tracker_edit_hint" else "layout_title"),
+		done = T(if onlyId == "requirements" then "tracker_lock" else "layout_done"),
 		reset = T("layout_reset"),
 		hide = T("layout_hide"),
 		show = T("layout_show"),
@@ -3555,7 +3760,7 @@ openHudEditor = function()
 		Remotes.event("SetHudLayout"):FireServer(mode, layout)
 		toast.Visible = false
 		updateLayout()
-	end)
+	end, onlyId)
 end
 local viewportConnection: RBXScriptConnection? = nil
 local function watchViewport()
@@ -3572,6 +3777,8 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchViewport)
 UserInputService:GetPropertyChangedSignal("TouchEnabled"):Connect(updateLayout)
 UserInputService:GetPropertyChangedSignal("KeyboardEnabled"):Connect(updateLayout)
 workspace:GetAttributeChangedSignal("ForceMobile"):Connect(updateLayout)
+gui:GetPropertyChangedSignal("AbsolutePosition"):Connect(updateLayout)
+gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateLayout)
 watchViewport()
 require(script.WindowInput).Start(function()
 	return currentWindowKind ~= nil or HudLayout.isEditing()
@@ -3586,6 +3793,19 @@ RunService.RenderStepped:Connect(function()
 	if isMobile() then
 		HudLayout.keepClear("inventory", hotbar)
 	end
+	player:SetAttribute(
+		"HudGameplayOpen",
+		currentWindowKind == nil
+			and not touchMenuGrid.Visible
+			and not HudLayout.isEditing()
+			and player:GetAttribute("LoadingBlocked") ~= true
+	)
+	player:SetAttribute(
+		"HudMenuOpen",
+		currentWindowKind ~= nil
+			and not HudLayout.isEditing()
+			and player:GetAttribute("LoadingBlocked") ~= true
+	)
 	local controlsVisible = isMobile() and currentWindowKind == nil
 	touchMenus.Visible, touchActions.Visible = controlsVisible, controlsVisible
 	local food, needItem = isFood(), isNeedConsumable()
@@ -3816,5 +4036,16 @@ if RunService:IsStudio() then
 	-- on the Player, not in PlayerGui: PlayerGui empties when the character respawns and the hook was lost
 	hook.Parent = player
 end
+require(script.TutorialGuide).Start(gui, function()
+	return profile
+end, function(kind)
+	open(kind)
+end, function()
+	return currentWindowKind ~= nil
+		or HudLayout.isEditing()
+		or player:GetAttribute("HudTouchMenuOpen") == true
+end, function()
+	openHudEditor("requirements")
+end, isMobile)
 require(game:GetService("ReplicatedFirst").Loading.LoadingController).ClientReady()
 print(string.format("[coco-prison] client ready (%s)", locale))

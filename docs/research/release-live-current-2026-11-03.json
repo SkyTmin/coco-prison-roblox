@@ -1,0 +1,368 @@
+{
+  "placeId": 92594200898716,
+  "gameId": 10772144679,
+  "date": "2026-11-03",
+  "published": false,
+  "desktop": {
+    "touch": false,
+    "status": "PASS",
+    "checks": [
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "menu",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu menu",
+        "pass": true
+      },
+      {
+        "name": "camera returns after menu",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "inventory",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu inventory",
+        "pass": true
+      },
+      {
+        "name": "camera returns after inventory",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "settings",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu settings",
+        "pass": true
+      },
+      {
+        "name": "camera returns after settings",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "actions",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu actions",
+        "pass": true
+      },
+      {
+        "name": "camera returns after actions",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "upgrade",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu upgrade",
+        "pass": true
+      },
+      {
+        "name": "camera returns after upgrade",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "level",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu level",
+        "pass": true
+      },
+      {
+        "name": "camera returns after level",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "auction",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu auction",
+        "pass": true
+      },
+      {
+        "name": "camera returns after auction",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "locations",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu locations",
+        "pass": true
+      },
+      {
+        "name": "camera returns after locations",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "low": -0.11999999731779099,
+          "high": 0.11999999731779099,
+          "parent": "Lighting"
+        },
+        "name": "actual Lighting brightness preview",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "low": 0.5,
+          "high": 1.5
+        },
+        "name": "actual mouse multiplier preview",
+        "pass": true
+      },
+      {
+        "name": "touch camera adapter installed",
+        "pass": true
+      }
+    ],
+    "viewport": [
+      1168,
+      338
+    ],
+    "profileMutated": false,
+    "physicalInputTested": false
+  },
+  "inventory": {
+    "desktop": {
+      "compact": true,
+      "window": "567.324707, 268",
+      "slots": 36,
+      "slot": "38.2857132, 38.2857132"
+    },
+    "iphone17pro": {
+      "touch": true,
+      "slot": "44, 44",
+      "viewport": "750, 381",
+      "window": "652, 308",
+      "position": "49, 5.5",
+      "compact": true
+    },
+    "galaxyA06": {
+      "touch": true,
+      "slot": "38.2857132, 38.2857132",
+      "viewport": "705, 338",
+      "window": "567.324707, 268",
+      "compact": true
+    }
+  },
+  "galaxyA06": {
+    "touch": true,
+    "status": "PASS",
+    "checks": [
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "menu",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu menu",
+        "pass": true
+      },
+      {
+        "name": "camera returns after menu",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "inventory",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu inventory",
+        "pass": true
+      },
+      {
+        "name": "camera returns after inventory",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "settings",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu settings",
+        "pass": true
+      },
+      {
+        "name": "camera returns after settings",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "actions",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu actions",
+        "pass": true
+      },
+      {
+        "name": "camera returns after actions",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "upgrade",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu upgrade",
+        "pass": true
+      },
+      {
+        "name": "camera returns after upgrade",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "level",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu level",
+        "pass": true
+      },
+      {
+        "name": "camera returns after level",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "auction",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu auction",
+        "pass": true
+      },
+      {
+        "name": "camera returns after auction",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "camera": "Scriptable",
+          "movement": 0,
+          "opened": "locations",
+          "jump": false,
+          "mouse": "Default",
+          "cursor": true,
+          "modal": true
+        },
+        "name": "first person menu locations",
+        "pass": true
+      },
+      {
+        "name": "camera returns after locations",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "low": -0.11999999731779099,
+          "high": 0.11999999731779099,
+          "parent": "Lighting"
+        },
+        "name": "actual Lighting brightness preview",
+        "pass": true
+      },
+      {
+        "evidence": {
+          "low": 0.5,
+          "high": 1.5
+        },
+        "name": "actual mouse multiplier preview",
+        "pass": true
+      },
+      {
+        "name": "touch camera adapter installed",
+        "pass": true
+      }
+    ],
+    "viewport": [
+      705,
+      338
+    ],
+    "profileMutated": false,
+    "physicalInputTested": false
+  },
+  "physicalInputTested": false
+}

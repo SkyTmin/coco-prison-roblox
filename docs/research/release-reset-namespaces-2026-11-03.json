@@ -1,0 +1,173 @@
+{
+  "cloudAPIsCalled": false,
+  "epoch": "release1_20261103",
+  "legacyReceiptAccess": "GetAsync only; receipt IDs only; no gameplay import",
+  "legacyReceiptStore": "PlayerProfiles_v3",
+  "namespaces": {
+    "dataStores": [
+      {
+        "archived": "PlayerProfiles_v3",
+        "live": "K_L_release1_20261103_PlayerProfiles_v3",
+        "studio": "K_S_release1_20261103_PlayerProfiles_v3"
+      },
+      {
+        "archived": "PlayerTransfers_v1",
+        "live": "K_L_release1_20261103_PlayerTransfers_v1",
+        "studio": "K_S_release1_20261103_PlayerTransfers_v1"
+      },
+      {
+        "archived": "AuctionLots_v1",
+        "live": "K_L_release1_20261103_AuctionLots_v1",
+        "studio": "K_S_release1_20261103_AuctionLots_v1"
+      },
+      {
+        "archived": "Gangs_v1",
+        "live": "K_L_release1_20261103_Gangs_v1",
+        "studio": "K_S_release1_20261103_Gangs_v1"
+      },
+      {
+        "archived": "GangTags_v1",
+        "live": "K_L_release1_20261103_GangTags_v1",
+        "studio": "K_S_release1_20261103_GangTags_v1"
+      },
+      {
+        "archived": "GangChest_v1",
+        "live": "K_L_release1_20261103_GangChest_v1",
+        "studio": "K_S_release1_20261103_GangChest_v1"
+      },
+      {
+        "archived": "FactionStorage_v1",
+        "live": "K_L_release1_20261103_FactionStorage_v1",
+        "studio": "K_S_release1_20261103_FactionStorage_v1"
+      },
+      {
+        "archived": "Referrals_v1",
+        "live": "K_L_release1_20261103_Referrals_v1",
+        "studio": "K_S_release1_20261103_Referrals_v1"
+      },
+      {
+        "archived": "TopNames_v1",
+        "live": "K_L_release1_20261103_TopNames_v1",
+        "studio": "K_S_release1_20261103_TopNames_v1"
+      }
+    ],
+    "memoryHashMaps": [
+      {
+        "archived": "AuctionAnnounce_v1",
+        "live": "K_L_release1_20261103_AuctionAnnounce_v1",
+        "studio": "K_S_release1_20261103_AuctionAnnounce_v1"
+      },
+      {
+        "archived": "GangInvites_v1",
+        "live": "K_L_release1_20261103_GangInvites_v1",
+        "studio": "K_S_release1_20261103_GangInvites_v1"
+      },
+      {
+        "archived": "ServerAffinity_v1",
+        "live": "K_L_release1_20261103_ServerAffinity_v1",
+        "studio": "K_S_release1_20261103_ServerAffinity_v1"
+      },
+      {
+        "archived": "ServerPresence_v1",
+        "live": "K_L_release1_20261103_ServerPresence_v1",
+        "studio": "K_S_release1_20261103_ServerPresence_v1"
+      },
+      {
+        "archived": "ServerInvites_v1",
+        "live": "K_L_release1_20261103_ServerInvites_v1",
+        "studio": "K_S_release1_20261103_ServerInvites_v1"
+      }
+    ],
+    "memorySortedMaps": [
+      {
+        "archived": "AuctionIndex_v1",
+        "live": "K_L_release1_20261103_AuctionIndex_v1",
+        "studio": "K_S_release1_20261103_AuctionIndex_v1"
+      },
+      {
+        "archived": "SharedBoosters_v1",
+        "live": "K_L_release1_20261103_SharedBoosters_v1",
+        "studio": "K_S_release1_20261103_SharedBoosters_v1"
+      }
+    ],
+    "messageTopics": [
+      {
+        "archived": "ProfileRelease",
+        "live": "K_L_release1_20261103_ProfileRelease",
+        "studio": "K_S_release1_20261103_ProfileRelease"
+      },
+      {
+        "archived": "AuctionSold",
+        "live": "K_L_release1_20261103_AuctionSold",
+        "studio": "K_S_release1_20261103_AuctionSold"
+      },
+      {
+        "archived": "AuctionAnnounce",
+        "live": "K_L_release1_20261103_AuctionAnnounce",
+        "studio": "K_S_release1_20261103_AuctionAnnounce"
+      },
+      {
+        "archived": "Gangs_v1",
+        "live": "K_L_release1_20261103_Gangs_v1",
+        "studio": "K_S_release1_20261103_Gangs_v1"
+      },
+      {
+        "archived": "SharedBoosters",
+        "live": "K_L_release1_20261103_SharedBoosters",
+        "studio": "K_S_release1_20261103_SharedBoosters"
+      },
+      {
+        "archived": "Referrals_v1",
+        "live": "K_L_release1_20261103_Referrals_v1",
+        "studio": "K_S_release1_20261103_Referrals_v1"
+      },
+      {
+        "archived": "Chat_v1",
+        "live": "K_L_release1_20261103_Chat_v1",
+        "studio": "K_S_release1_20261103_Chat_v1"
+      }
+    ],
+    "orderedDataStores": [
+      {
+        "archived": "Top_ratsClean_v1",
+        "live": "K_L_release1_20261103_Top_ratsClean_v1",
+        "studio": "K_S_release1_20261103_Top_ratsClean_v1"
+      },
+      {
+        "archived": "Top_money_v1",
+        "live": "K_L_release1_20261103_Top_money_v1",
+        "studio": "K_S_release1_20261103_Top_money_v1"
+      },
+      {
+        "archived": "Top_level_v1",
+        "live": "K_L_release1_20261103_Top_level_v1",
+        "studio": "K_S_release1_20261103_Top_level_v1"
+      },
+      {
+        "archived": "Top_blocksClean_v1",
+        "live": "K_L_release1_20261103_Top_blocksClean_v1",
+        "studio": "K_S_release1_20261103_Top_blocksClean_v1"
+      },
+      {
+        "archived": "Top_deaths_v1",
+        "live": "K_L_release1_20261103_Top_deaths_v1",
+        "studio": "K_S_release1_20261103_Top_deaths_v1"
+      }
+    ],
+    "qaDataStores": [
+      {
+        "archived": "PlayerProfiles_v3_QA",
+        "live": "K_L_release1_20261103_PlayerProfiles_v3_QA",
+        "studio": "K_S_release1_20261103_PlayerProfiles_v3_QA"
+      },
+      {
+        "archived": "PlayerTransfers_QA_v1",
+        "live": "K_L_release1_20261103_PlayerTransfers_QA_v1",
+        "studio": "K_S_release1_20261103_PlayerTransfers_QA_v1"
+      }
+    ]
+  },
+  "oldDataStoresRetained": true,
+  "resetMechanism": "Switch namespaces when new build starts; no delete or overwrite",
+  "schemasChanged": false
+}

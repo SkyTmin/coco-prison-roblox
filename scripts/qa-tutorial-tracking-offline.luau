@@ -61,8 +61,8 @@ check(
 p.tutorial = { version = 2, step = 4 }
 p.blocksTotal = 469
 check(
-	"level stage points to mine area without individual block highlight",
-	flow(p).mode == "mine_area"
+	"level mining is explained without a world marker",
+	flow(p).mode == nil and flow(p).phase == "tutorial_collect_level"
 )
 p.blocksTotal = 470
 local button = {}
@@ -72,6 +72,14 @@ check(
 )
 p.coins = 49900
 check("complete level resources and valuable bag point to seller", flow(p).mode == "sell")
+p.coins = 0
+check("first level sale points to seller even with a partial bag", flow(p).mode == "sell")
+check(
+	"level sale checkpoint waits for a sufficient second batch",
+	Tutorial.soldForLevel(p, 115) and flow(p).mode == nil
+)
+p.coins = 49900
+check("second batch that covers the deficit points back to seller", flow(p).mode == "sell")
 p.selectedSlot = 2
 p.inventory[2] = { id = "ordinary_key", count = 1 }
 check("equipped ordinary key temporarily guides its case", flow(p).mode == "case")

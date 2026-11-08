@@ -1,0 +1,26 @@
+{
+  "mode": "built-in image_gen",
+  "date": "2026-11-03",
+  "icon": {
+    "file": "katorga-icon-2026-11-03.png",
+    "width": 1254,
+    "height": 1254,
+    "prompt": "katorga-icon-2026-11-03.prompt.txt"
+  },
+  "thumbnail": {
+    "file": "katorga-thumbnail-2026-11-03.png",
+    "width": 1672,
+    "height": 941,
+    "prompt": "katorga-thumbnail-2026-11-03.prompt.txt"
+  },
+  "intent": "Original stylized illustrations based on Katorga gameplay and accepted quarry design, not gameplay screenshots.",
+  "direction": "Large orange prisoner and cyan pickaxe; visible mining action; gray prison/quarry architecture and blue sky; clear main silhouette at small sizes; no text, monetary promises or third-party logos.",
+  "sources": [
+    "https://create.roblox.com/docs/production/publishing/experience-icons",
+    "https://create.roblox.com/docs/discovery",
+    "https://create.roblox.com/docs/production/analytics/acquisition"
+  ],
+  "measurement": "No CTR or conversion measurement was performed. Compare acquisition/play-through after real impressions; no guaranteed most-clickable claim.",
+  "uploaded": false,
+  "moderated": false
+}
