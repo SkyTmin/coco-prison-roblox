@@ -12,7 +12,12 @@ local started = false
 local PLAYERS, MOBS, DROPS, PLAYER_VISUALS = "Players", "Mobs", "ItemDrops", "PlayerVisuals"
 CollisionGroups.DROPS = DROPS
 
+local registered = false
 local function register()
+	if registered then
+		return -- once per server: it used to run for every mob and character
+	end
+	registered = true
 	for _, name in ipairs({ PLAYERS, MOBS, DROPS, PLAYER_VISUALS }) do
 		if not PhysicsService:IsCollisionGroupRegistered(name) then
 			PhysicsService:RegisterCollisionGroup(name)

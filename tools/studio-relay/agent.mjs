@@ -221,6 +221,14 @@ async function main() {
 		case "runmode":
 		case "stop": {
 			const target = cmd === "stop" ? "server" : "edit";
+			if (cmd === "stop") {
+				const st = await jsonCall("/agent/status");
+				const srv = st.datamodels && st.datamodels.server;
+				if (!srv || srv.agoSec > 30) {
+					console.log("=> not running");
+					break;
+				}
+			}
 			printRun(await send(target, cmd, "", 30));
 			break;
 		}

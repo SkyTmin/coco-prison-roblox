@@ -315,10 +315,20 @@ function MobService.Start()
 		return
 	end
 	started = true
-	for _, part in ipairs(CollectionService:GetTagged("MobSpawn")) do
-		register(part)
-	end
+	-- [08.11: a fresh server hit «Script timeout» building every mob of 30 locations in one go, and every service
+	-- after this one never started — the client then waited forever on the loading screen] the mobs are built in
+	-- the background, a few milliseconds a frame
 	CollectionService:GetInstanceAddedSignal("MobSpawn"):Connect(register)
+	task.spawn(function()
+		local budget = os.clock()
+		for _, part in ipairs(CollectionService:GetTagged("MobSpawn")) do
+			register(part)
+			if os.clock() - budget > 0.008 then
+				task.wait()
+				budget = os.clock()
+			end
+		end
+	end)
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt

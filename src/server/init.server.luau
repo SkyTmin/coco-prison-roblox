@@ -142,21 +142,44 @@ local NameplateService = require(script.Services.NameplateService)
 local CollisionGroups = require(script.Services.CollisionGroups)
 local LeaderboardService = require(script.Services.LeaderboardService)
 
+-- [08.11] the service starts below run back to back; on a cold server the chain exceeded Roblox's script time limit
+-- («Script timeout: exhausted allowed execution time») and every later service — the Sfx remote the client waits
+-- for among them — never started, so the loading screen hung on «Интерфейс». breathe() yields one frame whenever
+-- the chain has run for more than half a second; the order of the starts is unchanged.
+local lastBreath = os.clock()
+local function breathe()
+	if os.clock() - lastBreath > 0.5 then
+		task.wait()
+		lastBreath = os.clock()
+	end
+end
 AvatarService.Start() -- first: the StarterCharacter must exist before anyone spawns
+breathe()
 CommercePolicyService.Start() -- account restrictions resolve asynchronously; gated actions fail closed meanwhile
+breathe()
 local MatteWindows = require(ReplicatedStorage.Shared.MatteWindows)
 MatteWindows.Apply(workspace:FindFirstChild("Ghetto"))
 MatteWindows.Apply(game:GetService("ServerStorage"):FindFirstChild("GangHouseTemplate"))
 NpcBodyService.Start() -- the map's R15 NPCs → our block body in their costumes
+breathe()
 SignService.Start() -- sign posts no longer cover the text
+breathe()
 HungerService.Start()
+breathe()
 DeathService.Start()
+breathe()
 require(script.Services.TutorialService).Start()
+breathe()
 ProfileService.Start()
+breathe()
 require(script.Services.ServerAffinityService).Start()
+breathe()
 FactionService.Start()
+breathe()
 ProfessionService.Start()
+breathe()
 TextureService.Start()
+breathe()
 local warzoneScenery = workspace:FindFirstChild("Warzone")
 if warzoneScenery then
 	local ok, err = pcall(
@@ -168,54 +191,103 @@ if warzoneScenery then
 	end
 end
 MineService.Start()
+breathe()
 DigService.Start()
+breathe()
 EconomyService.Start()
+breathe()
 NeedsService.Start()
+breathe()
 require(script.Services.FoodService).Start() -- eating over 1.6 s like Minecraft (client Eating.luau)
+breathe()
 require(script.Services.DonateService).Start() -- the donate shop: crystals for Robux, goods for crystals
+breathe()
 AchievementService.Start()
+breathe()
 GlobalBoosterService.Start()
+breathe()
 require(script.Services.GangService).Start() -- gangs: shared documents, invites, quests, treasury, upgrades
+breathe()
 require(script.Services.GangChestService).Start() -- the gang storage on the База банды (one server at a time)
+breathe()
 AuctionService.Start()
+breathe()
 BoosterService.Start()
+breathe()
 CaseService.Start()
+breathe()
 ArtifactService.Start()
+breathe()
 require(script.Services.MotionService).Start() -- fast movement snapshots between players (client Motion.luau)
+breathe()
 CombatService.Start()
+breathe()
 require(script.Services.BookService).Start() -- ancient books: applying from the hand, the 32 effects
+breathe()
 BowService.Start()
+breathe()
 LocationService.Start()
+breathe()
 require(script.Services.GangHouseService).Start() -- База банды: a house of its own for every gang (copies of a template)
+breathe()
 require(script.Services.GangBaseService).Start() -- База банды: Библиотекарь, Кузнец, Шнырь
+breathe()
 require(script.Services.GhettoMineService).Start()
+breathe()
 require(script.Services.GhettoService).Start() -- Гетто: Торговец, Чёрный рынок, Сундук с сокровищами
+breathe()
 require(script.Services.WarzoneService).Start() -- Дворы: four faction points captured by digging at the beacons
+breathe()
 TrainerService.Start()
+breathe()
 require(script.Services.SkillService).Start() -- the skill tree: buying levels, the oblivion scroll
+breathe()
 require(script.Services.PotionService).Start() -- the potion stand: brewing, drinking, splash potions
+breathe()
 require(script.Services.WorldSafetyService).Start() -- exterior guards and same-location recovery below the map
+breathe()
 FallService.Start()
+breathe()
 LavaService.Start()
+breathe()
 LightingService.Start()
+breathe()
 HurtService.Start()
+breathe()
 CreativeService.Start()
+breathe()
 ItemDropService.Start()
+breathe()
 BossService.Start()
+breathe()
 FactionStorageService.Start()
+breathe()
 CollisionGroups.Start() -- players and mobs pass through each other
+breathe()
 MobService.Start()
+breathe()
 NameplateService.Start()
+breathe()
 LeaderboardService.Start() -- the spawn top boards (global, OrderedDataStore)
+breathe()
 require(script.Services.ReferralService).Start() -- inviting friends (Referrals_v1), play time, the «Избранное» card
+breathe()
 require(script.Services.ChatService).Start() -- the chat (Roblox draws it): faction / gang TextChannels, announcements
+breathe()
 require(script.Services.ChatCommandService).Start() -- every chat command (TextChatCommands) and the bin (Rubbish)
+breathe()
 require(script.Services.ActionsService).Start()
+breathe()
 require(script.Services.DailyService).Start() -- the canteen portion and the daily rewards (/daily)
+breathe()
 require(script.Services.PrisService).Start() -- PRIS+: the PrisPlus attribute, the mine respawn board (PrisQuery)
+breathe()
 require(script.Services.NicknameService).Start() -- клички: «Ваши клички» (NicknameSet), the shown name (этап 9)
+breathe()
 require(script.Services.PlayerCardService).Start() -- the TAB list / chat player card numbers (PlayerCard, этап 9)
+breathe()
 require(ReplicatedStorage.Shared.Sfx).listen() -- creates the Sfx remote clients wait for
+breathe()
 
 -- Hearts by level [вики LEVELS.md: +0,5 сердца за уровень]: kept on every character once a second — a new character
 -- (the profile may load after the first spawn) starts full. EconomyService heals explicitly on level-up;
