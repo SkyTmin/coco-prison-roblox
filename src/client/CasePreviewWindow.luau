@@ -62,8 +62,8 @@ function CasePreviewWindow.listen(open: () -> ())
 			board.Name = "CaseInfoButton"
 			board.AlwaysOnTop = true
 			-- a tall empty canvas centred on the chest, the button at its bottom: a fixed number of screen pixels
-			-- under the engine «Открыть» prompt (UIOffset −36 px, ≈ 72 px tall) at any distance
-			board.Size = UDim2.fromOffset(118, 124)
+			-- under the engine «Открыть» prompt (≈ 72 px tall around the chest) at any distance: 74–98 px below its centre
+			board.Size = UDim2.fromOffset(118, 196)
 			board.Adornee = prompt.Parent :: any
 			board.ResetOnSpawn = false
 			local button = Instance.new("TextButton")
