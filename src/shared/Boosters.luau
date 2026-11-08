@@ -8,8 +8,9 @@
 -- reach the clients through ReplicatedStorage.SharedBoosters. A booster of a kind and scope that already runs waits
 -- in the queue and starts when the one before it ends. Times are workspace:GetServerTimeNow() seconds (the client
 -- counts down the same clock) and run on while the player is offline [решение]. Kinds: blocks (dug blocks), money
--- (selling), mobs (kills). Several boosters of one kind add up: 1 + Σ(mult − 1) [решение]; a point of the Дворы held by
--- the player's faction adds its +0.2 the same way (Shared/Warzone).
+-- (selling), mobs (kills). Boosters of one kind running at once add their whole multipliers: local ×2 + faction ×2 +
+-- global ×2 = ×6 [владелец 08.11]; a point of the Дворы held by the player's faction adds its +0.2 on top
+-- (Shared/Warzone). A local booster of a kind that already runs extends it (one line, more time) [владелец 08.11].
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(script.Parent.Config)
@@ -143,13 +144,18 @@ function Boosters.running(p: any, kind: string, now: number?): Active?
 end
 
 function Boosters.multiplier(p: any, kind: string, now: number?): number
-	local total = 1
+	local sum, any, extra = 0, false, 0
 	for _, a in ipairs(Boosters.runningAll(p, now)) do
 		if a.kind == kind then
-			total += a.mult - 1
+			if a.point then
+				extra += a.mult - 1
+			else
+				sum += a.mult
+				any = true
+			end
 		end
 	end
-	return total
+	return (if any then sum else 1) + extra
 end
 
 -- queued after `a` in the same line (kind, scope, faction / gang): how many wait and the seconds till the last one ends
@@ -266,11 +272,22 @@ function Boosters.queueStart(
 	return startsAt
 end
 
--- server: starts a local booster (or queues it behind the running one); returns whether it waits
+-- server: starts a local booster; one of the same kind and multiplier already running (or waiting) gets its time
+-- extended instead [владелец 08.11]; another multiplier queues behind it. Returns whether it waits
 function Boosters.startLocal(p: any, stored: Stored, now: number?): boolean
 	local t = now or Boosters.now()
 	Boosters.prune(p, t)
 	p.activeBoosters = p.activeBoosters or {}
+	local last: Active? = nil
+	for _, a in ipairs(p.activeBoosters) do
+		if a.kind == stored.kind and (last == nil or a.endsAt > (last :: Active).endsAt) then
+			last = a
+		end
+	end
+	if last and last.mult == stored.mult then
+		last.endsAt += stored.minutes * 60
+		return last.startsAt > t
+	end
 	local startsAt = Boosters.queueStart(p.activeBoosters, stored.kind, "local", nil, t)
 	table.insert(p.activeBoosters, {
 		kind = stored.kind,

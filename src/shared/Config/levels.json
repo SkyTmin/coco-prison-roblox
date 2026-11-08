@@ -1,20 +1,20 @@
 {
-  "source": "wiki/in-game-wiki/levels.json [вики]; сердца и очки навыков — [решение]",
+  "source": "wiki/in-game-wiki/levels.json [вики]; уровни 2–3 ускорены (design-decisions levelOverrides) [владелец 08.11]; сердца и очки навыков — [решение]",
   "maxLevel": 50,
   "blocksSpent": false,
   "moneySpent": true,
   "levels": [
     {
       "level": 2,
-      "money": 5,
-      "blocks": 470,
+      "money": 2,
+      "blocks": 150,
       "hearts": 10.5,
       "skillPoints": 1
     },
     {
       "level": 3,
-      "money": 7,
-      "blocks": 1120,
+      "money": 3,
+      "blocks": 400,
       "hearts": 11,
       "skillPoints": 0
     },

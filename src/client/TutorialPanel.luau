@@ -221,7 +221,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 			table.sort(requirements, function(a, b)
 				return if a.needed == b.needed then a.counter < b.counter else a.needed > b.needed
 			end)
-		elseif goal and step == 4 then
+		elseif goal and goal.neededBlocks then
 			table.insert(
 				requirements,
 				{ counter = false, have = goal.blocks, needed = goal.neededBlocks }
@@ -229,6 +229,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 		end
 		title.Text = if not goal
 			then Strings.t("tutorial_task_title", locale, math.clamp(step - 2, 1, 2))
+			elseif goal.title then Strings.t(goal.title, locale)
 			elseif step == 3 then Strings.t(
 				"tutorial_upgrade_goal",
 				locale,
@@ -275,7 +276,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 			then Ui.colors.money
 			else Ui.colors.text
 		local money = row(#requirements + 1)
-		money.frame.Name, money.frame.Visible = "MoneyRequirement", goal ~= nil
+		money.frame.Name, money.frame.Visible = "MoneyRequirement", goal ~= nil and goal.cost ~= nil
 		money.frame.Position, money.frame.Size =
 			UDim2.fromOffset(8, y + 3), UDim2.new(1, -16, 0, rowHeight)
 		money.icon.Image, money.icon.Position =
@@ -284,10 +285,12 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 		money.value.Size = UDim2.fromOffset(136, rowHeight)
 		money.value.Position = UDim2.new(1, -142, 0, 0)
 		money.name.Size = UDim2.new(1, -168, 1, 0)
-		money.value.TextColor3 = if goal and goal.coins >= goal.cost
+		money.value.TextColor3 = if goal
+				and goal.cost
+				and goal.coins >= goal.cost
 			then Ui.colors.money
 			else Ui.colors.text
-		money.value.Text = if goal
+		money.value.Text = if goal and goal.cost
 			then "$" .. Strings.money(goal.coins) .. " / $" .. Strings.money(goal.cost) .. (if goal.coins
 					>= goal.cost
 				then " ✓"
@@ -303,6 +306,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 			elseif phase == "tutorial_sell_blocks" then "tutorial_panel_sell"
 			else phase
 		hint.Text = if goal
+				and goal.cost
 				and (phase == "tutorial_collect_upgrade" or phase == "tutorial_collect_level" or phase == "tutorial_earn_upgrade")
 				and goal.coins < goal.cost
 				and (goal.estimatedSale or 0) > 0
@@ -323,7 +327,7 @@ function Panel.new(gui: ScreenGui, openMenu: (string) -> (), onHide: (() -> ())?
 		hint.Position = UDim2.fromOffset(8, y)
 		y += 28
 		shortcut.Visible, shortcut.Text =
-			goal ~= nil and goal.ready, Strings.t("tutorial_open_menu", locale)
+			goal ~= nil and goal.ready and not goal.title, Strings.t("tutorial_open_menu", locale)
 		shortcut.Position = UDim2.fromOffset(8, y)
 		if shortcut.Visible then
 			y += 48

@@ -243,4 +243,8 @@ return {
 		es = "No se pudo confirmar el guardado. Vuelve a entrar.",
 		fr = "La sauvegarde n'a pas été confirmée. Reconnectez-vous.",
 	},
+	-- the booster HUD card titles [владелец 08.11]
+	booster_kind_blocks = { ru = "Блоки", en = "Blocks", es = "Bloques", fr = "Blocs" },
+	booster_kind_money = { ru = "Деньги", en = "Money", es = "Dinero", fr = "Argent" },
+	booster_kind_mobs = { ru = "Мобы", en = "Mobs", es = "Monstruos", fr = "Monstres" },
 }

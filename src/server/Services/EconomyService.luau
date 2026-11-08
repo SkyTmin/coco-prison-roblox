@@ -188,6 +188,9 @@ local function buy(player: Player, id: any, bulk: any)
 		end
 	end)
 	local got = count - overflow
+	if got > 0 then
+		TutorialService.OnBought(player, id)
+	end
 	if got <= 0 then
 		toast(player, "bag_full")
 	elseif count > 1 then

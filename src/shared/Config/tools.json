@@ -118,7 +118,7 @@
   },
   "tools": {
     "pickaxe": {
-      "buyPrice": 22.5,
+      "buyPrice": 6,
       "enchant": "efficiency",
       "upgrades": [
         {

@@ -637,7 +637,8 @@ local ok, result = xpcall(function()
 		block("RimLanternFoot", p[1], 2, p[2], 5, 4, 5, "px_stone_bricks", BASALT)
 		lantern(p[1], 6, p[2], false)
 	end
-	spot("spawn", 0, 148, 0, -20)
+	-- [владелец 08.11: «тп рядом с шахтой в каменоломне, игрок должен смотреть на шахту»] at the pit's south rim
+	spot("spawn", 0, 84, 0, -20)
 	spot("mine", 0, 76, 0, -20)
 	for _, x in { -18, 18 } do
 		block("ArrivalBorder", x, 1, 152, 3, 2, 56, "px_stone_bricks", BASALT)

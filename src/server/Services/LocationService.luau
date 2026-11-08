@@ -17,6 +17,7 @@ local CombatService = require(script.Parent.CombatService)
 local InventoryService = require(script.Parent.InventoryService)
 local GangService = require(script.Parent.GangService)
 local FallService = require(script.Parent.FallService)
+local TutorialService = require(script.Parent.TutorialService)
 
 local LocationService = {}
 local started = false
@@ -243,7 +244,8 @@ local function teleport(
 		character:PivotTo(spawn.CFrame + Vector3.new(0, 4, 0))
 		root.AssemblyLinearVelocity = Vector3.zero
 		root.AssemblyAngularVelocity = Vector3.zero
-		Remotes.event("TeleportChannel"):FireClient(player, nil)
+		-- third argument: arrived, the client turns the camera the way the arrival faces [владелец 08.11]
+		Remotes.event("TeleportChannel"):FireClient(player, nil, nil, true)
 		return
 	end
 	local channel: Channel = {
@@ -320,7 +322,8 @@ local function updateChannels()
 			ProfileService.Mutate(player, function(p)
 				p.location = channel.locationId
 			end)
-			Remotes.event("TeleportChannel"):FireClient(player, nil)
+			TutorialService.OnArrived(player, channel.locationId)
+			Remotes.event("TeleportChannel"):FireClient(player, nil, nil, true)
 		end
 	end
 end

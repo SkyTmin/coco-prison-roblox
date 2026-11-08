@@ -1,5 +1,6 @@
 --!strict
--- Compact health / hunger bars [владелец 01.11]. Armor keeps its Minecraft icon row.
+-- Compact health / hunger bars [владелец 01.11]. [владелец 08.11: «бар брони и комбо сделать ровными»] armor and
+-- combo are the same bars: armor over health (left half), combo over hunger (right half), one width, one height.
 local Ui = require(script.Parent.Ui)
 local SurvivalBars = {}
 
@@ -49,6 +50,8 @@ local function make(parent: Frame, name: string, right: boolean, color: Color3)
 	return {
 		group = group,
 		tooltip = tooltip,
+		fill = fill,
+		label = label,
 		update = function(value: number, maximum: number, absorbed: number?)
 			maximum = math.max(1, maximum)
 			value = math.clamp(value, 0, maximum)
@@ -84,11 +87,21 @@ local function make(parent: Frame, name: string, right: boolean, color: Color3)
 	}
 end
 
+local ROW = 24 -- bar height 20 + gap 4
+
 function SurvivalBars.new(parent: Frame)
-	return {
+	local bars = {
 		health = make(parent, "HealthBar", false, Color3.fromRGB(183, 48, 53)),
 		hunger = make(parent, "HungerBar", true, Color3.fromRGB(177, 115, 43)),
+		armor = make(parent, "ArmorBar", false, Color3.fromRGB(140, 160, 190)),
+		combo = make(parent, "ComboBar", true, Color3.fromRGB(240, 190, 60)),
 	}
+	bars.armor.group.Position = UDim2.new(0, 0, 0, -ROW)
+	bars.combo.group.Position = UDim2.new(1, 0, 0, -ROW)
+	bars.armor.group.Visible = false
+	bars.combo.group.Visible = false
+	bars.combo.label.TextSize = 12
+	return bars
 end
 
 return SurvivalBars

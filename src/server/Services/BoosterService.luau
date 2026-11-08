@@ -116,6 +116,28 @@ local function activate(player: Player, index: any)
 	end
 end
 
+-- «Использовать» on a booster item [владелец 08.11: «покупаешь бустер и жмешь использовать — он применяется, а не
+-- переходит в хранилище»]: the caller already put it into the storage (guaranteed); start that storage entry now
+function BoosterService.ActivateStored(
+	player: Player,
+	kind: string,
+	scope: string?,
+	mult: number,
+	minutes: number
+)
+	local profile = ProfileService.Get(player)
+	if not profile or not profile.boosters then
+		return
+	end
+	local sc = if scope == "local" then nil else scope
+	for i, s in ipairs(profile.boosters) do
+		if s.kind == kind and s.scope == sc and s.mult == mult and s.minutes == minutes then
+			activate(player, i)
+			return
+		end
+	end
+end
+
 -- a crash between the steps of a shared activation: settle the notes left in the profile
 local function settle(player: Player)
 	local profile = ProfileService.Get(player)

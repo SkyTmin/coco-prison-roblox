@@ -26,10 +26,12 @@ const bowWiki = read("wiki/in-game-wiki/bow-upgrades.json");
 const shearsWiki = read("wiki/in-game-wiki/shears-upgrades.json");
 
 // ---------------------------------------------------------------- levels
+// [владелец 08.11] the first levels are faster than the original (decisions.levelOverrides, tuned by simulation)
+const levelOverride = (l) => (decisions.levelOverrides && decisions.levelOverrides[String(l.level)]) || {};
 const levels = levelsWiki.levels.map((l) => ({
 	level: l.level,
-	money: l.money,
-	blocks: l.blocks,
+	money: levelOverride(l).money ?? l.money,
+	blocks: levelOverride(l).blocks ?? l.blocks,
 	hearts: decisions.hearts.base + decisions.hearts.perLevel * (l.level - 1),
 	skillPoints:
 		l.level >= decisions.skillPoints.firstLevel && (l.level - decisions.skillPoints.firstLevel) % decisions.skillPoints.every === 0
@@ -37,7 +39,7 @@ const levels = levelsWiki.levels.map((l) => ({
 			: 0,
 }));
 write("levels.json", {
-	source: "wiki/in-game-wiki/levels.json [вики]; сердца и очки навыков — [решение]",
+	source: "wiki/in-game-wiki/levels.json [вики]; уровни 2–3 ускорены (design-decisions levelOverrides) [владелец 08.11]; сердца и очки навыков — [решение]",
 	maxLevel: levelsWiki.rules.maxLevel,
 	blocksSpent: false,
 	moneySpent: true,

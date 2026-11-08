@@ -20,6 +20,7 @@ local ProfileService = require(script.Parent.ProfileService)
 local GangService = require(script.Parent.GangService)
 local InventoryService = require(script.Parent.InventoryService)
 local SkillService = require(script.Parent.SkillService)
+local BoosterService = require(script.Parent.BoosterService)
 
 type Need = "hygiene" | "sleep" | "toilet"
 type State = {
@@ -395,19 +396,13 @@ local function useConsumable(player: Player, slot: any)
 		end
 		return
 	end
-	-- a donate booster as an item → back into the booster storage [B]; the auction slot item → +1 lot slot
+	-- a donate booster as an item → started at once (BoosterService); the auction slot item → +1 lot slot
 	-- [владелец 28.10: «всё, что можно купить в донат-магазине, можно выставлять на аукционе»]
 	local boosterKind, boosterScope = Boosters.fromItem(stack.id)
 	local slotItem = Donate.item(Donate.AUCTION_SLOT)
 	if boosterKind or (stack.id == Donate.AUCTION_SLOT and slotItem) then
-		if boosterKind and Boosters.storedCount(profile) >= Config.boosters.maxStored then
-			toast(player, "donate_storage_full")
-			return
-		elseif
-			not boosterKind
-			and slotItem
-			and (profile.auctionSlots or 0) >= (slotItem.max or 0)
-		then
+		-- a booster item starts at once [владелец 08.11], so a full booster storage no longer blocks it
+		if not boosterKind and slotItem and (profile.auctionSlots or 0) >= (slotItem.max or 0) then
 			toast(player, "donate_limit")
 			return
 		end
@@ -418,17 +413,22 @@ local function useConsumable(player: Player, slot: any)
 			done = InventoryService.remove(p, stack.id, 1) == 1
 			p.inventory[slot], p.inventory[last] = p.inventory[last], p.inventory[slot]
 			if done and boosterKind then
-				Boosters.store(p, boosterKind, boosterScope, Donate.MULT, Donate.MINUTES)
+				Boosters.store(p, boosterKind, boosterScope, Donate.MULT, Donate.MINUTES, nil, true)
 			elseif done then
 				p.auctionSlots = (p.auctionSlots or 0) + 1
 			end
 		end)
-		if done then
-			toast(
+		if done and boosterKind then
+			-- start it right away (local: in the profile; faction / global: the crash-safe shared path)
+			BoosterService.ActivateStored(
 				player,
-				if boosterKind then "booster_item_stored" else "auction_slot_used",
-				profile.auctionSlots or 0
+				boosterKind,
+				boosterScope,
+				Donate.MULT,
+				Donate.MINUTES
 			)
+		elseif done then
+			toast(player, "auction_slot_used", profile.auctionSlots or 0)
 		end
 		return
 	end

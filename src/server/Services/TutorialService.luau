@@ -45,6 +45,27 @@ function TutorialService.OnUpgraded(player: Player, itemId: string, before: numb
 	end)
 end
 
+-- [владелец 08.11] the pickaxe and Каменоломня steps
+function TutorialService.OnBought(player: Player, itemId: string)
+	local profile = Profile.Get(player)
+	if not profile or Tutorial.step(profile) ~= Tutorial.PICKAXE or itemId ~= "pickaxe" then
+		return
+	end
+	apply(player, function(p)
+		return Tutorial.bought(p, itemId, os.time())
+	end)
+end
+
+function TutorialService.OnArrived(player: Player, locationId: string)
+	local profile = Profile.Get(player)
+	if not profile or Tutorial.step(profile) ~= Tutorial.QUARRY or locationId ~= "quarry" then
+		return
+	end
+	apply(player, function(p)
+		return Tutorial.arrived(p, os.time())
+	end)
+end
+
 function TutorialService.Start()
 	-- State is part of the initial profile and each transition is saved; no client completion remote.
 end

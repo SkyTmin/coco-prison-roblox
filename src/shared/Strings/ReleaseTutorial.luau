@@ -178,4 +178,36 @@ return {
 		es = "Pulsa Mejorar",
 		fr = "Appuyez sur Améliorer",
 	},
+	-- [владелец 08.11] the pickaxe and Каменоломня steps
+	tutorial_pickaxe_goal = {
+		ru = "Купите кирку",
+		en = "Buy a pickaxe",
+		es = "Compra un pico",
+		fr = "Achetez une pioche",
+	},
+	tutorial_earn_pickaxe = {
+		ru = "Копайте и продавайте блоки, пока не хватит денег на кирку.",
+		en = "Mine and sell blocks until you can afford a pickaxe.",
+		es = "Mina y vende bloques hasta poder pagar un pico.",
+		fr = "Minez et vendez des blocs jusqu'à pouvoir payer une pioche.",
+	},
+	tutorial_buy_pickaxe = {
+		ru = "Идите к продавцу инструментов и купите кирку.",
+		en = "Go to the tool seller and buy a pickaxe.",
+		es = "Ve al vendedor de herramientas y compra un pico.",
+		fr = "Allez voir le vendeur d'outils et achetez une pioche.",
+	},
+	tutorial_marker_shop = { ru = "Кирка", en = "Pickaxe", es = "Pico", fr = "Pioche" },
+	tutorial_quarry_goal = {
+		ru = "Отправляйтесь в Каменоломню",
+		en = "Travel to the Quarry",
+		es = "Viaja a la Cantera",
+		fr = "Rendez-vous à la Carrière",
+	},
+	tutorial_go_quarry = {
+		ru = "Откройте Локации [M], выберите Каменоломню и нажмите «Телепорт». Там кирка добывает камень.",
+		en = "Open Locations [M], pick the Quarry and press Teleport. Your pickaxe mines stone there.",
+		es = "Abre Ubicaciones [M], elige la Cantera y pulsa Teletransporte. Allí el pico extrae piedra.",
+		fr = "Ouvrez Lieux [M], choisissez la Carrière et appuyez sur Téléporter. Votre pioche y extrait la pierre.",
+	},
 }

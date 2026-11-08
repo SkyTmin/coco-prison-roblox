@@ -229,6 +229,7 @@ function Guide.Start(
 			then mine:GetChildren()
 			elseif mode == "sell" then CollectionService:GetTagged("SellPoint")
 			elseif mode == "case" then CollectionService:GetTagged("OrdinaryCase")
+			elseif mode == "shop" then CollectionService:GetTagged("ItemShop")
 			elseif mode == "mine_area" then CollectionService:GetTagged("MineAnchor")
 			else {}
 		-- Fresh nearby probes respond promptly when another player exposes a block;
@@ -418,7 +419,7 @@ function Guide.Start(
 		for _, stroke in marks do
 			stroke.Thickness = 2 + pulse * 2
 		end
-		uiArrow.Visible = control ~= nil and visible(control) and step < 5
+		uiArrow.Visible = control ~= nil and visible(control) and step < Tutorial.DONE
 		if control and uiArrow.Visible then
 			local pos, size = control.AbsolutePosition - gui.AbsolutePosition, control.AbsoluteSize
 			local camera = workspace.CurrentCamera
@@ -479,7 +480,7 @@ function Guide.Start(
 				Tutorial.step(profile), profile and profile.locale or Config.defaultLocale
 			if step ~= previous then
 				itemConfirmed = false
-				if previous >= 5 and step == 3 then
+				if previous >= Tutorial.DONE and step == 3 then
 					initialFacing = false
 				end
 			end
@@ -512,7 +513,7 @@ function Guide.Start(
 						end
 					end
 				end
-			elseif step == 4 then
+			elseif step == 4 or step == Tutorial.LEVEL3 then
 				local goal = Tutorial.levelGoal(profile)
 				displayGoal = goal
 				if goal then
@@ -533,9 +534,38 @@ function Guide.Start(
 						worldMode = if goal.saleReady then "sell" else "mine_area"
 					end
 				end
+			elseif step == Tutorial.PICKAXE then
+				-- [владелец 08.11] buy the pickaxe: earn its price, then go to the item seller
+				local goal = Tutorial.pickaxeGoal(profile)
+				displayGoal = goal
+				if goal then
+					readyForMenu = goal.ready
+					if goal.ready then
+						phase, worldMode = "tutorial_buy_pickaxe", "shop"
+					else
+						phase = "tutorial_earn_pickaxe"
+						worldMode = if goal.saleReady then "sell" else "mine_area"
+					end
+				end
+			elseif step == Tutorial.QUARRY then
+				-- [владелец 08.11] travel to the Каменоломня through the locations menu [M]
+				displayGoal = { title = "tutorial_quarry_goal", requirements = {} }
+				phase = "tutorial_go_quarry"
+				local teleport = object("LocationTeleport")
+				if teleport and teleport:GetAttribute("LocationId") == "quarry" then
+					nextControl = teleport
+				else
+					nextControl = object("Location_quarry")
+						or object("Tile_locations")
+						or object("Touch_locations")
+						or object("MenuButton")
+						or object("Touch_menu")
+				end
 			end
 			if worldMode == "sell" then
-				phase = "tutorial_sell_blocks"
+				phase = if step == Tutorial.PICKAXE
+					then "tutorial_earn_pickaxe"
+					else "tutorial_sell_blocks"
 				nextControl = object("TutorialSell")
 			end
 			if Tutorial.shouldGuideCase(profile) then
@@ -545,14 +575,20 @@ function Guide.Start(
 			if ready then
 				faceMine(profile)
 			end
-			mark(if ready and step < 5 then nextControl else nil)
+			mark(if ready and step < Tutorial.DONE then nextControl else nil)
 			gui:SetAttribute("TutorialStep", step)
 			gui:SetAttribute("TutorialPhase", phase)
 			gui:SetAttribute("TutorialRequirementsReady", readyForMenu)
 			local camera = workspace.CurrentCamera
 			local tracked, trackedStep = Tutorial.trackedGoal(profile)
+			-- [владелец 08.11: «после обучения плашка исчезает, и игроки не понимают, что делать»] after the guide
+			-- the card keeps showing the next level's goal unless the player pins another one or hides the card
+			local afterGuide = step >= Tutorial.DONE and tracked == nil and profile ~= nil
+			if afterGuide then
+				tracked, trackedStep = Tutorial.levelGoal(profile), 4
+			end
 			taskPanel.manual = tracked ~= nil
-			if tracked or step >= 5 then
+			if tracked or step >= Tutorial.DONE then
 				displayGoal = tracked
 			end
 			local editing = HudLayout.isEditing()
@@ -562,7 +598,7 @@ function Guide.Start(
 			taskPanel.preservePosition = editing or HudLayout.moved("requirements")
 			if camera then
 				taskPanel.Update(
-					if tracked or step >= 5 then trackedStep else step,
+					if tracked or step >= Tutorial.DONE then trackedStep else step,
 					locale,
 					displayGoal,
 					phase,
@@ -578,7 +614,7 @@ function Guide.Start(
 			panel.Visible = editing
 				or (
 					ready
-					and (step < 5 or tracked ~= nil)
+					and (step < Tutorial.DONE or tracked ~= nil)
 					and not hidden
 					and os.clock() - hideRequestedAt >= 1
 					and not menuOpen()
@@ -606,12 +642,13 @@ function Guide.Start(
 				if worldMode == "mine" or worldMode == "mine_area"
 					then "tutorial_marker_mine"
 					elseif worldMode == "case" then "tutorial_marker_case"
+					elseif worldMode == "shop" then "tutorial_marker_shop"
 					else "tutorial_marker_sell",
 				locale
 			)
 			-- Re-evaluate every tick, including when another player digs our target or streaming removes it.
 			target = if ready
-					and step < 5
+					and step < Tutorial.DONE
 					and profile
 					and profile.location == "prison"
 				then chooseTarget(worldMode, wantedCounters)

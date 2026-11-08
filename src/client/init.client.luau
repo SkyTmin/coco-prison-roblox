@@ -236,18 +236,52 @@ local function renderTeleportCountdown()
 		end
 	end
 end
-Remotes.event("TeleportChannel").OnClientEvent:Connect(function(seconds: any, locationId: any)
-	if seconds == nil then
-		teleportEndsAt = nil
-		showTeleportPreview(nil)
-	elseif typeof(seconds) == "number" and seconds > 0 and seconds < math.huge then
-		teleportEndsAt = os.clock() + seconds
-		showTeleportPreview(if typeof(locationId) == "string" then locationId else nil)
-	else
-		return
-	end
-	renderTeleportCountdown()
-end)
+-- [владелец 08.11: «игрок должен смотреть на шахту»] after an arrival the camera turns the way the arrival point
+-- faces (the server pivots the character to it); behind the head in third person, straight ahead in first
+local function faceArrival()
+	task.delay(0.15, function()
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local camera = workspace.CurrentCamera
+		if
+			not root
+			or not root:IsA("BasePart")
+			or not camera
+			or camera.CameraType ~= Enum.CameraType.Custom
+		then
+			return
+		end
+		local look = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+		if look.Magnitude < 0.01 then
+			return
+		end
+		look = look.Unit
+		local distance = (camera.CFrame.Position - camera.Focus.Position).Magnitude
+		local head = root.Position + Vector3.new(0, 1.5, 0)
+		if distance < 1 then
+			camera.CFrame = CFrame.lookAt(head, head + look)
+		else
+			local eye = head - look * distance + Vector3.new(0, distance * 0.35, 0)
+			camera.CFrame = CFrame.lookAt(eye, head + look * 4)
+		end
+	end)
+end
+Remotes.event("TeleportChannel").OnClientEvent
+	:Connect(function(seconds: any, locationId: any, arrived: any)
+		if seconds == nil then
+			teleportEndsAt = nil
+			showTeleportPreview(nil)
+			if arrived == true then
+				faceArrival()
+			end
+		elseif typeof(seconds) == "number" and seconds > 0 and seconds < math.huge then
+			teleportEndsAt = os.clock() + seconds
+			showTeleportPreview(if typeof(locationId) == "string" then locationId else nil)
+		else
+			return
+		end
+		renderTeleportCountdown()
+	end)
 RunService.Heartbeat:Connect(function()
 	if teleportEndsAt then
 		renderTeleportCountdown()
@@ -303,157 +337,10 @@ survivalHud.Size = UDim2.new(1, -12, 0, 24)
 survivalHud.Parent = hotbar
 local survivalScale = Instance.new("UIScale")
 survivalScale.Parent = survivalHud
-type SurvivalMeter = { group: Frame, fills: { Frame }, tooltip: TextLabel }
-local function buildMeter(
-	rightAligned: boolean,
-	glyph: string,
-	color: Color3,
-	count: number?
-): SurvivalMeter
-	local group = Instance.new("Frame")
-	group.BackgroundTransparency = 1
-	group.Size = UDim2.fromOffset(190, 24)
-	group.AnchorPoint = Vector2.new(if rightAligned then 1 else 0, 0)
-	group.Position = UDim2.fromScale(if rightAligned then 1 else 0, 0)
-	group.Parent = survivalHud
-	local function drawIcon(parent: Frame, filled: boolean)
-		local tint = if filled then color else Ui.colors.border
-		local zIndex = if filled then 2 else 1
-		if glyph == "♥" then
-			local heart =
-				Ui.label(parent, glyph, UDim2.fromOffset(18, 24), UDim2.fromOffset(0, 0), 22, tint)
-			heart.Font = Enum.Font.SourceSansBold
-			heart.TextXAlignment = Enum.TextXAlignment.Center
-			heart.TextStrokeTransparency = 0
-			heart.ZIndex = zIndex
-			return
-		end
-		if glyph == "armor" then
-			-- our own 9×9 pixel chestplate (2 px a pixel), light from the upper left
-			local rows = {
-				"KKK...KKK",
-				"K12KKK21K",
-				"K1122222K",
-				"KK12222KK",
-				".K12222K.",
-				".K12222K.",
-				".K22223K.",
-				".K22333K.",
-				".KKKKKKK.",
-			}
-			local shades = if filled
-				then {
-					K = Color3.fromRGB(30, 30, 30),
-					["1"] = Color3.fromRGB(236, 236, 236),
-					["2"] = Color3.fromRGB(190, 190, 196),
-					["3"] = Color3.fromRGB(140, 140, 148),
-				}
-				else {
-					K = Color3.fromRGB(30, 30, 30),
-					["1"] = Color3.fromRGB(70, 70, 74),
-					["2"] = Color3.fromRGB(58, 58, 62),
-					["3"] = Color3.fromRGB(50, 50, 54),
-				}
-			for y, row in ipairs(rows) do
-				local x = 1
-				while x <= #row do
-					local ch = string.sub(row, x, x)
-					local run = 1
-					while string.sub(row, x + run, x + run) == ch do
-						run += 1
-					end
-					if ch ~= "." then
-						local px = Instance.new("Frame")
-						px.BorderSizePixel = 0
-						px.BackgroundColor3 = shades[ch]
-						px.Position = UDim2.fromOffset((x - 1) * 2, 3 + (y - 1) * 2)
-						px.Size = UDim2.fromOffset(run * 2, 2)
-						px.ZIndex = zIndex
-						px.Parent = parent
-					end
-					x += run
-				end
-			end
-			return
-		end
-		-- Frame drumsticks avoid platform-dependent colour emoji and clip cleanly at half hunger.
-		local icon = Instance.new("Frame")
-		icon.BackgroundTransparency = 1
-		icon.Size = UDim2.fromOffset(18, 24)
-		icon.ZIndex = zIndex
-		icon.Parent = parent
-		for index, geometry in ipairs({
-			{ 7, 10, 4, 10 }, -- bone
-			{ 5, 17, 8, 4 }, -- knuckle
-			{ 3, 2, 12, 14 }, -- meat
-		}) do
-			local shape = Instance.new("Frame")
-			shape.Position = UDim2.fromOffset(geometry[1], geometry[2])
-			shape.Size = UDim2.fromOffset(geometry[3], geometry[4])
-			shape.BackgroundColor3 = if filled and index < 3
-				then Color3.fromRGB(230, 215, 185)
-				else tint
-			shape.BorderSizePixel = 0
-			shape.ZIndex = zIndex
-			local rounding = Instance.new("UICorner")
-			rounding.CornerRadius = UDim.new(0.5, 0)
-			rounding.Parent = shape
-			local outline = Instance.new("UIStroke")
-			outline.Color = Ui.colors.panel
-			outline.Thickness = 1
-			outline.Parent = shape
-			shape.Parent = icon
-		end
-	end
-	local tooltip = Ui.label(group, "", UDim2.fromOffset(220, 22), UDim2.new(0.5, -110, 0, -26), 12)
-	tooltip.TextXAlignment = Enum.TextXAlignment.Center
-	tooltip.BackgroundColor3 = Ui.colors.panel
-	tooltip.BackgroundTransparency = 0.15
-	tooltip.Visible = false
-	group.MouseEnter:Connect(function()
-		tooltip.Visible = true
-	end)
-	group.MouseLeave:Connect(function()
-		tooltip.Visible = false
-	end)
-	local fills: { Frame } = {}
-	for i = 1, count or 10 do
-		local cell = Instance.new("Frame")
-		cell.Size = UDim2.fromOffset(18, 24)
-		-- the food row fills from the right like Minecraft's: icon 1 is the rightmost; more than 10 icons go on in
-		-- rows of 10 (the hearts: renderSurvival stacks the rows)
-		cell.Position = UDim2.fromOffset((if rightAligned then 10 - i else (i - 1) % 10) * 19, 0)
-		cell.BackgroundTransparency = 1
-		cell.Parent = group
-		drawIcon(cell, false)
-		local clip = Instance.new("Frame")
-		clip.Size = UDim2.fromScale(1, 1)
-		clip.BackgroundTransparency = 1
-		clip.ClipsDescendants = true
-		clip.Parent = cell
-		if rightAligned then
-			-- a half icon keeps its right half: the clip shrinks towards the right and the icon inside
-			-- stays pinned to the cell's right edge (it was drawn from the clip's left edge, shifted)
-			clip.AnchorPoint, clip.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
-			local holder = Instance.new("Frame")
-			holder.BackgroundTransparency = 1
-			holder.Size = UDim2.fromOffset(18, 24)
-			holder.AnchorPoint, holder.Position = Vector2.new(1, 0), UDim2.fromScale(1, 0)
-			holder.Parent = clip
-			drawIcon(holder, true)
-		else
-			drawIcon(clip, true)
-		end
-		fills[i] = clip
-	end
-	return { group = group, fills = fills, tooltip = tooltip }
-end
 -- [владелец 01.11] one compact numeric bar each; armor remains an icon row.
 local survivalBars = require(script.SurvivalBars).new(survivalHud)
 local drumsticks = survivalBars.hunger
-local armorMeter = buildMeter(false, "armor", Color3.new())
-armorMeter.group.Name = "ArmorMeter"
-armorMeter.group.Position = UDim2.fromOffset(0, -22)
+local armorBar = survivalBars.armor -- [владелец 08.11] a bar like health, over it
 
 -- Minecraft's experience bar between the meters and the hotbar [владелец 27.10]: the number is the player's level, the
 -- green fill how close the next level is (the blocks since the last level and the money it costs, the lower of the two)
@@ -508,27 +395,20 @@ end
 -- [владелец 28.10: «комбо бар падает на бар с сердечками. Сделай его выше над голодом»] it sits over the food row
 -- (the right half), clear of the heart rows that grow upwards on the left; inside the food row's frame, so it shares
 -- its place and its touch scale
-local combo = hudLine(0, 14, Ui.colors.muted)
-combo.Size = UDim2.fromOffset(240, 18)
-combo.Position = UDim2.new(0.5, 0, 0, -12)
-combo.Parent = drumsticks.group
+-- [владелец 08.11: «бар брони и комбо сделать ровными»] the combo is now a bar like hunger, right over it: the text
+-- inside, the fill drains over the idle time (empty = the combo resets)
+local comboUi = survivalBars.combo
+local combo = comboUi.label
 local comboMultiplier: number? = nil
 local comboBlocks = 0
 local comboAt = 0 -- os.clock() of the last dug block
 -- [владелец 21.10] combo timer: a bar under the combo text, full after every block, draining over the
 -- idle time (rules.combo.breakAfterIdleSeconds = 30 s) — empty means the combo resets
-local comboBar = Ui.inset(drumsticks.group, UDim2.fromOffset(180, 5), UDim2.new(0.5, 0, 0, -5))
-comboBar.AnchorPoint = Vector2.new(0.5, 1)
-comboBar.Visible = false
-local comboFill = Instance.new("Frame")
-comboFill.BackgroundColor3 = Ui.colors.money
-comboFill.BorderSizePixel = 0
-comboFill.Size = UDim2.fromScale(1, 1)
-comboFill.Parent = comboBar
+local comboFill = comboUi.fill
 local function renderCombo()
 	if comboMultiplier then
 		combo.Text = T("combo", comboMultiplier, comboBlocks, Config.rules.combo.blocksPerStep)
-		combo.TextColor3 = if comboMultiplier > 1 then Ui.colors.money else Ui.colors.muted
+		combo.TextColor3 = Color3.new(1, 1, 1)
 	end
 end
 RunService.Heartbeat:Connect(function()
@@ -536,21 +416,14 @@ RunService.Heartbeat:Connect(function()
 	local left = if active
 		then 1 - (os.clock() - comboAt) / Config.rules.combo.breakAfterIdleSeconds
 		else 0
-	comboBar.Visible = active and left > 0
+	comboUi.group.Visible = active
 	comboFill.Size = UDim2.fromScale(math.clamp(left, 0, 1), 1)
-	comboFill.BackgroundColor3 = if left < 0.25 then Ui.colors.close else Ui.colors.money
+	comboFill.BackgroundColor3 = if left < 0.25
+		then Ui.colors.close
+		else Color3.fromRGB(240, 190, 60)
 end)
 local trackedHumanoid: Humanoid? = nil
 local healthConnections: { RBXScriptConnection } = {}
-local function fillMeter(meter: SurvivalMeter, value: number)
-	-- Any partially filled icon is a half; full icons require both points.
-	local points = math.clamp(value, 0, #meter.fills * 2)
-	local fullPoints = math.floor(points / 2) * 2
-	local halves = fullPoints + (if points > fullPoints then 1 else 0)
-	for i, fill in ipairs(meter.fills) do
-		fill.Size = UDim2.fromScale(math.clamp(halves - (i - 1) * 2, 0, 2) / 2, 1)
-	end
-end
 -- 0 … 1: how close the next level is — the blocks since the last level and the money it costs, the lower of the two
 local function levelProgress(): number
 	if not profile then
@@ -576,9 +449,9 @@ local function renderSurvival()
 	drumsticks.tooltip.Text = T("hunger_tooltip", hunger, Config.rules.survival.hunger.max)
 	require(script.PrisPerks).appleSkin(drumsticks.group, profile, health, maxHealth) -- PRIS+ AppleSkin (этап 8)
 	local points = Combat.armorPoints(if profile then profile.armor else nil)
-	armorMeter.group.Visible = points > 0
-	fillMeter(armorMeter, points)
-	armorMeter.tooltip.Text = T("armor_tooltip", points)
+	armorBar.group.Visible = points > 0
+	armorBar.update(points, 20)
+	armorBar.tooltip.Text = T("armor_tooltip", points)
 	xpLevel.Text = tostring(if profile then profile.level else 1)
 	xpFill.Size = UDim2.fromScale(levelProgress(), 1)
 end
@@ -1375,6 +1248,7 @@ local function buildLocations(): Frame
 	refusal.TextWrapped = true
 	local teleportButton =
 		Ui.button(left, T("teleport"), UDim2.new(1, -16, 0, 36), UDim2.new(0, 8, 1, -44))
+	teleportButton.Name = "LocationTeleport" -- the guide points at it (TutorialGuide, LocationId = the selection)
 	local grid = Instance.new("ScrollingFrame")
 	grid.Name = "LocationCards"
 	grid.Size = UDim2.new(1, -316, 1, -68)
@@ -1446,6 +1320,7 @@ local function buildLocations(): Frame
 		end
 	end
 	local function selectLocation(location: Config.Location)
+		teleportButton:SetAttribute("LocationId", location.id)
 		selected = location
 		selectedLocations[locationTab] = location.id
 		detail:ClearAllChildren()

@@ -2680,10 +2680,10 @@ return {
 		fr = "En objet",
 	},
 	booster_to_item_done = {
-		ru = "Бустер в инвентаре — его можно выставить на Аукцион. «Использовать» вернёт его в хранилище",
-		en = "The booster is in your inventory — sell it at the Auction. «Use» puts it back into the storage",
-		es = "El potenciador está en el inventario: véndelo en la Subasta. «Usar» lo devuelve al almacén",
-		fr = "Le booster est dans l'inventaire : vendez-le à l'Enchère. « Utiliser » le remet en réserve",
+		ru = "Бустер в инвентаре — его можно выставить на Аукцион. «Использовать» сразу его запустит",
+		en = "The booster is in your inventory — sell it at the Auction. «Use» starts it right away",
+		es = "El potenciador está en el inventario: véndelo en la Subasta. «Usar» lo activa al instante",
+		fr = "Le booster est dans l'inventaire : vendez-le à l'Enchère. « Utiliser » le lance aussitôt",
 	},
 	booster_item_stored = {
 		ru = "Бустер в хранилище [B] — запускайте, когда удобно",
