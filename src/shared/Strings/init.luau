@@ -78,16 +78,25 @@ function Strings.bossName(id: string, fallbackName: string, locale: string?): st
 end
 
 -- Money for display: three decimals like the original ("0.012"), thousands as "9.91K".
+local function trimZeros(text: string): string
+	if string.find(text, ".", 1, true) then
+		text = string.gsub(string.gsub(text, "0+$", ""), "%.$", "")
+	end
+	return text
+end
+
 function Strings.money(units: number): string
 	local value = units / Config.moneyScale
 	if value >= 100000 then
-		return string.format("%.2fK", value / 1000)
+		return trimZeros(string.format("%.2f", value / 1000)) .. "K"
 	elseif value >= 1000 then
-		return string.format("%.1fK", value / 1000)
+		return trimZeros(string.format("%.1f", value / 1000)) .. "K"
 	elseif value >= 100 then
 		return string.format("%d", math.floor(value))
 	end
-	return string.format("%." .. tostring(Config.money.displayDecimals) .. "f", value)
+	-- [владелец 08.11: «как человек накопит 3к, чтобы поднять уровень до 3?»] «3.000» read as three thousand: trailing
+	-- zeros are dropped — 3 → «3», 5.5 → «5.5», 0.148 → «0.148»
+	return trimZeros(string.format("%." .. tostring(Config.money.displayDecimals) .. "f", value))
 end
 
 -- 8507 → "8,507"; 599945.6 → "599,945.6" (up to decimals digits, trailing zeros dropped) — the original's tops
