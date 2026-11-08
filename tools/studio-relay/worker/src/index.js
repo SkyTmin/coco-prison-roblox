@@ -16,6 +16,8 @@
 //   POST /plugin/result?id=..&ok=1             body = raw result
 //   POST /plugin/logs?target=edit              body = JSON [{t,type,msg}]
 //   POST /plugin/unpair
+//   GET  /plugin/code                          -> newest plugin build offered by the agent (X-Build) | 204
+//   POST /agent/code?build=N                   body = plugin source (offered, applied only by the owner)
 
 const MAX_WAIT = 25; // seconds a long-poll may hold the request
 const RESULT_TTL = 60 * 60 * 1000;
@@ -155,6 +157,14 @@ export class Relay {
 				}
 			}
 			return json({ ok: false, error: "code not found or expired" }, 404);
+		}
+		if (p === "/agent/code" && request.method === "POST") {
+			// a newer plugin build; the plugin only OFFERS it, the owner applies it with a button
+			const build = Number(url.searchParams.get("build"));
+			if (!Number.isInteger(build) || build < 1) return json({ error: "build required" }, 400);
+			const source = await readText(request);
+			await this.ctx.storage.put("code", { build, source, at: Date.now() });
+			return json({ ok: true, build, bytes: source.length });
 		}
 		if (p === "/agent/revoke") {
 			const toks = await this.ctx.storage.list({ prefix: "ptok:" });
@@ -298,6 +308,13 @@ export class Relay {
 			if (arr.length > LOG_KEEP) arr.splice(0, arr.length - LOG_KEEP);
 			this.logs.set(target, arr);
 			return json({ ok: true, seq: this.logSeq });
+		}
+		if (p === "/plugin/code") {
+			const rec = await this.ctx.storage.get("code");
+			if (!rec) return new Response(null, { status: 204 });
+			return new Response(rec.source, {
+				headers: { "x-build": String(rec.build), "content-type": "text/plain; charset=utf-8" },
+			});
 		}
 		if (p === "/plugin/unpair" && request.method === "POST") {
 			await this.ctx.storage.delete("ptok:" + (await sha256(tok)));

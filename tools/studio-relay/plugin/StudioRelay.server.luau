@@ -5,7 +5,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.1"
+local VERSION = "1.2"
+local BUILD = 3 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
@@ -38,6 +39,41 @@ if RunService:IsRunning() then
 	role = (RunService:IsClient() and not RunService:IsServer()) and "client" or "server"
 else
 	role = "edit"
+end
+
+-- Approved update: when the owner presses «Обновить» for a newer build, its source is kept in the
+-- plugin settings and runs instead of this installed file (in every DataModel). Nothing is applied
+-- without that press; «Откатить» returns to the installed file.
+local IS_CHILD = (RELAY_CHILD == true)
+local function launchSource(source)
+	local env = setmetatable({ RELAY_CHILD = true, plugin = plugin }, { __index = getfenv(0) })
+	local okLs, fn = pcall(function()
+		return loadstring(source)
+	end)
+	if okLs and fn then
+		setfenv(fn, env)
+		task.spawn(fn)
+		return true
+	end
+	local m = Instance.new("ModuleScript")
+	m.Source = "return function(plugin, RELAY_CHILD)\n" .. source .. "\nend"
+	local okM, f = pcall(require, m)
+	m:Destroy()
+	if okM and type(f) == "function" then
+		task.spawn(f, plugin, true)
+		return true
+	end
+	return false
+end
+if not IS_CHILD then
+	local approved = tonumber(getSetting("ApprovedBuild")) or 0
+	local src = getSetting("ApprovedSource")
+	if approved > BUILD and type(src) == "string" and #src > 0 then
+		if launchSource(src) then
+			return
+		end
+		warn("[StudioRelay] approved build " .. approved .. " failed to start, running the installed one")
+	end
 end
 
 local alive = true
@@ -97,9 +133,7 @@ local function base64(b)
 	local o = 0
 	local i = 0
 	while i + 2 < n do
-		local v = buffer.readu8(b, i) * 65536
-			+ buffer.readu8(b, i + 1) * 256
-			+ buffer.readu8(b, i + 2)
+		local v = buffer.readu8(b, i) * 65536 + buffer.readu8(b, i + 1) * 256 + buffer.readu8(b, i + 2)
 		buffer.writeu8(out, o, LUT[bit32.rshift(v, 18)])
 		buffer.writeu8(out, o + 1, LUT[bit32.band(bit32.rshift(v, 12), 63)])
 		buffer.writeu8(out, o + 2, LUT[bit32.band(bit32.rshift(v, 6), 63)])
@@ -351,8 +385,7 @@ local function invokeWithTimeout(remote, player, seconds, ...)
 		task.wait(0.05)
 	end
 	if not done then
-		return false,
-			"client did not answer in " .. seconds .. " s (plugin not running in the client?)"
+		return false, "client did not answer in " .. seconds .. " s (plugin not running in the client?)"
 	end
 	return table.unpack(packed, 1, packed.n)
 end
@@ -380,8 +413,7 @@ local function forwardToClient(target, kind, timeout, payload)
 			return false, { error = "bridge put: " .. tostring(err) }
 		end
 	end
-	local ok, accepted, n, clientOk =
-		invokeWithTimeout(remote, player, timeout + 20, "exec", token, kind, timeout)
+	local ok, accepted, n, clientOk = invokeWithTimeout(remote, player, timeout + 20, "exec", token, kind, timeout)
 	if not ok or accepted ~= true then
 		return false, { error = "bridge exec: " .. tostring(if ok then n else accepted) }
 	end
@@ -441,11 +473,8 @@ local function handle(id, kind, timeout, payload, target)
 	end
 	local body = encode(result)
 	for _ = 1, 3 do
-		local sent, res = request(
-			"POST",
-			"/plugin/result?id=" .. HttpService:UrlEncode(id) .. "&ok=" .. (ok and "1" or "0"),
-			body
-		)
+		local sent, res =
+			request("POST", "/plugin/result?id=" .. HttpService:UrlEncode(id) .. "&ok=" .. (ok and "1" or "0"), body)
 		if sent and res.StatusCode < 500 then
 			break
 		end
@@ -461,10 +490,7 @@ end
 local pendingLogs = {}
 LogService.MessageOut:Connect(function(msg, msgType)
 	if #pendingLogs < 1000 then
-		table.insert(
-			pendingLogs,
-			{ t = os.time(), type = msgType.Name, msg = string.sub(msg, 1, 4000) }
-		)
+		table.insert(pendingLogs, { t = os.time(), type = msgType.Name, msg = string.sub(msg, 1, 4000) })
 	end
 end)
 
@@ -510,8 +536,7 @@ if role == "server" then
 							if ok and type(batch) == "string" and batch ~= "[]" then
 								request(
 									"POST",
-									"/plugin/logs?target="
-										.. HttpService:UrlEncode("client:" .. p.Name),
+									"/plugin/logs?target=" .. HttpService:UrlEncode("client:" .. p.Name),
 									batch
 								)
 							end
@@ -591,18 +616,11 @@ local function pollLoop()
 		local ok, res = request("GET", "/plugin/next?" .. q)
 		if not ok then
 			fails += 1
-			setStatus(
-				"Нет связи с реле ("
-					.. fails
-					.. "): "
-					.. string.sub(tostring(res), 1, 120)
-			)
+			setStatus("Нет связи с реле (" .. fails .. "): " .. string.sub(tostring(res), 1, 120))
 			task.wait(math.min(30, 2 * fails))
 		elseif res.StatusCode == 401 then
 			setSetting("RelayToken", nil)
-			setStatus(
-				"Доступ отозван. Нажми «Подключить» заново."
-			)
+			setStatus("Доступ отозван. Нажми «Подключить» заново.")
 		elseif res.StatusCode == 200 then
 			fails = 0
 			local id = getHeader(res, "x-id")
@@ -618,12 +636,7 @@ local function pollLoop()
 			end
 		else
 			fails += 1
-			setStatus(
-				"Ответ реле "
-					.. res.StatusCode
-					.. ": "
-					.. string.sub(res.Body or "", 1, 120)
-			)
+			setStatus("Ответ реле " .. res.StatusCode .. ": " .. string.sub(res.Body or "", 1, 120))
 			task.wait(math.min(30, 2 * fails))
 		end
 	end
@@ -640,26 +653,21 @@ local function startPairing()
 	local ok, res = request("POST", "/plugin/pair/start", "")
 	if not ok or res.StatusCode ~= 200 then
 		ui.code.Text = ""
-		setStatus(
-			"Не удалось начать: "
-				.. string.sub(tostring(ok and res.StatusCode or res), 1, 160)
-		)
+		setStatus("Не удалось начать: " .. string.sub(tostring(ok and res.StatusCode or res), 1, 160))
 		pairing = false
 		return
 	end
 	local data = HttpService:JSONDecode(res.Body)
 	ui.code.Text = string.sub(data.code, 1, 3) .. " " .. string.sub(data.code, 4, 6)
-	setStatus(
-		"Напиши этот код агенту в чат. Код действует 10 минут."
-	)
+	setStatus("Напиши этот код агенту в чат. Код действует 10 минут.")
 	while alive and pairing do
-		local ok2, r2 =
-			request("GET", "/plugin/pair/poll?pairId=" .. HttpService:UrlEncode(data.pairId))
+		local ok2, r2 = request("GET", "/plugin/pair/poll?pairId=" .. HttpService:UrlEncode(data.pairId))
 		if ok2 and r2.StatusCode == 200 then
 			local d = HttpService:JSONDecode(r2.Body)
 			if d.status == "ok" then
 				setSetting("RelayToken", d.token)
 				setSetting("RelayPaused", false)
+				ui.checkNow = true
 				ui.code.Text = ""
 				setStatus("Подключено, жду команды")
 				break
@@ -685,17 +693,71 @@ local function disconnect()
 	setStatus("Отключено. Агент больше не имеет доступа.")
 end
 
-local function buildUi()
-	local toolbar = plugin:CreateToolbar("Studio Relay")
-	local button = toolbar:CreateButton(
-		"Studio Relay",
-		"Связь с облачным агентом",
-		"rbxassetid://4458901886"
+---------------------------------------------------------------- updates (edit only)
+local function applyUpdate()
+	local pending = ui.pending
+	if not pending then
+		return
+	end
+	setSetting("ApprovedBuild", pending.build)
+	setSetting("ApprovedSource", pending.source)
+	alive = false
+	pcall(function()
+		ui.widget:Destroy()
+	end)
+	pcall(function()
+		ui.toolbar:Destroy()
+	end)
+	if not launchSource(pending.source) then
+		setSetting("ApprovedBuild", nil)
+		setSetting("ApprovedSource", nil)
+		warn("[StudioRelay] update " .. pending.build .. " failed to start; restart Studio")
+	end
+end
+
+local function rollback()
+	setSetting("ApprovedBuild", nil)
+	setSetting("ApprovedSource", nil)
+	setStatus(
+		"Откат выполнен. Перезапусти Studio, чтобы вернуть сборку из файла."
 	)
+end
+
+local function checkUpdate()
+	if not getSetting("RelayToken") or getSetting("RelayPaused") then
+		return
+	end
+	local ok, res = request("GET", "/plugin/code")
+	if not ok or res.StatusCode ~= 200 then
+		return
+	end
+	local build = tonumber(getHeader(res, "x-build")) or 0
+	if build > BUILD and ui.updateLabel then
+		ui.pending = { build = build, source = res.Body }
+		ui.updateLabel.Text = "Доступно обновление: сборка "
+			.. build
+			.. " (сейчас "
+			.. BUILD
+			.. ")"
+		ui.updateLabel.Visible = true
+		ui.updateButton.Visible = true
+	end
+end
+
+local function buildUi()
+	local okTb, toolbar = pcall(function()
+		return plugin:CreateToolbar("Studio Relay")
+	end)
+	if not okTb then
+		toolbar = plugin:CreateToolbar("Studio Relay " .. BUILD)
+	end
+	ui.toolbar = toolbar
+	local button =
+		toolbar:CreateButton("Studio Relay", "Связь с облачным агентом", "rbxassetid://4458901886")
 	button.ClickableWhenViewportHidden = true
-	local info =
-		DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 320, 220, 280, 200)
-	local widget = plugin:CreateDockWidgetPluginGui("StudioRelayWidget", info)
+	local info = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 320, 220, 280, 200)
+	local widget = plugin:CreateDockWidgetPluginGui("StudioRelayWidget" .. BUILD, info)
+	ui.widget = widget
 	widget.Title = "Studio Relay"
 	button.Click:Connect(function()
 		widget.Enabled = not widget.Enabled
@@ -762,7 +824,15 @@ local function buildUi()
 	btn(5, "Отключить и забыть", Color3.fromRGB(170, 40, 40), disconnect)
 	local ver = label(6, 16, 11, false)
 	ver.TextColor3 = Color3.fromRGB(150, 150, 150)
-	ver.Text = "v" .. VERSION .. " · " .. relayUrl():gsub("^https://", "")
+	ver.Text = "v" .. VERSION .. " · сборка " .. BUILD .. " · " .. relayUrl():gsub("^https://", "")
+	ui.updateLabel = label(7, 32, 13, true)
+	ui.updateLabel.TextColor3 = Color3.fromRGB(255, 200, 80)
+	ui.updateLabel.Visible = false
+	ui.updateButton = btn(8, "Обновить", Color3.fromRGB(30, 140, 60), applyUpdate)
+	ui.updateButton.Visible = false
+	if IS_CHILD then
+		btn(9, "Откатить обновление", Color3.fromRGB(90, 90, 90), rollback)
+	end
 	setStatus(ui.statusText or "")
 	if not getSetting("RelayToken") then
 		widget.Enabled = true
@@ -771,6 +841,18 @@ end
 
 if role == "edit" then
 	buildUi()
+	task.spawn(function()
+		while alive do
+			checkUpdate()
+			for _ = 1, 60 do
+				if not alive or (ui.pending == nil and ui.checkNow) then
+					break
+				end
+				task.wait(2)
+			end
+			ui.checkNow = nil
+		end
+	end)
 end
 if role ~= "client" then
 	task.spawn(pollLoop)

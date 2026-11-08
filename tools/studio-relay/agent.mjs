@@ -12,6 +12,7 @@
 //   node tools/studio-relay/agent.mjs play | runmode | stop
 //   node tools/studio-relay/agent.mjs sync [only1,only2,...]   (scripts/make-studio-sync.mjs -> edit)
 //   node tools/studio-relay/agent.mjs revoke
+//   node tools/studio-relay/agent.mjs publish-plugin   (bump BUILD first; owner applies via «Обновить»)
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -151,6 +152,13 @@ async function main() {
 		}
 		case "pair": {
 			console.log(JSON.stringify(await jsonCall("/agent/pair?code=" + encodeURIComponent(a1 || ""), { method: "POST" })));
+			break;
+		}
+		case "publish-plugin": {
+			// offers a new plugin build; the owner applies it with the «Обновить» button in the widget
+			const src = readFileSync(join(here, "plugin", "StudioRelay.server.luau"), "utf8").replace("__RELAY_URL__", relayUrl());
+			const build = Number((src.match(/local BUILD = (\d+)/) || [])[1]);
+			console.log(JSON.stringify(await jsonCall("/agent/code?build=" + build, { method: "POST", body: src })));
 			break;
 		}
 		case "revoke": {
