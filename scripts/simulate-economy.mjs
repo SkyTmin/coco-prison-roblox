@@ -1,5 +1,6 @@
 // Economy pace simulation: minutes of continuous digging to reach each level.
-// Model: one player, always digs in the best unlocked mine by $/s for the current tool,
+// Model: one player, digs in the newest mostly-diggable mine, but goes where the blocks for its main tool's next upgrade
+// come fastest while they are missing (--greedy: never; the old model),
 // sells instantly, buys/upgrades tools greedily, levels up as soon as blocks and money allow.
 // Needs, bosses, combo and key drops are ignored (conservative estimate).
 // Usage: node scripts/simulate-economy.mjs [maxLevel=15]
@@ -51,10 +52,7 @@ const log = [];
 function priceMultiplier() {
 	return 1; // upgrade multiplier is earned via profession points; ignored in the conservative model
 }
-function bestMine() {
-	let best = null;
-	for (const loc of locations) {
-		if (loc.unlockLevel > player.level || loc.requiresPass || loc.kind !== "mine") continue;
+function evaluate(loc) {
 		let dollarsPerSec = 0;
 		let total = 0;
 		let detail = [];
@@ -71,13 +69,51 @@ function bestMine() {
 			total += share;
 			detail.push({ bid, t, price });
 		}
-		if (total === 0) continue;
+		if (total === 0) return null;
 		const blocksPerSec = detail.reduce((s, d) => s + (loc.mine.shares[d.bid] / total) / (d.t + OVERHEAD), 0);
-		const cand = { loc, dollarsPerSec: dollarsPerSec / total, blocksPerSec, detail, total };
+		return { loc, dollarsPerSec: dollarsPerSec / total, blocksPerSec, detail, total };
+}
+function unlockedMines() {
+	return locations.filter((loc) => loc.unlockLevel <= player.level && !loc.requiresPass && loc.kind === "mine");
+}
+// [08.11] like a real player following the upgrade tracker: when the main tool of the chosen mine cannot be upgraded
+// for lack of some block counters, dig where those blocks come fastest (still only mines the player can dig)
+function seekUpgrade(best) {
+	if (!best || !SEEK) return best;
+	const toolShare = {};
+	for (const d of best.detail) {
+		const t = blocks[d.bid].tool;
+		toolShare[t] = (toolShare[t] ?? 0) + best.loc.mine.shares[d.bid];
+	}
+	const main = Object.entries(toolShare).sort((a, b) => b[1] - a[1])[0]?.[0];
+	if (!main || !player.tools[main]) return best;
+	const up = toolsCfg.tools[main].upgrades.find((u) => u.from === player.tools[main]);
+	if (!up) return best;
+	const missing = new Set(Object.entries(up.requirements).filter(([k, v]) => v != null && (player.counters[k] ?? 0) < v).map(([k]) => k));
+	if (missing.size === 0) return best;
+	let seek = null, seekRate = 0;
+	for (const loc of unlockedMines()) {
+		const cand = evaluate(loc);
+		if (!cand) continue;
+		let rate = 0;
+		for (const d of cand.detail) {
+			if (missing.has(blocks[d.bid].upgradeCounter)) rate += (loc.mine.shares[d.bid] / cand.total) / (d.t + OVERHEAD);
+		}
+		if (rate > seekRate) { seek = cand; seekRate = rate; }
+	}
+	return seek ?? best;
+}
+const SEEK = !process.argv.includes("--greedy");
+function bestMine() {
+	let best = null;
+	for (const loc of unlockedMines()) {
+		const cand = evaluate(loc);
+		if (!cand) continue;
+		const total = cand.total;
 		// Real players move to the newest mine as soon as most of it is diggable (prices grow ~x4 per tier).
 		if (!best || (total >= 0.5 && loc.unlockLevel >= best.loc.unlockLevel) || (best.total < 0.5 && cand.dollarsPerSec > best.dollarsPerSec)) best = cand;
 	}
-	return best;
+	return seekUpgrade(best);
 }
 function tryUpgrades() {
 	for (const toolId of ["shovel", "pickaxe", "axe"]) {
