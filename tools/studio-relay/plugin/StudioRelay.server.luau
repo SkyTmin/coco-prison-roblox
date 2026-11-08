@@ -6,8 +6,8 @@
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.6"
-local BUILD = 7 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.7"
+local BUILD = 8 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")

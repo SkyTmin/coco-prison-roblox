@@ -246,6 +246,16 @@ end
 
 ---------------------------------------------------------------- scene state (per render)
 local scene = {}
+local K_DEFAULT = {
+	sun = 1, -- direct light multiplier
+	amb = 1, -- Ambient + OutdoorAmbient multiplier
+	env = 0.25, -- EnvironmentDiffuseScale sky light
+	fog = 0.0035, -- Atmosphere density -> extinction per stud
+	exposure = 1, -- final multiplier before tone mapping
+	sat = 1, -- extra saturation after colour correction
+	skyHaze = 0.35,
+}
+local K = table.clone(K_DEFAULT)
 
 local function collectScene(cam)
 	scene.sun = Lighting:GetSunDirection()
@@ -386,7 +396,7 @@ local function skyColor(dir)
 		local r, g, b = skyboxColor(dir)
 		if scene.atm then
 			-- atmosphere haze over the skybox near the horizon
-			local h = (1 - math.abs(dir.Y)) ^ 6 * clamp01(scene.haze * 0.35 + scene.density)
+			local h = (1 - math.abs(dir.Y)) ^ 6 * clamp01(scene.haze * K.skyHaze + scene.density)
 			local c = scene.fogColor
 			r, g, b = r * (1 - h) + c[1] * h, g * (1 - h) + c[2] * h, b * (1 - h) + c[3] * h
 		end
@@ -537,11 +547,12 @@ local function shade(hit, dir, r, g, b, neon)
 	local pos = hit.Position
 	-- ambient: indoor ambient everywhere, outdoor ambient weighted by how much the normal faces up
 	local up = 0.5 + 0.5 * n.Y
-	local lr = scene.ambient[1] + scene.outdoor[1] * (0.35 + 0.65 * up)
-	local lg = scene.ambient[2] + scene.outdoor[2] * (0.35 + 0.65 * up)
-	local lb = scene.ambient[3] + scene.outdoor[3] * (0.35 + 0.65 * up)
+	local ka = K.amb
+	local lr = (scene.ambient[1] + scene.outdoor[1] * (0.35 + 0.65 * up)) * ka
+	local lg = (scene.ambient[2] + scene.outdoor[2] * (0.35 + 0.65 * up)) * ka
+	local lb = (scene.ambient[3] + scene.outdoor[3] * (0.35 + 0.65 * up)) * ka
 	-- sky light (environment diffuse)
-	local sky = scene.envDiffuse * 0.25 * up
+	local sky = scene.envDiffuse * K.env * up
 	lr += sky * 0.6
 	lg += sky * 0.7
 	lb += sky * 0.9
@@ -554,9 +565,9 @@ local function shade(hit, dir, r, g, b, neon)
 			vis = 0
 		end
 		if vis > 0 then
-			lr += scene.direct[1] * ndl
-			lg += scene.direct[2] * ndl
-			lb += scene.direct[3] * ndl
+			lr += scene.direct[1] * ndl * K.sun
+			lg += scene.direct[2] * ndl * K.sun
+			lb += scene.direct[3] * ndl * K.sun
 		end
 	end
 	-- local lights
@@ -584,7 +595,7 @@ end
 local function applyFog(r, g, b, dist, dir)
 	local f
 	if scene.atm then
-		f = 1 - math.exp(-dist * scene.density * 0.0035)
+		f = 1 - math.exp(-dist * scene.density * K.fog)
 		f = clamp01(f * (0.7 + scene.haze * 0.25))
 	else
 		if scene.fogEnd >= 100000 then
@@ -661,7 +672,7 @@ end
 
 ---------------------------------------------------------------- post (colour correction, tone)
 local function post(r, g, b)
-	local e = scene.exposure
+	local e = scene.exposure * K.exposure
 	r, g, b = r * e, g * e, b * e
 	-- soft shoulder instead of a hard clip
 	local function tone(x)
@@ -677,6 +688,10 @@ local function post(r, g, b)
 		r, g, b = lum + (r - lum) * s, lum + (g - lum) * s, lum + (b - lum) * s
 		local t = cc.TintColor
 		r, g, b = r * t.R, g * t.G, b * t.B
+	end
+	if K.sat ~= 1 then
+		local lum = r * 0.299 + g * 0.587 + b * 0.114
+		r, g, b = lum + (r - lum) * K.sat, lum + (g - lum) * K.sat, lum + (b - lum) * K.sat
 	end
 	return clamp01(r), clamp01(g), clamp01(b)
 end
@@ -1300,6 +1315,15 @@ end
 local function render(opts, deps)
 	FONTS = deps.fonts
 	BASE64 = deps.base64
+	K = table.clone(K_DEFAULT)
+	if type(opts.k) == "table" then
+		for key, v in opts.k do
+			if K[key] ~= nil and tonumber(v) then
+				K[key] = tonumber(v)
+			end
+		end
+	end
+	imageStats = { ok = 0, fail = 0, failed = {} }
 	partInfo = {}
 	budgetStart = os.clock()
 	local t0 = os.clock()

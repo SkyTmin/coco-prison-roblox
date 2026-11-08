@@ -10,6 +10,7 @@
 //   node tools/studio-relay/agent.mjs shot <edit|client> <out.png> [--max 1024]
 //   node tools/studio-relay/agent.mjs render <edit|client|server> <out.png> [--max 640] [--noaa] [--nogui]
 //        [--cam x,y,z,lookX,lookY,lookZ] [--fov 70] [--size 1280x720]   (render from any point)
+//        [--k sun=1,amb=1,env=0.25,fog=0.0035,exposure=1,sat=1,skyHaze=0.35]   (calibration overrides)
 //   node tools/studio-relay/agent.mjs logs [target] [--since N] [--tail 50]
 //   node tools/studio-relay/agent.mjs play | runmode | stop
 //   node tools/studio-relay/agent.mjs sync [only1,only2,...]   (scripts/make-studio-sync.mjs -> edit)
@@ -194,6 +195,7 @@ async function main() {
 			if (arg("--cam")) opts.cam = arg("--cam").split(",").map(Number);
 			if (arg("--fov")) opts.fov = Number(arg("--fov"));
 			if (arg("--size")) [opts.vw, opts.vh] = arg("--size").split("x").map(Number);
+			if (arg("--k")) opts.k = Object.fromEntries(arg("--k").split(",").map((kv) => kv.split("=")).map(([k, v]) => [k, Number(v)]));
 			const r = await send(target, cmd === "render" ? "render" : "screenshot", JSON.stringify(opts), Number(arg("--timeout", 120)));
 			const data = JSON.parse(r.body);
 			if (!r.ok) {
@@ -204,6 +206,7 @@ async function main() {
 			writePng(out, data.w, data.h, Buffer.from(data.b64, "base64"));
 			const extra = data.rays ? ` rays ${data.rays}, gui ${data.guiObjects}, ${data.seconds}s (world ${data.worldSeconds}s)${data.minimized ? ", MINIMIZED" : ""}` : "";
 			console.log(`saved ${out} ${data.w}x${data.h} (source ${data.srcW}x${data.srcH})${extra}`);
+			if (data.images && data.images.fail) console.log(`images: ${data.images.ok} ok, ${data.images.fail} failed: ${data.images.failed.join(" | ")}`);
 			break;
 		}
 		case "logs": {
