@@ -29,6 +29,13 @@ local OFFERS: { [string]: { Offer } } = {
 		{ id = "shovel", price = 4 },
 	},
 }
+-- a tool's buyPrice in the configs wins when set (the same rule as EconomyService.SHOP_PRICES)
+for _, offer in OFFERS.shop do
+	local tool = Config.tools[offer.id]
+	if tool and typeof(tool.buyPrice) == "number" and tool.buyPrice > 0 then
+		offer.price = tool.buyPrice
+	end
+end
 local CARD_W, CARD_H, GAP = 220, 268, 10
 
 -- Prices like the original cards: 0.03$, 22.5$, 4,000$ (no trailing zeros, thousands grouped).

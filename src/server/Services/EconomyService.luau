@@ -21,7 +21,15 @@ local InventoryService = require(script.Parent.InventoryService)
 local ProfessionService = require(script.Parent.ProfessionService)
 local TutorialService = require(script.Parent.TutorialService)
 
-local SHOP_PRICES: { [string]: number } = { shovel = 4, axe = 4, pickaxe = 22.5, shears = 4000 } -- [меню]
+-- [меню] 4 / 22.5 / 4000 / 4; a tool's buyPrice in the configs wins when set (design-decisions toolShop: the pickaxe is
+-- $6 since 08.11 [решение]) — the shop window reads the same (ShopWindow)
+local SHOP_PRICES: { [string]: number } = { shovel = 4, axe = 4, pickaxe = 22.5, shears = 4000 }
+for id in pairs(SHOP_PRICES) do
+	local tool = Config.tools[id]
+	if tool and typeof(tool.buyPrice) == "number" and tool.buyPrice > 0 then
+		SHOP_PRICES[id] = tool.buyPrice
+	end
+end
 local FOOD_PRICES: { [string]: number } = { apple = 0.03, bread = 0.25, cooked_chicken = 0.5 } -- [меню]
 local PROMPTS = {
 	SellPoint = "sell",
