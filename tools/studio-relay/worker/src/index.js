@@ -166,6 +166,16 @@ export class Relay {
 			await this.ctx.storage.put("code", { build, source, at: Date.now() });
 			return json({ ok: true, build, bytes: source.length });
 		}
+		if (p === "/agent/asset" && request.method === "POST") {
+			// auxiliary plugin data (e.g. the bitmap font) for builds applied through «Обновить»
+			const name = (url.searchParams.get("name") || "").replace(/[^a-z0-9_-]/gi, "");
+			if (!name) return json({ error: "name required" }, 400);
+			const text = await readText(request);
+			const parts = Math.ceil(text.length / 900000) || 1;
+			for (let i = 0; i < parts; i++) await this.ctx.storage.put(`asset:${name}:${i}`, text.slice(i * 900000, (i + 1) * 900000));
+			await this.ctx.storage.put(`asset:${name}`, { parts, bytes: text.length });
+			return json({ ok: true, name, bytes: text.length });
+		}
 		if (p === "/agent/revoke") {
 			const toks = await this.ctx.storage.list({ prefix: "ptok:" });
 			await this.ctx.storage.delete([...toks.keys()]);
@@ -315,6 +325,14 @@ export class Relay {
 			return new Response(rec.source, {
 				headers: { "x-build": String(rec.build), "content-type": "text/plain; charset=utf-8" },
 			});
+		}
+		if (p === "/plugin/asset") {
+			const name = (url.searchParams.get("name") || "").replace(/[^a-z0-9_-]/gi, "");
+			const meta = await this.ctx.storage.get(`asset:${name}`);
+			if (!meta) return new Response(null, { status: 404 });
+			let text = "";
+			for (let i = 0; i < meta.parts; i++) text += (await this.ctx.storage.get(`asset:${name}:${i}`)) || "";
+			return new Response(text, { headers: { "content-type": "text/plain; charset=utf-8" } });
 		}
 		if (p === "/plugin/unpair" && request.method === "POST") {
 			await this.ctx.storage.delete("ptok:" + (await sha256(tok)));

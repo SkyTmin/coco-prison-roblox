@@ -3,14 +3,15 @@
 		<Properties>
 			<string name="Name">StudioRelay</string>
 			<ProtectedString name="Source"><![CDATA[--!nocheck
+--!native
 -- Studio Relay plugin: lets a cloud agent run Luau, read the output, take screenshots and start/stop
 -- Play in this Studio through the coco-studio-relay Worker. Studio only makes outgoing requests
 -- (long-poll); nothing listens on this PC. Pairing: the widget shows a 6-digit code, the owner gives
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.2"
-local BUILD = 3 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.3"
+local BUILD = 4 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "https://coco-studio-relay.coco-relay-2a55b6.workers.dev"
 
 local HttpService = game:GetService("HttpService")
@@ -328,6 +329,1304 @@ local function screenshot(payload)
 	return true, { w = w, h = h, srcW = size.X, srcH = size.Y, b64 = base64(rgb) }
 end
 
+---------------------------------------------------------------- software renderer ("agent's eye")
+local Render = (function()
+-- Software renderer for the Studio Relay ("the agent's eye"): works in Play and while Studio is
+-- minimized, because it uses raycasts (physics) and GUI layout instead of the GPU frame.
+--   World: one ray per pixel through camera.CFrame / FieldOfView, invisible parts skipped, partial
+--   transparency blended, colour from Part.Color, MaterialVariant colour maps, Textures and Decals
+--   sampled per face (owner's assets), sun + moon with shadow rays, point/spot lights, Atmosphere or
+--   legacy fog, sky gradient, ColorCorrection; extra rays only on object edges (edge anti-aliasing).
+--   GUI: every visible ScreenGui drawn from AbsolutePosition/Size: backgrounds, UICorner, UIGradient,
+--   UIStroke, images (ImageRect, ScaleType, 9-slice) and text with a bundled bitmap font.
+-- Included into StudioRelay.server.luau by build-plugin.mjs; returns render(opts) -> ok, result.
+
+local AssetService = game:GetService("AssetService")
+local Lighting = game:GetService("Lighting")
+local MaterialService = game:GetService("MaterialService")
+local Players = game:GetService("Players")
+local GuiService = game:GetService("GuiService")
+
+local FONTS = nil -- loaded lazily from the Font module next to the plugin script
+local BASE64 = nil
+
+---------------------------------------------------------------- helpers
+local function srgbToLin(c)
+	return c * c * (0.8 + 0.2 * c) -- fast approximation of the sRGB curve (gamma ~2.2)
+end
+local function linToSrgb(c)
+	if c <= 0 then
+		return 0
+	end
+	if c >= 1 then
+		return 1
+	end
+	return c ^ (1 / 2.2)
+end
+local function clamp01(x)
+	return if x < 0 then 0 elseif x > 1 then 1 else x
+end
+
+local budgetStart = os.clock()
+local function maybeYield()
+	if os.clock() - budgetStart > 0.006 then
+		task.wait()
+		budgetStart = os.clock()
+	end
+end
+
+---------------------------------------------------------------- images (owner's assets)
+local imageCache = {}
+-- property read that tolerates properties missing in older Studio builds
+local function prop(obj, name)
+	local ok, v = pcall(function()
+		return obj[name]
+	end)
+	return if ok then v else nil
+end
+local function uriOf(obj, contentName, legacyName)
+	local c = prop(obj, contentName)
+	if typeof(c) == "Content" and c.Uri and c.Uri ~= "" then
+		return c.Uri
+	end
+	return prop(obj, legacyName)
+end
+
+local function contentId(v)
+	if typeof(v) == "Content" then
+		return v.Uri
+	end
+	return v
+end
+local function loadImage(id)
+	id = contentId(id)
+	if type(id) ~= "string" or id == "" then
+		return nil
+	end
+	local c = imageCache[id]
+	if c ~= nil then
+		return c or nil
+	end
+	local ok, img = pcall(function()
+		return AssetService:CreateEditableImageAsync(Content.fromUri(id))
+	end)
+	if not ok or not img then
+		imageCache[id] = false
+		return nil
+	end
+	local size = img.Size
+	local okR, buf = pcall(function()
+		return img:ReadPixelsBuffer(Vector2.zero, size)
+	end)
+	img:Destroy()
+	if not okR then
+		imageCache[id] = false
+		return nil
+	end
+	local w, h = size.X, size.Y
+	-- average colour (alpha-weighted), used for meshes whose UVs we cannot know
+	local sr, sg, sb, sa = 0, 0, 0, 0
+	local step = math.max(1, math.floor(w * h / 4096))
+	for i = 0, w * h - 1, step do
+		local a = buffer.readu8(buf, i * 4 + 3) / 255
+		sr += buffer.readu8(buf, i * 4) * a
+		sg += buffer.readu8(buf, i * 4 + 1) * a
+		sb += buffer.readu8(buf, i * 4 + 2) * a
+		sa += a
+	end
+	sa = math.max(sa, 1e-6)
+	local rec = { w = w, h = h, buf = buf, avg = { sr / sa / 255, sg / sa / 255, sb / sa / 255 } }
+	imageCache[id] = rec
+	return rec
+end
+
+-- nearest sample, u/v in 0..1 (wrapped); returns r,g,b,a in 0..1
+local function sampleNearest(img, u, v)
+	local x = math.floor((u % 1) * img.w)
+	local y = math.floor((v % 1) * img.h)
+	local i = (y * img.w + x) * 4
+	local b = img.buf
+	return buffer.readu8(b, i) / 255,
+		buffer.readu8(b, i + 1) / 255,
+		buffer.readu8(b, i + 2) / 255,
+		buffer.readu8(b, i + 3) / 255
+end
+
+-- bilinear sample in pixel space (clamped); for GUI images
+local function sampleBilinearPx(img, fx, fy)
+	local w, h = img.w, img.h
+	fx = math.clamp(fx - 0.5, 0, w - 1)
+	fy = math.clamp(fy - 0.5, 0, h - 1)
+	local x0, y0 = math.floor(fx), math.floor(fy)
+	local x1, y1 = math.min(x0 + 1, w - 1), math.min(y0 + 1, h - 1)
+	local tx, ty = fx - x0, fy - y0
+	local b = img.buf
+	local function px(x, y, k)
+		return buffer.readu8(b, (y * w + x) * 4 + k)
+	end
+	local r, g, bl, a = 0, 0, 0, 0
+	for k = 0, 3 do
+		local v = (px(x0, y0, k) * (1 - tx) + px(x1, y0, k) * tx) * (1 - ty)
+			+ (px(x0, y1, k) * (1 - tx) + px(x1, y1, k) * tx) * ty
+		if k == 0 then
+			r = v
+		elseif k == 1 then
+			g = v
+		elseif k == 2 then
+			bl = v
+		else
+			a = v
+		end
+	end
+	return r / 255, g / 255, bl / 255, a / 255
+end
+
+---------------------------------------------------------------- faces and UV
+-- per face: normal axis, right vector R, up vector U (object space); image v grows downwards
+local FACES = {
+	[Enum.NormalId.Top] = { Vector3.new(1, 0, 0), Vector3.new(0, 0, -1) },
+	[Enum.NormalId.Bottom] = { Vector3.new(1, 0, 0), Vector3.new(0, 0, 1) },
+	[Enum.NormalId.Front] = { Vector3.new(-1, 0, 0), Vector3.new(0, 1, 0) },
+	[Enum.NormalId.Back] = { Vector3.new(1, 0, 0), Vector3.new(0, 1, 0) },
+	[Enum.NormalId.Right] = { Vector3.new(0, 0, -1), Vector3.new(0, 1, 0) },
+	[Enum.NormalId.Left] = { Vector3.new(0, 0, 1), Vector3.new(0, 1, 0) },
+}
+local function faceOf(localNormal)
+	local ax, ay, az = math.abs(localNormal.X), math.abs(localNormal.Y), math.abs(localNormal.Z)
+	if ay >= ax and ay >= az then
+		return if localNormal.Y > 0 then Enum.NormalId.Top else Enum.NormalId.Bottom
+	elseif ax >= az then
+		return if localNormal.X > 0 then Enum.NormalId.Right else Enum.NormalId.Left
+	end
+	return if localNormal.Z > 0 then Enum.NormalId.Back else Enum.NormalId.Front
+end
+local function absDot(a, b)
+	return math.abs(a.X * b.X + a.Y * b.Y + a.Z * b.Z)
+end
+-- returns u, v (0..1 across the face), face width, face height in studs
+local function faceUV(part, pos, face)
+	local lp = part.CFrame:PointToObjectSpace(pos)
+	local size = part.Size
+	local f = FACES[face]
+	local R, U = f[1], f[2]
+	local fw, fh = absDot(size, R), absDot(size, U)
+	local u = (lp.X * R.X + lp.Y * R.Y + lp.Z * R.Z) / fw + 0.5
+	local v = 0.5 - (lp.X * U.X + lp.Y * U.Y + lp.Z * U.Z) / fh
+	return u, v, fw, fh
+end
+
+---------------------------------------------------------------- per-part surface info (cached per render)
+local partInfo = {}
+local function infoOf(part)
+	local inf = partInfo[part]
+	if inf then
+		return inf
+	end
+	inf = { decals = nil, variant = nil, avg = nil }
+	for _, ch in part:GetChildren() do
+		if (ch:IsA("Decal") or ch:IsA("Texture")) and ch.Transparency < 0.99 then
+			local img = loadImage(uriOf(ch, "ColorMapContent", "Texture"))
+			if img then
+				inf.decals = inf.decals or {}
+				table.insert(inf.decals, { obj = ch, img = img, isTexture = ch:IsA("Texture") })
+			end
+		elseif ch:IsA("SpecialMesh") and ch.TextureId ~= "" then
+			local img = loadImage(ch.TextureId)
+			if img then
+				local vc = ch.VertexColor
+				inf.avg = { img.avg[1] * vc.X, img.avg[2] * vc.Y, img.avg[3] * vc.Z }
+			end
+		end
+	end
+	if part:IsA("MeshPart") then
+		local tex = uriOf(part, "TextureContent", "TextureID")
+		if tex and tex ~= "" then
+			local img = loadImage(tex)
+			if img then
+				inf.avg = img.avg
+			end
+		end
+	end
+	if part.MaterialVariant ~= "" then
+		local mv = MaterialService:FindFirstChild(part.MaterialVariant, true)
+		if mv and mv:IsA("MaterialVariant") then
+			local cm = uriOf(mv, "ColorMapContent", "ColorMap")
+			local img = loadImage(cm)
+			if img then
+				inf.variant = { img = img, studs = mv.StudsPerTile > 0 and mv.StudsPerTile or 10 }
+			end
+		end
+	end
+	partInfo[part] = inf
+	return inf
+end
+
+local function hasVisualChildren(part)
+	for _, ch in part:GetChildren() do
+		if ch:IsA("Decal") or ch:IsA("Texture") or ch:IsA("SurfaceGui") then
+			return true
+		end
+	end
+	return false
+end
+
+---------------------------------------------------------------- scene state (per render)
+local scene = {}
+
+local function collectScene(cam)
+	scene.sun = Lighting:GetSunDirection()
+	scene.moon = Lighting:GetMoonDirection()
+	local day = scene.sun.Y > -0.05
+	scene.lightDir = if day then scene.sun else scene.moon
+	local brightness = Lighting.Brightness * (if day then math.clamp(scene.sun.Y * 4 + 0.2, 0, 1) else 0.12)
+	local top = Lighting.ColorShift_Top
+	scene.direct = {
+		srgbToLin(clamp01(0.5 + top.R * 0.5)) * brightness,
+		srgbToLin(clamp01(0.5 + top.G * 0.5)) * brightness,
+		srgbToLin(clamp01(0.5 + top.B * 0.5)) * brightness,
+	}
+	if top == Color3.new(0, 0, 0) then
+		scene.direct = { brightness * 0.95, brightness * 0.93, brightness * 0.88 }
+	end
+	local amb, out = Lighting.Ambient, Lighting.OutdoorAmbient
+	scene.ambient = { srgbToLin(amb.R), srgbToLin(amb.G), srgbToLin(amb.B) }
+	scene.outdoor = { srgbToLin(out.R), srgbToLin(out.G), srgbToLin(out.B) }
+	scene.envDiffuse = Lighting.EnvironmentDiffuseScale
+	scene.shadows = Lighting.GlobalShadows
+	scene.exposure = 2 ^ Lighting.ExposureCompensation
+
+	local atm = Lighting:FindFirstChildOfClass("Atmosphere")
+	scene.atm = atm
+	if atm then
+		scene.fogColor = { srgbToLin(atm.Color.R), srgbToLin(atm.Color.G), srgbToLin(atm.Color.B) }
+		scene.decay = { srgbToLin(atm.Decay.R), srgbToLin(atm.Decay.G), srgbToLin(atm.Decay.B) }
+		scene.density = atm.Density
+		scene.haze = atm.Haze
+		scene.glare = atm.Glare
+	else
+		scene.fogStart, scene.fogEnd = Lighting.FogStart, Lighting.FogEnd
+		local fc = Lighting.FogColor
+		scene.fogColor = { srgbToLin(fc.R), srgbToLin(fc.G), srgbToLin(fc.B) }
+	end
+	scene.cc = {}
+	for _, e in Lighting:GetChildren() do
+		if e:IsA("ColorCorrectionEffect") and e.Enabled then
+			table.insert(scene.cc, e)
+		end
+	end
+	if cam then
+		for _, e in cam:GetChildren() do
+			if e:IsA("ColorCorrectionEffect") and e.Enabled then
+				table.insert(scene.cc, e)
+			end
+		end
+	end
+
+	-- local lights near the camera (capped)
+	scene.lights = {}
+	local camPos = cam.CFrame.Position
+	local candidates = {}
+	for _, l in workspace:GetDescendants() do
+		if (l:IsA("PointLight") or l:IsA("SpotLight") or l:IsA("SurfaceLight")) and l.Enabled and l.Brightness > 0 then
+			local p = l.Parent
+			local pos = if p and p:IsA("BasePart")
+				then p.Position
+				elseif p and p:IsA("Attachment") then p.WorldPosition
+				else nil
+			if pos then
+				local d = (pos - camPos).Magnitude
+				if d < 400 then
+					table.insert(candidates, { l = l, pos = pos, d = d })
+				end
+			end
+		end
+	end
+	table.sort(candidates, function(a, b)
+		return a.d < b.d
+	end)
+	for i = 1, math.min(24, #candidates) do
+		local c = candidates[i]
+		local col = c.l.Color
+		table.insert(scene.lights, {
+			pos = c.pos,
+			range = c.l.Range,
+			bright = c.l.Brightness,
+			col = { srgbToLin(col.R), srgbToLin(col.G), srgbToLin(col.B) },
+			shadows = c.l.Shadows,
+			part = c.l.Parent,
+		})
+	end
+end
+
+---------------------------------------------------------------- sky
+local function skyColor(dir)
+	local y = dir.Y
+	local day = scene.sun.Y > -0.05
+	local zen, hor
+	if scene.atm then
+		local ac = scene.atm.Color
+		hor = { srgbToLin(ac.R), srgbToLin(ac.G), srgbToLin(ac.B) }
+	end
+	if day then
+		local k = clamp01(scene.sun.Y * 3)
+		zen = { 0.10 * k + 0.01, 0.30 * k + 0.02, 0.85 * k + 0.05 }
+		hor = hor or { 0.55 * k + 0.05, 0.70 * k + 0.05, 0.95 * k + 0.08 }
+	else
+		zen = { 0.004, 0.006, 0.02 }
+		hor = hor and { hor[1] * 0.15, hor[2] * 0.15, hor[3] * 0.2 } or { 0.02, 0.025, 0.05 }
+	end
+	local t = clamp01(y * 1.6)
+	t = t ^ 0.6
+	local r = hor[1] * (1 - t) + zen[1] * t
+	local g = hor[2] * (1 - t) + zen[2] * t
+	local b = hor[3] * (1 - t) + zen[3] * t
+	-- sun disc
+	local s = scene.sun
+	local dot = dir.X * s.X + dir.Y * s.Y + dir.Z * s.Z
+	if day and dot > 0.9995 then
+		r, g, b = 4, 3.8, 3.4
+	elseif day and dot > 0.98 then
+		local k2 = (dot - 0.98) / 0.0195
+		r += k2 * k2 * 0.6
+		g += k2 * k2 * 0.55
+		b += k2 * k2 * 0.45
+	end
+	return r, g, b
+end
+
+---------------------------------------------------------------- surface shading
+local params = RaycastParams.new()
+params.FilterType = Enum.RaycastFilterType.Exclude
+params.IgnoreWater = false
+local shadowParams = RaycastParams.new()
+shadowParams.FilterType = Enum.RaycastFilterType.Exclude
+shadowParams.IgnoreWater = true
+
+local function partAlpha(inst)
+	if inst:IsA("Terrain") then
+		return 1
+	end
+	local t = math.max(inst.Transparency, inst.LocalTransparencyModifier)
+	if inst.Transparency < 1 and inst.LocalTransparencyModifier > 0 then
+		t = 1 - (1 - inst.Transparency) * (1 - inst.LocalTransparencyModifier)
+	end
+	return 1 - t
+end
+
+local function occluded(from, dir, dist)
+	local origin = from
+	for _ = 1, 4 do
+		local hit = workspace:Raycast(origin, dir * dist, shadowParams)
+		if not hit then
+			return false
+		end
+		local inst = hit.Instance
+		if inst:IsA("Terrain") or partAlpha(inst) > 0.5 then
+			return true
+		end
+		local travelled = (hit.Position - origin).Magnitude + 0.05
+		dist -= travelled
+		if dist <= 0 then
+			return false
+		end
+		origin = hit.Position + dir * 0.05
+	end
+	return false
+end
+
+-- base albedo (linear) and alpha for a hit; nil alpha = use part alpha
+local function albedo(hit)
+	local inst = hit.Instance
+	if inst:IsA("Terrain") then
+		local mat = hit.Material
+		if mat == Enum.Material.Water then
+			local wc = workspace.Terrain.WaterColor
+			return srgbToLin(wc.R),
+				srgbToLin(wc.G),
+				srgbToLin(wc.B),
+				1 - workspace.Terrain.WaterTransparency * 0.7,
+				false
+		end
+		local ok, c = pcall(function()
+			return workspace.Terrain:GetMaterialColor(mat)
+		end)
+		c = ok and c or Color3.fromRGB(110, 120, 90)
+		return srgbToLin(c.R), srgbToLin(c.G), srgbToLin(c.B), 1, false
+	end
+	local c = inst.Color
+	local r, g, b = srgbToLin(c.R), srgbToLin(c.G), srgbToLin(c.B)
+	local inf = infoOf(inst)
+	local face, u, v, fw, fh
+	if inf.variant or inf.decals then
+		local ln = inst.CFrame:VectorToObjectSpace(hit.Normal)
+		face = faceOf(ln)
+		u, v, fw, fh = faceUV(inst, hit.Position, face)
+	end
+	if inf.variant then
+		local st = inf.variant.studs
+		local tr, tg, tb = sampleNearest(inf.variant.img, u * fw / st, v * fh / st)
+		r, g, b = r * srgbToLin(tr), g * srgbToLin(tg), b * srgbToLin(tb)
+	elseif inf.avg then
+		r, g, b = srgbToLin(inf.avg[1]), srgbToLin(inf.avg[2]), srgbToLin(inf.avg[3])
+	end
+	local alpha = partAlpha(inst)
+	if inf.decals then
+		for _, d in inf.decals do
+			local obj = d.obj
+			if obj.Face == face then
+				local su, sv = u, v
+				if d.isTexture then
+					local spu = obj.StudsPerTileU > 0 and obj.StudsPerTileU or 2
+					local spv = obj.StudsPerTileV > 0 and obj.StudsPerTileV or 2
+					su = (u * fw + obj.OffsetStudsU) / spu
+					sv = (v * fh + obj.OffsetStudsV) / spv
+				end
+				local dr, dg, db, da = sampleNearest(d.img, su, sv)
+				local tint = obj.Color3
+				da *= 1 - obj.Transparency
+				if da > 0.01 then
+					r = r * (1 - da) + srgbToLin(dr * tint.R) * da
+					g = g * (1 - da) + srgbToLin(dg * tint.G) * da
+					b = b * (1 - da) + srgbToLin(db * tint.B) * da
+					alpha = math.max(alpha, da)
+				end
+			end
+		end
+	end
+	return r, g, b, alpha, inst.Material == Enum.Material.Neon
+end
+
+local function shade(hit, dir, r, g, b, neon)
+	if neon then
+		return r * 1.6, g * 1.6, b * 1.6
+	end
+	local n = hit.Normal
+	local pos = hit.Position
+	-- ambient: indoor ambient everywhere, outdoor ambient weighted by how much the normal faces up
+	local up = 0.5 + 0.5 * n.Y
+	local lr = scene.ambient[1] + scene.outdoor[1] * (0.35 + 0.65 * up)
+	local lg = scene.ambient[2] + scene.outdoor[2] * (0.35 + 0.65 * up)
+	local lb = scene.ambient[3] + scene.outdoor[3] * (0.35 + 0.65 * up)
+	-- sky light (environment diffuse)
+	local sky = scene.envDiffuse * 0.25 * up
+	lr += sky * 0.6
+	lg += sky * 0.7
+	lb += sky * 0.9
+	-- sun / moon
+	local L = scene.lightDir
+	local ndl = n.X * L.X + n.Y * L.Y + n.Z * L.Z
+	if ndl > 0 then
+		local vis = 1
+		if scene.shadows and occluded(pos + n * 0.05, L, 1000) then
+			vis = 0
+		end
+		if vis > 0 then
+			lr += scene.direct[1] * ndl
+			lg += scene.direct[2] * ndl
+			lb += scene.direct[3] * ndl
+		end
+	end
+	-- local lights
+	for _, l in scene.lights do
+		local d = l.pos - pos
+		local dist = d.Magnitude
+		if dist < l.range and dist > 1e-3 then
+			local ld = d / dist
+			local nd = n.X * ld.X + n.Y * ld.Y + n.Z * ld.Z
+			if nd > 0 then
+				local att = (1 - dist / l.range)
+				att = att * att * l.bright * nd
+				if att > 0.01 and l.shadows then
+					shadowParams.FilterDescendantsInstances = { l.part }
+					if occluded(pos + n * 0.05, ld, dist - 0.2) then
+						att = 0
+					end
+					shadowParams.FilterDescendantsInstances = scene.shadowFilter
+				end
+				lr += l.col[1] * att
+				lg += l.col[2] * att
+				lb += l.col[3] * att
+			end
+		end
+	end
+	return r * lr, g * lg, b * lb
+end
+
+local function applyFog(r, g, b, dist, dir)
+	local f
+	if scene.atm then
+		f = 1 - math.exp(-dist * scene.density * 0.012)
+		f = clamp01(f * (1 + scene.haze * 0.15))
+	else
+		if scene.fogEnd >= 100000 then
+			return r, g, b
+		end
+		f = clamp01((dist - scene.fogStart) / math.max(1, scene.fogEnd - scene.fogStart))
+	end
+	if f <= 0 then
+		return r, g, b
+	end
+	local fr, fg, fb = scene.fogColor[1], scene.fogColor[2], scene.fogColor[3]
+	if scene.atm then
+		local sr, sg, sb = skyColor(Vector3.new(dir.X, 0.05, dir.Z).Unit)
+		fr, fg, fb = fr * 0.5 + sr * 0.5, fg * 0.5 + sg * 0.5, fb * 0.5 + sb * 0.5
+	end
+	return r * (1 - f) + fr * f, g * (1 - f) + fg * f, b * (1 - f) + fb * f
+end
+
+-- returns linear r,g,b and the id of the first opaque instance (for edge detection)
+local MAXD = 3000
+local function trace(origin, dir)
+	local accR, accG, accB, remain = 0, 0, 0, 1
+	local firstInst = nil
+	local travelled = 0
+	for _ = 1, 10 do
+		local hit = workspace:Raycast(origin, dir * (MAXD - travelled), params)
+		if not hit then
+			local r, g, b = skyColor(dir)
+			return accR + r * remain, accG + g * remain, accB + b * remain, firstInst or "sky"
+		end
+		local inst = hit.Instance
+		local seg = (hit.Position - origin).Magnitude
+		travelled += seg
+		local r, g, b, alpha, neon = albedo(hit)
+		if alpha <= 0.02 then
+			if not inst:IsA("Terrain") and not hasVisualChildren(inst) then
+				params:AddToFilter(inst)
+			else
+				origin = hit.Position + dir * 0.03
+			end
+		else
+			r, g, b = shade(hit, dir, r, g, b, neon)
+			r, g, b = applyFog(r, g, b, travelled, dir)
+			firstInst = firstInst or inst
+			accR += r * alpha * remain
+			accG += g * alpha * remain
+			accB += b * alpha * remain
+			remain *= 1 - alpha
+			if remain < 0.03 then
+				return accR, accG, accB, firstInst
+			end
+			origin = hit.Position + dir * 0.03
+		end
+		if travelled >= MAXD then
+			break
+		end
+	end
+	local r, g, b = skyColor(dir)
+	return accR + r * remain, accG + g * remain, accB + b * remain, firstInst or "sky"
+end
+
+---------------------------------------------------------------- post (colour correction, tone)
+local function post(r, g, b)
+	local e = scene.exposure
+	r, g, b = r * e, g * e, b * e
+	-- soft shoulder instead of a hard clip
+	local function tone(x)
+		return if x < 0.8 then x else 0.8 + (1 - math.exp(-(x - 0.8) * 5)) * 0.2
+	end
+	r, g, b = linToSrgb(tone(r)), linToSrgb(tone(g)), linToSrgb(tone(b))
+	for _, cc in scene.cc do
+		r, g, b = r + cc.Brightness, g + cc.Brightness, b + cc.Brightness
+		local c = 1 + cc.Contrast
+		r, g, b = (r - 0.5) * c + 0.5, (g - 0.5) * c + 0.5, (b - 0.5) * c + 0.5
+		local lum = r * 0.299 + g * 0.587 + b * 0.114
+		local s = 1 + cc.Saturation
+		r, g, b = lum + (r - lum) * s, lum + (g - lum) * s, lum + (b - lum) * s
+		local t = cc.TintColor
+		r, g, b = r * t.R, g * t.G, b * t.B
+	end
+	return clamp01(r), clamp01(g), clamp01(b)
+end
+
+---------------------------------------------------------------- canvas
+local Canvas = {}
+Canvas.__index = Canvas
+local function newCanvas(w, h)
+	return setmetatable({ w = w, h = h, buf = buffer.create(w * h * 3) }, Canvas)
+end
+function Canvas:set(x, y, r, g, b)
+	local i = (y * self.w + x) * 3
+	buffer.writeu8(self.buf, i, math.floor(r * 255 + 0.5))
+	buffer.writeu8(self.buf, i + 1, math.floor(g * 255 + 0.5))
+	buffer.writeu8(self.buf, i + 2, math.floor(b * 255 + 0.5))
+end
+function Canvas:blend(x, y, r, g, b, a)
+	if a <= 0 or x < 0 or y < 0 or x >= self.w or y >= self.h then
+		return
+	end
+	local i = (y * self.w + x) * 3
+	local bf = self.buf
+	if a >= 1 then
+		buffer.writeu8(bf, i, math.floor(r * 255 + 0.5))
+		buffer.writeu8(bf, i + 1, math.floor(g * 255 + 0.5))
+		buffer.writeu8(bf, i + 2, math.floor(b * 255 + 0.5))
+		return
+	end
+	buffer.writeu8(bf, i, math.floor(buffer.readu8(bf, i) * (1 - a) + r * 255 * a + 0.5))
+	buffer.writeu8(bf, i + 1, math.floor(buffer.readu8(bf, i + 1) * (1 - a) + g * 255 * a + 0.5))
+	buffer.writeu8(bf, i + 2, math.floor(buffer.readu8(bf, i + 2) * (1 - a) + b * 255 * a + 0.5))
+end
+
+---------------------------------------------------------------- world pass
+local function renderWorld(canvas, cam, opts)
+	local W, H = canvas.w, canvas.h
+	local cf = cam.CFrame
+	local origin = cf.Position
+	local tanHalf = math.tan(math.rad(cam.FieldOfView) / 2)
+	local aspect = W / H
+	local right, up, look = cf.RightVector, cf.UpVector, cf.LookVector
+	local function rayDir(px, py)
+		local x = (2 * px / W - 1) * tanHalf * aspect
+		local y = (1 - 2 * py / H) * tanHalf
+		return (right * x + up * y + look).Unit
+	end
+
+	-- skip the local character in first person (its parts are hidden by LocalTransparencyModifier anyway)
+	local filter = {}
+	for _, inst in workspace:GetChildren() do
+		if inst.Name == "__StudioRelayTmp" then
+			table.insert(filter, inst)
+		end
+	end
+	params.FilterDescendantsInstances = filter
+	scene.shadowFilter = {}
+	shadowParams.FilterDescendantsInstances = scene.shadowFilter
+
+	local ids = {}
+	local idOf = {}
+	local nextId = 0
+	local lin = table.create(W * H * 3, 0)
+	for y = 0, H - 1 do
+		for x = 0, W - 1 do
+			local r, g, b, inst = trace(origin, rayDir(x + 0.5, y + 0.5))
+			local k = (y * W + x) * 3
+			lin[k + 1], lin[k + 2], lin[k + 3] = r, g, b
+			local id = idOf[inst]
+			if not id then
+				nextId += 1
+				id = nextId
+				idOf[inst] = id
+			end
+			ids[y * W + x + 1] = id
+			maybeYield()
+		end
+	end
+
+	-- edge anti-aliasing: 4 extra rays where a neighbour shows another object
+	local extra = 0
+	if opts.aa ~= false then
+		local offs = { { 0.25, 0.25 }, { 0.75, 0.25 }, { 0.25, 0.75 }, { 0.75, 0.75 } }
+		for y = 0, H - 1 do
+			for x = 0, W - 1 do
+				local id = ids[y * W + x + 1]
+				local edge = (x + 1 < W and ids[y * W + x + 2] ~= id)
+					or (y + 1 < H and ids[(y + 1) * W + x + 1] ~= id)
+					or (x > 0 and ids[y * W + x] ~= id)
+					or (y > 0 and ids[(y - 1) * W + x + 1] ~= id)
+				if edge then
+					local k = (y * W + x) * 3
+					local sr, sg, sb = lin[k + 1], lin[k + 2], lin[k + 3]
+					for _, o in offs do
+						local r, g, b = trace(origin, rayDir(x + o[1], y + o[2]))
+						sr += r
+						sg += g
+						sb += b
+					end
+					lin[k + 1], lin[k + 2], lin[k + 3] = sr / 5, sg / 5, sb / 5
+					extra += 4
+					maybeYield()
+				end
+			end
+		end
+	end
+
+	for y = 0, H - 1 do
+		for x = 0, W - 1 do
+			local k = (y * W + x) * 3
+			local r, g, b = post(lin[k + 1], lin[k + 2], lin[k + 3])
+			canvas:set(x, y, r, g, b)
+		end
+		maybeYield()
+	end
+	return W * H + extra
+end
+
+---------------------------------------------------------------- text
+local glyphCache = {}
+local function getFonts()
+	if FONTS then
+		return FONTS
+	end
+	return {}
+end
+local function decodeGlyph(sizeIdx, cp)
+	local key = sizeIdx * 0x200000 + cp
+	local g = glyphCache[key]
+	if g ~= nil then
+		return g or nil
+	end
+	local font = getFonts()[sizeIdx]
+	local raw = font and font.glyphs[cp]
+	if not raw then
+		glyphCache[key] = false
+		return nil
+	end
+	local w, adv, xoff, yoff, h, data = raw[1], raw[2], raw[3], raw[4], raw[5], raw[6]
+	local alpha = buffer.create(math.max(1, w * h))
+	local o = 0
+	for i = 1, #data do
+		local c = string.byte(data, i)
+		if c >= 103 then -- g..z: run of zeros
+			o += c - 102
+		else
+			local v = if c <= 57 then c - 48 else c - 87
+			buffer.writeu8(alpha, o, math.floor(v * 17))
+			o += 1
+		end
+	end
+	g = { w = w, adv = adv, xoff = xoff, yoff = yoff, h = h, a = alpha }
+	glyphCache[key] = g
+	return g
+end
+
+local function pickFont(px)
+	local fonts = getFonts()
+	local best, bestIdx = nil, 1
+	for i, f in fonts do
+		if not best or math.abs(f.line - px) < math.abs(best.line - px) then
+			best, bestIdx = f, i
+		end
+	end
+	return best, bestIdx
+end
+
+local function utf8chars(s)
+	local out = {}
+	for _, cp in utf8.codes(s) do
+		table.insert(out, cp)
+	end
+	return out
+end
+
+local function measure(fontIdx, cps, scale)
+	local w = 0
+	for _, cp in cps do
+		local g = decodeGlyph(fontIdx, cp) or decodeGlyph(fontIdx, 63)
+		w += (g and g.adv or 4) * scale
+	end
+	return w
+end
+
+local function wrapLines(text, fontIdx, scale, maxW, wrap)
+	local lines = {}
+	for para in string.gmatch(text .. "\n", "(.-)\n") do
+		if not wrap then
+			table.insert(lines, utf8chars(para))
+		else
+			local cur, curW = {}, 0
+			for word, sp in string.gmatch(para, "(%S*)(%s*)") do
+				if word == "" and sp == "" then
+					break
+				end
+				local wc = utf8chars(word)
+				local ww = measure(fontIdx, wc, scale)
+				local spc = utf8chars(sp)
+				local sw = measure(fontIdx, spc, scale)
+				if curW > 0 and curW + ww > maxW then
+					table.insert(lines, cur)
+					cur, curW = {}, 0
+				end
+				for _, cp in wc do
+					table.insert(cur, cp)
+				end
+				for _, cp in spc do
+					table.insert(cur, cp)
+				end
+				curW += ww + sw
+			end
+			table.insert(lines, cur)
+		end
+	end
+	return lines
+end
+
+local function drawGlyph(canvas, g, x0, y0, scale, r, gg, b, alpha, clip)
+	local tw = math.max(1, math.floor(g.w * scale + 0.5))
+	local th = math.max(1, math.floor(g.h * scale + 0.5))
+	for ty = 0, th - 1 do
+		local py = y0 + ty
+		if py >= clip[2] and py < clip[4] then
+			local sy = math.min(g.h - 1, math.floor((ty + 0.5) / scale))
+			for tx = 0, tw - 1 do
+				local px = x0 + tx
+				if px >= clip[1] and px < clip[3] then
+					local sx = math.min(g.w - 1, math.floor((tx + 0.5) / scale))
+					local a = buffer.readu8(g.a, sy * g.w + sx) / 255
+					if a > 0 then
+						canvas:blend(px, py, r, gg, b, a * alpha)
+					end
+				end
+			end
+		end
+	end
+end
+
+local function drawText(canvas, obj, rect, s, clip)
+	local text = obj.ContentText
+	if obj:IsA("TextBox") and text == "" then
+		text = obj.PlaceholderText
+	end
+	if text == "" or obj.TextTransparency >= 0.99 then
+		return
+	end
+	local color = if obj:IsA("TextBox") and obj.ContentText == "" then obj.PlaceholderColor3 else obj.TextColor3
+	local px = obj.TextSize
+	local tb = obj.TextBounds
+	local nLines = select(2, string.gsub(text, "\n", "")) + 1
+	if obj.TextScaled or obj.TextWrapped then
+		-- Roblox reports the final layout in TextBounds; derive the line height from it
+		local guess = obj.TextScaled and math.max(1, tb.Y / nLines) or px
+		px = if obj.TextScaled then guess else px
+	end
+	local font, fi = pickFont(px * s)
+	if not font then
+		return
+	end
+	local scale = px * s / font.line
+	local maxW = rect[3] - rect[1]
+	local lines = wrapLines(text, fi, scale, maxW, obj.TextWrapped or obj.TextScaled)
+	-- match Roblox widths: squeeze/stretch to TextBounds for single lines
+	local squeeze = 1
+	if #lines == 1 and tb.X > 0 then
+		local ourW = measure(fi, lines[1], scale)
+		if ourW > 0 then
+			squeeze = math.clamp(tb.X * s / ourW, 0.6, 1.6)
+		end
+	end
+	local lineH = font.line * scale
+	local totalH = lineH * #lines
+	local top
+	if obj.TextYAlignment == Enum.TextYAlignment.Top then
+		top = rect[2]
+	elseif obj.TextYAlignment == Enum.TextYAlignment.Bottom then
+		top = rect[4] - totalH
+	else
+		top = (rect[2] + rect[4]) / 2 - totalH / 2
+	end
+	local alpha = 1 - obj.TextTransparency
+	local strokeA = 1 - obj.TextStrokeTransparency
+	local strokeC = obj.TextStrokeColor3
+	for _, st in obj:GetChildren() do
+		if st:IsA("UIStroke") and st.Enabled and st.ApplyStrokeMode == Enum.ApplyStrokeMode.Contextual then
+			strokeA = 1 - st.Transparency
+			strokeC = st.Color
+		end
+	end
+	for li, cps in lines do
+		local lw = measure(fi, cps, scale) * squeeze
+		local left
+		if obj.TextXAlignment == Enum.TextXAlignment.Left then
+			left = rect[1]
+		elseif obj.TextXAlignment == Enum.TextXAlignment.Right then
+			left = rect[3] - lw
+		else
+			left = (rect[1] + rect[3]) / 2 - lw / 2
+		end
+		local passes = {}
+		if strokeA > 0.05 then
+			for _, d in { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } } do
+				table.insert(passes, { d[1], d[2], strokeC, strokeA * alpha })
+			end
+		end
+		table.insert(passes, { 0, 0, color, alpha })
+		for _, pass in passes do
+			local x = left
+			local baseY = top + (li - 1) * lineH
+			for _, cp in cps do
+				local g = decodeGlyph(fi, cp) or decodeGlyph(fi, 63)
+				if g then
+					if g.w > 0 then
+						drawGlyph(
+							canvas,
+							g,
+							math.floor(x + g.xoff * scale * squeeze + pass[1]),
+							math.floor(baseY + g.yoff * scale + pass[2]),
+							scale,
+							pass[3].R,
+							pass[3].G,
+							pass[3].B,
+							pass[4],
+							clip
+						)
+					end
+					x += g.adv * scale * squeeze
+				end
+			end
+		end
+	end
+end
+
+---------------------------------------------------------------- GUI pass
+local function cornerRadius(obj, w, h)
+	local c = obj:FindFirstChildOfClass("UICorner")
+	if not c then
+		return 0
+	end
+	return math.min(c.CornerRadius.Scale * math.min(w, h) + c.CornerRadius.Offset, math.min(w, h) / 2)
+end
+
+local function insideRounded(x, y, rect, rad)
+	if rad <= 0 then
+		return true
+	end
+	local cx = math.clamp(x, rect[1] + rad, rect[3] - rad)
+	local cy = math.clamp(y, rect[2] + rad, rect[4] - rad)
+	local dx, dy = x - cx, y - cy
+	return dx * dx + dy * dy <= rad * rad
+end
+
+local function gradientColor(grad, base, tx, ty)
+	if not grad or not grad.Enabled then
+		return base.R, base.G, base.B, 0
+	end
+	local rot = math.rad(grad.Rotation)
+	local t = clamp01((tx - 0.5) * math.cos(rot) + (ty - 0.5) * math.sin(rot) + 0.5 + grad.Offset.X)
+	local c = grad.Color.Keypoints
+	local col = c[1].Value
+	for i = 1, #c - 1 do
+		if t >= c[i].Time and t <= c[i + 1].Time then
+			local k = (t - c[i].Time) / math.max(1e-6, c[i + 1].Time - c[i].Time)
+			col = c[i].Value:Lerp(c[i + 1].Value, k)
+			break
+		end
+	end
+	if t > c[#c].Time then
+		col = c[#c].Value
+	end
+	local tk = grad.Transparency.Keypoints
+	local tr = tk[1].Value
+	for i = 1, #tk - 1 do
+		if t >= tk[i].Time and t <= tk[i + 1].Time then
+			local k = (t - tk[i].Time) / math.max(1e-6, tk[i + 1].Time - tk[i].Time)
+			tr = tk[i].Value + (tk[i + 1].Value - tk[i].Value) * k
+			break
+		end
+	end
+	return base.R * col.R, base.G * col.G, base.B * col.B, tr
+end
+
+local function fillRect(canvas, rect, color, alpha, clip, rad, grad)
+	local x0 = math.max(math.floor(rect[1]), clip[1])
+	local y0 = math.max(math.floor(rect[2]), clip[2])
+	local x1 = math.min(math.ceil(rect[3]), clip[3])
+	local y1 = math.min(math.ceil(rect[4]), clip[4])
+	local w, h = rect[3] - rect[1], rect[4] - rect[2]
+	for y = y0, y1 - 1 do
+		for x = x0, x1 - 1 do
+			if insideRounded(x + 0.5, y + 0.5, rect, rad) then
+				local r, g, b, tr =
+					gradientColor(grad, color, (x - rect[1]) / math.max(w, 1), (y - rect[2]) / math.max(h, 1))
+				canvas:blend(x, y, r, g, b, alpha * (1 - tr))
+			end
+		end
+	end
+end
+
+local function strokeRect(canvas, rect, color, alpha, thick, clip, rad)
+	local outer = { rect[1] - thick, rect[2] - thick, rect[3] + thick, rect[4] + thick }
+	local x0 = math.max(math.floor(outer[1]), clip[1])
+	local y0 = math.max(math.floor(outer[2]), clip[2])
+	local x1 = math.min(math.ceil(outer[3]), clip[3])
+	local y1 = math.min(math.ceil(outer[4]), clip[4])
+	for y = y0, y1 - 1 do
+		for x = x0, x1 - 1 do
+			local cx, cy = x + 0.5, y + 0.5
+			if insideRounded(cx, cy, outer, rad + thick) and not insideRounded(cx, cy, rect, rad) then
+				canvas:blend(x, y, color.R, color.G, color.B, alpha)
+			end
+		end
+	end
+end
+
+local function drawImage(canvas, obj, rect, clip, s)
+	local img = loadImage(uriOf(obj, "ImageContent", "Image"))
+	if not img then
+		return
+	end
+	local alpha = 1 - obj.ImageTransparency
+	if alpha <= 0.01 then
+		return
+	end
+	local tint = obj.ImageColor3
+	-- source rectangle (ImageRectOffset/Size)
+	local sx0, sy0, sw, sh = 0, 0, img.w, img.h
+	if obj.ImageRectSize.X > 0 and obj.ImageRectSize.Y > 0 then
+		sx0, sy0, sw, sh = obj.ImageRectOffset.X, obj.ImageRectOffset.Y, obj.ImageRectSize.X, obj.ImageRectSize.Y
+	end
+	local dx0, dy0 = rect[1], rect[2]
+	local dw, dh = rect[3] - rect[1], rect[4] - rect[2]
+	local st = obj.ScaleType
+	if st == Enum.ScaleType.Fit or st == Enum.ScaleType.Crop then
+		local k = if st == Enum.ScaleType.Fit then math.min(dw / sw, dh / sh) else math.max(dw / sw, dh / sh)
+		local nw, nh = sw * k, sh * k
+		dx0, dy0 = dx0 + (dw - nw) / 2, dy0 + (dh - nh) / 2
+		dw, dh = nw, nh
+	end
+	local pixelated = prop(obj, "ResampleMode") == Enum.ResamplerMode.Pixelated
+	local slice = st == Enum.ScaleType.Slice and obj.SliceCenter
+	local sliceScale = (prop(obj, "SliceScale") or 1) * s
+	local x0 = math.max(math.floor(math.max(dx0, rect[1])), clip[1])
+	local y0 = math.max(math.floor(math.max(dy0, rect[2])), clip[2])
+	local x1 = math.min(math.ceil(math.min(dx0 + dw, rect[3])), clip[3])
+	local y1 = math.min(math.ceil(math.min(dy0 + dh, rect[4])), clip[4])
+	local function mapSlice(d, total, a, b, srcTotal)
+		-- d: distance into destination; a,b: slice borders in source px
+		local ea, eb = a * sliceScale, (srcTotal - b) * sliceScale
+		if d < ea then
+			return d / sliceScale
+		elseif d > total - eb then
+			return b + (d - (total - eb)) / sliceScale
+		end
+		local mid = total - ea - eb
+		return a + (d - ea) / math.max(mid, 1e-6) * (b - a)
+	end
+	for y = y0, y1 - 1 do
+		for x = x0, x1 - 1 do
+			local fx, fy
+			if slice then
+				fx = sx0 + mapSlice(x + 0.5 - dx0, dw, slice.Min.X, slice.Max.X, sw)
+				fy = sy0 + mapSlice(y + 0.5 - dy0, dh, slice.Min.Y, slice.Max.Y, sh)
+			elseif st == Enum.ScaleType.Tile then
+				local ts = obj.TileSize
+				local tw, th = ts.X.Scale * dw + ts.X.Offset * s, ts.Y.Scale * dh + ts.Y.Offset * s
+				fx = sx0 + ((x + 0.5 - dx0) % math.max(tw, 1)) / math.max(tw, 1) * sw
+				fy = sy0 + ((y + 0.5 - dy0) % math.max(th, 1)) / math.max(th, 1) * sh
+			else
+				fx = sx0 + (x + 0.5 - dx0) / dw * sw
+				fy = sy0 + (y + 0.5 - dy0) / dh * sh
+			end
+			local r, g, b, a
+			if pixelated then
+				local ix = math.clamp(math.floor(fx), 0, img.w - 1)
+				local iy = math.clamp(math.floor(fy), 0, img.h - 1)
+				local i = (iy * img.w + ix) * 4
+				r, g, b, a =
+					buffer.readu8(img.buf, i) / 255,
+					buffer.readu8(img.buf, i + 1) / 255,
+					buffer.readu8(img.buf, i + 2) / 255,
+					buffer.readu8(img.buf, i + 3) / 255
+			else
+				r, g, b, a = sampleBilinearPx(img, fx, fy)
+			end
+			if a > 0.004 then
+				canvas:blend(x, y, r * tint.R, g * tint.G, b * tint.B, a * alpha)
+			end
+		end
+	end
+end
+
+local function guiVisible(obj)
+	return obj.Visible
+end
+
+local function drawGui(canvas, obj, offset, s, clip, stats)
+	if not obj:IsA("GuiObject") or not guiVisible(obj) then
+		return
+	end
+	local ap, as = obj.AbsolutePosition, obj.AbsoluteSize
+	local rect = {
+		(ap.X + offset.X) * s,
+		(ap.Y + offset.Y) * s,
+		(ap.X + offset.X + as.X) * s,
+		(ap.Y + offset.Y + as.Y) * s,
+	}
+	stats.gui += 1
+	local rad = cornerRadius(obj, rect[3] - rect[1], rect[4] - rect[2])
+	local grad = obj:FindFirstChildOfClass("UIGradient")
+	local bgA = 1 - obj.BackgroundTransparency
+	if bgA > 0.01 and not obj:IsA("ViewportFrame") or (obj:IsA("ViewportFrame") and bgA > 0.01) then
+		fillRect(canvas, rect, obj.BackgroundColor3, bgA, clip, rad, grad)
+	end
+	if obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+		drawImage(canvas, obj, rect, clip, s)
+	end
+	if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+		local pad = obj:FindFirstChildOfClass("UIPadding")
+		local tr = rect
+		if pad then
+			local w, h = rect[3] - rect[1], rect[4] - rect[2]
+			tr = {
+				rect[1] + (pad.PaddingLeft.Scale * w + pad.PaddingLeft.Offset * s),
+				rect[2] + (pad.PaddingTop.Scale * h + pad.PaddingTop.Offset * s),
+				rect[3] - (pad.PaddingRight.Scale * w + pad.PaddingRight.Offset * s),
+				rect[4] - (pad.PaddingBottom.Scale * h + pad.PaddingBottom.Offset * s),
+			}
+		end
+		drawText(canvas, obj, tr, s, clip)
+	end
+	for _, st in obj:GetChildren() do
+		if
+			st:IsA("UIStroke")
+			and st.Enabled
+			and (
+				st.ApplyStrokeMode == Enum.ApplyStrokeMode.Border
+				or not (obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox"))
+			)
+		then
+			strokeRect(canvas, rect, st.Color, 1 - st.Transparency, math.max(1, st.Thickness * s), clip, rad)
+		end
+	end
+	local childClip = clip
+	if obj.ClipsDescendants then
+		childClip = {
+			math.max(clip[1], math.floor(rect[1])),
+			math.max(clip[2], math.floor(rect[2])),
+			math.min(clip[3], math.ceil(rect[3])),
+			math.min(clip[4], math.ceil(rect[4])),
+		}
+		if childClip[1] >= childClip[3] or childClip[2] >= childClip[4] then
+			return
+		end
+	end
+	local kids = {}
+	for i, ch in obj:GetChildren() do
+		if ch:IsA("GuiObject") then
+			table.insert(kids, { ch, i })
+		end
+	end
+	table.sort(kids, function(a, b)
+		if a[1].ZIndex ~= b[1].ZIndex then
+			return a[1].ZIndex < b[1].ZIndex
+		end
+		return a[2] < b[2]
+	end)
+	for _, k in kids do
+		drawGui(canvas, k[1], offset, s, childClip, stats)
+	end
+	maybeYield()
+end
+
+local function renderGui(canvas, s, stats)
+	local player = Players.LocalPlayer
+	local pg = player and player:FindFirstChildOfClass("PlayerGui")
+	if not pg then
+		return
+	end
+	local inset = GuiService:GetGuiInset()
+	local guis = {}
+	for _, g in pg:GetChildren() do
+		if g:IsA("ScreenGui") and g.Enabled then
+			table.insert(guis, g)
+		end
+	end
+	table.sort(guis, function(a, b)
+		return a.DisplayOrder < b.DisplayOrder
+	end)
+	local clip = { 0, 0, canvas.w, canvas.h }
+	for _, g in guis do
+		-- AbsolutePosition is measured below the top bar; screen space adds the inset back
+		local offset = Vector2.new(inset.X, inset.Y)
+		local kids = {}
+		for i, ch in g:GetChildren() do
+			if ch:IsA("GuiObject") then
+				table.insert(kids, { ch, i })
+			end
+		end
+		table.sort(kids, function(a, b)
+			if a[1].ZIndex ~= b[1].ZIndex then
+				return a[1].ZIndex < b[1].ZIndex
+			end
+			return a[2] < b[2]
+		end)
+		for _, k in kids do
+			drawGui(canvas, k[1], offset, s, clip, stats)
+		end
+	end
+end
+
+---------------------------------------------------------------- entry
+-- opts: { w = width, aa = bool, gui = bool, maxSide = n }
+local function render(opts, deps)
+	FONTS = deps.fonts
+	BASE64 = deps.base64
+	partInfo = {}
+	budgetStart = os.clock()
+	local t0 = os.clock()
+	local cam = workspace.CurrentCamera
+	if not cam then
+		return false, { error = "no camera" }
+	end
+	local vp = cam.ViewportSize
+	local minimized = vp.X < 200 or vp.Y < 120
+	local maxSide = math.clamp(tonumber(opts.max) or 640, 64, 1280)
+	local vw, vh = vp.X, vp.Y
+	if minimized then
+		vw, vh = tonumber(opts.vw) or 1280, tonumber(opts.vh) or 720
+	end
+	local s = math.min(1, maxSide / math.max(vw, vh))
+	local W, H = math.max(16, math.floor(vw * s)), math.max(16, math.floor(vh * s))
+	local canvas = newCanvas(W, H)
+	collectScene(cam)
+	local stats = { gui = 0 }
+	local rays = renderWorld(canvas, cam, opts)
+	local tWorld = os.clock() - t0
+	if opts.gui ~= false and not minimized then
+		renderGui(canvas, s, stats)
+	end
+	return true,
+		{
+			w = W,
+			h = H,
+			srcW = vw,
+			srcH = vh,
+			b64 = BASE64(canvas.buf),
+			rays = rays,
+			guiObjects = stats.gui,
+			seconds = math.floor((os.clock() - t0) * 100) / 100,
+			worldSeconds = math.floor(tWorld * 100) / 100,
+			minimized = minimized,
+			lights = #scene.lights,
+		}
+end
+
+return render
+
+end)()
+local fontsCache = nil
+local function fonts()
+	if fontsCache == nil then
+		local m = script:FindFirstChild("Font")
+		local ok, f = pcall(require, m)
+		if not ok or type(f) ~= "table" then
+			-- installed file predates the font: fetch it from the relay (same source as Font.luau)
+			local okReq, res = request("GET", "/plugin/asset?name=font")
+			if okReq and res.StatusCode == 200 then
+				local okLs, fn = pcall(function()
+					return loadstring(res.Body)
+				end)
+				if okLs and fn then
+					ok, f = pcall(fn)
+				else
+					local tmp = Instance.new("ModuleScript")
+					tmp.Source = res.Body
+					ok, f = pcall(require, tmp)
+					tmp:Destroy()
+				end
+			end
+		end
+		fontsCache = if ok and type(f) == "table" then f else {}
+	end
+	return fontsCache
+end
+local function renderFrame(payload)
+	local opts = {}
+	pcall(function()
+		opts = HttpService:JSONDecode(payload)
+	end)
+	return Render(opts, { fonts = fonts(), base64 = base64 })
+end
+
 local function playControl(kind)
 	local StudioTestService = game:GetService("StudioTestService")
 	if kind == "stop" then
@@ -441,6 +1740,8 @@ local function execute(kind, timeout, payload)
 			ok, result = runCode(payload, timeout)
 		elseif kind == "screenshot" then
 			ok, result = screenshot(payload)
+		elseif kind == "render" then
+			ok, result = renderFrame(payload)
 		elseif kind == "play" or kind == "runmode" or kind == "stop" then
 			ok, result = playControl(kind)
 		elseif kind == "ping" then
@@ -863,5 +2164,986 @@ if role ~= "client" then
 end
 ]]></ProtectedString>
 		</Properties>
+		<Item class="ModuleScript" referent="RBX1">
+			<Properties>
+				<string name="Name">Font</string>
+				<ProtectedString name="Source"><![CDATA[--!nocheck
+-- GENERATED by tools/studio-relay/scripts/gen-font.py (DejaVu Sans Bold). Do not edit.
+-- sizes[i] = { size, ascent, line, glyphs }; glyph = { w, advance, xoff, yoff, h, alpha: 1..f literal, g..z = 1..20 zeros }
+return {
+	{
+		size = 9,
+		ascent = 9,
+		line = 12,
+		glyphs = {
+			[32] = { 0, 3, 0, 0, 0, "" },
+			[33] = { 4, 4, 0, 2, 7, "gbchbchach8albchbcg" },
+			[34] = { 5, 5, 0, 2, 7, "2d3cg2d3czl" },
+			[35] = { 8, 8, 0, 2, 7, "h1dgdj4a2cidffffeic294h5fffff6h4a1cj7759i" },
+			[36] = { 6, 6, 0, 2, 8, "h37i8eff33f77h2ffd7h5cff7h38d84eeeb2h37h" },
+			[37] = { 9, 9, 0, 2, 7, "2dd3g3bh986agb2h987a58i2dd4c4dd3i86a779h2bga789hb3g3dd3" },
+			[38] = { 8, 8, 0, 2, 7, "g1bef4i6f3k4f9j1ddf64e16f29ebbg4f61df5h7debcd1" },
+			[39] = { 3, 3, 0, 2, 7, "2dg2dv" },
+			[40] = { 4, 4, 0, 1, 8, "g2e2gabhe6g2f4g2f4he6habh2e2" },
+			[41] = { 4, 4, 0, 1, 8, "1e4h9bh5f1g2f4g2f4g5f1g9bg1e4g" },
+			[42] = { 5, 5, 0, 2, 7, "hbh86b84gbf7g86b84hbr" },
+			[43] = { 8, 8, 0, 4, 5, "ib4lb4jfffff8jb4lb4i" },
+			[44] = { 3, 3, 0, 7, 3, "1f72f55bg" },
+			[45] = { 4, 4, 0, 6, 3, "7ff3n" },
+			[46] = { 3, 3, 0, 7, 2, "1f71f7" },
+			[47] = { 4, 3, 0, 2, 7, "hc1g2bh76hc1g2bh76hc2h" },
+			[48] = { 6, 6, 0, 2, 7, "g5dd8g2e73f66f2gda8f2gdc6f2gda2e73f6g5dd8g" },
+			[49] = { 6, 6, 0, 2, 7, "geff2i6f2i6f2i6f2i6f2i6f2hefff9" },
+			[50] = { 6, 6, 0, 2, 7, "4ffe8j7f4i7f5h3ebh1dbicd1h4ffff7" },
+			[51] = { 6, 6, 0, 2, 7, "1ffe9j7f4i7e3g4ffaj6f6i5f65fed9g" },
+			[52] = { 6, 6, 0, 2, 7, "h4fdicedh7cadg1e4adg8bgadg8ffffciadg" },
+			[53] = { 6, 6, 0, 2, 7, "gffff2gf4jf4jfeea1i4f8i4f74ffe9g" },
+			[54] = { 6, 6, 0, 2, 7, "g2bef5gdb1h4f4i6fceb24f81ea1e81e9g4ceb1" },
+			[55] = { 6, 6, 0, 2, 7, "5ffff8i6f5icdi3f7i9e1h1e9i6f2h" },
+			[56] = { 6, 6, 0, 2, 7, "g8dea13f73f72e73f5g8ffcg4f51e85f62e9g9eeb1" },
+			[57] = { 6, 6, 0, 2, 7, "g8dd7g5f45f46f45f8gaece9i1f8i8e21fec4g" },
+			[58] = { 4, 4, 0, 4, 5, "gf8hf8lf8hf8g" },
+			[59] = { 4, 4, 0, 4, 6, "gf8hf8lf8hf6g4ch" },
+			[60] = { 8, 8, 0, 4, 5, "j398h28db61hfc3k28db61k398g" },
+			[61] = { 8, 8, 0, 5, 4, "gfffff8pfffff8o" },
+			[62] = { 8, 8, 0, 4, 5, "gc61k39db5l8e8h38db5ic61j" },
+			[63] = { 5, 5, 0, 2, 7, "5fec3h2e8hcd1g6f3m7f1h7f1g" },
+			[64] = { 9, 9, 0, 2, 8, "h5ced7i7b3g299g1cgadb5a2574cgc574574cgc6b21cgadbd5h8b3g3aj6cec4h" },
+			[65] = { 7, 7, 0, 2, 7, "haf9i1eeei6f9f5hbe1eag1eagbe16fffff5bdieb" },
+			[66] = { 7, 7, 0, 2, 7, "2ffec4g2f7gddg2f7gdcg2ffff6g2f7gae12f7g9f22ffed7g" },
+			[67] = { 7, 7, 0, 2, 7, "g2adebhdc218g5f5j7f3j5f5kdc218h2adebg" },
+			[68] = { 7, 7, 0, 2, 7, "2ffec6g2f718f62f7hdc2f7hbe2f7hdc2f718f62ffec6g" },
+			[69] = { 6, 6, 0, 2, 7, "2ffff52f7i2f7i2ffff32f7i2f7i2ffff7" },
+			[70] = { 6, 6, 0, 2, 7, "2ffff52f7i2f7i2ffff32f7i2f7i2f7i" },
+			[71] = { 7, 7, 0, 2, 7, "g2adec4gdc2g565f5j7f3gdfa5f5hdagdc2gdag2adec6" },
+			[72] = { 8, 8, 0, 2, 7, "2f7heag2f7heag2f7heag2fffffag2f7heag2f7heag2f7heag" },
+			[73] = { 3, 3, 0, 2, 7, "2f72f72f72f72f72f72f7" },
+			[74] = { 4, 3, -1, 2, 9, "g2f7g2f7g2f7g2f7g2f7g2f7g2f7g6f57d8g" },
+			[75] = { 8, 7, 0, 2, 7, "2f7g7f6g2f77f7h2fcf8i2ffe1i2fbec1h2f74ebh2f7g5ebg" },
+			[76] = { 6, 6, 0, 2, 7, "2f7i2f7i2f7i2f7i2f7i2f7i2ffff7" },
+			[77] = { 9, 9, 0, 2, 7, "2ff2g3ff12ff8g8ff12fcdgecf12f7e9e7f12f69f87f12f63f37f12f6i7f1" },
+			[78] = { 8, 8, 0, 2, 7, "2fdhdag2ff7gdag2fcdgdag2f7d6dag2f66ddag2f6gdfag2f6g6fag" },
+			[79] = { 8, 8, 0, 2, 7, "g2bed8h1db13e9g5f4hafg7f3h8f25f4hafg1db13e9h2bed8h" },
+			[80] = { 7, 7, 0, 2, 7, "2ffed6g2f7gaf12f7gaf12ffed6g2f7j2f7j2f7j" },
+			[81] = { 8, 8, 0, 2, 8, "g2bed8h1db13e9g5f4hafg7f3h8f25f4hae11db13eah2befbl7d3g" },
+			[82] = { 7, 7, 0, 2, 7, "2ffec4g2f7gdcg2f7gdbg2fffe2g2f73eag2f7g9e22f7g3f8" },
+			[83] = { 6, 6, 0, 2, 7, "g8ded43f5g554f81i9efc3h15eb4711da2ceeb2" },
+			[84] = { 7, 6, 0, 2, 7, "efffff1hbdkbdkbdkbdkbdkbdi" },
+			[85] = { 7, 7, 0, 2, 7, "2f7g3f72f7g3f72f7g3f72f7g3f72f8g3f6gdbg7f3g4ced7g" },
+			[86] = { 7, 7, 0, 2, 7, "bdieb6f3g4f51e8g9e1gbdgeah6f8f5h1eeejaf9h" },
+			[87] = { 10, 10, 0, 2, 7, "9ehedg1f76f32ef14f42f66bd57f1gea9898bdhbdc46be9h7ff12ff6h4fdhef3g" },
+			[88] = { 7, 7, 0, 2, 7, "6f5g6f5gbd2eah2eee1iaf9i3ede2hcd1dbg7f4g4f6" },
+			[89] = { 8, 7, -1, 2, 7, "gbe1g8f4g2e92eai8fce1jdf6k8f1k8f1k8f1h" },
+			[90] = { 7, 7, 0, 2, 7, "7fffffj6fbi2ed1icf4i9f8i5fcj8fffff1" },
+			[91] = { 4, 4, 0, 1, 8, "3ff73f4g3f4g3f4g3f4g3f4g3f4g3ff7" },
+			[92] = { 4, 3, 0, 2, 7, "c2h76h2bic1h76h2bic1" },
+			[93] = { 4, 4, 0, 1, 8, "5ff5g2f5g2f5g2f5g2f5g2f5g2f55ff5" },
+			[94] = { 8, 8, 0, 2, 7, "h5eb1i7a15b2zzg" },
+			[95] = { 5, 4, 0, 9, 2, "kffff7" },
+			[96] = { 5, 4, 0, 2, 7, "3dj58zm" },
+			[97] = { 6, 6, 0, 4, 5, "2ffd8j5f32ceff58f36f53dfff5" },
+			[98] = { 7, 6, 0, 1, 8, "3f4j3f4j3f4j3fffd3g3f91ccg3f5g9eg3f91ccg3fffd3g" },
+			[99] = { 5, 5, 0, 4, 5, "g7dfb5f6h8f1h5f6i8dfb" },
+			[100] = { 6, 6, 0, 1, 8, "jdajdajdagaeffa6f42ea8fhda6f42eagaeffa" },
+			[101] = { 6, 6, 0, 4, 5, "g8de9g5f42e68ffff95f4j8dff6" },
+			[102] = { 4, 4, 0, 1, 8, "g6efge9hf8gcffdgf8hf8hf8hf8g" },
+			[103] = { 6, 6, 0, 4, 7, "gaeffa6f43ea8fhda6f43eagaeffai2e8gffda1" },
+			[104] = { 6, 6, 0, 1, 8, "3f4i3f4i3f4i3fffd33f91e93f5gda3f4gda3f4gda" },
+			[105] = { 3, 3, 0, 1, 8, "3f43f4i3f43f43f43f43f4" },
+			[106] = { 4, 3, -1, 1, 10, "g3f4g3f4k3f4g3f4g3f4g3f4g3f4g5f34eag" },
+			[107] = { 7, 6, 0, 1, 8, "3f4j3f4j3f4j3f45e6g3fae6h3ffci3f7eah3f43e9g" },
+			[108] = { 3, 3, 0, 1, 8, "3f43f43f43f43f43f43f43f4" },
+			[109] = { 9, 9, 0, 4, 5, "3fffeced33f83fb1e93f51f7gda3f41f7gda3f41f7gda" },
+			[110] = { 6, 6, 0, 4, 5, "3fffd33f91e93f5gda3f4gda3f4gda" },
+			[111] = { 6, 6, 0, 4, 5, "g8de9g5f42e88fhdb5f42e8g8dea1" },
+			[112] = { 7, 6, 0, 4, 7, "3fffd3g3f91ccg3f5g9eg3f91ccg3fffd3g3f4j3f4j" },
+			[113] = { 6, 6, 0, 4, 7, "gaeffa6f42ea8fhda6f42eagaeffajdajda" },
+			[114] = { 5, 4, 0, 4, 5, "3fff63f9h3f5h3f4h3f4h" },
+			[115] = { 5, 5, 0, 4, 5, "2cef87e62g3eff9h4cd6fed5" },
+			[116] = { 5, 4, 0, 3, 6, "1f7hdfff11f7h1f7h1f8iaeeg" },
+			[117] = { 6, 6, 0, 4, 5, "4f4gd94f4gd94f4ge93f63f9gaeff9" },
+			[118] = { 6, 6, 0, 4, 5, "adhe84f35f2gd8abh7ee5h2eeh" },
+			[119] = { 8, 8, 0, 4, 5, "8eg9dg9d4f3ce2d9ge8d98f5gbea5ef1g7f62fcg" },
+			[120] = { 6, 6, 0, 4, 5, "6e36e3gade7h2feibce8g7e25f4" },
+			[121] = { 6, 6, 0, 4, 7, "adhe73f45f2gc9abh6ee6ieejc9h1fc2h" },
+			[122] = { 5, 5, 0, 4, 5, "7fffch6f7g5e8g4eah8fffc" },
+			[123] = { 6, 6, 0, 1, 8, "h2de4h7e1i9eidf8jcdj8ej7f2i2ce4" },
+			[124] = { 3, 3, 0, 2, 9, "gc2gc2gc2gc2gc2gc2gc2gc2gc2" },
+			[125] = { 6, 6, 0, 1, 8, "gde7j9dj8e1i2ef4h7f3i8ejadide6h" },
+			[126] = { 8, 8, 0, 4, 5, "o7da226h5g5dc2w" },
+			[1040] = { 7, 7, 0, 2, 7, "haf9i1eeei6f9f5hbe1eag1eagbe16fffff5bdieb" },
+			[1041] = { 7, 7, 0, 2, 7, "2ffffbg2f7j2f7j2ffed7g2f7gaf22f7g9f22ffed7g" },
+			[1042] = { 7, 7, 0, 2, 7, "2ffec4g2f7gddg2f7gdcg2ffff6g2f7gae12f7g9f22ffed7g" },
+			[1043] = { 6, 6, 0, 2, 7, "2ffff72f7i2f7i2f7i2f7i2f7i2f7i" },
+			[1044] = { 8, 8, 0, 2, 8, "g3ffff8h3f62f8h3f62f8h4f52f8h4f42f8h8f22f8g6ffffff76cjc7" },
+			[1045] = { 6, 6, 0, 2, 7, "2ffff52f7i2f7i2ffff32f7i2f7i2ffff7" },
+			[1046] = { 11, 11, 0, 2, 7, "2e9g5f5g9e3g4e85f56e4i7fbfae7j9fffff9i4facfb8f4hdd15f5gddg8f5g5f5g4f8" },
+			[1047] = { 6, 6, 0, 2, 7, "3ffea1i4f8i4f6g4ffd1i3eai2ea6ffea2" },
+			[1048] = { 8, 8, 0, 2, 7, "2f6g6fag2f6gdfag2f67ddag2f7e6dag2fedgdag2ff7gdag2fdhdag" },
+			[1049] = { 8, 8, 0, 0, 9, "h8ebq2f6g6fag2f6gdfag2f67ddag2f7e6dag2fedgdag2ff7gdag2fdhdag" },
+			[1050] = { 8, 7, 0, 2, 7, "2f7g4e9g2f73eah2faebi2fffci2fc5f8h2f7g9e3g2f7g1dcg" },
+			[1051] = { 7, 7, 0, 2, 7, "hffff9hfagf9hf9gf9g1f8gf9g2f6gf9g9e2gf98b4hf9" },
+			[1052] = { 9, 9, 0, 2, 7, "2ff2g3ff12ff8g8ff12fcdgecf12f7e9e7f12f69f87f12f63f37f12f6i7f1" },
+			[1053] = { 8, 8, 0, 2, 7, "2f7heag2f7heag2f7heag2fffffag2f7heag2f7heag2f7heag" },
+			[1054] = { 8, 8, 0, 2, 7, "g2bed8h1db13e9g5f4hafg7f3h8f25f4hafg1db13e9h2bed8h" },
+			[1055] = { 8, 8, 0, 2, 7, "2fffffag2f7heag2f7heag2f7heag2f7heag2f7heag2f7heag" },
+			[1056] = { 7, 7, 0, 2, 7, "2ffed6g2f7gaf12f7gaf12ffed6g2f7j2f7j2f7j" },
+			[1057] = { 7, 7, 0, 2, 7, "g2adebhdc218g5f5j7f3j5f5kdc218h2adebg" },
+			[1058] = { 7, 6, 0, 2, 7, "efffff1hbdkbdkbdkbdkbdkbdi" },
+			[1059] = { 7, 7, 0, 2, 7, "7f4g5f61ebgcehaf8f8h3ffe2icfaj8f3iad7i" },
+			[1060] = { 9, 9, 0, 2, 7, "i5f4j5cefeb5g4f86f59e37f35f44f64f86f59e3g6cefeb5j5f4i" },
+			[1061] = { 7, 7, 0, 2, 7, "6f5g6f5gbd2eah2eee1iaf9i3ede2hcd1dbg7f4g4f6" },
+			[1062] = { 8, 8, 0, 2, 8, "2f7heag2f7heag2f7heag2f7heag2f7heag2f7heag2ffffffcl7c" },
+			[1063] = { 7, 7, 0, 2, 7, "4f6g3f64f6g3f63f8g3f6gaefff6j3f6j3f6j3f6" },
+			[1064] = { 11, 11, 0, 2, 7, "2f7g4f6g6f42f7g4f6g6f42f7g4f6g6f42f7g4f6g6f42f7g4f6g6f42f7g4f6g6f42fffffffff4" },
+			[1065] = { 12, 12, 0, 2, 8, "2f7g4f6g6f4g2f7g4f6g6f4g2f7g4f6g6f4g2f7g4f6g6f4g2f7g4f6g6f4g2f7g4f6g6f4g2ffffffffff5pd5" },
+			[1066] = { 8, 8, 0, 2, 7, "48882i6acf4k5f5k5fffd5h5f63ddh5f62ddh5ffec4" },
+			[1067] = { 9, 9, 0, 2, 7, "2f7i2f72f7i2f72f7i2f72ffed72f72f7gaf4f72f7g9f4f72ffed72f7" },
+			[1068] = { 7, 7, 0, 2, 7, "2f7j2f7j2f7j2ffed7g2f7gaf22f7g9f22ffed7g" },
+			[1069] = { 7, 7, 0, 2, 8, "17983h6b8ce5kddh8ddef1g355ceg3426eag4efe91i1j" },
+			[1070] = { 11, 11, 0, 2, 7, "2f7g3bec7h2f72ea15f7g2f77f2hcdg2ffff1hafg2f77f2hcdg2f72ea15f7g2f7g3bed7h" },
+			[1071] = { 7, 7, 0, 2, 7, "g5deff1geag8f1geag8f1g6efff1g1e88f1g9e18f12e9g8f1" },
+			[1072] = { 6, 6, 0, 4, 5, "2ffd8j5f32ceff58f36f53dfff5" },
+			[1073] = { 6, 6, 0, 0, 9, "m5bdd12e4i7aj8ddea18f61d97f2gbc4f61dag7dea1" },
+			[1074] = { 6, 6, 0, 4, 5, "3ffe9g3f47eg3fffbg3f45f33ffebg" },
+			[1075] = { 5, 5, 0, 4, 5, "3fff73f4h3f4h3f4h3f4h" },
+			[1076] = { 7, 7, 0, 4, 6, "g4fffeh4f39eh5f29ehaeg9eg7fffffb79i5b" },
+			[1077] = { 6, 6, 0, 4, 5, "g8de9g5f42e68ffff95f4j8dff6" },
+			[1078] = { 9, 9, 0, 4, 5, "3e84f48e3g3ecfbe3h1dfffd1hbc6f5dag7e24f43e6" },
+			[1079] = { 5, 5, 0, 4, 5, "5fec3h1e6gbfd2h1d98fec3" },
+			[1080] = { 6, 6, 0, 4, 5, "3f45f83f5df83fddf83ff4f83fagf8" },
+			[1081] = { 6, 6, 0, 2, 7, "g1de5m3f45f83f5df83fddf83ff4f83fagf8" },
+			[1082] = { 6, 6, 0, 4, 5, "3f46e43fbe4g3ffe1g3f6bcg3f41d9" },
+			[1083] = { 7, 7, 0, 4, 5, "g6fffch6f2bch6f1bchadgbcg7c4gbcg" },
+			[1084] = { 7, 7, 0, 4, 5, "3fbg6f83ff3df83fcdde83f6e6e83f4he8" },
+			[1085] = { 6, 6, 0, 4, 5, "3f41f73f41f73ffff73f41f73f41f7" },
+			[1086] = { 6, 6, 0, 4, 5, "g8de9g5f42e88fhdb5f42e8g8dea1" },
+			[1087] = { 6, 6, 0, 4, 5, "3ffff73f41f73f41f73f41f73f41f7" },
+			[1088] = { 7, 6, 0, 4, 7, "3fffd3g3f91ccg3f5g9eg3f91ccg3fffd3g3f4j3f4j" },
+			[1089] = { 5, 5, 0, 4, 5, "g7dfb5f6h8f1h5f6i8dfb" },
+			[1090] = { 6, 5, 0, 4, 5, "effff2g2f5i2f5i2f5i2f5h" },
+			[1091] = { 6, 6, 0, 4, 7, "adhe73f45f2gc9abh6ee6ieejc9h1fc2h" },
+			[1092] = { 9, 9, 0, 1, 10, "i4f3l4f3l4f3j9efffe8g4f56f56f37f24f33f64f56f56f3g9efffe8j4f3l4f3i" },
+			[1093] = { 6, 6, 0, 4, 5, "6e36e3gade7h2feibce8g7e25f4" },
+			[1094] = { 7, 7, 0, 4, 6, "3f41f7g3f41f7g3f41f7g3f41f7g3fffff4kc4" },
+			[1095] = { 6, 6, 0, 4, 5, "6f26f26f36f22dfff2i6f2i6f2" },
+			[1096] = { 10, 10, 0, 4, 5, "3f4gf8gcbg3f4gf8gcbg3f4gf8gcbg3f4gf8gcbg3fffffffbg" },
+			[1097] = { 10, 10, 0, 4, 6, "3f4gf8gcbg3f4gf8gcbg3f4gf8gcbg3f4gf8gcbg3ffffffff8n88" },
+			[1098] = { 7, 7, 0, 4, 5, "bdd6j2f6j2feec1g2f63f5g2feeb1" },
+			[1099] = { 8, 8, 0, 4, 5, "3f4h2f63f4h2f63ffea3f63f45f6f63ffea3f6" },
+			[1100] = { 6, 6, 0, 4, 5, "3f4i3f4i3ffeag3f45f33ffeag" },
+			[1101] = { 5, 5, 0, 3, 7, "k4eeb1223eagaded112db5ffc2h1h" },
+			[1102] = { 9, 9, 0, 4, 5, "3f42bec5g3f4cc18e23fef9g4f43f4ccg8e23f42bed5g" },
+			[1103] = { 6, 6, 0, 4, 5, "1beffg4f48fhbfffhc98fg6e18fg" },
+			[1025] = { 6, 6, 0, 0, 9, "g5996m2ffff52f7i2f7i2ffff32f7i2f7i2ffff7" },
+			[1105] = { 6, 6, 0, 2, 7, "g4b87n8de9g5f42e68ffff95f4j8dff6" },
+			[171] = { 6, 6, 0, 4, 5, "g18g9g2c6c5g2c6c5h18g9m" },
+			[187] = { 6, 6, 0, 4, 5, "27g8i8b6ch8b6cg27g9n" },
+			[8212] = { 9, 9, 0, 6, 3, "7fffffff7x" },
+			[8211] = { 5, 4, 0, 6, 3, "7fffq" },
+			[8230] = { 9, 9, 0, 7, 2, "4f44f44f44f44f44f4" },
+			[8470] = { 11, 11, 0, 2, 7, "187h271i2ff4gcc1i2fecgdag88g2f7e5da58942f67cda49a43f6gdfag55gac2g6fa5dd5" },
+			[215] = { 8, 8, 0, 4, 5, "g85g1b2h2d7c8j3fbj2d7c8i86g1b2g" },
+			[183] = { 3, 3, 0, 5, 4, "1f71f7l" },
+			[8226] = { 6, 6, 0, 4, 5, "g4dc1h9ff6h4dc1s" },
+			[10003] = { 8, 8, 0, 3, 6, "j17lb3k77j66bk5e1r" },
+			[10004] = { 8, 8, 0, 3, 6, "j183j1dai42cbjddd1j9e4l2k" },
+			[8594] = { 8, 8, 0, 4, 5, "j19mb8g7ffffff1kb8k19h" },
+			[8592] = { 8, 8, 0, 4, 5, "g37k1d4k7ffffffg1d4l37k" },
+			[8593] = { 8, 8, 0, 2, 7, "h1d7kbee5j5b64kb4lb4lb4lb4i" },
+			[8595] = { 8, 8, 0, 2, 7, "ib4lb4lb4lb4k5b64jbee5j1d7i" },
+			[9733] = { 8, 8, 0, 2, 8, "q45l9aj9ffffa1h7ff8j8ccaj7h7p" },
+			[9734] = { 8, 8, 0, 2, 8, "q33l44j7411371h5h5j4444j6h6p" },
+			[9829] = { 8, 8, 0, 2, 7, "g271173hefcafe11fffeff2gbffffch1dffe2i3ee4k56i" },
+			[176] = { 5, 4, 0, 2, 7, "gad4g2a39hbd4zg" },
+			[8381] = { 6, 6, 0, 2, 7, "g6885hbebf9gbegdc9eeef74ce52gafffchbei" },
+			[8364] = { 7, 6, -1, 2, 7, "h2bed6hdc126gefffah5f4jeffejdc226h2bed6" },
+			[10005] = { 8, 8, 0, 3, 6, "g73h82h2c399j2eak99c3i89g2c2h1i1h" },
+			[10006] = { 8, 8, 0, 2, 7, "h1h1i9c15e3hbfdee5icff6i5effc1hde6bf7h25h6h" },
+			[9876] = { 8, 8, 0, 2, 7, "g1j1h43h24i6216k88j119911h1d43d2h82h29g" },
+			[9201] = { 5, 5, 0, 3, 8, "8fffe7i77i77i77i77i77i78fffe" },
+			[9889] = { 6, 6, 0, 2, 7, "k2i45i95i4a96j94i71i4j" },
+		},
+	},
+	{
+		size = 12,
+		ascent = 12,
+		line = 15,
+		glyphs = {
+			[32] = { 0, 4, 0, 0, 0, "" },
+			[33] = { 5, 5, 0, 3, 9, "g4fch4fch4fch4fbh2fah1f8m4fch4fcg" },
+			[34] = { 6, 6, 0, 3, 9, "gc84f1gc84f1gc84f1zv" },
+			[35] = { 10, 10, 0, 3, 9, "i1f33ek5dg8bi7fffffff3ie51f3j2f24ei2fffffff8i99gc7kc7ge4ke42f1i" },
+			[36] = { 8, 8, 0, 3, 11, "i49j2aefffhcd59jeeaajdfffe8h4dffff5i6ccf7i497f4geeeec6j49l49i" },
+			[37] = { 12, 12, 0, 3, 9, "g9ec3h3e2h6e19dhb7i8dg6fg6cj6e19c1e4k9ec3993ce9k3e1c91e6jc6ge6gc9i7chc91e6h1e3h3ce9g" },
+			[38] = { 10, 10, 0, 3, 9, "h2beffkcf4mdf5mafe1k9fefcg5f62fe2df99f33fcg2dfechce5g7ff7h19ded9de6" },
+			[39] = { 4, 4, 0, 3, 9, "gc8hc8hc8zk" },
+			[40] = { 5, 5, 0, 2, 11, "h7f4hech6f7haf3hdf1hefidf1haf3h6f7ieci7f4" },
+			[41] = { 5, 5, 0, 2, 11, "gcdi5f7iedibf2h9f5h8f6h9f5hbf2hedh5f7hcdh" },
+			[42] = { 7, 6, 0, 3, 9, "h59i77695ag19eeb3g19eeb3g77595ai59zj" },
+			[43] = { 10, 10, 0, 5, 7, "jaanaanaakbffffffbkaanaanaaj" },
+			[44] = { 5, 5, 0, 10, 4, "gbf4hbf4hech3e3h" },
+			[45] = { 5, 5, 0, 8, 4, "5fff45fff4p" },
+			[46] = { 5, 5, 0, 10, 2, "gbf4hbf4g" },
+			[47] = { 5, 4, 0, 3, 10, "h1e3h5dia9ie4h4ei9aid5h3e1h8bic6i" },
+			[48] = { 8, 8, 0, 3, 9, "h9deb3h9f52deg1eeh9f74fch7f95fch7fb4fch7f91eeh9f7g9f52dei9deb3g" },
+			[49] = { 8, 8, 0, 3, 9, "g9fff8k8f8k8f8k8f8k8f8k8f8k8f8k8f8i8fffff8" },
+			[50] = { 8, 8, 0, 3, 9, "g3aeda2ha3g7fdlff2j3ff1jcf9jbfbjafbj8fc1jffffff4" },
+			[51] = { 8, 8, 0, 3, 9, "g2aedb3h83g7fek1ff2j7fciaffe3k5ee2kdf5282g5ee1g6ceda3g" },
+			[52] = { 8, 8, 0, 3, 9, "i4ff8i1dff8iaeaf8h5f78f8g1ecg8f8g6f3g8f8g6ffffffcj8f8k8f8g" },
+			[53] = { 8, 8, 0, 3, 9, "gbffffdhbf1kbf1kbfeeb3k5fe2kcf6kcf6j5fe11fffda3g" },
+			[54] = { 8, 8, 0, 3, 9, "h4beff1g5ea1jdf1j2feced6g3ff81cf52ff3g7f9gef2g7f8g7f81ce3h7dec4g" },
+			[55] = { 8, 8, 0, 3, 9, "3ffffff5j2ff4j8fckef6j6fekcf8j3fe1j9f9kef3i" },
+			[56] = { 8, 8, 0, 3, 9, "g2adec5hcf51de3gff1gbf5gbf51de2g2dffe5hde31ce43fdh8f81ee31cf5g3beec6g" },
+			[57] = { 8, 8, 0, 3, 9, "g2adea1hce33fcg3fchdf44fchdf71ee33ff8g3beddf7kbf3j6fahcfed7h" },
+			[58] = { 5, 5, 0, 5, 7, "g9f6h9f6w9f6h9f6g" },
+			[59] = { 5, 5, 0, 5, 9, "g9f6h9f6w9f6h9f6hcd1g1f4h" },
+			[60] = { 10, 10, 0, 5, 7, "l27ak6bfd7h39eea4jbfb1l3aee94m6bfd7m27ag" },
+			[61] = { 10, 10, 0, 7, 5, "gbffffffbrbffffffbzg" },
+			[62] = { 10, 10, 0, 5, 7, "g982m6dfb61l49eea4l1afbj49eea4h6dfc61j982l" },
+			[63] = { 7, 7, 0, 3, 9, "2ffec5j2ee1i6fei3ef5ibf8jdf2qef2jef2h" },
+			[64] = { 12, 12, 0, 3, 11, "i4aeec6k7d51g3bbi5d1ka8hc5g7ebc72eg1eg3e33e7ge12dg6dhd71eg1eg3e33e899hc4g8eccd8i5d1p8d5h4b2k4beec6i" },
+			[65] = { 10, 9, 0, 3, 9, "idff2k3fff7k9fcfdkef3ef3i4fdg9f9iaf9g4feh1effffff4g6fbi6fagbf7i2fe1" },
+			[66] = { 9, 9, 0, 3, 9, "gdffeda1hdf5g9fahdf5g5fdhdf5g8fahdffffe3hdf5g4fe1gdf5hef3gdf5g4fe1gdfffeb4g" },
+			[67] = { 9, 9, 0, 3, 9, "h3adedah5ed4g29hef5k4ffl5fel4ffmef5l5ed4g29i3aeedbg" },
+			[68] = { 10, 10, 0, 3, 9, "gdffed93idf5g5ee4hdf5h6fdhdf5h1ff3gdf5iff4gdf5h1ff3gdf5h6fdhdf5g5ee4hdfeeda3h" },
+			[69] = { 8, 8, 0, 3, 9, "gdfffff2gdf5kdf5kdf5kdffffehdf5kdf5kdf5kdfffff4" },
+			[70] = { 8, 8, 0, 3, 9, "gdfffff2gdf5kdf5kdf5kdffffehdf5kdf5kdf5kdf5j" },
+			[71] = { 10, 10, 0, 3, 9, "h3adeec6h5ed4g268hef5l4ffm5feh8ffeg4ffi2fehef5h2feh5ed4g4fei3aeedc8g" },
+			[72] = { 10, 10, 0, 3, 9, "gdf5h4fehdf5h4fehdf5h4fehdf5h4fehdffffffehdf5h4fehdf5h4fehdf5h4fehdf5h4feg" },
+			[73] = { 4, 4, 0, 3, 9, "gdf5gdf5gdf5gdf5gdf5gdf5gdf5gdf5gdf5" },
+			[74] = { 5, 4, -1, 3, 11, "hdf5hdf5hdf5hdf5hdf5hdf5hdf5hdf5hdf4g4fe1adb3g" },
+			[75] = { 10, 9, 0, 3, 9, "gdf5g1cfahdf51cfaidf6cfajdfefbkdfff4kdfcfe3jdf59fe3idf5g9fe3hdf5h9fe3" },
+			[76] = { 8, 8, 0, 3, 9, "gdf5kdf5kdf5kdf5kdf5kdf5kdf5kdf5kdfffff4" },
+			[77] = { 12, 12, 0, 3, 9, "gdff2h3ffchdff9haffchdfde11edfchdf7f78f7fchdf3cdeb4fchdf36ff54fchdf3gddg4fchdf3j4fchdf3j4fcg" },
+			[78] = { 10, 10, 0, 3, 9, "gdfch3fehdff5g3fehdfedg3fehdf9f63fehdf3dd3fehdf35f9fehdf3gcefehdf3g5ffehdf3hcfeg" },
+			[79] = { 10, 10, 0, 3, 9, "h4beec6i6fc21af9g1ef4h1ef34ffjcf75fejbf84ffjcf71ef4h1ef3g6fc21af9i5beec6h" },
+			[80] = { 9, 9, 0, 3, 9, "gdfffda2hdf5g7fchdf5g1ff3gdf5g1ff3gdf5g7fchdfffda2hdf5ldf5ldf5k" },
+			[81] = { 10, 10, 0, 3, 11, "h4beec6i6fc21af9g1ef4h1ef34ffjcf75fejbf84ffjcf71ef3h1ef3g6fc21afai4beff8m4fan8f7g" },
+			[82] = { 9, 9, 0, 3, 9, "gdffeda1hdf5g9fahdf5g6fchdf5g9f8hdffffaidf52df6hdf5g6fehdf5hef5gdf5h9fb" },
+			[83] = { 9, 9, 0, 3, 9, "g1adeec2hce3g392g1femefd84j7ffffd2i27cff9l8fahb41gaf6hadeec7h" },
+			[84] = { 9, 8, 0, 3, 9, "efffffff1iff3lff3lff3lff3lff3lff3lff3lff3i" },
+			[85] = { 10, 10, 0, 3, 9, "gdf5h9f9hdf5h9f9hdf5h9f9hdf5h9f9hdf5h9f9hdf5h9f9hbf6haf7h6fb12ee3i6cedb4h" },
+			[86] = { 10, 9, 0, 3, 9, "bf7i3fe16fci8fag1ef2hdf4haf8g3fei4fdg9f9jef4ef3j9fcfdk3fff7ldff2i" },
+			[87] = { 13, 13, 0, 3, 9, "7f9h8fch6fb4fchcfeh9f71ef1gecf4gcf4gcf44f5f71feh9f87f1cb4fch5fbbcg9e8f8h2fee9g5fef5idff5g2fff2iaff2hdfdh" },
+			[88] = { 10, 9, 0, 3, 9, "4fe1hbf8hafag6fci1df7ee3j5fff8ldff2k6fefaj2ee4df5ibf8g4fe1g6fdi9fag" },
+			[89] = { 10, 9, -1, 3, 9, "gbf9idf7g2ef4g8fci7fd3ee3jcfef8k3efdmbf7mbf7mbf7mbf7i" },
+			[90] = { 9, 9, 0, 3, 9, "4fffffffk2efekcff5j8ff9j4ffcj1dfe2jbff6j5ffak6fffffff2" },
+			[91] = { 5, 5, 0, 2, 11, "geffagefiefiefiefiefiefiefiefiefieffa" },
+			[92] = { 5, 4, 0, 3, 10, "c6i8bi3e1id5i9ai4eje4ia9i5di1e3" },
+			[93] = { 5, 5, 0, 2, 11, "2fff6h8f6h8f6h8f6h8f6h8f6h8f6h8f6h8f6h8f62fff6" },
+			[94] = { 10, 10, 0, 3, 9, "i3ee4k4ebae4i4d6h5d5zzzg" },
+			[95] = { 6, 6, 0, 12, 3, "rffffff" },
+			[96] = { 6, 6, 0, 2, 10, "1c9j1b6zzp" },
+			[97] = { 8, 8, 0, 5, 7, "gdffda1k5fblefh8defff25fc1gef25fb16ff2g9effff2" },
+			[98] = { 9, 9, 0, 2, 10, "gef1lef1lef1lefffe9ief919f8hef3g3fdhef1g1ffhef3g3fdhef919f8hefffe9h" },
+			[99] = { 7, 7, 0, 5, 7, "g19de8hcf6g434fcj6fbj4fckcf6g54g19de8g" },
+			[100] = { 9, 9, 0, 2, 10, "k8f8l8f8l8f8h2cefff8hde42ef8g4fch9f8g6fbh8f8g4fch9f8hde42ef8h3cefff8g" },
+			[101] = { 8, 8, 0, 5, 7, "g19dea2hce42edg4fbh9f56ffffff84fblce4g293g19deb5g" },
+			[102] = { 6, 5, 0, 2, 10, "g2bef4g9f7ibf5hbffff2gbf5ibf5ibf5ibf5ibf5ibf5h" },
+			[103] = { 9, 9, 0, 5, 10, "g2cefff8hdf42ef8g4fch9f8g6fbh8f8g4fch9f8hde32ef8h3cefff8l9f7h74g3ee2h2aeda3h" },
+			[104] = { 9, 9, 0, 2, 10, "gef1lef1lef1lefffeaief91bf6hef2g7f9hef1g7f9hef1g7f9hef1g7f9hef1g7f9g" },
+			[105] = { 4, 4, 0, 2, 10, "gef1gef1kef1gef1gef1gef1gef1gef1gef1" },
+			[106] = { 5, 4, -1, 2, 13, "hef1hef1mef1hef1hef1hef1hef1hef1hef1hef1g3fdg6ec4g" },
+			[107] = { 9, 8, 0, 2, 10, "gef1lef1lef1lef11cf6hef2cf6iefcf7jeffe1jef9fc1ief19fbief1gbfag" },
+			[108] = { 4, 4, 0, 2, 10, "gef1gef1gef1gef1gef1gef1gef1gef1gef1gef1" },
+			[109] = { 13, 12, 0, 5, 7, "gffffedceeaiff81efb1bf6hff2gcf6g8f8hff1gbf4g8f8hff1gbf4g8f8hff1gbf4g8f8hff1gbf4g8f8g" },
+			[110] = { 9, 9, 0, 5, 7, "gefffeaief91bf6hef2g7f9hef1g7f9hef1g7f9hef1g7f9hef1g7f9g" },
+			[111] = { 8, 8, 0, 5, 7, "g19deb3hce41de24fch8f86fah7fa4fch8f8gde41de2g1adeb3g" },
+			[112] = { 9, 9, 0, 5, 10, "gefffe9ief919f8hef3g3fdhef1g1ffhef3g3fdhef919f8hefffe9ief1lef1lef1k" },
+			[113] = { 9, 9, 0, 5, 10, "g2cefff8hde42ef8g4fch9f8g6fbh8f8g4fch9f8hde42ef8h3cefff8l8f8l8f8l8f8g" },
+			[114] = { 6, 6, 0, 5, 7, "gefffdgefaief3ief1ief1ief1ief1h" },
+			[115] = { 7, 7, 0, 5, 7, "g7deb5g3f9g2924fc52iafffd2h14bf7382g9f6g6ced8g" },
+			[116] = { 6, 6, 0, 4, 8, "gcf4hcffff7gcf4icf4icf4ibf4iaf6i3cef4" },
+			[117] = { 9, 9, 0, 5, 7, "gffh8f8hffh8f8hffh8f8hffh8f8hffh9f8hdf42ef8h4defff8g" },
+			[118] = { 8, 8, 0, 5, 7, "9f6h9f63fbhee1gdf14fah7f79f5h2fceejbff9j6ff3h" },
+			[119] = { 11, 11, 0, 5, 7, "6f8g6f8g7f83fcgafbgaf4geegdcegeehaf5f6f6fch7fcegdcf8h3ffbgaff4ief8g6fe1g" },
+			[120] = { 8, 8, 0, 5, 7, "5fcg2ee2g9f7bf5h1defaj7ff3i1eefcibf59f7g7fbg1de3" },
+			[121] = { 8, 8, 0, 5, 10, "af6h9f64fchee1gdf24fbh7f88f6h1edde1iaffbj4ff6kee1j4fajceb1i" },
+			[122] = { 7, 7, 0, 5, 7, "4fffff6i6ff5h3efbh1dfd1hcfe3h6ff5i6fffff6" },
+			[123] = { 9, 9, 0, 2, 11, "i2befk9f8laf4laf4k2df2j7ff9l2ef2laf4laf4l8f8l2befh" },
+			[124] = { 4, 4, 0, 3, 12, "g7ch7ch7ch7ch7ch7ch7ch7ch7ch7ch7ch7cg" },
+			[125] = { 9, 9, 0, 2, 11, "g7fd7l1df2lbf3lbf3l9f8l2effk9f9lbf4lbf3k1df2j7fd7j" },
+			[126] = { 10, 10, 0, 6, 6, "q3beb4g39h73g4beb3zq" },
+			[1040] = { 10, 9, 0, 3, 9, "idff2k3fff7k9fcfdkef3ef3i4fdg9f9iaf9g4feh1effffff4g6fbi6fagbf7i2fe1" },
+			[1041] = { 9, 9, 0, 3, 9, "gdfffffahdf5ldf5ldf5ldfffdb3hdf5g4fe1gdf5hef3gdf5g4fe1gdfffeb3g" },
+			[1042] = { 9, 9, 0, 3, 9, "gdffeda1hdf5g9fahdf5g5fdhdf5g8fahdffffe3hdf5g4fe1gdf5hef3gdf5g4fe1gdfffeb4g" },
+			[1043] = { 8, 8, 0, 3, 9, "gdfffff4gdf5kdf5kdf5kdf5kdf5kdf5kdf5kdf5j" },
+			[1044] = { 11, 11, 0, 3, 11, "hafffffbjaf8g8fbjaf8g8fbjaf8g8fbjaf7g8fbjaf6g8fbjcf5g8fbi3ef2g8fbh4ffffffffeg4f6kbeg4f6kbeg" },
+			[1045] = { 8, 8, 0, 3, 9, "gdfffff2gdf5kdf5kdf5kdffffehdf5kdf5kdf5kdfffff4" },
+			[1046] = { 15, 15, 0, 3, 9, "1df5hbf7hafah2ee4gbf7g8fbj3ee3bf76fc1k7fedfbee2lcfffffff7k7feaffe8fe3i2ef5gcf8g9fcicfahbf7hdf7g7fd1hbf7h4fe3" },
+			[1047] = { 9, 9, 0, 3, 9, "g4bedb5i92g3ef4lbf7k3ee3iafff8l2df6l8fag282g2cf6h6ceec6h" },
+			[1048] = { 10, 10, 0, 3, 9, "gdf3hcfehdf3g5ffehdf3gdefehdf36f9fehdf4dd3fehdfbf63fehdffdg3fehdff5g3fehdfdh3feg" },
+			[1049] = { 10, 10, 0, 1, 11, "id25al6ec2jdf3hcfehdf3g5ffehdf3gdefehdf36f9fehdf4dd3fehdfbf63fehdffdg3fehdff5g3fehdfdh3feg" },
+			[1050] = { 10, 10, 0, 3, 9, "gdf5h8fc1gdf5g8fd1hdf57fd2idfbff3jdffff8jdfe7ee3idf6g8fdidf5hcf9hdf5h3ef4" },
+			[1051] = { 10, 10, 0, 3, 9, "h5fffffci5fdg5fci5fdg5fci5fcg5fci6fbg5fci7f9g5fci9f6g5fch4edh5fcg6c71h5fcg" },
+			[1052] = { 12, 12, 0, 3, 9, "gdff2h3ffchdff9haffchdfde11edfchdf7f78f7fchdf3cdeb4fchdf36ff54fchdf3gddg4fchdf3j4fchdf3j4fcg" },
+			[1053] = { 10, 10, 0, 3, 9, "gdf5h4fehdf5h4fehdf5h4fehdf5h4fehdffffffehdf5h4fehdf5h4fehdf5h4fehdf5h4feg" },
+			[1054] = { 10, 10, 0, 3, 9, "h4beec6i6fc21af9g1ef4h1ef34ffjcf75fejbf84ffjcf71ef4h1ef3g6fc21af9i5beec6h" },
+			[1055] = { 10, 10, 0, 3, 9, "gdffffffehdf5h4fehdf5h4fehdf5h4fehdf5h4fehdf5h4fehdf5h4fehdf5h4fehdf5h4feg" },
+			[1056] = { 9, 9, 0, 3, 9, "gdfffda2hdf5g7fchdf5g1ff3gdf5g1ff3gdf5g7fchdfffda2hdf5ldf5ldf5k" },
+			[1057] = { 9, 9, 0, 3, 9, "h3adedah5ed4g29hef5k4ffl5fel4ffmef5l5ed4g29i3aeedbg" },
+			[1058] = { 9, 8, 0, 3, 9, "efffffff1iff3lff3lff3lff3lff3lff3lff3lff3i" },
+			[1059] = { 9, 9, 0, 3, 9, "6fdiaf9gef6g2ff3g8fdg9fbh2ef8ef4iafffcj4fff5kcfdlaf6j3ed8j" },
+			[1060] = { 12, 12, 0, 3, 9, "j2ff1l7beffeb6ibf94ff2afag4ff12ff12ff25feg2ff1gff44ff12ff12ff2gbf93ff2afai7beffeb6l2ff1j" },
+			[1061] = { 10, 9, 0, 3, 9, "4fe1hbf8hafag6fci1df7ee3j5fff8ldff2k6fefaj2ee4df5ibf8g4fe1g6fdi9fag" },
+			[1062] = { 11, 11, 0, 3, 11, "gdf5h4feidf5h4feidf5h4feidf5h4feidf5h4feidf5h4feidf5h4feidf5h4feidffffffff6n4f6n4f6" },
+			[1063] = { 10, 10, 0, 3, 9, "gff3h9f8hff3h9f8hef3h9f8hcf7h9f8h3ceffff8m9f8m9f8m9f8m9f8g" },
+			[1064] = { 15, 15, 0, 3, 9, "gdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdf5haf8h8fahdfffffffffffag" },
+			[1065] = { 16, 16, 0, 3, 11, "gdf5haf8h8faidf5haf8h8faidf5haf8h8faidf5haf8h8faidf5haf8h8faidf5haf8h8faidf5haf8h8faidf5haf8h8faidfffffffffffff2s7f2s7f2" },
+			[1066] = { 11, 11, 0, 3, 9, "4bbbb8k5eeefbn8fbn8fc653k8fffffc1i8fc45df7i8fbh9f9i8fd89ef5i8fffec6g" },
+			[1067] = { 12, 12, 0, 3, 9, "gdf5kdf4gdf5kdf4gdf5kdf4gdf5kdf4gdfffdb3gdf4gdf5g4fe1df4gdf5hef3df4gdf5g4fe1df4gdfffeb3gdf4" },
+			[1068] = { 9, 9, 0, 3, 9, "gdf5ldf5ldf5ldf5ldfffdb3hdf5g4fe1gdf5hef3gdf5g4fe1gdfffeb3g" },
+			[1069] = { 9, 9, 0, 3, 10, "17bdc81h3ecbefd2g12h1cfbi3337fe1g2ffffff2g17779ff1kafcg3d87bfe4g1bfffc4k21j" },
+			[1070] = { 14, 14, 0, 3, 9, "gdf5h5ceeb4idf5g6fa12cf6hdf51ee1h3fe1gdf55fcjef4gdffffbjef6gdf55fcjef4gdf51ee1h3fe1gdf5g6fa12cf6hdf5h5ceeb5h" },
+			[1071] = { 9, 9, 0, 3, 9, "h8defff2g8fag1ff2gbf6g1ff2g9fag1ff2g1cfffff2h4fd1ff2hcf51ff2g5fdg1ff2gdf6g1ff2" },
+			[1072] = { 8, 8, 0, 5, 7, "gdffda1k5fblefh8defff25fc1gef25fb16ff2g9effff2" },
+			[1073] = { 8, 8, 0, 1, 11, "p7bcdahad3j2f5k6fadeb4g6ff61cf45feh6fa4fdh5fc2feh6fagbf61cf4g19dec4g" },
+			[1074] = { 8, 8, 0, 5, 7, "geffeb3hef15fahef15f8hefffe5hef12eehef12eeheffec4g" },
+			[1075] = { 6, 6, 0, 5, 7, "gefffegef1ief1ief1ief1ief1ief1h" },
+			[1076] = { 10, 10, 0, 5, 9, "hbffffdjbf52fdjbf42fdjcf42fdjef22fdi6feg2fdh4ffffffffg4f2j7fg4f2j7fg" },
+			[1077] = { 8, 8, 0, 5, 7, "g19dea2hce42edg4fbh9f56ffffff84fblce4g293g19deb5g" },
+			[1078] = { 12, 12, 0, 5, 7, "2ee31ffg4ed2g3ee5ff3ed2i3eeffee2j4fffffe4i1ee9ff6ed1hbf71ffg7fag7fag1ffhbf6" },
+			[1079] = { 7, 7, 0, 5, 7, "g6cec5g1712eej2ebh4ffe6j2df15612de1g8dec5g" },
+			[1080] = { 8, 8, 0, 5, 7, "gef11ef6gef19ff6gef4eff6gefcedf6geff9af6gefe1af6gef7gaf6" },
+			[1081] = { 8, 8, 0, 3, 9, "ha51d1i2ce7ief11ef6gef19ff6gef4eff6gefcedf6geff9af6gefe1af6gef7gaf6" },
+			[1082] = { 8, 8, 0, 5, 7, "gef12de4gef3de4hefee4iefff6ief6de2hef14fchef1g8f9" },
+			[1083] = { 9, 9, 0, 5, 7, "hdffffbidf24fbidf24fbief14fbieeg4fbh7f8g4fbg5d8h4fbg" },
+			[1084] = { 10, 10, 0, 5, 7, "gef9hcfchefe13ffcheff7affchefcdecfchef6ff6fchef2eb4fchef1h4fcg" },
+			[1085] = { 8, 8, 0, 5, 7, "gef1gcf4gef1gcf4gef1gcf4gefffff4gef1gcf4gef1gcf4gef1gcf4" },
+			[1086] = { 8, 8, 0, 5, 7, "g19deb3hce41de24fch8f86fah7fa4fch8f8gde41de2g1adeb3g" },
+			[1087] = { 8, 8, 0, 5, 7, "gefffff4gef1gcf4gef1gcf4gef1gcf4gef1gcf4gef1gcf4gef1gcf4" },
+			[1088] = { 9, 9, 0, 5, 10, "gefffe9ief919f8hef3g3fdhef1g1ffhef3g3fdhef919f8hefffe9ief1lef1lef1k" },
+			[1089] = { 7, 7, 0, 5, 7, "g19de8hcf6g434fcj6fbj4fckcf6g54g19de8g" },
+			[1090] = { 7, 7, 0, 5, 7, "efffffdh8f8j8f8j8f8j8f8j8f8j8f8h" },
+			[1091] = { 8, 8, 0, 5, 10, "af6h9f64fchee1gdf24fbh7f88f6h1edde1iaffbj4ff6kee1j4fajceb1i" },
+			[1092] = { 12, 12, 0, 2, 13, "j1ffo1ffo1ffl2beffffea1hcf44ff26fbg3fdg1ffhef14fcg1ffhef33fdg1ffhef1gcf44ff26fbh2beffffea1k1ffo1ffo1ffk" },
+			[1093] = { 8, 8, 0, 5, 7, "5fcg2ee2g9f7bf5h1defaj7ff3i1eefcibf59f7g7fbg1de3" },
+			[1094] = { 9, 9, 0, 5, 9, "gef1gcf4hef1gcf4hef1gcf4hef1gcf4hef1gcf4hef1gcf4heffffff5l1f5l1f5" },
+			[1095] = { 8, 8, 0, 5, 7, "3fdg3fdg3fdg3fdg2fe13fdh8efffdk3fdk3fdk3fdg" },
+			[1096] = { 13, 13, 0, 5, 7, "gef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hefffffffff9g" },
+			[1097] = { 13, 13, 0, 5, 9, "gef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9hef1gaf5g6f9heffffffffffbqbbqbb" },
+			[1098] = { 9, 9, 0, 5, 7, "68884j8bdf8l7f91k7fffeai7fa3af6h7fa4bf6h7fffd9g" },
+			[1099] = { 11, 11, 0, 5, 7, "gef1i3fdhef1i3fdhef1i3fdheffec43fdhef12ee3fdhef12ee3fdheffec43fdg" },
+			[1100] = { 8, 8, 0, 5, 7, "gef1kef1kef1keffec4hef12eehef12eeheffec4g" },
+			[1101] = { 7, 7, 0, 5, 8, "18a96h3ecefbj1df5g5ddef8g144cf62858fe22effc4i21i" },
+			[1102] = { 12, 12, 0, 5, 7, "gef1g7cec7ief17f918f8hef2df3g2feheffff1g1ff1gef3df3g2fehef17f9g8f8hef1g7cec7h" },
+			[1103] = { 8, 8, 0, 5, 7, "g6deffag1fe15fag1ee15fah6efffah3e95fahbe25fag5fag5fag" },
+			[1025] = { 8, 8, 0, 1, 11, "hc87cqdfffff2gdf5kdf5kdf5kdffffehdf5kdf5kdf5kdfffff4" },
+			[1105] = { 8, 8, 0, 3, 9, "haa5fq19dea2hce42edg4fbh9f56ffffff84fblce4g293g19deb5g" },
+			[171] = { 8, 8, 0, 6, 6, "h28g37h5e77e4g1f64e4i6e78e4i28g37o" },
+			[187] = { 8, 8, 0, 6, 6, "g91g9j8e5ad3i7fgach8e5ad3h91g9q" },
+			[8212] = { 12, 12, 0, 8, 4, "5ffffffffff5zv" },
+			[8211] = { 6, 6, 0, 8, 4, "5ffff5x" },
+			[8230] = { 12, 12, 0, 10, 2, "gffhffhffhffhffhffg" },
+			[8470] = { 14, 14, 0, 3, 9, "gab9i5a7kdff4g1ef5kdffcg3feh22hdfbf53feg6cd6gdf4dc3fegc45cgdf36f9fegb56bgdf3gdefeg4dd33ef2g5ffeg22228e9icfegdffc" },
+			[215] = { 10, 10, 0, 5, 7, "g1b1h1b2h1cd11cd2i1cdcd2k3ff4k1cdcd2i1cd11cd2h2b1h1b2g" },
+			[183] = { 5, 5, 0, 7, 5, "gbf4hbf4v" },
+			[8226] = { 8, 8, 0, 5, 7, "h7dc3i2fffci2fffcj7ec3zl" },
+			[10003] = { 10, 10, 0, 4, 8, "l26m1d5mb8m6bk1a2d1lee5m89v" },
+			[10004] = { 10, 10, 0, 4, 8, "l274l3ed1k2ee2i281ce4j8fcf7k4ffamcc1u" },
+			[8594] = { 10, 10, 0, 6, 6, "l49n2dag4ffffffff6l2dam49r" },
+			[8592] = { 10, 10, 0, 6, 6, "h95m9d2l5ffffffff5g9d2n95v" },
+			[8593] = { 10, 10, 0, 3, 9, "i1cc2k2deed3j38ab74labnabnabnabnabnabj" },
+			[8595] = { 10, 10, 0, 3, 9, "jabnabnabnabnabnabl38ab74j2deed3k1cd2i" },
+			[9733] = { 11, 11, 0, 3, 10, "k2pao4e1k455bf8553h3cfffffa1jafff7l9fff5le92bak35i7t" },
+			[9734] = { 11, 11, 0, 3, 10, "k2p8o441k4446g6443h24k51j6h15l5g3g4l76255k35i7t" },
+			[9829] = { 11, 11, 0, 3, 9, "h8a3g5a6iaffe4fff6hdfffdfff9hafffffff7h3ffffffe1i7ffffe4kafff7mcf9n2ak" },
+			[176] = { 6, 6, 0, 3, 9, "g4dd3hc33chc33ch4dd4zq" },
+			[8381] = { 8, 8, 0, 3, 9, "g3bba94h4feeff6g4feg9fb16fe2bfb9fffffe449fe751g6bfeaa4g6bfeaa4h4fej" },
+			[8364] = { 9, 8, -1, 3, 9, "i2adec5h2ee4g46haf8kdfffff3h2ff1kdffff5jaf8l2ee4g46i2adec5" },
+			[10005] = { 10, 10, 0, 4, 8, "g29j82h1cah9c1i1ca9d1k1ee2l9dcak9d11cai3c1h1c3q" },
+			[10006] = { 10, 10, 0, 3, 9, "h1j1i2dah9d2haffa9ffbh1cffffc1i1effe2j9ffffai9ffdcffah4ec11ce5i41h14h" },
+			[9876] = { 11, 11, 0, 3, 9, "g2l2j8j17j28i9l37g91m6c2n9b5l797ga84j7b6g8c3i3aj1c1g" },
+			[9201] = { 7, 7, 0, 4, 11, "6fffff864j864j864j864j864j864j864j864j864j86fffff8" },
+			[9889] = { 8, 8, 0, 3, 9, "l31k83j4b2j9d1k7adb4k8b1j77k63k4l" },
+		},
+	},
+	{
+		size = 16,
+		ascent = 15,
+		line = 19,
+		glyphs = {
+			[32] = { 0, 6, 0, 0, 0, "" },
+			[33] = { 7, 7, 0, 3, 12, "hbffjbffjbffjbffjbffj9fej8fcj6faqbffjbffjbffh" },
+			[34] = { 8, 8, 0, 3, 12, "g7f5gfch7f5gfch7f5gfch7f5gfczzzk" },
+			[35] = { 13, 13, 0, 3, 12, "kbehebmebg2f8l3f7g6f4jffffffffff4hffffffffff4jdcg2f9l3f7g6f5jdfffffffff6hdfffffffff6jddheal1f9g4f6l5f5g8f2j" },
+			[36] = { 11, 11, 0, 3, 14, "kf3of3l3adfda5i4effffff5h9fd3f4394h9fd2f3k3efefc83j28bffff7lf4afeh9721f39fehbfffffff9h17befeb7mf3of3j" },
+			[37] = { 16, 16, 0, 3, 12, "g4ced6j7e3i2ec19f5h2e9j6f7g3fahad1j6f7g3fag4f6k2ec18f5gdbm4ced6g8e2r2e8g6cec4mbdg5f91ce2k5f5g9f4g7f6kdbh9f4g7f6j8e2h5f91be2i2e8j6cec4g" },
+			[38] = { 14, 14, 0, 3, 12, "i19dec6ncfffff6l3ffa1275l2ffaqcff6oafffe5hbfah8fe6dfe5gef7hdfbg2dfeafe2hefch2dfff9ibff8119fff3i3effffffffd1i29deda56ffcg" },
+			[39] = { 5, 5, 0, 3, 12, "g7f5h7f5h7f5h7f5zzg" },
+			[40] = { 7, 7, 0, 3, 14, "i8fbi2ef4i8fdjef8i4ff4i7ff2i8ff1i8ffj7ff2i4ff4jef8j9fdj2ef4j8fbg" },
+			[41] = { 7, 7, 0, 3, 14, "g7fckef6j8fdj3ff4jef8jcfcjbfdjbfdjcfcjef8i3ff4i9fdjef6i7fdi" },
+			[42] = { 9, 8, 0, 3, 12, "i7cj5a27cg79g3becedd6i8ffc1h2becedd6g5a27cg69j7czzo" },
+			[43] = { 13, 13, 0, 5, 10, "k3f9p3f9p3f9p3f9l4fffffffffah4fffffffffal3f9p3f9p3f9p3f9k" },
+			[44] = { 6, 6, 0, 12, 5, "g5ff6h5ff6h6fe3haf8ieci" },
+			[45] = { 7, 7, 0, 9, 6, "1ffffbg1ffffbzo" },
+			[46] = { 6, 6, 0, 12, 3, "g5ff6h5ff6h5ff6g" },
+			[47] = { 6, 6, 0, 3, 13, "i1eai5f5iae1iebi4f6i9e1idbi3f7i8f2idci3f7i7f3icdj" },
+			[48] = { 11, 11, 0, 3, 12, "h18ded91jcfffffd1h8ff816ffahdfeidfe11ffciaff33ffbi9ff53ffbi9ff51ffciaff3gdfeidfe1g8ff816ffaicfffffd1i18ded91h" },
+			[49] = { 11, 11, 0, 3, 12, "h39eff5j2fffff5j2b57ff5m7ff5m7ff5m7ff5m7ff5m7ff5m7ff5m7ff5j1ffffffffh1ffffffffg" },
+			[50] = { 11, 11, 0, 3, 12, "g16beec81iaffffffd1h972g3dff7m6ff9m7ff7l2efe1k2dfe4k3dfe4k3efe3k3efd3lbfffffffbhbfffffffbg" },
+			[51] = { 11, 11, 0, 3, 12, "h5bdeda4i6fffffff4h582g1aff8l1aff4jdfffd4kdffffbm3cff8m3ffbm3ffcha52g2bff8hdffffffd1h28ceec81h" },
+			[52] = { 11, 11, 0, 3, 12, "kdffbl8fffbk3eeffbkcf7ffbj7fb1ffbi2ee21ffbibf7g1ffbh3fdh1ffbh4fffffffff64fffffffff6k1ffbm1ffbh" },
+			[53] = { 11, 11, 0, 3, 12, "g4fffffff2h4fffffff2h4ff1m4ff1m4ffdeda2i4ffffffe3h483g2affbm1ffem1ffeh972g2affahbffffffe2h17bded91h" },
+			[54] = { 11, 11, 0, 3, 12, "i3adec7j5efffff7h2efd4g266h8ff3mcfe8dec6iefffffff7heffag3efe1gdff4haff3gaff4haff3g5ffag3efdiafffffe5j7ceea3h" },
+			[55] = { 11, 11, 0, 3, 12, "gdfffffffchdfffffffcm8ff7mdfe1l5ff9mcff2l3ffbmaff4l1efcm8ff6mdfem5ff8k" },
+			[56] = { 11, 11, 0, 3, 12, "h5beeec6i6fffffff8hbff5g3efch8ff5g3efai8efffe91i9efffea1h9ff6g4efahdfdibffhefdibff1gcff6g4efdh4effffff6i3adeeb5h" },
+			[57] = { 11, 11, 0, 3, 12, "h3adec7j4efffffbicfe4g8ff6g1ffbh2ffcg2ffbh2ffehefe4g8fff1g6ffffffffi5ced9dfem2efah572g3cfe3h5ffffff6j6ceda3i" },
+			[58] = { 6, 6, 0, 6, 9, "g3ff9h3ff9h3ff9z3ff9h3ff9h3ff9g" },
+			[59] = { 6, 6, 0, 6, 11, "g3ff9h3ff9h3ff9z3ff9h3ff9h4ff6h8faicd1h" },
+			[60] = { 13, 13, 0, 5, 10, "o389m17cffaj16befea5i2aefea5l4ffb2n2aefea5n16bffea5n17cffap389t" },
+			[61] = { 13, 13, 0, 7, 8, "g4fffffffffah4fffffffffazn4fffffffffah4fffffffffazm" },
+			[62] = { 13, 13, 0, 5, 10, "g4a5p4ffe94n38dffd83n38dffc5o7efal38dffc5i38dffd83j4ffe94m4a5zh" },
+			[63] = { 9, 9, 0, 3, 12, "g29ced81hdfffffbha511cff2kaff2j4efcj4efd2jefe2j3ff8t4ff8k4ff8k4ff8i" },
+			[64] = { 16, 16, 0, 3, 14, "k7beec82m4db4h28e7k4e6l4e7jd8haec9f46e2h6e1g9e33ef4ge8hbag1eah9f4gbbhd8g3f8h7f4g9chd8g3f8h7f4gabhbag1eah9f4ge7h7eh9e33ef6aci1e8g1aedafd8k4e5t4ea3h26c3m17ceeda5j" },
+			[65] = { 13, 12, 0, 3, 12, "jbfff2m2ffff7m7ffffdmcfeaff3k3ffa4ff9k8ff5gefekdfe1gaff4i4ffbh5ffai9ffffffffe1hefffffffff6g5ff9j4ffbgbff4kdff2" },
+			[66] = { 12, 12, 0, 3, 12, "g8ffffeda2i8fffffffe2h8ff7g1bff7h8ff7h6ff8h8ff7g1bff5h8fffffff9i8fffffffd2h8ff7h5ffch8ff7ieffh8ff7h5ffeh8ffffffff8h8ffffeeb6h" },
+			[67] = { 12, 12, 0, 3, 12, "i18ceec93i5effffffah3efe71g268hbff8neff2m2ffen2ffeoeff2nbff8n3efe71g268i5effffffaj28ceec93g" },
+			[68] = { 13, 13, 0, 3, 12, "g8fffeec93j8ffffffff8i8ff7g16eff6h8ff7i5ffeh8ff7jdff4g8ff7jaff6g8ff7jbff6g8ff7jdff4g8ff7i5ffeh8ff7g16eff6h8ffffffff7i8fffeec93i" },
+			[69] = { 11, 11, 0, 3, 12, "g8fffffff8h8fffffff8h8ff7m8ff7m8ff7m8fffffff4h8fffffff4h8ff7m8ff7m8ff7m8fffffffbh8fffffffbg" },
+			[70] = { 11, 11, 0, 3, 12, "g8fffffff8h8fffffff8h8ff7m8ff7m8ff7m8fffffff4h8fffffff4h8ff7m8ff7m8ff7m8ff7m8ff7l" },
+			[71] = { 13, 13, 0, 3, 12, "i18ceedb72i4efffffff8h3eff82g1397hbff9oeff2n2ffeo2ffeibfffeheff1hbfffehbff8jdfeh3efe71g1dfei5efffffffej28ceedb72g" },
+			[72] = { 13, 13, 0, 3, 12, "g8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8fffffffffdh8fffffffffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdg" },
+			[73] = { 6, 6, 0, 3, 12, "g8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7h8ff7g" },
+			[74] = { 7, 6, -1, 3, 15, "h8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i8ff7i9ff6h3eff3gdfffahdec6i" },
+			[75] = { 13, 12, 0, 3, 12, "g8ff7i9ffbh8ff7h9ffbi8ff7g9ffbj8ff79ffbk8ffeffcl8ffffd1l8fffff7l8ffbeff7k8ff75eff6j8ff7g5eff6i8ff7h5eff6h8ff7i5efe6" },
+			[76] = { 10, 10, 0, 3, 12, "g8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8fffffffbg8fffffffb" },
+			[77] = { 16, 16, 0, 3, 12, "g8fff7j8fff6h8fffdjefff6h8ffff4h5ffff6h8ffdfahbfdff6h8ff7fe12fe8ff6h8ff4cf78fb5ff6h8ff45fdef45ff6h8ff4geffdg5ff6h8ff4g8ff7g5ff6h8ff4g2fe1g5ff6h8ff4l5ff6h8ff4l5ff6g" },
+			[78] = { 13, 13, 0, 3, 12, "g8ffe1idfdh8fff9idfdh8fffe2hdfdh8ffef9hdfdh8ff9fe2gdfdh8ff4bfagdfdh8ff44fe2dfdh8ff4gbfadfdh8ff4g3ffefdh8ff4hafffdh8ff4h3fffdh8ff4iaffdg" },
+			[79] = { 14, 14, 0, 3, 12, "i39deec7l6effffffd2i4ffe5g19ffcibff6jcff5heff1j7ff9g2ffek5ffbg2ffek5ffbheff1j7ff9hbff6jcff5h4ffe5g19ffcj6effffffd2k39deec71i" },
+			[80] = { 12, 12, 0, 3, 12, "g8ffffeda3i8fffffffe4h8ff7h9ffch8ff7h1fffh8ff7h1fffh8ff7h9ffch8fffffffe4h8ffffeda3i8ff7n8ff7n8ff7n8ff7m" },
+			[81] = { 14, 14, 0, 3, 14, "i39deec71k6effffffd2i4efe5g19ffcibff6jcff5heff1j7ff9g2ffek5ffbg2ffek5ffbheff1j7ff9hbff6jcff4h4ffe4g19ffcj7effffffd1k39deffcq6ff6q6ff6h" },
+			[82] = { 12, 12, 0, 3, 12, "g8ffffeda2i8fffffffe1h8ff7g1bff6h8ff7h7ff6h8ff7g1bfe2h8ffffffd5i8ffffffd3i8ff7g6ffdi8ff7hbff7h8ff7h4ffdh8ff7icff5g8ff7i6ffb" },
+			[83] = { 12, 12, 0, 3, 12, "h29deeca4i3effffff8iafe5g1387icfeoaffb52l5fffffd81j5dfffffcl26afff3n9ff4h9831g2cff2hbfffffffai38bdeec7i" },
+			[84] = { 11, 11, 0, 3, 12, "dfffffffffcdfffffffffcjffenffenffenffenffenffenffenffenffenffej" },
+			[85] = { 13, 13, 0, 3, 12, "g8ff7i7ff8h8ff7i7ff8h8ff7i7ff8h8ff7i7ff8h8ff7i7ff8h8ff7i7ff8h8ff7i7ff8h7ff7i7ff7h6ff9i9ff6h2efe4g4efe2i8fffffff8k5beeeb5i" },
+			[86] = { 13, 12, 0, 3, 12, "bff4kdff25ff9j3ffbhefej8ff6h9ff4idfe1h4ffah4ffajdfeh9ff4j8ff5gefek3ffa4ff9lcfebff3l7ffffdm2ffff7nbfff2j" },
+			[87] = { 18, 18, 0, 3, 12, "6ff7ibff5icfeg2ffaieff9iefchefeh3fffch4ff8haff2g6faef1g7ff5h7ff5g9f6cf4gbff1h3ff9gdf38f8gefdjefc1feg5fb3ffajbff6fbg1fe7ff6j8ffdf7hdfdff3j4ffff4h9fffek1fffe1h6fffbldffci2fff7i" },
+			[88] = { 13, 12, 0, 3, 12, "3efdj9ff7h8ff8h4ffcjcfe3gdfe3j3efd9ff8l8ffffcndfff3m1efff5maffefe1k5ffb6ffaj1efe2gbff5iaff6h2efd1g5ffbj6ffag" },
+			[89] = { 13, 12, -1, 3, 12, "gcff6jcff6g3efe1h7ffbi8ffag2efe2jdff4aff7k4ffeffcm9fffe3m1dff8oaff4oaff4oaff4oaff4oaff4j" },
+			[90] = { 12, 12, 0, 3, 12, "1fffffffffag1fffffffffam6ffe4l3eff7l1dffamaffd1l7ffe2l4eff5l2eff9mcffcm4fffffffffdg4fffffffffdg" },
+			[91] = { 7, 7, 0, 3, 14, "g9ffff3g9ffff3g9ffj9ffj9ffj9ffj9ffj9ffj9ffj9ffj9ffj9ffj9ffff3g9ffff3" },
+			[92] = { 6, 6, 0, 3, 13, "cdj7f3i3f7jdcj8f2i3f7jdbj9e1i4f6jebjae1i5f5i1ea" },
+			[93] = { 7, 7, 0, 3, 14, "gdfffehdfffejafejafejafejafejafejafejafejafejafejafehdfffehdfffeg" },
+			[94] = { 13, 13, 0, 3, 12, "kafe3nbfefe3lbf915ee4i1bd5i1ae4zzzzzk" },
+			[95] = { 8, 8, 0, 15, 4, "zjffffffff" },
+			[96] = { 8, 8, 0, 2, 13, "gbf4lbe1lcbzzzzi" },
+			[97] = { 11, 11, 0, 6, 9, "g8fffed92i8ffffffd1m7ff6h19deffff7hdfffffff8g3ffb1g5ff8g3ffag2cff8hdfffffff8h2beea7ff8g" },
+			[98] = { 11, 11, 0, 3, 12, "g9ff2m9ff2m9ff2m9ff6bde91h9fffffffch9ffb11bff5g9ff4h4ff9g9ff2h2ffag9ff4h4ff9g9ffb11bff5g9fffffffch9ff6bde91g" },
+			[99] = { 9, 9, 0, 6, 9, "h29dec7h4efffff6gdff811553ffck4ff9k3ffcldff81155g4efffff6h29dec7g" },
+			[100] = { 11, 11, 0, 3, 12, "maff1maff1maff1h5cec7bff1g5ffffffff1gdfe5g6fff12ffbicff14ff9ibff12ffbicff1gdfe5g6fff1g6ffffffff1h5cec7bff1" },
+			[101] = { 11, 11, 0, 6, 9, "h29ded92i4efffffe3hdfc2g3efbg3ffffffffeg4fffffffff13ffandfe6g1388h4effffffai29dedb61g" },
+			[102] = { 8, 7, 0, 3, 12, "h4beff1g1effff1g4ff9iafffffdgafffffdh4ff7j4ff7j4ff7j4ff7j4ff7j4ff7j4ff7i" },
+			[103] = { 11, 11, 0, 6, 12, "h5cec7bff1g5ffffffff1gdff5g6fff12ffbicff14ff9ibff12ffbicff1gdfe5g6fff1g5ffffffff1h5cec7bff1g293g15efdh3ffffffe5i5beed93h" },
+			[104] = { 11, 11, 0, 3, 12, "g9ff2m9ff2m9ff2m9ff5add91h9fffffff9h9ffc22dfeh9ff4haff1g9ff2haff2g9ff2haff2g9ff2haff2g9ff2haff2g9ff2haff2" },
+			[105] = { 5, 5, 0, 3, 12, "g9ff2g9ff2l9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2" },
+			[106] = { 6, 5, -1, 3, 15, "h9ff2h9ff2n9ff2h9ff2h9ff2h9ff2h9ff2h9ff2h9ff2h9ff2haff1g1dfeg8fff8g8fd8h" },
+			[107] = { 11, 11, 0, 3, 12, "g9ff2m9ff2m9ff2m9ff2g2efd2g9ff22dfd2h9ff4dfd2i9ffefd1j9ffffak9ffbff9j9ff2aff8i9ff2gbff8h9ff2g1cff7" },
+			[108] = { 5, 5, 0, 3, 12, "g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2g9ff2" },
+			[109] = { 17, 17, 0, 6, 9, "gaff5bed8g8deb2iafffffffdffffdiaffb15fff6gaff4haff4g1ffdh6ff5haff2hffch6ff6haff2hffbh6ff6haff2hffbh6ff6haff2hffbh6ff6haff2hffbh6ff6g" },
+			[110] = { 11, 11, 0, 6, 9, "g9ff5add91h9fffffff9h9ffc22dfeh9ff4haff1g9ff2haff2g9ff2haff2g9ff2haff2g9ff2haff2g9ff2haff2" },
+			[111] = { 11, 11, 0, 6, 9, "h3adeda3i4efffffe4hdfe5g5efdg3ffbibff34ff9i9ff43ffbibff3gdfe5g5efdh4efffffe4i3adeda3h" },
+			[112] = { 11, 11, 0, 6, 12, "g9ff6bde91h9fffffffch9ffb11bff5g9ff4h4ff9g9ff2h2ffag9ff4h4ff9g9ffb11bff5g9fffffffch9ff6bde91h9ff2m9ff2m9ff2l" },
+			[113] = { 11, 11, 0, 6, 12, "h5cec7bff1g6ffffffff1gdfe5g6fff12ffbicff14ff9ibff12ffbicff1gdfe5g6fff1g6ffffffff1h5cec7bff1maff1maff1maff1" },
+			[114] = { 8, 8, 0, 6, 9, "g9ff28dcg9ffaffcg9ffc3i9ff4j9ff2j9ff2j9ff2j9ff2j9ff2i" },
+			[115] = { 10, 10, 0, 6, 9, "g2adeda4idffffff2g1ff7g14a2hefb53k4dfffea1j147ef8hb52g2efbhfffffff7h39ceec6h" },
+			[116] = { 8, 8, 0, 4, 11, "g5ff6j5ff6ibffffff4bffffff4g5ff6j5ff6j5ff6j5ff6j4ff8j1effffi5ceffg" },
+			[117] = { 11, 11, 0, 6, 9, "gbffibffhbffibffhbffibffhbffibffhbffibffhbff1hdffh9ff6g7fffh4ffffffffi6cec7bffg" },
+			[118] = { 11, 10, 0, 6, 9, "8ff3ibfeg2ff8h2ff9hcfdh7ff3h6ff4gcfcjef92ff7j9fe8fe1j4ffefaldfff4l7ffdj" },
+			[119] = { 15, 15, 0, 6, 9, "4ff5hdfah9ff1gef9g1ffdhcfchcfdg5fef21ff8h8ff19faf55ff5h4ff5ce3f98fe1iefafbgedcfcjbfef7gafef8j7fff4g7fff4j3ffeh3ffei" },
+			[120] = { 11, 10, 0, 6, 9, "3efah5ff8h7ff51efcjbfebfe2j2efff5l9ffdl3efff8j1dfd9ff4iafe3gdfd1g5ff8h3efag" },
+			[121] = { 11, 10, 0, 6, 12, "8ff2icfdg2ff8h2ff8hbfdh7ff2h4ff5gcfbjdfa1ff5j6fe8fdlefef8l8fff2l2ffbm3ef5k5fffcl5feb2k" },
+			[122] = { 9, 9, 0, 6, 9, "1fffffff81fffffff8j2efe2i2dfe3i1dfe4i1cfe5jbff6j4fffffff84fffffff8" },
+			[123] = { 11, 11, 0, 3, 15, "k5cef5k3efff5k7ff6m8ff1m8ff1m9ff1l3dfelfffe5lfffe7m2dfen8ff1m8ff1m7ff5m3ffff5l6cef5g" },
+			[124] = { 6, 6, 0, 3, 16, "hecjecjecjecjecjecjecjecjecjecjecjecjecjecjecjech" },
+			[125] = { 11, 11, 0, 3, 15, "hfed91lffff9m2dfdnafenafenaffn8ff7m1bfff5k2dfff5k8ff6mafenafem1dfdlffff9lfed91j" },
+			[126] = { 13, 13, 0, 8, 7, "u5ced94g169h4fffffffffah4a2g27bed81zz" },
+			[1040] = { 13, 12, 0, 3, 12, "jbfff2m2ffff7m7ffffdmcfeaff3k3ffa4ff9k8ff5gefekdfe1gaff4i4ffbh5ffai9ffffffffe1hefffffffff6g5ff9j4ffbgbff4kdff2" },
+			[1041] = { 12, 12, 0, 3, 12, "g8ffffffff4h8ffffffff4h8ff7n8ff7n8ff7n8ffffeda4i8ffffffff7h8ff7h5ffeh8ff7ieffh8ff7h5ffeh8ffffffff7h8ffffeda4h" },
+			[1042] = { 12, 12, 0, 3, 12, "g8ffffeda2i8fffffffe2h8ff7g1bff7h8ff7h6ff8h8ff7g1bff5h8fffffff9i8fffffffd2h8ff7h5ffch8ff7ieffh8ff7h5ffeh8ffffffff8h8ffffeeb6h" },
+			[1043] = { 10, 10, 0, 3, 12, "g8fffffffbg8fffffffbg8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7l8ff7k" },
+			[1044] = { 14, 14, 0, 3, 15, "idfffffff9kdfffffff9kdff1g5ff9kdff1g5ff9kdff1g5ff9kdffh5ff9kefeh5ff9kefdh5ff9j2ffbh5ff9jaff8h5ff9iffffffffffff4gffffffffffff4gff3mef4gff3mef4gff3mef4" },
+			[1045] = { 11, 11, 0, 3, 12, "g8fffffff8h8fffffff8h8ff7m8ff7m8ff7m8fffffff4h8fffffff4h8ff7m8ff7m8ff7m8fffffffbh8fffffffbg" },
+			[1046] = { 20, 20, 0, 3, 12, "gbfe5iaff4ibff6h1cfe4haff4h9ff7j1dfe3gaff4g7ff9l2efd2aff46ffan4ffdcff9efco6fffffffffe1m2effffffffffambff9afffe4dff5k6ffdhcff6g4ffe1i2efe3haff4h9ffaibff8iaff4idff5g6ffcjaff4i4ffd1" },
+			[1047] = { 11, 11, 0, 3, 12, "g17beedb6iafffffffah862h5ffem5ffbjeffff8keffffe4l17ffenbff3mbff4gb51g17ffe1gefffffff6h29ceeda4h" },
+			[1048] = { 13, 13, 0, 3, 12, "g8ff4iaffdh8ff4h3fffdh8ff4hbfffdh8ff4g4ffefdh8ff4gcfadfdh8ff45fe2dfdh8ff5cfagdfdh8ffbfe2gdfdh8ffff9hdfdh8fffe2hdfdh8fff9idfdh8ffe1idfdg" },
+			[1049] = { 13, 13, 0, 0, 15, "je5g7dn5cec3x8ff4iaffdh8ff4h3fffdh8ff4hbfffdh8ff4g4ffefdh8ff4gcfadfdh8ff45fe2dfdh8ff5cfagdfdh8ffbfe2gdfdh8ffff9hdfdh8fffe2hdfdh8fff9idfdh8ffe1idfdg" },
+			[1050] = { 13, 13, 0, 3, 12, "g8ff7i4efe2g8ff7h4efe3h8ff7g3efe3i8ff72efe4j8ff9dff4k8ffffff5k8ffffefe1j8fff68ffbj8ff9hcff6i8ff7h3efe2h8ff7i7ffch8ff7jbff7" },
+			[1051] = { 13, 13, 0, 3, 12, "i7fffffffcj7fffffffcj7ff7g2ffcj7ff7g2ffcj7ff7g2ffcj8ff6g2ffcj9ff5g2ffcjaff3g2ffcjefeh2ffch2affah2ffcg4fffc1h2ffcg3da5j2ffcg" },
+			[1052] = { 16, 16, 0, 3, 12, "g8fff7j8fff6h8fffdjefff6h8ffff4h5ffff6h8ffdfahbfdff6h8ff7fe12fe8ff6h8ff4cf78fb5ff6h8ff45fdef45ff6h8ff4geffdg5ff6h8ff4g8ff7g5ff6h8ff4g2fe1g5ff6h8ff4l5ff6h8ff4l5ff6g" },
+			[1053] = { 13, 13, 0, 3, 12, "g8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8fffffffffdh8fffffffffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdg" },
+			[1054] = { 14, 14, 0, 3, 12, "i39deec7l6effffffd2i4ffe5g19ffcibff6jcff5heff1j7ff9g2ffek5ffbg2ffek5ffbheff1j7ff9hbff6jcff5h4ffe5g19ffcj6effffffd2k39deec71i" },
+			[1055] = { 13, 13, 0, 3, 12, "g8fffffffffdh8fffffffffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdh8ff7i1ffdg" },
+			[1056] = { 12, 12, 0, 3, 12, "g8ffffeda3i8fffffffe4h8ff7h9ffch8ff7h1fffh8ff7h1fffh8ff7h9ffch8fffffffe4h8ffffeda3i8ff7n8ff7n8ff7n8ff7m" },
+			[1057] = { 12, 12, 0, 3, 12, "i18ceec93i5effffffah3efe71g268hbff8neff2m2ffen2ffeoeff2nbff8n3efe71g268i5effffffaj28ceec93g" },
+			[1058] = { 11, 11, 0, 3, 12, "dfffffffffcdfffffffffcjffenffenffenffenffenffenffenffenffenffej" },
+			[1059] = { 12, 12, 0, 3, 12, "4ffcj8ff9gcff5ieff2g5ffch7ffaidff4gdff3i7ffb6ffbj1effeff5k8ffffdl1efff6m9ffdn9ff7l9fffdm9ed92k" },
+			[1060] = { 16, 16, 0, 3, 12, "l8ff6o49deffec94kbffffffffffai9ffc38ff74dff7heff2g8ff6g4ffdg2ffeh8ff6g1fffg2ffeh8ff6g1fffheff2g8ff6g4ffdh9ffc38ff74dff7h1bffffffffffak5adeffec94o8ff6l" },
+			[1061] = { 13, 12, 0, 3, 12, "3efdj9ff7h8ff8h4ffcjcfe3gdfe3j3efd9ff8l8ffffcndfff3m1efff5maffefe1k5ffb6ffaj1efe2gbff5iaff6h2efd1g5ffbj6ffag" },
+			[1062] = { 15, 15, 0, 3, 15, "g8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8ff7i1ffdj8fffffffffffdh8fffffffffffdr5fdr5fdr5fdg" },
+			[1063] = { 13, 13, 0, 3, 12, "gaff4i8ff7haff4i8ff7haff4i8ff7haff5i8ff7h8ff9i8ff7h3fffffffff7i5ceffffff7o8ff7o8ff7o8ff7o8ff7o8ff7g" },
+			[1064] = { 20, 20, 0, 3, 12, "g8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ff7i9ff5iaff4h8ffffffffffffffff4h8ffffffffffffffff4g" },
+			[1065] = { 21, 21, 0, 3, 15, "g8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ff7i9ff5iaff4i8ffffffffffffffffff3g8ffffffffffffffffff3xff3xff3xff3" },
+			[1066] = { 15, 15, 0, 3, 12, "2aaaaaa6m3ffffff9m2999bff9q5ff9q5ffa332n5ffffffe91k5ffffffffbk5ff9g14eff1j5ff9icff3j5ff9h4efe1j5ffffffff9k5fffffeb6h" },
+			[1067] = { 17, 17, 0, 3, 12, "g8ff7mdff1h8ff7mdff1h8ff7mdff1h8ff7mdff1h8ff7mdff1h8ffffeda4hdff1h8ffffffff7gdff1h8ff7h5ffegdff1h8ff7ieffgdff1h8ff7h5ffegdff1h8ffffffff7gdff1h8ffffeda4hdff1g" },
+			[1068] = { 12, 12, 0, 3, 12, "g8ff7n8ff7n8ff7n8ff7n8ff7n8ffffeda4i8ffffffff7h8ff7h5ffeh8ff7ieffh8ff7h5ffeh8ffffffff7h8ffffeda4h" },
+			[1069] = { 12, 12, 0, 3, 13, "g28bcc95keffffffb1ie9557dffci2j1dff6n6ffbi7eeeeeffdi8fffffffdi244448ffcnbff8hb4h29ffe1heffefffe4i7dfffea2l132l" },
+			[1070] = { 19, 19, 0, 3, 12, "g8ff7i29deec81j8ff7h5effffffd3i8ff7g2efe6g18ffd1h8ff7g9ff8jbff7h8ff7geff2j5ffbh8fffffff1j3ffdh8fffffff1j3ffdh8ff7geff2j5ffbh8ff7g9ff8jbff7h8ff7g2efe6g18ffd1h8ff7h5effffffd3i8ff7i29deec81i" },
+			[1071] = { 12, 12, 0, 3, 12, "h18ceffffcicfffffffch4ffc2g2ffch5ff9h2ffch3ffc2g2ffciafffffffcj8ffffffcj6ff82ffcjdfe12ffci8ff7g2ffch2efe1g2ffchaff7h2ffcg" },
+			[1072] = { 11, 11, 0, 6, 9, "g8fffed92i8ffffffd1m7ff6h19deffff7hdfffffff8g3ffb1g5ff8g3ffag2cff8hdfffffff8h2beea7ff8g" },
+			[1073] = { 11, 11, 0, 2, 13, "s27abdedi2effedca1hbf92l1fe8ceeb4h4ffffffff6g3fff7g3efe12ffdi8ff51ffci6ff6gefdi8ff5gbff7g3efe1g2effffff7i29deeb4h" },
+			[1074] = { 10, 10, 0, 6, 9, "g9fffeda2h9ffffffch9ff2gbfeh9ff2gbf9h9fffffe6h9fffffff3g9ff2g6ff5g9ffffffe2g9ffffdb4g" },
+			[1075] = { 8, 8, 0, 6, 9, "g9fffffeg9fffffeg9ff2j9ff2j9ff2j9ff2j9ff2j9ff2j9ff2i" },
+			[1076] = { 13, 13, 0, 6, 11, "ieffffff8keffffff8kffcg3ff8kffbg3ff8j1ffag3ff8j5ff8g3ff8i1cff4g3ff8h1fffffffffffg1fffffffffffg1fdmefg1fdmefg" },
+			[1077] = { 11, 11, 0, 6, 9, "h29ded92i4efffffe3hdfc2g3efbg3ffffffffeg4fffffffff13ffandfe6g1388h4effffffai29dedb61g" },
+			[1078] = { 16, 16, 0, 6, 9, "1cfd2g6ff5g3efc1g1cfe36ff53efc1i1cfe9ff8efc1k1effffffd1l6ffffffff5k2efcdffcbfe2jcfd16ff51efci9fe4g6ff5g4ff8g5ff7h6ff5h8ff4" },
+			[1079] = { 9, 9, 0, 6, 9, "g29deda2hcfffffdh83g1afek1be7ibfffc4ibffffe1393g18ff33ffffffdh5beed92g" },
+			[1080] = { 11, 11, 0, 6, 9, "g9ff2g4ffdh9ff2gdffdh9ff27fffdh9ff4efffdh9ffcfdefdh9ffff4dfdh9fffagdfdh9ffe2gdfdh9ff8hdfdg" },
+			[1081] = { 11, 11, 0, 2, 13, "id6g3e1k3ced6zl9ff2g4ffdh9ff2gdffdh9ff27fffdh9ff4efffdh9ffcfdefdh9ffff4dfdh9fffagdfdh9ffe2gdfdh9ff8hdfdg" },
+			[1082] = { 11, 11, 0, 6, 9, "g9ff2g4efbh9ff24efbi9ff6efbj9ffffck9ffffe3j9ffacfd1i9ff22efai9ff2g5ff7h9ff2h9fe3" },
+			[1083] = { 12, 12, 0, 6, 9, "h2fffffff5i2fffffff5i3ff9g6ff5i3ff8g6ff5i3ff7g6ff5i5ff6g6ff5h3cff3g6ff5g1fff9h6ff5g1eb6i6ff5g" },
+			[1084] = { 13, 13, 0, 6, 9, "g9ffbiaffbh9fff3g2effbh9fff9g8fffbh9fffe2efffbh9ffafdfaffbh9ff3eff3ffbh9ff29fagffbh9ff2jffbh9ff2jffbg" },
+			[1085] = { 11, 11, 0, 6, 9, "g9ff2g1ffah9ff2g1ffah9ff2g1ffah9ff2g1ffah9fffffffah9fffffffah9ff2g1ffah9ff2g1ffah9ff2g1ffag" },
+			[1086] = { 11, 11, 0, 6, 9, "h3adeda3i4efffffe4hdfe5g5efdg3ffbibff34ff9i9ff43ffbibff3gdfe5g5efdh4efffffe4i3adeda3h" },
+			[1087] = { 11, 11, 0, 6, 9, "g9fffffffah9fffffffah9ff2g1ffah9ff2g1ffah9ff2g1ffah9ff2g1ffah9ff2g1ffah9ff2g1ffah9ff2g1ffag" },
+			[1088] = { 11, 11, 0, 6, 12, "g9ff6bde91h9fffffffch9ffb11bff5g9ff4h4ff9g9ff2h2ffag9ff4h4ff9g9ffb11bff5g9fffffffch9ff6bde91h9ff2m9ff2m9ff2l" },
+			[1089] = { 9, 9, 0, 6, 9, "h29dec7h4efffff6gdff811553ffck4ff9k3ffcldff81155g4efffff6h29dec7g" },
+			[1090] = { 10, 9, 0, 6, 9, "effffffff3effffffff3ibffmbffmbffmbffmbffmbffmbffj" },
+			[1091] = { 11, 10, 0, 6, 12, "8ff2icfdg2ff8h2ff8hbfdh7ff2h4ff5gcfbjdfa1ff5j6fe8fdlefef8l8fff2l2ffbm3ef5k5fffcl5feb2k" },
+			[1092] = { 16, 16, 0, 3, 15, "l6ff5r6ff5r6ff5n4ceb8ff7beb3i3effffffffffe2hbff6g9ff8g8ff9hefdh6ff5hefdg1ffch6ff5hdfehefdh6ff5hefdhbff6g9ff8g8ff9h3effffffffffe2i4ceb8ff7beb3n6ff5r6ff5r6ff5l" },
+			[1093] = { 11, 10, 0, 6, 9, "3efah5ff8h7ff51efcjbfebfe2j2efff5l9ffdl3efff8j1dfd9ff4iafe3gdfd1g5ff8h3efag" },
+			[1094] = { 12, 12, 0, 6, 11, "g9ff2g1ffai9ff2g1ffai9ff2g1ffai9ff2g1ffai9ff2g1ffai9ff2g1ffai9ff2g1ffai9fffffffff2g9fffffffff2ocf2ocf2" },
+			[1095] = { 11, 11, 0, 6, 9, "gefch9ff2hefch9ff2hefch9ff2hdfe1g9ff2hafffffff2h1befffff2m9ff2m9ff2m9ff2g" },
+			[1096] = { 17, 17, 0, 6, 9, "g9ff2hefch3ff8h9ff2hefch3ff8h9ff2hefch3ff8h9ff2hefch3ff8h9ff2hefch3ff8h9ff2hefch3ff8h9ff2hefch3ff8h9fffffffffffff8h9fffffffffffff8g" },
+			[1097] = { 18, 18, 0, 6, 11, "g9ff2hefch3ff8i9ff2hefch3ff8i9ff2hefch3ff8i9ff2hefch3ff8i9ff2hefch3ff8i9ff2hefch3ff8i9ff2hefch3ff8i9fffffffffffffffh9fffffffffffffffvffvffg" },
+			[1098] = { 12, 12, 0, 6, 9, "7bbbbb1kaeeeff1naff1naff7652kaffffff9jaff54aff3iaff1g4ff5iaffbbefe1iafffeda3g" },
+			[1099] = { 14, 14, 0, 6, 9, "g9ff2k9ff2g9ff2k9ff2g9ff2k9ff2g9ff2k9ff2g9ffffdb4g9ff2g9ffffffe29ff2g9ff2g6ff59ff2g9ffffffe29ff2g9ffffeb4g9ff2" },
+			[1100] = { 10, 10, 0, 6, 9, "g9ff2l9ff2l9ff2l9ff2l9ffffdb4h9ffffffe2g9ff2g6ff5g9ffffffe2g9ffffeb4g" },
+			[1101] = { 9, 9, 0, 6, 10, "g8cedb5idfffff9h7214dff5h2227ff9hdfffffbh5558ffag4h1bff6gddceffchcfffe91i132j" },
+			[1102] = { 16, 16, 0, 6, 9, "g9ff2h7ceec7j9ff2gbffffffbi9ff25ffb11aff6h9ff3bff4h3ffbh9ffffff2h1ffch9ff6bff4h3ffbh9ff25ffb11aff6h9ff2gaffffffbi9ff2h7ceec7i" },
+			[1103] = { 10, 10, 0, 6, 9, "g19defffeh9ffffffehcfe1gcfeh9fe1gcfeh1dfffffei6fffffeh1efcgcfeh9fe3gcfeg3ef8hcfeg" },
+			[1025] = { 11, 11, 0, 0, 15, "h1fbgfck1fbgfcu8fffffff8h8fffffff8h8ff7m8ff7m8ff7m8fffffff4h8fffffff4h8ff7m8ff7m8ff7m8fffffffbh8fffffffbg" },
+			[1105] = { 11, 11, 0, 3, 12, "iddgcflddgcfv29ded92i4efffffe3hdfc2g3efbg3ffffffffeg4fffffffff13ffandfe6g1388h4effffffai29dedb61g" },
+			[171] = { 10, 10, 0, 7, 8, "j81g18i2ce14dch5ed48fb1hbe2gfcj5ed48fb1i2ce14dck81g18q" },
+			[187] = { 10, 10, 0, 7, 8, "g54h82j6e8gae5j8eb3bf9j8f5gbf1h8eb3af9h6e8gae5i64h82s" },
+			[8212] = { 16, 16, 0, 9, 6, "2ffffffffffffff22ffffffffffffff2zzzj" },
+			[8211] = { 8, 8, 0, 9, 6, "2ffffff22ffffff2zr" },
+			[8230] = { 16, 16, 0, 12, 3, "gbff1g6ff6g1ffbhbff1g6ff6g1ffbhbff1g6ff6g1ffbg" },
+			[8470] = { 19, 19, 0, 3, 12, "g5aa9k698m8fff6i9ffcm8fffdidfe1m8ffff7hdfdi43i8ffbfe1gdfdhceebh8ff5cf8gdfdg5f34f4g8ff45fe1dfdg7f11f6g8ff4gcf9dfdg5f34f4g8ff4g4feefdhceebh8ff4hbfffdi43h5efe2h3fffdg4888836ec6jaffdg7ffff7" },
+			[215] = { 13, 13, 0, 5, 10, "h3ak68jafc1h7fe2jafc17fd2l9fefd2ncff4n9fefd2lafc17fd2jafc1h7fe2i3ak69u" },
+			[183] = { 6, 6, 0, 8, 7, "g5ff6h5ff6h5ff6zk" },
+			[8226] = { 10, 10, 0, 6, 9, "i5dd8k4ffff7j9ffffcj9ffffcj3ffff7k5dd8zs" },
+			[10003] = { 13, 13, 0, 4, 11, "zg4d6o2e9pccp8e2o3e5m6e1d9n6fdd1n1ef4p44zg" },
+			[10004] = { 13, 13, 0, 4, 11, "p1p4df4n6ef7n5ff9l1g3efblce2dfd1lffefe3mcfff6n6ffap77zg" },
+			[8594] = { 13, 13, 0, 6, 9, "oa1p4fc1p7fbg1fffffffffff81fffffffffff8o7fbo4ec1pa1u" },
+			[8592] = { 13, 13, 0, 6, 9, "i84p7fao5fco2effffffffff72effffffffff7g5fcq7faq84zg" },
+			[8593] = { 13, 13, 0, 3, 12, "k5ebo5effbm6edfdfbl6c4f96bn3f9p3f9p3f9p3f9p3f9p3f9p3f9p3f9k" },
+			[8595] = { 13, 13, 0, 3, 12, "k3f9p3f9p3f9p3f9p3f9p3f9p3f9p3f9n6c4f96bl6edfdfbm5effbo5ebk" },
+			[9733] = { 14, 14, 0, 3, 13, "m1r27r7crcf2l11113ff81111h3dffffffffe7j9ffffffd3l6ffffbn6ffffcnbfb8ef2l1e8h4d7l54j17w" },
+			[9734] = { 14, 14, 0, 3, 13, "m1r27r67r742l111134g71111h3a444h24486j72k73l62i8n6h1g7n7177342l1a6h476l54j17w" },
+			[9829] = { 14, 14, 0, 3, 12, "h1794h1883jcfff51dffe4h6ffffd8ffffbh8fffffeffffdh5ffffffffffbiefffffffff5i5ffffffffak8ffffffc1laffffe2ncffe4o2ef6q48l" },
+			[176] = { 8, 8, 0, 3, 12, "h7dd7i5e22e4h8aha8h5d22d4i7dd7zzx" },
+			[8381] = { 11, 11, 0, 3, 12, "h7aaa973jbffffff9ibff9afff3hbff4gaff6hbff4gcff66ceffdeffe17fffffffd4g24cff742i48dffa885h7fffffff9h13cff6332jbff4k" },
+			[8364] = { 12, 11, -1, 3, 12, "j18cedb5j2dffffffjdff91g3ai5ffbmbfffffff7h2ffffffff2jcff2mbffffff5i2ffffffel4ffd4h3aj7fffffffk39dedb5g" },
+			[10005] = { 13, 13, 0, 4, 11, "i2l3jae3jae2i2de3haf7k2de3af7m2dff7obfe3naf8de3laf7g2de3jaf7i2de2i36k28u" },
+			[10006] = { 13, 13, 0, 3, 12, "u1c7i2d4jcff7g2dfe4h4efff8dfffbi6effffffbk5effffbl2dffff7k2dffffff7i2dfffcefff7h3effbg6eff9i3ebi6e9k3k3i" },
+			[9876] = { 14, 14, 0, 3, 12, "h2n11i73m9ka2ka2k1b1i94m2b1g86o4b79q9eq5c99nb5d2gb893k5f9h4ebk2d553g63d6ja7l2d1g" },
+			[9201] = { 10, 10, 0, 4, 14, "3fffffffcg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3ak1cg3fffffffcg" },
+			[9889] = { 11, 11, 0, 3, 12, "o5n39n89m3d7m8e5m6efb74m36dfam3d8m3d4m4a1m46n33n" },
+		},
+	},
+	{
+		size = 22,
+		ascent = 21,
+		line = 27,
+		glyphs = {
+			[32] = { 0, 8, 0, 0, 0, "" },
+			[33] = { 10, 10, 0, 5, 16, "idffeldffeldffeldffeldffeldffelcffclaffal8ff9l6ff7zldffeldffeldffeldffei" },
+			[34] = { 11, 11, 0, 5, 16, "hdf9g2ff5idf9g2ff5idf9g2ff5idf9g2ff5idf9g2ff5idf9g2ff5zzzzzq" },
+			[35] = { 18, 18, 0, 5, 16, "mafah7fdpdf7hafao1ff3hdf7o5feh1ff4o8fch4ff1k4fffffffffffffei4fffffffffffffel5feh1ff4o9fbh5fepcf8h9fbl7fffffffffffffai7fffffffffffffal9fbh6fepdf7hafao2ff3hdf6o6feh2ff2l" },
+			[36] = { 15, 15, 0, 5, 19, "l3f8r3f8o17bdfeca61j3effffffffcjdff94f8248ai2fff23f8m3fff83f8m2ffffefc63lbffffffffc4j1affffffffe3k26affffff9m3f94effbm3f8g9ffbh3b7313f82dff6h4ffffefffffbj37bcefeda5o3f8r3f8r3f8l" },
+			[37] = { 22, 22, 0, 5, 16, "h4beeb4l7fdl5fffffe5j2ef4ldfd22dfdjafal3ff7h8ff2h5fe1l4ff6h6ff3hdf6m3ff7h8ff2g9fbodfd22dfdg3ee2o5fffffe5gcf7g4beeb4j4beeb4g7fdg5efffff6o2ef4gdfd22dfeoaf9g2ff8h7ff3m5fe1g3ff7h5ff4l1df5h2ff8h7ff3l9fbjdfd21dfel3ee2j5efffff6lcf7l4beeb4h" },
+			[38] = { 19, 19, 0, 5, 16, "k3acedb72p7fffffffeo1effc1g26bo3fff9ueffe3t9fffd1r9fffffbjcff6i9fffefffaieff5h2fffb2dfff7g3fff2h7fff3g3efff59ffdi9fffi5fffeeff7i8fff2i8fffffe1i4fff9jbffff5kbfff8114cffffak1bffffffffffffal5adedca62bfffag" },
+			[39] = { 7, 7, 0, 5, 16, "hdf9jdf9jdf9jdf9jdf9jdf9zzzr" },
+			[40] = { 10, 10, 0, 4, 20, "j2efe1kaff8k3ffe2kaffbk1eff6k6fff2k9ffeldffbleff9k1fff8k1fff8leff9ldffbl9ffdl6fff2k1eff6laffbl3ffe2laff8l2efe1g" },
+			[41] = { 10, 10, 0, 4, 20, "heff3l8ffbl1eff4laffal5ffe1k1fff6ldffalaffel8fffl7fff1k7fff1k8ffflaffeldffak1fff6k5ffe1kaffak1eff4k8ffbleff3j" },
+			[42] = { 12, 12, 0, 5, 16, "j2fao2fak1c5g2fag298g3cfd8fbaee8i4bfffe81j4bfffe81h3cfd8fb9ee8g1c5g2fag298k2fao2fazzzw" },
+			[43] = { 18, 18, 0, 8, 13, "nff7uff7uff7uff7uff7oafffffffffffff1iafffffffffffff1iafffffffffffff1off7uff7uff7uff7uff7m" },
+			[44] = { 8, 8, 0, 17, 7, "hbfff1ibfff1ibfff1icffci1ffe3i6ff7jafbj" },
+			[45] = { 9, 9, 0, 13, 8, "gcfffffehcfffffehcfffffezzl" },
+			[46] = { 8, 8, 0, 17, 4, "hbfff1ibfff1ibfff1ibfff1g" },
+			[47] = { 9, 8, 0, 5, 18, "k7fdlcf8k1ff3k6fdlbf9k1ef4k5felafalef5k5fel9fblef6k4fe1k8fbldf7k3ff2k8fclcf8l" },
+			[48] = { 15, 15, 0, 5, 16, "j4adedb6m9fffffffc1j7fff6g3dffbi1effai6fff5h7fff6i1fffbhafff4jeffehdfff3jdfff2gdfff2jdfff3gdfff3jdfff3gdfff3jdfff2gafff4jeffeh7fff6i2fffbh1effai6fff5i7fff6g3dffbk9fffffffc1l4adeeb6j" },
+			[49] = { 15, 15, 0, 5, 16, "i48cefff2l7fffffff2l7b73bfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2pbfff2l6ffffffffffci6ffffffffffcg" },
+			[50] = { 15, 15, 0, 5, 16, "h26adeeda5k3fffffffffbj3ff92g4dfff9i3e5j4fffei24lefff3pdfff3o1effe1o8fffao3effe1n4effe3n5effe3n7fffd3n8fffd2nafffc1n4fffffffffff5h4fffffffffff5g" },
+			[51] = { 15, 15, 0, 5, 16, "h16aceedb71kcffffffffd3ja731g3cfffcp2ffff1pefff1o2fffdo3cffe4lbfffffb2mbffffffc2n13afffdqcfff6p9fff7pcfff6h7952h3afffe1h8fffffffffd3j49cdeeca6j" },
+			[52] = { 15, 15, 0, 5, 16, "l1dffffoafffffn6ffffffm2efdefffmcff4dfffl9ff9gdfffk5ffdhdfffj2efe4hdfffjcff8idfffjffcjdfffjfffffffffffff4gfffffffffffff4ndfffqdfffqdfffqdfffi" },
+			[53] = { 15, 15, 0, 5, 16, "hafffffffff9jafffffffff9jaff9qaff9qaff9qaff9qaffeeeec81kaffffffffe4j8841g2afffe2pbfff8p6fffap6fffapbfff7h4b631g2afffe1h4fffffffffd3j37bceedb6j" },
+			[54] = { 15, 15, 0, 5, 16, "k4adedc83k1bffffffff1jcffd51g25b1i8ffe2peff9p4fff99deda4j7ffffffffff9i8ffffa11bfff6h9fffe1h2fffch8fffdjefffh6fffcjdfff1g2fffdjeffeicffe1h2fffai3effa11bffe3j5effffffe5l29ceec82i" },
+			[55] = { 15, 15, 0, 5, 16, "g8fffffffffff8h8fffffffffff8pefff6o6fffe1ocfff8o4fffe1oafff9o1efff3o8fffbpefff4o5fffcpcfff5o3fffdpafff6o1effep7fff8m" },
+			[56] = { 15, 15, 0, 5, 16, "i17beeec93k3effffffff7jdfff6g3dfff3h3fffbi7fff7h3fff9i5fff8h1effbi7fff5i8fff5g3dffck6dfffffe8k19efffffea3jdffd4g2bffe3h6fff6i2fffbh9fff4jeffdh8fff6i2fffch3fffd4g2bfff7i7effffffffak38ceeeda5i" },
+			[57] = { 15, 15, 0, 5, 16, "j7beeda4l2dfffffff8kdffd317fff7i6fff6icffe1hbfff3i9fff6hcfff2i8fffahbfff3i9fffch8fff6icfffdh2effd3g7ffffci5efffffffffbj29dedb7fff8p5fff4pcffcja72g14cffe2jcfffffffd3k17bdedb6k" },
+			[58] = { 9, 9, 0, 9, 12, "h8fff5j8fff5j8fff5j8fff5zz8fff5j8fff5j8fff5j8fff5h" },
+			[59] = { 9, 9, 0, 9, 15, "h8fff5j8fff5j8fff5j8fff5zz8fff5j8fff5j8fff5j9ffe2jdff6j2ffak7fd1j" },
+			[60] = { 18, 18, 0, 8, 13, "s16b1q16beff1o5aefffebm4aefffeb61k39efffeb61naffeb61qaffeb61q39efffeb61q4aefffeb61q5aefffebr16beff1t16b1y" },
+			[61] = { 18, 18, 0, 10, 11, "hafffffffffffff1iafffffffffffff1iafffffffffffff1zyafffffffffffff1iafffffffffffff1iafffffffffffff1zzu" },
+			[62] = { 18, 18, 0, 8, 13, "h883uaffd83r6effffc72q49effffc71q49effffb6r49efff1q38dfff1n49dffffb6l49dffffc71l6effffc72oaffd83r883zq" },
+			[63] = { 13, 13, 0, 5, 16, "h59ceeda4j7ffffffff8i6942g3dfff2n8fff4m1dfff2l1cfffal1cfffbmafffam1fffdn3fff9zt4fff9n4fff9n4fff9n4fff9k" },
+			[64] = { 22, 22, 0, 5, 19, "m48ceedb61q3cffffffffe7o6efd73h149efb1l5ff8n2cfbk2ef6p1cf7j9f9i6cec5af8g3fdjee1h8fffffdf8hcf3h4fbh2efa11aff8h9f5h6f8h6ff1h1ef8h9f6h7f7h7fejdf8hbf4h6f8h6ff1h1ef8g3fei4fbh2efa11aff94df7jee1h8fffffdffff9kaf9i6cec5aed93l2ef5y6fe7n76o7efc62h26cfe1o4cffffffffd5r49ceeda5m" },
+			[65] = { 17, 17, 0, 5, 16, "k2fffff2p7fffff8pdfffffdo3fffefff4n9fff6fff9neffdgcffem5fff8g7fff5lbfff2g2fffbk1effcicfff2j7fff7i7fff7jcfffffffffffdi3fffffffffffff3h8fff2k1fff9heffdmdffeg5fff9m9fff5afff5m5fffb" },
+			[66] = { 17, 17, 0, 5, 16, "hefffffeec93leffffffffff7kefff2h5effe2jefff2iafff6jefff2i8fff8jefff2iafff6jefff2h5effe1jefffffffffc3kefffffffffe9kefff2h2afff9jefff2i1fffejefff2jefff2iefff2i1ffff1iefff2h2afffcjeffffffffffd2jeffffffedb71i" },
+			[67] = { 16, 16, 0, 5, 16, "k27bdeedb73k9effffffffbjcfffb4h27ebi9fffbl17h3fffe1p8fffaqbfff7qdfff6qdfff6qbfff7q8fffaq3fffe1q9fffbl17jcfffb4h27ebk9effffffffbl27bdeedb73g" },
+			[68] = { 18, 18, 0, 5, 16, "hefffeeedb82meffffffffffa1kefff2g14afffd2jefff2j8fffcjefff2kcfff6iefff2k7fffbiefff2k4fffeiefff2k2ffff1hefff2k2ffff1hefff2k4fffeiefff2k7fffbiefff2kdfff6iefff2j8fffcjefff2g14afffd2jeffffffffffa1keffffeedb82k" },
+			[69] = { 15, 15, 0, 5, 16, "heffffffffff2ieffffffffff2iefff2pefff2pefff2pefff2pefff2pefffffffffbjefffffffffbjefff2pefff2pefff2pefff2pefff2peffffffffff6ieffffffffff6g" },
+			[70] = { 15, 15, 0, 5, 16, "heffffffffff2ieffffffffff2iefff2pefff2pefff2pefff2pefff2pefffffffffbjefffffffffbjefff2pefff2pefff2pefff2pefff2pefff2pefff2n" },
+			[71] = { 18, 18, 0, 5, 16, "k17bdeedca73l8efffffffffckbfffc51g149ecj9fffbm29i3fffe1r8fffasbfff7sdfff6jffffff6hdfff6jffffff6hbfff7l7fff6h8fffal7fff6h3fffe1k7fff6i9fffak7fff6jcfffc41g2afff6k9effffffffff6l27bdeedca63h" },
+			[72] = { 18, 18, 0, 5, 16, "hefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefffffffffffff5iefffffffffffff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5g" },
+			[73] = { 8, 8, 0, 5, 16, "hefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2iefff2g" },
+			[74] = { 10, 8, -2, 5, 20, "jefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kefff2kffff1j4fffej3cfff8h3fffffbi3feda4j" },
+			[75] = { 18, 17, 0, 5, 16, "hefff2j5effe6iefff2i6effe6jefff2h6fffe5kefff2g6fffe5lefff27fffe5mefff9fffe5neffffffe4oeffffff6peffffffe3oefffefffe3nefff4dfffe3mefff22dfffe3lefff2g1dfffe3kefff2h1dfffe3jefff2i1cfffe3iefff2j1cfffe3" },
+			[76] = { 14, 14, 0, 5, 16, "hefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oeffffffffff6heffffffffff6" },
+			[77] = { 22, 22, 0, 5, 16, "heffff7l9ffffcjeffffdk1effffcjefffff5j6fffffcjefffffbjdfffffcjeffeeff2h4ffdfffcjeffe8ff9hbff7fffcjeffe2efe12ffe1fffcjeffegaff78ff8gfffcjeffeg4ffdeff2gfffcjeffehcffffbhfffcjeffeh6ffff4hfffcjeffeieffdifffcjeffei8ff6ifffcjeffepfffcjeffepfffcjeffepfffch" },
+			[78] = { 18, 18, 0, 5, 16, "hefffdk8fff5ieffff6j8fff5ieffffdj8fff5iefffff7i8fff5iefffffe1h8fff5ieffecff8h8fff5ieffe4ffe1g8fff5ieffegbff9g8fff5ieffeg3ffe28fff5ieffehaffa8fff5ieffeh2effbfff5ieffei9ffffff5ieffei1efffff5ieffej8fffff5ieffej1effff5ieffek7ffff5g" },
+			[79] = { 19, 19, 0, 5, 16, "k49ceedb82n1bffffffffe8l1dffe81g3bfffakbfff7kbfff6i4fffdl3fffdi8fff9mefff3hbfff7mbfff7hdfff5mafff8hdfff5mafff8hbfff7mbfff7h8fff9mefff3h4fffdl3fffdjbfff7kbfff6j1dffe71g3afffal1bffffffffe8o49ceedb82k" },
+			[80] = { 16, 16, 0, 5, 16, "heffffffeda4keffffffffffajefff2h3dfff8iefff2i5fffeiefff2i1ffff2hefff2i1ffff2hefff2i5fffeiefff2h3dfff8ieffffffffffajeffffffeda4kefff2qefff2qefff2qefff2qefff2qefff2o" },
+			[81] = { 19, 19, 0, 5, 19, "k49ceedb82n1bffffffffe8l1dffe81g3bfffakbfff7kbfff6i3fffdl3fffdi8fff9mefff3hbfff7mbfff6hdfff5mafff8hdfff5mafff8hbfff6mbfff7h8fff9mefff4h4fffdl3fffejbfff6kbfff7j1dffe71g3afffbl1bfffffffffao49ceefff7ubffd1ucffc1t1dffci" },
+			[82] = { 17, 17, 0, 5, 16, "hefffffeec82lefffffffffe5kefff2g18fffe1jefff2idfff4jefff2iafff6jefff2iafff5jefff2idffe1jefff2g18fff8keffffffffd6leffffffffe7lefff2g3dfff8kefff2h3effe3jefff2i9fffbjefff2i2efff3iefff2j9fffbiefff2j2efff3" },
+			[83] = { 16, 16, 0, 5, 16, "j7beeedca81j2dfffffffff2jcffd41g27df2i3fff6l82i5fff6q5fffd3p2fffffd962maffffffffc5l8effffffff6l169dfffffep29ffff2qdfff2h38mcffei4fe841g18fffai4ffffffffffc1i158bcdeeda6j" },
+			[84] = { 15, 15, 0, 5, 16, "dfffffffffffffddfffffffffffffdk8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8k" },
+			[85] = { 18, 18, 0, 5, 16, "hefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjefff2j4fffcjcfff3j6fffaj9fff7jafff6j2effe5117effdl4effffffffd3m17bdeeda6k" },
+			[86] = { 17, 17, 0, 5, 16, "afff6m6fffb5fffcmbfff5gefff2k2fffeh8fff7k7fff9h3fffdkcfff3icfff3i3fffdj7fff9i8fff7j1effeidfff2kbfff4g4fffbl5fffag9fff5meffe1effen9fffbfff9n3fffffff4odfffffdp7fffff8p2fffff2k" },
+			[87] = { 24, 24, 0, 5, 16, "3fffbkefff3j7fff6geffej3ffff7jafff3gbfff3i6ffffajeffeh7fff6iaffefei2fffbh4fffaidfebff2h6fff7ieffdh2ffa7ff6hafff4icfff2g6ff73ff9hdffej8fff6g9ff3gefdg2fffcj4fff9gdfehbff25fff8j1fffd1ffbh7ff59fff4kcfff7ff8h4ff9cfff1k9fffdff4iefdfffcl5fffffe1icfffff9l1fffffcj8fffff5mdffff8j4fffff2m9ffff5j1ffffdj" },
+			[88] = { 17, 17, 0, 5, 16, "1dfff4k5fffd1g5fffd1i1efff4i9fff9iafff9j1dfff5g6fffdl4fffd3effe3m9fffefff8odfffffcp3fffff3p7fffff6o2efffffe2ncfffcfffbm7fffbgcfff6k3effe2g3effe2jcfff6i7fffbi8fffbkbfff7g3effe2k2effe2" },
+			[89] = { 18, 16, -1, 5, 16, "gcfff9lafffbh3efff3j5fffe2i8fffci1dfff7kdfff8h9fffcl3effe24fffe2m8fffcdfff7odffffffcp4fffffe3q9ffff8r1ffffs1ffffs1ffffs1ffffs1ffffs1ffffs1ffffm" },
+			[90] = { 16, 16, 0, 5, 16, "gbffffffffffffahbffffffffffffapbffffao8ffffe2n4fffff5n2effff8ocffffco9ffffe2n5fffff4n2effff8ocffffbo9ffffd1n6ffffe3oeffff7pfffffffffffffehfffffffffffffeg" },
+			[91] = { 10, 10, 0, 4, 20, "g1ffffff8h1ffffff8h1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1fff8k1ffffff8h1ffffff8g" },
+			[92] = { 9, 8, 0, 5, 18, "cf7l8fcl3ff2ldf7l8fbl4fe1lef6l9fbl5femef5lafal5fel1ef4lbf9l6fdl1ff3lcf8l7fdg" },
+			[93] = { 10, 10, 0, 4, 20, "g7ffffff2h7ffffff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2k7fff2h7ffffff2h7ffffff2g" },
+			[94] = { 18, 18, 0, 5, 16, "m8ffd1r7ffffc1p7ffedffc1n6ffd41affbm5efb1i6efbk4ee7l2cfazzzzzzzzzh" },
+			[95] = { 11, 11, 0, 21, 5, "zsffffffffffffffffffffff" },
+			[96] = { 11, 11, 0, 3, 18, "g7ff6n7fe3n7fd1n7fazzzzzzzx" },
+			[97] = { 15, 15, 0, 9, 12, "h26adeedb7lfffffffffd1jc621g17effaqcffej17bdeffffff1h2effffffffff1hbfff81hbfff1heffdjdfff1heffdi3ffff1hbfff6g3dffff1h3efffffbbfff1i3aeec7gbfff1g" },
+			[98] = { 16, 16, 0, 4, 17, "g2fffaq2fffaq2fffaq2fffaq2fffaq2fffag7ced91j2fffbbfffffd2i2ffffb2g6effci2ffff2iafff5h2fffcj5fff9h2fffbj4fffah2fffbj4fffah2fffcj5fff9h2ffff2iafff5h2ffffb2g6effci2fffbbfffffe2i2fffag7ced92i" },
+			[99] = { 13, 13, 0, 9, 12, "j6adedb6j2cfffffff8h1dfff71g267h8fff9ndfff2neffeoeffeodfff2n8fff9n1dffe71g277i2dfffffff8k6adedb6h" },
+			[100] = { 16, 16, 0, 4, 17, "peffdreffdreffdreffdreffdk3aeeb5geffdj5efffff8effdi2effd3g3dfffdi9fff6i6fffdidfff1i1fffdieffekeffdieffekeffdidfff1i1fffdi9fff6i6fffdi2effd3g3dfffdj6efffff8effdk3beeb5geffdh" },
+			[101] = { 15, 15, 0, 9, 12, "j6bdeeb6l3dfffffffc1i1dffd4g4dffci8fff5i6fff5hdffej2fffahefffffffffffchefffffffffffchdffeq8fff4p1dffd51g237b4i3dfffffffff4k6bdeecb73h" },
+			[102] = { 10, 10, 0, 4, 17, "i29deffbh1dfffffbh7fff8k9fff3kafff2i8ffffffff78ffffffff7hafff2kafff2kafff2kafff2kafff2kafff2kafff2kafff2kafff2kafff2i" },
+			[103] = { 16, 16, 0, 9, 17, "i3aeeb5geffdj5efffff8effdi2effd4g4efffdi8fff6i6fffdidfff1i2fffdieffekeffdieffekeffdicfff1i2fffdi8fff6i6fffdi2effd3g4efffdj5efffff8effdk3aeeb5gfffcq2fffaq8fff6j7931g17effck8ffffffffb1l5aceeda5k" },
+			[104] = { 16, 16, 0, 4, 17, "g2fffaq2fffaq2fffaq2fffaq2fffaq2fffag6ceea3j2fffbbfffffe2i2ffffc218fffai2fffe2ifffdi2fffcjeffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffeh" },
+			[105] = { 8, 8, 0, 4, 17, "g2fffai2fffai2fffai2fffaq2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffah" },
+			[106] = { 9, 8, -1, 4, 22, "h2fffaj2fffaj2fffaj2fffas2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj2fffaj3fff8i19fff4hbffffbibfec7j" },
+			[107] = { 16, 15, 0, 4, 17, "g2fffaq2fffaq2fffaq2fffaq2fffaq2fffai5effd2h2fffah5effc1i2fffag5effc1j2fffa6effb1k2fffdeffbm2ffffffdn2fffffffam2fffbbfff9l2fffa1cfff9k2fffag1cfff9j2fffah1dfff8i2fffai2dfff8g" },
+			[108] = { 8, 8, 0, 4, 17, "g2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffai2fffah" },
+			[109] = { 23, 23, 0, 9, 12, "g2fffag8dec6h4beeb5j2fffbcfffff97ffffff6i2ffffa11cffff813effdi2fffe1h8fffcibfff1h2fffci6fff8iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2h2fffai6fff6iafff2g" },
+			[110] = { 16, 16, 0, 9, 12, "g2fffag6ceea3j2fffbbfffffe2i2ffffc218fffai2fffe2ifffdi2fffcjeffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffei2fffajdffeh" },
+			[111] = { 15, 15, 0, 9, 12, "j6bdeeb71k3dfffffffe4i1effd4g3dffe2h8fff6i4fffahdfff1jeffeheffekdfff1geffekdfff1gdfff1jeffeh8fff6i4fffah1effd4g3dffe2i3dfffffffe4k17bdeec71i" },
+			[112] = { 16, 16, 0, 9, 17, "g2fffag7ced91j2fffbbfffffd2i2ffffb2g6effci2ffff2iafff5h2fffcj5fff9h2fffbj4fffah2fffbj4fffah2fffcj5fff9h2ffff2iafff5h2ffffb2g6effci2fffbbfffffe2i2fffag7ced92j2fffaq2fffaq2fffaq2fffaq2fffap" },
+			[113] = { 16, 16, 0, 9, 17, "i3aeeb5geffdj6efffff8effdi2effd3g3dfffdi9fff6i6fffdidfff1i1fffdieffekeffdieffekeffdidfff1i1fffdi9fff6i6fffdi2effd3g3dfffdj6efffff8effdk3beeb5geffdreffdreffdreffdreffdreffdh" },
+			[114] = { 11, 11, 0, 9, 12, "g2fffag7cebg2fffbcfffbg2ffffd4j2ffff3k2fffcl2fffal2fffal2fffal2fffal2fffal2fffal2fffak" },
+			[115] = { 13, 13, 0, 9, 12, "h28ceedb83i2effffffff3haffc2g136b3hcffaobfffda751j6fffffffea1i7efffffffak368cfffeoaffeh9942h3dffchaffffffffe3i59cdeec82h" },
+			[116] = { 11, 11, 0, 6, 15, "hcfffmcfffmcfffkafffffffffgaffffffffficfffmcfffmcfffmcfffmcfffmcfffmbfff1lafff6l4ffffffaj5befffag" },
+			[117] = { 16, 16, 0, 9, 12, "g4fff8jfffci4fff8jfffci4fff8jfffci4fff8jfffci4fff8jfffci4fff8jfffci4fff8jfffci4fff8i2fffci3fffai7fffcjeffe4g5efffcj7ffffff7fffck6ceeb4gfffch" },
+			[118] = { 15, 14, 0, 9, 12, "7fff5keffcg1effaj5fff6haffe1ibffei4fff6h1eff9jdffch7fff3j7fff2gcffck1eff72fff6laffd8ffe1l4fffeff9ndfffff3n8ffffdo2efff7k" },
+			[119] = { 20, 20, 0, 9, 12, "1fff9i8ffdi4fff6gcffdicfff2h8fff2g8fff1hefff5hbffdh4fff5g4ffef9heff9ieff9g8feafdg4fff5ibffcgbfa6ff28fff1i7fff2ef72ff5bffcj3fff9ff3gdfaeff8keffefehafefff4kaffffbh6ffffel6ffff7h2ffffbl2ffff3idfff7i" },
+			[120] = { 14, 14, 0, 9, 12, "2effd1ibffe4g5fff9h7fff7i9fff53effbkcffecffd1k2effffe4m5ffff8n8ffffbm4ffffff7k1effcaffe4jbffe21dffd1h8fff6h4fffbg4fffbj8fff7" },
+			[121] = { 14, 14, 0, 9, 17, "7fff4j1effb1effaj6fff5gaffe1ibffeh3fff7h1eff9icffdh6fff4i6fff4gbffdkeffa1eff8k8ffe8fff3k2fffeffcmbfffff7m4ffffe1ndfffbo7fff5o9ffeo4eff8mcffffcncfed81l" },
+			[122] = { 13, 13, 0, 9, 12, "gbfffffffffbhbfffffffffbm2efffbl1dfffe3k1cfffe4lbffff6laffff8l8ffff9l7ffffbmffffcnffffffffffbhffffffffffbg" },
+			[123] = { 16, 16, 0, 4, 20, "m5beefdo5fffffdobffe5qdffcrdffbrdffbreffbq1fffap2afff6n3ffffe8o3ffffe9q2bfff6q1fffareffbrdffbrdffbrdffcrbffe5q5fffffdp4beefdi" },
+			[124] = { 8, 8, 0, 4, 22, "h3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3j3ff3h" },
+			[125] = { 16, 16, 0, 4, 20, "h3ffed92o3fffffd1p19fff6q2fff8q1fff8q1fff8q1fff9reffbrbfff61p1affffdo2cffffdobfff71peffcq1fff9q1fff8q1fff8q2fff8p19fff6n3fffffd1n3ffed92m" },
+			[126] = { 18, 18, 0, 11, 10, "zg5adeda731g26d1i9fffffffffffff1iaffffffffffffe1iac51g259ceec71j4zzzzm" },
+			[1040] = { 17, 17, 0, 5, 16, "k2fffff2p7fffff8pdfffffdo3fffefff4n9fff6fff9neffdgcffem5fff8g7fff5lbfff2g2fffbk1effcicfff2j7fff7i7fff7jcfffffffffffdi3fffffffffffff3h8fff2k1fff9heffdmdffeg5fff9m9fff5afff5m5fffb" },
+			[1041] = { 17, 17, 0, 5, 16, "hefffffffffff2jefffffffffff2jefff2refff2refff2refff2refff2reffffffeda6leffffffffffd2jefff2h2afffbjefff2i1ffff1iefff2jefff2iefff2i1ffff1iefff2h2afffbjeffffffffffd2jeffffffeda6j" },
+			[1042] = { 17, 17, 0, 5, 16, "hefffffeec93leffffffffff7kefff2h5effe2jefff2iafff6jefff2i8fff8jefff2iafff6jefff2h5effe1jefffffffffc3kefffffffffe9kefff2h2afff9jefff2i1fffejefff2jefff2iefff2i1ffff1iefff2h2afffcjeffffffffffd2jeffffffedb71i" },
+			[1043] = { 14, 14, 0, 5, 16, "heffffffffff6heffffffffff6hefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2oefff2m" },
+			[1044] = { 20, 20, 0, 5, 19, "jbfffffffffffnbfffffffffffnbfff6h1ffffnbfff6h1ffffnbfff5h1ffffnbfff5h1ffffnbfff5h1ffffnbfff4h1ffffnbfff4h1ffffncfff3h1ffffndfff1h1ffffneffei1ffffm4fffci1ffffl1cfff8i1ffffkaffffffffffffffff4haffffffffffffffff4haff6pcff4haff6pcff4haff6pcff4g" },
+			[1045] = { 15, 15, 0, 5, 16, "heffffffffff2ieffffffffff2iefff2pefff2pefff2pefff2pefff2pefffffffffbjefffffffffbjefff2pefff2pefff2pefff2pefff2peffffffffff6ieffffffffff6g" },
+			[1046] = { 27, 27, 0, 5, 16, "g7fffbk9fff8j1cfff6i9fffaj9fff8jbfff8kafff9i9fff8iafff9mbfff8h9fff8h9fffaocfff7g9fff8g8fffbp1cfff59fff87fffcr4fffecfffcffff3rcfffffffffffffbq8fffffffffffffff7o3efff8efffffe8fffe2ndfff9g5ffffe4gafffcm8fffdi9fff8h1dfff7k4fffe4i9fff8i5fffe3i1dfff8j9fff8j9fffci9fffck9fff8j1dfff8g4fffe3k9fff8k4fffe4" },
+			[1047] = { 16, 16, 0, 5, 16, "h37bdeedb82k2ffffffffff8j2a621g16efff5q8fffaq5fffbq8fff7o16effc1lcfffffe8ncffffffe8p15dfff8q3ffferefff2p3fffei7952h15dfff9i8ffffffffffak49ceeedb83j" },
+			[1048] = { 18, 18, 0, 5, 16, "heffek7ffff5ieffej1effff5ieffej8fffff5ieffei1efffff5ieffei9ffffff5ieffeh2effbfff5ieffehaffa8fff5ieffeg3ffe28fff5ieffegbff9g8fff5ieffe4ffe1g8fff5ieffebff8h8fff5iefffffe1h8fff5iefffff7i8fff5ieffffdj8fff5ieffff6j8fff5iefffdk8fff5g" },
+			[1049] = { 18, 18, 0, 0, 21, "k9e4g17f4p3effffdr4beda2zzjeffek7ffff5ieffej1effff5ieffej8fffff5ieffei1efffff5ieffei9ffffff5ieffeh2effbfff5ieffehaffa8fff5ieffeg3ffe28fff5ieffegbff9g8fff5ieffe4ffe1g8fff5ieffebff8h8fff5iefffffe1h8fff5iefffff7i8fff5ieffffdj8fff5ieffff6j8fff5iefffdk8fff5g" },
+			[1050] = { 18, 18, 0, 5, 16, "hefff2kcfffbiefff2jbfffbjefff2ibfffbkefff2hbfffc1kefff2gbfffc1lefff2bfffc1mefffcfffe2neffffffff9nefffffffff5meffffd8fffe1lefffd1gbfffblefff3h2efff7kefff2i5fffe3jefff2j9fffcjefff2j1dfff8iefff2k3efff4" },
+			[1051] = { 18, 18, 0, 5, 16, "j2fffffffffff3k2fffffffffff3k2fffeidfff3k2fffeidfff3k2fffeidfff3k2fffdidfff3k3fffdidfff3k3fffbidfff3k4fffaidfff3k5fff8idfff3k7fff6idfff3kafff2idfff3j2effcjdfff3h15dffe4jdfff3hefffc3kdfff3hdb83mdfff3g" },
+			[1052] = { 22, 22, 0, 5, 16, "heffff7l9ffffcjeffffdk1effffcjefffff5j6fffffcjefffffbjdfffffcjeffeeff2h4ffdfffcjeffe8ff9hbff7fffcjeffe2efe12ffe1fffcjeffegaff78ff8gfffcjeffeg4ffdeff2gfffcjeffehcffffbhfffcjeffeh6ffff4hfffcjeffeieffdifffcjeffei8ff6ifffcjeffepfffcjeffepfffcjeffepfffch" },
+			[1053] = { 18, 18, 0, 5, 16, "hefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefffffffffffff5iefffffffffffff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5g" },
+			[1054] = { 19, 19, 0, 5, 16, "k49ceedb82n1bffffffffe8l1dffe81g3bfffakbfff7kbfff6i4fffdl3fffdi8fff9mefff3hbfff7mbfff7hdfff5mafff8hdfff5mafff8hbfff7mbfff7h8fff9mefff3h4fffdl3fffdjbfff7kbfff6j1dffe71g3afffal1bffffffffe8o49ceedb82k" },
+			[1055] = { 18, 18, 0, 5, 16, "hefffffffffffff5iefffffffffffff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5iefff2kbfff5g" },
+			[1056] = { 16, 16, 0, 5, 16, "heffffffeda4keffffffffffajefff2h3dfff8iefff2i5fffeiefff2i1ffff2hefff2i1ffff2hefff2i5fffeiefff2h3dfff8ieffffffffffajeffffffeda4kefff2qefff2qefff2qefff2qefff2qefff2o" },
+			[1057] = { 16, 16, 0, 5, 16, "k27bdeedb73k9effffffffbjcfffb4h27ebi9fffbl17h3fffe1p8fffaqbfff7qdfff6qdfff6qbfff7q8fffaq3fffe1q9fffbl17jcfffb4h27ebk9effffffffbl27bdeedb73g" },
+			[1058] = { 15, 15, 0, 5, 16, "dfffffffffffffddfffffffffffffdk8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8p8fff8k" },
+			[1059] = { 17, 17, 0, 5, 16, "2efff2k4fffe1gafffakbfff9h3fffe2i3fffe2ibfff9iafff9j5fffe2g2efff2kdfff9g9fffal6fffe3efff3mefffefffbn8fffffff4n1efffffcp9fffff5p2ffffcrbfff5q2dffdpbffffe3pbeec82n" },
+			[1060] = { 22, 22, 0, 5, 16, "n2fffew2fffes169ceffffec95n8effffffffffffe6kbfffc53fffe16dfff8i5fffdh2fffeh2efff3hafff8h2fffeiafff8hdfff6h2fffei8fffahdfff6h2fffei8fffahbfff8h2fffeiafff8h6fffdh2fffeh2efff3ibfffc43fffe16dfff8k8effffffffffffe7m16aceffffec95s2fffew2fffeo" },
+			[1061] = { 17, 17, 0, 5, 16, "1dfff4k5fffd1g5fffd1i1efff4i9fff9iafff9j1dfff5g6fffdl4fffd3effe3m9fffefff8odfffffcp3fffff3p7fffff6o2efffffe2ncfffcfffbm7fffbgcfff6k3effe2g3effe2jcfff6i7fffbi8fffbkbfff7g3effe2k2effe2" },
+			[1062] = { 20, 20, 0, 5, 19, "hefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5kefff2kbfff5keffffffffffffffff1heffffffffffffffff1vfff1vfff1vfff1" },
+			[1063] = { 18, 18, 0, 5, 16, "g3fffdk5fffbi3fffdk5fffbi3fffdk5fffbi3fffdk5fffbi3fffek5fffbi2ffffk5fffbjdfff8j5fffbj6ffffffffffffbk5befffffffffbs5fffbs5fffbs5fffbs5fffbs5fffbs5fffbs5fffbh" },
+			[1064] = { 27, 27, 0, 5, 16, "hefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2iefff2j7fff9kefff2ieffffffffffffffffffffff2ieffffffffffffffffffffff2g" },
+			[1065] = { 29, 29, 0, 5, 19, "hefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2kefff2j7fff9kefff2keffffffffffffffffffffffffcieffffffffffffffffffffffffczk4ffczk4ffczk4ffcg" },
+			[1066] = { 21, 21, 0, 4, 17, "zhdffffffff7qdffffffff7qdffffffff7q111119fff7v9fff7v9fff7v9fffedddca6p9ffffffffffd3n9fffffffffffdn9fff93348ffff5m9fff7jafff7m9fff7j9fff8m9fff7i2dfff5m9fffdccdefffe1m9ffffffffffe4n9ffffffedb71i" },
+			[1067] = { 23, 23, 0, 5, 16, "hefff2o5fffbjefff2o5fffbjefff2o5fffbjefff2o5fffbjefff2o5fffbjefff2o5fffbjeffffffeda5i5fffbjeffffffffffb1g5fffbjefff2h2bfff9g5fffbjefff2i2fffeg5fffbjefff2jefff25fffbjefff2jefff25fffbjefff2i2fffeg5fffbjefff2h2bfffag5fffbjeffffffffffb1g5fffbjeffffffeda5i5fffbh" },
+			[1068] = { 17, 17, 0, 5, 16, "hefff2refff2refff2refff2refff2refff2reffffffeda5leffffffffffb1jefff2h2bfff9jefff2i2fffejefff2jefff2iefff2jefff2iefff2i2fffejefff2h2bfffajeffffffffffb1jeffffffeda5j" },
+			[1069] = { 16, 16, 0, 4, 18, "j24431n29dfffffd71k8fffffffffd3j8ffcaadffffe3i881j4dfffdq3efff6qafffaj5888888bfffdj9ffffffffffej9ffffffffffej5888888bfffdqafffap3efff6h882j4dfffdi8ffcaadffffe3i8fffffffffd3j29dfffffd71n23431m" },
+			[1070] = { 26, 26, 0, 5, 16, "hefff2k39ceedb82mefff2jaffffffffe8lefff2ibffe81g3afffakefff2h8fff7kbfff6jefff2g1effel3fffdjefff2g7fff9mdfff4iefff2gafff7mbfff7iefffffffff6mafff8iefffffffff6mafff8iefff2gafff7mbfff7iefff2g7fff9mdfff4iefff2g1effel3fffdjefff2h8fff7kbfff6jefff2ibffe81g2afffakefff2jaffffffffe8lefff2k39ceedb82k" },
+			[1071] = { 17, 17, 0, 5, 16, "j49deffffffdk9ffffffffffdj5fffd4h3fffdjafff7i3fffdjcfff5i3fffdjbfff5i3fffdj6fff7i3fffdkaffe4h3fffdl8effffffffdmcffffffffdl5fffe13fffdldfff7g3fffdk8fffch3fffdj2efff4h3fffdjafffai3fffdi4fffe2i3fffdh" },
+			[1072] = { 15, 15, 0, 9, 12, "h26adeedb7lfffffffffd1jc621g17effaqcffej17bdeffffff1h2effffffffff1hbfff81hbfff1heffdjdfff1heffdi3ffff1hbfff6g3dffff1h3efffffbbfff1i3aeec7gbfff1g" },
+			[1073] = { 15, 15, 0, 3, 18, "q1m368acdef4kaffffedcb6j9ffa3o3ffaq9ff2qdfe4aceec92jefffffffffe7iffffe6g1afff6hdfffai1effdhcfff5jbfff3gcfff3j9fff5gbfff3j9fff5gafff5jbfff3g5fffai1effdicffe6g1afff6i1cfffffffe7l5adeec92i" },
+			[1074] = { 14, 14, 0, 9, 12, "g2fffffeec81i2fffffffffdi2fffah5fff5h2fffah5fff5h2fffffffffe1h2ffffffffe3i2fffah3efe3h2fffaiaffbh2fffaiaffdh2fffah3effch2fffffffffe5h2ffffffeda3h" },
+			[1075] = { 12, 12, 0, 9, 12, "g2ffffffffeh2ffffffffeh2fffam2fffam2fffam2fffam2fffam2fffam2fffam2fffam2fffam2fffal" },
+			[1076] = { 18, 18, 0, 9, 15, "jcfffffffff8mcfffffffff8mcffeh4fff8mdffeh4fff8mdffdh4fff8meffch4fff8mfffbh4fff8l3fff9h4fff8l8fff6h4fff8k5efff3h4fff8jbffffffffffffff8hbffffffffffffff8hbfeo3ff8hbfeo3ff8hbfeo3ff8g" },
+			[1077] = { 15, 15, 0, 9, 12, "j6bdeeb6l3dfffffffc1i1dffd4g4dffci8fff5i6fff5hdffej2fffahefffffffffffchefffffffffffchdffeq8fff4p1dffd51g237b4i3dfffffffff4k6bdeecb73h" },
+			[1078] = { 22, 22, 0, 9, 12, "gafff7ieffdi8fff9iafff7heffdh8fff9kafff7geffdg9fff8m9fff8effd9fff8o9ffffffffff7paffffffffff9o7ffffffffffff5m3effa7fffe6cffe2k1dffd1geffdg2effckbffe3heffdh4fff9i7fff6ieffdi8fff6g4effajeffdjbffe3" },
+			[1079] = { 13, 13, 0, 9, 12, "h4aceedb6j5ffffffff9i5831g2affen2bffekdffffff8kdffffe6n14cff8o3fff3n3fff5hb73h4cfff3hdffffffff9i27bdeec94i" },
+			[1080] = { 15, 15, 0, 9, 12, "g2fffaiafff8h2fffah5ffff8h2fffahdffff8h2fffag8fffff8h2fffa2efffff8h2fffabffefff8h2fffeffe7fff8h2ffffff84fff8h2fffffdg4fff8h2fffff5g4fff8h2ffffbh4fff8h2fffe2h4fff8g" },
+			[1081] = { 15, 15, 0, 4, 17, "jbd3g18f3m6fffffco6ced91zu2fffaiafff8h2fffah5ffff8h2fffahdffff8h2fffag8fffff8h2fffa2efffff8h2fffabffefff8h2fffeffe7fff8h2ffffff84fff8h2fffffdg4fff8h2fffff5g4fff8h2ffffbh4fff8h2fffe2h4fff8g" },
+			[1082] = { 15, 15, 0, 9, 12, "g2fffai8fff9h2fffah9fff9i2fffag9fff8j2fffaafff7k2fffffff7l2fffffff8l2ffffffff4k2fffe5cffe2j2fffag2effcj2fffah4eff9i2fffai7fff6h2fffajbffe3" },
+			[1083] = { 16, 16, 0, 9, 12, "i1ffffffffff4j1ffffffffff4j1fffah8fff4j2fffah8fff4j2fffah8fff4j2fff9h8fff4j3fff8h8fff4j4fff5h8fff4j9fff2h8fff4h17eff9i8fff4hbfffaj8fff4hbda5k8fff4g" },
+			[1084] = { 18, 18, 0, 9, 12, "g2ffff7j8ffff1h2ffffdjeffff1h2fffff5h6fffff1h2fffffchdfffff1h2ffffff45ffffff1h2fffcffbbffdfff1h2fffabffffbafff1h2fffa4ffff4afff1h2fffagdffdgafff1h2fffag7ff7gafff1h2fffalafff1h2fffalafff1g" },
+			[1085] = { 15, 15, 0, 9, 12, "g2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffffffffff5h2fffffffffff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5g" },
+			[1086] = { 15, 15, 0, 9, 12, "j6bdeeb71k3dfffffffe4i1effd4g3dffe2h8fff6i4fffahdfff1jeffeheffekdfff1geffekdfff1gdfff1jeffeh8fff6i4fffah1effd4g3dffe2i3dfffffffe4k17bdeec71i" },
+			[1087] = { 15, 15, 0, 9, 12, "g2fffffffffff5h2fffffffffff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5h2fffai7fff5g" },
+			[1088] = { 16, 16, 0, 9, 17, "g2fffag7ced91j2fffbbfffffd2i2ffffb2g6effci2ffff2iafff5h2fffcj5fff9h2fffbj4fffah2fffbj4fffah2fffcj5fff9h2ffff2iafff5h2ffffb2g6effci2fffbbfffffe2i2fffag7ced92j2fffaq2fffaq2fffaq2fffaq2fffap" },
+			[1089] = { 13, 13, 0, 9, 12, "j6adedb6j2cfffffff8h1dfff71g267h8fff9ndfff2neffeoeffeodfff2n8fff9n1dffe71g277i2dfffffff8k6adedb6h" },
+			[1090] = { 13, 13, 0, 9, 12, "dfffffffffff9dfffffffffff9j8fff4n8fff4n8fff4n8fff4n8fff4n8fff4n8fff4n8fff4n8fff4n8fff4j" },
+			[1091] = { 14, 14, 0, 9, 17, "7fff4j1effb1effaj6fff5gaffe1ibffeh3fff7h1eff9icffdh6fff4i6fff4gbffdkeffa1eff8k8ffe8fff3k2fffeffcmbfffff7m4ffffe1ndfffbo7fff5o9ffeo4eff8mcffffcncfed81l" },
+			[1092] = { 22, 22, 0, 4, 22, "offfcxfffcxfffcxfffcxfffcr29de9gfffc1aed81k3effff9fffcbffffc1jdffe417fffe5g7fffai5fff9ifffcicfff2h9fff5ifffci7fff6hbfff3ifffci6fff8hbfff3ifffci6fff8h9fff5ifffci7fff6h5fff9ifffcicfff2idffe417fffe5g6fffaj3effff9fffcbffffd1k29de9gfffc1aed81rfffcxfffcxfffcxfffcxfffco" },
+			[1093] = { 14, 14, 0, 9, 12, "2effd1ibffe4g5fff9h7fff7i9fff53effbkcffecffd1k2effffe4m5ffff8n8ffffbm4ffffff7k1effcaffe4jbffe21dffd1h8fff6h4fffbg4fffbj8fff7" },
+			[1094] = { 16, 16, 0, 9, 15, "g2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffai7fff5i2fffffffffffff5g2fffffffffffff5r6ff5r6ff5r6ff5" },
+			[1095] = { 15, 15, 0, 9, 12, "g8fff4h3fff9i8fff4h3fff9i8fff4h3fff9i8fff5h3fff9i6fff9h3fff9i1efffffffff9j3befffffff9p3fff9p3fff9p3fff9p3fff9p3fff9h" },
+			[1096] = { 23, 23, 0, 9, 12, "g2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffai4fff8i7fff5h2fffffffffffffffffff5h2fffffffffffffffffff5g" },
+			[1097] = { 24, 24, 0, 9, 15, "g2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffai4fff8i7fff5i2fffffffffffffffffffff5g2fffffffffffffffffffff5z5ff5z5ff5z5ff5" },
+			[1098] = { 17, 17, 0, 8, 13, "w8fffffff6n8fffffff6n25559fff6r6fff6r6fffa7664n6ffffffffe5l6fffedeffff3k6fff6h3fff8k6fff6ieff9k6fff966afff7k6fffffffffd1k6fffffeec71h" },
+			[1099] = { 20, 20, 0, 9, 12, "g2fffanbfff1h2fffanbfff1h2fffanbfff1h2fffanbfff1h2fffanbfff1h2ffffffed93hbfff1h2fffffffffe4gbfff1h2fffah2dffbgbfff1h2fffaiaffdgbfff1h2fffah2dffbgbfff1h2fffffffffe4gbfff1h2ffffffed93hbfff1g" },
+			[1100] = { 14, 14, 0, 9, 12, "g2fffao2fffao2fffao2fffao2fffao2ffffffed93i2fffffffffe4h2fffah2dffbh2fffaiaffdh2fffah2dffbh2fffffffffe4h2ffffffed93h" },
+			[1101] = { 13, 13, 0, 8, 14, "i2443m5dffffea3j8fffffffe5i8d868cfffe2h2kbfff9j11114fffei1fffffffffi1fffffffffn2fffeh2kbfff9h8d868dfffe2h8fffffffe5i5dffffea3l2343l" },
+			[1102] = { 21, 21, 0, 9, 12, "g2fffaj5adeec92j2fffah1cfffffffe7i2fffahbffe6g1afff6h2fffag5fffai1effdh2fffa1afff5jbfff3g2fffffffff3j9fff5g2fffffffff3j9fff5g2fffa1afff5jbfff3g2fffag5fffai1effdh2fffahbffe6g1afff6h2fffah1cfffffffe7i2fffaj6bdeec92i" },
+			[1103] = { 14, 14, 0, 9, 12, "h18ceefffff4icfffffffff4h4fffa1g8fff4h6fff4h8fff4h3fff4h8fff4iaffa1g8fff4j9ffffffff4j8ffffffff4i2effbg8fff4ibffe2g8fff4h6fff6h8fff4g1effbi8fff4g" },
+			[1025] = { 15, 15, 0, 0, 21, "jff7gbfbnff7gbfbnff7gbfbzveffffffffff2ieffffffffff2iefff2pefff2pefff2pefff2pefff2pefffffffffbjefffffffffbjefff2pefff2pefff2pefff2pefff2peffffffffff6ieffffffffff6g" },
+			[1105] = { 15, 15, 0, 4, 17, "jbfbg8ffnbfbg8ffnbfbg8ffzx6bdeeb6l3dfffffffc1i1dffd4g4dffci8fff5i6fff5hdffej2fffahefffffffffffchefffffffffffchdffeq8fff4p1dffd51g237b4i3dfffffffff4k6bdeecb73h" },
+			[171] = { 14, 14, 0, 10, 11, "l9j72k2cfh1bf2j5efdg3dfe1i9ffb17efc2i4fe7g2ff9k4fe7g2ff9l9ffb17efc2k5efdg4dfe1k2cfh1bf2m9j72u" },
+			[187] = { 14, 14, 0, 10, 11, "h8j81mdc2hbd4lcfe6gafe7laff918ffb1k7ef5g5ef7k6ef5g5ef7jaff918ffb1icfe6gafe8kdd2hbd4l9j81y" },
+			[8212] = { 22, 22, 0, 13, 8, "gcffffffffffffffffffchcffffffffffffffffffchcffffffffffffffffffczzzzzq" },
+			[8211] = { 11, 11, 0, 13, 8, "gcfffffffchcfffffffchcfffffffczzv" },
+			[8230] = { 22, 22, 0, 17, 4, "g4fff9ieffei9fff4h4fff9ieffei9fff4h4fff9ieffei9fff4h4fff9ieffei9fff4g" },
+			[8470] = { 26, 26, 0, 4, 17, "znefffdl3adeapeffff6j2efffapeffffdj6fffb3pefffff7i7fff6qefffffe1h8fff5i2662jeffebff8h8fff5h6effe5ieffe4ffe1g8fff5g1ee56fdieffegbff9g8fff5g4fbhdf3heffeg3ffe28fff5g6fahbf5heffehaffa8fff5g4fchdf3heffeh2effbfff5hee67fdieffei9ffffff5h5effe4ieffdi1efffff5i1441h18fffcj8fffff5g1222222g4ffff7j1effff5g6ffffff53edb6l7ffff5g6ffffff5" },
+			[215] = { 18, 18, 0, 8, 13, "i1b2m95lcfd2k9fe5k8ffd2i9ffd1l8ffd2g8ffd1n8ffd9ffd2p8ffffd2rcfff3r8ffffd1p8ffd9ffd1n8ffd2g9ffd1l8ffd2i9ffd1kcfd2k9fe5k1b2m95i" },
+			[183] = { 8, 8, 0, 11, 10, "hbfff1ibfff1ibfff1ibfff1zzo" },
+			[8226] = { 14, 14, 0, 9, 12, "j19eea2m1dffffd1l8ffffff9lbffffffclbffffffcl7ffffff8mdffffd1m19eea2zzz" },
+			[10003] = { 18, 18, 0, 7, 14, "r6b6t7fct4ee2s1ef5tbf8t7fbt2ee1p4d5gbf5q9fc7far5fffd1seff4t7c7zzm" },
+			[10004] = { 18, 18, 0, 7, 14, "r5bd9saffe2rbffe4rafff6r8fff8n261g5fffbn4ef91effc1n5ffecffe2o3ffffff4qdffff8r8fffcs1dfd3u1zp" },
+			[8594] = { 18, 18, 0, 8, 13, "r58u2ef7uaff6ubfe5hbffffffffffffffe3gbfffffffffffffff5gbffffffffffffffe3sbfe5saff6s2ef7u58zz" },
+			[8592] = { 18, 18, 0, 8, 13, "j3au2df8s1dfe2r1cfe3sbfffffffffffffff2gdfffffffffffffff2gbfffffffffffffff2g1cfe3t1dfe2t2df8u3azzn" },
+			[8593] = { 18, 18, 0, 5, 16, "m2df7s2dfff8q3efffff9o4efcffcff9n4ec1ff76fao31gff7g4sff7uff7uff7uff7uff7uff7uff7uff7uff7uff7m" },
+			[8595] = { 18, 18, 0, 5, 16, "nff7uff7uff7uff7uff7uff7uff7uff7uff7uff7r31gff7g4o4ec2ff76fan4efcffcff9o3efffff9q2dfff8s2df7m" },
+			[9733] = { 20, 20, 0, 5, 17, "o3y94xd9w3few8ff4vdff9o1acccccfffeccccc8j1afffffffffffe7m6effffffffd3o3cffffffa1q8ffffff3rcffffff8q2fff8bffdq7fd4h7ef3pcb1j3d8o27n8zk" },
+			[9734] = { 20, 20, 0, 5, 17, "o3y94x99w359w8144v9h8o1a988885h78888a8j194p67m68m193o3a1j491q81j53r9h21g18q27g7893g9q7394h7753pc91j3a8o27n8zk" },
+			[9829] = { 20, 20, 0, 4, 17, "zi2aee8i2aee8l2effffag1dffffbkaffffff49ffffff6jeffffffbeffffffajeffffffffffffffbjcffffffffffffff8j7ffffffffffffff3j1dffffffffffffbl4effffffffffe2m7fffffffffe4oaffffffff6qcffffff9r1dffffbt3effd1u6fe2w94o" },
+			[176] = { 11, 11, 0, 5, 16, "i5cec4k6fffff5jde4g4edi1faiafjee4g4edj7fffff5k5cec4zzzzzh" },
+			[8381] = { 15, 15, 0, 4, 17, "xdfffffeb71kdffffffffe3jdfffefffffdjdfff3g7ffff3idfff3hdfff5idfff3g1efff5166efff87dffff14ffffffffffff9g4ffffffffffe8h288efffa8751ldfff3m4ddefffddddbi4ffffffffffci288efffa8887ldfff3pdfff3m" },
+			[8364] = { 16, 15, -1, 5, 16, "l28ceedb83l8efffffffckafffc4114ccj5fffd1k7jdfff5oaffffffffffai2fffffffffff3k6fffaq6fffapaffffffffe1j2fffffffff9ndfff5q6fffd1k7kafffc4h4ccl8efffffffcm28ceedc83g" },
+			[10005] = { 18, 18, 0, 6, 15, "j2o2l9e4mbd2kbfe4kbfe3lbfe4ibfe3nbfe4gbfe3pbfecfe3rbffe3sbffe4rbfebfe4pbfe3gbfe4nbfe3ibfe4lbfe3kbfe4k9e3mbd2l2o1zg" },
+			[10006] = { 18, 18, 0, 5, 16, "k1m1n9d2k9d2l9ffd2i9ffd2j9ffffd2g9ffffd2i9fffffdafffffd2j9ffffffffffd2l9ffffffffd2n9ffffffd2o9ffffffd2n9ffffffffd2l9ffffffffffd2j9fffffd9fffffd2i9ffffd2g9ffffd2j9ffd2i9ffd2l9d2k9d2n1m1j" },
+			[9876] = { 20, 20, 0, 4, 17, "zi5r5la4p86l1c3n7an2d2l6cp4d1j5d1q6c1h4e3s9cg3e4ubbd7v2fdv1cce9r71gbd14e8g35n8bae2h6f8d4odf8jcfao9e7aag1c89e4m8f6nae5lcapd9i" },
+			[9201] = { 13, 13, 0, 5, 19, "gdffffffffff1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gd4m1f1gdffffffffff1" },
+			[9889] = { 15, 15, 0, 4, 17, "zm84q3b3q8c2p3cb1p8e9p3cf7p6efe4p4adffec85o149ffeq9fb1p9e7qad3qba1p1b6q192r6r" },
+		},
+	},
+	{
+		size = 30,
+		ascent = 28,
+		line = 36,
+		glyphs = {
+			[32] = { 0, 10, 0, 0, 0, "" },
+			[33] = { 14, 14, 0, 6, 22, "jcffff7ncffff7ncffff7ncffff7ncffff7ncffff7ncffff7ncffff7nbffff7naffff5n8ffff4n7ffff2n5ffffo3fffdo1fffbzwcffff7ncffff7ncffff7ncffff7ncffff7j" },
+			[34] = { 16, 16, 0, 6, 22, "h2fff4haffbk2fff4haffbk2fff4haffbk2fff4haffbk2fff4haffbk2fff4haffbk2fff4haffbk2fff4haffbzzzzzzzzzzzm" },
+			[35] = { 25, 25, 0, 6, 22, "peff3idff5s4ffei1fff1s7ffbi5ffdtbff7i9ff9teff4icff6s3ffei1eff2n4fffffffffffffffffff1j4fffffffffffffffffff1j4fffffffffffffffffff1n4ffei1fff2s7ffbi5ffdtbff7i9ff9teff3idff5oeffffffffffffffffff6keffffffffffffffffff6keffffffffffffffffff6oeff4idff5s3ffei1fff2s7ffci5ffdtaff8i8ffatdff5icff6s2fff1ieff3o" },
+			[36] = { 21, 21, 0, 6, 26, "obf9xbf9xbf9t27bdefedb963n8efffffffffff7l9fffffffffffff7k3ffffc3bf9149ef7k7ffff2gbf9j66k9ffffhbf9q8ffff7gbf9q5fffffcdfb2qdfffffffffea6n2dfffffffffffd3n6cffffffffffe1o14cfeefffff8qbf9g7ffffbqbf9hdfffcj76kbf9hdfffbj9fe951gbf918ffff6j9fffffeefffffffck9fffffffffffffb1l369bceffedb83tbf9xbf9xbf9xbf9o" },
+			[37] = { 30, 30, 0, 6, 22, "i29deeb6o1efe3n5effffffc1maff8n2eff9g2dffbl4ffdo9ffei6fff3kdff4odffbi2fff7j8ffapeff9jfff9i2efe1peff9jfff9ibff6qdffbi2fff7h6ffcr9ffei6fff3g1efe3r2eff9g2dffbh9ff8t5effffffc1g4ffdi6beed92l29deeb6icff5g1cffffffe5t7ffahaffd3g8ffe3r2efe2g3fff7ieffarbff7h7fff2iaffeq5ffci8fff1i9fff1o1dfe3i8fff1i9fff1o9ff9j7fff2iaffeo3ffd1j2fff7ieffaocff5laffd3g8ffe3n7ffbm1cffffffe5n2efe2o6beed92i" },
+			[38] = { 26, 26, 0, 6, 22, "n6adeecb84u3dfffffffffas2effffffffffas9ffffc3g14afasdffff5k37sdffff6zaffffcz4fffff8y2dfffff6w5effffffe5kafffck6fffffffffe4jcfffaj3effff8dffffe3iefff8jaffff9g2effffd2g5ffff4jeffff1h4effffd1cfffej2ffffdj5fffffdffff8j2ffffek7ffffffffe1keffff3k9fffffff6laffffclbfffffcm3effffc4h28effffff7m5efffffffffffffffff6m4dffffffffffdcfffff6n59ceeedb73hbfffff6g" },
+			[39] = { 9, 9, 0, 6, 22, "h2fff4j2fff4j2fff4j2fff4j2fff4j2fff4j2fff4j2fff4zzzzzzn" },
+			[40] = { 14, 14, 0, 5, 27, "l5fffe1ndfff9n6fffe2ndfffan6ffff4ncfffen2ffff9n7ffff5nbffff2nefffen2ffffbn4ffffan5ffff9n6ffff8n5ffff9n4ffffan2ffffboefffeobffff2n7ffff5n2ffff9ocfffeo6ffff4odfffao6fffe2odfff9o5fffe1h" },
+			[41] = { 14, 14, 0, 5, 27, "h5fffe1odfff9o6fffe2odfff9o9fffe1n3ffff7odfffdo9ffff3n6ffff7n3ffffaoffffdoefffeodffff1ncffff1ndffff1nefffeoffffdn3ffffan6ffff7n9ffff3ndfffdn3ffff8n9fffe1ndfff9n6fffe2ndfff9n5fffe1l" },
+			[42] = { 16, 16, 0, 6, 22, "l5ff1r5ff1m78i5ff1h2a3g1efd5g5ff1g8efag1bfffb8ff6dffe8i4cffffffffa2l6dffffc4n6effffc4l4cffffffffa2h1bfffb8ff6dffe8g1efd5g5ff1g7efah78i5ff1h2a3m5ff1r5ff1zzzzzzt" },
+			[43] = { 25, 25, 0, 9, 19, "p2fff4z2fff4z2fff4z2fff4z2fff4z2fff4z2fff4z2fff4scfffffffffffffffffelcfffffffffffffffffelcfffffffffffffffffes2fff4z2fff4z2fff4z2fff4z2fff4z2fff4z2fff4z2fff4p" },
+			[44] = { 11, 11, 0, 22, 10, "ieffff4keffff4keffff4keffff4keffff3j3ffffak7fffd1kbfff5leffal4ffe1k" },
+			[45] = { 12, 12, 0, 17, 11, "g5ffffffffch5ffffffffch5ffffffffch5ffffffffczzzzk" },
+			[46] = { 11, 11, 0, 22, 6, "ieffff4keffff4keffff4keffff4keffff4keffff4h" },
+			[47] = { 11, 11, 0, 6, 25, "m6ffbmbff7l1eff2l5ffdmaff8meff3l4ffdm9ff9mdff4l3ffem8ffamcff6l2ffe1l6ffbmbff7l1eff2l5ffcmaff8meff3l4ffdm9ff9mdff4l3ffem8ffamcff5m" },
+			[48] = { 21, 21, 0, 6, 22, "l38cdedb72q9efffffffe8obfffffffffffam9fffffffffffff7k3fffffa2g3bffffe2j9ffffdj1effff7jeffff7k9ffffdi3fffff4k6fffff1h6fffff2k4fffff4h7fffff1k3fffff5h8fffff1k3fffff6h8fffff1k3fffff6h7fffff1k3fffff5h6fffff2k4fffff4h3fffff4k6fffff1ieffff8kaffffdj9ffffdj1effff7j3fffffa2g3bffffe2k9fffffffffffff7mbfffffffffffao9efffffffe8q38cdedb72l" },
+			[49] = { 21, 21, 0, 6, 22, "j369ceffffcp9fffffffffcp9fffffffffcp9fffffffffcp8b8537ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcu7ffffcp7ffffffffffffffck7ffffffffffffffck7ffffffffffffffck7ffffffffffffffch" },
+			[50] = { 21, 21, 0, 6, 22, "i368bdeeedb71n8fffffffffffe8m8fffffffffffffal8ffffffffffffff6k8fe941g15dfffffck77m2efffffu9fffff1t8ffffeubffffbt4fffff4s3effffas4effffbs5effffbs7fffffas9fffff9safffff7r1cffffe5r2dffffe4s9fffffffffffffff4j9fffffffffffffff4j9fffffffffffffff4j9fffffffffffffff4h" },
+			[51] = { 21, 21, 0, 6, 22, "i158bcdeedb83offffffffffffb2mfffffffffffffd1lffffffffffffff8lc8421g14cfffffcudffffeuaffffdudffff9r14bffffe2n3fffffffffc2o3ffffffff91p3fffffffffe6o3fffffffffff6r139effffe1t7fffff5t2fffff6ja2n6fffff6jffb62h138efffff3jfffffffffffffffbkffffffffffffffd2k3bffffffffffe91n27bdeedca61l" },
+			[52] = { 21, 21, 0, 6, 22, "o3efffff5scffffff5r8fffffff5q3efffffff5qcffeeffff5p8fff7effff5o3effcgeffff5ocffe3geffff5n8fff7heffff5m3effcieffff5mcffe3ieffff5l8fff7jeffff5k3effckeffff5k9ffe3keffff5k9fffffffffffffffff7h9fffffffffffffffff7h9fffffffffffffffff7h9fffffffffffffffff7reffff5ueffff5ueffff5ueffff5j" },
+			[53] = { 21, 21, 0, 6, 22, "icfffffffffffff3lcfffffffffffff3lcfffffffffffff3lcfffffffffffff3lcfffavcfffavcfffavcfffdceedc83ocfffffffffffb1mcffffffffffffd1lcfffffffffffffblcfb52g13affffff3k93m8fffff8ueffffaudffffbueffffaj86n8fffff7jafd841g13affffff3jaffffffffffffffakafffffffffffffcl18efffffffffe8p59cdeeda71l" },
+			[54] = { 21, 21, 0, 6, 22, "m16adeed94q7effffffffc3nbfffffffffffcmbffffffffffffcl7fffffb41g149ecleffff8m29k6ffffcuaffff639deec82mdffffbfffffffe8lfffffffffffffff9j1ffffffffffffffff5i1ffffffd4g17effffci1ffffff4j9fffff1ieffffek4fffff3icffffdk3fffff3i9ffffek4fffff2i4fffff4j9ffffdkdffffd4g17effff9k4fffffffffffffe1l7fffffffffffe4n6effffffffd3p16bdeed95l" },
+			[55] = { 21, 21, 0, 6, 22, "hffffffffffffffff7jffffffffffffffff7jffffffffffffffff7jffffffffffffffff5taffffdt2effff6t8ffffet1effff8t7ffffe1tdffff9t5fffff2tcffffat4fffff4taffffct2fffff5t9ffffdt1effff6t7ffffeudffff8t6ffffe1tcffff9t4fffff2p" },
+			[56] = { 21, 21, 0, 6, 22, "k27bdeeeda72oaffffffffffe9mbfffffffffffffak5fffffffffffffff3j9fffff71g29fffff6j9ffffbkdffff7j7ffffbkdffff5j1effff71g29ffffdl4efffffffffffd3m28efffffffd71n5cffffffffeb3m9ffffffffffffe7k6ffffe71g28fffff3jdffff8kaffffai1fffff3k5ffffei2fffff3k6ffffei1fffff7kaffffdjdffffe71g28fffffaj7fffffffffffffff4kbfffffffffffff9m9efffffffffe8o27adeeeda61k" },
+			[57] = { 21, 21, 0, 6, 22, "l6adeeda5q5effffffffc3n7fffffffffffe4l3effffffffffffe1kbffffe5116effffaj1fffff6j7ffffe1i5fffff1j2fffff6i6fffffk1fffff9i6fffff1j2fffffci4fffff6j7fffffdjeffffe5116efffffej8fffffffffffffffdkcffffffffffffffck1afffffffecffffam49deec829ffff7t1effff3ka1maffffblfe83h25cfffff4lfffffffffffff8mffffffffffff9n4dffffffffd6q5adeec95n" },
+			[58] = { 12, 12, 0, 12, 16, "i9ffff9l9ffff9l9ffff9l9ffff9l9ffff9l9ffff9zzt9ffff9l9ffff9l9ffff9l9ffff9l9ffff9l9ffff9i" },
+			[59] = { 12, 12, 0, 12, 20, "i9ffff9l9ffff9l9ffff9l9ffff9l9ffff9l9ffff9zzt9ffff9l9ffff9l9ffff9l9ffff9laffff8ldfffd1k2ffff4l6fff9maffd1meff5l" },
+			[60] = { 25, 25, 0, 10, 18, "y17bz5befew4aeffffet38dfffffffbq27cfffffffc72o16bfffffffd82p4aeffffffd83scfffffd93vcfffe8ycfffffd83v4aeffffffd83u16bfffffffc72u27dfffffffc72u38dfffffffbw4aeffffez5befezh17bzn" },
+			[61] = { 25, 25, 0, 14, 14, "icfffffffffffffffffelcfffffffffffffffffelcfffffffffffffffffezzzzgcfffffffffffffffffelcfffffffffffffffffelcfffffffffffffffffezzzzzzn" },
+			[62] = { 25, 25, 0, 10, 18, "ia72zhcffc61ycffffea5w9effffffe94u16cfffffffd82u27cfffffffc61u27cffffffeb5v38dfffffey6efffev27cfffffes27cffffffeb5p27cfffffffc71o16bfffffffd82q9effffffe94tcffffea5wcffc61ya72zzj" },
+			[63] = { 17, 17, 0, 6, 22, "hefffffedb82lefffffffffe8kefffffffffff8jeea51g2affffe1ia2leffff5qdffff6p1effff5paffffe1o9fffff8o8fffffbo7fffffbo3effffcp9ffffd1pcffff7qdffff5zzkdffff5qdffff5qdffff5qdffff5qdffff5l" },
+			[64] = { 30, 30, 0, 6, 26, "p16aceeec951w2affffffffffe91t8efffffffffffffe6q1bfffea52h136befff8pbfff81o2bfff7n9ffe5s7ffe3l3ffe3u7ffblbff7j39dec6gcff3hbff3j2ffcj6efffff9cff3h4ff7j7ff5i3efffffffeff3iefbjbfejbffe6116efff3idfcjdfcjeff7j7fff3idfcjefbi2fff3j2fff3iefbjefbi2fff3j2fff3h5ff8jdfcjeff7j7fff3g1dff3jbfe1ibffe6116efff45dffak7ff5i3effffffeeffffffcl3ffcj6efffff9cffffe9ncff5j3adec6gceeb72o4ffe3zlaffd4r84rcffe81n2bfcr1cfffe952h25aefff5s9fffffffffffffe8u3bffffffffffa3x26aceedb72p" },
+			[65] = { 24, 23, 0, 6, 22, "ndffffff2u4fffffff7uafffffffdt1effffffff3s6fffffffff9sbffffbffffer2fffff2dffff5q7ffffcg9ffffbqdffff7g3ffffe1o3fffff2hdffff7o9ffffci8ffffcoeffff6i3fffff3m5fffff1jdffff8maffffbk8ffffdl1effffffffffffffff4k7fffffffffffffffffakcfffffffffffffffffe1i3fffffffffffffffffff6i8ffffeocffffbidffffao6fffff2g4fffff4o1effff7gaffffeqbffffdg" },
+			[66] = { 23, 23, 0, 6, 22, "h3ffffffffeeda72n3ffffffffffffffa1l3fffffffffffffffbl3ffffffffffffffff5k3fffff5i2afffffak3fffff5keffffck3fffff5kcffffck3fffff5keffffak3fffff5i2afffff4k3fffffffffffffff9l3ffffffffffffff7m3ffffffffffffffe7l3ffffffffffffffff8k3fffff5i14cffffe2j3fffff5k1fffff8j3fffff5ldffffaj3fffff5k1fffffaj3fffff5i14cfffff8j3fffffffffffffffff3j3ffffffffffffffff9k3ffffffffffffffe8l3fffffffffeeca61k" },
+			[67] = { 22, 22, 0, 6, 22, "n37bdeeec961o5cffffffffffeam9ffffffffffffff1kbfffffffffffffff1j9ffffffb51h25aef1i3efffff7n191iafffff8ueffffeu3fffff9u5fffff6u6fffff5u6fffff5u5fffff6u3fffff9veffffevafffff8u3ffffff7n191j9ffffffb51h25aef1kbfffffffffffffff1l9ffffffffffffff1m5cffffffffffeap37bdeeeca61i" },
+			[68] = { 25, 25, 0, 6, 22, "h3ffffffeedcb962p3ffffffffffffffb3n3fffffffffffffffe8m3fffffffffffffffff8l3fffff5h137dffffff6k3fffff5l9fffffe1j3fffff5mafffff7j3fffff5m2effffcj3fffff5ncfffff1i3fffff5n9fffff3i3fffff5n7fffff4i3fffff5n7fffff4i3fffff5n9fffff3i3fffff5ncfffff1i3fffff5m2fffffcj3fffff5mbfffff7j3fffff5l9fffffe1j3fffff5h137dffffff6k3fffffffffffffffff8l3fffffffffffffffe7m3fffffffffffffea3n3ffffffeedcb961n" },
+			[69] = { 21, 20, 0, 6, 22, "h3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4h" },
+			[70] = { 21, 20, 0, 6, 22, "h3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffff5r" },
+			[71] = { 25, 25, 0, 6, 22, "n37acdeedb962q4bffffffffffffc4n9fffffffffffffff9maffffffffffffffff9l9ffffffc62h126aef9k2efffff8p77kafffff9xeffffe1w3fffff9x5fffff6x6fffff5k5ffffffff6i6fffff5k5ffffffff6i5fffff6k5ffffffff6i3fffff9k5ffffffff6jeffffeoeffff6jafffff8neffff6j3ffffff7meffff6k9ffffffc52h14effff6lbfffffffffffffffff6m9ffffffffffffffff6n5cfffffffffffeb5q37bdeeedb851k" },
+			[72] = { 25, 25, 0, 6, 22, "h3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5h" },
+			[73] = { 11, 11, 0, 6, 22, "h3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5j3fffff5h" },
+			[74] = { 13, 11, -2, 6, 28, "j3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l3fffff5l4fffff5l6fffff4lcfffff1j3bfffffciaffffffff5iafffffff9jafffffe7kaeeda61l" },
+			[75] = { 25, 23, 0, 6, 22, "h3fffff5l1cfffff8j3fffff5k1dfffff8k3fffff5j1dfffff8l3fffff5i2dfffff8m3fffff5h2dfffff7n3fffff5g2dfffff7o3fffff52dfffff7p3fffff8dfffff7q3fffffffffff7r3ffffffffff7s3fffffffffbt3ffffffffff9s3fffffffffff9r3fffffbffffff9q3fffff56ffffff9p3fffff5g6ffffff9o3fffff5h6ffffff9n3fffff5i6ffffff9m3fffff5j6ffffff9l3fffff5k6ffffff9k3fffff5l6ffffff9j3fffff5m6efffff9g" },
+			[76] = { 19, 19, 0, 6, 22, "h3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffffffffffffff4h3fffffffffffffff4h3fffffffffffffff4h3fffffffffffffff4" },
+			[77] = { 30, 30, 0, 6, 22, "h3ffffffe2n4fffffff1j3fffffff8nafffffff1j3fffffffem2efffffff1j3ffffffff5l8ffffffff1j3ffffffffcleffffffff1j3fffffffff3j5fffffffff1j3fffffbfff9jcfffbfffff1j3fffff5fffe1h3fffe5fffff1j3fffff1cfff7h9fffa3fffff1j3fffff16fffdg1efff43fffff1j3fffff1gefff47fffcg3fffff1j3fffff1g8fffbdfff6g3fffff1j3fffff1g2fffffffeh3fffff1j3fffff1hbffffff9h3fffff1j3fffff1h5ffffff2h3fffff1j3fffff1idffffbi3fffff1j3fffff1i7ffff5i3fffff1j3fffff1i1effdj3fffff1j3fffff1r3fffff1j3fffff1r3fffff1j3fffff1r3fffff1j3fffff1r3fffff1h" },
+			[78] = { 25, 25, 0, 6, 22, "h3ffffff4mfffff5j3ffffffcmfffff5j3fffffff5lfffff5j3fffffffdlfffff5j3ffffffff6kfffff5j3ffffffffdkfffff5j3fffffffff7jfffff5j3fffffafffejfffff5j3fffff2efff7ifffff5j3fffff18fffe1hfffff5j3fffff11efff8hfffff5j3fffff1g7fffe1gfffff5j3fffff1hdfff9gfffff5j3fffff1h6fffe2fffff5j3fffff1idfffafffff5j3fffff1i5fffffffff5j3fffff1jcffffffff5j3fffff1j4ffffffff5j3fffff1kbfffffff5j3fffff1k3fffffff5j3fffff1lbffffff5j3fffff1l3ffffff5h" },
+			[79] = { 26, 26, 0, 6, 22, "n59cdeedb73t7effffffffffb3p2cfffffffffffffe7n1dffffffffffffffff7mbfffffe72g14bfffffe3k4fffffd2l8fffffbkbfffff5ncfffff3jeffffdo5fffff8i4fffff8o1fffffbi5fffff6pdffffdi6fffff5pcffffei7fffff5pcffffei5fffff6pdffffdi4fffff8o1fffffbjeffffdo5fffff8jbfffff5ncfffff3j4fffffd2l8fffffclbfffffe72g14bfffffe4l1dffffffffffffffff7n2cfffffffffffffe7q8effffffffffb3t59cdeedb73n" },
+			[80] = { 22, 22, 0, 6, 22, "h3fffffffffedc94m3ffffffffffffffc2k3fffffffffffffffe3j3ffffffffffffffffcj3fffff5i27efffff5i3fffff5k6fffff9i3fffff5k2fffffai3fffff5k2fffffai3fffff5k7fffff9i3fffff5i17efffff5i3ffffffffffffffffcj3fffffffffffffffe3j3ffffffffffffffc2k3fffffffffedc94m3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5s" },
+			[81] = { 26, 26, 0, 6, 26, "n59cdeedb73t7effffffffffb4p2cfffffffffffffe7n1dffffffffffffffff7mbfffffe72g14bfffffe4k4fffffd2l8fffffckbfffff5ncfffff4jeffffdo5fffff8i4fffff8o1fffffbi5fffff6pdffffdi6fffff5pcffffei6fffff5pcffffei5fffff6pdffffdi4fffff8o1fffffbjeffffco5fffff8jbfffff4ncfffff3j4fffffd1l8fffffblbfffffd62g14bfffffe3l1dffffffffffffffff6n2cfffffffffffffe6q8effffffffffb2t59cdeffffe4z3efffe3z4efffd2z6ffffc1z7ffffcj" },
+			[82] = { 23, 23, 0, 6, 22, "h3ffffffffeeda72n3fffffffffffffe8m3fffffffffffffff9l3ffffffffffffffff3k3fffff5i3cfffff7k3fffff5j3fffff9k3fffff5keffffak3fffff5keffff9k3fffff5j3fffff5k3fffff5i4cffffdl3ffffffffffffffd2l3ffffffffffffe81m3ffffffffffffe8n3ffffffffffffffbm3fffff5h4cfffff8l3fffff5i1dffffe2k3fffff5j4fffffak3fffff5kbfffff3j3fffff5k4fffffaj3fffff5lbfffff3i3fffff5l4fffffbi3fffff5mbfffff3" },
+			[83] = { 22, 22, 0, 6, 22, "k16adeeedb974o6efffffffffffem6fffffffffffffel2efffffffffffffel7ffffe72h148dfelbffff7n4blcffff4vbffffav9fffffc731r3fffffffffd961o8fffffffffffe91n6efffffffffffd2n16befffffffffbr369effffff2u9fffff5u1fffff5j871n3fffff4j9feb741h15dffffe1j9fffffffffffffffak9ffffffffffffffd2k5cffffffffffffb2n259bdeeedb83l" },
+			[84] = { 21, 20, 0, 6, 22, "cfffffffffffffffffff4cfffffffffffffffffff4cfffffffffffffffffff4cfffffffffffffffffff4m8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffn" },
+			[85] = { 24, 24, 0, 6, 22, "h3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff5mfffff9j3fffff6mfffff8j2fffff7l2fffff7keffffal4fffff5kbffffe1kafffff2k6fffffc4h29fffffbmdffffffffffffffe4m2efffffffffffff7o2bffffffffffd5r38bdeedc95m" },
+			[86] = { 24, 23, 0, 6, 22, "affffeqbffffdg4fffff5o1fffff7hdffffao7fffff2h8ffffe1ncffffbi3fffff6m3fffff6jcffffbm8ffffe1j7fffff2ldffffak1effff7k4fffff4laffffck9ffffdm5fffff3jeffff8neffff8i5fffff3n9ffffdiaffffco3fffff4g1effff7pdffff9g6ffffe1p7ffffegbffffbq2fffff7fffff5rbffffeffffes6fffffffff9s1effffffff3tafffffffdu4fffffff7vdffffff2n" },
+			[87] = { 33, 33, 0, 6, 22, "geffff6l4fffff5l4ffffehbffff9l7fffff9l8ffffch7ffffdlbfffffclcffff8h4fffff1keffffff1keffff5ieffff5j3fffffff4j4fffff1icffff8j7fffdfff8j7ffffdj8ffffcjafff6fffbjbffff9j5ffffe1idffegeffejeffff5j1fffff4h2fffbgafff3h3fffff2kdffff8h6fff8g7fff7h6ffffdl9ffffbh9fff4g3fffahaffffal5ffffehdffe1heffehdffff6l2fffff31fffcibfff22fffff3mdffff75fff8i7fff66ffffenaffffa8fff5i4fffa9ffffbn6ffffecfff1jeffddffff7n3ffffffffdkcffffffff4oefffffff9k8fffffffepbfffffff6k5fffffffcp7fffffff2k1fffffff8p3ffffffemcffffff5qefffffam9ffffff1k" },
+			[88] = { 23, 23, 0, 6, 22, "gbffffe2m1dffffch2effffbmaffffe3i6fffff6k5fffff8kbffffe2i1effffcl2effffbiaffffe3m6fffff7g5fffff7obffffe4effffcp1effffeffffe2q5fffffffff7safffffffbt1efffffe2t5fffffff6s1dfffffffe2rafffffffffbq5fffffcfffff6o1effffcgbffffe2naffffe3g2effffbm5fffff7i6fffff7k1effffckaffffe2jbffffe2k1effffci6fffff7m5fffff7g1effffcoaffffe3" },
+			[89] = { 24, 22, -1, 6, 22, "1dffffe3n7fffffah4fffffcm2effffe1i9fffff6lbfffff5j1dffffe2j5fffffal5fffffbi1dffffe1mafffff5h9fffff6n1effffd14fffffbp5fffffadffffe2qaffffffffff6r1effffffffbt6fffffffe2ubffffff7v2effffcxeffffaxeffffaxeffffaxeffffaxeffffaxeffffaxeffffaxeffffaxeffffao" },
+			[90] = { 22, 22, 0, 6, 22, "g4ffffffffffffffffffi4ffffffffffffffffffi4ffffffffffffffffffi4fffffffffffffffffdt4fffffe3s2efffff6s1dfffff9tbfffffbt8fffffd1s5fffffe3s3efffff5s1dfffff8tbfffffbt9fffffd1s6fffffe2s3efffff5s1dfffff8tcfffffat8ffffffffffffffffff6h9ffffffffffffffffff6h9ffffffffffffffffff6h9ffffffffffffffffff6g" },
+			[91] = { 14, 14, 0, 5, 27, "h6ffffffffaj6ffffffffaj6ffffffffaj6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffff8n6ffffffffaj6ffffffffaj6ffffffffah" },
+			[92] = { 11, 11, 0, 6, 25, "cff5m8ffam3ffendff4m9ff9m4ffdneff3maff8m5ffcm1eff2mbff7m6ffbm2ffe1mcff6m8ffam3ffendff4m9ff9m4ffdneff3maff8m5ffdm1eff2mbff7m6ffc" },
+			[93] = { 14, 14, 0, 5, 27, "heffffffff2jeffffffff2jeffffffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2ncffff2jeffffffff2jeffffffff2jeffffffff2h" },
+			[94] = { 25, 25, 0, 6, 22, "pafffbyafffffbw9fffffffbu9ffffcffffas8fffe6g5efffaq8fffc2i1bfffao7fff9m7eff9m7ffe5o3dff9zzzzzzzzzzzzzzzzzs" },
+			[95] = { 15, 15, 0, 28, 7, "zzzfffffffffffffffffffffffffffffffffffffffffffff" },
+			[96] = { 15, 15, 0, 4, 24, "g3effcq4eff8q5ffe3q7ffdr8ff9r9ff4zzzzzzzzzzzzzu" },
+			[97] = { 20, 20, 0, 12, 16, "h4ffffffeedb83m4ffffffffffffb1k4fffffffffffffck4b7321h26effff6t7ffffal38bdeefffffffcj1bfffffffffffffdjcffffffffffffffdi5fffff92i6ffffdi8ffffck7ffffdiaffff9kaffffdi9ffffbj3effffdi5fffff71g5efffffdjdffffffffe9ffffdj2dffffffe46ffffdk17ceec81g6ffffdh" },
+			[98] = { 21, 21, 0, 5, 23, "h7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbh5bdec82l7ffffb1bffffffe5k7ffffcbfffffffff5j7ffffff71g3cffffe1i7fffff8j1effff7i7fffff1k9ffffci7ffffdl6ffffei7ffffbl4fffff1h7ffffbl4fffff1h7ffffdl6ffffei7fffff1k9ffffci7fffff8j1effff7i7fffffe71g3cffffe1i7ffffcbfffffffff5j7ffffb1bffffffe6k7ffffbh6bded82j" },
+			[99] = { 18, 18, 0, 12, 16, "l59cdedca51l5dfffffffffbk8fffffffffffbj6fffffc51g27dbjdffffcl17i5fffff3q8ffffdr9ffffbr9ffffbr8ffffdr5fffff3rdffffcm7j6fffffc51g26dbk8fffffffffffbl5dfffffffffbn59cdedca51h" },
+			[100] = { 21, 21, 0, 5, 23, "s4ffffeu4ffffeu4ffffeu4ffffeu4ffffeu4ffffeu4ffffem5bdec82g4ffffek1cffffffe54ffffekcffffffffe8ffffej8fffff71g3cfffffei1effff8j1effffei5fffff1k9ffffei8ffffdl6ffffei9ffffcl5ffffei9ffffcl5ffffei8ffffdl6ffffei5fffff1k9ffffei1effff8j1effffej8ffffe71g3cfffffekcffffffffe8ffffek1cffffffe54ffffem6beed82g4ffffeh" },
+			[101] = { 20, 20, 0, 12, 16, "l6aceedb71o6effffffffe7m9ffffffffffff9k6fffff81g3dffff6jeffff8j2efffe1h5ffffe1kbffff6h8ffffcl8ffffah9ffffffffffffffffchaffffffffffffffffdh8ffffffffffffffffdh5ffffcueffff4n3a1i6ffffe721g147cff1j9ffffffffffffff1k6effffffffffff1m59ceeedca841h" },
+			[102] = { 14, 13, 0, 5, 23, "k39ceffff4j6efffffff4i2effffffff4i8ffffd2mbffff7ncffff6ncffff6k6fffffffffffdg6fffffffffffdg6fffffffffffdjcffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6ncffff6k" },
+			[103] = { 21, 21, 0, 12, 22, "k5bdec82g4ffffek1bffffffe54ffffekcffffffffe8ffffej8fffff81g4dfffffei1effff9j2effffei5fffff2kaffffei8ffffdl6ffffei9ffffcl5ffffei9ffffcl5ffffei8ffffdl6ffffei5fffff1kaffffejeffff8j2effffej8ffffe71g4cfffffekcffffffffe8ffffek1bffffffe55ffffdm5bded82g6ffffcuaffff9k73m3effff4k9fb51h27effffbl9ffffffffffffc1l9ffffffffffe9o48bceeeca61l" },
+			[104] = { 21, 21, 0, 5, 23, "h7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbh5adeda3l7ffffbgafffffff7k7ffffbbffffffffe3j7ffffff81g5effffaj7fffff9j8ffffdj7fffff2j5ffffej7ffffdk4fffffj7ffffck4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffh" },
+			[105] = { 10, 10, 0, 5, 23, "h7ffffbj7ffffbj7ffffbj7ffffbj7ffffbzj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbh" },
+			[106] = { 11, 10, -1, 5, 29, "i7ffffbk7ffffbk7ffffbk7ffffbk7ffffbzm7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffbk7ffffakaffff8i15effff4hfffffffciffffffd2iffeeb7k" },
+			[107] = { 21, 20, 0, 5, 23, "h7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbkaffffe5i7ffffbjaffffe4j7ffffbiaffffe3k7ffffbhbffffd2l7ffffbgbffffc1m7ffffcbffffc1n7fffffffffbp7ffffffffe2p7fffffffffd2o7ffffddffffd2n7ffffb2effffd2m7ffffbg3effffd2l7ffffbh3effffd2k7ffffbi4effffd2j7ffffbj4effffd2i7ffffbk5effffd2" },
+			[108] = { 10, 10, 0, 5, 23, "h7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbj7ffffbh" },
+			[109] = { 31, 31, 0, 12, 16, "h7ffffbh6ceda4j6bded92l7ffffb1cffffff8g1bffffffe5k7ffffccffffffff6cffffffffe2j7fffffe5g1affffffc2g4effff8j7fffff6i2fffffe1i9ffffbj7ffffe1jfffff9j6ffffcj7ffffckeffff6j5ffffdj7ffffbkeffff5j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdj7ffffbkeffff4j5ffffdh" },
+			[110] = { 21, 21, 0, 12, 16, "h7ffffbh5adeda3l7ffffbgafffffff7k7ffffbbffffffffe3j7ffffff81g5effffaj7fffff9j8ffffdj7fffff2j5ffffej7ffffdk4fffffj7ffffck4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffj7ffffbk4fffffh" },
+			[111] = { 21, 21, 0, 12, 16, "l6adeedc94p6efffffffffc3m9ffffffffffffe4k6fffff71g3bffffe1jeffff8kdffff9i5ffffe1k7ffffei8ffffdl3fffff2h9ffffbl2fffff4haffffbl2fffff4h8ffffdl3fffff2h5ffffe1k7ffffejeffff8kdffff9j6ffffe71g3bffffe1k9ffffffffffffe4m6efffffffffc3p6adeedc94l" },
+			[112] = { 21, 21, 0, 12, 22, "h7ffffbh5bdec82l7ffffb1bffffffe5k7ffffcbfffffffff5j7ffffff71g3cffffe1i7fffff8j1effff7i7fffff1k9ffffci7ffffdl6ffffei7ffffbl4fffff1h7ffffbl4fffff1h7ffffdl6ffffei7fffff1k9ffffci7fffff8j1effff7i7fffffe71g3cffffe1i7ffffcbfffffffff5j7ffffb1bffffffe6k7ffffbh6bded82l7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbs" },
+			[113] = { 21, 21, 0, 12, 22, "k5bdec82g4ffffek1cffffffe54ffffekcffffffffe8ffffej8fffff71g3cfffffei1effff8j1effffei5fffff1k9ffffei8ffffdl6ffffei9ffffcl5ffffei9ffffcl5ffffei8ffffdl6ffffei5fffff1k9ffffei1effff8j1effffej8ffffe71g3cfffffekcffffffffe8ffffek1cffffffe54ffffem6beed82g4ffffeu4ffffeu4ffffeu4ffffeu4ffffeu4ffffeu4ffffeh" },
+			[114] = { 15, 15, 0, 12, 16, "h7ffffbh6bdfah7ffffb1cffffah7ffffccfffffah7fffffffffffah7ffffffb3g158h7fffffbn7fffff2n7ffffdo7ffffbo7ffffbo7ffffbo7ffffbo7ffffbo7ffffbo7ffffbo7ffffbm" },
+			[115] = { 18, 18, 0, 12, 16, "j5aceeecb963k2dfffffffffff5jdffffffffffff5i4ffffb3h259ef5i6ffff3l184i5ffff8r1effffeb9641m7ffffffffffb5l4befffffffff8n368adffffe2rbffff5h291m9ffff6h3fea52h16effff3h3fffffffffffffci3ffffffffffffb1j258bcdeedb84j" },
+			[116] = { 14, 14, 0, 7, 21, "ifffff3nfffff3nfffff3nfffff3nfffff3k9ffffffffffff99ffffffffffff99ffffffffffff9ifffff3nfffff3nfffff3nfffff3nfffff3nfffff3nfffff3nfffff3neffff4ncffffb1m8fffffffff3i1dffffffff3j17beeffff3" },
+			[117] = { 21, 21, 0, 12, 16, "h9ffff9k6ffffcj9ffff9k6ffffcj9ffff9k6ffffcj9ffff9k6ffffcj9ffff9k6ffffcj9ffff9k6ffffcj9ffff8k6ffffcj9ffff8k6ffffcj9ffff8k6ffffcj9ffff9k8ffffcj9ffffakbffffcj8ffffdj3fffffcj4fffff91g5dfffffckdffffffffe9ffffck2dffffffd36ffffcl18ceec71g6ffffch" },
+			[118] = { 20, 20, 0, 12, 16, "5ffffdm4ffffdhdffff3laffff7h8ffff9k1efffe1h2efffek6ffffajbffff5jcffff4j4ffffai2ffffdldfffe1h8ffff7l7ffff7hdfffe1l1efffcg4ffffanaffff39ffff4n4ffff9efffdpdffffffff7p7fffffffe1p1effffff9raffffff3r4fffffcm" },
+			[119] = { 28, 28, 0, 12, 16, "gcffff4j6ffff2j8ffff8h8ffff7jaffff6jcffff3h4ffffbjeffffajefffejefffei3fffffei4ffffajaffff4h6ffffff2h8ffff6j6ffff7haffbeff6hcffff2j2ffffbheff7bffag1efffdldfffeg3fff37ffeg4ffff9l9ffff46ffeg3fff38ffff5l5ffff7affbheff6cffff1l1ffffbeff7hbffbefffcncfffffff3h7fffffff8n8ffffffei3fffffff4n4ffffffbjefffffepefffff7jbfffffbpbfffff3j7fffff7k" },
+			[120] = { 19, 19, 0, 12, 16, "gcffff9k4ffffe3g2effff5i1dffff7i5ffffe1haffffak9ffffbg6ffffd1lcffff9efffe3m2effffffff6o4fffffff9q8fffffdrcfffffe3p9fffffffd1n5fffffffffam2efffe4dffff7lcffff7g3efffe3j9ffffbi7ffffd1h6ffffe2jbffffbg2effff5k1dffff7" },
+			[121] = { 20, 20, 0, 12, 22, "6ffffcm6ffffcheffff3lbffff6h8ffff9k1efffei1efffek6ffff9jaffff6jbffff3j3ffffci2ffffclbffff3h7ffff6l5ffff9hcfffe1mdfffe12ffffan7ffff67ffff4n1efffccfffdp8ffffffff7p2effffffe1qaffffffar4ffffff4scffffdt6ffff7t9fffe1r16efff9qfffffffe1qffffffe4rfffec81p" },
+			[122] = { 17, 17, 0, 12, 16, "g4ffffffffffffffh4ffffffffffffffh4ffffffffffffffp7fffffeo6fffffe5n5efffff6n4efffff7n3efffff8n3efffff9n2dfffff9n2dfffffan1dfffffbo9fffffcp9ffffffffffffffh9ffffffffffffffh9ffffffffffffffg" },
+			[123] = { 21, 21, 0, 5, 28, "p39ceeff9r6effffff9q2efffffff9q7ffffe51s9ffff8uaffff5uaffff4uaffff4uaffff4uaffff4ucffff3t2fffff1s4cffffcq3fffffffd2q3ffffffc2r3fffffffe4t4cffffdu1effff2ucffff3uaffff4uaffff4uaffff4uaffff4u9ffff7u7ffffd41s2efffffff9r7fffffff9s39ceeff9i" },
+			[124] = { 11, 11, 0, 5, 30, "i2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2l2fff2i" },
+			[125] = { 21, 21, 0, 5, 28, "i3fffeda5s3fffffffbr3ffffffff7t3bffffcu2ffffeveffffveffffvdffffvdffffvdffff1udffff3ubffff7u6ffffe71tafffffff9s8ffffff9q1cfffffff9q8ffffe61scffff6udffff2udffffvdffffvdffffveffffu2ffffet2affffcq3ffffffff7q3fffffffbr3fffeda5p" },
+			[126] = { 25, 25, 0, 15, 13, "zg1n39dedb61m4dl1bfffffffeb62g14afelcfffffffffffffffffelcfb51g25aefffffffc2lb5m16adeda4n1zzzzzzzzq" },
+			[1040] = { 24, 23, 0, 6, 22, "ndffffff2u4fffffff7uafffffffdt1effffffff3s6fffffffff9sbffffbffffer2fffff2dffff5q7ffffcg9ffffbqdffff7g3ffffe1o3fffff2hdffff7o9ffffci8ffffcoeffff6i3fffff3m5fffff1jdffff8maffffbk8ffffdl1effffffffffffffff4k7fffffffffffffffffakcfffffffffffffffffe1i3fffffffffffffffffff6i8ffffeocffffbidffffao6fffff2g4fffff4o1effff7gaffffeqbffffdg" },
+			[1041] = { 23, 23, 0, 6, 22, "h3ffffffffffffffff4k3ffffffffffffffff4k3ffffffffffffffff4k3ffffffffffffffff4k3fffff5v3fffff5v3fffff5v3fffff5v3fffff5v3fffffffffedc95n3ffffffffffffffd5l3ffffffffffffffff7k3ffffffffffffffffe2j3fffff5j3cfffff7j3fffff5k1fffff9j3fffff5ldffffaj3fffff5k1fffff9j3fffff5i14cfffff7j3ffffffffffffffffe2j3ffffffffffffffff7k3ffffffffffffffd5l3fffffffffeec95l" },
+			[1042] = { 23, 23, 0, 6, 22, "h3ffffffffeeda72n3ffffffffffffffa1l3fffffffffffffffbl3ffffffffffffffff5k3fffff5i2afffffak3fffff5keffffck3fffff5kcffffck3fffff5keffffak3fffff5i2afffff4k3fffffffffffffff9l3ffffffffffffff7m3ffffffffffffffe7l3ffffffffffffffff8k3fffff5i14cffffe2j3fffff5k1fffff8j3fffff5ldffffaj3fffff5k1fffffaj3fffff5i14cfffff8j3fffffffffffffffff3j3ffffffffffffffff9k3ffffffffffffffe8l3fffffffffeeca61k" },
+			[1043] = { 19, 19, 0, 6, 22, "h3fffffffffffffff4h3fffffffffffffff4h3fffffffffffffff4h3fffffffffffffff4h3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5r3fffff5p" },
+			[1044] = { 27, 27, 0, 6, 27, "k2fffffffffffffffcp2fffffffffffffffcp2fffffffffffffffcp2fffffffffffffffcp2fffff6jcffffcp2fffff6jcffffcp2fffff6jcffffcp3fffff6jcffffcp3fffff6jcffffcp3fffff5jcffffcp3fffff5jcffffcp4fffff4jcffffcp4fffff2jcffffcp5fffff1jcffffcp6ffffekcffffcp9ffffckcffffco2effff8kcffffcn1cfffff4kcffffcl3ffffffffffffffffffffffdi3ffffffffffffffffffffffdi3ffffffffffffffffffffffdi3ffffffffffffffffffffffdi3fffft5fffdi3fffft5fffdi3fffft5fffdi3fffft5fffdi3fffft5fffdh" },
+			[1045] = { 21, 20, 0, 6, 22, "h3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4h" },
+			[1046] = { 37, 37, 0, 6, 22, "g3effffbm6fffff2l1dffffcj4effffal6fffff2k1cffffd1k5effff8k6fffff2kbffffd2m6fffff7j6fffff2jaffffe3o7fffff6i6fffff2i9ffffe4q9ffffe5h6fffff2h8ffffe5saffffe3g6fffff2g7fffff6ubffffe36fffff25fffff7v1cffffd9fffff7effff9w1efffffffffffffffffbwbfffffffffffffffffff7u6ffffffffffffffffffffe2s2effffeefffffffffefffffcsbfffff66ffffffffe2afffff7q7fffffbh7ffffffe3g1dffffe3o2effffe1i9fffff5i4fffffcocfffff6j6fffff2j9fffff8m7fffffak6fffff2j1dffffe3k3effffe1k6fffff2k4fffffckcfffff5l6fffff2l9fffff8i8fffffam6fffff2mdffffe4g3effffd1m6fffff2m4effffdg" },
+			[1047] = { 21, 21, 0, 6, 22, "i479bdeeedb95n8ffffffffffffe7l8ffffffffffffffak8fffffffffffffff5j7a642i15cfffffat1effffcucffffbt1effff7r25cffffdn4ffffffffffa1n4ffffffffe7p4ffffffffffd4n4fffffffffffe4r14afffffdu9fffff3t5fffff4ia2o9fffff3iffb631h14afffffe1iffffffffffffffff9jfffffffffffffffck4bfffffffffffe8n27bdeeedb951k" },
+			[1048] = { 25, 25, 0, 6, 22, "h3fffff1l3ffffff5j3fffff1lbffffff5j3fffff1k4fffffff5j3fffff1kbfffffff5j3fffff1j5ffffffff5j3fffff1jcffffffff5j3fffff1i5fffffffff5j3fffff1idfffafffff5j3fffff1h6fffe2fffff5j3fffff1hdfff9gfffff5j3fffff1g7fffe1gfffff5j3fffff11efff8hfffff5j3fffff18fffe1hfffff5j3fffff3efff7ifffff5j3fffffbfffejfffff5j3fffffffff7jfffff5j3ffffffffdkfffff5j3ffffffff6kfffff5j3fffffffdlfffff5j3fffffff5lfffff5j3ffffffcmfffff5j3ffffff4mfffff5h" },
+			[1049] = { 25, 25, 0, 1, 27, "mbf7j4fdu6fe61g4df8vbffffffd1w7ceec81zv3fffff1l3ffffff5j3fffff1lbffffff5j3fffff1k4fffffff5j3fffff1kbfffffff5j3fffff1j5ffffffff5j3fffff1jcffffffff5j3fffff1i5fffffffff5j3fffff1idfffafffff5j3fffff1h6fffe2fffff5j3fffff1hdfff9gfffff5j3fffff1g7fffe1gfffff5j3fffff11efff8hfffff5j3fffff18fffe1hfffff5j3fffff3efff7ifffff5j3fffffbfffejfffff5j3fffffffff7jfffff5j3ffffffffdkfffff5j3ffffffff6kfffff5j3fffffffdlfffff5j3fffffff5lfffff5j3ffffffcmfffff5j3ffffff4mfffff5h" },
+			[1050] = { 25, 25, 0, 6, 22, "h3fffff5m4effffd2i3fffff5l4effffe2j3fffff5k3effffe3k3fffff5j3effffe3l3fffff5i3effffe3m3fffff5h2effffe4n3fffff5g2dffffe4o3fffff52dffffe4p3fffff8dffffe4q3ffffffffffff4q3ffffffffffffd1p3fffffffffffffap3ffffffffdfffff6o3fffffff62effffe2n3ffffff7h5fffffbn3fffff8jafffff7m3fffff5j1dffffe3l3fffff5k4fffffdl3fffff5l8fffff9k3fffff5mcfffff4j3fffff5m3effffd1i3fffff5n7fffffag" },
+			[1051] = { 25, 25, 0, 6, 22, "l6fffffffffffffff2n6fffffffffffffff2n6fffffffffffffff2n6fffffffffffffff2n6fffff3i7fffff2n6fffff3i7fffff2n6fffff3i7fffff2n6fffff3i7fffff2n7fffff2i7fffff2n7fffff1i7fffff2n8fffffj7fffff2n9ffffej7fffff2naffffdj7fffff2ncffffaj7fffff2neffff8j7fffff2m5fffff5j7fffff2l2dffffe1j7fffff2j38efffffak7fffff2i9fffffffe2k7fffff2i9ffffffd3l7fffff2i9ffffd7n7fffff2i9ca73p7fffff2h" },
+			[1052] = { 30, 30, 0, 6, 22, "h3ffffffe2n4fffffff1j3fffffff8nafffffff1j3fffffffem2efffffff1j3ffffffff5l8ffffffff1j3ffffffffcleffffffff1j3fffffffff3j5fffffffff1j3fffffbfff9jcfffbfffff1j3fffff5fffe1h3fffe5fffff1j3fffff1cfff7h9fffa3fffff1j3fffff16fffdg1efff43fffff1j3fffff1gefff47fffcg3fffff1j3fffff1g8fffbdfff6g3fffff1j3fffff1g2fffffffeh3fffff1j3fffff1hbffffff9h3fffff1j3fffff1h5ffffff2h3fffff1j3fffff1idffffbi3fffff1j3fffff1i7ffff5i3fffff1j3fffff1i1effdj3fffff1j3fffff1r3fffff1j3fffff1r3fffff1j3fffff1r3fffff1j3fffff1r3fffff1h" },
+			[1053] = { 25, 25, 0, 6, 22, "h3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5h" },
+			[1054] = { 26, 26, 0, 6, 22, "n59cdeedb73t7effffffffffb3p2cfffffffffffffe7n1dffffffffffffffff7mbfffffe72g14bfffffe3k4fffffd2l8fffffbkbfffff5ncfffff3jeffffdo5fffff8i4fffff8o1fffffbi5fffff6pdffffdi6fffff5pcffffei7fffff5pcffffei5fffff6pdffffdi4fffff8o1fffffbjeffffdo5fffff8jbfffff5ncfffff3j4fffffd2l8fffffclbfffffe72g14bfffffe4l1dffffffffffffffff7n2cfffffffffffffe7q8effffffffffb3t59cdeedb73n" },
+			[1055] = { 25, 25, 0, 6, 22, "h3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffffffffffffffffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5j3fffff5m4fffff5h" },
+			[1056] = { 22, 22, 0, 6, 22, "h3fffffffffedc94m3ffffffffffffffc2k3fffffffffffffffe3j3ffffffffffffffffcj3fffff5i27efffff5i3fffff5k6fffff9i3fffff5k2fffffai3fffff5k2fffffai3fffff5k7fffff9i3fffff5i17efffff5i3ffffffffffffffffcj3fffffffffffffffe3j3ffffffffffffffc2k3fffffffffedc94m3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5u3fffff5s" },
+			[1057] = { 22, 22, 0, 6, 22, "n37bdeeec961o5cffffffffffeam9ffffffffffffff1kbfffffffffffffff1j9ffffffb51h25aef1i3efffff7n191iafffff8ueffffeu3fffff9u5fffff6u6fffff5u6fffff5u5fffff6u3fffff9veffffevafffff8u3ffffff7n191j9ffffffb51h25aef1kbfffffffffffffff1l9ffffffffffffff1m5cffffffffffeap37bdeeeca61i" },
+			[1058] = { 21, 20, 0, 6, 22, "cfffffffffffffffffff4cfffffffffffffffffff4cfffffffffffffffffff4cfffffffffffffffffff4m8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffu8fffffn" },
+			[1059] = { 23, 23, 0, 6, 22, "gdffffeodffffeh6fffff7m6fffff8idffffdmcffffe1i7fffff6k5fffff8keffffdkcffffe2k7fffff6i4fffff9l1effffdibfffff2m8fffff5g3fffffan1effffdgafffff3o9fffff8fffffbp2effffffffff4q9fffffffffcr2fffffffff5safffffffdt3fffffff6ubfffffdv5fffff7u3cffffe1r8ffffffff8s8fffffffdt8ffffffc2t8eedb94r" },
+			[1060] = { 30, 30, 0, 6, 22, "reffffazjeffffay269cdfffffedb951r6cfffffffffffffffeb4n1cffffffffffffffffffff9l1cffffffffffffffffffffffak8fffffe941effffa15bffffff5jeffffe4ieffffai7fffffbi4fffff9jeffffajdffffei6fffff6jeffffajafffff2h7fffff5jeffffaj9fffff3h6fffff6jeffffajafffff2h4fffff9jeffffajdffffejeffffe3ieffffai7fffffbj9fffffe931effffa14affffff5j1dffffffffffffffffffffffal1cffffffffffffffffffff9o6cfffffffffffffffeb4r26acefffffedb951yeffffazjeffffazjeffffar" },
+			[1061] = { 23, 23, 0, 6, 22, "gbffffe2m1dffffch2effffbmaffffe3i6fffff6k5fffff8kbffffe2i1effffcl2effffbiaffffe3m6fffff7g5fffff7obffffe4effffcp1effffeffffe2q5fffffffff7safffffffbt1efffffe2t5fffffff6s1dfffffffe2rafffffffffbq5fffffcfffff6o1effffcgbffffe2naffffe3g2effffbm5fffff7i6fffff7k1effffckaffffe2jbffffe2k1effffci6fffff7m5fffff7g1effffcoaffffe3" },
+			[1062] = { 28, 28, 0, 6, 27, "h3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffff5m4fffff5m3fffffffffffffffffffffffj3fffffffffffffffffffffffj3fffffffffffffffffffffffj3fffffffffffffffffffffffzi3ffffzi3ffffzi3ffffzi3ffffzi3ffffh" },
+			[1063] = { 24, 24, 0, 6, 22, "h8fffffm2fffff7j8fffffm2fffff7j8fffffm2fffff7j8fffffm2fffff7j8fffff1l2fffff7j8fffff1l2fffff7j8fffff2l2fffff7j7fffff5l2fffff7j5fffffd3k2fffff7j1efffffffffffffffff7k9fffffffffffffffff7k1cffffffffffffffff7m6befffffffffffff7w2fffff7w2fffff7w2fffff7w2fffff7w2fffff7w2fffff7w2fffff7w2fffff7w2fffff7h" },
+			[1064] = { 37, 37, 0, 6, 22, "h3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffff5l4fffff5l5fffff4j3fffffffffffffffffffffffffffffff4j3fffffffffffffffffffffffffffffff4j3fffffffffffffffffffffffffffffff4j3fffffffffffffffffffffffffffffff4h" },
+			[1065] = { 40, 40, 0, 6, 27, "h3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3fffff5l4fffff5l5fffff4m3ffffffffffffffffffffffffffffffffffej3ffffffffffffffffffffffffffffffffffej3ffffffffffffffffffffffffffffffffffej3ffffffffffffffffffffffffffffffffffezu4fffezu4fffezu4fffezu4fffezu4fffeh" },
+			[1066] = { 28, 28, 0, 6, 22, "g7dddddddddddd4t8ffffffffffff4t8ffffffffffff4t8ffffffffffff4t35555558fffff4zg4fffff4zg4fffff4zg4fffff4zg4fffffa8887652t4fffffffffffffc6r4fffffffffffffffb1p4ffffffffffffffffap4fffffcbbbceffffff3o4fffff4j1afffff7o4fffff4k2fffff9o4fffff4leffff9o4fffff4k2fffff8o4fffff4j2cfffff5o4fffffdccceffffffdp4fffffffffffffffe4p4ffffffffffffffd4q4fffffffffedc94k" },
+			[1067] = { 31, 31, 0, 6, 22, "h3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffff5s4fffff4j3fffffffffedc94k4fffff4j3ffffffffffffffc4i4fffff4j3fffffffffffffffe5h4fffff4j3ffffffffffffffffd1g4fffff4j3fffff5j4dfffff5g4fffff4j3fffff5k3fffff9g4fffff4j3fffff5leffffag4fffff4j3fffff5leffffag4fffff4j3fffff5k3fffff9g4fffff4j3fffff5i15dfffff5g4fffff4j3ffffffffffffffffd1g4fffff4j3fffffffffffffffe5h4fffff4j3ffffffffffffffd4i4fffff4j3fffffffffedc94k4fffff4h" },
+			[1068] = { 23, 23, 0, 6, 22, "h3fffff5v3fffff5v3fffff5v3fffff5v3fffff5v3fffff5v3fffff5v3fffff5v3fffffffffedc94n3ffffffffffffffc4l3fffffffffffffffe5k3ffffffffffffffffd1j3fffff5j4dfffff5j3fffff5k3fffff9j3fffff5leffffaj3fffff5leffffaj3fffff5k3fffff9j3fffff5i15dfffff5j3ffffffffffffffffd1j3fffffffffffffffe5k3ffffffffffffffd4l3fffffffffedc94l" },
+			[1069] = { 22, 22, 0, 5, 24, "l12331t49dfffffeb71odfffffffffffe8m1ffffffffffffffc1k1ffffedcefffffffc1j1fd83j28efffffaj18o5efffff3u7fffffaveffffev9fffff4k5fffffffffffffff5k5fffffffffffffff7k5fffffffffffffff7k5fffffffffffffff6k1333333333afffff4udffffe1t6fffffbj5o3efffff5i1fc5l6efffffcj1fffecaabeffffffd2j1ffffffffffffffd3leffffffffffffa1m17cfffffffd93r1356542p" },
+			[1070] = { 35, 35, 0, 6, 22, "h3fffff5n37bdeedc951o3fffff5l3bffffffffffe8n3fffff5k6efffffffffffffc2l3fffff5j5ffffffffffffffffd1k3fffff5i2efffffb41g26dfffffbk3fffff5ibfffff9l1dfffff5j3fffff5h2fffffdn4fffffcj3fffff5h7fffff6ocfffff1i3fffff5hafffff2o7fffff5i3fffffffffffffep5fffff6i3fffffffffffffdp4fffff7i3fffffffffffffdp4fffff7i3fffffffffffffep5fffff6i3fffff5hafffff2o7fffff5i3fffff5h7fffff6ocfffff1i3fffff5h2fffffdn3fffffcj3fffff5ibfffff9l1dfffff5j3fffff5i2efffffb41g26dfffffck3fffff5j5ffffffffffffffffd1k3fffff5k6efffffffffffffc2l3fffff5l3bffffffffffe8n3fffff5n37bdeedc961m" },
+			[1071] = { 23, 23, 0, 6, 22, "l28bdefffffffff5m9ffffffffffffff5lbfffffffffffffff5k6fffffb3i4fffff5kbffffe1j4fffff5keffffak4fffff5kfffff9k4fffff5keffff9k4fffff5kaffffak4fffff5k3efffe1j4fffff5l5efffb3i4fffff5m4efffffffffffff5n1cffffffffffff5n2effffffffffff5nafffff7g4fffff5m4fffffch4fffff5mcfffff3h4fffff5l6fffff9i4fffff5k1effffe1i4fffff5k9fffff6j4fffff5j3effffck4fffff5jbffffe3k4fffff5h" },
+			[1072] = { 20, 20, 0, 12, 16, "h4ffffffeedb83m4ffffffffffffb1k4fffffffffffffck4b7321h26effff6t7ffffal38bdeefffffffcj1bfffffffffffffdjcffffffffffffffdi5fffff92i6ffffdi8ffffck7ffffdiaffff9kaffffdi9ffffbj3effffdi5fffff71g5efffffdjdffffffffe9ffffdj2dffffffe46ffffdk17ceec81g6ffffdh" },
+			[1073] = { 21, 21, 0, 4, 24, "u1r3579acdef9n1aefffffffffe1l2dfffffeedba972lcfffc62s6fffbvdffe1u3fff9v7fff549ceeeda6m8fffefffffffffe6kafffffffffffffff9j9ffffffb3g18fffff6i7fffffck9ffffdi6fffff6k2fffff4h6fffff3leffff7h5fffff1lcffff9h5fffff1lcffff9h3fffff3leffff7h1effff6k2fffff4iaffffck9ffffdj3effffb2g18fffff6k5fffffffffffff9m4dfffffffffe6p49cdeeda6l" },
+			[1074] = { 19, 19, 0, 12, 16, "h7fffffffeec95l7ffffffffffffc1j7fffffffffffff8j7ffffbi5ffffdj7ffffbjefffdj7ffffbi5ffffaj7ffffffffffffd2j7fffffffffffe3k7fffffffffffff6j7ffffbi2cfffe2i7ffffbj5ffff8i7ffffbj5ffff9i7ffffbi2cffff8i7fffffffffffffe2i7ffffffffffffe5j7ffffffffedb71i" },
+			[1075] = { 16, 16, 0, 12, 16, "h7fffffffffffei7fffffffffffei7fffffffffffei7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbp7ffffbn" },
+			[1076] = { 24, 24, 0, 12, 20, "k5fffffffffffffco5fffffffffffffco5fffffffffffffco5ffffdi6ffffco5ffffci6ffffco6ffffci6ffffco6ffffbi6ffffco7ffffai6ffffco9ffff9i6ffffcocffff7i6ffffcn1effff4i6ffffcn8fffff1i6ffffcm7fffffcj6ffffck4ffffffffffffffffffff8h4ffffffffffffffffffff8h4ffffffffffffffffffff8h4fff6r3fff8h4fff6r3fff8h4fff6r3fff8h4fff6r3fff8g" },
+			[1077] = { 20, 20, 0, 12, 16, "l6aceedb71o6effffffffe7m9ffffffffffff9k6fffff81g3dffff6jeffff8j2efffe1h5ffffe1kbffff6h8ffffcl8ffffah9ffffffffffffffffchaffffffffffffffffdh8ffffffffffffffffdh5ffffcueffff4n3a1i6ffffe721g147cff1j9ffffffffffffff1k6effffffffffff1m59ceeedca841h" },
+			[1078] = { 30, 30, 0, 12, 16, "g6ffffe4jaffff8j6efffe5i6efffe4iaffff8i7ffffe4k5efffe5haffff8h8ffffe3m4efffe5gaffff8g8ffffe3o4efffe5affff89ffffd2q3efffedffffeffffd2s5ffffffffffffff3tcffffffffffffffbsaffffffffffffffff8q7ffffcbffffffbeffff5o4efffe1gcffffbg4efffe2m1dfffe4haffff8h7ffffcmcffff8iaffff8iaffffak9ffffbjaffff8i1dffff6i5ffffd1jaffff8j3efffe3g3efffe3kaffff8k5ffffd1" },
+			[1079] = { 17, 17, 0, 12, 16, "h159bdeeeca6lbffffffffffd2jbfffffffffffbjbd62h26effff1i7mbfffep27efffblbffffffffb1lbfffffff81mbffffffffe4p26efffe1q5ffff6h66m6ffff7h8fd72h26effff5h8ffffffffffffci8fffffffffffb1j48bceeedb84j" },
+			[1080] = { 21, 21, 0, 12, 16, "h7ffffbj3fffff7j7ffffbjcfffff7j7ffffbi7ffffff7j7ffffbh2effffff7j7ffffbhbfffffff7j7ffffbg5ffffffff7j7ffffb1dffffffff7j7ffffb9ffffdffff7j7ffffdefff9bffff7j7ffffffffd1bffff7j7ffffffff5gbffff7j7fffffffbhbffff7j7ffffffe2hbffff7j7ffffff7ibffff7j7fffffdjbffff7j7fffff4jbffff7h" },
+			[1081] = { 21, 21, 0, 5, 23, "k5fckcf5p1ef92g29fe1q7fffffff7s4adeeb4zzzr7ffffbj3fffff7j7ffffbjcfffff7j7ffffbi7ffffff7j7ffffbh2effffff7j7ffffbhbfffffff7j7ffffbg5ffffffff7j7ffffb1dffffffff7j7ffffb9ffffdffff7j7ffffdefff9bffff7j7ffffffffd1bffff7j7ffffffff5gbffff7j7fffffffbhbffff7j7ffffffe2hbffff7j7ffffff7ibffff7j7fffffdjbffff7j7fffff4jbffff7h" },
+			[1082] = { 20, 20, 0, 12, 16, "h7ffffbj1cffffbi7ffffbi2dffffaj7ffffbh2dffff9k7ffffbg3effff8l7ffffb4effff7m7ffffdefffe6n7fffffffff8o7fffffffffe2n7ffffffffffd1m7fffffdaffffam7ffffd2gcffff8l7ffffbh2effff5k7ffffbi4efffe2j7ffffbj7ffffcj7ffffbkaffffai7ffffblcffff7" },
+			[1083] = { 22, 22, 0, 12, 16, "kafffffffffffff6mafffffffffffff6mafffffffffffff6maffff7icffff6mbffff7icffff6mbffff7icffff6mbffff6icffff6mcffff5icffff6mcffff4icffff6meffff2icffff6l1ffffejcffff6l9ffffbjcffff6j3affffe3jcffff6i5ffffff6kcffff6i5ffffd4lcffff6i5dca5ncffff6h" },
+			[1084] = { 25, 25, 0, 12, 16, "h7fffffbl4fffffek7ffffff3kbfffffek7ffffffaj3ffffffek7fffffff2iaffffffek7fffffff9h2effffffek7fffffffe1g9fffffffek7ffffffff81efffffffek7ffffcdffe9fffaffffek7ffffb7ffffffe4ffffek7ffffb1efffff83ffffek7ffffbg8ffffe23ffffek7ffffbg2efffag3ffffek7ffffbhafff3g3ffffek7ffffbn3ffffek7ffffbn3ffffek7ffffbn3ffffei" },
+			[1085] = { 21, 21, 0, 12, 16, "h7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7fffffffffffffff3j7fffffffffffffff3j7fffffffffffffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3h" },
+			[1086] = { 21, 21, 0, 12, 16, "l6adeedc94p6efffffffffc3m9ffffffffffffe4k6fffff71g3bffffe1jeffff8kdffff9i5ffffe1k7ffffei8ffffdl3fffff2h9ffffbl2fffff4haffffbl2fffff4h8ffffdl3fffff2h5ffffe1k7ffffejeffff8kdffff9j6ffffe71g3bffffe1k9ffffffffffffe4m6efffffffffc3p6adeedc94l" },
+			[1087] = { 21, 21, 0, 12, 16, "h7fffffffffffffff3j7fffffffffffffff3j7fffffffffffffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3j7ffffbkfffff3h" },
+			[1088] = { 21, 21, 0, 12, 22, "h7ffffbh5bdec82l7ffffb1bffffffe5k7ffffcbfffffffff5j7ffffff71g3cffffe1i7fffff8j1effff7i7fffff1k9ffffci7ffffdl6ffffei7ffffbl4fffff1h7ffffbl4fffff1h7ffffdl6ffffei7fffff1k9ffffci7fffff8j1effff7i7fffffe71g3cffffe1i7ffffcbfffffffff5j7ffffb1bffffffe6k7ffffbh6bded82l7ffffbu7ffffbu7ffffbu7ffffbu7ffffbu7ffffbs" },
+			[1089] = { 18, 18, 0, 12, 16, "l59cdedca51l5dfffffffffbk8fffffffffffbj6fffffc51g27dbjdffffcl17i5fffff3q8ffffdr9ffffbr9ffffbr8ffffdr5fffff3rdffffcm7j6fffffc51g26dbk8fffffffffffbl5dfffffffffbn59cdedca51h" },
+			[1090] = { 18, 17, 0, 12, 16, "dffffffffffffffff3dffffffffffffffff3dffffffffffffffff3ldffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4rdffff4l" },
+			[1091] = { 20, 20, 0, 12, 22, "6ffffcm6ffffcheffff3lbffff6h8ffff9k1efffei1efffek6ffff9jaffff6jbffff3j3ffffci2ffffclbffff3h7ffff6l5ffff9hcfffe1mdfffe12ffffan7ffff67ffff4n1efffccfffdp8ffffffff7p2effffffe1qaffffffar4ffffff4scffffdt6ffff7t9fffe1r16efff9qfffffffe1qffffffe4rfffec81p" },
+			[1092] = { 30, 30, 0, 5, 29, "rbffff7zjbffff7zjbffff7zjbffff7zjbffff7zjbffff7zjbffff7w39dec4gbffff7g6dec82o8fffffe4bffff77fffffe5m8fffffffdbffffaeffffffe5k3fffff9117effffd5g2cffffe1jaffffcjbffff7i1effff7jeffff6jbffff7j9ffffbi3fffff2jbffff7j6ffffei4fffff1jbffff7j5fffff1h4fffff1jbffff7j5fffff1h3fffff2jbffff7j6ffffejeffff6jbffff7j9ffffbjaffffcjbffff7i1effff7j3fffff9117effffd5g2cffffe1k8fffffffdbffffaeffffffe5m8fffffe4bffff77fffffe5o39dec4gbffff7g6dec82wbffff7zjbffff7zjbffff7zjbffff7zjbffff7zjbffff7r" },
+			[1093] = { 19, 19, 0, 12, 16, "gcffff9k4ffffe3g2effff5i1dffff7i5ffffe1haffffak9ffffbg6ffffd1lcffff9efffe3m2effffffff6o4fffffff9q8fffffdrcfffffe3p9fffffffd1n5fffffffffam2efffe4dffff7lcffff7g3efffe3j9ffffbi7ffffd1h6ffffe2jbffffbg2effff5k1dffff7" },
+			[1094] = { 22, 22, 0, 12, 20, "h7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7ffffbkfffff3k7fffffffffffffffffei7fffffffffffffffffei7fffffffffffffffffexcffexcffexcffexcffeg" },
+			[1095] = { 21, 21, 0, 12, 16, "hfffff2jfffff3kfffff2jfffff3kfffff2jfffff3kfffff2jfffff3kfffff4jfffff3keffffa1ifffff3kaffffffffffffff3k2efffffffffffff3l29deffffffffff3ufffff3ufffff3ufffff3ufffff3ufffff3ufffff3ufffff3i" },
+			[1096] = { 32, 32, 0, 12, 16, "h7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffbkbffff6j1fffff2j7ffffffffffffffffffffffffff2j7ffffffffffffffffffffffffff2j7ffffffffffffffffffffffffff2h" },
+			[1097] = { 33, 33, 0, 12, 20, "h7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffbkbffff6j1fffff2k7ffffffffffffffffffffffffffffdi7ffffffffffffffffffffffffffffdi7ffffffffffffffffffffffffffffdzodffdzodffdzodffdzodffdg" },
+			[1098] = { 23, 23, 0, 11, 17, "266666666662q6ffffffffff6q6ffffffffff6q5ccccceffff6wbffff6wbffff6wbffff82221sbfffffffffec7pbffffffffffffd2nbfffffffffffffbnbffff7h15effff2mbffff6j9ffff4mbffff6jaffff4mbffff94448fffff1mbfffffffffffffanbffffffffffffb1nbfffffffeec94j" },
+			[1099] = { 27, 27, 0, 12, 16, "h7ffffbq8ffffaj7ffffbq8ffffaj7ffffbq8ffffaj7ffffbq8ffffaj7ffffbq8ffffaj7ffffbq8ffffaj7ffffffffeda6j8ffffaj7ffffffffffffe3h8ffffaj7fffffffffffffe1g8ffffaj7ffffbi2cffff6g8ffffaj7ffffbj5ffff9g8ffffaj7ffffbj5ffff9g8ffffaj7ffffbi3cffff6g8ffffaj7fffffffffffffe1g8ffffaj7ffffffffffffe4h8ffffaj7ffffffffeda6j8ffffah" },
+			[1100] = { 19, 19, 0, 12, 16, "h7ffffbs7ffffbs7ffffbs7ffffbs7ffffbs7ffffbs7ffffffffeda6l7ffffffffffffe3j7fffffffffffffe1i7ffffbi2cffff6i7ffffbj5ffff9i7ffffbj5ffff9i7ffffbi3cffff6i7fffffffffffffe1i7ffffffffffffe4j7ffffffffeda6j" },
+			[1101] = { 18, 18, 0, 11, 18, "i489bba85oeffffffffe8mfffffffffffc1kffffefffffffcke83i5dfffff7j1l1effffer6fffff3kaaaaaabfffff5j1ffffffffffff7j1ffffffffffff6k3333336fffff5q9fffff1i6l5fffffcjfd8556bffffff4jffffffffffff8kffffffffffe7l9dffffffe92o245542n" },
+			[1102] = { 29, 29, 0, 12, 16, "h7ffffbl48cdeeda71m7ffffbj2cfffffffffe8l7ffffbi3effffffffffffbk7ffffbh1dffffc4g16effff8j7ffffbh7ffffe1j6ffffe2i7ffffbhdffff9leffff7i7ffffb26fffff5lbffffai7ffffffffffff4l9ffffbi7ffffffffffff4l9ffffbi7ffffd77fffff5lbffffai7ffffbhcffff9leffff7i7ffffbh7ffffe1j6ffffe2i7ffffbidffffc4g16effff8j7ffffbi3effffffffffffbk7ffffbj2cfffffffffe8l7ffffbl48cdeeda71k" },
+			[1103] = { 19, 19, 0, 12, 16, "j49ceefffffffbkaffffffffffffbj6fffffffffffffbjbffffb2h6ffffbjcffff3i6ffffbjaffff3i6ffffbj5ffffb2h6ffffbkaffffffffffffbl9fffffffffffbl1effffffffffbl9ffff5g6ffffbk3ffffbh6ffffbkcfffe2h6ffffbj7ffff8i6ffffbi2efffdj6ffffbibffff5j6ffffbh" },
+			[1025] = { 21, 20, 0, 0, 28, "k8ffdhbff9q8ffdhbff9q8ffdhbff9q8ffdhbff9zzp3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3ffffffffffffffek3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3ffffffffffffff6k3fffff5t3fffff5t3fffff5t3fffff5t3fffff5t3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4j3fffffffffffffff4h" },
+			[1105] = { 20, 20, 0, 5, 23, "k3fff3g6fffp3fff3g6fffp3fff3g6fffp3fff3g6fffzzzq6aceedb71o6effffffffe7m9ffffffffffff9k6fffff81g3dffff6jeffff8j2efffe1h5ffffe1kbffff6h8ffffcl8ffffah9ffffffffffffffffchaffffffffffffffffdh8ffffffffffffffffdh5ffffcueffff4n3a1i6ffffe721g147cff1j9ffffffffffffff1k6effffffffffff1m59ceeedca841h" },
+			[171] = { 19, 19, 0, 12, 16, "n36k36o6e8j6e8n9ff8i9ff8l2cfff6g2cfff7k4effe7g4effe7k6fffd3g6effd4laffb1haffc1maffb1haffb1m7fffd3g6fffd4m5effe6g4effe7m2cfff6g2cfff7n9ff8i9ff8o6e8j6e8p36k36zz" },
+			[187] = { 19, 19, 0, 12, 16, "h27k27p2faj2fa1n2ffc2h2ffd2m1effe5g1effe5m3dfff8g3dfff9m1bfffbg1afffbn7effi7effn7effi7effl1bfffbg1afffck3dfff9g2dfff9k1effe5g1effe6l2ffc2h2ffd3m2faj2fa1n27k27zzl" },
+			[8212] = { 30, 30, 0, 17, 11, "g5ffffffffffffffffffffffffff5h5ffffffffffffffffffffffffff5h5ffffffffffffffffffffffffff5h5ffffffffffffffffffffffffff5zzzzzzzzzzq" },
+			[8211] = { 15, 15, 0, 17, 11, "g5fffffffffff5h5fffffffffff5h5fffffffffff5h5fffffffffff5zzzzzl" },
+			[8230] = { 30, 30, 0, 22, 6, "h9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9j9ffff9h" },
+			[8470] = { 36, 36, 0, 6, 22, "h3dddddd3o59bcc1s3ffffffbm1cfffff1s3fffffff4l8ffffff1s3fffffffclcffffc6t3ffffffff5keffff6u3ffffffffdkfffff5u3fffffffff6jfffff5j16996l3fffffbfffdjfffff5i3dffffd2j3fffff3efff7ifffff5idffabffcj3fffff18fffe1hfffff5h5ff9hbff4i3fffff11efff8hfffff5h9ff4h6ff7i3fffff1g7fffe1gfffff5haff3h5ff9i3fffff1hdfff9gfffff5haff4h5ff8i3fffff1h6fffe2fffff5h7ff7h8ff6i3fffff1idfffafffff5h2efd45efe1i3fffff1i5fffefffff5i7ffffff6j3fffff1jcffffffff5j5ceec5k4fffffk5ffffffff5t4affffelbfffffff5tefffffal4fffffff5haeeeeeeee8heffffe2mbffffff5haffffffff9heedb71n3ffffff5haffffffff9g" },
+			[215] = { 25, 25, 0, 10, 18, "k49q86o4efao8fe5nefff9m7fffe2m4efff9k7ffff6o4efff9i7ffff6q5efff8g6ffff7s5efffbffff7u5effffff7w6effff8x5effff7w5effffff7u5efffbffff7s4efff9g7ffff6q4efff9i7ffff6o4efff9k7ffff6nefff9m8fffe2m4efao8fe5o4aq86k" },
+			[183] = { 11, 11, 0, 15, 13, "ieffff4keffff4keffff4keffff4keffff4keffff4zzzy" },
+			[8226] = { 19, 19, 0, 12, 16, "m7ced91q2dfffffe3pcfffffffd1n4fffffffff7n8fffffffffbn9fffffffffcn8fffffffffbn4fffffffff7obfffffffdp1dfffffe3q18ded91zzzzzg" },
+			[10003] = { 25, 25, 0, 9, 19, "v18cbz1cff4zbff8z8ffbz4efd1y1dfe3zbff6z6ff9z2efcv371hbfe3u4ef8g6ff7v6ffd2efcw2fffefe2xcffff7y7fffbz1dfd2zh1zzzm" },
+			[10004] = { 25, 25, 0, 9, 19, "w7cdd7x2dfffd2w4efffe3w4efffe4w3effff7w1dffff9xcffffbs581h9ffffc1q3dff8g5ffffe2r7fffd2efffe4s6ffffeffff7t3ffffffffavdffffffd1v8fffffe3w2effff8yafffczg453zzzl" },
+			[8594] = { 25, 25, 0, 12, 16, "w86zh8ff6zgbfff7zgbfff7zgbfff7i4fffffffffffffffffffff7h4fffffffffffffffffffffah4fffffffffffffffffffff7ybfff7ybfff7ybfff7z8ff6zh86zzzzg" },
+			[8592] = { 25, 25, 0, 12, 16, "l4azh5efaz5effc1x5effc1x5effc1x5effffffffffffffffffff6h8fffffffffffffffffffff6h5effffffffffffffffffff6i5effc1z5effc1z5effc1z5efazh4azzzzr" },
+			[8593] = { 25, 25, 0, 6, 22, "p1cfd2y1cfffd2xbfffffd1vbfffffffc1tbfffffffffc1rafffafffaeffc1qaff82fff55efbsa7g2fff5g5bw2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5p" },
+			[8595] = { 25, 25, 0, 6, 22, "p2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5z2fff5w97g2fff5g5bsaff72fff55efbrafffafffaeffc1rbfffffffffc1tbfffffffc1vbfffffd1w1cfffd2y1cfd2p" },
+			[9733] = { 27, 27, 0, 6, 23, "s2zlbzk4f2zj8f7zjdfczi3fff2zh8fff7zhdfffcs455555557fffff655555553j1bfffffffffffffffffffa1l7efffffffffffffffe6o3dfffffffffffffc2q1afffffffffff9u6ffffffffe5v2ffffffffe1v7fffffffff6vcfffffffffbu2ffff92afffe1t7ffe5i6eff5tcfc2k3cfas2e8o9es54q54zs" },
+			[9734] = { 27, 27, 0, 6, 23, "s2zlbzk4f2zj897zjc1czi39ga2zh84g57zhcibs4555555579ia655555553j1bb5555552i2555555ca1l7a1s2b6o3c4q5b2q1a8n1a9u6cmd5v2amc1v75m76vc1h5d4h1bu2bh992a8hb1t763c5i6b265tc9b2k3c7as2e8o9es54q54zs" },
+			[9829] = { 27, 27, 0, 6, 22, "k28bb82k29cb81o5effffe4i6effffe4m4effffffe1g3effffffe2lcffffffffagbffffffffbk2fffffffffe4ffffffffff1j4ffffffffffcffffffffff3j3fffffffffffffffffffff2j1ffffffffffffffffffffelcfffffffffffffffffffbl5fffffffffffffffffff5mcfffffffffffffffffcn2efffffffffffffffe2o5fffffffffffffff5q8fffffffffffff8sbfffffffffffat1dfffffffffcv2efffffffd1w4efffffe3y7fffff5zgafff8zicfazj1bs" },
+			[176] = { 15, 15, 0, 6, 22, "j18dec7n1dfffffc1lbfd4g4efak2ff5i5ff1j5ffj1ff4j5ffkff4j2ff5i5ff1kbfd4g4dfal1dfffffc1m18ded8zzzzzzzzzk" },
+			[8381] = { 21, 21, 0, 6, 22, "jaddddddcca73obfffffffffffc3mbffffffffffffe4lbfffffffffffffdlbffffd359efffff4kbffffci7fffff8kbffffci3fffff9kbffffci5fffff8kbffffch3dfffff6hccceffffeceffffffe1hfffffffffffffffff8ifffffffffffffffe8jffffffffffffed82k333cffffd332rbffffcraaaeffffeaaaaaa1kfffffffffffffff2kfffffffffffffff2kaaadffffeaaaaaa1nbffffcubffffcubffffcq" },
+			[8364] = { 22, 21, -1, 6, 22, "o48bdeeda5q4cfffffffffe7n7ffffffffffffdm7fffffffffffffdl3efffffb41g148edlbfffff7m19k2fffffas7ffffffffffffffe1kdffffffffffffff9k5fffffffffffffff3ndffffbvdffffbt7ffffffffffffcndffffffffffff6m5ffffffffffffeq2fffffavbfffff7m19l3efffffb41g149edm7fffffffffffffdn7ffffffffffffdo4cfffffffffe7q48cdeeda5j" },
+			[10005] = { 25, 25, 0, 8, 20, "k42q16o5ed2o1cf7ndffd2m1cffe1m2dffd2k1cffe3o2dffd2i1cffe3q2dffd2g1cffe3s2dffd4cffe3u2dfffffe3w2dfffe3x1cfffd2w1cfffffd2u1cffe5dffd2s1cffe3g2dffd2q1cffe3i2dffd2o1cffe3k2dffd2ncffe3m2dffd1m7fe3o2df8o63q27zzu" },
+			[10006] = { 25, 25, 0, 7, 21, "l48o67q4ef8m6ff7o4efff8k6ffff7m4efffff8i6ffffff7k2efffffff8g6ffffffff4k8ffffffffbffffffffam8fffffffffffffffao8fffffffffffffaq8fffffffffffas8fffffffffat6fffffffff8s6effffffffff8q6fffffffffffff8o6fffffffffffffff8m6ffffffffcffffffff8k2efffffffag8ffffffff4k6ffffffai8ffffff8m6ffffak8ffff8o6ffam8ff8q6ao88zq" },
+			[9876] = { 27, 27, 0, 6, 22, "j4w4nb3u49n5e2s3e4o8d1q3e6qbc1o2d9sccn1dbt2dbl1cd1u3eakbe2w5f8iae4y8f7g9f6zgafbf8zidfczi5efe4zg4ee5ee3u37h3ee4g5fd2h82p2f82ef6i8fd19e1q7fef8kafef5r2efe5k6ffd1q1cfa8ed1g2ed7cfbqbfbi2i2h1cfaodfcr1dfbnae4s6e8j" },
+			[9201] = { 18, 18, 0, 7, 26, "g7ffffffffffffff7h7ffffffffffffff7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7f2p2f7h7ffffffffffffff7h7ffffffffffffff7g" },
+			[9889] = { 21, 21, 0, 6, 22, "w85w3c6w7e4v3cd3v7ec1u2cfbv7ef9u2cff7u7eff8u6ffffd852r17befffffda61r258cffff7u2fffa1t1cfe6u1cfc2u2df8v2dd4v3eb1v4e7w5c3w69x45w" },
+		},
+	},
+}
+]]></ProtectedString>
+			</Properties>
+		</Item>
 	</Item>
 </roblox>

@@ -8,6 +8,7 @@
 //   node tools/studio-relay/agent.mjs pair 123456
 //   node tools/studio-relay/agent.mjs run <edit|server|client> <file.luau | -e "code"> [--timeout 60]
 //   node tools/studio-relay/agent.mjs shot <edit|client> <out.png> [--max 1024]
+//   node tools/studio-relay/agent.mjs render <edit|client|server> <out.png> [--max 640] [--noaa] [--nogui]
 //   node tools/studio-relay/agent.mjs logs [target] [--since N] [--tail 50]
 //   node tools/studio-relay/agent.mjs play | runmode | stop
 //   node tools/studio-relay/agent.mjs sync [only1,only2,...]   (scripts/make-studio-sync.mjs -> edit)
@@ -156,8 +157,11 @@ async function main() {
 		}
 		case "publish-plugin": {
 			// offers a new plugin build; the owner applies it with the «Обновить» button in the widget
-			const src = readFileSync(join(here, "plugin", "StudioRelay.server.luau"), "utf8").replace("__RELAY_URL__", relayUrl());
+			execFileSync("node", [join(here, "build-plugin.mjs")], { stdio: "inherit" });
+			const src = readFileSync(join(here, "plugin", ".build.luau"), "utf8");
 			const build = Number((src.match(/local BUILD = (\d+)/) || [])[1]);
+			const font = readFileSync(join(here, "plugin", "Font.luau"), "utf8");
+			console.log(JSON.stringify(await jsonCall("/agent/asset?name=font", { method: "POST", body: font })));
 			console.log(JSON.stringify(await jsonCall("/agent/code?build=" + build, { method: "POST", body: src })));
 			break;
 		}
@@ -179,10 +183,14 @@ async function main() {
 			printRun(await send("edit", "run", code, Number(arg("--timeout", 180))));
 			break;
 		}
-		case "shot": {
+		case "shot":
+		case "render": {
 			const target = a1 || "edit";
-			const out = a2 || "shot.png";
-			const r = await send(target, "screenshot", JSON.stringify({ max: Number(arg("--max", 1024)) }), 60);
+			const out = a2 || cmd + ".png";
+			const opts = { max: Number(arg("--max", cmd === "render" ? 640 : 1024)) };
+			if (process.argv.includes("--noaa")) opts.aa = false;
+			if (process.argv.includes("--nogui")) opts.gui = false;
+			const r = await send(target, cmd === "render" ? "render" : "screenshot", JSON.stringify(opts), Number(arg("--timeout", 120)));
 			const data = JSON.parse(r.body);
 			if (!r.ok) {
 				console.log("ERROR: " + data.error);
@@ -190,7 +198,8 @@ async function main() {
 				break;
 			}
 			writePng(out, data.w, data.h, Buffer.from(data.b64, "base64"));
-			console.log(`saved ${out} ${data.w}x${data.h} (source ${data.srcW}x${data.srcH})`);
+			const extra = data.rays ? ` rays ${data.rays}, gui ${data.guiObjects}, ${data.seconds}s (world ${data.worldSeconds}s)${data.minimized ? ", MINIMIZED" : ""}` : "";
+			console.log(`saved ${out} ${data.w}x${data.h} (source ${data.srcW}x${data.srcH})${extra}`);
 			break;
 		}
 		case "logs": {

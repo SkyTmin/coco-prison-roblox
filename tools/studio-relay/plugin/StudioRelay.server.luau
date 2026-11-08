@@ -1,12 +1,13 @@
 --!nocheck
+--!native
 -- Studio Relay plugin: lets a cloud agent run Luau, read the output, take screenshots and start/stop
 -- Play in this Studio through the coco-studio-relay Worker. Studio only makes outgoing requests
 -- (long-poll); nothing listens on this PC. Pairing: the widget shows a 6-digit code, the owner gives
 -- it to the agent, the relay hands this plugin its own token (stored in plugin settings).
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
-local VERSION = "1.2"
-local BUILD = 3 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local VERSION = "1.3"
+local BUILD = 4 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
@@ -324,6 +325,42 @@ local function screenshot(payload)
 	return true, { w = w, h = h, srcW = size.X, srcH = size.Y, b64 = base64(rgb) }
 end
 
+---------------------------------------------------------------- software renderer ("agent's eye")
+--#include Render.luau
+local fontsCache = nil
+local function fonts()
+	if fontsCache == nil then
+		local m = script:FindFirstChild("Font")
+		local ok, f = pcall(require, m)
+		if not ok or type(f) ~= "table" then
+			-- installed file predates the font: fetch it from the relay (same source as Font.luau)
+			local okReq, res = request("GET", "/plugin/asset?name=font")
+			if okReq and res.StatusCode == 200 then
+				local okLs, fn = pcall(function()
+					return loadstring(res.Body)
+				end)
+				if okLs and fn then
+					ok, f = pcall(fn)
+				else
+					local tmp = Instance.new("ModuleScript")
+					tmp.Source = res.Body
+					ok, f = pcall(require, tmp)
+					tmp:Destroy()
+				end
+			end
+		end
+		fontsCache = if ok and type(f) == "table" then f else {}
+	end
+	return fontsCache
+end
+local function renderFrame(payload)
+	local opts = {}
+	pcall(function()
+		opts = HttpService:JSONDecode(payload)
+	end)
+	return Render(opts, { fonts = fonts(), base64 = base64 })
+end
+
 local function playControl(kind)
 	local StudioTestService = game:GetService("StudioTestService")
 	if kind == "stop" then
@@ -437,6 +474,8 @@ local function execute(kind, timeout, payload)
 			ok, result = runCode(payload, timeout)
 		elseif kind == "screenshot" then
 			ok, result = screenshot(payload)
+		elseif kind == "render" then
+			ok, result = renderFrame(payload)
 		elseif kind == "play" or kind == "runmode" or kind == "stop" then
 			ok, result = playControl(kind)
 		elseif kind == "ping" then
