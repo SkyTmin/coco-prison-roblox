@@ -1093,8 +1093,17 @@ local function insideRounded(x, y, rect, rad)
 	if rad <= 0 then
 		return true
 	end
-	local cx = math.clamp(x, rect[1] + rad, rect[3] - rad)
-	local cy = math.clamp(y, rect[2] + rad, rect[4] - rad)
+	-- a rect clipped by its parent can be narrower than 2·rad: keep min ≤ max
+	local x0, x1 = rect[1] + rad, rect[3] - rad
+	local y0, y1 = rect[2] + rad, rect[4] - rad
+	if x1 < x0 then
+		x0, x1 = (rect[1] + rect[3]) / 2, (rect[1] + rect[3]) / 2
+	end
+	if y1 < y0 then
+		y0, y1 = (rect[2] + rect[4]) / 2, (rect[2] + rect[4]) / 2
+	end
+	local cx = math.clamp(x, x0, x1)
+	local cy = math.clamp(y, y0, y1)
 	local dx, dy = x - cx, y - cy
 	return dx * dx + dy * dy <= rad * rad
 end

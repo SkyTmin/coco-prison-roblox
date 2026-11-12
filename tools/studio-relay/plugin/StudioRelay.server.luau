@@ -7,7 +7,7 @@
 -- Runs in every Studio DataModel: "edit", and during a test "server" and "client" (+ "client:<Name>").
 
 local VERSION = "2.1"
-local BUILD = 12 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
+local BUILD = 13 -- bump on every change; agent.mjs publish-plugin offers it to installed plugins
 local DEFAULT_URL = "__RELAY_URL__"
 
 local HttpService = game:GetService("HttpService")
