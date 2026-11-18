@@ -2,7 +2,7 @@
 // Neither side accepts incoming connections, so both poll this Worker. One Durable Object ("main")
 // keeps the command queues, results and logs in memory; plugin tokens and pairing live in its storage.
 //
-// Agent side (Authorization: Bearer <AGENT_TOKEN secret>):
+// Agent side (Authorization: Bearer <AGENT_TOKEN or CODEX_TOKEN secret>):
 //   GET  /agent/status                         -> which Studio DataModels polled recently
 //   POST /agent/pair?code=123456               -> confirm a pairing code shown in the plugin
 //   POST /agent/revoke                         -> forget every paired plugin
@@ -104,7 +104,10 @@ export class Relay {
 		const p = url.pathname;
 		try {
 			if (p.startsWith("/agent/")) {
-				if (!safeEqual(bearer(request), this.env.AGENT_TOKEN || "")) return json({ error: "unauthorized" }, 401);
+				// two agent keys: AGENT_TOKEN (Claude sessions) and CODEX_TOKEN (Codex, owner 18.11), revocable separately
+				const key = bearer(request);
+				const agentOk = safeEqual(key, this.env.AGENT_TOKEN || "") || safeEqual(key, this.env.CODEX_TOKEN || "");
+				if (!agentOk) return json({ error: "unauthorized" }, 401);
 				return await this.agent(p, url, request);
 			}
 			if (p === "/plugin/pair/start") return await this.pairStart();
