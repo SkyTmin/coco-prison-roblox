@@ -7,7 +7,7 @@ agent (cloud) --HTTPS--> Worker (Cloudflare, Durable Object "main") <--long-poll
 ```
 
 - `worker/` — Cloudflare Worker + Durable Object (in-memory queues/results/logs; pairing and plugin
-  tokens in storage). Secret `AGENT_TOKEN` authenticates the agent. Deploy: `cd worker && npx wrangler deploy`
+  tokens in storage). Secret `AGENT_TOKEN` authenticates the agent (Claude sessions); secret `CODEX_TOKEN` [владелец 18.11] is a second, separately revocable agent key for Codex (`wrangler secret delete CODEX_TOKEN` revokes it) that may run commands, read logs and status but gets 403 on `/agent/pair`, `/agent/revoke`, `/agent/code`. Deploy: `cd worker && npx wrangler deploy`
   (API token via the session proxy), `npx wrangler secret put AGENT_TOKEN`.
 - `plugin/StudioRelay.server.luau` → `node build-plugin.mjs` → `StudioRelay.rbxmx` (relay URL baked in).
   The owner drops it into `%LOCALAPPDATA%\Roblox\Plugins`, presses «Подключить», gives the 6-digit code.
