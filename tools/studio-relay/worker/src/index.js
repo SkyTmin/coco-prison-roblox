@@ -108,6 +108,11 @@ export class Relay {
 				const key = bearer(request);
 				const agentOk = safeEqual(key, this.env.AGENT_TOKEN || "") || safeEqual(key, this.env.CODEX_TOKEN || "");
 				if (!agentOk) return json({ error: "unauthorized" }, 401);
+				// Codex may run commands, read logs and status, but never pair/unpair plugins or offer plugin code
+				const isCodex = !safeEqual(key, this.env.AGENT_TOKEN || "");
+				if (isCodex && (p === "/agent/pair" || p === "/agent/revoke" || p === "/agent/code")) {
+					return json({ error: "forbidden for this key" }, 403);
+				}
 				return await this.agent(p, url, request);
 			}
 			if (p === "/plugin/pair/start") return await this.pairStart();
